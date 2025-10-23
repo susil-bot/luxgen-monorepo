@@ -1,0 +1,216 @@
+# Luxgen Monorepo - Cursor Rules
+
+## Component Architecture
+
+### UI Component Structure
+Each UI component MUST follow this exact structure:
+```
+packages/ui/src/ComponentName/
+├── ComponentName.tsx          # Main component file
+├── fetcher.ts                 # Data fetching logic
+├── fixture.ts                 # Test fixtures and mock data
+├── ComponentName.spec.ts      # Unit tests
+├── styles.ts                  # Styled components and CSS-in-JS
+├── translations.ts             # i18n translations
+├── index.ts                   # Public exports
+└── README.md                  # Component documentation
+```
+
+### Plugin System Architecture
+All plugins MUST follow this structure:
+```
+packages/core/src/plugin/
+├── Plugin.ts                  # Base plugin class
+├── PhaseSet.ts               # Phase execution container
+├── Fetcher.ts                # Data fetching interface
+├── Transformer.ts            # Data transformation interface
+├── WorkflowContext.ts        # State management
+├── Presenter.ts              # Route-specific plugins
+├── PluginRegistry.ts         # Plugin management
+└── examples/                 # Example implementations
+```
+
+## File Naming Conventions
+
+### Strict Naming Policy
+- **Components**: PascalCase (e.g., `UserProfile.tsx`, `DataTable.tsx`)
+- **Files**: camelCase for utilities, PascalCase for components
+- **Directories**: PascalCase for component folders, camelCase for utilities
+- **Constants**: UPPER_SNAKE_CASE (e.g., `API_ENDPOINTS`, `DEFAULT_CONFIG`)
+- **Types/Interfaces**: PascalCase with descriptive names (e.g., `UserProfileProps`, `ApiResponse`)
+- **Hooks**: camelCase starting with 'use' (e.g., `useUserData`, `useApiCall`)
+
+### File Extensions
+- `.tsx` for React components with JSX
+- `.ts` for TypeScript files without JSX
+- `.spec.ts` for test files
+- `.d.ts` for type declaration files
+- `.js` for JavaScript configuration files
+
+## Variable Naming Strict Policy
+
+### Variables and Functions
+- **camelCase** for all variables, functions, and methods
+- **Descriptive names** - no abbreviations unless universally known (e.g., `id`, `url`)
+- **Boolean variables** must start with `is`, `has`, `can`, `should` (e.g., `isLoading`, `hasPermission`)
+- **Arrays** should be plural (e.g., `users`, `items`, `results`)
+- **Objects** should be singular (e.g., `user`, `item`, `result`)
+
+### TypeScript Specific
+- **Interfaces** start with `I` prefix (e.g., `IUserProfile`, `IApiResponse`)
+- **Types** use descriptive names without prefix (e.g., `UserRole`, `ApiStatus`)
+- **Enums** use PascalCase (e.g., `UserStatus`, `ApiMethod`)
+- **Generic types** use single uppercase letters (e.g., `T`, `K`, `V`)
+
+### React Specific
+- **Props interfaces** end with `Props` (e.g., `ButtonProps`, `CardProps`)
+- **State interfaces** end with `State` (e.g., `UserState`, `FormState`)
+- **Event handlers** start with `handle` (e.g., `handleClick`, `handleSubmit`)
+- **Custom hooks** start with `use` (e.g., `useUserData`, `useApiCall`)
+
+## Code Quality Standards
+
+### TypeScript Strict Mode
+- **Always use strict TypeScript** - no `any` types without explicit justification
+- **Explicit return types** for all functions
+- **Proper error handling** with typed error objects
+- **Null safety** - use optional chaining and nullish coalescing
+
+### React Best Practices
+- **Functional components only** - no class components
+- **Custom hooks** for complex logic
+- **Memoization** for expensive computations
+- **Proper key props** for list items
+- **Accessibility** - proper ARIA attributes
+
+### Performance
+- **Lazy loading** for large components
+- **Code splitting** at route level
+- **Memoization** for expensive operations
+- **Bundle size optimization**
+
+## Testing Requirements
+
+### Test Coverage
+- **Minimum 80% coverage** for all components
+- **Unit tests** for all utility functions
+- **Integration tests** for complex workflows
+- **E2E tests** for critical user paths
+
+### Test Structure
+- **Arrange-Act-Assert** pattern
+- **Descriptive test names** that explain the scenario
+- **Mock external dependencies**
+- **Test error scenarios**
+
+## Documentation Standards
+
+### Component Documentation
+- **README.md** for each component with usage examples
+- **Props documentation** with types and descriptions
+- **Usage examples** with different configurations
+- **Accessibility notes** where applicable
+
+### Code Documentation
+- **JSDoc comments** for all public functions
+- **Inline comments** for complex logic
+- **Type definitions** for all interfaces
+- **API documentation** for all endpoints
+
+## Security Guidelines
+
+### Data Handling
+- **Sanitize all user inputs**
+- **Validate data at boundaries**
+- **Use proper authentication**
+- **Implement proper authorization**
+
+### Environment Variables
+- **Never commit secrets** to version control
+- **Use environment-specific configs**
+- **Validate required environment variables**
+- **Use secure defaults**
+
+## Performance Guidelines
+
+### Bundle Optimization
+- **Tree shaking** for unused code
+- **Code splitting** for large applications
+- **Lazy loading** for non-critical components
+- **Bundle analysis** to identify large dependencies
+
+### Runtime Performance
+- **Debounce user inputs**
+- **Throttle expensive operations**
+- **Use React.memo** for expensive components
+- **Optimize re-renders**
+
+## Accessibility Standards
+
+### WCAG Compliance
+- **Level AA compliance** minimum
+- **Keyboard navigation** support
+- **Screen reader** compatibility
+- **Color contrast** requirements
+
+### Semantic HTML
+- **Proper heading hierarchy**
+- **Semantic elements** (nav, main, section, article)
+- **Form labels** and descriptions
+- **Focus management**
+
+## Error Handling
+
+### Error Boundaries
+- **React error boundaries** for component errors
+- **Global error handling** for unhandled errors
+- **User-friendly error messages**
+- **Error logging** and monitoring
+
+### API Error Handling
+- **Proper HTTP status codes**
+- **Consistent error response format**
+- **Retry mechanisms** for transient errors
+- **Fallback UI** for critical failures
+
+## Git Workflow
+
+### Branch Naming
+- **feature/description** for new features
+- **bugfix/description** for bug fixes
+- **hotfix/description** for critical fixes
+- **chore/description** for maintenance
+
+### Commit Messages
+- **Conventional commits** format
+- **Descriptive messages** explaining the change
+- **Breaking changes** clearly marked
+- **Reference issues** when applicable
+
+## Monorepo Structure
+
+### Package Dependencies
+- **Internal packages** use workspace references
+- **External dependencies** properly versioned
+- **Peer dependencies** for shared libraries
+- **Dev dependencies** for build tools
+
+### Build System
+- **Turborepo** for build orchestration
+- **TypeScript** for type safety
+- **ESLint** for code quality
+- **Prettier** for code formatting
+
+## Development Environment
+
+### Local Development
+- **Docker Compose** for local services
+- **Hot reload** for development
+- **Debug configuration** for IDEs
+- **Environment setup** documentation
+
+### Code Quality Tools
+- **ESLint** with strict rules
+- **Prettier** for formatting
+- **Husky** for git hooks
+- **lint-staged** for pre-commit checks

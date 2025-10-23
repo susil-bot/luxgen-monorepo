@@ -1,0 +1,190 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongodb:
+    image: mongo:7.0
+    container_name: luxgen-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: luxgen
+    volumes:
+      - mongodb_data:/data/db
+      - ./packages/db/src/seed.ts:/docker-entrypoint-initdb.d/seed.ts:ro
+    networks:
+      - luxgen-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis Cache
+  redis:
+    image: redis:7.2-alpine
+    container_name: luxgen-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - luxgen-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # API Server
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: luxgen-api
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: development
+      PORT: 4000
+      MONGODB_URI: mongodb://admin:password123@mongodb:27017/luxgen?authSource=admin
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      CORS_ORIGIN: http://localhost:3000
+    volumes:
+      - ./apps/api:/app/apps/api
+      - ./packages:/app/packages
+      - /app/node_modules
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - luxgen-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Web Application
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: luxgen-web
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+    volumes:
+      - ./apps/web:/app/apps/web
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/.next
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - luxgen-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Development Tools
+  dev-tools:
+    image: node:18-alpine
+    container_name: luxgen-dev-tools
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - .:/app
+      - /app/node_modules
+    command: >
+      sh -c "
+        npm install &&
+        npm run dev
+      "
+    environment:
+      NODE_ENV: development
+    depends_on:
+      - mongodb
+      - redis
+    networks:
+      - luxgen-network
+
+  # Database Admin (Mongo Express)
+  mongo-express:
+    image: mongo-express:1.0.0
+    container_name: luxgen-mongo-express
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: admin
+      ME_CONFIG_MONGODB_ADMINPASSWORD: password123
+      ME_CONFIG_MONGODB_URL: mongodb://admin:password123@mongodb:27017/
+      ME_CONFIG_BASICAUTH_USERNAME: admin
+      ME_CONFIG_BASICAUTH_PASSWORD: admin123
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    networks:
+      - luxgen-network
+
+  # Redis Admin (Redis Commander)
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: luxgen-redis-commander
+    restart: unless-stopped
+    ports:
+      - "8082:8081"
+    environment:
+      REDIS_HOSTS: local:redis:6379
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - luxgen-network
+
+  # Nginx Reverse Proxy (Optional)
+  nginx:
+    image: nginx:alpine
+    container_name: luxgen-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - web
+      - api
+    networks:
+      - luxgen-network
+
+volumes:
+  mongodb_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  luxgen-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
