@@ -10,7 +10,7 @@
  * @param {Object} options - Transformation options
  * @returns {Object} Transformed props
  */
-export const transformComponentProps = (props, options = {}) => {
+export const transformComponentProps = (props: any, options: any = {}) => {
   const {
     includeTheme = true,
     includeSSR = true,
@@ -77,7 +77,7 @@ export const transformComponentProps = (props, options = {}) => {
  * @param {Object} options - SSR options
  * @returns {Object} SSR-ready data
  */
-export const transformForSSR = (componentData, options = {}) => {
+export const transformForSSR = (componentData: any, options: any = {}) => {
   const {
     includeStyles = true,
     includeScripts = true,
@@ -108,7 +108,7 @@ export const transformForSSR = (componentData, options = {}) => {
  * @param {Object} options - Style options
  * @returns {Object} Transformed styles
  */
-export const transformStyles = (styles, theme, options = {}) => {
+export const transformStyles = (styles: any, theme: any, options: any = {}) => {
   const {
     includeResponsive = true,
     includeDarkMode = true,
@@ -163,7 +163,7 @@ export const transformStyles = (styles, theme, options = {}) => {
  * @param {Object} options - Translation options
  * @returns {Object} Transformed translations
  */
-export const transformTranslations = (translations, locale, options = {}) => {
+export const transformTranslations = (translations: any, locale: string, options: any = {}) => {
   const {
     includeFallback = true,
     includeNamespace = true,
@@ -194,7 +194,7 @@ export const transformTranslations = (translations, locale, options = {}) => {
  * @param {Object} options - Testing options
  * @returns {Object} Transformed tests
  */
-export const transformTests = (tests, framework = 'jest', options = {}) => {
+export const transformTests = (tests: any, framework: string = 'jest', options: any = {}) => {
   const {
     includeAccessibility = true,
     includeVisual = true,
@@ -239,7 +239,7 @@ export const transformTests = (tests, framework = 'jest', options = {}) => {
  * @param {Object} options - Fixture options
  * @returns {Object} Transformed fixtures
  */
-export const transformFixtures = (fixtures, options = {}) => {
+export const transformFixtures = (fixtures: any, options: any = {}) => {
   const {
     includeVariants = true,
     includeStates = true,
@@ -269,7 +269,7 @@ export const transformFixtures = (fixtures, options = {}) => {
  * @param {Object} options - Documentation options
  * @returns {Object} Documentation-ready data
  */
-export const transformForDocumentation = (componentData, options = {}) => {
+export const transformForDocumentation = (componentData: any, options: any = {}) => {
   const {
     includeExamples = true,
     includeAPI = true,
@@ -316,7 +316,7 @@ export const transformForDocumentation = (componentData, options = {}) => {
  * @param {Object} options - Transformation options
  * @returns {Object} Fully transformed component data
  */
-export const transformComponent = (componentData, options = {}) => {
+export const transformComponent = (componentData: any, options: any = {}) => {
   const {
     includeSSR = true,
     includeStyles = true,
@@ -370,7 +370,7 @@ export const transformComponent = (componentData, options = {}) => {
  * @param {Object} transformedData - Transformed component data
  * @returns {Object} Validation results
  */
-export const validateTransformedComponent = (transformedData) => {
+export const validateTransformedComponent = (transformedData: any) => {
   const errors = [];
   const warnings = [];
 
