@@ -1,6 +1,7 @@
 import { Plugin } from '../Plugin';
 import { PhaseSet } from '../PhaseSet';
 import { createFetcher, createTransformer } from '../index';
+import { WorkflowContext } from '../WorkflowContext';
 
 /**
  * NavigationPlugin is a shared plugin that manages site navigation.
@@ -145,7 +146,7 @@ export class NavigationPlugin extends Plugin {
     const breadcrumbs = [{ label: 'Home', href: '/' }];
     
     let currentPath = '';
-    segments.forEach((segment, index) => {
+    segments.forEach((segment: string, index: number) => {
       currentPath += `/${segment}`;
       breadcrumbs.push({
         label: segment.charAt(0).toUpperCase() + segment.slice(1),

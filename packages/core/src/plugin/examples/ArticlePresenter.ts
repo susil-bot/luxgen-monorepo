@@ -142,7 +142,9 @@ export class ArticlePresenter extends Presenter {
       'presenter-articles',
       '/articles/:id',
       'article',
-      phaseSet
+      phaseSet,
+      undefined,
+      undefined
     );
   }
 }
