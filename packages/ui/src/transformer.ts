@@ -173,7 +173,7 @@ export const transformTranslations = (translations: any, locale: string, options
   const transformed = {
     locale,
     translations: translations[locale] || {},
-    fallback: includeFallback ? translations.en || {},
+    fallback: includeFallback ? (translations as any).en || {},
     namespace: includeNamespace ? 'ui' : undefined,
   };
 
