@@ -35,7 +35,7 @@ build: ## Build all packages
 	@echo "Building packages..."
 	npm run build
 
-build:docker ## Build Docker images
+build-docker: ## Build Docker images
 	@echo "Building Docker images..."
 	docker-compose build
 
@@ -44,15 +44,15 @@ logs: ## Show logs for all services
 	@echo "Showing logs..."
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs -f
 
-logs:web ## Show logs for web service
+logs-web: ## Show logs for web service
 	@echo "Showing web logs..."
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs -f web
 
-logs:api ## Show logs for API service
+logs-api: ## Show logs for API service
 	@echo "Showing API logs..."
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs -f api
 
-logs:db ## Show logs for database services
+logs-db: ## Show logs for database services
 	@echo "Showing database logs..."
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs -f mongodb redis
 
@@ -61,11 +61,11 @@ test: ## Run all tests
 	@echo "Running tests..."
 	npm run test
 
-test:watch ## Run tests in watch mode
+test-watch: ## Run tests in watch mode
 	@echo "Running tests in watch mode..."
 	npm run test:watch
 
-test:coverage ## Run tests with coverage
+test-coverage: ## Run tests with coverage
 	@echo "Running tests with coverage..."
 	npm run test:coverage
 
@@ -74,7 +74,7 @@ lint: ## Run ESLint
 	@echo "Running ESLint..."
 	npm run lint
 
-lint:fix ## Fix ESLint issues
+lint-fix: ## Fix ESLint issues
 	@echo "Fixing ESLint issues..."
 	npm run lint:fix
 
@@ -82,7 +82,7 @@ format: ## Format code with Prettier
 	@echo "Formatting code..."
 	npm run format
 
-format:check ## Check code formatting
+format-check: ## Check code formatting
 	@echo "Checking code formatting..."
 	npm run format:check
 
@@ -91,16 +91,16 @@ db:seed ## Seed the database
 	@echo "Seeding database..."
 	docker-compose exec api npm run db:seed
 
-db:reset ## Reset the database
+db-reset: ## Reset the database
 	@echo "Resetting database..."
 	docker-compose exec mongodb mongosh --eval "db.dropDatabase()"
-	$(MAKE) db:seed
+	$(MAKE) db-seed
 
-db:backup ## Backup the database
+db-backup: ## Backup the database
 	@echo "Backing up database..."
 	docker-compose exec mongodb mongodump --out /backup/$(shell date +%Y%m%d_%H%M%S)
 
-db:restore ## Restore the database
+db-restore: ## Restore the database
 	@echo "Restoring database..."
 	docker-compose exec mongodb mongorestore /backup/latest
 
@@ -109,11 +109,11 @@ clean: ## Clean up Docker resources
 	@echo "Cleaning up Docker resources..."
 	./scripts/dev.sh cleanup
 
-clean:volumes ## Clean up Docker volumes
+clean-volumes: ## Clean up Docker volumes
 	@echo "Cleaning up Docker volumes..."
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down -v
 
-clean:all ## Clean up everything
+clean-all: ## Clean up everything
 	@echo "Cleaning up everything..."
 	docker system prune -af
 	docker volume prune -f
@@ -123,7 +123,7 @@ prod:build ## Build for production
 	@echo "Building for production..."
 	docker build -t luxgen-monorepo:latest .
 
-prod:deploy ## Deploy to production
+prod-deploy: ## Deploy to production
 	@echo "Deploying to production..."
 	docker-compose -f docker-compose.prod.yml up -d
 
@@ -132,15 +132,15 @@ status: ## Show status of all services
 	@echo "Service status:"
 	docker-compose -f docker-compose.yml -f docker-compose.dev.yml ps
 
-shell:web ## Open shell in web container
+shell-web: ## Open shell in web container
 	@echo "Opening shell in web container..."
 	docker-compose exec web bash
 
-shell:api ## Open shell in API container
+shell-api: ## Open shell in API container
 	@echo "Opening shell in API container..."
 	docker-compose exec api bash
 
-shell:db ## Open MongoDB shell
+shell-db: ## Open MongoDB shell
 	@echo "Opening MongoDB shell..."
 	docker-compose exec mongodb mongosh
 

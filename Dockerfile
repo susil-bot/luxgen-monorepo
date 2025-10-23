@@ -13,8 +13,8 @@ COPY turbo.json ./
 COPY tsconfig.base.json ./
 
 # Copy package.json files for all packages
-COPY packages/*/package.json ./packages/*/
-COPY apps/*/package.json ./apps/*/
+COPY packages/ ./packages/
+COPY apps/ ./apps/
 
 # Install all dependencies (including dev dependencies for build)
 RUN npm install
