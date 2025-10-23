@@ -170,10 +170,12 @@ export const transformTranslations = (translations: any, locale: string, options
     includePluralization = true,
   } = options;
 
+  const fallbackTranslations = includeFallback ? (translations as any).en || {} : {};
+  
   const transformed = {
     locale,
     translations: translations[locale] || {},
-    fallback: includeFallback ? ((translations as any).en || {}),
+    fallback: fallbackTranslations,
     namespace: includeNamespace ? 'ui' : undefined,
   };
 
