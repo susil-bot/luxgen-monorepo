@@ -7,7 +7,7 @@ FROM base AS deps
 RUN apk add --no-cache libc6-compat
 WORKDIR /app
 
-# Install dependencies based on the preferred package manager
+# Copy package files
 COPY package.json package-lock.json* ./
 COPY turbo.json ./
 COPY tsconfig.base.json ./
@@ -16,7 +16,8 @@ COPY tsconfig.base.json ./
 COPY packages/*/package.json ./packages/*/
 COPY apps/*/package.json ./apps/*/
 
-RUN npm ci --only=production
+# Install all dependencies (including dev dependencies for build)
+RUN npm install
 
 # Rebuild the source code only when needed
 FROM base AS builder

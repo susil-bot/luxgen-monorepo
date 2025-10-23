@@ -55,6 +55,22 @@ luxgen-monorepo/
 
 ## Development
 
+
+# Start development environment
+make dev
+
+# View logs
+make logs
+
+# Run tests
+make test
+
+# Stop environment
+make stop
+
+# Clean up
+make clean
+
 - `npm run dev` - Start all development servers
 - `npm run build` - Build all packages
 - `npm run lint` - Lint all packages
