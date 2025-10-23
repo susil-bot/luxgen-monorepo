@@ -1,4 +1,3 @@
-import React from 'react';
 import { Presenter } from '../Presenter';
 import { PhaseSet } from '../PhaseSet';
 import { createFetcher, createTransformer, createSliceTransformer, createFilterTransformer } from '../index';
@@ -143,8 +142,7 @@ export class ArticlePresenter extends Presenter {
       'presenter-articles',
       '/articles/:id',
       'article',
-      phaseSet,
-      ArticleComponent
+      phaseSet
     );
   }
 }
@@ -152,67 +150,8 @@ export class ArticlePresenter extends Presenter {
 /**
  * ArticleComponent is the React component for displaying articles.
  * This would typically be a more complex component with proper styling.
+ * Note: This is a placeholder - the actual component would be in a .tsx file
  */
-const ArticleComponent: React.FC<any> = ({ articleData, relatedArticles, comments }) => {
-  return (
-    <div className="article">
-      <header className="article-header">
-        <h1 className="article-title">{articleData.title}</h1>
-        <div className="article-meta">
-          <span className="article-author">By {articleData.author.name}</span>
-          <span className="article-date">{new Date(articleData.publishedAt).toLocaleDateString()}</span>
-          <span className="article-read-time">{articleData.readTime} min read</span>
-        </div>
-        <div className="article-tags">
-          {articleData.tags.map((tag: string) => (
-            <span key={tag} className="article-tag">{tag}</span>
-          ))}
-        </div>
-      </header>
-      
-      <div className="article-content">
-        <img src={articleData.featuredImage} alt={articleData.title} className="article-featured-image" />
-        <div dangerouslySetInnerHTML={{ __html: articleData.content }} />
-      </div>
-      
-      <div className="article-stats">
-        <span className="article-views">{articleData.stats.views} views</span>
-        <span className="article-likes">{articleData.stats.likes} likes</span>
-        <span className="article-comments">{articleData.stats.comments} comments</span>
-      </div>
-      
-      {relatedArticles.length > 0 && (
-        <section className="related-articles">
-          <h2>Related Articles</h2>
-          <div className="related-articles-list">
-            {relatedArticles.map((article: any) => (
-              <div key={article.id} className="related-article">
-                <h3>{article.title}</h3>
-                <p>{article.excerpt}</p>
-                <span className="article-read-time">{article.readTime} min read</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-      
-      {comments.length > 0 && (
-        <section className="article-comments">
-          <h2>Comments</h2>
-          <div className="comments-list">
-            {comments.map((comment: any) => (
-              <div key={comment.id} className="comment">
-                <div className="comment-author">{comment.author}</div>
-                <div className="comment-content">{comment.content}</div>
-                <div className="comment-meta">
-                  <span className="comment-date">{new Date(comment.publishedAt).toLocaleDateString()}</span>
-                  <span className="comment-likes">{comment.likes} likes</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-    </div>
-  );
+export const ArticleComponent = () => {
+  return null; // Placeholder for the actual component
 };

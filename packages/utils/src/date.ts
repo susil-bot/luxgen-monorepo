@@ -1,9 +1,19 @@
 export const formatDate = (date: Date, format: 'short' | 'long' | 'time' = 'short'): string => {
-  const options: Intl.DateTimeFormatOptions = {
-    short: { year: 'numeric', month: 'short', day: 'numeric' },
-    long: { year: 'numeric', month: 'long', day: 'numeric' },
-    time: { hour: '2-digit', minute: '2-digit' },
-  }[format];
+  let options: Intl.DateTimeFormatOptions;
+  
+  switch (format) {
+    case 'short':
+      options = { year: 'numeric', month: 'short', day: 'numeric' };
+      break;
+    case 'long':
+      options = { year: 'numeric', month: 'long', day: 'numeric' };
+      break;
+    case 'time':
+      options = { hour: '2-digit', minute: '2-digit' };
+      break;
+    default:
+      options = { year: 'numeric', month: 'short', day: 'numeric' };
+  }
 
   return new Intl.DateTimeFormat('en-US', options).format(date);
 };
