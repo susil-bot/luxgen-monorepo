@@ -4,6 +4,17 @@ A multi-tenant learning management system built with Next.js, GraphQL, and Mongo
 
 ## Architecture
 
+
+| Layer                               | Responsibility                                                                          | Example Files / Folders                                                            |
+| ----------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| **1. Presentation (UI Layer)**      | Visual components, forms, buttons, pages — tenant-aware UI                              | `/packages/ui/*`, `/features/auth/pages/LoginPage.tsx`                             |
+| **2. View Logic (Container Layer)** | Hooks, state management, orchestrates form actions, calls services                      | `/features/auth/hooks/useLogin.ts`, `/features/auth/containers/LoginContainer.tsx` |
+| **3. Domain / Service Layer**       | Business logic, validations, core service calls                                         | `/features/auth/services/AuthService.ts`                                           |
+| **4. Data Access / API Layer**      | Handles API communication (REST/GraphQL) and data formatting                            | `/lib/api/authApi.ts`, `/lib/graphql/mutations/login.ts`                           |
+| **5. Context / Tenant Layer**       | Provides current tenant context, injects tenant configs (theme, API base URL, branding) | `/context/TenantContext.tsx`, `/providers/TenantProvider.tsx`                      |
+| **6. Infrastructure Layer**         | Backend integration, config, caching, environment setup                                 | `/config/env.ts`, `/lib/httpClient.ts`, `/config/tenantConfig.json`                |
+
+
 - **Frontend**: Next.js with TypeScript
 - **Backend**: Node.js with Apollo GraphQL Server
 - **Database**: MongoDB

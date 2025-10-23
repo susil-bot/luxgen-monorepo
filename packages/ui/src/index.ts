@@ -23,9 +23,9 @@ export * from './Badge';
 export * from './Kicker';
 export * from './Carousel';
 export * from './Accordion';
+export * from './Card';
 export * from './Modal';
 export * from './Table';
-export * from './Card';
 
 // Shared Types and Utilities
 export * from './types';
