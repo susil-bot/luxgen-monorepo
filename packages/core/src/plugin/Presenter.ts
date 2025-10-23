@@ -18,7 +18,7 @@ export class Presenter extends Plugin {
     route: string,
     contentType: string,
     phaseSet: PhaseSet,
-    component: ComponentType,
+    component?: ComponentType,
     tenant?: string
   ) {
     super(name, phaseSet, component);
