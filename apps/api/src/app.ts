@@ -52,7 +52,13 @@ const server = new ApolloServer({
   },
 });
 
-// Apply Apollo GraphQL middleware
-server.applyMiddleware({ app: app as any, path: '/graphql' });
+// Start Apollo Server and apply middleware
+const startServer = async () => {
+  await server.start();
+  server.applyMiddleware({ app: app as any, path: '/graphql' });
+};
+
+// Start the server
+startServer().catch(console.error);
 
 export { app };
