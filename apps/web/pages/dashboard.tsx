@@ -133,6 +133,11 @@ export default function Dashboard({ tenant }: DashboardProps) {
           ),
           children: [
             {
+              id: 'group-dashboard',
+              label: 'Group Dashboard',
+              href: '/groups/dashboard',
+            },
+            {
               id: 'all-groups',
               label: 'All Groups',
               href: '/groups',
