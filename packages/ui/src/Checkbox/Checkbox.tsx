@@ -1,9 +1,9 @@
 import React from 'react';
-import { BaseComponentProps, TenantTheme, FormProps } from '../types';
+import { BaseComponentProps, TenantTheme, BaseFormProps } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
-export interface CheckboxProps extends BaseComponentProps, FormProps {
+export interface CheckboxProps extends BaseComponentProps, BaseFormProps {
   tenantTheme?: TenantTheme;
   label?: string;
   disabled?: boolean;
@@ -11,6 +11,7 @@ export interface CheckboxProps extends BaseComponentProps, FormProps {
   helperText?: string;
   error?: string;
   indeterminate?: boolean;
+  checked?: boolean;
 }
 
 const CheckboxComponent: React.FC<CheckboxProps> = ({

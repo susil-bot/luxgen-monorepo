@@ -1,9 +1,9 @@
 import React from 'react';
-import { BaseComponentProps, TenantTheme, FormProps } from '../types';
+import { BaseComponentProps, TenantTheme, BaseFormProps } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
-export interface InputWithLabelProps extends BaseComponentProps, FormProps {
+export interface InputWithLabelProps extends BaseComponentProps, BaseFormProps {
   tenantTheme?: TenantTheme;
   label: string;
   type?: 'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search';

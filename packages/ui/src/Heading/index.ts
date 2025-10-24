@@ -3,4 +3,4 @@ export type { HeadingProps } from './Heading';
 export { fetchHeadingData, fetchHeadingSSR } from './fetcher';
 export { headingFixtures } from './fixture';
 export { headingStyles } from './styles';
-export { headingTranslations } from './translations';
+export { HeadingTranslations } from './translations';

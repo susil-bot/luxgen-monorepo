@@ -3,6 +3,8 @@ import { BaseComponentProps, TenantTheme } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
+export type { TenantTheme } from '../types';
+
 export interface FooterLink {
   label: string;
   href: string;

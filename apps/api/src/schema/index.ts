@@ -37,7 +37,7 @@ export const typeDefs = mergeTypeDefs([
 ]);
 
 // Merge all resolvers
-export const resolvers = mergeResolvers([
+export const resolvers: any = mergeResolvers([
   tenantResolvers,
   userResolvers,
   courseResolvers,

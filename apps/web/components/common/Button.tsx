@@ -2,7 +2,6 @@ import { ReactNode, ButtonHTMLAttributes, AnchorHTMLAttributes } from 'react';
 import Link from 'next/link';
 
 interface BaseButtonProps {
-  children: ReactNode;
   variant?: 'primary' | 'secondary' | 'outline' | 'danger';
   size?: 'sm' | 'md' | 'lg';
   loading?: boolean;

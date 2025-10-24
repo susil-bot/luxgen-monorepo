@@ -74,11 +74,13 @@ const HeadingComponent: React.FC<HeadingProps> = ({
   const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
   const sizeClass = getSizeClass();
 
+  const { loading, ...headingProps } = props;
+  
   return (
     <HeadingTag
       className={`heading heading-${sizeClass} ${className}`}
       style={styles}
-      {...props}
+      {...headingProps}
     >
       {text}
     </HeadingTag>

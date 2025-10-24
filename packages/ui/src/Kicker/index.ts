@@ -3,4 +3,4 @@ export type { KickerProps } from './Kicker';
 export { fetchKickerData, fetchKickerSSR } from './fetcher';
 export { kickerFixtures } from './fixture';
 export { kickerStyles } from './styles';
-export { kickerTranslations } from './translations';
+export { KickerTranslations } from './translations';

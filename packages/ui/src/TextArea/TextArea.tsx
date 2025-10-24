@@ -1,9 +1,9 @@
 import React from 'react';
-import { BaseComponentProps, TenantTheme, FormProps } from '../types';
+import { BaseComponentProps, TenantTheme, BaseFormProps } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
-export interface TextAreaProps extends BaseComponentProps, FormProps {
+export interface TextAreaProps extends BaseComponentProps, BaseFormProps {
   tenantTheme?: TenantTheme;
   rows?: number;
   placeholder?: string;

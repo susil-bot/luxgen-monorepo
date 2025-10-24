@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { BaseComponentProps, TenantTheme, FormProps, SelectOption } from '../types';
+import { BaseComponentProps, TenantTheme, BaseFormProps, SelectOption } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
-export interface SelectProps extends BaseComponentProps, FormProps {
+export interface SelectProps extends BaseComponentProps, BaseFormProps {
   tenantTheme?: TenantTheme;
   options: SelectOption[];
   placeholder?: string;

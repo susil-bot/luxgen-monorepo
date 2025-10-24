@@ -7,6 +7,7 @@ import { resolvers } from './schema';
 import { context } from './context';
 import { authMiddleware } from './middleware/auth';
 import { tenantMiddleware } from './middleware/tenant';
+import authRoutes from './routes/auth';
 
 const app = express();
 
@@ -30,13 +31,15 @@ app.get('/health', (req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
+// API Routes
+app.use('/api/auth', authRoutes);
+
 // Create Apollo Server
 const server = new ApolloServer({
   typeDefs,
   resolvers,
   context,
   introspection: process.env.APOLLO_INTROSPECTION === 'true',
-  playground: process.env.APOLLO_PLAYGROUND === 'true',
   formatError: (error) => {
     console.error('GraphQL Error:', error);
     return {
@@ -48,6 +51,6 @@ const server = new ApolloServer({
 });
 
 // Apply Apollo GraphQL middleware
-server.applyMiddleware({ app, path: '/graphql' });
+server.applyMiddleware({ app: app as any, path: '/graphql' });
 
 export { app };

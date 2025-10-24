@@ -6,6 +6,7 @@ export interface TenantTheme {
     secondary: string;
     accent: string;
     background: string;
+    backgroundSecondary: string;
     surface: string;
     text: string;
     textSecondary: string;
@@ -54,7 +55,7 @@ export interface ClickableProps {
   onClick?: (e: React.MouseEvent) => void;
 }
 
-export interface FormProps {
+export interface BaseFormProps {
   onChange?: (value: any) => void;
   value?: any;
   error?: string;

@@ -3,7 +3,7 @@ import { BaseComponentProps, TenantTheme, VariantProps } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
-export interface CardProps extends BaseComponentProps, VariantProps {
+export interface CardProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
   children: React.ReactNode;
   title?: React.ReactNode;
@@ -244,14 +244,14 @@ const CardComponent: React.FC<CardProps> = ({
   return (
     <div
       className={`card card-${variant} card-${size} ${clickable ? 'card-clickable' : ''} ${hover ? 'card-hover' : ''} ${className}`}
-      style={styles}
+      style={styles as React.CSSProperties}
       onClick={handleClick}
       {...props}
     >
       {image && imagePosition === 'top' && renderImage()}
       {image && imagePosition === 'left' && renderImage()}
       
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' } as React.CSSProperties}>
         {renderHeader()}
         
         <div

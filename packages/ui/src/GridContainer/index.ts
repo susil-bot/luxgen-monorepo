@@ -3,4 +3,4 @@ export type { GridContainerProps } from './GridContainer';
 export { fetchGridContainerData, fetchGridContainerSSR } from './fetcher';
 export { gridContainerFixtures } from './fixture';
 export { gridContainerStyles } from './styles';
-export { gridContainerTranslations } from './translations';
+export { gridContaineUrTranslations } from './translations';
