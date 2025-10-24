@@ -23,7 +23,7 @@ export * from './Sidebar';
 export * from './GroupCard';
 export * from './GroupForm';
 export * from './GroupMemberList';
-export * from './GroupDashboardCard';
+// export * from './GroupDashboardCard';
 export * from './Menu';
 export * from './Layout';
 
