@@ -18,6 +18,9 @@ export * from './Select';
 export * from './Checkbox';
 export * from './RadioGroup';
 export * from './Switch';
+
+// Display Components
+export * from './Chip';
 export * from './Form';
 export * from './InputWithLabel';
 export * from './LoginForm';
