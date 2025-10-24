@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { User, IUser } from '@luxgen/db';
 import { hashPassword, verifyPassword } from '@luxgen/auth';
-import { generateToken } from '@luxgen/auth';
+import { generateToken } from '../utils/jwt';
 import { userService } from '../services/userService';
 import { validateLogin, validateRegister } from '../middleware/validation';
 
@@ -93,7 +93,19 @@ router.post('/login', validateLogin, async (req: Request, res: Response) => {
 // Register endpoint
 router.post('/register', validateRegister, async (req: Request, res: Response) => {
   try {
-    const { email, password, firstName, lastName, tenantId, role } = req.body;
+    const { email, password, firstName, lastName, role } = req.body;
+    
+    // Get tenant from request (set by middleware)
+    const tenantId = req.tenantId;
+    if (!tenantId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Tenant context required',
+        errors: {
+          tenant: 'No tenant context found'
+        }
+      });
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ email: email.toLowerCase().trim() });

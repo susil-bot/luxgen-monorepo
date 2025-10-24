@@ -1,5 +1,5 @@
 export { Kicker } from './Kicker';
-export type { KickerProps } from './Kicker';
+export { KickerProps } from './Kicker';
 export { fetchKickerData, fetchKickerSSR } from './fetcher';
 export { kickerFixtures } from './fixture';
 export { kickerStyles } from './styles';

@@ -29,12 +29,12 @@ router.get('/current', async (req: Request, res: Response) => {
         subdomain: tenant.subdomain,
         domain: tenant.domain,
         status: tenant.status,
-        plan: tenant.metadata.plan,
-        branding: tenant.settings.branding,
-        features: tenant.settings.config.features,
-        limits: tenant.settings.config.limits,
+        plan: tenant.metadata?.plan || 'free',
+        branding: tenant.settings?.branding || {},
+        features: tenant.settings?.config?.features || {},
+        limits: tenant.settings?.config?.limits || {},
         createdAt: tenant.createdAt,
-        lastActive: tenant.metadata.lastActive
+        lastActive: tenant.metadata?.lastActive || tenant.createdAt
       }
     });
   } catch (error) {
@@ -66,9 +66,9 @@ router.get('/config', async (req: Request, res: Response) => {
     res.json({
       success: true,
       data: {
-        branding: tenant.settings.branding,
-        security: tenant.settings.security,
-        config: tenant.settings.config
+        branding: tenant.settings?.branding || {},
+        security: tenant.settings?.security || {},
+        config: tenant.settings?.config || {}
       }
     });
   } catch (error) {
@@ -228,8 +228,8 @@ router.get('/stats', async (req: Request, res: Response) => {
       data: {
         users: userCount,
         courses: courseCount,
-        plan: tenant.metadata.plan,
-        limits: tenant.settings.config.limits,
+        plan: tenant.metadata?.plan || 'free',
+        limits: tenant.settings?.config?.limits || {},
         usage: {
           users: userCount,
           storage: 0, // TODO: Calculate actual storage usage

@@ -1,5 +1,5 @@
 export { Switch } from './Switch';
-export type { SwitchProps } from './Switch';
+export { SwitchProps } from './Switch';
 export { fetchSwitchData, fetchSwitchSSR } from './fetcher';
 export { switchFixtures } from './fixture';
 export { switchStyles } from './styles';

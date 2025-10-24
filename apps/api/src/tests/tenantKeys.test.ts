@@ -210,9 +210,18 @@ describe('Per-Tenant JWT Keys', () => {
     });
 
     it('should handle missing tenant keys', () => {
+      // Clear the default key to ensure the test works
+      const originalDefault = tenantKeyManager['keyStore']['default'];
+      delete tenantKeyManager['keyStore']['default'];
+      
       expect(() => {
         tenantKeyManager.getTenantKey('non-existent-tenant');
       }).toThrow('No signing key found for tenant: non-existent-tenant');
+      
+      // Restore the default key
+      if (originalDefault) {
+        tenantKeyManager['keyStore']['default'] = originalDefault;
+      }
     });
   });
 });

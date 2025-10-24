@@ -959,35 +959,257 @@ export class TenantWorkflowUtils {
       demo: {
         name: 'Demo Platform',
         subdomain: 'demo',
-        metadata: { plan: 'pro', tier: 'standard' },
+        metadata: { 
+          plan: 'pro' as const, 
+          tier: 'standard' as const,
+          createdAt: new Date(),
+          lastActive: new Date(),
+          createdBy: 'system',
+          tags: ['demo'],
+          region: 'us-east-1',
+          timezone: 'UTC'
+        },
         branding: {
+          logo: {
+            primary: '/assets/logos/demo-logo.svg',
+            secondary: '/assets/logos/demo-logo-secondary.svg',
+            icon: '/assets/logos/demo-icon.svg',
+            favicon: '/assets/favicons/demo-favicon.ico'
+          },
           colors: {
             primary: '#1E40AF',
             secondary: '#64748B',
-            accent: '#059669'
+            accent: '#059669',
+            success: '#10B981',
+            warning: '#F59E0B',
+            error: '#EF4444',
+            info: '#3B82F6',
+            background: '#FFFFFF',
+            surface: '#F8FAFC',
+            text: {
+              primary: '#0F172A',
+              secondary: '#475569',
+              muted: '#94A3B8'
+            }
+          },
+          typography: {
+            fontFamily: {
+              primary: 'Inter, system-ui, sans-serif',
+              secondary: 'Roboto, sans-serif',
+              mono: 'JetBrains Mono, monospace'
+            },
+            fontSize: {
+              xs: '0.75rem',
+              sm: '0.875rem',
+              base: '1rem',
+              lg: '1.125rem',
+              xl: '1.25rem',
+              '2xl': '1.5rem',
+              '3xl': '1.875rem',
+              '4xl': '2.25rem',
+              '5xl': '3rem'
+            },
+            fontWeight: {
+              light: 300,
+              normal: 400,
+              medium: 500,
+              semibold: 600,
+              bold: 700,
+              extrabold: 800
+            },
+            lineHeight: {
+              tight: 1.25,
+              normal: 1.5,
+              relaxed: 1.75
+            }
+          },
+          spacing: {
+            xs: '0.25rem',
+            sm: '0.5rem',
+            md: '1rem',
+            lg: '1.5rem',
+            xl: '2rem',
+            '2xl': '3rem',
+            '3xl': '4rem',
+            '4xl': '6rem'
+          },
+          borderRadius: {
+            none: '0',
+            sm: '0.125rem',
+            base: '0.25rem',
+            md: '0.375rem',
+            lg: '0.5rem',
+            xl: '0.75rem',
+            '2xl': '1rem',
+            full: '9999px'
+          },
+          shadows: {
+            sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+            base: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+            md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          },
+          assets: {
+            heroImage: '/assets/images/demo-hero.jpg',
+            backgroundPattern: '/assets/patterns/demo-pattern.svg',
+            placeholderImage: '/assets/images/demo-placeholder.jpg'
           }
         },
         limits: {
-          users: { max: 50 },
-          storage: { max: 2048 },
-          apiCalls: { max: 20000 }
+          users: { 
+            max: 50,
+            current: 0,
+            warningThreshold: 40
+          },
+          storage: { 
+            max: 2048,
+            current: 0,
+            warningThreshold: 1600
+          },
+          apiCalls: { 
+            max: 20000,
+            current: 0,
+            resetPeriod: 'monthly' as const,
+            warningThreshold: 16000
+          },
+          customDomains: {
+            max: 3,
+            current: 0
+          },
+          integrations: {
+            max: 10,
+            current: 0
+          }
         }
       },
       'idea-vibes': {
         name: 'Idea Vibes',
         subdomain: 'idea-vibes',
-        metadata: { plan: 'enterprise', tier: 'premium' },
+        metadata: { 
+          plan: 'enterprise' as const, 
+          tier: 'premium' as const,
+          createdAt: new Date(),
+          lastActive: new Date(),
+          createdBy: 'system',
+          tags: ['creative'],
+          region: 'us-west-2',
+          timezone: 'UTC'
+        },
         branding: {
+          logo: {
+            primary: '/assets/logos/idea-vibes-logo.svg',
+            secondary: '/assets/logos/idea-vibes-logo-secondary.svg',
+            icon: '/assets/logos/idea-vibes-icon.svg',
+            favicon: '/assets/favicons/idea-vibes-favicon.ico'
+          },
           colors: {
             primary: '#8B5CF6',
             secondary: '#F59E0B',
-            accent: '#EC4899'
+            accent: '#EC4899',
+            success: '#10B981',
+            warning: '#F59E0B',
+            error: '#EF4444',
+            info: '#3B82F6',
+            background: '#FFFFFF',
+            surface: '#F8FAFC',
+            text: {
+              primary: '#0F172A',
+              secondary: '#475569',
+              muted: '#94A3B8'
+            }
+          },
+          typography: {
+            fontFamily: {
+              primary: 'Poppins, system-ui, sans-serif',
+              secondary: 'Open Sans, sans-serif',
+              mono: 'Fira Code, monospace'
+            },
+            fontSize: {
+              xs: '0.75rem',
+              sm: '0.875rem',
+              base: '1rem',
+              lg: '1.125rem',
+              xl: '1.25rem',
+              '2xl': '1.5rem',
+              '3xl': '1.875rem',
+              '4xl': '2.25rem',
+              '5xl': '3rem'
+            },
+            fontWeight: {
+              light: 300,
+              normal: 400,
+              medium: 500,
+              semibold: 600,
+              bold: 700,
+              extrabold: 800
+            },
+            lineHeight: {
+              tight: 1.25,
+              normal: 1.5,
+              relaxed: 1.75
+            }
+          },
+          spacing: {
+            xs: '0.25rem',
+            sm: '0.5rem',
+            md: '1rem',
+            lg: '1.5rem',
+            xl: '2rem',
+            '2xl': '3rem',
+            '3xl': '4rem',
+            '4xl': '6rem'
+          },
+          borderRadius: {
+            none: '0',
+            sm: '0.125rem',
+            base: '0.25rem',
+            md: '0.375rem',
+            lg: '0.5rem',
+            xl: '0.75rem',
+            '2xl': '1rem',
+            full: '9999px'
+          },
+          shadows: {
+            sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+            base: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+            md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+            lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          },
+          assets: {
+            heroImage: '/assets/images/idea-vibes-hero.jpg',
+            backgroundPattern: '/assets/patterns/idea-vibes-pattern.svg',
+            placeholderImage: '/assets/images/idea-vibes-placeholder.jpg'
           }
         },
         limits: {
-          users: { max: 200 },
-          storage: { max: 10240 },
-          apiCalls: { max: 50000 }
+          users: { 
+            max: 200,
+            current: 0,
+            warningThreshold: 160
+          },
+          storage: { 
+            max: 10240,
+            current: 0,
+            warningThreshold: 8000
+          },
+          apiCalls: { 
+            max: 50000,
+            current: 0,
+            resetPeriod: 'monthly' as const,
+            warningThreshold: 40000
+          },
+          customDomains: {
+            max: 5,
+            current: 0
+          },
+          integrations: {
+            max: 20,
+            current: 0
+          }
         }
       }
     };

@@ -1,29 +1,32 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { LoginForm, LoginFormData, SnackbarProvider, useSnackbar } from '@luxgen/ui';
+import { RegisterForm, RegisterFormData, SnackbarProvider, useSnackbar } from '@luxgen/ui';
 import { PageWrapper } from '@luxgen/ui';
 
-const LoginPageContent: React.FC = () => {
+const RegisterPageContent: React.FC = () => {
   const router = useRouter();
   const { showSuccess, showError } = useSnackbar();
   const [loading, setLoading] = useState(false);
 
-  const handleLogin = async (data: LoginFormData) => {
+  const handleRegister = async (data: RegisterFormData) => {
     setLoading(true);
 
     try {
       // Get current hostname to determine tenant
       const hostname = window.location.hostname;
       const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-      const apiUrl = isLocalhost ? `http://${hostname}:4000/api/auth/login` : '/api/auth/login';
+      const apiUrl = isLocalhost ? `http://${hostname}:4000/api/auth/register` : '/api/auth/register';
 
       const response = await fetch(apiUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'x-tenant': 'demo', // Assuming 'demo' tenant for registration
         },
         body: JSON.stringify({
+          firstName: data.firstName,
+          lastName: data.lastName,
           email: data.email,
           password: data.password,
         }),
@@ -35,12 +38,12 @@ const LoginPageContent: React.FC = () => {
         // Store token and user data
         localStorage.setItem('authToken', responseData.data.token);
         localStorage.setItem('user', JSON.stringify(responseData.data.user));
-
-        showSuccess('Login successful! Redirecting...');
-
+        
+        showSuccess('Registration successful! Redirecting to login...');
+        
         // Redirect after a short delay
         setTimeout(() => {
-          router.push('/dashboard');
+          router.push('/login');
         }, 1500);
       } else {
         // Handle validation errors
@@ -48,11 +51,11 @@ const LoginPageContent: React.FC = () => {
           const errorMessages = Object.values(responseData.errors).join(', ');
           showError(errorMessages);
         } else {
-          showError(responseData.message || 'Login failed. Please check your credentials.');
+          showError(responseData.message || 'Registration failed. Please try again.');
         }
       }
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Registration error:', error);
       showError('Network error. Please check your connection and try again.');
     } finally {
       setLoading(false);
@@ -62,12 +65,12 @@ const LoginPageContent: React.FC = () => {
   const handleSocialLogin = async (provider: 'google' | 'linkedin' | 'github') => {
     setLoading(true);
     showInfo(`Redirecting to ${provider}...`);
-
+    
     try {
       // TODO: Implement actual social login
       // For now, just show a message
       setTimeout(() => {
-        showError(`${provider} login is not yet implemented. Please use email/password.`);
+        showError(`${provider} registration is not yet implemented. Please use email/password.`);
         setLoading(false);
       }, 2000);
     } catch (error) {
@@ -76,35 +79,30 @@ const LoginPageContent: React.FC = () => {
     }
   };
 
-  const handleForgotPassword = () => {
-    showSuccess('Password reset email sent! Check your inbox.');
-  };
-
-  const handleSignUp = () => {
-    router.push('/register');
+  const handleLogin = () => {
+    router.push('/login');
   };
 
   return (
     <>
       <Head>
-        <title>Login - LuxGen</title>
-        <meta name="description" content="Sign in to your LuxGen account" />
+        <title>Register - LuxGen</title>
+        <meta name="description" content="Create your LuxGen account" />
       </Head>
-      
+
       <PageWrapper>
         <div className="min-h-screen bg-white flex items-center justify-center p-4">
           <div className="w-full max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-center">
-              {/* Left Section - Login Form */}
+              {/* Left Section - Register Form */}
               <div className="order-2 md:order-1">
-                <LoginForm
-                  onSubmit={handleLogin}
+                <RegisterForm
+                  onSubmit={handleRegister}
                   onSocialLogin={handleSocialLogin}
-                  onForgotPassword={handleForgotPassword}
-                  onSignUp={handleSignUp}
+                  onSignIn={handleLogin}
                   loading={loading}
-                  title="Welcome Back"
-                  subtitle="Sign in to your account to continue"
+                  title="Create Account"
+                  subtitle="Sign up for your account to get started"
                   socialProviders={['google', 'linkedin', 'github']}
                   className=""
                 />
@@ -144,19 +142,19 @@ const LoginPageContent: React.FC = () => {
                   </div>
 
                   {/* Testimonial Card */}
-                        <div className="bg-green-50 border border-green-200 rounded-lg p-6">
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-6">
                     <div className="text-center">
                       <div className="mb-4">
                         <svg className="w-8 h-8 text-yellow-400 mx-auto mb-2" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.996 2.05c-3.481.881-6.006 3.789-6.006 7.559 0 2.5 1.5 4.5 3.5 4.5s3.5-2 3.5-4.5c0-3.77-2.525-6.678-6.006-7.559l.996-2.05c5.252 1.039 8.983 4.905 8.983 10.609v7.391h-9.017z"/>
                         </svg>
                       </div>
-                        <p className="text-gray-700 text-lg leading-relaxed mb-6 italic">
-                        "Thanks to this platform, I quickly found my dream job! Easy to navigate, countless opportunities, and excellent results. Highly recommended!"
+                      <p className="text-gray-700 text-lg leading-relaxed mb-6 italic">
+                        "Join thousands of professionals who have found their dream careers through our platform. Start your journey today!"
                       </p>
                       <div>
-                        <p className="text-gray-900 font-semibold text-lg">Emily Kuper</p>
-                        <p className="text-gray-600">Satisfied Customer</p>
+                        <p className="text-gray-900 font-semibold text-lg">Join Our Community</p>
+                        <p className="text-gray-600">Over 10,000+ successful placements</p>
                       </div>
                     </div>
                   </div>
@@ -170,10 +168,10 @@ const LoginPageContent: React.FC = () => {
   );
 };
 
-export default function Login() {
+export default function Register() {
   return (
     <SnackbarProvider position="top-right" maxSnackbars={3}>
-      <LoginPageContent />
+      <RegisterPageContent />
     </SnackbarProvider>
   );
 }

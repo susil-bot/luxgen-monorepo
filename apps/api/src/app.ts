@@ -18,13 +18,13 @@ import {
   tenantSecurityHeadersMiddleware,
   tenantRateLimitMiddleware
 } from './middleware/tenantHeaders';
-import {
-  tenantWorkflowMiddleware,
-  tenantFeatureMiddleware,
-  tenantLimitMiddleware,
-  tenantUsageTrackingMiddleware,
-  tenantComplianceMiddleware
-} from './middleware/tenantWorkflow';
+// import {
+//   tenantWorkflowMiddleware,
+//   tenantFeatureMiddleware,
+//   tenantLimitMiddleware,
+//   tenantUsageTrackingMiddleware,
+//   tenantComplianceMiddleware
+// } from './middleware/tenantWorkflow';
 import authRoutes from './routes/auth';
 import adminRoutes from './routes/admin';
 import tenantRoutes from './routes/tenant';
@@ -34,7 +34,23 @@ const app = express();
 // Security middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://demo.localhost:3000',
+      'http://idea-vibes.localhost:3000',
+      process.env.CORS_ORIGIN || 'http://localhost:3000'
+    ];
+    
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    
+    return callback(new Error('Not allowed by CORS'));
+  },
   credentials: true,
 }));
 
@@ -43,7 +59,7 @@ app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
 // Centralized tenant workflow middleware (must be first)
-app.use(tenantWorkflowMiddleware);
+// app.use(tenantWorkflowMiddleware);
 
 // Legacy tenant routing middleware (for backward compatibility)
 app.use(tenantRoutingMiddleware);
@@ -62,7 +78,7 @@ app.use(tenantAuthMiddleware);
 app.use(authMiddleware);
 
 // Legacy tenant middleware (for backward compatibility)
-app.use(tenantMiddleware);
+// app.use(tenantMiddleware); // Commented out as it overwrites the tenant object
 
 // Health check endpoint
 app.get('/health', (req, res) => {

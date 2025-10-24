@@ -60,7 +60,10 @@ export const tenantHeadersMiddleware = (
     
     // CORS headers based on tenant settings
     if (security.corsOrigins.length > 0) {
-      res.set('Access-Control-Allow-Origin', security.corsOrigins.join(', '));
+      const origin = req.get('Origin');
+      if (origin && security.corsOrigins.includes(origin)) {
+        res.set('Access-Control-Allow-Origin', origin);
+      }
     }
     
     // Custom tenant headers for API clients

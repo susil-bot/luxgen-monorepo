@@ -65,7 +65,7 @@ export const generateNewTenantKey = (length: number = 64): string => {
  */
 export const validateTenantKey = (key: string): boolean => {
   // Basic validation - at least 32 characters
-  return key && key.length >= 32;
+  return Boolean(key && key.length >= 32);
 };
 
 /**

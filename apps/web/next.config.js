@@ -4,6 +4,10 @@ const nextConfig = {
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
+  transpilePackages: ['@luxgen/ui'],
+  experimental: {
+    externalDir: true,
+  },
   async rewrites() {
     return [
       {

@@ -15,6 +15,9 @@ export * from './RadioGroup';
 export * from './Switch';
 export * from './Form';
 export * from './InputWithLabel';
+export * from './LoginForm';
+export * from './RegisterForm';
+export * from './Snackbar';
 
 // Display Components
 export * from './Heading';
