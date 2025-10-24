@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { withSSR } from '../ssr';
 import { defaultTheme, TenantTheme } from '../theme';
+import { getTenantLogo } from '../tenant-config';
+import { useTenant } from '../TenantProvider';
 
 export interface SidebarItem {
   id: string;
@@ -54,10 +56,7 @@ export interface SidebarProps {
 const SidebarComponent: React.FC<SidebarProps> = ({
   tenantTheme = defaultTheme,
   sections = [],
-  logo = {
-    text: 'LuxGen',
-    href: '/',
-  },
+  logo,
   user = null,
   onUserAction,
   className = '',
@@ -75,6 +74,10 @@ const SidebarComponent: React.FC<SidebarProps> = ({
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
   const [activeItem, setActiveItem] = useState<string>('');
+
+  // Get tenant-specific logo from runtime tenant detection
+  const { tenantConfig } = useTenant();
+  const tenantLogo = logo || tenantConfig.logo;
 
   // Initialize expanded sections
   useEffect(() => {
@@ -191,17 +194,17 @@ const SidebarComponent: React.FC<SidebarProps> = ({
           <div className="flex items-center justify-between p-4 border-b border-gray-200">
             {!isCollapsed && (
               <a
-                href={logo.href || '/'}
+                href={tenantLogo.href || '/'}
                 className="flex items-center space-x-2 text-xl font-bold text-green-600"
               >
-                {logo.src ? (
+                {tenantLogo.src ? (
                   <img
-                    src={logo.src}
-                    alt={logo.alt || 'Logo'}
+                    src={tenantLogo.src}
+                    alt={tenantLogo.alt || 'Logo'}
                     className="h-8 w-8"
                   />
                 ) : null}
-                <span>{logo.text}</span>
+                <span>{tenantLogo.text}</span>
               </a>
             )}
             
@@ -327,9 +330,12 @@ const SidebarItemComponent: React.FC<{
 
   const handleClick = () => {
     if (item.children && item.children.length > 0) {
+      // Only toggle submenu, don't navigate
       setIsExpanded(!isExpanded);
+    } else {
+      // Only navigate if no children
+      onClick();
     }
-    onClick();
   };
 
   return (
@@ -342,7 +348,9 @@ const SidebarItemComponent: React.FC<{
           transition-colors duration-200
           ${isActive 
             ? 'bg-green-50 text-green-700 border-r-2 border-green-500' 
-            : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
+            : item.children && item.children.length > 0
+              ? 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
           }
           ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         `}
@@ -390,7 +398,7 @@ const SidebarItemComponent: React.FC<{
               item={child}
               isActive={false}
               isCollapsed={isCollapsed}
-              onClick={() => {}}
+              onClick={onClick}
               variant={variant}
               styles={styles}
             />

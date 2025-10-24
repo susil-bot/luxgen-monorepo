@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { GroupCard, GroupForm, GroupFormData, SnackbarProvider, useSnackbar } from '@luxgen/ui';
-import { PageWrapper } from '@luxgen/ui';
+import { GroupCard, GroupForm, GroupFormData, SnackbarProvider, useSnackbar, AppLayout, getDefaultNavItems, getDefaultUser, getDefaultLogo, getDefaultSidebarSections, TenantDebug } from '@luxgen/ui';
 
 interface Group {
   id: string;
@@ -28,9 +27,31 @@ const GroupsPageContent: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingGroup, setEditingGroup] = useState<Group | null>(null);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     fetchGroups();
+  }, []);
+
+  // Load user data
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        setUser({
+          name: `${parsedUser.firstName} ${parsedUser.lastName}`,
+          email: parsedUser.email,
+          role: parsedUser.role,
+          tenant: parsedUser.tenant,
+        });
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        setUser(getDefaultUser());
+      }
+    } else {
+      setUser(getDefaultUser());
+    }
   }, []);
 
   const fetchGroups = async () => {
@@ -252,6 +273,35 @@ const GroupsPageContent: React.FC = () => {
     router.push(`/groups/${groupId}/settings`);
   };
 
+  // Handle user actions
+  const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
+    switch (action) {
+      case 'profile':
+        router.push('/profile');
+        break;
+      case 'settings':
+        router.push('/settings');
+        break;
+      case 'logout':
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        router.push('/login');
+        break;
+    }
+  };
+
+  // Handle search
+  const handleSearch = (query: string) => {
+    console.log('Search query:', query);
+    // TODO: Implement search functionality
+  };
+
+  // Handle notifications
+  const handleNotificationClick = () => {
+    console.log('Notification clicked');
+    // TODO: Implement notification functionality
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -267,94 +317,107 @@ const GroupsPageContent: React.FC = () => {
         <meta name="description" content="Manage user groups and permissions" />
       </Head>
 
-      <PageWrapper>
-        <div className="min-h-screen bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* Header */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h1 className="text-3xl font-bold text-gray-900">Groups</h1>
-                  <p className="mt-2 text-gray-600">
-                    Manage user groups and track training progress
-                  </p>
-                </div>
-                
-                <button
-                  onClick={() => setShowCreateForm(true)}
-                  className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200"
-                >
-                  Create Group
-                </button>
+      <AppLayout
+        sidebarSections={getDefaultSidebarSections()}
+        user={user}
+        onUserAction={handleUserAction}
+        onSearch={handleSearch}
+        onNotificationClick={handleNotificationClick}
+        showSearch={true}
+        showNotifications={true}
+        notificationCount={0}
+        searchPlaceholder="Search groups..."
+        logo={getDefaultLogo()}
+        sidebarCollapsible={true}
+        sidebarDefaultCollapsed={false}
+        responsive={true}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Groups</h1>
+                <p className="mt-2 text-gray-600">
+                  Manage user groups and track training progress
+                </p>
+              </div>
+              
+              <button
+                onClick={() => setShowCreateForm(true)}
+                className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors duration-200"
+              >
+                Create Group
+              </button>
+            </div>
+          </div>
+
+          {/* Groups Grid */}
+          {groups.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-gray-500 text-lg mb-4">No groups found</div>
+              <button
+                onClick={() => setShowCreateForm(true)}
+                className="text-green-600 hover:text-green-700 font-medium"
+              >
+                Create your first group
+              </button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {groups.map((group) => (
+                <GroupCard
+                  key={group.id}
+                  group={group}
+                  onEdit={setEditingGroup}
+                  onDelete={handleDeleteGroup}
+                  onViewMembers={handleViewMembers}
+                  onManageSettings={handleManageSettings}
+                />
+              ))}
+            </div>
+          )}
+
+          {/* Create/Edit Form Modal */}
+          {(showCreateForm || editingGroup) && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <GroupForm
+                  initialData={editingGroup ? {
+                    name: editingGroup.name,
+                    description: editingGroup.description || '',
+                    color: editingGroup.color || '#3B82F6',
+                    icon: editingGroup.icon || 'users',
+                    settings: {
+                      allowSelfJoin: false,
+                      requireApproval: true,
+                      maxMembers: null,
+                      trainingEnabled: editingGroup.settings?.trainingEnabled || true,
+                      nudgeEnabled: editingGroup.settings?.nudgeEnabled || true,
+                      reportingEnabled: editingGroup.settings?.reportingEnabled || true,
+                      notifications: {
+                        onMemberJoin: true,
+                        onMemberLeave: true,
+                        onTrainingUpdate: true,
+                        onNudgeSent: true,
+                        onReportGenerated: true,
+                      },
+                    },
+                  } : undefined}
+                  onSubmit={editingGroup ? handleEditGroup : handleCreateGroup}
+                  onCancel={() => {
+                    setShowCreateForm(false);
+                    setEditingGroup(null);
+                  }}
+                  title={editingGroup ? 'Edit Group' : 'Create Group'}
+                  submitText={editingGroup ? 'Update Group' : 'Create Group'}
+                />
               </div>
             </div>
-
-            {/* Groups Grid */}
-            {groups.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-gray-500 text-lg mb-4">No groups found</div>
-                <button
-                  onClick={() => setShowCreateForm(true)}
-                  className="text-green-600 hover:text-green-700 font-medium"
-                >
-                  Create your first group
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {groups.map((group) => (
-                  <GroupCard
-                    key={group.id}
-                    group={group}
-                    onEdit={setEditingGroup}
-                    onDelete={handleDeleteGroup}
-                    onViewMembers={handleViewMembers}
-                    onManageSettings={handleManageSettings}
-                  />
-                ))}
-              </div>
-            )}
-
-            {/* Create/Edit Form Modal */}
-            {(showCreateForm || editingGroup) && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                  <GroupForm
-                    initialData={editingGroup ? {
-                      name: editingGroup.name,
-                      description: editingGroup.description || '',
-                      color: editingGroup.color || '#3B82F6',
-                      icon: editingGroup.icon || 'users',
-                      settings: {
-                        allowSelfJoin: false,
-                        requireApproval: true,
-                        maxMembers: null,
-                        trainingEnabled: editingGroup.settings?.trainingEnabled || true,
-                        nudgeEnabled: editingGroup.settings?.nudgeEnabled || true,
-                        reportingEnabled: editingGroup.settings?.reportingEnabled || true,
-                        notifications: {
-                          onMemberJoin: true,
-                          onMemberLeave: true,
-                          onTrainingUpdate: true,
-                          onNudgeSent: true,
-                          onReportGenerated: true,
-                        },
-                      },
-                    } : undefined}
-                    onSubmit={editingGroup ? handleEditGroup : handleCreateGroup}
-                    onCancel={() => {
-                      setShowCreateForm(false);
-                      setEditingGroup(null);
-                    }}
-                    title={editingGroup ? 'Edit Group' : 'Create Group'}
-                    submitText={editingGroup ? 'Update Group' : 'Create Group'}
-                  />
-                </div>
-              </div>
-            )}
-          </div>
+          )}
         </div>
-      </PageWrapper>
+        <TenantDebug />
+      </AppLayout>
     </>
   );
 };

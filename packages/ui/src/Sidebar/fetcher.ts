@@ -1,4 +1,5 @@
-import { TenantTheme, MenuItem } from '../types';
+import { TenantTheme } from '../types';
+import { MenuItem } from '../Menu';
 import { defaultTheme } from '../theme';
 
 export interface SidebarData {

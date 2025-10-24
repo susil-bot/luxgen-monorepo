@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { SnackbarProvider, useSnackbar, PageLayout, getDefaultNavItems, getDefaultMenuItems, getDefaultUser, getDefaultLogo } from '@luxgen/ui';
+import { SnackbarProvider, useSnackbar, AppLayout, getDefaultNavItems, getDefaultUser, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
 
 interface GroupDashboardData {
   id: string;
@@ -155,24 +155,21 @@ const GroupDashboardPageContent: React.FC = () => {
         <meta name="description" content="Group management dashboard for admins and super admins" />
       </Head>
 
-      <PageLayout
-        navItems={getDefaultNavItems()}
-        menuItems={getDefaultMenuItems()}
-        user={user}
-        onUserAction={handleUserAction}
-        onSearch={handleSearch}
-        onNotificationClick={handleNotificationClick}
-        showSearch={true}
-        showNotifications={true}
-        notificationCount={3}
-        searchPlaceholder="Search groups, users..."
-        logo={getDefaultLogo()}
-        menuPosition="top"
-        menuVariant="default"
-        menuCollapsible={true}
-        menuDefaultCollapsed={false}
-        responsive={true}
-      >
+             <AppLayout
+               sidebarSections={getDefaultSidebarSections()}
+               user={user}
+               onUserAction={handleUserAction}
+               onSearch={handleSearch}
+               onNotificationClick={handleNotificationClick}
+               showSearch={true}
+               showNotifications={true}
+               notificationCount={3}
+               searchPlaceholder="Search groups, users..."
+               logo={getDefaultLogo()}
+               sidebarCollapsible={true}
+               sidebarDefaultCollapsed={false}
+               responsive={true}
+             >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="mb-8">
@@ -334,7 +331,7 @@ const GroupDashboardPageContent: React.FC = () => {
             </div>
           </div>
         </div>
-      </PageLayout>
+             </AppLayout>
     </>
   );
 };

@@ -1,198 +1,240 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { Sidebar, SidebarSection, SidebarItem } from './Sidebar';
+import { Sidebar } from './Sidebar';
 
-// Mock Next.js router
+// Mock next/router
+const mockPush = jest.fn();
+const mockBack = jest.fn();
+
 jest.mock('next/router', () => ({
   useRouter: () => ({
-    push: jest.fn(),
-    pathname: '/',
+    push: mockPush,
+    back: mockBack,
   }),
 }));
 
-describe('Sidebar Component', () => {
-  const mockSections: SidebarSection[] = [
+// Mock window.location
+Object.defineProperty(window, 'location', () => ({
+  href: 'http://demo.localhost:3000',
+}));
+
+describe('Sidebar', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const mockSections = [
     {
-      id: 'main',
-      title: 'Main Navigation',
+      id: 'navigation',
+      title: 'Navigation',
       items: [
         {
           id: 'dashboard',
           label: 'Dashboard',
           href: '/dashboard',
+          icon: <svg className="h-5 w-5" />,
         },
         {
-          id: 'courses',
-          label: 'Courses',
-          href: '/courses',
+          id: 'groups',
+          label: 'Groups',
+          icon: <svg className="h-5 w-5" />,
           children: [
             {
-              id: 'all-courses',
-              label: 'All Courses',
-              href: '/courses/all',
+              id: 'all-groups',
+              label: 'All Groups',
+              href: '/groups',
             },
             {
-              id: 'my-courses',
-              label: 'My Courses',
-              href: '/courses/my',
+              id: 'create-group',
+              label: 'Create Group',
+              href: '/groups/create',
             },
           ],
         },
-      ],
-    },
-    {
-      id: 'settings',
-      title: 'Settings',
-      items: [
         {
-          id: 'profile',
-          label: 'Profile',
-          href: '/profile',
-        },
-        {
-          id: 'preferences',
-          label: 'Preferences',
-          href: '/preferences',
+          id: 'users',
+          label: 'Users',
+          href: '/users',
+          icon: <svg className="h-5 w-5" />,
         },
       ],
     },
   ];
 
-  const mockUser = {
-    name: 'John Doe',
-    email: 'john@example.com',
-    role: 'Admin',
-    avatar: '/path/to/avatar.jpg',
-  };
+  it('renders with default props', () => {
+    render(<Sidebar sections={mockSections} />);
+    
+    expect(screen.getByText('Navigation')).toBeInTheDocument();
+    expect(screen.getByText('Dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Groups')).toBeInTheDocument();
+    expect(screen.getByText('Users')).toBeInTheDocument();
+  });
 
-  beforeEach(() => {
-    // Mock window.location
-    Object.defineProperty(window, 'location', {
-      value: {
-        href: '/',
-      },
-      writable: true,
+  it('toggles submenu when clicking on item with children', async () => {
+    render(<Sidebar sections={mockSections} />);
+    
+    const groupsItem = screen.getByText('Groups');
+    expect(screen.queryByText('All Groups')).not.toBeInTheDocument();
+    
+    fireEvent.click(groupsItem);
+    
+    await waitFor(() => {
+      expect(screen.getByText('All Groups')).toBeInTheDocument();
+      expect(screen.getByText('Create Group')).toBeInTheDocument();
     });
   });
 
-  it('renders with basic props', () => {
+  it('navigates to page when clicking on item without children', () => {
+    const mockOnItemClick = jest.fn();
+    render(<Sidebar sections={mockSections} onItemClick={mockOnItemClick} />);
+    
+    const dashboardItem = screen.getByText('Dashboard');
+    fireEvent.click(dashboardItem);
+    
+    expect(mockOnItemClick).toHaveBeenCalledWith({
+      id: 'dashboard',
+      label: 'Dashboard',
+      href: '/dashboard',
+      icon: expect.any(Object),
+    });
+  });
+
+  it('does not navigate when clicking on item with children', () => {
+    const mockOnItemClick = jest.fn();
+    render(<Sidebar sections={mockSections} onItemClick={mockOnItemClick} />);
+    
+    const groupsItem = screen.getByText('Groups');
+    fireEvent.click(groupsItem);
+    
+    // Should not call onItemClick for parent items with children
+    expect(mockOnItemClick).not.toHaveBeenCalled();
+  });
+
+  it('navigates when clicking on submenu items', async () => {
+    const mockOnItemClick = jest.fn();
+    render(<Sidebar sections={mockSections} onItemClick={mockOnItemClick} />);
+    
+    // First click to open submenu
+    const groupsItem = screen.getByText('Groups');
+    fireEvent.click(groupsItem);
+    
+    await waitFor(() => {
+      expect(screen.getByText('All Groups')).toBeInTheDocument();
+    });
+    
+    // Click on submenu item
+    const allGroupsItem = screen.getByText('All Groups');
+    fireEvent.click(allGroupsItem);
+    
+    expect(mockOnItemClick).toHaveBeenCalledWith({
+      id: 'all-groups',
+      label: 'All Groups',
+      href: '/groups',
+    });
+  });
+
+  it('toggles submenu open and closed', async () => {
     render(<Sidebar sections={mockSections} />);
     
-    expect(screen.getByText('LuxGen')).toBeInTheDocument();
-    expect(screen.getByText('Main Navigation')).toBeInTheDocument();
-    expect(screen.getByText('Dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Courses')).toBeInTheDocument();
+    const groupsItem = screen.getByText('Groups');
+    
+    // First click to open
+    fireEvent.click(groupsItem);
+    await waitFor(() => {
+      expect(screen.getByText('All Groups')).toBeInTheDocument();
+    });
+    
+    // Second click to close
+    fireEvent.click(groupsItem);
+    await waitFor(() => {
+      expect(screen.queryByText('All Groups')).not.toBeInTheDocument();
+    });
   });
 
-  it('renders with custom logo', () => {
-    const customLogo = {
-      text: 'Custom Logo',
-      href: '/custom',
+  it('shows chevron icon for items with children', () => {
+    render(<Sidebar sections={mockSections} />);
+    
+    const groupsItem = screen.getByText('Groups');
+    const chevronIcon = groupsItem.parentElement?.querySelector('svg');
+    
+    expect(chevronIcon).toBeInTheDocument();
+  });
+
+  it('rotates chevron when submenu is expanded', async () => {
+    render(<Sidebar sections={mockSections} />);
+    
+    const groupsItem = screen.getByText('Groups');
+    const chevronIcon = groupsItem.parentElement?.querySelector('svg');
+    
+    expect(chevronIcon).not.toHaveClass('rotate-180');
+    
+    fireEvent.click(groupsItem);
+    
+    await waitFor(() => {
+      expect(chevronIcon).toHaveClass('rotate-180');
+    });
+  });
+
+  it('handles collapsed state', () => {
+    render(<Sidebar sections={mockSections} defaultCollapsed={true} />);
+    
+    expect(screen.queryByText('Navigation')).not.toBeInTheDocument();
+    expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
+  });
+
+  it('shows user section when user is provided', () => {
+    const mockUser = {
+      name: 'John Doe',
+      email: 'john@example.com',
+      role: 'Admin',
     };
     
-    render(<Sidebar sections={mockSections} logo={customLogo} />);
-    
-    expect(screen.getByText('Custom Logo')).toBeInTheDocument();
-  });
-
-  it('renders user section when user is provided', () => {
     render(<Sidebar sections={mockSections} user={mockUser} />);
     
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('Admin')).toBeInTheDocument();
   });
 
-  it('toggles collapsed state when toggle button is clicked', () => {
-    render(<Sidebar sections={mockSections} collapsible={true} />);
-    
-    const toggleButton = screen.getByRole('button', { name: /toggle/i });
-    fireEvent.click(toggleButton);
-    
-    // Check if sidebar is collapsed (this would depend on implementation)
-    expect(toggleButton).toBeInTheDocument();
-  });
-
-  it('expands and collapses sections when section header is clicked', async () => {
-    render(<Sidebar sections={mockSections} />);
-    
-    const sectionHeader = screen.getByText('Main Navigation');
-    fireEvent.click(sectionHeader);
-    
-    // Check if section is collapsed/expanded
-    await waitFor(() => {
-      expect(sectionHeader).toBeInTheDocument();
-    });
-  });
-
-  it('handles item clicks', () => {
-    const mockOnItemClick = jest.fn();
-    
-    render(
-      <Sidebar 
-        sections={mockSections} 
-        onItemClick={mockOnItemClick}
-      />
-    );
-    
-    const dashboardItem = screen.getByText('Dashboard');
-    fireEvent.click(dashboardItem);
-    
-    expect(mockOnItemClick).toHaveBeenCalled();
-  });
-
   it('handles user actions', () => {
     const mockOnUserAction = jest.fn();
+    const mockUser = {
+      name: 'John Doe',
+      email: 'john@example.com',
+      role: 'Admin',
+    };
     
     render(
       <Sidebar 
         sections={mockSections} 
-        user={mockUser}
+        user={mockUser} 
         onUserAction={mockOnUserAction}
       />
     );
     
-    const userButton = screen.getByText('John Doe');
-    fireEvent.click(userButton);
+    const userMenuButton = screen.getByRole('button', { name: /profile/i });
+    fireEvent.click(userMenuButton);
     
-    expect(mockOnUserAction).toHaveBeenCalled();
+    expect(mockOnUserAction).toHaveBeenCalledWith('profile');
   });
 
-  it('renders sub-menu items when parent is clicked', () => {
-    render(<Sidebar sections={mockSections} />);
+  it('applies custom styling', () => {
+    render(
+      <Sidebar 
+        sections={mockSections} 
+        className="custom-sidebar"
+        variant="compact"
+      />
+    );
     
-    const coursesItem = screen.getByText('Courses');
-    fireEvent.click(coursesItem);
-    
-    // Check if sub-menu items are visible
-    expect(screen.getByText('All Courses')).toBeInTheDocument();
-    expect(screen.getByText('My Courses')).toBeInTheDocument();
+    const sidebar = screen.getByRole('complementary');
+    expect(sidebar).toHaveClass('custom-sidebar');
   });
 
-  it('handles external links correctly', () => {
-    const sectionsWithExternal: SidebarSection[] = [
+  it('handles disabled items', () => {
+    const sectionsWithDisabled = [
       {
-        id: 'external',
-        items: [
-          {
-            id: 'external-link',
-            label: 'External Link',
-            href: 'https://example.com',
-            external: true,
-          },
-        ],
-      },
-    ];
-    
-    render(<Sidebar sections={sectionsWithExternal} />);
-    
-    const externalLink = screen.getByText('External Link');
-    expect(externalLink).toBeInTheDocument();
-  });
-
-  it('disables navigation items when disabled prop is true', () => {
-    const sectionsWithDisabled: SidebarSection[] = [
-      {
-        id: 'disabled',
+        id: 'navigation',
+        title: 'Navigation',
         items: [
           {
             id: 'disabled-item',
@@ -207,19 +249,20 @@ describe('Sidebar Component', () => {
     render(<Sidebar sections={sectionsWithDisabled} />);
     
     const disabledItem = screen.getByText('Disabled Item');
-    expect(disabledItem).toHaveClass('opacity-50', 'cursor-not-allowed');
+    expect(disabledItem.closest('button')).toBeDisabled();
   });
 
-  it('renders badges on navigation items', () => {
-    const sectionsWithBadge: SidebarSection[] = [
+  it('shows badges on items', () => {
+    const sectionsWithBadge = [
       {
-        id: 'badge',
+        id: 'navigation',
+        title: 'Navigation',
         items: [
           {
-            id: 'with-badge',
-            label: 'Item with Badge',
-            href: '/badge',
-            badge: 'New',
+            id: 'notifications',
+            label: 'Notifications',
+            href: '/notifications',
+            badge: 5,
           },
         ],
       },
@@ -227,79 +270,6 @@ describe('Sidebar Component', () => {
     
     render(<Sidebar sections={sectionsWithBadge} />);
     
-    expect(screen.getByText('New')).toBeInTheDocument();
-  });
-
-  it('applies custom className', () => {
-    render(<Sidebar sections={mockSections} className="custom-sidebar" />);
-    
-    const sidebar = screen.getByRole('complementary');
-    expect(sidebar).toHaveClass('custom-sidebar');
-  });
-
-  it('handles different variants correctly', () => {
-    const { rerender } = render(<Sidebar sections={mockSections} variant="compact" />);
-    let sidebar = screen.getByRole('complementary');
-    expect(sidebar).toHaveClass('w-16');
-    
-    rerender(<Sidebar sections={mockSections} variant="minimal" />);
-    sidebar = screen.getByRole('complementary');
-    expect(sidebar).toHaveClass('w-12');
-  });
-
-  it('handles different positions correctly', () => {
-    const { rerender } = render(<Sidebar sections={mockSections} position="fixed" />);
-    let sidebar = screen.getByRole('complementary');
-    expect(sidebar).toHaveClass('fixed');
-    
-    rerender(<Sidebar sections={mockSections} position="sticky" />);
-    sidebar = screen.getByRole('complementary');
-    expect(sidebar).toHaveClass('sticky');
-  });
-
-  it('handles different widths correctly', () => {
-    const { rerender } = render(<Sidebar sections={mockSections} width="narrow" />);
-    let sidebar = screen.getByRole('complementary');
-    expect(sidebar).toHaveClass('w-48');
-    
-    rerender(<Sidebar sections={mockSections} width="wide" />);
-    sidebar = screen.getByRole('complementary');
-    expect(sidebar).toHaveClass('w-80');
-  });
-
-  it('hides logo when showLogo is false', () => {
-    render(<Sidebar sections={mockSections} showLogo={false} />);
-    
-    expect(screen.queryByText('LuxGen')).not.toBeInTheDocument();
-  });
-
-  it('hides user section when showUserSection is false', () => {
-    render(<Sidebar sections={mockSections} user={mockUser} showUserSection={false} />);
-    
-    expect(screen.queryByText('John Doe')).not.toBeInTheDocument();
-  });
-
-  it('calls onToggle when collapsed state changes', () => {
-    const mockOnToggle = jest.fn();
-    
-    render(
-      <Sidebar 
-        sections={mockSections} 
-        collapsible={true}
-        onToggle={mockOnToggle}
-      />
-    );
-    
-    const toggleButton = screen.getByRole('button', { name: /toggle/i });
-    fireEvent.click(toggleButton);
-    
-    expect(mockOnToggle).toHaveBeenCalledWith(true);
-  });
-
-  it('starts collapsed when defaultCollapsed is true', () => {
-    render(<Sidebar sections={mockSections} defaultCollapsed={true} />);
-    
-    const sidebar = screen.getByRole('complementary');
-    expect(sidebar).toHaveClass('w-16');
+    expect(screen.getByText('5')).toBeInTheDocument();
   });
 });

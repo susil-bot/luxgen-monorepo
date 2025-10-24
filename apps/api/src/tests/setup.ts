@@ -19,3 +19,19 @@ global.console = {
   warn: jest.fn(),
   error: jest.fn(),
 };
+
+// Mock database connection to prevent timeouts
+jest.mock('../db/connect', () => ({
+  connectDB: jest.fn().mockResolvedValue(undefined),
+  disconnectDB: jest.fn().mockResolvedValue(undefined),
+}));
+
+// Mock logger to prevent console output during tests
+jest.mock('../utils/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+    warn: jest.fn(),
+    debug: jest.fn(),
+  },
+}));

@@ -8,3 +8,5 @@ export type { IUser } from './user';
 export { User } from './user';
 export type { ICourse } from './course';
 export { Course } from './course';
+export type { IGroup, IGroupMember } from './group';
+export { Group, GroupMember } from './group';

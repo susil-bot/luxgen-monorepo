@@ -122,7 +122,6 @@ export const getVariantStyles = (variant: 'default' | 'transparent' | 'solid', i
       };
   }
 };
-
 export const getPositionStyles = (position: 'fixed' | 'sticky' | 'static') => {
   switch (position) {
     case 'fixed':
@@ -134,3 +133,4 @@ export const getPositionStyles = (position: 'fixed' | 'sticky' | 'static') => {
       return 'static';
   }
 };
+

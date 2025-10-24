@@ -1,5 +1,6 @@
 import React from 'react';
-import { BaseComponentProps, TenantTheme, MenuItem } from '../types';
+import { BaseComponentProps, TenantTheme } from '../types';
+import { MenuItem } from '../Menu';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 

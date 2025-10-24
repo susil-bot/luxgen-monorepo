@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { withSSR } from '../ssr';
 import { defaultTheme, TenantTheme } from '../theme';
+import { getTenantLogo } from '../tenant-config';
+import { useTenant } from '../TenantProvider';
 
 export interface NavItem {
   id: string;
@@ -32,12 +34,11 @@ export interface NavBarProps {
     text?: string;
     href?: string;
   };
-  items?: NavItem[];
   user?: UserMenu | null;
   onUserAction?: (action: 'profile' | 'settings' | 'logout') => void;
   onMobileMenuToggle?: (isOpen: boolean) => void;
   className?: string;
-  variant?: 'default' | 'transparent' | 'solid';
+  variant?: 'default' | 'transparent' | 'solid' | 'minimal';
   position?: 'fixed' | 'sticky' | 'static';
   showUserMenu?: boolean;
   showMobileMenu?: boolean;
@@ -47,15 +48,15 @@ export interface NavBarProps {
   showNotifications?: boolean;
   notificationCount?: number;
   onNotificationClick?: () => void;
+  responsive?: boolean;
+  mobileBreakpoint?: number;
+  tabletBreakpoint?: number;
+  desktopBreakpoint?: number;
 }
 
 const NavBarComponent: React.FC<NavBarProps> = ({
   tenantTheme = defaultTheme,
-  logo = {
-    text: 'LuxGen',
-    href: '/',
-  },
-  items = [],
+  logo,
   user = null,
   onUserAction,
   onMobileMenuToggle,
@@ -70,12 +71,40 @@ const NavBarComponent: React.FC<NavBarProps> = ({
   showNotifications = false,
   notificationCount = 0,
   onNotificationClick,
+  responsive = true,
+  mobileBreakpoint = 640,
+  tabletBreakpoint = 768,
+  desktopBreakpoint = 1024,
   ...props
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isTablet, setIsTablet] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  // Get tenant-specific logo from runtime tenant detection
+  const { tenantConfig } = useTenant();
+  const tenantLogo = logo || tenantConfig.logo;
+  
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const mobileMenuRef = useRef<HTMLDivElement>(null);
+
+  // Handle responsive breakpoints
+  useEffect(() => {
+    const handleResize = () => {
+      const width = window.innerWidth;
+      setIsMobile(width < mobileBreakpoint);
+      setIsTablet(width >= mobileBreakpoint && width < tabletBreakpoint);
+      setIsDesktop(width >= desktopBreakpoint);
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [mobileBreakpoint, tabletBreakpoint, desktopBreakpoint]);
 
   // Handle scroll effect
   useEffect(() => {
@@ -86,6 +115,22 @@ const NavBarComponent: React.FC<NavBarProps> = ({
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Handle click outside to close menus
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+      if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+        setIsMobileMenuOpen(false);
+        onMobileMenuToggle?.(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [onMobileMenuToggle]);
 
   // Handle mobile menu toggle
   const handleMobileMenuToggle = () => {
@@ -111,14 +156,7 @@ const NavBarComponent: React.FC<NavBarProps> = ({
     setIsUserMenuOpen(false);
   };
 
-  // Handle navigation
-  const handleNavClick = (item: NavItem) => {
-    if (item.external) {
-      window.open(item.href, '_blank', 'noopener,noreferrer');
-    } else {
-      window.location.href = item.href;
-    }
-  };
+  // Handle navigation - Removed since navItems are removed
 
   // Get variant styles
   const getVariantStyles = () => {
@@ -139,6 +177,13 @@ const NavBarComponent: React.FC<NavBarProps> = ({
           text: 'text-white',
           shadow: 'shadow-lg',
         };
+      case 'minimal':
+        return {
+          bg: 'bg-white',
+          border: 'border-b border-gray-100',
+          text: 'text-gray-900',
+          shadow: 'shadow-none',
+        };
       case 'default':
       default:
         return {
@@ -150,7 +195,29 @@ const NavBarComponent: React.FC<NavBarProps> = ({
     }
   };
 
+  // Get responsive styles
+  const getResponsiveStyles = () => {
+    if (!responsive) return {};
+    
+    return {
+      container: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full overflow-hidden',
+      nav: 'flex justify-between items-center h-16 overflow-hidden',
+      logo: 'flex-shrink-0 overflow-hidden',
+      logoText: 'text-xl font-bold truncate',
+      logoImage: 'h-8 w-8 flex-shrink-0',
+      desktopNav: 'hidden md:flex md:items-center md:space-x-8 overflow-hidden',
+      mobileNav: 'md:hidden overflow-hidden',
+      search: 'hidden md:flex md:items-center md:ml-6 overflow-hidden',
+      mobileSearch: 'px-3 py-2 overflow-hidden',
+      actions: 'flex items-center space-x-4 overflow-hidden',
+      userMenu: 'relative overflow-hidden',
+      mobileMenu: 'md:hidden overflow-hidden',
+      mobileMenuButton: 'md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors duration-200 flex-shrink-0',
+    };
+  };
+
   const styles = getVariantStyles();
+  const responsiveStyles = getResponsiveStyles();
   const positionClass = position === 'fixed' ? 'fixed' : position === 'sticky' ? 'sticky' : 'static';
 
   return (
@@ -159,85 +226,43 @@ const NavBarComponent: React.FC<NavBarProps> = ({
         ${positionClass} top-0 left-0 right-0 z-50
         ${styles.bg} ${styles.border} ${styles.text} ${styles.shadow}
         transition-all duration-300 ease-in-out
+        overflow-hidden
         ${className}
       `}
+      style={{ 
+        position: 'fixed',
+        width: '100%',
+        height: '64px',
+        overflow: 'hidden'
+      }}
       {...props}
     >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
+      <div className={`${responsiveStyles.container} h-full overflow-hidden`}>
+        <div className={`${responsiveStyles.nav} h-full overflow-hidden`}>
           {/* Logo */}
-          <div className="flex-shrink-0">
+          <div className={responsiveStyles.logo}>
             <a
-              href={logo.href || '/'}
-              className="flex items-center space-x-2 text-xl font-bold"
+              href={tenantLogo.href || '/'}
+              className="flex items-center space-x-2"
             >
-              {logo.src ? (
+              {tenantLogo.src ? (
                 <img
-                  src={logo.src}
-                  alt={logo.alt || 'Logo'}
-                  className="h-8 w-8"
+                  src={tenantLogo.src}
+                  alt={tenantLogo.alt || 'Logo'}
+                  className={responsiveStyles.logoImage}
                 />
               ) : null}
-              <span className="text-green-600">{logo.text}</span>
+              <span className={`${responsiveStyles.logoText} text-green-600`}>
+                {tenantLogo.text}
+              </span>
             </a>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex md:items-center md:space-x-8">
-            {items.map((item) => (
-              <div key={item.id} className="relative group">
-                <button
-                  onClick={() => handleNavClick(item)}
-                  disabled={item.disabled}
-                  className={`
-                    flex items-center space-x-1 px-3 py-2 rounded-md text-sm font-medium
-                    hover:bg-gray-100 transition-colors duration-200
-                    ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                  `}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                  {item.badge && (
-                    <span className="ml-1 px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">
-                      {item.badge}
-                    </span>
-                  )}
-                </button>
-
-                {/* Dropdown Menu */}
-                {item.children && item.children.length > 0 && (
-                  <div className="absolute top-full left-0 mt-1 w-48 bg-white rounded-md shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                    <div className="py-1">
-                      {item.children.map((child) => (
-                        <button
-                          key={child.id}
-                          onClick={() => handleNavClick(child)}
-                          disabled={child.disabled}
-                          className={`
-                            block w-full text-left px-4 py-2 text-sm text-gray-700
-                            hover:bg-gray-100 transition-colors duration-200
-                            ${child.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                          `}
-                        >
-                          {child.icon && <span className="mr-2">{child.icon}</span>}
-                          {child.label}
-                          {child.badge && (
-                            <span className="ml-2 px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">
-                              {child.badge}
-                            </span>
-                          )}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          {/* Desktop Navigation - Removed navItems */}
 
           {/* Search Bar */}
           {showSearch && (
-            <div className="hidden md:flex md:items-center md:ml-6">
+            <div className={responsiveStyles.search}>
               <form onSubmit={handleSearch} className="relative">
                 <input
                   type="text"
@@ -256,7 +281,7 @@ const NavBarComponent: React.FC<NavBarProps> = ({
           )}
 
           {/* Right Side Actions */}
-          <div className="flex items-center space-x-4">
+          <div className={responsiveStyles.actions}>
             {/* Notifications */}
             {showNotifications && (
               <button
@@ -276,7 +301,7 @@ const NavBarComponent: React.FC<NavBarProps> = ({
 
             {/* User Menu */}
             {showUserMenu && user && (
-              <div className="relative">
+              <div className={responsiveStyles.userMenu} ref={userMenuRef}>
                 <button
                   onClick={handleUserMenuToggle}
                   className="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100 transition-colors duration-200"
@@ -360,7 +385,7 @@ const NavBarComponent: React.FC<NavBarProps> = ({
             {showMobileMenu && (
               <button
                 onClick={handleMobileMenuToggle}
-                className="md:hidden p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 transition-colors duration-200"
+                className={responsiveStyles.mobileMenuButton}
               >
                 <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   {isMobileMenuOpen ? (
@@ -376,11 +401,11 @@ const NavBarComponent: React.FC<NavBarProps> = ({
 
         {/* Mobile Menu */}
         {showMobileMenu && isMobileMenuOpen && (
-          <div className="md:hidden">
+          <div className={responsiveStyles.mobileMenu} ref={mobileMenuRef}>
             <div className="px-2 pt-2 pb-3 space-y-1 border-t border-gray-200">
               {/* Mobile Search */}
               {showSearch && (
-                <div className="px-3 py-2">
+                <div className={responsiveStyles.mobileSearch}>
                   <form onSubmit={handleSearch} className="relative">
                     <input
                       type="text"
@@ -398,45 +423,11 @@ const NavBarComponent: React.FC<NavBarProps> = ({
                 </div>
               )}
 
-              {/* Mobile Navigation Items */}
-              {items.map((item) => (
-                <button
-                  key={item.id}
-                  onClick={() => handleNavClick(item)}
-                  disabled={item.disabled}
-                  className={`
-                    block w-full text-left px-3 py-2 rounded-md text-base font-medium
-                    hover:bg-gray-100 transition-colors duration-200
-                    ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-                  `}
-                >
-                  <div className="flex items-center space-x-2">
-                    {item.icon}
-                    <span>{item.label}</span>
-                    {item.badge && (
-                      <span className="ml-auto px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">
-                        {item.badge}
-                      </span>
-                    )}
-                  </div>
-                </button>
-              ))}
+              {/* Mobile Navigation Items - Removed navItems */}
             </div>
           </div>
         )}
       </div>
-
-      {/* Click outside to close menus */}
-      {(isUserMenuOpen || isMobileMenuOpen) && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => {
-            setIsUserMenuOpen(false);
-            setIsMobileMenuOpen(false);
-            onMobileMenuToggle?.(false);
-          }}
-        />
-      )}
     </nav>
   );
 };

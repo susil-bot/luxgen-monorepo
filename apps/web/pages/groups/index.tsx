@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { SnackbarProvider, useSnackbar, PageLayout, getDefaultNavItems, getDefaultMenuItems, getDefaultUser, getDefaultLogo } from '@luxgen/ui';
+import { SnackbarProvider, useSnackbar, AppLayout, getDefaultNavItems, getDefaultMenuItems, getDefaultUser, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
 
 const GroupsPageContent: React.FC = () => {
   const router = useRouter();
@@ -65,9 +65,9 @@ const GroupsPageContent: React.FC = () => {
         <meta name="description" content="Manage your groups and team members" />
       </Head>
 
-      <PageLayout
-        navItems={getDefaultNavItems()}
+      <AppLayout
         menuItems={getDefaultMenuItems()}
+        sidebarSections={getDefaultSidebarSections()}
         user={user}
         onUserAction={handleUserAction}
         onSearch={handleSearch}
@@ -81,6 +81,8 @@ const GroupsPageContent: React.FC = () => {
         menuVariant="default"
         menuCollapsible={true}
         menuDefaultCollapsed={false}
+        sidebarCollapsible={true}
+        sidebarDefaultCollapsed={false}
         responsive={true}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -152,7 +154,7 @@ const GroupsPageContent: React.FC = () => {
             </div>
           </div>
         </div>
-      </PageLayout>
+      </AppLayout>
     </>
   );
 };

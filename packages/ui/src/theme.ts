@@ -1,5 +1,7 @@
 import { TenantTheme } from './types';
 
+export type { TenantTheme };
+
 export const defaultTheme: TenantTheme = {
   colors: {
     primary: '#3B82F6',

@@ -1,4 +1,11 @@
 export const groupTypeDefs = `
+  type PageInfo {
+    hasNextPage: Boolean!
+    hasPreviousPage: Boolean!
+    startCursor: String
+    endCursor: String
+  }
+
   type Group {
     id: ID!
     name: String!

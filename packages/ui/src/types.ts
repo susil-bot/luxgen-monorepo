@@ -70,13 +70,7 @@ export interface SizeProps {
   size?: 'sm' | 'md' | 'lg';
 }
 
-export interface MenuItem {
-  id: string;
-  label: string;
-  href?: string;
-  icon?: ReactNode;
-  children?: MenuItem[];
-}
+// MenuItem interface moved to Menu component to avoid duplication
 
 export interface TableColumn<T = any> {
   key: keyof T;

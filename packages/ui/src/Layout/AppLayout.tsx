@@ -4,6 +4,7 @@ import { defaultTheme, TenantTheme } from '../theme';
 import { NavBar, NavItem, UserMenu } from '../NavBar';
 import { Sidebar, SidebarSection } from '../Sidebar';
 import { MenuLayer, MenuItem } from '../Menu';
+import { TenantProvider } from '../TenantProvider';
 
 export interface AppLayoutProps {
   tenantTheme?: TenantTheme;
@@ -143,44 +144,9 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   };
 
   return (
-    <div className={`min-h-screen bg-gray-50 ${className}`} {...props}>
-      {/* NavBar */}
-      <NavBar
-        items={navItems}
-        user={user}
-        onUserAction={onUserAction}
-        showSearch={showSearch}
-        onSearch={onSearch}
-        searchPlaceholder={searchPlaceholder}
-        showNotifications={showNotifications}
-        notificationCount={notificationCount}
-        onNotificationClick={onNotificationClick}
-        logo={logo}
-        variant="default"
-        position="sticky"
-        className="shadow-sm"
-      />
-
-      {/* Menu Layer */}
-      {menuItems.length > 0 && (
-        <MenuLayer
-          items={menuItems}
-          variant={menuVariant}
-          position={menuPosition}
-          collapsible={menuCollapsible}
-          defaultCollapsed={menuCollapsed}
-          onToggle={handleMenuToggle}
-          className={getMenuStyles()}
-          responsive={responsive}
-          mobileBreakpoint={mobileBreakpoint}
-          tabletBreakpoint={tabletBreakpoint}
-          desktopBreakpoint={desktopBreakpoint}
-        />
-      )}
-
-      {/* Main Layout */}
-      <div className={`flex ${getLayoutStyles()}`}>
-        {/* Sidebar */}
+    <TenantProvider>
+      <div className={`flex h-screen bg-gray-50 ${className}`} {...props}>
+        {/* Sidebar - Always rendered */}
         {sidebarSections.length > 0 && (
           <Sidebar
             sections={sidebarSections}
@@ -198,20 +164,56 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
           />
         )}
 
-        {/* Main Content */}
-        <main className={`flex-1 ${getMainContentStyles()}`}>
-          {children}
-        </main>
-      </div>
+        {/* Main Content Area */}
+        <div className="flex flex-col flex-1">
+          {/* NavBar - Always rendered */}
+          <NavBar
+            user={user}
+            onUserAction={onUserAction}
+            showSearch={showSearch}
+            onSearch={onSearch}
+            searchPlaceholder={searchPlaceholder}
+            showNotifications={showNotifications}
+            notificationCount={notificationCount}
+            onNotificationClick={onNotificationClick}
+            logo={logo}
+            variant="default"
+            position="fixed"
+            className="shadow-sm"
+          />
 
-      {/* Mobile Overlay */}
-      {isMobile && !sidebarCollapsed && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-40"
-          onClick={handleSidebarToggle}
-        />
-      )}
-    </div>
+          {/* Menu Layer */}
+          {menuItems.length > 0 && (
+            <MenuLayer
+              items={menuItems}
+              variant={menuVariant}
+              position={menuPosition}
+              collapsible={menuCollapsible}
+              defaultCollapsed={menuCollapsed}
+              onToggle={handleMenuToggle}
+              className={getMenuStyles()}
+              responsive={responsive}
+              mobileBreakpoint={mobileBreakpoint}
+              tabletBreakpoint={tabletBreakpoint}
+              desktopBreakpoint={desktopBreakpoint}
+            />
+          )}
+
+          {/* Main Content - Dynamic children */}
+          <main className={`flex-1 overflow-y-auto p-4 ${getMainContentStyles()}`} style={{ paddingTop: '80px' }}>
+            {children}
+          </main>
+        </div>
+
+        {/* Mobile Overlay */}
+        {isMobile && !sidebarCollapsed && (
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={handleSidebarToggle}
+          />
+        )}
+      </div>
+    </TenantProvider>
   );
 };
 

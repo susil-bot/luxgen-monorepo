@@ -1,5 +1,6 @@
 import { Context } from '../context';
-import { ObjectId } from 'mongodb';
+import { Group, GroupMember, IGroup, IGroupMember } from '@luxgen/db';
+import { Types } from 'mongoose';
 
 export class GroupService {
   // Get groups with pagination and filtering
@@ -15,14 +16,12 @@ export class GroupService {
       createdBy?: string;
     }
   ) {
-    const { db } = context;
     const { tenant } = context;
 
     if (!tenant) {
       throw new Error('Tenant not found');
     }
 
-    const collection = db.collection('groups');
     let query: any = { tenant: tenant.id };
 
     // Apply filters
@@ -38,21 +37,21 @@ export class GroupService {
     }
 
     if (args.createdBy) {
-      query.createdBy = new ObjectId(args.createdBy);
+      query.createdBy = args.createdBy;
     }
 
     // Get total count
-    const totalCount = await collection.countDocuments(query);
+    const totalCount = await Group.countDocuments(query);
 
     // Apply pagination
     let cursor = args.after || args.before;
     if (cursor) {
-      const cursorObj = await collection.findOne({ _id: new ObjectId(cursor) });
+      const cursorObj = await Group.findById(cursor);
       if (cursorObj) {
         if (args.after) {
-          query._id = { $gt: cursorObj._id };
+          query._id = { $gt: new Types.ObjectId(cursor) };
         } else {
-          query._id = { $lt: cursorObj._id };
+          query._id = { $lt: new Types.ObjectId(cursor) };
         }
       }
     }
@@ -61,11 +60,10 @@ export class GroupService {
     const sort = args.before ? { _id: -1 } : { _id: 1 };
     const limit = args.first || args.last || 10;
 
-    const groups = await collection
-      .find(query)
+    const groups = await Group.find(query)
       .sort(sort)
       .limit(limit)
-      .toArray();
+      .lean();
 
     // Reverse if using before cursor
     if (args.before) {
@@ -101,18 +99,16 @@ export class GroupService {
 
   // Get group by ID
   static async getGroupById(context: Context, id: string) {
-    const { db } = context;
     const { tenant } = context;
 
     if (!tenant) {
       throw new Error('Tenant not found');
     }
 
-    const collection = db.collection('groups');
-    const group = await collection.findOne({
-      _id: new ObjectId(id),
+    const group = await Group.findOne({
+      _id: new Types.ObjectId(id),
       tenant: tenant.id,
-    });
+    }).lean();
 
     if (!group) {
       throw new Error('Group not found');
@@ -144,18 +140,13 @@ export class GroupService {
       isActive?: boolean;
     }
   ) {
-    const { db } = context;
     const { tenant } = context;
 
     if (!tenant) {
       throw new Error('Tenant not found');
     }
 
-    const collection = db.collection('groupMembers');
-    let query: any = {
-      groupId: new ObjectId(args.groupId),
-      tenant: tenant.id,
-    };
+    let query: any = { groupId: args.groupId };
 
     if (args.role) {
       query.role = args.role;
@@ -165,17 +156,17 @@ export class GroupService {
       query.isActive = args.isActive;
     }
 
-    const totalCount = await collection.countDocuments(query);
+    const totalCount = await GroupMember.countDocuments(query);
 
     // Apply pagination
     let cursor = args.after || args.before;
     if (cursor) {
-      const cursorObj = await collection.findOne({ _id: new ObjectId(cursor) });
+      const cursorObj = await GroupMember.findById(cursor);
       if (cursorObj) {
         if (args.after) {
-          query._id = { $gt: cursorObj._id };
+          query._id = { $gt: new Types.ObjectId(cursor) };
         } else {
-          query._id = { $lt: cursorObj._id };
+          query._id = { $lt: new Types.ObjectId(cursor) };
         }
       }
     }
@@ -183,11 +174,10 @@ export class GroupService {
     const sort = args.before ? { _id: -1 } : { _id: 1 };
     const limit = args.first || args.last || 10;
 
-    const members = await collection
-      .find(query)
+    const members = await GroupMember.find(query)
       .sort(sort)
       .limit(limit)
-      .toArray();
+      .lean();
 
     if (args.before) {
       members.reverse();
@@ -196,10 +186,14 @@ export class GroupService {
     const edges = members.map((member) => ({
       node: {
         id: member._id.toString(),
+        groupId: member.groupId,
+        userId: member.userId,
         role: member.role,
         joinedAt: member.joinedAt,
         isActive: member.isActive,
         permissions: member.permissions,
+        createdAt: member.createdAt,
+        updatedAt: member.updatedAt,
       },
       cursor: member._id.toString(),
     }));
@@ -229,201 +223,172 @@ export class GroupService {
       isActive?: boolean;
     }
   ) {
-    const { db } = context;
     const { tenant } = context;
 
     if (!tenant) {
       throw new Error('Tenant not found');
     }
 
-    // First get group members for the user
-    const groupMembersCollection = db.collection('groupMembers');
-    const groupMembers = await groupMembersCollection
-      .find({
-        userId: new ObjectId(args.userId),
-        tenant: tenant.id,
-        ...(args.role && { role: args.role }),
-        ...(args.isActive !== undefined && { isActive: args.isActive }),
-      })
-      .toArray();
+    let query: any = { userId: args.userId };
 
-    const groupIds = groupMembers.map((member) => member.groupId);
-
-    if (groupIds.length === 0) {
-      return {
-        edges: [],
-        pageInfo: {
-          hasNextPage: false,
-          hasPreviousPage: false,
-          startCursor: null,
-          endCursor: null,
-        },
-        totalCount: 0,
-      };
+    if (args.role) {
+      query.role = args.role;
     }
 
-    // Get groups
-    const groupsCollection = db.collection('groups');
-    const groups = await groupsCollection
-      .find({
-        _id: { $in: groupIds },
-        tenant: tenant.id,
-      })
-      .toArray();
+    if (args.isActive !== undefined) {
+      query.isActive = args.isActive;
+    }
 
-    const edges = groups.map((group) => ({
+    const totalCount = await GroupMember.countDocuments(query);
+
+    // Apply pagination
+    let cursor = args.after || args.before;
+    if (cursor) {
+      const cursorObj = await GroupMember.findById(cursor);
+      if (cursorObj) {
+        if (args.after) {
+          query._id = { $gt: new Types.ObjectId(cursor) };
+        } else {
+          query._id = { $lt: new Types.ObjectId(cursor) };
+        }
+      }
+    }
+
+    const sort = args.before ? { _id: -1 } : { _id: 1 };
+    const limit = args.first || args.last || 10;
+
+    const members = await GroupMember.find(query)
+      .sort(sort)
+      .limit(limit)
+      .lean();
+
+    if (args.before) {
+      members.reverse();
+    }
+
+    const edges = members.map((member) => ({
       node: {
-        id: group._id.toString(),
-        name: group.name,
-        description: group.description,
-        color: group.color,
-        icon: group.icon,
-        isActive: group.isActive,
-        settings: group.settings,
-        createdAt: group.createdAt,
-        updatedAt: group.updatedAt,
+        id: member._id.toString(),
+        groupId: member.groupId,
+        userId: member.userId,
+        role: member.role,
+        joinedAt: member.joinedAt,
+        isActive: member.isActive,
+        permissions: member.permissions,
+        createdAt: member.createdAt,
+        updatedAt: member.updatedAt,
       },
-      cursor: group._id.toString(),
+      cursor: member._id.toString(),
     }));
 
     return {
       edges,
       pageInfo: {
-        hasNextPage: false,
-        hasPreviousPage: false,
+        hasNextPage: members.length === limit,
+        hasPreviousPage: !!cursor,
         startCursor: edges[0]?.cursor,
         endCursor: edges[edges.length - 1]?.cursor,
       },
-      totalCount: groups.length,
+      totalCount,
     };
   }
 
   // Create group
   static async createGroup(context: Context, input: any) {
-    const { db } = context;
     const { tenant, user } = context;
 
-    if (!tenant || !user) {
-      throw new Error('Tenant or user not found');
+    if (!tenant) {
+      throw new Error('Tenant not found');
     }
 
-    // Check if user has permission to create groups
-    if (!['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
-      throw new Error('Insufficient permissions to create groups');
+    if (!user) {
+      throw new Error('User not found');
     }
 
-    const collection = db.collection('groups');
-    const now = new Date();
-
-    const group = {
+    const group = new Group({
       name: input.name,
       description: input.description,
-      color: input.color || '#3B82F6',
-      icon: input.icon || 'users',
+      color: input.color,
+      icon: input.icon,
       tenant: tenant.id,
-      createdBy: user.id,
+      createdBy: user._id.toString(),
       isActive: true,
       settings: {
         allowSelfJoin: input.settings?.allowSelfJoin || false,
         requireApproval: input.settings?.requireApproval || true,
-        maxMembers: input.settings?.maxMembers || null,
-        trainingEnabled: input.settings?.trainingEnabled || true,
-        nudgeEnabled: input.settings?.nudgeEnabled || true,
-        reportingEnabled: input.settings?.reportingEnabled || true,
-        notifications: {
-          onMemberJoin: input.settings?.notifications?.onMemberJoin || true,
-          onMemberLeave: input.settings?.notifications?.onMemberLeave || true,
-          onTrainingUpdate: input.settings?.notifications?.onTrainingUpdate || true,
-          onNudgeSent: input.settings?.notifications?.onNudgeSent || true,
-          onReportGenerated: input.settings?.notifications?.onReportGenerated || true,
-        },
+        maxMembers: input.settings?.maxMembers,
+        allowFileSharing: input.settings?.allowFileSharing || true,
+        allowComments: input.settings?.allowComments || true,
+        allowNudges: input.settings?.allowNudges || true,
+        canSendNudges: input.settings?.canSendNudges || false,
       },
-      createdAt: now,
-      updatedAt: now,
-    };
+    });
 
-    const result = await collection.insertOne(group);
-    const createdGroup = await collection.findOne({ _id: result.insertedId });
+    await group.save();
 
     return {
-      id: createdGroup._id.toString(),
-      name: createdGroup.name,
-      description: createdGroup.description,
-      color: createdGroup.color,
-      icon: createdGroup.icon,
-      isActive: createdGroup.isActive,
-      settings: createdGroup.settings,
-      createdAt: createdGroup.createdAt,
-      updatedAt: createdGroup.updatedAt,
+      id: group._id.toString(),
+      name: group.name,
+      description: group.description,
+      color: group.color,
+      icon: group.icon,
+      isActive: group.isActive,
+      settings: group.settings,
+      createdAt: group.createdAt,
+      updatedAt: group.updatedAt,
     };
   }
 
   // Update group
   static async updateGroup(context: Context, input: any) {
-    const { db } = context;
-    const { tenant, user } = context;
+    const { tenant } = context;
 
-    if (!tenant || !user) {
-      throw new Error('Tenant or user not found');
+    if (!tenant) {
+      throw new Error('Tenant not found');
     }
 
-    const collection = db.collection('groups');
-    const group = await collection.findOne({
-      _id: new ObjectId(input.id),
-      tenant: tenant.id,
-    });
+    const group = await Group.findOneAndUpdate(
+      { _id: new Types.ObjectId(input.id), tenant: tenant.id },
+      {
+        $set: {
+          name: input.name,
+          description: input.description,
+          color: input.color,
+          icon: input.icon,
+          isActive: input.isActive,
+          settings: input.settings,
+        },
+      },
+      { new: true }
+    );
 
     if (!group) {
       throw new Error('Group not found');
     }
 
-    // Check permissions
-    if (group.createdBy.toString() !== user.id && !['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
-      throw new Error('Insufficient permissions to update group');
-    }
-
-    const updateData: any = {
-      updatedAt: new Date(),
-    };
-
-    if (input.name) updateData.name = input.name;
-    if (input.description !== undefined) updateData.description = input.description;
-    if (input.color) updateData.color = input.color;
-    if (input.icon) updateData.icon = input.icon;
-    if (input.settings) updateData.settings = { ...group.settings, ...input.settings };
-
-    await collection.updateOne(
-      { _id: new ObjectId(input.id) },
-      { $set: updateData }
-    );
-
-    const updatedGroup = await collection.findOne({ _id: new ObjectId(input.id) });
-
     return {
-      id: updatedGroup._id.toString(),
-      name: updatedGroup.name,
-      description: updatedGroup.description,
-      color: updatedGroup.color,
-      icon: updatedGroup.icon,
-      isActive: updatedGroup.isActive,
-      settings: updatedGroup.settings,
-      createdAt: updatedGroup.createdAt,
-      updatedAt: updatedGroup.updatedAt,
+      id: group._id.toString(),
+      name: group.name,
+      description: group.description,
+      color: group.color,
+      icon: group.icon,
+      isActive: group.isActive,
+      settings: group.settings,
+      createdAt: group.createdAt,
+      updatedAt: group.updatedAt,
     };
   }
 
   // Delete group
   static async deleteGroup(context: Context, id: string) {
-    const { db } = context;
-    const { tenant, user } = context;
+    const { tenant } = context;
 
-    if (!tenant || !user) {
-      throw new Error('Tenant or user not found');
+    if (!tenant) {
+      throw new Error('Tenant not found');
     }
 
-    const collection = db.collection('groups');
-    const group = await collection.findOne({
-      _id: new ObjectId(id),
+    const group = await Group.findOneAndDelete({
+      _id: new Types.ObjectId(id),
       tenant: tenant.id,
     });
 
@@ -431,263 +396,207 @@ export class GroupService {
       throw new Error('Group not found');
     }
 
-    // Check permissions
-    if (group.createdBy.toString() !== user.id && !['SUPER_ADMIN'].includes(user.role)) {
-      throw new Error('Insufficient permissions to delete group');
-    }
+    // Also delete all group members
+    await GroupMember.deleteMany({ groupId: id });
 
-    // Remove group and all its members
-    await collection.deleteOne({ _id: new ObjectId(id) });
-    await db.collection('groupMembers').deleteMany({ groupId: new ObjectId(id) });
-
-    return true;
+    return {
+      id: group._id.toString(),
+      name: group.name,
+      description: group.description,
+      color: group.color,
+      icon: group.icon,
+      isActive: group.isActive,
+      settings: group.settings,
+      createdAt: group.createdAt,
+      updatedAt: group.updatedAt,
+    };
   }
 
   // Add group member
   static async addGroupMember(context: Context, input: any) {
-    const { db } = context;
-    const { tenant, user } = context;
+    const { tenant } = context;
 
-    if (!tenant || !user) {
-      throw new Error('Tenant or user not found');
+    if (!tenant) {
+      throw new Error('Tenant not found');
     }
 
-    // Check if group exists
-    const group = await db.collection('groups').findOne({
-      _id: new ObjectId(input.groupId),
-      tenant: tenant.id,
+    const member = new GroupMember({
+      groupId: input.groupId,
+      userId: input.userId,
+      role: input.role || 'member',
+      isActive: true,
+      permissions: {
+        canInvite: input.permissions?.canInvite || false,
+        canRemove: input.permissions?.canRemove || false,
+        canEdit: input.permissions?.canEdit || false,
+        canDelete: input.permissions?.canDelete || false,
+      },
     });
 
-    if (!group) {
-      throw new Error('Group not found');
+    await member.save();
+
+    return {
+      id: member._id.toString(),
+      groupId: member.groupId,
+      userId: member.userId,
+      role: member.role,
+      joinedAt: member.joinedAt,
+      isActive: member.isActive,
+      permissions: member.permissions,
+      createdAt: member.createdAt,
+      updatedAt: member.updatedAt,
+    };
+  }
+
+  // Remove group member
+  static async removeGroupMember(context: Context, input: any) {
+    const { tenant } = context;
+
+    if (!tenant) {
+      throw new Error('Tenant not found');
     }
 
-    // Check permissions
-    if (group.createdBy.toString() !== user.id && !['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
-      throw new Error('Insufficient permissions to add members');
+    const member = await GroupMember.findOneAndDelete({
+      groupId: input.groupId,
+      userId: input.userId,
+    });
+
+    if (!member) {
+      throw new Error('Group member not found');
+    }
+
+    return {
+      id: member._id.toString(),
+      groupId: member.groupId,
+      userId: member.userId,
+      role: member.role,
+      joinedAt: member.joinedAt,
+      isActive: member.isActive,
+      permissions: member.permissions,
+      createdAt: member.createdAt,
+      updatedAt: member.updatedAt,
+    };
+  }
+
+  // Update group member
+  static async updateGroupMember(context: Context, input: any) {
+    const { tenant } = context;
+
+    if (!tenant) {
+      throw new Error('Tenant not found');
+    }
+
+    const member = await GroupMember.findOneAndUpdate(
+      { _id: new Types.ObjectId(input.id) },
+      {
+        $set: {
+          role: input.role,
+          isActive: input.isActive,
+          permissions: input.permissions,
+        },
+      },
+      { new: true }
+    );
+
+    if (!member) {
+      throw new Error('Group member not found');
+    }
+
+    return {
+      id: member._id.toString(),
+      groupId: member.groupId,
+      userId: member.userId,
+      role: member.role,
+      joinedAt: member.joinedAt,
+      isActive: member.isActive,
+      permissions: member.permissions,
+      createdAt: member.createdAt,
+      updatedAt: member.updatedAt,
+    };
+  }
+
+  // Join group
+  static async joinGroup(context: Context, groupId: string) {
+    const { tenant, user } = context;
+
+    if (!tenant) {
+      throw new Error('Tenant not found');
+    }
+
+    if (!user) {
+      throw new Error('User not found');
     }
 
     // Check if user is already a member
-    const existingMember = await db.collection('groupMembers').findOne({
-      groupId: new ObjectId(input.groupId),
-      userId: new ObjectId(input.userId),
+    const existingMember = await GroupMember.findOne({
+      groupId,
+      userId: user._id.toString(),
     });
 
     if (existingMember) {
       throw new Error('User is already a member of this group');
     }
 
-    // Check max members limit
-    if (group.settings.maxMembers) {
-      const memberCount = await db.collection('groupMembers').countDocuments({
-        groupId: new ObjectId(input.groupId),
-        isActive: true,
-      });
-
-      if (memberCount >= group.settings.maxMembers) {
-        throw new Error('Group has reached maximum member limit');
-      }
-    }
-
-    const member = {
-      groupId: new ObjectId(input.groupId),
-      userId: new ObjectId(input.userId),
-      role: input.role || 'MEMBER',
-      joinedAt: new Date(),
+    const member = new GroupMember({
+      groupId,
+      userId: user._id.toString(),
+      role: 'member',
       isActive: true,
       permissions: {
-        canInviteMembers: input.role === 'ADMIN',
-        canRemoveMembers: input.role === 'ADMIN',
-        canEditGroup: input.role === 'ADMIN',
-        canViewReports: true,
-        canManageTraining: input.role === 'ADMIN',
-        canSendNudges: input.role === 'ADMIN',
+        canInvite: false,
+        canRemove: false,
+        canEdit: false,
+        canDelete: false,
       },
-    };
+    });
 
-    const result = await db.collection('groupMembers').insertOne(member);
-    const createdMember = await db.collection('groupMembers').findOne({ _id: result.insertedId });
+    await member.save();
 
     return {
-      id: createdMember._id.toString(),
-      role: createdMember.role,
-      joinedAt: createdMember.joinedAt,
-      isActive: createdMember.isActive,
-      permissions: createdMember.permissions,
-    };
-  }
-
-  // Remove group member
-  static async removeGroupMember(context: Context, input: any) {
-    const { db } = context;
-    const { tenant, user } = context;
-
-    if (!tenant || !user) {
-      throw new Error('Tenant or user not found');
-    }
-
-    // Check if group exists
-    const group = await db.collection('groups').findOne({
-      _id: new ObjectId(input.groupId),
-      tenant: tenant.id,
-    });
-
-    if (!group) {
-      throw new Error('Group not found');
-    }
-
-    // Check permissions
-    if (group.createdBy.toString() !== user.id && !['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
-      throw new Error('Insufficient permissions to remove members');
-    }
-
-    await db.collection('groupMembers').deleteOne({
-      groupId: new ObjectId(input.groupId),
-      userId: new ObjectId(input.userId),
-    });
-
-    return true;
-  }
-
-  // Update group member
-  static async updateGroupMember(context: Context, input: any) {
-    const { db } = context;
-    const { tenant, user } = context;
-
-    if (!tenant || !user) {
-      throw new Error('Tenant or user not found');
-    }
-
-    // Check if group exists
-    const group = await db.collection('groups').findOne({
-      _id: new ObjectId(input.groupId),
-      tenant: tenant.id,
-    });
-
-    if (!group) {
-      throw new Error('Group not found');
-    }
-
-    // Check permissions
-    if (group.createdBy.toString() !== user.id && !['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
-      throw new Error('Insufficient permissions to update members');
-    }
-
-    const updateData: any = {};
-    if (input.role) updateData.role = input.role;
-    if (input.permissions) updateData.permissions = input.permissions;
-
-    await db.collection('groupMembers').updateOne(
-      {
-        groupId: new ObjectId(input.groupId),
-        userId: new ObjectId(input.userId),
-      },
-      { $set: updateData }
-    );
-
-    const updatedMember = await db.collection('groupMembers').findOne({
-      groupId: new ObjectId(input.groupId),
-      userId: new ObjectId(input.userId),
-    });
-
-    return {
-      id: updatedMember._id.toString(),
-      role: updatedMember.role,
-      joinedAt: updatedMember.joinedAt,
-      isActive: updatedMember.isActive,
-      permissions: updatedMember.permissions,
-    };
-  }
-
-  // Join group
-  static async joinGroup(context: Context, groupId: string) {
-    const { db } = context;
-    const { tenant, user } = context;
-
-    if (!tenant || !user) {
-      throw new Error('Tenant or user not found');
-    }
-
-    // Check if group exists
-    const group = await db.collection('groups').findOne({
-      _id: new ObjectId(groupId),
-      tenant: tenant.id,
-    });
-
-    if (!group) {
-      throw new Error('Group not found');
-    }
-
-    // Check if self-join is allowed
-    if (!group.settings.allowSelfJoin) {
-      throw new Error('Self-join is not allowed for this group');
-    }
-
-    // Check if user is already a member
-    const existingMember = await db.collection('groupMembers').findOne({
-      groupId: new ObjectId(groupId),
-      userId: user.id,
-    });
-
-    if (existingMember) {
-      throw new Error('You are already a member of this group');
-    }
-
-    // Check max members limit
-    if (group.settings.maxMembers) {
-      const memberCount = await db.collection('groupMembers').countDocuments({
-        groupId: new ObjectId(groupId),
-        isActive: true,
-      });
-
-      if (memberCount >= group.settings.maxMembers) {
-        throw new Error('Group has reached maximum member limit');
-      }
-    }
-
-    const member = {
-      groupId: new ObjectId(groupId),
-      userId: user.id,
-      role: 'MEMBER',
-      joinedAt: new Date(),
-      isActive: true,
-      permissions: {
-        canInviteMembers: false,
-        canRemoveMembers: false,
-        canEditGroup: false,
-        canViewReports: true,
-        canManageTraining: false,
-        canSendNudges: false,
-      },
-    };
-
-    const result = await db.collection('groupMembers').insertOne(member);
-    const createdMember = await db.collection('groupMembers').findOne({ _id: result.insertedId });
-
-    return {
-      id: createdMember._id.toString(),
-      role: createdMember.role,
-      joinedAt: createdMember.joinedAt,
-      isActive: createdMember.isActive,
-      permissions: createdMember.permissions,
+      id: member._id.toString(),
+      groupId: member.groupId,
+      userId: member.userId,
+      role: member.role,
+      joinedAt: member.joinedAt,
+      isActive: member.isActive,
+      permissions: member.permissions,
+      createdAt: member.createdAt,
+      updatedAt: member.updatedAt,
     };
   }
 
   // Leave group
   static async leaveGroup(context: Context, groupId: string) {
-    const { db } = context;
     const { tenant, user } = context;
 
-    if (!tenant || !user) {
-      throw new Error('Tenant or user not found');
+    if (!tenant) {
+      throw new Error('Tenant not found');
     }
 
-    await db.collection('groupMembers').deleteOne({
-      groupId: new ObjectId(groupId),
-      userId: user.id,
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const member = await GroupMember.findOneAndDelete({
+      groupId,
+      userId: user._id.toString(),
     });
 
-    return true;
+    if (!member) {
+      throw new Error('User is not a member of this group');
+    }
+
+    return {
+      id: member._id.toString(),
+      groupId: member.groupId,
+      userId: member.userId,
+      role: member.role,
+      joinedAt: member.joinedAt,
+      isActive: member.isActive,
+      permissions: member.permissions,
+      createdAt: member.createdAt,
+      updatedAt: member.updatedAt,
+    };
   }
 
   // Bulk add group members
@@ -695,58 +604,33 @@ export class GroupService {
     context: Context,
     groupId: string,
     userIds: string[],
-    role?: string
+    role: string = 'member'
   ) {
-    const { db } = context;
-    const { tenant, user } = context;
+    const { tenant } = context;
 
-    if (!tenant || !user) {
-      throw new Error('Tenant or user not found');
-    }
-
-    // Check if group exists
-    const group = await db.collection('groups').findOne({
-      _id: new ObjectId(groupId),
-      tenant: tenant.id,
-    });
-
-    if (!group) {
-      throw new Error('Group not found');
-    }
-
-    // Check permissions
-    if (group.createdBy.toString() !== user.id && !['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
-      throw new Error('Insufficient permissions to add members');
+    if (!tenant) {
+      throw new Error('Tenant not found');
     }
 
     const members = userIds.map((userId) => ({
-      groupId: new ObjectId(groupId),
-      userId: new ObjectId(userId),
-      role: role || 'MEMBER',
-      joinedAt: new Date(),
+      groupId,
+      userId,
+      role,
       isActive: true,
       permissions: {
-        canInviteMembers: role === 'ADMIN',
-        canRemoveMembers: role === 'ADMIN',
-        canEditGroup: role === 'ADMIN',
-        canViewReports: true,
-        canManageTraining: role === 'ADMIN',
-        canSendNudges: role === 'ADMIN',
+        canInvite: false,
+        canRemove: false,
+        canEdit: false,
+        canDelete: false,
       },
     }));
 
-    const result = await db.collection('groupMembers').insertMany(members);
-    const createdMembers = await db.collection('groupMembers')
-      .find({ _id: { $in: Object.values(result.insertedIds) } })
-      .toArray();
+    await GroupMember.insertMany(members);
 
-    return createdMembers.map((member) => ({
-      id: member._id.toString(),
-      role: member.role,
-      joinedAt: member.joinedAt,
-      isActive: member.isActive,
-      permissions: member.permissions,
-    }));
+    return {
+      success: true,
+      addedCount: userIds.length,
+    };
   }
 
   // Bulk remove group members
@@ -755,121 +639,77 @@ export class GroupService {
     groupId: string,
     userIds: string[]
   ) {
-    const { db } = context;
-    const { tenant, user } = context;
+    const { tenant } = context;
 
-    if (!tenant || !user) {
-      throw new Error('Tenant or user not found');
+    if (!tenant) {
+      throw new Error('Tenant not found');
     }
 
-    // Check if group exists
-    const group = await db.collection('groups').findOne({
-      _id: new ObjectId(groupId),
-      tenant: tenant.id,
+    const result = await GroupMember.deleteMany({
+      groupId,
+      userId: { $in: userIds },
     });
 
+    return {
+      success: true,
+      removedCount: result.deletedCount,
+    };
+  }
+
+  // Get group tenant
+  static async getGroupTenant(context: Context, groupId: string) {
+    const group = await Group.findById(groupId).lean();
     if (!group) {
       throw new Error('Group not found');
     }
-
-    // Check permissions
-    if (group.createdBy.toString() !== user.id && !['ADMIN', 'SUPER_ADMIN'].includes(user.role)) {
-      throw new Error('Insufficient permissions to remove members');
-    }
-
-    await db.collection('groupMembers').deleteMany({
-      groupId: new ObjectId(groupId),
-      userId: { $in: userIds.map((id) => new ObjectId(id)) },
-    });
-
-    return true;
+    return { id: group.tenant };
   }
 
-  // Helper methods for GraphQL resolvers
-  static async getGroupTenant(context: Context, groupId: string) {
-    const { db } = context;
-    const group = await db.collection('groups').findOne({ _id: new ObjectId(groupId) });
-    if (!group) return null;
-
-    const tenant = await db.collection('tenants').findOne({ _id: group.tenant });
-    return tenant ? {
-      id: tenant._id.toString(),
-      name: tenant.name,
-      subdomain: tenant.subdomain,
-    } : null;
-  }
-
+  // Get group creator
   static async getGroupCreator(context: Context, groupId: string) {
-    const { db } = context;
-    const group = await db.collection('groups').findOne({ _id: new ObjectId(groupId) });
-    if (!group) return null;
-
-    const user = await db.collection('users').findOne({ _id: group.createdBy });
-    return user ? {
-      id: user._id.toString(),
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
-    } : null;
+    const group = await Group.findById(groupId).lean();
+    if (!group) {
+      throw new Error('Group not found');
+    }
+    return { id: group.createdBy };
   }
 
+  // Get group members list
   static async getGroupMembersList(context: Context, groupId: string) {
-    const { db } = context;
-    const members = await db.collection('groupMembers')
-      .find({ groupId: new ObjectId(groupId), isActive: true })
-      .toArray();
-
-    const userIds = members.map((member) => member.userId);
-    const users = await db.collection('users')
-      .find({ _id: { $in: userIds } })
-      .toArray();
-
-    return users.map((user) => ({
-      id: user._id.toString(),
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
+    const members = await GroupMember.find({ groupId, isActive: true }).lean();
+    return members.map((member) => ({
+      id: member._id.toString(),
+      groupId: member.groupId,
+      userId: member.userId,
+      role: member.role,
+      joinedAt: member.joinedAt,
+      isActive: member.isActive,
+      permissions: member.permissions,
+      createdAt: member.createdAt,
+      updatedAt: member.updatedAt,
     }));
   }
 
+  // Get group member count
   static async getGroupMemberCount(context: Context, groupId: string) {
-    const { db } = context;
-    return await db.collection('groupMembers').countDocuments({
-      groupId: new ObjectId(groupId),
-      isActive: true,
-    });
+    return await GroupMember.countDocuments({ groupId, isActive: true });
   }
 
+  // Get group member user
   static async getGroupMemberUser(context: Context, memberId: string) {
-    const { db } = context;
-    const member = await db.collection('groupMembers').findOne({ _id: new ObjectId(memberId) });
-    if (!member) return null;
-
-    const user = await db.collection('users').findOne({ _id: member.userId });
-    return user ? {
-      id: user._id.toString(),
-      email: user.email,
-      firstName: user.firstName,
-      lastName: user.lastName,
-      role: user.role,
-    } : null;
+    const member = await GroupMember.findById(memberId).lean();
+    if (!member) {
+      throw new Error('Group member not found');
+    }
+    return { id: member.userId };
   }
 
+  // Get group member group
   static async getGroupMemberGroup(context: Context, memberId: string) {
-    const { db } = context;
-    const member = await db.collection('groupMembers').findOne({ _id: new ObjectId(memberId) });
-    if (!member) return null;
-
-    const group = await db.collection('groups').findOne({ _id: member.groupId });
-    return group ? {
-      id: group._id.toString(),
-      name: group.name,
-      description: group.description,
-      color: group.color,
-      icon: group.icon,
-      isActive: group.isActive,
-    } : null;
+    const member = await GroupMember.findById(memberId).lean();
+    if (!member) {
+      throw new Error('Group member not found');
+    }
+    return { id: member.groupId };
   }
 }

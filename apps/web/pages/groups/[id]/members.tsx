@@ -1,8 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { GroupMemberList, GroupMember, SnackbarProvider, useSnackbar } from '@luxgen/ui';
-import { PageWrapper } from '@luxgen/ui';
+import { GroupMemberList, GroupMember, SnackbarProvider, useSnackbar, AppLayout, getDefaultNavItems, getDefaultUser, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
 
 const GroupMembersPageContent: React.FC = () => {
   const router = useRouter();
@@ -11,6 +10,7 @@ const GroupMembersPageContent: React.FC = () => {
   const [group, setGroup] = useState<any>(null);
   const [members, setMembers] = useState<GroupMember[]>([]);
   const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
     if (id) {
@@ -18,6 +18,27 @@ const GroupMembersPageContent: React.FC = () => {
       fetchMembers();
     }
   }, [id]);
+
+  // Load user data
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        setUser({
+          name: `${parsedUser.firstName} ${parsedUser.lastName}`,
+          email: parsedUser.email,
+          role: parsedUser.role,
+          tenant: parsedUser.tenant,
+        });
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        setUser(getDefaultUser());
+      }
+    } else {
+      setUser(getDefaultUser());
+    }
+  }, []);
 
   const fetchGroup = async () => {
     try {
@@ -268,6 +289,35 @@ const GroupMembersPageContent: React.FC = () => {
     }
   };
 
+  // Handle user actions
+  const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
+    switch (action) {
+      case 'profile':
+        router.push('/profile');
+        break;
+      case 'settings':
+        router.push('/settings');
+        break;
+      case 'logout':
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        router.push('/login');
+        break;
+    }
+  };
+
+  // Handle search
+  const handleSearch = (query: string) => {
+    console.log('Search query:', query);
+    // TODO: Implement search functionality
+  };
+
+  // Handle notifications
+  const handleNotificationClick = () => {
+    console.log('Notification clicked');
+    // TODO: Implement notification functionality
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -299,60 +349,72 @@ const GroupMembersPageContent: React.FC = () => {
         <meta name="description" content={`Manage members for ${group.name} group`} />
       </Head>
 
-      <PageWrapper>
-        <div className="min-h-screen bg-gray-50">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            {/* Header */}
-            <div className="mb-8">
-              <div className="flex items-center justify-between">
-                <div>
-                  <div className="flex items-center space-x-3 mb-2">
-                    <button
-                      onClick={() => router.push('/groups')}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                      </svg>
-                    </button>
-                    <h1 className="text-3xl font-bold text-gray-900">{group.name}</h1>
-                  </div>
-                  <p className="text-gray-600">{group.description}</p>
-                </div>
-                
-                <div className="flex items-center space-x-3">
-                  <div
-                    className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-semibold"
-                    style={{ backgroundColor: group.color }}
+      <AppLayout
+        sidebarSections={getDefaultSidebarSections()}
+        user={user}
+        onUserAction={handleUserAction}
+        onSearch={handleSearch}
+        onNotificationClick={handleNotificationClick}
+        showSearch={true}
+        showNotifications={true}
+        notificationCount={0}
+        searchPlaceholder="Search members..."
+        logo={getDefaultLogo()}
+        sidebarCollapsible={true}
+        sidebarDefaultCollapsed={false}
+        responsive={true}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header */}
+          <div className="mb-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="flex items-center space-x-3 mb-2">
+                  <button
+                    onClick={() => router.push('/groups')}
+                    className="text-gray-500 hover:text-gray-700"
                   >
-                    {group.icon ? (
-                      <span className="text-xl">{group.icon}</span>
-                    ) : (
-                      <span className="text-xl">
-                        {group.name.charAt(0).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <h1 className="text-3xl font-bold text-gray-900">{group.name}</h1>
+                </div>
+                <p className="text-gray-600">{group.description}</p>
+              </div>
+              
+              <div className="flex items-center space-x-3">
+                <div
+                  className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-semibold"
+                  style={{ backgroundColor: group.color }}
+                >
+                  {group.icon ? (
+                    <span className="text-xl">{group.icon}</span>
+                  ) : (
+                    <span className="text-xl">
+                      {group.name.charAt(0).toUpperCase()}
+                    </span>
+                  )}
                 </div>
               </div>
             </div>
-
-            {/* Members List */}
-            <GroupMemberList
-              members={members}
-              onRoleChange={handleRoleChange}
-              onRemoveMember={handleRemoveMember}
-              onAddMembers={handleAddMembers}
-              onBulkAction={handleBulkAction}
-              currentUserRole="ADMIN"
-              showActions={true}
-              showPermissions={true}
-              allowRoleChange={true}
-              allowMemberRemoval={true}
-            />
           </div>
+
+          {/* Members List */}
+          <GroupMemberList
+            members={members}
+            onRoleChange={handleRoleChange}
+            onRemoveMember={handleRemoveMember}
+            onAddMembers={handleAddMembers}
+            onBulkAction={handleBulkAction}
+            currentUserRole="ADMIN"
+            showActions={true}
+            showPermissions={true}
+            allowRoleChange={true}
+            allowMemberRemoval={true}
+          />
         </div>
-      </PageWrapper>
+      </AppLayout>
     </>
   );
 };
