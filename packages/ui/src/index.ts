@@ -20,6 +20,9 @@ export * from './RegisterForm';
 export * from './Snackbar';
 export * from './NavBar';
 export * from './Sidebar';
+export * from './GroupCard';
+export * from './GroupForm';
+export * from './GroupMemberList';
 
 // Display Components
 export * from './Heading';

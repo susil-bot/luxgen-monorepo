@@ -5,11 +5,13 @@ import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge';
 import { tenantTypeDefs } from './tenant/typeDefs';
 import { userTypeDefs } from './user/typeDefs';
 import { courseTypeDefs } from './course/typeDefs';
+import { groupTypeDefs } from './group/typeDefs';
 
 // Import resolvers
 import { tenantResolvers } from './tenant/resolvers';
 import { userResolvers } from './user/resolvers';
 import { courseResolvers } from './course/resolvers';
+import { groupResolvers } from './group/resolvers';
 
 // Base schema
 const baseTypeDefs = `
@@ -35,6 +37,7 @@ export const typeDefs = mergeTypeDefs([
   tenantTypeDefs,
   userTypeDefs,
   courseTypeDefs,
+  groupTypeDefs,
 ]);
 
 // Scalar resolvers
@@ -75,6 +78,7 @@ export const resolvers: any = mergeResolvers([
   tenantResolvers,
   userResolvers,
   courseResolvers,
+  groupResolvers,
 ]);
 
 // Create executable schema
