@@ -89,7 +89,7 @@ const KickerComponent: React.FC<KickerProps> = ({
   return (
     <div
       className={`kicker kicker-${variant} kicker-${size} ${className}`}
-      style={styles}
+      style={styles as React.CSSProperties}
       {...props}
     >
       {icon && (

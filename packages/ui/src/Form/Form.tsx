@@ -3,7 +3,7 @@ import { BaseComponentProps, TenantTheme } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
-export interface FormProps extends BaseComponentProps {
+export interface FormComponentProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
   onSubmit?: (e: React.FormEvent) => void;
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -12,7 +12,7 @@ export interface FormProps extends BaseComponentProps {
   noValidate?: boolean;
 }
 
-const FormComponent: React.FC<FormProps> = ({
+const FormComponent: React.FC<FormComponentProps> = ({
   tenantTheme = defaultTheme,
   className = '',
   style,

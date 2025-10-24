@@ -1,31 +1,31 @@
-import { Tenant } from '@luxgen/db';
+import { Tenant, ITenant } from '@luxgen/db';
 
 export class TenantService {
-  async getTenantById(id: string): Promise<Tenant | null> {
+  async getTenantById(id: string): Promise<ITenant | null> {
     // TODO: Implement database query
     console.log('Getting tenant by ID:', id);
     return null;
   }
 
-  async getTenantBySubdomain(subdomain: string): Promise<Tenant | null> {
+  async getTenantBySubdomain(subdomain: string): Promise<ITenant | null> {
     // TODO: Implement database query
     console.log('Getting tenant by subdomain:', subdomain);
     return null;
   }
 
-  async getAllTenants(): Promise<Tenant[]> {
+  async getAllTenants(): Promise<ITenant[]> {
     // TODO: Implement database query
     console.log('Getting all tenants');
     return [];
   }
 
-  async createTenant(input: any): Promise<Tenant> {
+  async createTenant(input: any): Promise<ITenant> {
     // TODO: Implement database creation
     console.log('Creating tenant:', input);
     throw new Error('Not implemented');
   }
 
-  async updateTenant(id: string, input: any): Promise<Tenant> {
+  async updateTenant(id: string, input: any): Promise<ITenant> {
     // TODO: Implement database update
     console.log('Updating tenant:', id, input);
     throw new Error('Not implemented');

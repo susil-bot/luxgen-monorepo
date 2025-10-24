@@ -1,6 +1,6 @@
 export { Checkbox } from './Checkbox';
-export type { CheckboxProps } from './Checkbox';
+export { CheckboxProps } from './Checkbox';
 export { fetchCheckboxData, fetchCheckboxSSR } from './fetcher';
 export { checkboxFixtures } from './fixture';
 export { checkboxStyles } from './styles';
-export { checkboxTranslations } from './translations';
+export { checkboUxTranslations } from './translations';

@@ -14,6 +14,7 @@ import { courseResolvers } from './course/resolvers';
 // Base schema
 const baseTypeDefs = `
   scalar Date
+  scalar JSON
 
   type Query {
     _empty: String
@@ -36,8 +37,41 @@ export const typeDefs = mergeTypeDefs([
   courseTypeDefs,
 ]);
 
+// Scalar resolvers
+const scalarResolvers = {
+  Date: {
+    serialize: (date: Date) => date.toISOString(),
+    parseValue: (value: string) => new Date(value),
+    parseLiteral: (ast: any) => new Date(ast.value),
+  },
+  JSON: {
+    serialize: (value: any) => value,
+    parseValue: (value: any) => value,
+    parseLiteral: (ast: any) => {
+      switch (ast.kind) {
+        case 'StringValue':
+        case 'BooleanValue':
+          return ast.value;
+        case 'IntValue':
+        case 'FloatValue':
+          return parseFloat(ast.value);
+        case 'ObjectValue':
+          return ast.fields.reduce((obj: any, field: any) => {
+            obj[field.name.value] = JSON.parse(field.value.value);
+            return obj;
+          }, {});
+        case 'ListValue':
+          return ast.values.map((value: any) => JSON.parse(value.value));
+        default:
+          return null;
+      }
+    },
+  },
+};
+
 // Merge all resolvers
-export const resolvers = mergeResolvers([
+export const resolvers: any = mergeResolvers([
+  scalarResolvers,
   tenantResolvers,
   userResolvers,
   courseResolvers,

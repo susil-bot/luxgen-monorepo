@@ -1,4 +1,4 @@
-import { ReactElement } from 'react';
+import React, { ReactElement } from 'react';
 import { renderToString } from 'react-dom/server';
 import { TenantTheme } from './types';
 import { defaultTheme } from './theme';
@@ -14,7 +14,7 @@ export const createSSRComponent = <P extends object>(
 ) => {
   return (props: P & SSRProps) => {
     const mergedProps = { ...defaultProps, ...props } as P;
-    return Component(mergedProps);
+    return React.createElement(Component, mergedProps);
   };
 };
 

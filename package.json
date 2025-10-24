@@ -17,12 +17,17 @@
     "docker:clean": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml down -v && docker system prune -f",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "init:tenant-workflow": "node scripts/init-tenant-workflow.js",
+    "init:tenants": "node scripts/init-tenants.js"
   },
   "devDependencies": {
     "turbo": "^1.10.0",
     "@types/node": "^20.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "tailwindcss": "^3.4.0",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8.5.6"
   },
   "engines": {
     "node": ">=18.0.0"

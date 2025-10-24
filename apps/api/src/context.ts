@@ -1,10 +1,10 @@
 import { Request, Response } from 'express';
-import { User } from '@luxgen/db';
+import { User, IUser } from '@luxgen/db';
 
 export interface GraphQLContext {
   req: Request;
   res: Response;
-  user?: User;
+  user?: IUser;
   tenant?: string;
 }
 

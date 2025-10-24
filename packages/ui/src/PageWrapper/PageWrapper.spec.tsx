@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { PageWrapper } from './PageWrapper';
 import { pageWrapperFixtures } from './fixture';
+import { defaultTheme } from '../theme';
 
 describe('PageWrapper', () => {
   it('renders with default props', () => {
@@ -43,10 +44,11 @@ describe('PageWrapper', () => {
   });
 
   it('applies tenant theme colors', () => {
+    const baseTheme = pageWrapperFixtures.withCustomTheme.tenantTheme || defaultTheme;
     const customTheme = {
-      ...pageWrapperFixtures.withCustomTheme.tenantTheme,
+      ...baseTheme,
       colors: {
-        ...pageWrapperFixtures.withCustomTheme.tenantTheme.colors,
+        ...baseTheme.colors,
         primary: '#FF6B6B',
       },
     };

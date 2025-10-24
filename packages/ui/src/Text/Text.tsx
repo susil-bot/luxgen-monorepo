@@ -3,7 +3,7 @@ import { BaseComponentProps, TenantTheme, VariantProps } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
-export interface TextProps extends BaseComponentProps, VariantProps {
+export interface TextProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
   text: string;
   variant?: 'normal' | 'muted' | 'small' | 'large' | 'lead' | 'caption';
@@ -30,16 +30,22 @@ const TextComponent: React.FC<TextProps> = ({
   const getVariantColor = () => {
     if (color) return color;
     
-    const variantColors = {
+    const variantColors: Record<string, string> = {
       primary: tenantTheme.colors.text,
       secondary: tenantTheme.colors.textSecondary,
       success: tenantTheme.colors.success,
       error: tenantTheme.colors.error,
       warning: tenantTheme.colors.warning,
       info: tenantTheme.colors.info,
+      normal: tenantTheme.colors.text,
+      muted: tenantTheme.colors.textSecondary,
+      small: tenantTheme.colors.text,
+      large: tenantTheme.colors.text,
+      lead: tenantTheme.colors.text,
+      caption: tenantTheme.colors.textSecondary,
     };
     
-    return variantColors[props.variant] || tenantTheme.colors.text;
+    return variantColors[variant] || tenantTheme.colors.text;
   };
 
   const getVariantSize = () => {

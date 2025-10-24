@@ -1,4 +1,4 @@
-import { FormProps } from './Form';
+import { FormComponentProps } from './Form';
 import { defaultTheme } from '../theme';
 
 export const formFixtures = {
@@ -23,7 +23,7 @@ export const formFixtures = {
         </div>
       </>
     ),
-  } as FormProps,
+  } as FormComponentProps,
   
   withValidation: {
     tenantTheme: defaultTheme,
@@ -47,7 +47,7 @@ export const formFixtures = {
         </div>
       </>
     ),
-  } as FormProps,
+  } as FormComponentProps,
   
   withFileUpload: {
     tenantTheme: defaultTheme,
@@ -66,7 +66,7 @@ export const formFixtures = {
         </div>
       </>
     ),
-  } as FormProps,
+  } as FormComponentProps,
   
   withCustomTheme: {
     tenantTheme: {
@@ -92,7 +92,7 @@ export const formFixtures = {
         </div>
       </>
     ),
-  } as FormProps,
+  } as FormComponentProps,
   
   withNoValidation: {
     tenantTheme: defaultTheme,
@@ -111,7 +111,7 @@ export const formFixtures = {
         </div>
       </>
     ),
-  } as FormProps,
+  } as FormComponentProps,
   
   withGetMethod: {
     tenantTheme: defaultTheme,
@@ -130,5 +130,5 @@ export const formFixtures = {
         </div>
       </>
     ),
-  } as FormProps,
+  } as FormComponentProps,
 };

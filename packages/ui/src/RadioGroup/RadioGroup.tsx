@@ -1,9 +1,9 @@
 import React from 'react';
-import { BaseComponentProps, TenantTheme, FormProps, RadioOption } from '../types';
+import { BaseComponentProps, TenantTheme, BaseFormProps, RadioOption } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
-export interface RadioGroupProps extends BaseComponentProps, FormProps {
+export interface RadioGroupProps extends BaseComponentProps, BaseFormProps {
   tenantTheme?: TenantTheme;
   options: RadioOption[];
   name: string;

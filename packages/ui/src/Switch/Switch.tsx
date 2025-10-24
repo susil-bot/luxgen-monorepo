@@ -1,9 +1,9 @@
 import React from 'react';
-import { BaseComponentProps, TenantTheme, FormProps } from '../types';
+import { BaseComponentProps, TenantTheme, BaseFormProps } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
-export interface SwitchProps extends BaseComponentProps, FormProps {
+export interface SwitchProps extends BaseComponentProps, BaseFormProps {
   tenantTheme?: TenantTheme;
   label?: string;
   disabled?: boolean;
@@ -11,6 +11,7 @@ export interface SwitchProps extends BaseComponentProps, FormProps {
   helperText?: string;
   error?: string;
   size?: 'sm' | 'md' | 'lg';
+  checked?: boolean;
 }
 
 const SwitchComponent: React.FC<SwitchProps> = ({

@@ -48,7 +48,6 @@ export const textFixtures = {
     tenantTheme: defaultTheme,
     text: 'Success text content',
     variant: 'normal' as const,
-    variant: 'success' as const,
   } as TextProps,
   
   withWeight: {
