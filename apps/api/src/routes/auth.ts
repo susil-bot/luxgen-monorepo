@@ -93,7 +93,7 @@ router.post('/login', validateLogin, async (req: Request, res: Response) => {
 // Register endpoint
 router.post('/register', validateRegister, async (req: Request, res: Response) => {
   try {
-    const { email, password, firstName, lastName, tenant, role } = req.body;
+    const { email, password, firstName, lastName, tenantId, role } = req.body;
 
     // Check if user already exists
     const existingUser = await User.findOne({ email: email.toLowerCase().trim() });
@@ -117,7 +117,7 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       role: role || 'STUDENT',
-      tenant: tenant, // This should be validated against existing tenants
+      tenant: tenantId, // This should be validated against existing tenants
     });
 
     await newUser.save();

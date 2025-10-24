@@ -7,8 +7,20 @@ import { resolvers } from './schema';
 import { context } from './context';
 import { authMiddleware } from './middleware/auth';
 import { tenantMiddleware } from './middleware/tenant';
+import { 
+  tenantRoutingMiddleware, 
+  tenantAuthMiddleware, 
+  tenantSecurityMiddleware 
+} from './middleware/tenantRouting';
+import { 
+  tenantHeadersMiddleware, 
+  tenantBrandingMiddleware, 
+  tenantSecurityHeadersMiddleware,
+  tenantRateLimitMiddleware 
+} from './middleware/tenantHeaders';
 import authRoutes from './routes/auth';
 import adminRoutes from './routes/admin';
+import tenantRoutes from './routes/tenant';
 
 const app = express();
 
@@ -23,9 +35,24 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Custom middleware
-app.use(tenantMiddleware);
+// Tenant routing middleware (must be first)
+app.use(tenantRoutingMiddleware);
+
+// Tenant security middleware
+app.use(tenantSecurityMiddleware);
+
+// Tenant headers middleware
+app.use(tenantHeadersMiddleware);
+app.use(tenantBrandingMiddleware);
+app.use(tenantSecurityHeadersMiddleware);
+app.use(tenantRateLimitMiddleware);
+
+// Authentication middleware
+app.use(tenantAuthMiddleware);
 app.use(authMiddleware);
+
+// Legacy tenant middleware (for backward compatibility)
+app.use(tenantMiddleware);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
@@ -35,6 +62,7 @@ app.get('/health', (req, res) => {
 // API Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/tenant', tenantRoutes);
 
 // Create Apollo Server
 const server = new ApolloServer({
