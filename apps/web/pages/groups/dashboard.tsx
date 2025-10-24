@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { SnackbarProvider, useSnackbar } from '@luxgen/ui';
+import { SnackbarProvider, useSnackbar, PageLayout, getDefaultNavItems, getDefaultMenuItems, getDefaultUser, getDefaultLogo } from '@luxgen/ui';
 
 interface GroupDashboardData {
   id: string;
@@ -25,6 +25,7 @@ interface GroupDashboardData {
 const GroupDashboardPageContent: React.FC = () => {
   const router = useRouter();
   const { showSuccess, showError, showInfo } = useSnackbar();
+  const [user, setUser] = useState<any>(null);
   const [groups, setGroups] = useState<GroupDashboardData[]>([
     {
       id: '1',
@@ -97,6 +98,56 @@ const GroupDashboardPageContent: React.FC = () => {
     router.push(`/groups/${groupId}/members`);
   };
 
+  // Load user data
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        setUser({
+          name: `${parsedUser.firstName} ${parsedUser.lastName}`,
+          email: parsedUser.email,
+          role: parsedUser.role,
+          tenant: parsedUser.tenant,
+        });
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+        setUser(getDefaultUser());
+      }
+    } else {
+      setUser(getDefaultUser());
+    }
+  }, []);
+
+  // Handle user actions
+  const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
+    switch (action) {
+      case 'profile':
+        router.push('/profile');
+        break;
+      case 'settings':
+        router.push('/settings');
+        break;
+      case 'logout':
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        router.push('/login');
+        break;
+    }
+  };
+
+  // Handle search
+  const handleSearch = (query: string) => {
+    console.log('Search query:', query);
+    // TODO: Implement search functionality
+  };
+
+  // Handle notifications
+  const handleNotificationClick = () => {
+    console.log('Notification clicked');
+    // TODO: Implement notification functionality
+  };
+
   return (
     <>
       <Head>
@@ -104,7 +155,24 @@ const GroupDashboardPageContent: React.FC = () => {
         <meta name="description" content="Group management dashboard for admins and super admins" />
       </Head>
 
-      <div className="min-h-screen bg-gray-50">
+      <PageLayout
+        navItems={getDefaultNavItems()}
+        menuItems={getDefaultMenuItems()}
+        user={user}
+        onUserAction={handleUserAction}
+        onSearch={handleSearch}
+        onNotificationClick={handleNotificationClick}
+        showSearch={true}
+        showNotifications={true}
+        notificationCount={3}
+        searchPlaceholder="Search groups, users..."
+        logo={getDefaultLogo()}
+        menuPosition="top"
+        menuVariant="default"
+        menuCollapsible={true}
+        menuDefaultCollapsed={false}
+        responsive={true}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="mb-8">
@@ -266,7 +334,7 @@ const GroupDashboardPageContent: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </PageLayout>
     </>
   );
 };
