@@ -121,7 +121,6 @@ const PageLayoutComponent: React.FC<PageLayoutProps> = ({
     <div className={`min-h-screen bg-gray-50 ${className}`} {...props}>
       {/* NavBar */}
       <NavBar
-        items={navItems}
         user={user}
         onUserAction={onUserAction}
         showSearch={showSearch}

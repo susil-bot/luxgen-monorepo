@@ -26,9 +26,10 @@ export const groupTypeDefs = `
     allowSelfJoin: Boolean!
     requireApproval: Boolean!
     maxMembers: Int
-    trainingEnabled: Boolean!
-    nudgeEnabled: Boolean!
-    reportingEnabled: Boolean!
+    allowFileSharing: Boolean!
+    allowComments: Boolean!
+    allowNudges: Boolean!
+    canSendNudges: Boolean!
     notifications: GroupNotificationSettings
   }
 
@@ -77,9 +78,10 @@ export const groupTypeDefs = `
     allowSelfJoin: Boolean
     requireApproval: Boolean
     maxMembers: Int
-    trainingEnabled: Boolean
-    nudgeEnabled: Boolean
-    reportingEnabled: Boolean
+    allowFileSharing: Boolean
+    allowComments: Boolean
+    allowNudges: Boolean
+    canSendNudges: Boolean
     notifications: GroupNotificationSettingsInput
   }
 

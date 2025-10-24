@@ -62,12 +62,9 @@ describe('NavBar Component', () => {
   });
 
   it('renders with basic props', () => {
-    render(<NavBar items={mockItems} />);
+    render(<NavBar />);
     
     expect(screen.getByText('LuxGen')).toBeInTheDocument();
-    expect(screen.getByText('Home')).toBeInTheDocument();
-    expect(screen.getByText('About')).toBeInTheDocument();
-    expect(screen.getByText('Services')).toBeInTheDocument();
   });
 
   it('renders with custom logo', () => {
@@ -76,13 +73,13 @@ describe('NavBar Component', () => {
       href: '/custom',
     };
     
-    render(<NavBar items={mockItems} logo={customLogo} />);
+    render(<NavBar logo={customLogo} />);
     
     expect(screen.getByText('Custom Logo')).toBeInTheDocument();
   });
 
   it('renders user menu when user is provided', () => {
-    render(<NavBar items={mockItems} user={mockUser} />);
+    render(<NavBar  user={mockUser} />);
     
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('Admin')).toBeInTheDocument();
@@ -93,7 +90,6 @@ describe('NavBar Component', () => {
     
     render(
       <NavBar 
-        items={mockItems} 
         user={mockUser} 
         onUserAction={mockOnUserAction}
       />
@@ -114,7 +110,6 @@ describe('NavBar Component', () => {
     
     render(
       <NavBar 
-        items={mockItems} 
         user={mockUser} 
         onUserAction={mockOnUserAction}
       />
@@ -135,7 +130,6 @@ describe('NavBar Component', () => {
     
     render(
       <NavBar 
-        items={mockItems} 
         showSearch={true}
         onSearch={mockOnSearch}
         searchPlaceholder="Search..."
@@ -150,7 +144,6 @@ describe('NavBar Component', () => {
     
     render(
       <NavBar 
-        items={mockItems} 
         showSearch={true}
         onSearch={mockOnSearch}
       />
@@ -168,7 +161,6 @@ describe('NavBar Component', () => {
     
     render(
       <NavBar 
-        items={mockItems} 
         showNotifications={true}
         notificationCount={5}
         onNotificationClick={mockOnNotificationClick}
@@ -183,7 +175,6 @@ describe('NavBar Component', () => {
     
     render(
       <NavBar 
-        items={mockItems} 
         showNotifications={true}
         onNotificationClick={mockOnNotificationClick}
       />
@@ -196,14 +187,14 @@ describe('NavBar Component', () => {
   });
 
   it('renders login/signup buttons when user is not provided', () => {
-    render(<NavBar items={mockItems} />);
+    render(<NavBar  />);
     
     expect(screen.getByText('Login')).toBeInTheDocument();
     expect(screen.getByText('Sign Up')).toBeInTheDocument();
   });
 
   it('opens mobile menu when mobile menu button is clicked', () => {
-    render(<NavBar items={mockItems} showMobileMenu={true} />);
+    render(<NavBar  showMobileMenu={true} />);
     
     const mobileMenuButton = screen.getByRole('button', { name: /menu/i });
     fireEvent.click(mobileMenuButton);
@@ -221,7 +212,7 @@ describe('NavBar Component', () => {
       },
     ];
     
-    render(<NavBar items={itemsWithExternal} />);
+    render(<NavBar />);
     
     const externalLink = screen.getByText('External Link');
     expect(externalLink).toBeInTheDocument();
@@ -237,7 +228,7 @@ describe('NavBar Component', () => {
       },
     ];
     
-    render(<NavBar items={itemsWithDisabled} />);
+    render(<NavBar />);
     
     const disabledItem = screen.getByText('Disabled Item');
     expect(disabledItem).toHaveClass('opacity-50', 'cursor-not-allowed');
@@ -253,34 +244,34 @@ describe('NavBar Component', () => {
       },
     ];
     
-    render(<NavBar items={itemsWithBadge} />);
+    render(<NavBar />);
     
     expect(screen.getByText('New')).toBeInTheDocument();
   });
 
   it('applies custom className', () => {
-    render(<NavBar items={mockItems} className="custom-navbar" />);
+    render(<NavBar  className="custom-navbar" />);
     
     const navbar = screen.getByRole('navigation');
     expect(navbar).toHaveClass('custom-navbar');
   });
 
   it('handles different variants correctly', () => {
-    const { rerender } = render(<NavBar items={mockItems} variant="transparent" />);
+    const { rerender } = render(<NavBar  variant="transparent" />);
     let navbar = screen.getByRole('navigation');
     expect(navbar).toHaveClass('bg-transparent');
     
-    rerender(<NavBar items={mockItems} variant="solid" />);
+    rerender(<NavBar  variant="solid" />);
     navbar = screen.getByRole('navigation');
     expect(navbar).toHaveClass('bg-gray-900');
   });
 
   it('handles different positions correctly', () => {
-    const { rerender } = render(<NavBar items={mockItems} position="fixed" />);
+    const { rerender } = render(<NavBar  position="fixed" />);
     let navbar = screen.getByRole('navigation');
     expect(navbar).toHaveClass('fixed');
     
-    rerender(<NavBar items={mockItems} position="sticky" />);
+    rerender(<NavBar  position="sticky" />);
     navbar = screen.getByRole('navigation');
     expect(navbar).toHaveClass('sticky');
   });

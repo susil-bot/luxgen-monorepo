@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { LoginForm, LoginFormData, SnackbarProvider, useSnackbar } from '@luxgen/ui';
+import { LoginForm, LoginFormData, SnackbarProvider, useSnackbar, authenticateUser } from '@luxgen/ui';
 import { PageWrapper } from '@luxgen/ui';
 
 const LoginPageContent: React.FC = () => {
@@ -15,45 +15,33 @@ const LoginPageContent: React.FC = () => {
     try {
       // Get current hostname to determine tenant
       const hostname = window.location.hostname;
-      const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-      const apiUrl = isLocalhost ? `http://${hostname}:4000/api/auth/login` : '/api/auth/login';
+      let tenantId = 'demo'; // default tenant
+      
+      if (hostname.includes('ideavibes')) {
+        tenantId = 'ideavibes';
+      } else if (hostname.includes('acme-corp')) {
+        tenantId = 'acme-corp';
+      }
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-        }),
+      console.log('🔐 Attempting login for tenant:', tenantId);
+
+      // Use the userService for authentication
+      const user = await authenticateUser(tenantId, {
+        email: data.email,
+        password: data.password,
       });
 
-      const responseData = await response.json();
-
-      if (response.ok) {
-        // Store token and user data
-        localStorage.setItem('authToken', responseData.data.token);
-        localStorage.setItem('user', JSON.stringify(responseData.data.user));
-
-        showSuccess('Login successful! Redirecting...');
-
+      if (user) {
+        showSuccess(`Login successful! Welcome ${user.name}`);
+        
         // Redirect after a short delay
         setTimeout(() => {
           router.push('/dashboard');
         }, 1500);
-      } else {
-        // Handle validation errors
-        if (responseData.errors) {
-          const errorMessages = Object.values(responseData.errors).join(', ');
-          showError(errorMessages);
-        } else {
-          showError(responseData.message || 'Login failed. Please check your credentials.');
-        }
       }
     } catch (error) {
       console.error('Login error:', error);
-      showError('Network error. Please check your connection and try again.');
+      showError('Login failed. Please check your credentials and try again.');
     } finally {
       setLoading(false);
     }

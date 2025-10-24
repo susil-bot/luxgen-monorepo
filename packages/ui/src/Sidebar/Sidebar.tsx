@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { withSSR } from '../ssr';
 import { defaultTheme, TenantTheme } from '../theme';
-import { getTenantLogo } from '../tenant-config';
-import { useTenant } from '../TenantProvider';
+import { useGlobalContext } from '../context/GlobalContext';
+import { useTheme } from '../context/ThemeContext';
+import { useUser } from '../context/UserContext';
 
 export interface SidebarItem {
   id: string;
@@ -76,8 +77,13 @@ const SidebarComponent: React.FC<SidebarProps> = ({
   const [activeItem, setActiveItem] = useState<string>('');
 
   // Get tenant-specific logo from runtime tenant detection
-  const { tenantConfig } = useTenant();
-  const tenantLogo = logo || tenantConfig.logo;
+  const { tenantConfig } = useGlobalContext();
+  const { theme } = useTheme();
+  const { user: dynamicUser, logout: userLogout } = useUser();
+  const tenantLogo = logo || tenantConfig.branding.logo;
+  
+  // Use dynamic user data if available, fallback to prop
+  const currentUser = dynamicUser || user;
 
   // Initialize expanded sections
   useEffect(() => {
@@ -204,7 +210,7 @@ const SidebarComponent: React.FC<SidebarProps> = ({
                     className="h-8 w-8"
                   />
                 ) : null}
-                <span>{tenantLogo.text}</span>
+                <span style={{ color: theme.colors.primary }}>{tenantLogo.text}</span>
               </a>
             )}
             
@@ -277,27 +283,32 @@ const SidebarComponent: React.FC<SidebarProps> = ({
         </nav>
 
         {/* User Section */}
-        {showUserSection && user && !isCollapsed && (
+        {showUserSection && currentUser && !isCollapsed && (
           <div className="border-t border-gray-200 p-4">
             <div className="flex items-center space-x-3">
-              {user.avatar ? (
+              {currentUser.avatar ? (
                 <img
-                  src={user.avatar}
-                  alt={user.name}
+                  src={currentUser.avatar}
+                  alt={currentUser.name}
                   className="h-8 w-8 rounded-full"
                 />
               ) : (
                 <div className="h-8 w-8 bg-green-500 rounded-full flex items-center justify-center text-white font-medium">
-                  {user.name.charAt(0).toUpperCase()}
+                  {currentUser.name.charAt(0).toUpperCase()}
                 </div>
               )}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">
-                  {user.name}
+                  {currentUser.name}
                 </p>
                 <p className="text-xs text-gray-500 truncate">
-                  {user.role}
+                  {currentUser.role}
                 </p>
+                {dynamicUser && dynamicUser.tenant && (
+                  <p className="text-xs text-gray-400 truncate">
+                    {dynamicUser.tenant.name}
+                  </p>
+                )}
               </div>
               <div className="relative">
                 <button

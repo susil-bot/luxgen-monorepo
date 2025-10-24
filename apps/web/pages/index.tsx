@@ -1,6 +1,7 @@
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
+import { useGlobalContext } from '@luxgen/ui';
 import { Header } from '../components/layout/Header';
 import { Footer } from '../components/layout/Footer';
 
@@ -10,12 +11,21 @@ interface HomeProps {
 
 export default function Home({ tenant }: HomeProps) {
   const router = useRouter();
+  const { isInitialized, currentTenant } = useGlobalContext();
 
   useEffect(() => {
-    if (tenant) {
+    if (isInitialized && currentTenant && currentTenant !== 'demo') {
       router.push('/dashboard');
     }
-  }, [tenant, router]);
+  }, [isInitialized, currentTenant, router]);
+
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -29,7 +39,10 @@ export default function Home({ tenant }: HomeProps) {
             Your multi-tenant learning management system
           </p>
           <div className="space-x-4">
-            <button className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">
+            <button 
+              onClick={() => router.push('/dashboard')}
+              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
+            >
               Get Started
             </button>
             <button className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50">

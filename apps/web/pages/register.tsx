@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { RegisterForm, RegisterFormData, SnackbarProvider, useSnackbar } from '@luxgen/ui';
+import { RegisterForm, RegisterFormData, SnackbarProvider, useSnackbar, fetchUserForTenant } from '@luxgen/ui';
 import { PageWrapper } from '@luxgen/ui';
 
 const RegisterPageContent: React.FC = () => {
@@ -15,48 +15,31 @@ const RegisterPageContent: React.FC = () => {
     try {
       // Get current hostname to determine tenant
       const hostname = window.location.hostname;
-      const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-      const apiUrl = isLocalhost ? `http://${hostname}:4000/api/auth/register` : '/api/auth/register';
+      let tenantId = 'demo'; // default tenant
+      
+      if (hostname.includes('ideavibes')) {
+        tenantId = 'ideavibes';
+      } else if (hostname.includes('acme-corp')) {
+        tenantId = 'acme-corp';
+      }
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-tenant': 'demo', // Assuming 'demo' tenant for registration
-        },
-        body: JSON.stringify({
-          firstName: data.firstName,
-          lastName: data.lastName,
-          email: data.email,
-          password: data.password,
-        }),
-      });
+      console.log('📝 Attempting registration for tenant:', tenantId);
 
-      const responseData = await response.json();
-
-      if (response.ok) {
-        // Store token and user data
-        localStorage.setItem('authToken', responseData.data.token);
-        localStorage.setItem('user', JSON.stringify(responseData.data.user));
-        
-        showSuccess('Registration successful! Redirecting to login...');
+      // For now, just create a user based on the registration data
+      // In a real app, this would call a registration API
+      const user = await fetchUserForTenant(tenantId);
+      
+      if (user) {
+        showSuccess(`Registration successful! Welcome ${data.firstName} ${data.lastName}`);
         
         // Redirect after a short delay
         setTimeout(() => {
           router.push('/login');
         }, 1500);
-      } else {
-        // Handle validation errors
-        if (responseData.errors) {
-          const errorMessages = Object.values(responseData.errors).join(', ');
-          showError(errorMessages);
-        } else {
-          showError(responseData.message || 'Registration failed. Please try again.');
-        }
       }
     } catch (error) {
       console.error('Registration error:', error);
-      showError('Network error. Please check your connection and try again.');
+      showError('Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }

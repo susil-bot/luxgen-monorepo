@@ -111,10 +111,12 @@ export const tenantRoutingMiddleware = async (
     
     // If still no tenant found, return 404
     if (!tenant) {
-      // Only allow health checks and specific API routes without tenant context
+      // Only allow health checks, GraphQL, and specific API routes without tenant context
       if (req.path === '/health' || 
           req.path === '/api/health' ||
-          req.path === '/api/status') {
+          req.path === '/api/status' ||
+          req.path === '/graphql' ||
+          req.path.startsWith('/api/tenant-config/')) {
         return next();
       }
       

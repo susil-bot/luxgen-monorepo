@@ -1,5 +1,5 @@
 import { Context } from '../context';
-import { Group, GroupMember, IGroup, IGroupMember } from '@luxgen/db';
+import { Group, GroupMember, IGroup, IGroupMember, Tenant } from '@luxgen/db';
 import { Types } from 'mongoose';
 
 export class GroupService {
@@ -22,7 +22,29 @@ export class GroupService {
       throw new Error('Tenant not found');
     }
 
-    let query: any = { tenant: tenant.id };
+    // Find tenant by subdomain or use default
+    let tenantId: string | null = null;
+    
+    if (tenant && tenant !== 'demo') {
+      const tenantDoc = await Tenant.findOne({ subdomain: tenant });
+      if (tenantDoc) {
+        tenantId = tenantDoc._id.toString();
+      }
+    } else {
+      // Default to demo tenant
+      const demoTenant = await Tenant.findOne({ subdomain: 'demo' });
+      if (demoTenant) {
+        tenantId = demoTenant._id.toString();
+      }
+    }
+    
+    let query: any = { isActive: true };
+    if (tenantId) {
+      query.tenant = tenantId;
+    }
+    
+    console.log('🔍 GroupService query:', query);
+    console.log('🔍 Tenant ID:', tenantId);
 
     // Apply filters
     if (args.search) {

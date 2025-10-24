@@ -3,4 +3,4 @@ export { CarouselProps, CarouselItem } from './Carousel';
 export { fetchCarouselData, fetchCarouselSSR } from './fetcher';
 export { carouselFixtures } from './fixture';
 export { carouselStyles } from './styles';
-export { carouseUlTranslations } from './translations';
+export { CarouselTranslations } from './translations';

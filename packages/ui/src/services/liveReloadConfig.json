@@ -1,0 +1,17 @@
+{
+  "socket_port": 3001,
+  "server_port": 3002,
+  "enabled": true,
+  "watch_paths": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.js",
+    "src/**/*.jsx"
+  ],
+  "ignore_paths": [
+    "node_modules/**",
+    "dist/**",
+    "build/**",
+    "*.log"
+  ]
+}

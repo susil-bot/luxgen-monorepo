@@ -44,7 +44,7 @@ const GroupMembersPageContent: React.FC = () => {
     try {
       const hostname = window.location.hostname;
       const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-      const apiUrl = isLocalhost ? `http://${hostname}:4000/graphql` : '/graphql';
+      const apiUrl = isLocalhost ? `http://localhost:4000/graphql` : '/graphql';
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -90,7 +90,7 @@ const GroupMembersPageContent: React.FC = () => {
       setLoading(true);
       const hostname = window.location.hostname;
       const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-      const apiUrl = isLocalhost ? `http://${hostname}:4000/graphql` : '/graphql';
+      const apiUrl = isLocalhost ? `http://localhost:4000/graphql` : '/graphql';
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -153,7 +153,7 @@ const GroupMembersPageContent: React.FC = () => {
     try {
       const hostname = window.location.hostname;
       const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-      const apiUrl = isLocalhost ? `http://${hostname}:4000/graphql` : '/graphql';
+      const apiUrl = isLocalhost ? `http://localhost:4000/graphql` : '/graphql';
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -202,7 +202,7 @@ const GroupMembersPageContent: React.FC = () => {
     try {
       const hostname = window.location.hostname;
       const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-      const apiUrl = isLocalhost ? `http://${hostname}:4000/graphql` : '/graphql';
+      const apiUrl = isLocalhost ? `http://localhost:4000/graphql` : '/graphql';
 
       const response = await fetch(apiUrl, {
         method: 'POST',

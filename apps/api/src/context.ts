@@ -9,10 +9,24 @@ export interface GraphQLContext {
 }
 
 export const context = ({ req, res }: { req: Request; res: Response }): GraphQLContext => {
+  // For GraphQL requests, try to get tenant from headers or default to 'demo'
+  let tenant = req.tenant;
+  
+  if (!tenant) {
+    // Check for tenant in headers
+    const tenantHeader = req.get('x-tenant');
+    if (tenantHeader) {
+      tenant = tenantHeader;
+    } else {
+      // Default to demo tenant for GraphQL requests
+      tenant = 'demo';
+    }
+  }
+  
   return {
     req,
     res,
     user: req.user,
-    tenant: req.tenant,
+    tenant,
   };
 };

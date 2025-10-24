@@ -1,27 +1,72 @@
-# Sidebar Component
+---
+title: Sidebar
+---
 
-A comprehensive, responsive sidebar component with sub-menu support, optimized for performance with separate components for sub-menu items.
+A collapsible sidebar navigation component that provides hierarchical navigation with tenant-aware branding. The Sidebar supports multiple sections, expandable items, and responsive behavior.
+
+## Purpose
+
+To provide a consistent navigation experience with hierarchical menu structure, tenant-specific branding, and responsive collapsible behavior.
 
 ## Features
 
-- **Responsive Design**: Mobile-first approach with collapsible sidebar
-- **Sub-menu Support**: Nested navigation with expandable sections
-- **Performance Optimized**: Separate components for sub-menu items
-- **Tenant Theming**: Supports custom tenant colors and branding
-- **User Management**: User section with profile, settings, and logout actions
-- **Accessibility**: Full keyboard navigation and screen reader support
-- **Multiple Variants**: Default, compact, and minimal variants
-- **Flexible Positioning**: Fixed, sticky, or static positioning options
-- **Context Management**: SidebarProvider for global state management
+- **Hierarchical Navigation**: Support for nested menu items and sections
+- **Collapsible Design**: Can be collapsed to save space
+- **Tenant-Aware Branding**: Displays tenant logo and applies theme colors
+- **Responsive Behavior**: Adapts to different screen sizes
+- **User Section**: Optional user information display
+- **Active State Management**: Highlights current page/route
 
-## Usage
+## Props
+
+| Property                    | Type                    | Default     | Description                                                                                                                        |
+| --------------------------- | ----------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| sections                   | SidebarSection[]        | -           | Required array of sidebar sections                                                                                                |
+| user                       | UserMenu                | -           | User information for user section                                                                                                 |
+| onUserAction               | Function                | -           | Callback for user actions (profile, settings, logout)                                                                             |
+| logo                       | Object                  | -           | Logo configuration (src, alt, text, href)                                                                                         |
+| className                  | String                  | ''          | Additional CSS classes                                                                                                             |
+| variant                    | String                  | 'default'   | Sidebar variant ('default', 'compact', 'minimal')                                                                                |
+| position                   | String                  | 'static'    | Sidebar position ('fixed', 'absolute', 'static')                                                                                 |
+| width                      | String                  | 'normal'    | Sidebar width ('normal', 'wide', 'narrow')                                                                                        |
+| collapsible                | Boolean                 | true        | Allow sidebar to be collapsed                                                                                                     |
+| defaultCollapsed           | Boolean                 | false       | Start with sidebar collapsed                                                                                                       |
+| showUserSection            | Boolean                 | true        | Show user section at bottom                                                                                                        |
+| showLogo                   | Boolean                 | true        | Show logo at top                                                                                                                   |
+| responsive                 | Boolean                 | true        | Enable responsive behavior                                                                                                         |
+| mobileBreakpoint           | Number                  | 640         | Mobile breakpoint in pixels                                                                                                        |
+| tabletBreakpoint           | Number                  | 768         | Tablet breakpoint in pixels                                                                                                       |
+| desktopBreakpoint          | Number                  | 1024        | Desktop breakpoint in pixels                                                                                                      |
+
+## Component Usage
 
 ### Basic Usage
 
-```tsx
-import { Sidebar, SidebarSection } from '@luxgen/ui';
+```jsx
+import { Sidebar } from '@luxgen/ui';
 
-const sections: SidebarSection[] = [
+const sections = [
+  {
+    id: 'main',
+    title: 'Main Navigation',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
+      { id: 'users', label: 'Users', href: '/users' }
+    ]
+  }
+];
+
+<Sidebar
+  sections={sections}
+  user={user}
+  onUserAction={handleUserAction}
+/>
+```
+
+### With Nested Items
+
+```jsx
+const sections = [
   {
     id: 'main',
     title: 'Main Navigation',
@@ -30,55 +75,448 @@ const sections: SidebarSection[] = [
         id: 'dashboard',
         label: 'Dashboard',
         href: '/dashboard',
-        icon: <DashboardIcon />,
+        icon: <DashboardIcon />
       },
       {
-        id: 'courses',
-        label: 'Courses',
-        href: '/courses',
-        icon: <CoursesIcon />,
+        id: 'users',
+        label: 'Users',
+        href: '/users',
+        icon: <UsersIcon />,
         children: [
-          {
-            id: 'all-courses',
-            label: 'All Courses',
-            href: '/courses/all',
-          },
-          {
-            id: 'my-courses',
-            label: 'My Courses',
-            href: '/courses/my',
-          },
-        ],
-      },
-    ],
-  },
+          { id: 'user-list', label: 'User List', href: '/users/list' },
+          { id: 'user-roles', label: 'User Roles', href: '/users/roles' }
+        ]
+      }
+    ]
+  }
 ];
 
 <Sidebar
   sections={sections}
-  logo={{
-    text: 'LuxGen',
-    href: '/',
-  }}
+  user={user}
+  onUserAction={handleUserAction}
+/>
+```
+
+### With Multiple Sections
+
+```jsx
+const sections = [
+  {
+    id: 'main',
+    title: 'Main Navigation',
+    items: [
+      { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
+      { id: 'users', label: 'Users', href: '/users' }
+    ]
+  },
+  {
+    id: 'settings',
+    title: 'Settings',
+    items: [
+      { id: 'profile', label: 'Profile', href: '/profile' },
+      { id: 'preferences', label: 'Preferences', href: '/preferences' }
+    ]
+  }
+];
+
+<Sidebar
+  sections={sections}
+  user={user}
+  onUserAction={handleUserAction}
+/>
+```
+
+## SidebarSection Interface
+
+```typescript
+interface SidebarSection {
+  id: string;                    // Unique section identifier
+  title?: string;               // Optional section title
+  items: SidebarItem[];         // Array of sidebar items
+  collapsible?: boolean;        // Allow section to be collapsed
+  defaultCollapsed?: boolean;    // Start with section collapsed
+}
+```
+
+## SidebarItem Interface
+
+```typescript
+interface SidebarItem {
+  id: string;                    // Unique item identifier
+  label: string;                 // Display text
+  href?: string;                 // Link URL
+  icon?: React.ReactNode;        // Optional icon
+  badge?: string | number;       // Optional badge
+  children?: SidebarItem[];      // Nested items
+  external?: boolean;            // External link
+  disabled?: boolean;            // Disabled state
+  active?: boolean;              // Active state
+  onClick?: () => void;         // Click handler
+}
+```
+
+## Styling Variants
+
+### Default Variant
+
+```jsx
+<Sidebar variant="default" />
+```
+
+- Standard width (256px)
+- White background
+- Right border
+- Standard spacing
+
+### Compact Variant
+
+```jsx
+<Sidebar variant="compact" />
+```
+
+- Narrower width (192px)
+- Smaller text and icons
+- Reduced spacing
+- More items visible
+
+### Minimal Variant
+
+```jsx
+<Sidebar variant="minimal" />
+```
+
+- Transparent background
+- No borders
+- Minimal styling
+- Clean appearance
+
+## Width Options
+
+### Normal Width
+
+```jsx
+<Sidebar width="normal" />
+```
+
+- 256px width when expanded
+- 64px width when collapsed
+
+### Wide Width
+
+```jsx
+<Sidebar width="wide" />
+```
+
+- 320px width when expanded
+- 64px width when collapsed
+
+### Narrow Width
+
+```jsx
+<Sidebar width="narrow" />
+```
+
+- 192px width when expanded
+- 64px width when collapsed
+
+## Position Options
+
+### Fixed Position
+
+```jsx
+<Sidebar position="fixed" />
+```
+
+- Fixed to viewport
+- Overlays content
+- Requires margin-left on content
+
+### Absolute Position
+
+```jsx
+<Sidebar position="absolute" />
+```
+
+- Positioned relative to parent
+- Overlays content
+- Use within positioned container
+
+### Static Position
+
+```jsx
+<Sidebar position="static" />
+```
+
+- Normal document flow
+- Part of layout
+- Recommended for most use cases
+
+## Collapsible Behavior
+
+### Collapsible Sidebar
+
+```jsx
+<Sidebar
   collapsible={true}
   defaultCollapsed={false}
 />
 ```
 
-### With User Section
+- Toggle button in header
+- Smooth collapse animation
+- Icon-only mode when collapsed
 
-```tsx
-const user = {
-  name: 'John Doe',
-  email: 'john@example.com',
-  role: 'Admin',
-  avatar: '/path/to/avatar.jpg',
-};
+### Non-Collapsible Sidebar
 
+```jsx
 <Sidebar
-  sections={sections}
-  user={user}
-  onUserAction={(action) => {
+  collapsible={false}
+/>
+```
+
+- Always expanded
+- No toggle button
+- Consistent width
+
+## User Section
+
+### With User Information
+
+```jsx
+<Sidebar
+  showUserSection={true}
+  user={{
+    name: 'John Doe',
+    email: 'john@example.com',
+    role: 'Admin',
+    avatar: '/avatar.jpg'
+  }}
+  onUserAction={handleUserAction}
+/>
+```
+
+### User Actions
+
+The `onUserAction` callback receives the following actions:
+
+- `'profile'`: User clicked on profile
+- `'settings'`: User clicked on settings
+- `'logout'`: User clicked on logout
+
+## Logo Section
+
+### With Logo
+
+```jsx
+<Sidebar
+  showLogo={true}
+  logo={{
+    src: '/logo.png',
+    alt: 'Company Logo',
+    text: 'My Company',
+    href: '/'
+  }}
+/>
+```
+
+### Logo Behavior
+
+- **Expanded**: Shows logo image and text
+- **Collapsed**: Shows only logo image or first letter
+- **Clickable**: Links to home page
+- **Theme-aware**: Uses tenant colors
+
+## Responsive Design
+
+### Desktop Behavior (≥1024px)
+
+- Full sidebar visible
+- All features available
+- Collapsible if enabled
+
+### Tablet Behavior (768px-1023px)
+
+- Sidebar may be hidden
+- Touch-friendly interface
+- Simplified navigation
+
+### Mobile Behavior (<768px)
+
+- Overlay sidebar
+- Touch gestures
+- Simplified interface
+
+## Active State Management
+
+### Automatic Active Detection
+
+The sidebar automatically detects the active item based on the current URL:
+
+```jsx
+// Current URL: /users/list
+// Active item: { id: 'user-list', href: '/users/list' }
+```
+
+### Manual Active State
+
+```jsx
+const sections = [
+  {
+    id: 'main',
+    items: [
+      {
+        id: 'dashboard',
+        label: 'Dashboard',
+        href: '/dashboard',
+        active: true  // Manually set as active
+      }
+    ]
+  }
+];
+```
+
+## Icons and Badges
+
+### With Icons
+
+```jsx
+import { DashboardIcon, UsersIcon } from '@luxgen/ui';
+
+const sections = [
+  {
+    id: 'main',
+    items: [
+      {
+        id: 'dashboard',
+        label: 'Dashboard',
+        href: '/dashboard',
+        icon: <DashboardIcon />
+      },
+      {
+        id: 'users',
+        label: 'Users',
+        href: '/users',
+        icon: <UsersIcon />
+      }
+    ]
+  }
+];
+```
+
+### With Badges
+
+```jsx
+const sections = [
+  {
+    id: 'main',
+    items: [
+      {
+        id: 'notifications',
+        label: 'Notifications',
+        href: '/notifications',
+        badge: 5
+      },
+      {
+        id: 'messages',
+        label: 'Messages',
+        href: '/messages',
+        badge: 'New'
+      }
+    ]
+  }
+];
+```
+
+## External Links
+
+### External Link Handling
+
+```jsx
+const sections = [
+  {
+    id: 'main',
+    items: [
+      {
+        id: 'external-docs',
+        label: 'Documentation',
+        href: 'https://docs.example.com',
+        external: true
+      }
+    ]
+  }
+];
+```
+
+External links open in a new tab automatically.
+
+## Disabled Items
+
+### Disabled State
+
+```jsx
+const sections = [
+  {
+    id: 'main',
+    items: [
+      {
+        id: 'feature',
+        label: 'Coming Soon',
+        href: '/feature',
+        disabled: true
+      }
+    ]
+  }
+];
+```
+
+Disabled items are not clickable and have reduced opacity.
+
+## Click Handlers
+
+### Custom Click Handlers
+
+```jsx
+const sections = [
+  {
+    id: 'main',
+    items: [
+      {
+        id: 'custom-action',
+        label: 'Custom Action',
+        onClick: () => {
+          console.log('Custom action clicked');
+          // Handle custom logic
+        }
+      }
+    ]
+  }
+];
+```
+
+## Examples
+
+### Complete Example
+
+```jsx
+import React from 'react';
+import { Sidebar } from '@luxgen/ui';
+import { 
+  DashboardIcon, 
+  UsersIcon, 
+  SettingsIcon,
+  LogoutIcon 
+} from '@luxgen/ui';
+
+const MySidebar = () => {
+  const user = {
+    name: 'John Doe',
+    email: 'john@example.com',
+    role: 'Admin',
+    avatar: '/avatar.jpg'
+  };
+
+  const handleUserAction = (action) => {
     switch (action) {
       case 'profile':
         router.push('/profile');
@@ -87,305 +525,95 @@ const user = {
         router.push('/settings');
         break;
       case 'logout':
-        handleLogout();
+        localStorage.removeItem('authToken');
+        router.push('/login');
         break;
     }
+  };
+
+  const sections = [
+    {
+      id: 'main',
+      title: 'Main Navigation',
+      items: [
+        {
+          id: 'dashboard',
+          label: 'Dashboard',
+          href: '/dashboard',
+          icon: <DashboardIcon />
+        },
+        {
+          id: 'users',
+          label: 'Users',
+          href: '/users',
+          icon: <UsersIcon />,
+          children: [
+            { id: 'user-list', label: 'User List', href: '/users/list' },
+            { id: 'user-roles', label: 'User Roles', href: '/users/roles' }
+          ]
+        }
+      ]
+    },
+    {
+      id: 'settings',
+      title: 'Settings',
+      items: [
+        {
+          id: 'profile',
+          label: 'Profile',
+          href: '/profile',
+          icon: <SettingsIcon />
+        }
+      ]
+    }
+  ];
+
+  return (
+    <Sidebar
+      sections={sections}
+      user={user}
+      onUserAction={handleUserAction}
+      variant="default"
+      position="fixed"
+      width="normal"
+      collapsible={true}
+      defaultCollapsed={false}
+      showUserSection={true}
+      showLogo={true}
+    />
+  );
+};
+
+export default MySidebar;
+```
+
+### With Custom Styling
+
+```jsx
+<Sidebar
+  className="custom-sidebar"
+  sections={sections}
+  user={user}
+  onUserAction={handleUserAction}
+  style={{
+    backgroundColor: 'var(--color-surface)',
+    borderRight: '1px solid var(--color-border)'
   }}
 />
 ```
 
-### With Context Provider
+## Troubleshooting
 
-```tsx
-import { SidebarProvider, useSidebar } from '@luxgen/ui';
+### Common Issues
 
-function App() {
-  return (
-    <SidebarProvider
-      defaultCollapsed={false}
-      onItemClick={(item) => console.log('Item clicked:', item)}
-      onUserAction={(action) => console.log('User action:', action)}
-    >
-      <Sidebar sections={sections} />
-    </SidebarProvider>
-  );
-}
-```
+1. **Items not clickable**: Check `href` or `onClick` props
+2. **Active state not working**: Verify URL matching logic
+3. **Collapse not working**: Check `collapsible` prop
+4. **Icons not showing**: Verify icon components are imported
 
-### Different Variants
+### Debug Steps
 
-```tsx
-// Compact sidebar
-<Sidebar
-  variant="compact"
-  sections={sections}
-  width="narrow"
-/>
-
-// Minimal sidebar
-<Sidebar
-  variant="minimal"
-  sections={sections}
-  width="narrow"
-/>
-
-// Default sidebar
-<Sidebar
-  variant="default"
-  sections={sections}
-  width="normal"
-/>
-```
-
-## Components
-
-### Sidebar
-
-Main sidebar component with full functionality.
-
-#### Props
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `sections` | `SidebarSection[]` | `[]` | Array of sidebar sections |
-| `logo` | `LogoConfig` | `{text: 'LuxGen', href: '/'}` | Logo configuration |
-| `user` | `UserInfo \| null` | `null` | User information |
-| `onUserAction` | `(action: string) => void` | - | User action handler |
-| `className` | `string` | `''` | Additional CSS classes |
-| `variant` | `'default' \| 'compact' \| 'minimal'` | `'default'` | Visual variant |
-| `position` | `'fixed' \| 'sticky' \| 'static'` | `'fixed'` | Positioning type |
-| `width` | `'narrow' \| 'normal' \| 'wide'` | `'normal'` | Sidebar width |
-| `showUserSection` | `boolean` | `true` | Show user section |
-| `showLogo` | `boolean` | `true` | Show logo section |
-| `collapsible` | `boolean` | `true` | Allow collapsing |
-| `defaultCollapsed` | `boolean` | `false` | Start collapsed |
-| `onToggle` | `(collapsed: boolean) => void` | - | Toggle handler |
-| `onItemClick` | `(item: SidebarItem) => void` | - | Item click handler |
-
-### SidebarItem
-
-Individual sidebar item component with sub-menu support.
-
-#### Props
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `item` | `SidebarItem` | Item configuration |
-| `isActive` | `boolean` | Active state |
-| `isCollapsed` | `boolean` | Collapsed state |
-| `onClick` | `() => void` | Click handler |
-| `variant` | `string` | Visual variant |
-| `depth` | `number` | Nesting depth |
-| `className` | `string` | Additional CSS classes |
-
-### SidebarSection
-
-Sidebar section component for organizing items.
-
-#### Props
-
-| Prop | Type | Description |
-|------|------|-------------|
-| `section` | `SidebarSection` | Section configuration |
-| `isExpanded` | `boolean` | Expanded state |
-| `isCollapsed` | `boolean` | Collapsed state |
-| `onToggle` | `() => void` | Toggle handler |
-| `onItemClick` | `(item: SidebarItem) => void` | Item click handler |
-| `variant` | `string` | Visual variant |
-| `className` | `string` | Additional CSS classes |
-
-### SidebarProvider
-
-Context provider for sidebar state management.
-
-#### Props
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `children` | `ReactNode` | - | Child components |
-| `defaultCollapsed` | `boolean` | `false` | Start collapsed |
-| `onItemClick` | `(item: SidebarItem) => void` | - | Item click handler |
-| `onUserAction` | `(action: string) => void` | - | User action handler |
-| `onToggle` | `(collapsed: boolean) => void` | - | Toggle handler |
-
-## Data Types
-
-### SidebarItem
-
-```typescript
-interface SidebarItem {
-  id: string;
-  label: string;
-  href?: string;
-  icon?: React.ReactNode;
-  badge?: string | number;
-  children?: SidebarItem[];
-  external?: boolean;
-  disabled?: boolean;
-  active?: boolean;
-  onClick?: () => void;
-}
-```
-
-### SidebarSection
-
-```typescript
-interface SidebarSection {
-  id: string;
-  title?: string;
-  items: SidebarItem[];
-  collapsible?: boolean;
-  defaultCollapsed?: boolean;
-}
-```
-
-## Performance Optimization
-
-### Separate Components
-
-The sidebar uses separate components for sub-menu items to improve performance:
-
-- **SidebarItem**: Memoized component for individual items
-- **SidebarSection**: Memoized component for sections
-- **SidebarProvider**: Context-based state management
-
-### Memoization
-
-```tsx
-// SidebarItem is memoized to prevent unnecessary re-renders
-const SidebarItem = memo(SidebarItemComponent);
-
-// SidebarSection is memoized for section-level optimization
-const SidebarSection = memo(SidebarSectionComponent);
-```
-
-### Context Management
-
-```tsx
-// Use context for global sidebar state
-const { isCollapsed, toggleCollapsed, expandedSections } = useSidebar();
-```
-
-## Styling
-
-### Custom Styling
-
-```tsx
-<Sidebar
-  className="custom-sidebar border-r-2 border-green-500"
-  sections={sections}
-/>
-```
-
-### Tenant Theming
-
-```tsx
-const customTheme = {
-  colors: {
-    primary: '#10b981',
-    secondary: '#6b7280',
-  },
-};
-
-<Sidebar
-  tenantTheme={customTheme}
-  sections={sections}
-/>
-```
-
-## Accessibility
-
-- Full keyboard navigation support
-- Screen reader compatible
-- ARIA labels and roles
-- Focus management
-- High contrast support
-
-## Responsive Behavior
-
-- **Desktop**: Full sidebar with all features
-- **Tablet**: Collapsible sidebar with touch support
-- **Mobile**: Minimal sidebar with essential navigation
-
-## Examples
-
-### Dashboard Sidebar
-
-```tsx
-const dashboardSections: SidebarSection[] = [
-  {
-    id: 'main',
-    title: 'Main',
-    items: [
-      {
-        id: 'dashboard',
-        label: 'Dashboard',
-        href: '/dashboard',
-        icon: <DashboardIcon />,
-      },
-      {
-        id: 'analytics',
-        label: 'Analytics',
-        href: '/analytics',
-        icon: <AnalyticsIcon />,
-      },
-    ],
-  },
-  {
-    id: 'content',
-    title: 'Content',
-    items: [
-      {
-        id: 'courses',
-        label: 'Courses',
-        href: '/courses',
-        icon: <CoursesIcon />,
-        children: [
-          {
-            id: 'all-courses',
-            label: 'All Courses',
-            href: '/courses/all',
-          },
-          {
-            id: 'my-courses',
-            label: 'My Courses',
-            href: '/courses/my',
-          },
-        ],
-      },
-    ],
-  },
-];
-
-<Sidebar
-  sections={dashboardSections}
-  user={user}
-  onUserAction={handleUserAction}
-  collapsible={true}
-  variant="default"
-  width="normal"
-/>
-```
-
-### Compact Sidebar
-
-```tsx
-<Sidebar
-  sections={sections}
-  variant="compact"
-  width="narrow"
-  collapsible={true}
-  defaultCollapsed={true}
-/>
-```
-
-## Best Practices
-
-1. **Use separate components** for sub-menu items to improve performance
-2. **Memoize components** to prevent unnecessary re-renders
-3. **Use context** for global sidebar state management
-4. **Keep sections organized** with clear titles and logical grouping
-5. **Test accessibility** with keyboard navigation and screen readers
-6. **Optimize for mobile** with touch-friendly navigation
-7. **Use consistent icons** for better visual hierarchy
-8. **Limit nesting depth** to avoid complex navigation structures
+1. Check console for navigation logs
+2. Verify section and item structure
+3. Test click handlers
+4. Check responsive behavior

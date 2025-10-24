@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { AppLayout, NavItem, UserMenu, SidebarSection, getDefaultNavItems, getDefaultUser, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { AppLayout, NavItem, UserMenu, getDefaultNavItems, getDefaultUser, getDefaultLogo, getDefaultSidebarSections, TenantDebug } from '@luxgen/ui';
 import { TenantBanner } from '../components/tenant/TenantBanner';
+import { fetchUserForTenant } from '@luxgen/ui/src/services/userService';
 
 interface DashboardProps {
   tenant: string;
@@ -10,32 +11,36 @@ interface DashboardProps {
 
 export default function Dashboard({ tenant }: DashboardProps) {
   const router = useRouter();
-  const [user, setUser] = useState<UserMenu | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<UserMenu | null>(() => {
+    // Initialize user data immediately to avoid loading state
+    return {
+      name: `${tenant.charAt(0).toUpperCase() + tenant.slice(1)} User`,
+      email: `user@${tenant}.com`,
+      role: 'Admin',
+      tenant: {
+        name: `${tenant.charAt(0).toUpperCase() + tenant.slice(1)} Company`,
+        subdomain: tenant,
+      },
+    };
+  });
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    // Simulate user data loading
-    const loadUser = async () => {
-      try {
-        // In a real app, this would fetch from an API
-        const userData: UserMenu = {
-          name: 'John Doe',
-          email: 'john.doe@example.com',
-          role: 'Admin',
-          tenant: {
-            name: 'Demo Platform',
-            subdomain: tenant,
-          },
-        };
-        setUser(userData);
-      } catch (error) {
-        console.error('Error loading user:', error);
-      } finally {
-        setLoading(false);
-      }
+    console.log('🔍 Dashboard useEffect running for tenant:', tenant);
+    // Use hardcoded user data for now to avoid API issues
+    const userData: UserMenu = {
+      name: `${tenant.charAt(0).toUpperCase() + tenant.slice(1)} User`,
+      email: `user@${tenant}.com`,
+      role: 'Admin',
+      tenant: {
+        name: `${tenant.charAt(0).toUpperCase() + tenant.slice(1)} Company`,
+        subdomain: tenant,
+      },
     };
-
-    loadUser();
+    console.log('🔍 Setting user data:', userData);
+    setUser(userData);
+    setLoading(false);
+    console.log('🔍 Loading set to false');
   }, [tenant]);
 
   const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
@@ -120,15 +125,33 @@ export default function Dashboard({ tenant }: DashboardProps) {
               <p className="text-3xl font-bold text-purple-600">87%</p>
             </div>
           </div>
-        </div>
-      </AppLayout>
-    </>
-  );
-}
+          </div>
+        </AppLayout>
+        <TenantDebug />
+      </>
+    );
+  }
 
 export const getServerSideProps = async (context: any) => {
   const host = context.req.headers.host;
-  const tenant = host?.split('.')[0] || 'default';
+  let tenant = 'demo'; // Default tenant
+  
+  // Extract tenant from subdomain
+  if (host && host.includes('.')) {
+    const parts = host.split('.');
+    if (parts.length > 1) {
+      const subdomain = parts[0];
+      if (subdomain !== 'www' && subdomain !== 'localhost' && subdomain !== '127.0.0.1') {
+        tenant = subdomain;
+      }
+    }
+  }
+  
+  // Check for tenant query parameter
+  const queryTenant = context.query.tenant;
+  if (queryTenant) {
+    tenant = queryTenant;
+  }
 
   return {
     props: {

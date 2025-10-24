@@ -1,6 +1,9 @@
 export * from './connection';
 export * from './types';
 
+// Export tenant configurations
+export * from './tenant-config';
+
 // Export models and interfaces with explicit names
 export type { ITenant } from './tenant';
 export { Tenant } from './tenant';

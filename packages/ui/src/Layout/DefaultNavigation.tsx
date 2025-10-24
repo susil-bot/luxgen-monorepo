@@ -1,6 +1,7 @@
 import React from 'react';
-import { NavItem, SidebarSectionType, UserMenu } from '../index';
+import { NavItem, UserMenu } from '../index';
 import { MenuItem } from '../Menu';
+import { SidebarSection } from '../Sidebar/Sidebar';
 
 export const getDefaultNavItems = (): NavItem[] => [
   { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
@@ -140,7 +141,7 @@ export const getDefaultLogo = () => ({
   href: '/dashboard',
 });
 
-export const getDefaultSidebarSections = (): SidebarSectionType[] => [
+export const getDefaultSidebarSections = (): SidebarSection[] => [
   {
     id: 'navigation',
     title: 'Navigation',

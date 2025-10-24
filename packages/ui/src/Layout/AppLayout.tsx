@@ -1,10 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { withSSR } from '../ssr';
 import { defaultTheme, TenantTheme } from '../theme';
 import { NavBar, NavItem, UserMenu } from '../NavBar';
-import { Sidebar, SidebarSection } from '../Sidebar';
+import { Sidebar } from '../Sidebar/Sidebar';
+import type { SidebarSection } from '../Sidebar/Sidebar';
 import { MenuLayer, MenuItem } from '../Menu';
-import { TenantProvider } from '../TenantProvider';
+import { useGlobalContext } from '../context/GlobalContext';
+import { useTheme } from '../context/ThemeContext';
+// import { ErrorBoundary } from '../ErrorBoundary';
 
 export interface AppLayoutProps {
   tenantTheme?: TenantTheme;
@@ -73,6 +76,59 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   const [isDesktop, setIsDesktop] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(sidebarDefaultCollapsed);
   const [menuCollapsed, setMenuCollapsed] = useState(menuDefaultCollapsed);
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  
+  // Refs for analytics and performance tracking
+  const layoutRef = useRef<HTMLDivElement>(null);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Get tenant context for analytics
+  const { currentTenant, tenantConfig } = useGlobalContext();
+  const { theme } = useTheme();
+
+  // Analytics tracking functions
+  const trackLayoutEvent = useCallback((eventName: string, properties?: Record<string, any>) => {
+    if (typeof window !== 'undefined' && (window as any).gtag) {
+      (window as any).gtag('event', eventName, {
+        tenant: currentTenant,
+        ...properties,
+      });
+    }
+    console.log(`📊 Layout Event: ${eventName}`, { tenant: currentTenant, ...properties });
+  }, [currentTenant]);
+
+  const trackUserInteraction = useCallback((action: string, target: string) => {
+    trackLayoutEvent('user_interaction', {
+      action,
+      target,
+      timestamp: Date.now(),
+    });
+  }, [trackLayoutEvent]);
+
+  // Error handling
+  const handleError = useCallback((error: Error, errorInfo?: any) => {
+    console.error('AppLayout Error:', error, errorInfo);
+    setHasError(true);
+    trackLayoutEvent('layout_error', {
+      error: error.message,
+      stack: error.stack,
+    });
+  }, [trackLayoutEvent]);
+
+  // Performance tracking
+  const trackPerformance = useCallback(() => {
+    if (typeof window !== 'undefined' && window.performance) {
+      const perfData = window.performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+      if (perfData) {
+        trackLayoutEvent('layout_performance', {
+          loadTime: perfData.loadEventEnd - perfData.loadEventStart,
+          domContentLoaded: perfData.domContentLoadedEventEnd - perfData.domContentLoadedEventStart,
+          firstPaint: perfData.loadEventEnd - perfData.fetchStart,
+        });
+      }
+    }
+  }, [trackLayoutEvent]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -80,12 +136,19 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
       setIsMobile(width < mobileBreakpoint);
       setIsTablet(width >= mobileBreakpoint && width < tabletBreakpoint);
       setIsDesktop(width >= desktopBreakpoint);
+      
+      // Track responsive breakpoint changes
+      trackLayoutEvent('responsive_change', {
+        width,
+        breakpoint: width < mobileBreakpoint ? 'mobile' : 
+                   width < tabletBreakpoint ? 'tablet' : 'desktop',
+      });
     };
 
     handleResize();
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, [mobileBreakpoint, tabletBreakpoint, desktopBreakpoint]);
+  }, [mobileBreakpoint, tabletBreakpoint, desktopBreakpoint, trackLayoutEvent]);
 
   const getLayoutStyles = () => {
     if (isMobile) {
@@ -141,11 +204,90 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
 
   const handleMenuToggle = () => {
     setMenuCollapsed(!menuCollapsed);
+    trackUserInteraction('menu_toggle', 'menu');
   };
 
+  // Initialize layout
+  useEffect(() => {
+    const initializeLayout = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Track layout initialization
+        trackLayoutEvent('layout_initialized', {
+          tenant: currentTenant,
+          theme: theme.colors.primary,
+          responsive: responsive,
+        });
+
+        // Track performance after a short delay
+        setTimeout(trackPerformance, 1000);
+        
+        setIsLoading(false);
+      } catch (error) {
+        handleError(error as Error);
+      }
+    };
+
+    initializeLayout();
+  }, [currentTenant, theme.colors.primary, responsive, trackLayoutEvent, trackPerformance, handleError]);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      trackLayoutEvent('layout_unmounted');
+    };
+  }, [trackLayoutEvent]);
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: theme.colors.background }}>
+        <div className="text-center">
+          <div 
+            className="animate-spin rounded-full h-32 w-32 border-b-2 mx-auto mb-4"
+            style={{ borderColor: theme.colors.primary }}
+          ></div>
+          <p className="text-gray-600">Loading layout...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (hasError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: theme.colors.background }}>
+        <div className="text-center p-8">
+          <div className="mb-4">
+            <svg className="mx-auto h-12 w-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h2 className="text-lg font-semibold text-gray-900 mb-2">Layout Error</h2>
+          <p className="text-gray-600 mb-4">There was an error loading the layout. Please try refreshing the page.</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 rounded-md text-white transition-colors"
+            style={{ backgroundColor: theme.colors.primary }}
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <TenantProvider>
-      <div className={`flex h-screen bg-gray-50 ${className}`} {...props}>
+    <div 
+      ref={layoutRef}
+      className={`flex h-screen ${className}`} 
+      style={{ backgroundColor: theme.colors.background }}
+      {...props}
+    >
         {/* Sidebar - Always rendered */}
         {sidebarSections.length > 0 && (
           <Sidebar
@@ -182,23 +324,6 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
             className="shadow-sm"
           />
 
-          {/* Menu Layer */}
-          {menuItems.length > 0 && (
-            <MenuLayer
-              items={menuItems}
-              variant={menuVariant}
-              position={menuPosition}
-              collapsible={menuCollapsible}
-              defaultCollapsed={menuCollapsed}
-              onToggle={handleMenuToggle}
-              className={getMenuStyles()}
-              responsive={responsive}
-              mobileBreakpoint={mobileBreakpoint}
-              tabletBreakpoint={tabletBreakpoint}
-              desktopBreakpoint={desktopBreakpoint}
-            />
-          )}
-
           {/* Main Content - Dynamic children */}
           <main className={`flex-1 overflow-y-auto p-4 ${getMainContentStyles()}`} style={{ paddingTop: '80px' }}>
             {children}
@@ -213,8 +338,7 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
           />
         )}
       </div>
-    </TenantProvider>
-  );
-};
+    );
+  };
 
 export const AppLayout = withSSR(AppLayoutComponent);

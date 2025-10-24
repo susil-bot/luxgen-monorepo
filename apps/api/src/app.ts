@@ -28,6 +28,7 @@ import {
 import authRoutes from './routes/auth';
 import adminRoutes from './routes/admin';
 import tenantRoutes from './routes/tenant';
+import tenantConfigRoutes from './routes/tenantConfig';
 
 const app = express();
 
@@ -89,6 +90,7 @@ app.get('/health', (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/tenant', tenantRoutes);
+app.use('/api/tenant-config', tenantConfigRoutes);
 
 // Create Apollo Server
 const server = new ApolloServer({
@@ -110,6 +112,7 @@ const server = new ApolloServer({
 const startServer = async () => {
   await server.start();
   server.applyMiddleware({ app: app as any, path: '/graphql' });
+  console.log('✅ Apollo Server middleware applied to /graphql');
 };
 
 // Start the server

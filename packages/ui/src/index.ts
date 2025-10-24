@@ -23,6 +23,10 @@ export * from './InputWithLabel';
 export * from './LoginForm';
 export * from './RegisterForm';
 
+// Search and Navigation Components
+export * from './SearchBar';
+export * from './CountryLanguageDropdown';
+
 // Display Components
 export * from './Heading';
 export * from './Text';
@@ -47,10 +51,26 @@ export * from './GroupMemberList';
 export * from './NotFound';
 export * from './Assets';
 export * from './TenantDebug';
+export * from './ErrorBoundary';
+
+// Context Providers
+export * from './context/GlobalContext';
+export * from './context/ThemeContext';
+export * from './context/UserContext';
+
+// Services
+export * from './services/userService';
+
+// Tenant Configuration
+export { 
+  getTenantConfig,
+  getAvailableTenants,
+  getTenantAssets,
+  type TenantConfig,
+  type AvailableTenant
+} from './services/tenantService';
 
 // Shared Types and Utilities
 export * from './types';
 export * from './theme';
 export * from './ssr';
-export * from './TenantProvider';
-export * from './tenant-config';
