@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useGlobalContext } from './context/GlobalContext';
 import { useTheme } from './context/ThemeContext';
 import { useUser } from './context/UserContext';
@@ -7,14 +7,20 @@ export const TenantDebug: React.FC = () => {
   const { currentTenant, tenantConfig, isInitialized } = useGlobalContext();
   const { theme } = useTheme();
   const { user, isLoading: userLoading } = useUser();
+  const [cssPrimary, setCssPrimary] = useState<string>('N/A');
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+    if (typeof window !== 'undefined') {
+      const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--color-primary');
+      setCssPrimary(primaryColor || 'N/A');
+    }
+  }, []);
 
   if (!isInitialized) {
     return null;
   }
-
-  const cssPrimary = typeof window !== 'undefined' 
-    ? getComputedStyle(document.documentElement).getPropertyValue('--color-primary')
-    : 'N/A';
 
   return (
     <div className="fixed bottom-4 right-4 bg-black text-white p-4 rounded-lg shadow-lg z-50 text-sm max-w-xs">
@@ -27,9 +33,11 @@ export const TenantDebug: React.FC = () => {
       <div>Theme Primary: <span className="text-cyan-300">{tenantConfig.theme.colors.primary}</span></div>
       <div>Theme Background: <span className="text-orange-300">{tenantConfig.theme.colors.background}</span></div>
       <div>Active Theme: <span className="text-pink-300">{theme.colors.primary}</span></div>
-      <div className="mt-2 text-xs text-gray-400">
-        CSS Var: <span style={{ color: 'var(--color-primary)' }}>●</span> {cssPrimary}
-      </div>
+      {isClient && (
+        <div className="mt-2 text-xs text-gray-400">
+          CSS Var: <span style={{ color: 'var(--color-primary)' }}>●</span> {cssPrimary}
+        </div>
+      )}
       <div className="mt-1 text-xs text-gray-400">
         Applied: {theme.colors.primary === tenantConfig.theme.colors.primary ? '✅' : '❌'}
       </div>

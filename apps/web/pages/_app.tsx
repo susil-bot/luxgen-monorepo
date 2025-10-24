@@ -7,7 +7,7 @@ import '../styles/globals.css';
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <ApolloProvider client={client}>
-      <GlobalProvider>
+      <GlobalProvider initialTenant={pageProps.tenant}>
         <Component {...pageProps} />
       </GlobalProvider>
     </ApolloProvider>

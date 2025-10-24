@@ -15,11 +15,13 @@ const GlobalContext = createContext<GlobalContextType | undefined>(undefined);
 interface GlobalProviderProps {
   children: ReactNode;
   defaultTenant?: string;
+  initialTenant?: string;
 }
 
 export const GlobalProvider: React.FC<GlobalProviderProps> = ({ 
   children, 
-  defaultTenant = 'demo' 
+  defaultTenant = 'demo',
+  initialTenant
 }) => {
   // Create a stable fallback config
   const createFallbackConfig = (tenantId: string): TenantConfig => ({
@@ -83,9 +85,17 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({
     return detectedTenant;
   };
 
+  // Use initialTenant if provided, otherwise detect from URL
+  const getInitialTenant = (): string => {
+    if (initialTenant) {
+      return initialTenant;
+    }
+    return detectTenantFromUrl();
+  };
+
   // Initialize with detected tenant immediately (memoized to prevent re-detection)
-  const [currentTenant, setCurrentTenant] = useState<string>(() => detectTenantFromUrl());
-  const [tenantConfig, setTenantConfig] = useState<TenantConfig>(() => createFallbackConfig(detectTenantFromUrl()));
+  const [currentTenant, setCurrentTenant] = useState<string>(() => getInitialTenant());
+  const [tenantConfig, setTenantConfig] = useState<TenantConfig>(() => createFallbackConfig(getInitialTenant()));
   const [isInitialized] = useState(true);
 
   const setTenant = (tenantId: string) => {
