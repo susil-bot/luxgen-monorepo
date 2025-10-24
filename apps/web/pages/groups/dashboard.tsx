@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { SnackbarProvider, useSnackbar } from '@luxgen/ui';
-import { PageWrapper } from '@luxgen/ui';
 
 interface GroupDashboardData {
   id: string;
@@ -26,13 +25,7 @@ interface GroupDashboardData {
 const GroupDashboardPageContent: React.FC = () => {
   const router = useRouter();
   const { showSuccess, showError, showInfo } = useSnackbar();
-  const [groups, setGroups] = useState<GroupDashboardData[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Simulate loading with sample data
-    setTimeout(() => {
-      const sampleGroups: GroupDashboardData[] = [
+  const [groups, setGroups] = useState<GroupDashboardData[]>([
         {
           id: '1',
           name: 'Development Team',
@@ -90,12 +83,7 @@ const GroupDashboardPageContent: React.FC = () => {
           tasks: 5,
           comments: 3,
         },
-      ];
-      
-      setGroups(sampleGroups);
-      setLoading(false);
-    }, 1000);
-  }, []);
+      ]);
 
   const handleEditGroup = (groupId: string) => {
     router.push(`/groups/${groupId}/edit`);
@@ -139,13 +127,6 @@ const GroupDashboardPageContent: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500"></div>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -154,8 +135,7 @@ const GroupDashboardPageContent: React.FC = () => {
         <meta name="description" content="Group management dashboard for admins and super admins" />
       </Head>
 
-      <PageWrapper>
-        <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
             <div className="mb-8">
@@ -466,7 +446,6 @@ const GroupDashboardPageContent: React.FC = () => {
             </div>
           </div>
         </div>
-      </PageWrapper>
     </>
   );
 };
