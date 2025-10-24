@@ -18,6 +18,7 @@ export * from './InputWithLabel';
 export * from './LoginForm';
 export * from './RegisterForm';
 export * from './Snackbar';
+export * from './NavBar';
 
 // Display Components
 export * from './Heading';
