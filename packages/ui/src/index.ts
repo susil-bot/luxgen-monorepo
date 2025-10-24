@@ -21,6 +21,7 @@ export * from './Switch';
 
 // Display Components
 export * from './Chip';
+export * from './UserManagement';
 export * from './Form';
 export * from './InputWithLabel';
 export * from './LoginForm';
