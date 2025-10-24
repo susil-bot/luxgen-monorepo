@@ -1,6 +1,11 @@
 export { Sidebar } from './Sidebar';
-export { SidebarProps } from './Sidebar';
-export { fetchSidebarData, fetchSidebarSSR } from './fetcher';
-export { sidebarFixtures } from './fixture';
-export { sidebarStyles } from './styles';
-export { SidebarTranslations } from './translations';
+export { SidebarItem } from './SidebarItem';
+export { SidebarSection } from './SidebarSection';
+export { SidebarProvider, useSidebar } from './SidebarProvider';
+export type { 
+  SidebarProps, 
+  SidebarItem as SidebarItemType, 
+  SidebarSection as SidebarSectionType, 
+  SidebarItemProps, 
+  SidebarSectionProps 
+} from './Sidebar';

@@ -1,206 +1,391 @@
 # Sidebar Component
 
-A collapsible sidebar navigation component with responsive design and theme support.
+A comprehensive, responsive sidebar component with sub-menu support, optimized for performance with separate components for sub-menu items.
 
 ## Features
 
-- **Collapsible**: Toggle between expanded and collapsed states
-- **SSR Support**: Server-side rendering with theme injection
-- **Responsive Design**: Adapts to mobile, tablet, and desktop screens
-- **Navigation Menu**: Configurable menu items
-- **Theme Integration**: Supports tenant-specific theming
-- **Accessibility**: Proper semantic HTML and ARIA attributes
-- **Smooth Animations**: CSS transitions for state changes
+- **Responsive Design**: Mobile-first approach with collapsible sidebar
+- **Sub-menu Support**: Nested navigation with expandable sections
+- **Performance Optimized**: Separate components for sub-menu items
+- **Tenant Theming**: Supports custom tenant colors and branding
+- **User Management**: User section with profile, settings, and logout actions
+- **Accessibility**: Full keyboard navigation and screen reader support
+- **Multiple Variants**: Default, compact, and minimal variants
+- **Flexible Positioning**: Fixed, sticky, or static positioning options
+- **Context Management**: SidebarProvider for global state management
 
 ## Usage
 
+### Basic Usage
+
 ```tsx
-import { Sidebar } from '@luxgen/ui';
+import { Sidebar, SidebarSection } from '@luxgen/ui';
 
-// Basic usage
-<Sidebar
-  menuItems={[
-    { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
-    { id: 'courses', label: 'Courses', href: '/courses' },
-  ]}
-/>
+const sections: SidebarSection[] = [
+  {
+    id: 'main',
+    title: 'Main Navigation',
+    items: [
+      {
+        id: 'dashboard',
+        label: 'Dashboard',
+        href: '/dashboard',
+        icon: <DashboardIcon />,
+      },
+      {
+        id: 'courses',
+        label: 'Courses',
+        href: '/courses',
+        icon: <CoursesIcon />,
+        children: [
+          {
+            id: 'all-courses',
+            label: 'All Courses',
+            href: '/courses/all',
+          },
+          {
+            id: 'my-courses',
+            label: 'My Courses',
+            href: '/courses/my',
+          },
+        ],
+      },
+    ],
+  },
+];
 
-// With toggle handler
 <Sidebar
-  menuItems={menuItems}
-  onToggle={(collapsed) => console.log('Sidebar collapsed:', collapsed)}
-/>
-
-// With custom theme
-<Sidebar
-  tenantTheme={customTheme}
-  menuItems={menuItems}
+  sections={sections}
+  logo={{
+    text: 'LuxGen',
+    href: '/',
+  }}
+  collapsible={true}
+  defaultCollapsed={false}
 />
 ```
 
-## Props
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `menuItems` | `MenuItem[]` | `[]` | Array of menu items |
-| `collapsed` | `boolean` | `false` | Initial collapsed state |
-| `onToggle` | `(collapsed: boolean) => void` | - | Toggle handler |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
-
-## MenuItem Interface
+### With User Section
 
 ```tsx
-interface MenuItem {
-  id: string;
-  label: string;
-  href?: string;
-  icon?: ReactNode;
-  children?: MenuItem[];
+const user = {
+  name: 'John Doe',
+  email: 'john@example.com',
+  role: 'Admin',
+  avatar: '/path/to/avatar.jpg',
+};
+
+<Sidebar
+  sections={sections}
+  user={user}
+  onUserAction={(action) => {
+    switch (action) {
+      case 'profile':
+        router.push('/profile');
+        break;
+      case 'settings':
+        router.push('/settings');
+        break;
+      case 'logout':
+        handleLogout();
+        break;
+    }
+  }}
+/>
+```
+
+### With Context Provider
+
+```tsx
+import { SidebarProvider, useSidebar } from '@luxgen/ui';
+
+function App() {
+  return (
+    <SidebarProvider
+      defaultCollapsed={false}
+      onItemClick={(item) => console.log('Item clicked:', item)}
+      onUserAction={(action) => console.log('User action:', action)}
+    >
+      <Sidebar sections={sections} />
+    </SidebarProvider>
+  );
 }
 ```
 
-## SSR Usage
+### Different Variants
 
 ```tsx
-import { fetchSidebarSSR } from '@luxgen/ui';
+// Compact sidebar
+<Sidebar
+  variant="compact"
+  sections={sections}
+  width="narrow"
+/>
 
-// Server-side rendering
-const { html, styles } = await fetchSidebarSSR(tenantId);
+// Minimal sidebar
+<Sidebar
+  variant="minimal"
+  sections={sections}
+  width="narrow"
+/>
+
+// Default sidebar
+<Sidebar
+  variant="default"
+  sections={sections}
+  width="normal"
+/>
+```
+
+## Components
+
+### Sidebar
+
+Main sidebar component with full functionality.
+
+#### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `sections` | `SidebarSection[]` | `[]` | Array of sidebar sections |
+| `logo` | `LogoConfig` | `{text: 'LuxGen', href: '/'}` | Logo configuration |
+| `user` | `UserInfo \| null` | `null` | User information |
+| `onUserAction` | `(action: string) => void` | - | User action handler |
+| `className` | `string` | `''` | Additional CSS classes |
+| `variant` | `'default' \| 'compact' \| 'minimal'` | `'default'` | Visual variant |
+| `position` | `'fixed' \| 'sticky' \| 'static'` | `'fixed'` | Positioning type |
+| `width` | `'narrow' \| 'normal' \| 'wide'` | `'normal'` | Sidebar width |
+| `showUserSection` | `boolean` | `true` | Show user section |
+| `showLogo` | `boolean` | `true` | Show logo section |
+| `collapsible` | `boolean` | `true` | Allow collapsing |
+| `defaultCollapsed` | `boolean` | `false` | Start collapsed |
+| `onToggle` | `(collapsed: boolean) => void` | - | Toggle handler |
+| `onItemClick` | `(item: SidebarItem) => void` | - | Item click handler |
+
+### SidebarItem
+
+Individual sidebar item component with sub-menu support.
+
+#### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `item` | `SidebarItem` | Item configuration |
+| `isActive` | `boolean` | Active state |
+| `isCollapsed` | `boolean` | Collapsed state |
+| `onClick` | `() => void` | Click handler |
+| `variant` | `string` | Visual variant |
+| `depth` | `number` | Nesting depth |
+| `className` | `string` | Additional CSS classes |
+
+### SidebarSection
+
+Sidebar section component for organizing items.
+
+#### Props
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `section` | `SidebarSection` | Section configuration |
+| `isExpanded` | `boolean` | Expanded state |
+| `isCollapsed` | `boolean` | Collapsed state |
+| `onToggle` | `() => void` | Toggle handler |
+| `onItemClick` | `(item: SidebarItem) => void` | Item click handler |
+| `variant` | `string` | Visual variant |
+| `className` | `string` | Additional CSS classes |
+
+### SidebarProvider
+
+Context provider for sidebar state management.
+
+#### Props
+
+| Prop | Type | Default | Description |
+|------|------|---------|-------------|
+| `children` | `ReactNode` | - | Child components |
+| `defaultCollapsed` | `boolean` | `false` | Start collapsed |
+| `onItemClick` | `(item: SidebarItem) => void` | - | Item click handler |
+| `onUserAction` | `(action: string) => void` | - | User action handler |
+| `onToggle` | `(collapsed: boolean) => void` | - | Toggle handler |
+
+## Data Types
+
+### SidebarItem
+
+```typescript
+interface SidebarItem {
+  id: string;
+  label: string;
+  href?: string;
+  icon?: React.ReactNode;
+  badge?: string | number;
+  children?: SidebarItem[];
+  external?: boolean;
+  disabled?: boolean;
+  active?: boolean;
+  onClick?: () => void;
+}
+```
+
+### SidebarSection
+
+```typescript
+interface SidebarSection {
+  id: string;
+  title?: string;
+  items: SidebarItem[];
+  collapsible?: boolean;
+  defaultCollapsed?: boolean;
+}
+```
+
+## Performance Optimization
+
+### Separate Components
+
+The sidebar uses separate components for sub-menu items to improve performance:
+
+- **SidebarItem**: Memoized component for individual items
+- **SidebarSection**: Memoized component for sections
+- **SidebarProvider**: Context-based state management
+
+### Memoization
+
+```tsx
+// SidebarItem is memoized to prevent unnecessary re-renders
+const SidebarItem = memo(SidebarItemComponent);
+
+// SidebarSection is memoized for section-level optimization
+const SidebarSection = memo(SidebarSectionComponent);
+```
+
+### Context Management
+
+```tsx
+// Use context for global sidebar state
+const { isCollapsed, toggleCollapsed, expandedSections } = useSidebar();
 ```
 
 ## Styling
 
-The component uses CSS custom properties for theming:
+### Custom Styling
 
-```css
-.sidebar {
-  background-color: var(--color-surface);
-  border-right: 1px solid var(--color-border);
-  transition: width 0.3s ease;
-}
-
-.sidebar.collapsed {
-  width: 4rem;
-}
-
-.sidebar:not(.collapsed) {
-  width: 16rem;
-}
-
-.sidebar-nav-item {
-  color: var(--color-text);
-  transition: all 0.2s ease;
-}
-
-.sidebar-nav-item:hover {
-  background-color: var(--color-primary);
-  color: white;
-}
+```tsx
+<Sidebar
+  className="custom-sidebar border-r-2 border-green-500"
+  sections={sections}
+/>
 ```
 
-## Responsive Design
+### Tenant Theming
 
-- **Mobile**: Full-width overlay with slide animation
-- **Tablet**: Medium width (14rem)
-- **Desktop**: Full width (16rem)
+```tsx
+const customTheme = {
+  colors: {
+    primary: '#10b981',
+    secondary: '#6b7280',
+  },
+};
+
+<Sidebar
+  tenantTheme={customTheme}
+  sections={sections}
+/>
+```
 
 ## Accessibility
 
-- Uses semantic `<aside>` element
-- Proper navigation structure
-- Keyboard navigation support
-- Screen reader friendly
-- ARIA labels for toggle button
-- Tooltips for collapsed state
+- Full keyboard navigation support
+- Screen reader compatible
+- ARIA labels and roles
+- Focus management
+- High contrast support
 
-## Testing
+## Responsive Behavior
 
-```tsx
-import { render, screen, fireEvent } from '@testing-library/react';
-import { Sidebar } from '@luxgen/ui';
-
-test('renders with menu items', () => {
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
-    { id: 'courses', label: 'Courses', href: '/courses' },
-  ];
-  
-  render(<Sidebar menuItems={menuItems} />);
-  
-  expect(screen.getByText('Dashboard')).toBeInTheDocument();
-  expect(screen.getByText('Courses')).toBeInTheDocument();
-});
-
-test('toggles collapsed state', () => {
-  const mockOnToggle = jest.fn();
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
-  ];
-  
-  render(
-    <Sidebar 
-      menuItems={menuItems} 
-      onToggle={mockOnToggle} 
-    />
-  );
-  
-  const toggleButton = screen.getByLabelText('Collapse sidebar');
-  fireEvent.click(toggleButton);
-  
-  expect(mockOnToggle).toHaveBeenCalledWith(true);
-});
-```
+- **Desktop**: Full sidebar with all features
+- **Tablet**: Collapsible sidebar with touch support
+- **Mobile**: Minimal sidebar with essential navigation
 
 ## Examples
 
-### Basic Sidebar
+### Dashboard Sidebar
+
 ```tsx
+const dashboardSections: SidebarSection[] = [
+  {
+    id: 'main',
+    title: 'Main',
+    items: [
+      {
+        id: 'dashboard',
+        label: 'Dashboard',
+        href: '/dashboard',
+        icon: <DashboardIcon />,
+      },
+      {
+        id: 'analytics',
+        label: 'Analytics',
+        href: '/analytics',
+        icon: <AnalyticsIcon />,
+      },
+    ],
+  },
+  {
+    id: 'content',
+    title: 'Content',
+    items: [
+      {
+        id: 'courses',
+        label: 'Courses',
+        href: '/courses',
+        icon: <CoursesIcon />,
+        children: [
+          {
+            id: 'all-courses',
+            label: 'All Courses',
+            href: '/courses/all',
+          },
+          {
+            id: 'my-courses',
+            label: 'My Courses',
+            href: '/courses/my',
+          },
+        ],
+      },
+    ],
+  },
+];
+
 <Sidebar
-  menuItems={[
-    { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
-    { id: 'courses', label: 'Courses', href: '/courses' },
-    { id: 'students', label: 'Students', href: '/students' },
-  ]}
+  sections={dashboardSections}
+  user={user}
+  onUserAction={handleUserAction}
+  collapsible={true}
+  variant="default"
+  width="normal"
 />
 ```
 
-### Collapsed Sidebar
+### Compact Sidebar
+
 ```tsx
 <Sidebar
-  collapsed={true}
-  menuItems={menuItems}
+  sections={sections}
+  variant="compact"
+  width="narrow"
+  collapsible={true}
+  defaultCollapsed={true}
 />
 ```
 
-### Sidebar with Icons
-```tsx
-<Sidebar
-  menuItems={[
-    { 
-      id: 'dashboard', 
-      label: 'Dashboard', 
-      href: '/dashboard',
-      icon: <DashboardIcon />
-    },
-    { 
-      id: 'courses', 
-      label: 'Courses', 
-      href: '/courses',
-      icon: <CoursesIcon />
-    },
-  ]}
-/>
-```
+## Best Practices
 
-### Sidebar with Toggle Handler
-```tsx
-<Sidebar
-  menuItems={menuItems}
-  onToggle={(collapsed) => {
-    // Update layout or state based on sidebar state
-    setLayout({ sidebarCollapsed: collapsed });
-  }}
-/>
-```
+1. **Use separate components** for sub-menu items to improve performance
+2. **Memoize components** to prevent unnecessary re-renders
+3. **Use context** for global sidebar state management
+4. **Keep sections organized** with clear titles and logical grouping
+5. **Test accessibility** with keyboard navigation and screen readers
+6. **Optimize for mobile** with touch-friendly navigation
+7. **Use consistent icons** for better visual hierarchy
+8. **Limit nesting depth** to avoid complex navigation structures

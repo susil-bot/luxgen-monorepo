@@ -19,6 +19,7 @@ export * from './LoginForm';
 export * from './RegisterForm';
 export * from './Snackbar';
 export * from './NavBar';
+export * from './Sidebar';
 
 // Display Components
 export * from './Heading';
