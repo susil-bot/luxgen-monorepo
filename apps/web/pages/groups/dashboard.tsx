@@ -25,6 +25,7 @@ interface GroupDashboardData {
 const GroupDashboardPageContent: React.FC = () => {
   const router = useRouter();
   const { showSuccess, showError, showInfo } = useSnackbar();
+  const [user, setUser] = useState<any>(null);
   const [groups, setGroups] = useState<GroupDashboardData[]>([
         {
           id: '1',
@@ -85,6 +86,25 @@ const GroupDashboardPageContent: React.FC = () => {
         },
       ]);
 
+
+  // Load user data
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        setUser({
+          name: `${parsedUser.firstName} ${parsedUser.lastName}`,
+          email: parsedUser.email,
+          role: parsedUser.role,
+          tenant: parsedUser.tenant,
+        });
+      } catch (error) {
+        console.error('Error parsing user data:', error);
+      }
+    }
+  }, []);
+
   const handleEditGroup = (groupId: string) => {
     router.push(`/groups/${groupId}/edit`);
   };
@@ -96,6 +116,7 @@ const GroupDashboardPageContent: React.FC = () => {
   const handleManageUsers = (groupId: string) => {
     router.push(`/groups/${groupId}/members`);
   };
+
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
@@ -446,6 +467,7 @@ const GroupDashboardPageContent: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
     </>
   );
 };
