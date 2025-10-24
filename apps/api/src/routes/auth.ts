@@ -50,13 +50,13 @@ router.post('/login', validateLogin, async (req: Request, res: Response) => {
     //   });
     // }
 
-    // Generate JWT token
+    // Generate JWT token with tenant-specific key
     const token = generateToken({
       id: user._id.toString(),
       email: user.email,
       tenant: user.tenant._id?.toString(),
       role: user.role,
-    });
+    }, user.tenant._id?.toString());
 
     // Return success response
     res.json({
@@ -123,13 +123,13 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
     await newUser.save();
     await newUser.populate('tenant');
 
-    // Generate JWT token
+    // Generate JWT token with tenant-specific key
     const token = generateToken({
       id: newUser._id.toString(),
       email: newUser.email,
       tenant: newUser.tenant._id?.toString(),
       role: newUser.role,
-    });
+    }, newUser.tenant._id?.toString());
 
     // Return success response
     res.status(201).json({
