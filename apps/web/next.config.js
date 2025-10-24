@@ -1,8 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  experimental: {
-    appDir: true,
-  },
+  output: 'standalone',
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
@@ -10,7 +8,7 @@ const nextConfig = {
     return [
       {
         source: '/api/graphql',
-        destination: 'http://localhost:4000/graphql',
+        destination: 'http://api:4000/graphql',
       },
     ];
   },

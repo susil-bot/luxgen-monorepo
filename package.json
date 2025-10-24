@@ -9,6 +9,12 @@
   "scripts": {
     "build": "turbo run build",
     "dev": "turbo run dev",
+    "dev:api": "turbo run dev --filter=@luxgen/api",
+    "dev:web": "turbo run dev --filter=@luxgen/web",
+    "dev:docker": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up",
+    "dev:docker:build": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
+    "docker:down": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml down",
+    "docker:clean": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml down -v && docker system prune -f",
     "lint": "turbo run lint",
     "test": "turbo run test",
     "clean": "turbo run clean"
