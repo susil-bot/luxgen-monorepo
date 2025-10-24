@@ -17,7 +17,9 @@
     "docker:clean": "docker-compose -f docker-compose.yml -f docker-compose.dev.yml down -v && docker system prune -f",
     "lint": "turbo run lint",
     "test": "turbo run test",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "init:tenant-workflow": "node scripts/init-tenant-workflow.js",
+    "init:tenants": "node scripts/init-tenants.js"
   },
   "devDependencies": {
     "turbo": "^1.10.0",

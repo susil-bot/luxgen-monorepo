@@ -7,17 +7,24 @@ import { resolvers } from './schema';
 import { context } from './context';
 import { authMiddleware } from './middleware/auth';
 import { tenantMiddleware } from './middleware/tenant';
-import { 
-  tenantRoutingMiddleware, 
-  tenantAuthMiddleware, 
-  tenantSecurityMiddleware 
+import {
+  tenantRoutingMiddleware,
+  tenantAuthMiddleware,
+  tenantSecurityMiddleware
 } from './middleware/tenantRouting';
-import { 
-  tenantHeadersMiddleware, 
-  tenantBrandingMiddleware, 
+import {
+  tenantHeadersMiddleware,
+  tenantBrandingMiddleware,
   tenantSecurityHeadersMiddleware,
-  tenantRateLimitMiddleware 
+  tenantRateLimitMiddleware
 } from './middleware/tenantHeaders';
+import {
+  tenantWorkflowMiddleware,
+  tenantFeatureMiddleware,
+  tenantLimitMiddleware,
+  tenantUsageTrackingMiddleware,
+  tenantComplianceMiddleware
+} from './middleware/tenantWorkflow';
 import authRoutes from './routes/auth';
 import adminRoutes from './routes/admin';
 import tenantRoutes from './routes/tenant';
@@ -35,7 +42,10 @@ app.use(cors({
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Tenant routing middleware (must be first)
+// Centralized tenant workflow middleware (must be first)
+app.use(tenantWorkflowMiddleware);
+
+// Legacy tenant routing middleware (for backward compatibility)
 app.use(tenantRoutingMiddleware);
 
 // Tenant security middleware
