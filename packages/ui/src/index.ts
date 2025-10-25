@@ -18,6 +18,13 @@ export * from './Select';
 export * from './Checkbox';
 export * from './RadioGroup';
 export * from './Switch';
+
+// Display Components
+export * from './Chip';
+export * from './UserManagement';
+export * from './CourseMenu';
+export * from './Arrow';
+export * from './BannerCarousel';
 export * from './Form';
 export * from './InputWithLabel';
 export * from './LoginForm';
@@ -35,8 +42,25 @@ export * from './Kicker';
 export * from './Carousel';
 export * from './Accordion';
 export * from './Card';
+export * from './ProductCard';
 export * from './Modal';
 export * from './Table';
+
+// Dashboard Components
+export * from './AdminDashboard';
+export * from './UserDashboard';
+
+// Dashboard Layout Components
+export * from './AdminDashboardLayout';
+export * from './UserDashboardLayout';
+
+// Standalone Chart Components
+export * from './UserRetention';
+export * from './EngagementBreakdown';
+export * from './EngagementTrends';
+export * from './RecentActivities';
+export * from './LastSurvey';
+export * from './PermissionRequest';
 
 // Notification Components
 export * from './Snackbar';
