@@ -23,6 +23,8 @@ export * from './Switch';
 export * from './Chip';
 export * from './UserManagement';
 export * from './CourseMenu';
+export * from './Arrow';
+export * from './BannerCarousel';
 export * from './Form';
 export * from './InputWithLabel';
 export * from './LoginForm';

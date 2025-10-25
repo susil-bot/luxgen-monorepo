@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
-import { CourseMenu, CourseOverview, CourseAnalytics } from '@luxgen/ui';
-import CourseLayout from './courses/_layout';
+import Head from 'next/head';
+import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo, TenantDebug, CourseMenu, CourseOverview, CourseAnalytics } from '@luxgen/ui';
+import { TenantBanner } from '../components/tenant/TenantBanner';
 
 interface CoursesPageProps {
   tenant: string;
 }
 
-function CoursesContent({ tenant }: CoursesPageProps) {
+export default function CoursesPage({ tenant }: CoursesPageProps) {
   const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'learner' | 'user'>('learner');
   const [loading, setLoading] = useState(true);
 
@@ -51,30 +52,64 @@ function CoursesContent({ tenant }: CoursesPageProps) {
   }
 
   return (
-    <div className="space-y-8">
-      {/* Course Overview */}
-      <CourseOverview
-        course={sampleCourse}
-        userRole={userRole}
-        enrollmentStatus="enrolled"
-      />
+    <>
+      <Head>
+        <title>Courses - {tenant.charAt(0).toUpperCase() + tenant.slice(1)}</title>
+      </Head>
+      
+      <AppLayout
+        sidebarSections={getDefaultSidebarSections()}
+        user={getDefaultUser()}
+        logo={getDefaultLogo()}
+        onUserAction={(action) => {
+          switch (action) {
+            case 'profile':
+              console.log('Navigate to profile');
+              break;
+            case 'settings':
+              console.log('Navigate to settings');
+              break;
+            case 'logout':
+              console.log('Logout');
+              break;
+          }
+        }}
+        showSearch={true}
+        showNotifications={true}
+        notificationCount={3}
+        sidebarDefaultCollapsed={false}
+        responsive={true}
+      >
+        <TenantBanner tenant={tenant} />
+        
+        <div className="mt-6 space-y-8">
+          {/* Course Overview */}
+          <CourseOverview
+            course={sampleCourse}
+            userRole={userRole}
+            enrollmentStatus="enrolled"
+          />
 
-      {/* Course Analytics (Admin/Instructor only) */}
-      {(userRole === 'admin' || userRole === 'instructor') && (
-        <CourseAnalytics
-          courseId={sampleCourse.id}
-          userRole={userRole}
-          metrics={analyticsMetrics}
-        />
-      )}
+          {/* Course Analytics (Admin/Instructor only) */}
+          {(userRole === 'admin' || userRole === 'instructor') && (
+            <CourseAnalytics
+              courseId={sampleCourse.id}
+              userRole={userRole}
+              metrics={analyticsMetrics}
+            />
+          )}
 
-      {/* Course Menu */}
-      <CourseMenu
-        userRole={userRole}
-        courseId={sampleCourse.id}
-        onNavigate={handleNavigate}
-      />
-    </div>
+          {/* Course Menu */}
+          <CourseMenu
+            userRole={userRole}
+            courseId={sampleCourse.id}
+            onNavigate={handleNavigate}
+          />
+        </div>
+        
+        <TenantDebug />
+      </AppLayout>
+    </>
   );
 }
 
@@ -105,10 +140,3 @@ export const getServerSideProps = async (context: any) => {
   };
 };
 
-export default function CoursesPage({ tenant }: CoursesPageProps) {
-  return (
-    <CourseLayout tenant={tenant} title="Courses">
-      <CoursesContent tenant={tenant} />
-    </CourseLayout>
-  );
-}
