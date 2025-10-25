@@ -53,11 +53,21 @@ export const userResolvers = {
           throw new Error('Invalid email or password');
         }
 
+        console.log(
+          'user', user,
+          'tenant', user.tenant,
+          'tenant._id', user.tenant._id,
+          'tenant.toString', user.tenant.toString(),
+          'tenant._id?.toString', user.tenant._id?.toString(),
+          'tenant.toString()', user.tenant.toString(),
+          'tenant._id?.toString()', user.tenant._id?.toString(),
+          'tenant.toString()', user.tenant.toString(),
+        );
         // Generate JWT token with tenant-specific key
         const token = generateToken({
           id: user._id.toString(),
           email: user.email,
-          tenant: user.tenant._id?.toString(),
+          tenant: user.tenant.toString(),
           role: user.role,
         }, user.tenant._id?.toString());
 
@@ -66,7 +76,7 @@ export const userResolvers = {
           user,
         };
       } catch (error) {
-        throw new Error(error.message || 'Login failed');
+        throw new Error((error as Error).message || 'Login failed');
       }
     },
     register: async (_: any, { input }: { input: any }) => {
@@ -94,7 +104,7 @@ export const userResolvers = {
         const token = generateToken({
           id: user._id.toString(),
           email: user.email,
-          tenant: user.tenant._id?.toString(),
+          tenant: user.tenant.toString(),
           role: user.role,
         }, user.tenant._id?.toString());
 
@@ -103,7 +113,7 @@ export const userResolvers = {
           user,
         };
       } catch (error) {
-        throw new Error(error.message || 'Registration failed');
+        throw new Error((error as Error).message || 'Registration failed');
       }
     },
   },

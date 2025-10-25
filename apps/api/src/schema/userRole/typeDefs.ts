@@ -102,6 +102,17 @@ export const userRoleTypeDefs = `
     language: String
   }
 
+  input UserPermissionsInput {
+    canManageUsers: Boolean
+    canManageTenants: Boolean
+    canManageCourses: Boolean
+    canManageGroups: Boolean
+    canViewReports: Boolean
+    canManageSettings: Boolean
+    canInviteUsers: Boolean
+    canApproveRequests: Boolean
+  }
+
   input UserInvitationInput {
     email: String!
     firstName: String!
@@ -156,7 +167,7 @@ export const userRoleTypeDefs = `
     activateUser(userId: ID!): UserRegistrationResult!
     deactivateUser(userId: ID!): UserRegistrationResult!
     suspendUser(userId: ID!, reason: String): UserRegistrationResult!
-    updateUserPermissions(userId: ID!, permissions: UserPermissions!): UserRegistrationResult!
+    updateUserPermissions(userId: ID!, permissions: UserPermissionsInput!): UserRegistrationResult!
     assignTenantRole(userId: ID!, tenantId: ID!, role: UserRole!): RoleUpdateResult!
     removeTenantRole(userId: ID!, tenantId: ID!): RoleUpdateResult!
     bulkUpdateUserRoles(updates: [RoleUpdateInput!]!): [RoleUpdateResult!]!

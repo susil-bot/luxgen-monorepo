@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { User, IUser, UserRole } from '@luxgen/db';
+import { User, IUser } from '@luxgen/db';
+import { UserRole } from '@luxgen/auth';
 import { hashPassword, verifyPassword } from '@luxgen/auth';
 import { generateToken } from '../utils/jwt';
 import { userService } from '../services/userService';

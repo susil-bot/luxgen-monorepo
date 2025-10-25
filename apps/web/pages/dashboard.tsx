@@ -25,7 +25,7 @@ export default function Dashboard({ tenant }: DashboardProps) {
     variables: { tenant },
     errorPolicy: 'ignore', // Ignore GraphQL errors and continue
     fetchPolicy: 'cache-first',
-    skip: true, // Skip GraphQL for now to use fallback data
+    skip: false, // Enable GraphQL queries now that API is working
   });
 
   useEffect(() => {
