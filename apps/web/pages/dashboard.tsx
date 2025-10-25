@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
+import { useQuery } from '@apollo/client';
 import { AdminDashboardLayout, UserMenu, TenantDebug } from '@luxgen/ui';
 import { TenantBanner } from '../components/tenant/TenantBanner';
+import { GET_DASHBOARD_DATA } from '../graphql/queries/dashboard';
 
 interface DashboardProps {
   tenant: string;
@@ -22,7 +24,13 @@ export default function Dashboard({ tenant }: DashboardProps) {
       },
     };
   });
-  const [loading, setLoading] = useState(false);
+
+  // GraphQL query for dashboard data
+  const { data: dashboardData, loading: dataLoading, error: dataError } = useQuery(GET_DASHBOARD_DATA, {
+    variables: { tenant },
+    errorPolicy: 'all',
+    fetchPolicy: 'cache-and-network',
+  });
 
   useEffect(() => {
     console.log('🔍 Dashboard useEffect running for tenant:', tenant);
@@ -38,7 +46,6 @@ export default function Dashboard({ tenant }: DashboardProps) {
     };
     console.log('🔍 Setting user data:', userData);
     setUser(userData);
-    setLoading(false);
     console.log('🔍 Loading set to false');
   }, [tenant]);
 
@@ -56,19 +63,15 @@ export default function Dashboard({ tenant }: DashboardProps) {
     }
   };
 
-  const handleSearch = (query: string) => {
-    console.log('Search query:', query);
-    // Implement search functionality
+  const handleDashboardAction = (action: string, data?: any) => {
+    console.log('Dashboard action:', action, data);
+    // Handle dashboard-specific actions
   };
 
-  const handleNotificationClick = () => {
-    console.log('Notification clicked');
-    // Implement notification functionality
-  };
-
-  if (loading) {
+  // Show loading state
+  if (dataLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading dashboard...</p>
@@ -77,94 +80,82 @@ export default function Dashboard({ tenant }: DashboardProps) {
     );
   }
 
-  // Dashboard data - sample data to show components
-  const dashboardData = {
-    title: 'Welcome to Ideavibes',
+  // Show error state
+  if (dataError) {
+    console.error('GraphQL Error:', dataError);
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="text-red-600 text-xl mb-4">Error loading dashboard data</div>
+          <p className="text-gray-600">Please try refreshing the page</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Transform GraphQL data for dashboard components
+  const transformedDashboardData = dashboardData ? {
+    title: `Welcome to ${tenant.charAt(0).toUpperCase() + tenant.slice(1)}`,
     subtitle: 'Your learning management dashboard',
     stats: {
-      totalCourses: 12,
-      activeStudents: 156,
-      completionRate: 87,
-      totalUsers: 1200
+      totalCourses: dashboardData.getDashboardData?.stats?.totalCourses || 0,
+      activeStudents: dashboardData.getDashboardData?.stats?.activeStudents || 0,
+      completionRate: dashboardData.getDashboardData?.stats?.completionRate || 0,
+      totalUsers: dashboardData.getDashboardData?.stats?.totalGroups || 0
     },
-    retentionData: [
-      { date: 'Jan', value: 400, label: 'January' },
-      { date: 'Feb', value: 450, label: 'February' },
-      { date: 'Mar', value: 500, label: 'March' },
-      { date: 'Apr', value: 480, label: 'April' },
-      { date: 'May', value: 550, label: 'May' }
-    ],
-    engagementData: [
-      { id: '1', label: 'Quizzes', value: 30, color: '#3B82F6', percentage: 30 },
-      { id: '2', label: 'Surveys', value: 15, color: '#10B981', percentage: 15 },
-      { id: '3', label: 'Polls', value: 35, color: '#8B5CF6', percentage: 35 },
-      { id: '4', label: 'Videos', value: 20, color: '#F59E0B', percentage: 20 }
-    ],
-    trendsData: [
-      { label: 'Week 1', interactions: 120, completions: 45 },
-      { label: 'Week 2', interactions: 150, completions: 60 },
-      { label: 'Week 3', interactions: 180, completions: 75 },
-      { label: 'Week 4', interactions: 200, completions: 90 }
-    ],
-    activitiesData: [
-      {
-        id: '1',
-        user: { name: 'John Doe', avatar: '/avatars/john.jpg', initials: 'JD' },
-        action: 'Completed React Course',
-        time: '2 hours ago',
-        status: 'online' as const,
-        avatarColor: '#3B82F6'
+    retentionData: dashboardData.getDashboardData?.userRetention?.map((item: any) => ({
+      date: item.period,
+      value: item.retention,
+      label: new Date(item.period).toLocaleDateString('en-US', { month: 'short' })
+    })) || [],
+    engagementData: dashboardData.getDashboardData?.engagementBreakdown?.map((item: any) => ({
+      id: item.category.toLowerCase().replace(/\s+/g, '-'),
+      label: item.category,
+      value: item.value,
+      color: item.color,
+      percentage: item.value
+    })) || [],
+    trendsData: dashboardData.getDashboardData?.engagementTrends?.map((item: any) => ({
+      label: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+      interactions: item.activeUsers,
+      completions: item.completedCourses
+    })) || [],
+    activitiesData: dashboardData.getDashboardData?.recentActivities?.map((activity: any) => ({
+      id: activity.id,
+      user: { 
+        name: activity.user, 
+        avatar: activity.userAvatar, 
+        initials: activity.user.split(' ').map((n: string) => n[0]).join('')
       },
-      {
-        id: '2',
-        user: { name: 'Jane Smith', avatar: '/avatars/jane.jpg', initials: 'JS' },
-        action: 'Started TypeScript Course',
-        time: '4 hours ago',
-        status: 'offline' as const,
-        avatarColor: '#10B981'
+      action: activity.title,
+      time: new Date(activity.timestamp).toLocaleString(),
+      status: activity.status === 'completed' ? 'online' : 'offline',
+      avatarColor: '#3B82F6'
+    })) || [],
+    surveyData: dashboardData.getDashboardData?.lastSurvey ? {
+      id: dashboardData.getDashboardData.lastSurvey.id,
+      title: dashboardData.getDashboardData.lastSurvey.title,
+      description: dashboardData.getDashboardData.lastSurvey.description,
+      status: dashboardData.getDashboardData.lastSurvey.status,
+      progress: dashboardData.getDashboardData.lastSurvey.progress,
+      totalResponses: dashboardData.getDashboardData.lastSurvey.responses,
+      targetResponses: Math.floor(dashboardData.getDashboardData.lastSurvey.responses * 1.3),
+      createdAt: dashboardData.getDashboardData.lastSurvey.createdAt,
+      expiresAt: dashboardData.getDashboardData.lastSurvey.expiresAt
+    } : undefined,
+    permissionRequests: dashboardData.getDashboardData?.permissionRequests?.map((request: any) => ({
+      id: request.id,
+      user: { 
+        name: request.user, 
+        avatar: request.userAvatar, 
+        initials: request.user.split(' ').map((n: string) => n[0]).join('')
       },
-      {
-        id: '3',
-        user: { name: 'Mike Johnson', avatar: '/avatars/mike.jpg', initials: 'MJ' },
-        action: 'Completed Quiz: JavaScript Fundamentals',
-        time: '6 hours ago',
-        status: 'online' as const,
-        avatarColor: '#8B5CF6'
-      }
-    ],
-    surveyData: {
-      id: '1',
-      title: 'Q1 2024 Employee Survey',
-      status: 'active' as const,
-      progress: 75,
-      totalResponses: 150,
-      targetResponses: 200,
-      createdAt: '2024-01-15',
-      expiresAt: '2024-02-15',
-      description: 'Quarterly employee satisfaction and feedback survey'
-    },
-    permissionData: [
-      {
-        id: '1',
-        user: { name: 'Alice Brown', email: 'alice@example.com', initials: 'AB' },
-        permission: 'admin',
-        resource: 'User Management',
-        requestedAt: '2024-01-20',
-        reason: 'Need to manage user accounts',
-        status: 'pending' as const,
-        avatarColor: '#3B82F6'
-      },
-      {
-        id: '2',
-        user: { name: 'Bob Wilson', email: 'bob@example.com', initials: 'BW' },
-        permission: 'instructor',
-        resource: 'Course Creation',
-        requestedAt: '2024-01-19',
-        reason: 'Want to create new courses',
-        status: 'approved' as const,
-        avatarColor: '#10B981'
-      }
-    ],
+      requestType: request.requestType,
+      description: request.description,
+      status: request.status,
+      requestedAt: request.requestedAt,
+      avatarColor: '#3B82F6'
+    })) || [],
     quickActions: [
       { 
         id: '1', 
@@ -178,6 +169,16 @@ export default function Dashboard({ tenant }: DashboardProps) {
       },
       { 
         id: '2', 
+        label: 'Add User', 
+        onClick: () => console.log('Add User clicked'),
+        icon: (
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+        )
+      },
+      { 
+        id: '3', 
         label: 'View Reports', 
         onClick: () => console.log('View Reports clicked'),
         icon: (
@@ -185,93 +186,64 @@ export default function Dashboard({ tenant }: DashboardProps) {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
           </svg>
         )
-      },
-      { 
-        id: '3', 
-        label: 'Manage Users', 
-        onClick: () => console.log('Manage Users clicked'),
-        icon: (
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-          </svg>
-        )
       }
     ]
-  };
+  } : null;
+
+  if (!transformedDashboardData) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="text-gray-600 text-xl mb-4">No dashboard data available</div>
+          <p className="text-gray-500">Please check your connection and try again</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <>
       <Head>
-        <title>Dashboard - LuxGen</title>
-        <meta name="description" content="Dashboard for LuxGen platform" />
+        <title>Dashboard - {tenant.charAt(0).toUpperCase() + tenant.slice(1)}</title>
+        <meta name="description" content="Learning management dashboard" />
       </Head>
-
+      
       <AdminDashboardLayout
-        currentTenant={{
-          name: tenant.charAt(0).toUpperCase() + tenant.slice(1),
-          subdomain: tenant,
-          logo: `/logos/${tenant}.png`
-        }}
+        currentTenant={tenant}
         user={user ? {
           name: user.name,
           email: user.email,
-          avatar: user.avatar,
-          initials: user.name?.split(' ').map(n => n[0]).join('') || 'U',
-          role: user.role || 'Admin'
+          role: user.role,
+          initials: user.name.split(' ').map(n => n[0]).join('')
         } : undefined}
-        dashboardData={dashboardData}
+        dashboardData={transformedDashboardData}
         variant="default"
-        loading={loading}
+        loading={dataLoading}
         onUserAction={handleUserAction}
-        onSearch={handleSearch}
-        onNotificationClick={handleNotificationClick}
-        showSearch={true}
-        showNotifications={true}
-        notificationCount={3}
-        searchPlaceholder="Search dashboard..."
-        sidebarCollapsible={true}
-        sidebarDefaultCollapsed={false}
-        responsive={true}
-        onRetentionPointClick={(point) => console.log('Retention point clicked:', point)}
-        onEngagementSegmentClick={(segment) => console.log('Engagement segment clicked:', segment)}
-        onTrendsPointClick={(point) => console.log('Trends point clicked:', point)}
-        onActivityClick={(activity) => console.log('Activity clicked:', activity)}
-        onSurveyView={(survey) => console.log('Survey view:', survey)}
-        onSurveyEdit={(survey) => console.log('Survey edit:', survey)}
-        onSurveyShare={(survey) => console.log('Survey share:', survey)}
-        onPermissionApprove={(request) => console.log('Permission approved:', request)}
-        onPermissionDeny={(request) => console.log('Permission denied:', request)}
-        onPermissionViewDetails={(request) => console.log('Permission details:', request)}
+        onDashboardAction={handleDashboardAction}
+        onDataPointClick={(point: any) => console.log('Data point clicked:', point)}
+        onSegmentClick={(segment: any) => console.log('Segment clicked:', segment)}
+        onActivityClick={(activity: any) => console.log('Activity clicked:', activity)}
+        onSurveyClick={(survey: any) => console.log('Survey clicked:', survey)}
+        onRequestClick={(request: any) => console.log('Request clicked:', request)}
+        onViewSurvey={(survey: any) => console.log('View survey:', survey)}
+        onEditSurvey={(survey: any) => console.log('Edit survey:', survey)}
+        onShareSurvey={(survey: any) => console.log('Share survey:', survey)}
+        onApproveRequest={(request: any) => console.log('Approve request:', request)}
+        onDenyRequest={(request: any) => console.log('Deny request:', request)}
+        onViewDetails={(request: any) => console.log('View details:', request)}
       />
-      <TenantDebug />
+      
     </>
   );
-  }
+}
 
-export const getServerSideProps = async (context: any) => {
-  const host = context.req.headers.host;
-  let tenant = 'demo'; // Default tenant
+export async function getServerSideProps(context: any) {
+  const { tenant } = context.query;
   
-  // Extract tenant from subdomain
-  if (host && host.includes('.')) {
-    const parts = host.split('.');
-    if (parts.length > 1) {
-      const subdomain = parts[0];
-      if (subdomain !== 'www' && subdomain !== 'localhost' && subdomain !== '127.0.0.1') {
-        tenant = subdomain;
-      }
-    }
-  }
-  
-  // Check for tenant query parameter
-  const queryTenant = context.query.tenant;
-  if (queryTenant) {
-    tenant = queryTenant;
-  }
-
   return {
     props: {
-      tenant,
+      tenant: tenant || 'demo',
     },
   };
-};
+}
