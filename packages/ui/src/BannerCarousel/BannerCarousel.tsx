@@ -184,6 +184,7 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
                 variant="outline"
                 onClick={goToPrevious}
                 aria-label="Previous slide"
+                data-testid="arrow-left"
               />
             </div>
             <div className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20">
@@ -193,6 +194,7 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
                 variant="outline"
                 onClick={goToNext}
                 aria-label="Next slide"
+                data-testid="arrow-right"
               />
             </div>
           </>
