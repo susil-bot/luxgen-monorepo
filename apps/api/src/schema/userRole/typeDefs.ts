@@ -24,7 +24,7 @@ export const userRoleTypeDefs = `
   }
 
   type UserMetadata {
-    lastLogin: String
+    lastLogin: Date
     loginCount: Int!
     preferences: UserPreferences!
     permissions: UserPermissions!
@@ -41,7 +41,7 @@ export const userRoleTypeDefs = `
     tenantId: ID!
     role: UserRole!
     assignedBy: ID!
-    assignedAt: String!
+    assignedAt: Date!
   }
 
   type User {
@@ -54,8 +54,8 @@ export const userRoleTypeDefs = `
     tenant: Tenant!
     isActive: Boolean!
     metadata: UserMetadata!
-    createdAt: String!
-    updatedAt: String!
+    createdAt: Date!
+    updatedAt: Date!
   }
 
   type UserInvitation {
@@ -66,9 +66,9 @@ export const userRoleTypeDefs = `
     role: UserRole!
     tenant: Tenant!
     invitedBy: User!
-    invitedAt: String!
+    invitedAt: Date!
     status: String!
-    expiresAt: String!
+    expiresAt: Date!
   }
 
   type RoleAssignment {
@@ -77,7 +77,7 @@ export const userRoleTypeDefs = `
     newRole: UserRole!
     previousRole: UserRole!
     assignedBy: User!
-    assignedAt: String!
+    assignedAt: Date!
     reason: String
   }
 
