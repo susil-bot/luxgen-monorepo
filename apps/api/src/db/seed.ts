@@ -1,6 +1,7 @@
 import { logger } from '../utils/logger';
 import { connectDB } from './connect';
 import { Group, User, Tenant } from '@luxgen/db';
+import { seedDashboardData } from './dashboardSeed';
 
 export const seedDatabase = async (): Promise<void> => {
   try {
@@ -25,8 +26,13 @@ export const seedDatabase = async (): Promise<void> => {
     const groups = await createSampleGroups(tenants, users);
     console.log(`✅ Created ${groups.length} groups`);
     
+    // Create dashboard data
+    console.log('📊 Creating dashboard data...');
+    const dashboardData = await seedDashboardData();
+    console.log(`✅ Created dashboard data: ${dashboardData.activities.length} activities, ${dashboardData.surveys.length} surveys, ${dashboardData.permissionRequests.length} requests`);
+    
     console.log('🎉 Database seeding completed successfully!');
-    console.log(`📊 Summary: ${tenants.length} tenants, ${users.length} users, ${groups.length} groups`);
+    console.log(`📊 Summary: ${tenants.length} tenants, ${users.length} users, ${groups.length} groups, dashboard data seeded`);
   } catch (error) {
     console.error('❌ Database seeding error:', error);
     throw error;
