@@ -139,13 +139,23 @@ const LoginPageContent: React.FC = () => {
                           <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.996 2.05c-3.481.881-6.006 3.789-6.006 7.559 0 2.5 1.5 4.5 3.5 4.5s3.5-2 3.5-4.5c0-3.77-2.525-6.678-6.006-7.559l.996-2.05c5.252 1.039 8.983 4.905 8.983 10.609v7.391h-9.017z"/>
                         </svg>
                       </div>
-                        <p className="text-gray-700 text-lg leading-relaxed mb-6 italic">
-                        "Thanks to this platform, I quickly found my dream job! Easy to navigate, countless opportunities, and excellent results. Highly recommended!"
-                      </p>
-                      <div>
-                        <p className="text-gray-900 font-semibold text-lg">Emily Kuper</p>
-                        <p className="text-gray-600">Satisfied Customer</p>
-                      </div>
+                        <div className="text-center">
+                          <h2 className="text-4xl md:text-6xl font-bold mb-4 susil-crazy">
+                            susil
+                          </h2>
+                          <p className="text-gray-700 text-lg leading-relaxed mb-6 italic animate-bounce">
+                            "Ready to start your first project? Let's build something amazing together! 🚀"
+                          </p>
+                          <div className="flex justify-center space-x-2 mb-4">
+                            <div className="w-3 h-3 bg-purple-500 rounded-full animate-ping"></div>
+                            <div className="w-3 h-3 bg-pink-500 rounded-full animate-ping" style={{animationDelay: '0.2s'}}></div>
+                            <div className="w-3 h-3 bg-blue-500 rounded-full animate-ping" style={{animationDelay: '0.4s'}}></div>
+                          </div>
+                          <div>
+                            <p className="text-gray-900 font-semibold text-lg animate-pulse">Ready to Code</p>
+                            <p className="text-gray-600">Let's Start Building!</p>
+                          </div>
+                        </div>
                     </div>
                   </div>
                 </div>
