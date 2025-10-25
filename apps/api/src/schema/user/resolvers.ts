@@ -53,16 +53,6 @@ export const userResolvers = {
           throw new Error('Invalid email or password');
         }
 
-        console.log(
-          'user', user,
-          'tenant', user.tenant,
-          'tenant._id', user.tenant._id,
-          'tenant.toString', user.tenant.toString(),
-          'tenant._id?.toString', user.tenant._id?.toString(),
-          'tenant.toString()', user.tenant.toString(),
-          'tenant._id?.toString()', user.tenant._id?.toString(),
-          'tenant.toString()', user.tenant.toString(),
-        );
         // Generate JWT token with tenant-specific key
         const token = generateToken({
           id: user._id.toString(),

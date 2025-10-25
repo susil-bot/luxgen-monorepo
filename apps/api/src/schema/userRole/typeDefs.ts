@@ -47,6 +47,7 @@ export const userRoleTypeDefs = `
   type User {
     id: ID!
     email: String!
+    username: String 
     firstName: String!
     lastName: String!
     role: UserRole!
