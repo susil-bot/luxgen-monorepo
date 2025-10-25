@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       name: `${tenant.charAt(0).toUpperCase() + tenant.slice(1)} User`,
       email: `user@${tenant}.com`,
       role: 'ADMIN',
-      avatar: `/avatars/${tenant}-user.jpg`,
+      avatar: undefined, // Use initials instead of non-existent avatar
       tenant: {
         id: tenant,
         name: `${tenant.charAt(0).toUpperCase() + tenant.slice(1)} Company`,

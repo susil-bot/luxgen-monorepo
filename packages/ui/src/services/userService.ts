@@ -87,7 +87,7 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
         name: `User from ${tenantConfig.name}`,
         email: `user@${tenantConfig.subdomain}.com`,
         role: 'User',
-        avatar: `/avatars/${tenantConfig.subdomain}-user.jpg`,
+        avatar: undefined, // Use initials instead of non-existent avatar
         tenant: {
           name: tenantConfig.name,
           subdomain: tenantConfig.subdomain,
@@ -299,7 +299,7 @@ export const authenticateUser = async (tenantId: string, credentials: { email: s
         name: `${displayName} from ${tenantConfig.name}`, // Use actual user name from email
         email: credentials.email, // Use the actual email provided
         role: 'User',
-        avatar: `/avatars/${tenantConfig.subdomain}-user.jpg`,
+        avatar: undefined, // Use initials instead of non-existent avatar
         tenant: {
           name: tenantConfig.name,
           subdomain: tenantConfig.subdomain,
