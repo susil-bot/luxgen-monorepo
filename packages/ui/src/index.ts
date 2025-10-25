@@ -19,6 +19,9 @@ export * from './Checkbox';
 export * from './RadioGroup';
 export * from './Switch';
 
+// Authentication Components
+export * from './Logout';
+
 // Display Components
 export * from './Chip';
 export * from './UserManagement';
