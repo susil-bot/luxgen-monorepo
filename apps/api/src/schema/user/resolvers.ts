@@ -57,7 +57,7 @@ export const userResolvers = {
         const token = generateToken({
           id: user._id.toString(),
           email: user.email,
-          tenant: user.tenant._id?.toString(),
+          tenant: user.tenant.toString(),
           role: user.role,
         }, user.tenant._id?.toString());
 
@@ -66,7 +66,7 @@ export const userResolvers = {
           user,
         };
       } catch (error) {
-        throw new Error(error.message || 'Login failed');
+        throw new Error((error as Error).message || 'Login failed');
       }
     },
     register: async (_: any, { input }: { input: any }) => {
@@ -94,7 +94,7 @@ export const userResolvers = {
         const token = generateToken({
           id: user._id.toString(),
           email: user.email,
-          tenant: user.tenant._id?.toString(),
+          tenant: user.tenant.toString(),
           role: user.role,
         }, user.tenant._id?.toString());
 
@@ -103,7 +103,7 @@ export const userResolvers = {
           user,
         };
       } catch (error) {
-        throw new Error(error.message || 'Registration failed');
+        throw new Error((error as Error).message || 'Registration failed');
       }
     },
   },

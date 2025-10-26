@@ -7,6 +7,7 @@ import { userTypeDefs } from './user/typeDefs';
 import { courseTypeDefs } from './course/typeDefs';
 import { groupTypeDefs } from './group/typeDefs';
 import { dashboardTypeDefs } from './dashboard/typeDefs';
+import { userRoleTypeDefs } from './userRole/typeDefs';
 
 // Import resolvers
 import { tenantResolvers } from './tenant/resolvers';
@@ -14,6 +15,7 @@ import { userResolvers } from './user/resolvers';
 import { courseResolvers } from './course/resolvers';
 import { groupResolvers } from './group/resolvers';
 import { dashboardResolvers } from './dashboard/resolvers';
+import { userRoleResolvers } from './userRole/resolvers';
 
 // Base schema
 const baseTypeDefs = `
@@ -41,6 +43,7 @@ export const typeDefs = mergeTypeDefs([
   courseTypeDefs,
   groupTypeDefs,
   dashboardTypeDefs,
+  userRoleTypeDefs,
 ]);
 
 // Scalar resolvers
@@ -83,6 +86,7 @@ export const resolvers: any = mergeResolvers([
   courseResolvers,
   groupResolvers,
   dashboardResolvers,
+  userRoleResolvers,
 ]);
 
 // Create executable schema
