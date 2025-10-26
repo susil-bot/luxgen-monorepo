@@ -26,17 +26,21 @@
     "select-tenant": "node scripts/select-tenant.js"
   },
   "devDependencies": {
-    "turbo": "^1.10.0",
     "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "tailwindcss": "^3.4.0",
-    "autoprefixer": "^10.4.21",
-    "postcss": "^8.5.6",
-    "eslint": "^8.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0"
+    "@typescript-eslint/parser": "^6.0.0",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^8.0.0",
+    "postcss": "^8.5.6",
+    "tailwindcss": "^3.4.0",
+    "turbo": "^1.10.0",
+    "typescript": "^5.0.0"
   },
   "engines": {
     "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "classnames": "^2.5.1",
+    "prop-types": "^15.8.1"
   }
 }

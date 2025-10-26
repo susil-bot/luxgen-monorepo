@@ -1,61 +1,16 @@
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/router';
+import React from 'react';
 import Head from 'next/head';
-import { SnackbarProvider, useSnackbar, AppLayout, getDefaultNavItems, getDefaultMenuItems, getDefaultUser, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { useRouter } from 'next/router';
 
-const GroupsPageContent: React.FC = () => {
+export default function GroupsPage() {
   const router = useRouter();
-  const { showSuccess, showError, showInfo } = useSnackbar();
-  const [user, setUser] = useState<any>(null);
 
-  // Load user data
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser({
-          name: `${parsedUser.firstName} ${parsedUser.lastName}`,
-          email: parsedUser.email,
-          role: parsedUser.role,
-          tenant: parsedUser.tenant,
-        });
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        setUser(getDefaultUser());
-      }
-    } else {
-      setUser(getDefaultUser());
-    }
-  }, []);
-
-  // Handle user actions
-  const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
-    switch (action) {
-      case 'profile':
-        router.push('/profile');
-        break;
-      case 'settings':
-        router.push('/settings');
-        break;
-      case 'logout':
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        router.push('/login');
-        break;
-    }
+  const handleCreateGroup = () => {
+    router.push('/groups/create');
   };
 
-  // Handle search
-  const handleSearch = (query: string) => {
-    console.log('Search query:', query);
-    // TODO: Implement search functionality
-  };
-
-  // Handle notifications
-  const handleNotificationClick = () => {
-    console.log('Notification clicked');
-    // TODO: Implement notification functionality
+  const handleViewAnalytics = () => {
+    router.push('/groups/analytics');
   };
 
   return (
@@ -64,105 +19,71 @@ const GroupsPageContent: React.FC = () => {
         <title>Groups - LuxGen</title>
         <meta name="description" content="Manage your groups and team members" />
       </Head>
-
-      <AppLayout
-        menuItems={getDefaultMenuItems()}
-        sidebarSections={getDefaultSidebarSections()}
-        user={user}
-        onUserAction={handleUserAction}
-        onSearch={handleSearch}
-        onNotificationClick={handleNotificationClick}
-        showSearch={true}
-        showNotifications={true}
-        notificationCount={3}
-        searchPlaceholder="Search groups, users..."
-        logo={getDefaultLogo()}
-        menuPosition="top"
-        menuVariant="default"
-        menuCollapsible={true}
-        menuDefaultCollapsed={false}
-        sidebarCollapsible={true}
-        sidebarDefaultCollapsed={false}
-        responsive={true}
-      >
+      
+      <div className="min-h-screen bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
           <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">Groups</h1>
-                <p className="mt-2 text-gray-600">Manage your groups and team members</p>
-              </div>
-              <div className="flex space-x-3">
-                <button
-                  onClick={() => router.push('/groups/create')}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200"
-                >
-                  Create Group
-                </button>
-                <button
-                  onClick={() => router.push('/groups/analytics')}
-                  className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors duration-200"
-                >
-                  View Analytics
-                </button>
-              </div>
-            </div>
+            <h1 className="text-3xl font-bold text-gray-900">Groups</h1>
+            <p className="mt-2 text-gray-600">Manage your groups and team members</p>
           </div>
 
-          {/* Groups List */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div className="px-6 py-4 border-b border-gray-200">
-              <h2 className="text-lg font-semibold text-gray-900">All Groups</h2>
+          {/* Action Buttons */}
+          <div className="mb-8 flex space-x-4">
+            <button
+              onClick={handleCreateGroup}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            >
+              Create New Group
+            </button>
+            <button
+              onClick={handleViewAnalytics}
+              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
+            >
+              View Analytics
+            </button>
+          </div>
+
+          {/* Groups Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Sample Group Cards */}
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Development Team</h3>
+              <p className="text-gray-600 mb-4">Software development and engineering team</p>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-500">12 members</span>
+                <div className="flex space-x-2">
+                  <button className="text-blue-600 hover:text-blue-800 text-sm">Edit</button>
+                  <button className="text-red-600 hover:text-red-800 text-sm">Delete</button>
+                </div>
+              </div>
             </div>
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {/* Sample Groups */}
-                <div className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow duration-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Development Team</h3>
-                  <p className="text-sm text-gray-600 mb-4">Software development team</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">8 members</span>
-                    <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                      View Details
-                    </button>
-                  </div>
-                </div>
 
-                <div className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow duration-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Marketing Team</h3>
-                  <p className="text-sm text-gray-600 mb-4">Marketing and communications</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">5 members</span>
-                    <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                      View Details
-                    </button>
-                  </div>
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Marketing Team</h3>
+              <p className="text-gray-600 mb-4">Marketing and communications team</p>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-500">8 members</span>
+                <div className="flex space-x-2">
+                  <button className="text-blue-600 hover:text-blue-800 text-sm">Edit</button>
+                  <button className="text-red-600 hover:text-red-800 text-sm">Delete</button>
                 </div>
+              </div>
+            </div>
 
-                <div className="p-4 border border-gray-200 rounded-lg hover:shadow-md transition-shadow duration-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">Sales Team</h3>
-                  <p className="text-sm text-gray-600 mb-4">Sales and customer relations</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">12 members</span>
-                    <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                      View Details
-                    </button>
-                  </div>
+            <div className="bg-white shadow rounded-lg p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Design Team</h3>
+              <p className="text-gray-600 mb-4">UI/UX design and creative team</p>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-500">6 members</span>
+                <div className="flex space-x-2">
+                  <button className="text-blue-600 hover:text-blue-800 text-sm">Edit</button>
+                  <button className="text-red-600 hover:text-red-800 text-sm">Delete</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </AppLayout>
+      </div>
     </>
-  );
-};
-
-export default function Groups() {
-  return (
-    <SnackbarProvider position="top-right" maxSnackbars={3}>
-      <GroupsPageContent />
-    </SnackbarProvider>
   );
 }

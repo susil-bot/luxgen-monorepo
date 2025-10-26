@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { SnackbarProvider, useSnackbar, AppLayout, getDefaultNavItems, getDefaultUser, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { SnackbarProvider, useSnackbar, AppLayout, getDefaultNavItems, getDefaultUser, getDefaultLogo, getDefaultSidebarSections, Button } from '@luxgen/ui';
 
 interface GroupDashboardData {
   id: string;
@@ -179,18 +179,22 @@ const GroupDashboardPageContent: React.FC = () => {
                 <p className="mt-2 text-gray-600">Manage and monitor your groups</p>
               </div>
               <div className="flex space-x-3">
-                <button
+                <Button
+                  variant="primary"
+                  size="md"
                   onClick={() => router.push('/groups/create')}
-                  className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors duration-200"
+                  className="px-4 py-2"
                 >
                   Create Group
-                </button>
-                <button
+                </Button>
+                <Button
+                  variant="secondary"
+                  size="md"
                   onClick={() => router.push('/groups/analytics')}
-                  className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors duration-200"
+                  className="px-4 py-2"
                 >
                   View Analytics
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -269,18 +273,22 @@ const GroupDashboardPageContent: React.FC = () => {
                 <p className="text-sm text-gray-600 mb-4">Active Users: {group.activeUsers}</p>
                 <p className="text-sm text-gray-600 mb-4">Status: {group.status}</p>
                 <div className="flex space-x-2">
-                  <button
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => handleEditGroup(group.id)}
-                    className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700"
+                    className="px-3 py-1"
                   >
                     Edit
-                  </button>
-                  <button
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => handleViewDetails(group.id)}
-                    className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700"
+                    className="px-3 py-1"
                   >
                     View Details
-                  </button>
+                  </Button>
                 </div>
               </div>
             ))}
@@ -292,7 +300,7 @@ const GroupDashboardPageContent: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <button
                 onClick={() => router.push('/groups/create')}
-                className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors duration-200"
+                className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors duration-200 w-full"
               >
                 <div className="text-center">
                   <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -305,7 +313,7 @@ const GroupDashboardPageContent: React.FC = () => {
 
               <button
                 onClick={() => router.push('/users/invite')}
-                className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-400 hover:bg-green-50 transition-colors duration-200"
+                className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-green-400 hover:bg-green-50 transition-colors duration-200 w-full"
               >
                 <div className="text-center">
                   <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -318,7 +326,7 @@ const GroupDashboardPageContent: React.FC = () => {
 
               <button
                 onClick={() => router.push('/reports/generate')}
-                className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-400 hover:bg-purple-50 transition-colors duration-200"
+                className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-purple-400 hover:bg-purple-50 transition-colors duration-200 w-full"
               >
                 <div className="text-center">
                   <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

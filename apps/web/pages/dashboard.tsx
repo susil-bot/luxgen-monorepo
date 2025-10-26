@@ -84,13 +84,43 @@ export default function Dashboard({ tenant }: DashboardProps) {
       </Head>
       
       <AdminDashboardLayout
-        currentTenant={tenant}
+        currentTenant={{
+          name: tenant.charAt(0).toUpperCase() + tenant.slice(1),
+          subdomain: tenant
+        }}
         user={user ? {
           name: user.name,
           email: user.email,
-          role: user.role,
+          role: user.role || 'User',
           initials: user.name.split(' ').map(n => n[0]).join('')
         } : undefined}
+        bannerCarousel={{
+          banners: [
+            {
+              id: '1',
+              title: 'Welcome to Ideavibes',
+              description: 'Your learning management dashboard',
+              image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80',
+              buttonText: 'Get Started'
+            },
+            {
+              id: '2',
+              title: 'Explore New Courses',
+              description: 'Discover our latest learning content and enhance your skills',
+              image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+              buttonText: 'Browse Courses'
+            },
+            {
+              id: '3',
+              title: 'Track Your Progress',
+              description: 'Monitor your learning journey and achieve your goals',
+              image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+              buttonText: 'View Analytics'
+            }
+          ],
+          autoPlay: true,
+          interval: 5000
+        }}
         dashboardData={transformedDashboardData}
         variant="default"
         loading={dataLoading}
