@@ -12,6 +12,7 @@ export interface RegisterFormData {
   email: string;
   password: string;
   confirmPassword: string;
+  role: string;
   agreeToTerms: boolean;
 }
 
@@ -35,6 +36,7 @@ export interface RegisterFormProps {
   emailLabel?: string;
   passwordLabel?: string;
   confirmPasswordLabel?: string;
+  roleLabel?: string;
   agreeToTermsLabel?: string;
   loginText?: string;
   loginLinkText?: string;
@@ -70,6 +72,7 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
   emailLabel = 'Email address',
   passwordLabel = 'Password',
   confirmPasswordLabel = 'Confirm password',
+  roleLabel = 'Role',
   agreeToTermsLabel = 'I agree to the Terms of Service and Privacy Policy',
   loginText = 'Already have an account?',
   loginLinkText = 'Sign in here',
@@ -82,6 +85,7 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
     email: '',
     password: '',
     confirmPassword: '',
+    role: 'USER',
     agreeToTerms: false,
   });
   const [errors, setErrors] = useState<Partial<RegisterFormData>>({});
@@ -103,13 +107,15 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
         email: '',
         password: '',
         confirmPassword: '',
+        role: 'USER',
         agreeToTerms: false,
       });
     }
   }, [success, loading]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value, type, checked } = e.target;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    const checked = 'checked' in e.target ? e.target.checked : false;
     setFormData(prev => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
@@ -148,6 +154,11 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
       newErrors.confirmPassword = 'Please confirm your password';
     } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
+    }
+    
+    // Role validation
+    if (!formData.role) {
+      newErrors.role = 'Please select a role';
     }
     
     // Terms agreement validation
@@ -222,6 +233,7 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
                      formData.email.trim() && 
                      formData.password && 
                      formData.confirmPassword && 
+                     formData.role && 
                      (!showTermsAgreement || formData.agreeToTerms) && 
                      Object.keys(errors).length === 0;
   const isDisabled = loading || isSubmitting;
@@ -329,6 +341,32 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
           />
           {errors.email && (
             <p className="mt-1 text-sm text-red-400">{errors.email}</p>
+          )}
+        </div>
+
+        {/* Role Field */}
+        <div>
+          <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+            {roleLabel}
+          </label>
+          <select
+            id="role"
+            name="role"
+            value={formData.role}
+            onChange={handleInputChange}
+            disabled={loading || isSubmitting}
+            className={`w-full px-4 py-3 bg-white/90 border rounded-lg text-gray-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 ${
+              errors.role ? 'border-red-500' : 'border-gray-300'
+            }`}
+            required
+          >
+            <option value="">Select a role</option>
+            <option value="USER">User</option>
+            <option value="ADMIN">Admin</option>
+            <option value="SUPER_ADMIN">Super Admin</option>
+          </select>
+          {errors.role && (
+            <p className="mt-1 text-sm text-red-400">{errors.role}</p>
           )}
         </div>
 

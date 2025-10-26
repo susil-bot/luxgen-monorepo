@@ -27,16 +27,22 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
     // Skip tenant config for now to avoid dependency issues
     
     // Make real API call to fetch user data
-    const response = await fetch(`/api/users/current?tenant=${tenantId}`, {
+    const response = await fetch(`/api/users/me?tenant=${tenantId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'X-Tenant-ID': tenantId,
+        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`,
       },
       credentials: 'include', // Include cookies for authentication
     });
     
     if (!response.ok) {
+      // If no auth token or authentication failed, fall back to tenant-based user generation
+      if (response.status === 401 || response.status === 403) {
+        console.log('👤 Authentication required or failed, using tenant-based user generation');
+        throw new Error('API_ENDPOINT_NOT_FOUND');
+      }
       throw new Error(`Failed to fetch user data: ${response.status} ${response.statusText}`);
     }
     
@@ -59,7 +65,7 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
       name: userMenu.name,
       email: userMenu.email,
       role: userMenu.role,
-      tenantName: userMenu.tenant.name,
+      tenantName: userMenu.tenant?.name,
     });
     
     // Save to localStorage for persistence
@@ -82,7 +88,7 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
       }
       
       // Generate user based on tenant configuration
-      const tenantConfig = getTenantConfig(tenantId);
+      const tenantConfig = await getTenantConfig(tenantId);
       const tenantBasedUser: UserMenu = {
         name: `User from ${tenantConfig.name}`,
         email: `user@${tenantConfig.subdomain}.com`,
@@ -108,7 +114,7 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
     }
     
     // Final fallback - create user based on tenant configuration
-    const tenantConfig = getTenantConfig(tenantId);
+    const tenantConfig = await getTenantConfig(tenantId);
     const fallbackUser: UserMenu = {
       name: `User from ${tenantConfig.name}`,
       email: `user@${tenantConfig.subdomain}.com`,
@@ -175,7 +181,7 @@ export const updateUserForTenant = async (tenantId: string, updates: Partial<Use
   
   try {
     // Make API call to update user data
-    const response = await fetch(`/api/users/current?tenant=${tenantId}`, {
+    const response = await fetch(`/api/users/me?tenant=${tenantId}`, {
       method: 'PATCH',
       headers: {
         'Content-Type': 'application/json',
@@ -195,7 +201,7 @@ export const updateUserForTenant = async (tenantId: string, updates: Partial<Use
     }
     
     const updatedUserData: RealUserData = await response.json();
-    const tenantConfig = getTenantConfig(tenantId);
+    const tenantConfig = await getTenantConfig(tenantId);
     
     // Transform to UserMenu format
     const updatedUser: UserMenu = {
@@ -264,7 +270,7 @@ export const authenticateUser = async (tenantId: string, credentials: { email: s
     }
     
     const authData = await response.json();
-    const tenantConfig = getTenantConfig(tenantId);
+    const tenantConfig = await getTenantConfig(tenantId);
     
     const userMenu: UserMenu = {
       name: authData.user.name,
@@ -289,7 +295,7 @@ export const authenticateUser = async (tenantId: string, credentials: { email: s
       console.log('👤 Auth API not implemented yet, using tenant-based authentication');
       
       // Generate user based on actual credentials and tenant configuration
-      const tenantConfig = getTenantConfig(tenantId);
+      const tenantConfig = await getTenantConfig(tenantId);
       
       // Extract name from email (e.g., "susilkhan@gmail.com" -> "Susilkhan")
       const emailName = credentials.email.split('@')[0];

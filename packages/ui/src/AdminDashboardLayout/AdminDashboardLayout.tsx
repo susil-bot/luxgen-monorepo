@@ -25,6 +25,18 @@ export interface AdminDashboardLayoutProps extends BaseComponentProps {
     initials?: string;
     role: string;
   };
+  bannerCarousel?: {
+    banners: Array<{
+      id: string;
+      title: string;
+      description: string;
+      image: string;
+      link?: string;
+      buttonText?: string;
+    }>;
+    autoPlay?: boolean;
+    interval?: number;
+  };
   dashboardData?: {
     title?: string;
     subtitle?: string;
@@ -106,6 +118,7 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
   tenantTheme = defaultTheme,
   currentTenant,
   user = getDefaultUser(),
+  bannerCarousel,
   dashboardData = {},
   variant = 'default',
   loading = false,
@@ -171,6 +184,7 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
             title={dashboardData.title || 'Admin Dashboard'}
             subtitle={dashboardData.subtitle}
             currentTenant={currentTenant}
+            bannerCarousel={bannerCarousel}
             stats={dashboardData.stats}
             retentionData={dashboardData.retentionData}
             engagementData={dashboardData.engagementData}

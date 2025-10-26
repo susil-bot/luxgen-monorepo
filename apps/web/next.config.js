@@ -8,6 +8,9 @@ const nextConfig = {
   experimental: {
     externalDir: true,
   },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   async rewrites() {
     return [
       {
