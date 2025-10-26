@@ -33,6 +33,7 @@ export * from './InputWithLabel';
 export * from './LoginForm';
 export * from './RegisterForm';
 export * from './RegisterVisual';
+export * from './EditProfile';
 
 // Search and Navigation Components
 export * from './SearchBar';
