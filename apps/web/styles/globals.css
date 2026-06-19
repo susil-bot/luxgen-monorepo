@@ -831,26 +831,79 @@
     background-color: var(--color-bg-tertiary);
   }
 
-  /* Shopify-style product edit — two-column layout */
-  .product-edit-layout {
+  /* ── Split page layout (Shopify admin — products, orders, settings) ───── */
+  .split-page {
+    min-height: 100%;
+    background-color: var(--color-bg-secondary);
+    margin: -1rem;
+    padding: 1.5rem 1rem;
+  }
+
+  .admin-list-page {
+    min-height: 100%;
+    background-color: var(--color-bg-secondary);
+    margin: -1rem;
+  }
+  @media (min-width: 640px) {
+    .split-page {
+      margin: -1rem;
+      padding: 1.5rem 1.5rem;
+    }
+  }
+  @media (min-width: 1024px) {
+    .split-page {
+      padding: 1.5rem 2rem;
+    }
+  }
+
+  .split-page .ios-card {
+    background-color: var(--color-bg-primary);
+    border: 1px solid var(--color-separator);
+  }
+
+  .admin-list-page .ios-card {
+    background-color: var(--color-bg-primary);
+    border: 1px solid var(--color-separator);
+  }
+
+  .split-page-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 320px;
     gap: 20px;
     align-items: start;
   }
 
-  .product-edit-sidebar {
+  .split-page-grid--main-aside {
+    grid-template-columns: minmax(0, 1fr) 320px;
+  }
+
+  .split-page-grid--nav-main {
+    grid-template-columns: 240px minmax(0, 1fr);
+  }
+
+  .split-page-grid--triple {
+    grid-template-columns: 320px minmax(0, 1fr) 320px;
+    gap: 16px;
+  }
+
+  .split-page-sticky {
     position: sticky;
     top: 72px;
   }
 
   @media (max-width: 1024px) {
-    .product-edit-layout {
+    .split-page-grid--main-aside,
+    .split-page-grid--nav-main {
       grid-template-columns: 1fr;
     }
 
-    .product-edit-sidebar {
+    .split-page-sticky {
       position: static;
+    }
+  }
+
+  @media (max-width: 1200px) {
+    .split-page-grid--triple {
+      grid-template-columns: 1fr;
     }
   }
 

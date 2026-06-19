@@ -71,26 +71,40 @@ Mobile: single column — main sections first, sidebar stacks below (`@media max
 
 ## Component registry
 
+Each component lives under `packages/ui/src/ProductEdit/` and follows the scalable UI structure:
+
+```
+ComponentName/
+├── ComponentName.tsx
+├── fetcher.ts          # Constants, options, data helpers
+├── fixture.ts          # Story/test props
+└── index.ts
+```
+
+Shell components also include `styles.ts`, `translations.ts`, and `README.md` at the `ProductEdit/` root.
+
 | Component | Path | Status |
 |-----------|------|--------|
-| `ProductEditLayout` | `components/products/edit/ProductEditLayout.tsx` | **Live** |
-| `ProductEditSection` | `components/products/edit/ProductEditSection.tsx` | **Live** |
-| `ProductEditHeader` | `components/products/edit/ProductEditHeader.tsx` | **Live** |
-| `TitleDescriptionSection` | `components/products/edit/sections/TitleDescriptionSection.tsx` | **Live** |
-| `MediaSection` | `components/products/edit/sections/MediaSection.tsx` | Partial (UI) |
-| `CategorySection` | `components/products/edit/sections/CategorySection.tsx` | Partial |
-| `PricingSection` | `components/products/edit/sections/PricingSection.tsx` | Partial |
-| `InventorySection` | `components/products/edit/sections/InventorySection.tsx` | Partial |
-| `DeliverySection` | `components/products/edit/sections/DeliverySection.tsx` | Partial |
-| `VariantsSection` | `components/products/edit/sections/VariantsSection.tsx` | Planned shell |
-| `MetafieldsSection` | `components/products/edit/sections/MetafieldsSection.tsx` | Partial |
-| `SearchListingSection` | `components/products/edit/sections/SearchListingSection.tsx` | **Live** |
-| `StatusSection` | `components/products/edit/sidebar/StatusSection.tsx` | **Live** |
-| `PublishingSection` | `components/products/edit/sidebar/PublishingSection.tsx` | Partial |
-| `SalesSection` | `components/products/edit/sidebar/SalesSection.tsx` | Partial |
-| `OrganizationSection` | `components/products/edit/sidebar/OrganizationSection.tsx` | Partial |
-| `ThemeTemplateSection` | `components/products/edit/sidebar/ThemeTemplateSection.tsx` | Partial |
-| `ProductEditForm` | `components/products/edit/ProductEditForm.tsx` | **Live** |
+| `ProductEditLayout` | `packages/ui/src/ProductEdit/ProductEditLayout.tsx` | **Live** |
+| `ProductEditSection` | `packages/ui/src/ProductEdit/ProductEditSection.tsx` | **Live** |
+| `ProductEditHeader` | `packages/ui/src/ProductEdit/ProductEditHeader.tsx` | **Live** |
+| `TitleDescriptionSection` | `packages/ui/src/ProductEdit/sections/TitleDescriptionSection/` | **Live** |
+| `MediaSection` | `packages/ui/src/ProductEdit/sections/MediaSection/` | Partial (UI) |
+| `CategorySection` | `packages/ui/src/ProductEdit/sections/CategorySection/` | Partial |
+| `PricingSection` | `packages/ui/src/ProductEdit/sections/PricingSection/` | Partial |
+| `InventorySection` | `packages/ui/src/ProductEdit/sections/InventorySection/` | Partial |
+| `DeliverySection` | `packages/ui/src/ProductEdit/sections/DeliverySection/` | Partial |
+| `VariantsSection` | `packages/ui/src/ProductEdit/sections/VariantsSection/` | Planned shell |
+| `MetafieldsSection` | `packages/ui/src/ProductEdit/sections/MetafieldsSection/` | Partial |
+| `SearchListingSection` | `packages/ui/src/ProductEdit/sections/SearchListingSection/` | **Live** |
+| `StatusSection` | `packages/ui/src/ProductEdit/sidebar/StatusSection/` | **Live** |
+| `PublishingSection` | `packages/ui/src/ProductEdit/sidebar/PublishingSection/` | Partial |
+| `SalesSection` | `packages/ui/src/ProductEdit/sidebar/SalesSection/` | Partial |
+| `OrganizationSection` | `packages/ui/src/ProductEdit/sidebar/OrganizationSection/` | Partial |
+| `ThemeTemplateSection` | `packages/ui/src/ProductEdit/sidebar/ThemeTemplateSection/` | Partial |
+| `ProductEditForm` | `packages/ui/src/ProductEdit/ProductEditForm.tsx` | **Live** |
+
+Import from `@luxgen/ui`. Page wiring: `apps/web/pages/products/[id]/edit.tsx`.
 
 ---
 
@@ -99,8 +113,8 @@ Mobile: single column — main sections first, sidebar stacks below (`@media max
 | Field group | GraphQL / API today | Persistence plan |
 |-------------|---------------------|------------------|
 | Title, description, status | `UPDATE_COURSE` | **Live** |
-| SEO (meta title, description, handle) | Embedded in `description` via `product-seo.ts` | **Live** |
-| Extended meta (category, tags, price display) | `product-edit-meta.ts` in description JSON | Phase 3 |
+| SEO (meta title, description, handle) | `ProductEdit/fetcher.ts` — embedded in `description` | **Live** |
+| Extended meta (category, tags, price display) | `ProductEdit/fetcher.ts` — description JSON footer | Phase 3 |
 | Media | — | `POST /api/courses/:id/media` |
 | Groups (collections) | `GET_GROUPS` + link mutation | Phase 3 |
 | Pricing | `GET_TENANT_BILLING` / Stripe | `/billing` |
@@ -122,8 +136,9 @@ Mobile: single column — main sections first, sidebar stacks below (`@media max
 
 - `docs/PROFILE_SETTINGS_FEATURE_MAP.md` — products catalog overview
 - `skills/ios-design/SKILL.md` — tokens and `.ios-card` rules
-- `apps/web/lib/product-seo.ts` — SEO serialization
-- `apps/web/lib/product-edit-meta.ts` — extended form meta (Phase 3)
+- `packages/ui/src/ProductEdit/README.md` — component usage
+- `packages/ui/src/ProductEdit/fetcher.ts` — parse/serialize + course mapping
+- `apps/web/lib/product-edit-meta.ts` — re-exports from `@luxgen/ui` (compat)
 
 ---
 

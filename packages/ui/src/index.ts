@@ -3,6 +3,7 @@ export * from './PageWrapper';
 export * from './Header';
 export * from './Footer';
 export * from './GridContainer';
+export * from './SplitPageLayout';
 export * from './Layout';
 
 // Navigation Components
@@ -47,6 +48,9 @@ export * from './Carousel';
 export * from './Accordion';
 export * from './Card';
 export * from './ProductCard';
+export * from './ProductEdit';
+export * from './Order';
+export * from './Customer';
 export * from './Modal';
 export * from './Table';
 

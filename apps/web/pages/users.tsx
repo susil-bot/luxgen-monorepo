@@ -93,10 +93,10 @@ export default function UsersPage({ tenant }: UsersPageProps) {
       >
         <TenantBanner tenant={tenant} />
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-2 space-y-8">
+        <div className="split-page admin-list-page max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-2 space-y-8">
           <div>
-            <h1 className="ios-large-title">Users</h1>
-            <p className="mt-1 text-secondary text-sm">Tenant members and role assignments</p>
+            <h1 className="ios-large-title">User management</h1>
+            <p className="mt-1 text-secondary text-sm">App-level tenant members — admins, instructors, and staff</p>
           </div>
 
           {error && users.length === 0 && (
