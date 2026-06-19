@@ -14,9 +14,9 @@
 | P0 | Dashboard `/dashboard` | GraphQL | ✅ | Loading/empty states use iOS tokens |
 | P0 | Home `/` | redirect | ✅ | iOS landing page |
 | P0 | 404 | — | ✅ | iOS quick-nav buttons |
-| P1 | Users `/users` | mock | ✅ | Full iOS card/table restyle (data still mock — Phase 1.1) |
-| P1 | Courses `/courses`, `/courses/[id]` | mock | 🟡 | iOS loading + layout shell; mock data — Phase 1.1 |
-| P1 | Groups detail `/groups/[id]/*` | mock | 🟡 | Loading/empty iOS; some pages still need card pass |
+| P1 | Users `/users` | mock | ✅ UI | iOS restyle done; GraphQL wiring — Phase 1.1c |
+| P1 | Courses `/courses`, `/courses/[id]` | mock | 🟡 | iOS shell done; GraphQL — Phase 1.1b |
+| P1 | Groups `/groups/*` | GraphQL | ✅ | Phase 1.1 — real data + `ios-metric-tile` dashboard |
 | P2 | Plan gate overlay | `@luxgen/billing` | ✅ | Token names fixed |
 | ✅ | Automations `/automations` | GraphQL | ✅ | Reference implementation |
 | ✅ | Billing `/billing` | GraphQL + Stripe | ✅ | |
@@ -28,10 +28,10 @@
 | ✅ | Developer hub `/developer` | — | ✅ | |
 | ✅ | Customers `/customers` | partial | ✅ | |
 | ✅ | Admin listings `/admin/listings` | GraphQL | ✅ | |
-| ✅ | Groups index/create/analytics | mock | ✅ | Reference for groups UI |
+| ✅ | Groups index/create/dashboard/detail | GraphQL | ✅ | Phase 1.1 |
 | ✅ | Courses create/edit/analytics | partial | ✅ | |
 | ⬜ | Banner demo `/banner-demo` | demo | ❌ | Low priority internal demo |
-| ⬜ | Legacy layout components | — | 🟡 | `components/layout/*` still has gray Tailwind |
+| ✅ | Layout Header/Footer | — | ✅ | Design tokens (home page) |
 
 ---
 

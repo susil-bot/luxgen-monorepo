@@ -1,6 +1,5 @@
-import { useState } from 'react';
-import { Button } from '../common/Button';
-import { logout } from '../../lib/auth';
+import { useRouter } from 'next/router';
+import { performLogout } from '../../lib/user-actions';
 
 interface HeaderProps {
   user?: {
@@ -11,39 +10,37 @@ interface HeaderProps {
 }
 
 export function Header({ user }: HeaderProps) {
-  const [_isMenuOpen, _setIsMenuOpen] = useState(false);
+  const router = useRouter();
 
   const handleLogout = () => {
-    logout();
+    performLogout({ router });
   };
 
   return (
-    <header className="bg-white shadow-sm border-b">
+    <header style={{ background: 'var(--color-bg-secondary)', borderBottom: '1px solid var(--color-separator)' }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
-            <h1 className="text-xl font-semibold text-gray-900">LuxGen</h1>
-          </div>
+          <h1 className="text-xl font-semibold text-primary">LuxGen</h1>
 
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center gap-3">
             {user ? (
-              <div className="flex items-center space-x-4">
-                <span className="text-sm text-gray-700">
-                  Welcome, {user.firstName} {user.lastName}
+              <>
+                <span className="text-sm text-secondary">
+                  {user.firstName} {user.lastName}
                 </span>
-                <Button onClick={handleLogout} variant="outline" size="sm">
-                  Logout
-                </Button>
-              </div>
+                <button type="button" className="ios-btn-secondary text-sm" onClick={handleLogout}>
+                  Sign out
+                </button>
+              </>
             ) : (
-              <div className="flex items-center space-x-4">
-                <Button href="/login" variant="outline" size="sm">
-                  Login
-                </Button>
-                <Button href="/register" size="sm">
-                  Sign Up
-                </Button>
-              </div>
+              <>
+                <button type="button" className="ios-btn-secondary text-sm" onClick={() => router.push('/login')}>
+                  Sign in
+                </button>
+                <button type="button" className="ios-btn-primary text-sm" onClick={() => router.push('/register')}>
+                  Create account
+                </button>
+              </>
             )}
           </div>
         </div>

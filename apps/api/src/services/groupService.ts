@@ -3,6 +3,21 @@ import { Group, GroupMember, Tenant } from '@luxgen/db';
 import { Types } from 'mongoose';
 
 export class GroupService {
+  /** Resolve tenant Mongo id from context subdomain */
+  private static async resolveTenantId(context: Context): Promise<string | null> {
+    const { tenant } = context;
+
+    if (!tenant) return null;
+
+    if (tenant !== 'demo') {
+      const tenantDoc = await Tenant.findOne({ subdomain: tenant });
+      return tenantDoc?._id.toString() ?? null;
+    }
+
+    const demoTenant = await Tenant.findOne({ subdomain: 'demo' });
+    return demoTenant?._id.toString() ?? null;
+  }
+
   // Get groups with pagination and filtering
   static async getGroups(
     context: Context,
@@ -22,21 +37,7 @@ export class GroupService {
       throw new Error('Tenant not found');
     }
 
-    // Find tenant by subdomain or use default
-    let tenantId: string | null = null;
-
-    if (tenant && tenant !== 'demo') {
-      const tenantDoc = await Tenant.findOne({ subdomain: tenant });
-      if (tenantDoc) {
-        tenantId = tenantDoc._id.toString();
-      }
-    } else {
-      // Default to demo tenant
-      const demoTenant = await Tenant.findOne({ subdomain: 'demo' });
-      if (demoTenant) {
-        tenantId = demoTenant._id.toString();
-      }
-    }
+    const tenantId = await GroupService.resolveTenantId(context);
 
     let query: any = { isActive: true };
     if (tenantId) {
@@ -124,10 +125,13 @@ export class GroupService {
       throw new Error('Tenant not found');
     }
 
-    const group = await Group.findOne({
-      _id: new Types.ObjectId(id),
-      tenant: tenant.id,
-    }).lean();
+    const tenantId = await GroupService.resolveTenantId(context);
+    const query: Record<string, unknown> = { _id: new Types.ObjectId(id) };
+    if (tenantId) {
+      query.tenant = tenantId;
+    }
+
+    const group = await Group.findOne(query).lean();
 
     if (!group) {
       throw new Error('Group not found');
@@ -318,12 +322,17 @@ export class GroupService {
       throw new Error('User not found');
     }
 
+    const tenantId = await GroupService.resolveTenantId(context);
+    if (!tenantId) {
+      throw new Error('Tenant not found');
+    }
+
     const group = new Group({
       name: input.name,
       description: input.description,
       color: input.color,
       icon: input.icon,
-      tenant: tenant.id,
+      tenant: tenantId,
       createdBy: user._id.toString(),
       isActive: true,
       settings: {
@@ -360,8 +369,14 @@ export class GroupService {
       throw new Error('Tenant not found');
     }
 
+    const tenantId = await GroupService.resolveTenantId(context);
+    const filter: Record<string, unknown> = { _id: new Types.ObjectId(input.id) };
+    if (tenantId) {
+      filter.tenant = tenantId;
+    }
+
     const group = await Group.findOneAndUpdate(
-      { _id: new Types.ObjectId(input.id), tenant: tenant.id },
+      filter,
       {
         $set: {
           name: input.name,
@@ -400,10 +415,13 @@ export class GroupService {
       throw new Error('Tenant not found');
     }
 
-    const group = await Group.findOneAndDelete({
-      _id: new Types.ObjectId(id),
-      tenant: tenant.id,
-    });
+    const tenantId = await GroupService.resolveTenantId(context);
+    const filter: Record<string, unknown> = { _id: new Types.ObjectId(id) };
+    if (tenantId) {
+      filter.tenant = tenantId;
+    }
+
+    const group = await Group.findOneAndDelete(filter);
 
     if (!group) {
       throw new Error('Group not found');
