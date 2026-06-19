@@ -16,63 +16,62 @@
  */
 
 :root {
-  /* ── Surface ──────────────────────────────────────────────────────────────── */
-  /* The sidebar is always dark, regardless of app light/dark mode toggle.      */
-  /* Always dark for strong visual hierarchy, independent of light/dark mode.     */
-  --lux-sidebar-bg: #1c1c1e; /* macOS system dark surface */
-  --lux-sidebar-border: rgba(255, 255, 255, 0.06);
-  --lux-sidebar-shadow: 4px 0 16px rgba(0, 0, 0, 0.2);
+  /* ── Surface (light — follows app light mode / Shopify-style chrome) ─────── */
+  --lux-sidebar-bg: #f6f6f7;
+  --lux-sidebar-border: rgba(0, 0, 0, 0.08);
+  --lux-sidebar-shadow: 1px 0 0 rgba(0, 0, 0, 0.05);
 
-  /* ── Text on dark sidebar ─────────────────────────────────────────────────── */
-  --lux-text-primary: rgba(255, 255, 255, 0.92);
-  --lux-text-secondary: rgba(255, 255, 255, 0.55);
-  --lux-text-tertiary: rgba(255, 255, 255, 0.32);
-  --lux-text-disabled: rgba(255, 255, 255, 0.22);
+  /* ── Text on light sidebar ───────────────────────────────────────────────── */
+  --lux-text-primary: rgba(0, 0, 0, 0.88);
+  --lux-text-secondary: rgba(0, 0, 0, 0.55);
+  --lux-text-tertiary: rgba(0, 0, 0, 0.35);
+  --lux-text-disabled: rgba(0, 0, 0, 0.22);
 
-  /* ── Accent ───────────────────────────────────────────────────────────────── */
-  /* iOS dark-mode blue — brighter than light-mode blue for legibility on dark. */
-  --lux-color-accent: #0a84ff;
-  --lux-color-accent-tint: rgba(10, 132, 255, 0.18);
-  --lux-color-accent-hover: rgba(10, 132, 255, 0.26);
+  /* ── Accent (iOS light blue) ─────────────────────────────────────────────── */
+  --lux-color-accent: #007aff;
+  --lux-color-accent-tint: rgba(0, 122, 255, 0.12);
+  --lux-color-accent-hover: rgba(0, 122, 255, 0.18);
 
   /* ── Item backgrounds ─────────────────────────────────────────────────────── */
-  --lux-item-hover-bg: rgba(255, 255, 255, 0.06);
-  --lux-item-active-bg: rgba(10, 132, 255, 0.18);
-  --lux-item-active-hover-bg: rgba(10, 132, 255, 0.26);
+  --lux-item-hover-bg: rgba(0, 0, 0, 0.05);
+  --lux-item-active-bg: rgba(0, 122, 255, 0.12);
+  --lux-item-active-hover-bg: rgba(0, 122, 255, 0.16);
 
   /* ── Search field ─────────────────────────────────────────────────────────── */
-  --lux-search-bg: rgba(255, 255, 255, 0.07);
-  --lux-search-border: rgba(255, 255, 255, 0.1);
-  --lux-search-focus-border: rgba(10, 132, 255, 0.6);
-  --lux-search-text: rgba(255, 255, 255, 0.92);
-  --lux-search-placeholder: rgba(255, 255, 255, 0.35);
+  --lux-search-bg: rgba(0, 0, 0, 0.04);
+  --lux-search-border: rgba(0, 0, 0, 0.08);
+  --lux-search-focus-border: rgba(0, 122, 255, 0.45);
+  --lux-search-text: rgba(0, 0, 0, 0.88);
+  --lux-search-placeholder: rgba(0, 0, 0, 0.35);
 
   /* ── Separators ───────────────────────────────────────────────────────────── */
-  --lux-separator: rgba(255, 255, 255, 0.07);
+  --lux-separator: rgba(0, 0, 0, 0.08);
 
   /* ── Sub-navigation ───────────────────────────────────────────────────────── */
-  --lux-subnav-border: rgba(10, 132, 255, 0.4); /* left indent border */
-  --lux-subnav-max-h: 400px; /* safe upper bound for animation */
+  --lux-subnav-border: rgba(0, 0, 0, 0.14);
+  --lux-subnav-active-bg: #ffffff;
+  --lux-subnav-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --lux-subnav-max-h: 400px;
 
   /* ── Tooltip (collapsed mode labels) ─────────────────────────────────────── */
-  --lux-tooltip-bg: #2c2c2e;
-  --lux-tooltip-text: rgba(255, 255, 255, 0.92);
+  --lux-tooltip-bg: #ffffff;
+  --lux-tooltip-text: rgba(0, 0, 0, 0.88);
   --lux-tooltip-radius: 6px;
-  --lux-tooltip-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --lux-tooltip-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 
   /* ── Badge ────────────────────────────────────────────────────────────────── */
-  --lux-badge-blue-bg: rgba(10, 132, 255, 0.22);
-  --lux-badge-blue-text: #0a84ff;
-  --lux-badge-green-bg: rgba(48, 209, 88, 0.2);
-  --lux-badge-green-text: #30d158;
-  --lux-badge-red-bg: rgba(255, 69, 58, 0.2);
-  --lux-badge-red-text: #ff453a;
-  --lux-badge-orange-bg: rgba(255, 159, 10, 0.2);
-  --lux-badge-orange-text: #ff9f0a;
-  --lux-badge-purple-bg: rgba(191, 90, 242, 0.2);
-  --lux-badge-purple-text: #bf5af2;
-  --lux-badge-gray-bg: rgba(255, 255, 255, 0.1);
-  --lux-badge-gray-text: rgba(255, 255, 255, 0.55);
+  --lux-badge-blue-bg: rgba(0, 122, 255, 0.14);
+  --lux-badge-blue-text: #007aff;
+  --lux-badge-green-bg: rgba(52, 199, 89, 0.14);
+  --lux-badge-green-text: #248a3d;
+  --lux-badge-red-bg: rgba(255, 59, 48, 0.14);
+  --lux-badge-red-text: #d70015;
+  --lux-badge-orange-bg: rgba(255, 149, 0, 0.14);
+  --lux-badge-orange-text: #c93400;
+  --lux-badge-purple-bg: rgba(175, 82, 222, 0.14);
+  --lux-badge-purple-text: #8944ab;
+  --lux-badge-gray-bg: rgba(0, 0, 0, 0.06);
+  --lux-badge-gray-text: rgba(0, 0, 0, 0.55);
 
   /* ── Dimensions ───────────────────────────────────────────────────────────── */
   --lux-sidebar-expanded-w: 240px;
@@ -100,6 +99,48 @@
   --lux-transition-overlay: opacity 250ms ease;
 }
 
+/* ── Dark mode sidebar tokens (synced with html.dark in globals.css) ───────── */
+
+html.dark {
+  --lux-sidebar-bg: #1c1c1e;
+  --lux-sidebar-border: rgba(255, 255, 255, 0.06);
+  --lux-sidebar-shadow: 4px 0 16px rgba(0, 0, 0, 0.2);
+  --lux-text-primary: rgba(255, 255, 255, 0.92);
+  --lux-text-secondary: rgba(255, 255, 255, 0.55);
+  --lux-text-tertiary: rgba(255, 255, 255, 0.32);
+  --lux-text-disabled: rgba(255, 255, 255, 0.22);
+  --lux-color-accent: #0a84ff;
+  --lux-color-accent-tint: rgba(10, 132, 255, 0.18);
+  --lux-color-accent-hover: rgba(10, 132, 255, 0.26);
+  --lux-item-hover-bg: rgba(255, 255, 255, 0.06);
+  --lux-item-active-bg: rgba(10, 132, 255, 0.18);
+  --lux-item-active-hover-bg: rgba(10, 132, 255, 0.26);
+  --lux-search-bg: rgba(255, 255, 255, 0.07);
+  --lux-search-border: rgba(255, 255, 255, 0.1);
+  --lux-search-focus-border: rgba(10, 132, 255, 0.6);
+  --lux-search-text: rgba(255, 255, 255, 0.92);
+  --lux-search-placeholder: rgba(255, 255, 255, 0.35);
+  --lux-separator: rgba(255, 255, 255, 0.07);
+  --lux-subnav-border: rgba(10, 132, 255, 0.4);
+  --lux-subnav-active-bg: rgba(255, 255, 255, 0.14);
+  --lux-subnav-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  --lux-tooltip-bg: #2c2c2e;
+  --lux-tooltip-text: rgba(255, 255, 255, 0.92);
+  --lux-tooltip-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --lux-badge-blue-bg: rgba(10, 132, 255, 0.22);
+  --lux-badge-blue-text: #0a84ff;
+  --lux-badge-green-bg: rgba(48, 209, 88, 0.2);
+  --lux-badge-green-text: #30d158;
+  --lux-badge-red-bg: rgba(255, 69, 58, 0.2);
+  --lux-badge-red-text: #ff453a;
+  --lux-badge-orange-bg: rgba(255, 159, 10, 0.2);
+  --lux-badge-orange-text: #ff9f0a;
+  --lux-badge-purple-bg: rgba(191, 90, 242, 0.2);
+  --lux-badge-purple-text: #bf5af2;
+  --lux-badge-gray-bg: rgba(255, 255, 255, 0.1);
+  --lux-badge-gray-text: rgba(255, 255, 255, 0.55);
+}
+
 /* ── Tenant-specific accent overrides ─────────────────────────────────────────
    Applied via data-tenant attribute on <body> or on the sidebar element itself.
    e.g. <aside data-tenant="idea-vibes"> or <body data-tenant="idea-vibes">
@@ -107,7 +148,18 @@
 
 [data-tenant='idea-vibes'],
 [data-tenant='idea-vibes'] * {
-  --lux-color-accent: #bf5af2; /* iOS purple */
+  --lux-color-accent: #af52de;
+  --lux-color-accent-tint: rgba(175, 82, 222, 0.14);
+  --lux-color-accent-hover: rgba(175, 82, 222, 0.2);
+  --lux-item-active-bg: rgba(175, 82, 222, 0.14);
+  --lux-item-active-hover-bg: rgba(175, 82, 222, 0.18);
+  --lux-subnav-border: rgba(175, 82, 222, 0.35);
+  --lux-search-focus-border: rgba(175, 82, 222, 0.45);
+}
+
+html.dark [data-tenant='idea-vibes'],
+html.dark [data-tenant='idea-vibes'] * {
+  --lux-color-accent: #bf5af2;
   --lux-color-accent-tint: rgba(191, 90, 242, 0.18);
   --lux-color-accent-hover: rgba(191, 90, 242, 0.26);
   --lux-item-active-bg: rgba(191, 90, 242, 0.18);
@@ -118,7 +170,11 @@
 
 [data-tenant='demo'],
 [data-tenant='demo'] * {
-  /* demo uses the default blue — explicitly listed for clarity */
+  --lux-color-accent: #007aff;
+}
+
+html.dark [data-tenant='demo'],
+html.dark [data-tenant='demo'] * {
   --lux-color-accent: #0a84ff;
 }
 
@@ -140,9 +196,86 @@
   flex-direction: column;
   overflow: hidden;
   z-index: 40;
-  transition: var(--lux-transition-collapse);
-  /* Prevent text selection during drag */
+  transition:
+    var(--lux-transition-collapse),
+    background-color 200ms ease,
+    border-color 200ms ease,
+    box-shadow 200ms ease;
   user-select: none;
+}
+
+.lux-sidebar__body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.lux-sidebar-nav {
+  flex: 1;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 6px 8px;
+}
+
+.lux-sidebar-section__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px 4px;
+}
+
+.lux-sidebar-section__title {
+  font-size: var(--lux-font-size-section);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--lux-text-tertiary);
+}
+
+.lux-sidebar-section__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--lux-text-tertiary);
+  cursor: pointer;
+}
+
+.lux-sidebar-section__items {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.lux-nav-item-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.lux-sidebar-header__collapse {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: auto;
+  padding: 0;
+  border: none;
+  border-radius: var(--lux-item-radius);
+  background: transparent;
+  color: var(--lux-text-tertiary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.lux-sidebar-header__collapse:hover {
+  background-color: var(--lux-item-hover-bg);
+  color: var(--lux-text-primary);
 }
 
 .lux-sidebar[data-collapsed='true'] {
@@ -314,6 +447,7 @@
 }
 
 .lux-subnav__item {
+  position: relative;
   display: flex;
   align-items: center;
   width: 100%;
@@ -341,8 +475,28 @@
 }
 
 .lux-subnav__item--active {
-  color: var(--lux-color-accent);
+  background-color: var(--lux-subnav-active-bg);
+  color: var(--lux-text-primary);
   font-weight: 600;
+  box-shadow: var(--lux-subnav-active-shadow);
+}
+
+.lux-subnav__item--active:hover {
+  background-color: var(--lux-subnav-active-bg);
+  color: var(--lux-text-primary);
+}
+
+/* Horizontal branch from tree line to each sub-item */
+.lux-subnav__item::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * (var(--lux-icon-size) / 2 + 6px));
+  top: 50%;
+  width: 10px;
+  height: 2px;
+  background: var(--lux-subnav-border);
+  border-radius: 1px;
+  transform: translateY(-50%);
 }
 
 /* ── Tooltip (shown on hover in icon-only collapsed mode) ─────────────────── */

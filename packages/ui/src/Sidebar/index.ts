@@ -1,4 +1,5 @@
-// ── Legacy sidebar (kept for backwards compatibility until Phase 4 migration) ──
+export { LuxSidebarNavItem } from './LuxSidebarNavItem';
+export { LuxSidebarSubItems } from './LuxSidebarSubItems';
 export { Sidebar } from './Sidebar';
 export { SidebarItem } from './SidebarItem';
 export { SidebarSection } from './SidebarSection';
