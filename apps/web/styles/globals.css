@@ -1608,6 +1608,195 @@
   opacity: 0.5;
   cursor: not-allowed;
 }
+
+/* ── AI Studio Sidekick (Shopify-style docked assistant) ─────────────────── */
+.lux-sidekick {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  border-left: 1px solid var(--color-separator);
+  background: var(--color-bg-primary);
+  overflow: hidden;
+}
+.lux-sidekick-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-separator);
+  background: var(--color-bg-secondary);
+  flex-shrink: 0;
+}
+.lux-sidekick-header-left {
+  min-width: 0;
+  flex: 1;
+}
+.lux-sidekick-title-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  padding: 4px 6px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-label-primary);
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+.lux-sidekick-title-btn:hover {
+  background: var(--color-fill-quaternary);
+}
+.lux-sidekick-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lux-sidekick-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.lux-sidekick-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-label-secondary);
+  cursor: pointer;
+  transition: background var(--transition-fast);
+}
+.lux-sidekick-icon-btn:hover {
+  background: var(--color-fill-quaternary);
+  color: var(--color-label-primary);
+}
+.lux-sidekick-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.lux-sidekick-empty {
+  padding: 20px 16px;
+}
+.lux-sidekick-chat {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.lux-sidekick-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.lux-sidekick-msg--agent .lux-sidekick-msg-content {
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--color-label-primary);
+  white-space: pre-wrap;
+}
+.lux-sidekick-msg--agent .lux-sidekick-msg-content h3,
+.lux-sidekick-msg--user .lux-sidekick-msg-content {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.lux-sidekick-msg--user {
+  align-self: flex-end;
+  max-width: 88%;
+}
+.lux-sidekick-msg--user .lux-sidekick-msg-content {
+  background: var(--color-fill-tertiary);
+  border-radius: var(--radius-lg);
+  padding: 10px 14px;
+  color: var(--color-label-primary);
+  white-space: pre-wrap;
+}
+.lux-sidekick-tools {
+  margin-bottom: 8px;
+}
+.lux-sidekick-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--color-separator);
+  background: var(--color-bg-secondary);
+  padding: 10px 12px 12px;
+}
+.lux-sidekick-feedback {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+.lux-sidekick-feedback-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-label-tertiary);
+  cursor: pointer;
+}
+.lux-sidekick-feedback-btn:hover {
+  background: var(--color-fill-quaternary);
+  color: var(--color-label-secondary);
+}
+.lux-sidekick-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: var(--radius-full);
+  border: 1px solid var(--color-separator-opaque);
+  background: var(--color-bg-primary);
+}
+.lux-sidekick-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-label-primary);
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+}
+.lux-sidekick-input::placeholder {
+  color: var(--color-label-tertiary);
+}
+.lux-sidekick-input-action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--color-label-secondary);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+.lux-sidekick-input-action:hover:not(:disabled) {
+  background: var(--color-fill-quaternary);
+}
+.lux-sidekick-input-action:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .lux-trace-panel {
   background: var(--color-bg-secondary);
   border-radius: var(--radius-xl);

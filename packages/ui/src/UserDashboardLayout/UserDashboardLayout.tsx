@@ -123,7 +123,7 @@ const UserDashboardLayoutComponent: React.FC<UserDashboardLayoutProps> = ({
   onSearch,
   onNotificationClick,
   showSearch = true,
-  showNotifications = true,
+  showNotifications = false,
   notificationCount = 0,
   searchPlaceholder = 'Search...',
   responsive = true,

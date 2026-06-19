@@ -21,6 +21,7 @@ export * from './Layout';
 export * from './NavBar';
 export * from './Sidebar';
 export * from './Menu';
+export * from './AIStudio';
 
 // Form Components
 export * from './Button';

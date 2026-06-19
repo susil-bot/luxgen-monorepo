@@ -205,7 +205,7 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
   onSearch,
   onNotificationClick,
   showSearch = true,
-  showNotifications = true,
+  showNotifications = false,
   notificationCount = 0,
   searchPlaceholder = 'Search...',
   showThemeToggle = false,

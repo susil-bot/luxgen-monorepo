@@ -15,6 +15,7 @@ export interface PageLayoutProps {
   onNotificationClick?: () => void;
   showSearch?: boolean;
   showNotifications?: boolean;
+  showAIStudio?: boolean;
   notificationCount?: number;
   searchPlaceholder?: string;
   logo?: {
@@ -44,7 +45,8 @@ const PageLayoutComponent: React.FC<PageLayoutProps> = ({
   onSearch,
   onNotificationClick,
   showSearch = true,
-  showNotifications = true,
+  showNotifications = false,
+  showAIStudio = true,
   notificationCount = 0,
   searchPlaceholder = 'Search...',
   logo = {
@@ -127,6 +129,7 @@ const PageLayoutComponent: React.FC<PageLayoutProps> = ({
         onSearch={onSearch}
         searchPlaceholder={searchPlaceholder}
         showNotifications={showNotifications}
+        showAIStudio={showAIStudio}
         notificationCount={notificationCount}
         onNotificationClick={onNotificationClick}
         logo={logo}
