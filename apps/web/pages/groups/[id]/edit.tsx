@@ -104,6 +104,7 @@ const EditGroupPageContent: React.FC = () => {
             </button>
           </div>
 
+          {/* Form */}
           <div className="ios-card p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
               <div className="ios-form-group">
@@ -140,13 +141,7 @@ const EditGroupPageContent: React.FC = () => {
                 <label htmlFor="maxUsers" className="text-sm text-secondary">
                   Maximum Users
                 </label>
-                <select
-                  id="maxUsers"
-                  name="maxUsers"
-                  value={maxUsers}
-                  onChange={(e) => setMaxUsers(Number(e.target.value))}
-                  className="ios-input"
-                >
+                <select id="maxUsers" name="maxUsers" value={formData.maxUsers} onChange={handleInputChange} className="ios-input">
                   <option value={5}>5 users</option>
                   <option value={10}>10 users</option>
                   <option value={25}>25 users</option>
@@ -155,11 +150,39 @@ const EditGroupPageContent: React.FC = () => {
                 </select>
               </div>
 
+              <div className="ios-form-group">
+                <label htmlFor="status" className="text-sm text-secondary">
+                  Status
+                </label>
+                <select id="status" name="status" value={formData.status} onChange={handleInputChange} className="ios-input">
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Archived">Archived</option>
+                </select>
+              </div>
+
+              {/* Public Group */}
+              <div className="flex items-center">
+                <input
+                  type="checkbox"
+                  id="isPublic"
+                  name="isPublic"
+                  checked={formData.isPublic}
+                  onChange={handleInputChange}
+                  className="h-4 w-4"
+                  style={{ accentColor: 'var(--color-blue)' }}
+                />
+                <label htmlFor="isPublic" className="ml-2 text-sm text-secondary">
+                  Make this group public (visible to all users)
+                </label>
+              </div>
+
               <div className="flex justify-end gap-3 pt-6" style={{ borderTop: '1px solid var(--color-separator)' }}>
-                <button type="button" className="ios-btn-secondary" onClick={() => router.push(`/groups/${groupId}`)}>
+                <button type="button" className="ios-btn-secondary" onClick={() => router.push(`/groups/${id}`)}>
                   Cancel
                 </button>
-                <button type="submit" className="ios-btn-primary" disabled={isSaving || !name.trim()}>
+                <button type="submit" className="ios-btn-primary" disabled={isSaving || !formData.name.trim()}>
                   {isSaving ? 'Saving…' : 'Save Changes'}
                 </button>
               </div>
