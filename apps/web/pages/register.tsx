@@ -5,6 +5,7 @@ import { useMutation } from '@apollo/client';
 import { RegisterForm, RegisterFormData, RegisterVisual, SnackbarProvider, useSnackbar } from '@luxgen/ui';
 import { PageWrapper } from '@luxgen/ui';
 import { REGISTER_MUTATION } from '../graphql/queries/auth';
+import { persistSession } from '../lib/session';
 
 const RegisterPageContent: React.FC = () => {
   const router = useRouter();
@@ -57,10 +58,7 @@ const RegisterPageContent: React.FC = () => {
       if (result.data?.register) {
         const { token, user } = result.data.register;
 
-        // Store token in localStorage
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        localStorage.setItem('currentTenant', user.tenant.subdomain);
+        persistSession(token, user);
 
         const roleDisplayName = data.role === 'SUPER_ADMIN' ? 'Super Admin' : data.role === 'ADMIN' ? 'Admin' : 'User';
         showSuccess(`Registration successful! Welcome ${data.firstName} ${data.lastName} as ${roleDisplayName}`);

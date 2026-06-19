@@ -1,4 +1,5 @@
 import { UserMenu } from '@luxgen/ui';
+import { createHandleUserAction } from './user-actions';
 
 export interface DashboardData {
   stats: {
@@ -390,15 +391,5 @@ export const handleDashboardAction = (action: string, data?: any) => {
  * Handle user action events
  */
 export const handleUserAction = (action: 'profile' | 'settings' | 'logout', router: any) => {
-  switch (action) {
-    case 'profile':
-      router.push('/profile');
-      break;
-    case 'settings':
-      router.push('/settings');
-      break;
-    case 'logout':
-      router.push('/login');
-      break;
-  }
+  createHandleUserAction(router)(action);
 };

@@ -9,6 +9,7 @@ import {
   getDefaultLogo,
   getDefaultSidebarSections,
 } from '@luxgen/ui';
+import { createHandleUserAction } from '../lib/user-actions';
 import AgentChat from '../components/agent/AgentChat';
 import AgentTransparency from '../components/agent/AgentTransparency';
 
@@ -60,12 +61,7 @@ function AgentStudioContent() {
       .catch(() => setOllamaStatus('offline'));
   }, []);
 
-  const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
-    if (action === 'logout') {
-      localStorage.removeItem('authToken');
-      router.push('/login');
-    } else router.push(`/${action}`);
-  };
+  const handleUserAction = createHandleUserAction(router);
 
   const handleFileStaged = useCallback(
     (path: string, _type: string, _description: string) => {
