@@ -17,9 +17,12 @@ export interface OrderDetailViewProps {
   order: OrderDetail;
   backHref?: string;
   timeline?: TimelineActivityProps;
+  notes?: string;
+  onNotesChange?: (value: string) => void;
+  savingNotes?: boolean;
 }
 
-export function OrderDetailView({ order, backHref, timeline }: OrderDetailViewProps) {
+export function OrderDetailView({ order, backHref, timeline, notes, onNotesChange, savingNotes }: OrderDetailViewProps) {
   return (
     <OrderDetailLayout
       header={<OrderDetailHeader order={order} backHref={backHref} />}
@@ -28,7 +31,11 @@ export function OrderDetailView({ order, backHref, timeline }: OrderDetailViewPr
           <FulfillmentSection order={order} />
           <PaymentSummarySection order={order} />
           <TimelineSection order={order} {...timeline} />
-          <NotesSection notes={order.notes} />
+          <NotesSection
+            notes={notes ?? order.notes}
+            onNotesChange={onNotesChange}
+            saving={savingNotes}
+          />
         </>
       }
       sidebar={

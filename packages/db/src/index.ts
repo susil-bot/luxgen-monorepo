@@ -36,3 +36,7 @@ export type { IBusinessListing, ApplicationStatus, PublicationStatus, IStatusHis
 export { BusinessListing } from './business-listing';
 export type { IActivityEvent, ActivitySubjectType, ActivityEventKind, ActivityActorType } from './activity-event';
 export { ActivityEvent } from './activity-event';
+export type { IEnrollment, EnrollmentPaymentStatus } from './enrollment';
+export { Enrollment, enrollmentSubjectId } from './enrollment';
+export type { IEmailNotificationLog, ListingEmailTemplate } from './email-notification-log';
+export { EmailNotificationLog } from './email-notification-log';

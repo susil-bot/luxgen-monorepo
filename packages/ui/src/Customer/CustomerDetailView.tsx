@@ -16,9 +16,19 @@ export interface CustomerDetailViewProps {
   customer: CustomerDetail;
   onCreateOrder?: () => void;
   timeline?: TimelineActivityProps;
+  customerNotes?: string;
+  onCustomerNotesChange?: (value: string) => void;
+  savingCustomerNotes?: boolean;
 }
 
-export function CustomerDetailView({ customer, onCreateOrder, timeline }: CustomerDetailViewProps) {
+export function CustomerDetailView({
+  customer,
+  onCreateOrder,
+  timeline,
+  customerNotes,
+  onCustomerNotesChange,
+  savingCustomerNotes,
+}: CustomerDetailViewProps) {
   return (
     <SplitPageLayout
       variant="main-aside"
@@ -41,7 +51,11 @@ export function CustomerDetailView({ customer, onCreateOrder, timeline }: Custom
           <MarketingSection customer={customer} />
           <StoreCreditSection customer={customer} />
           <CustomerTagsSection customer={customer} />
-          <CustomerNotesSection customer={customer} />
+          <CustomerNotesSection
+            notes={customerNotes ?? customer.notes}
+            onNotesChange={onCustomerNotesChange}
+            saving={savingCustomerNotes}
+          />
         </>
       }
     />

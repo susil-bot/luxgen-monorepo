@@ -1,5 +1,6 @@
 import { courseService } from '../../services/courseService';
 import { activityEventService, actorFromContext } from '../../services/activityEventService';
+import { enrollmentService } from '../../services/enrollmentService';
 import type { GraphQLContext } from '../../context';
 
 export const courseResolvers = {
@@ -65,6 +66,7 @@ export const courseResolvers = {
         (course.tenant as { toString(): string })?.toString?.() ??
         '';
       const actor = actorFromContext(context.user);
+      await enrollmentService.ensureEnrollment(tenantId, courseId, studentId);
       await activityEventService.recordOrderCreated(
         tenantId,
         courseId,
@@ -75,8 +77,14 @@ export const courseResolvers = {
       );
       return course;
     },
-    unenrollStudent: async (_: unknown, { courseId, studentId }: { courseId: string; studentId: string }) => {
-      return await courseService.unenrollStudent(courseId, studentId);
+    unenrollStudent: async (
+      _: unknown,
+      { courseId, studentId }: { courseId: string; studentId: string },
+      context: GraphQLContext,
+    ) => {
+      const course = await courseService.unenrollStudent(courseId, studentId);
+      await enrollmentService.cancelEnrollment(courseId, studentId, actorFromContext(context.user));
+      return course;
     },
   },
 };

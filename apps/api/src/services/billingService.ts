@@ -10,6 +10,7 @@ import {
 } from '@luxgen/billing';
 import { Tenant, TenantSubscription, type ITenantSubscription } from '@luxgen/db';
 import { listingSubscriptionService } from './listingSubscriptionService';
+import { enrollmentService } from './enrollmentService';
 import { logger } from '../utils/logger';
 
 const STRIPE_PRICE_ENV: Record<Exclude<PlanTier, 'free' | 'enterprise'>, string> = {
@@ -224,6 +225,10 @@ export class BillingService {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session;
+
+        const handledEnrollment = await enrollmentService.handleEnrollmentCheckoutCompleted(session);
+        if (handledEnrollment) break;
+
         const tenantId = session.metadata?.tenantId;
         const plan = normalizePlan(session.metadata?.plan);
         if (tenantId && plan) {
