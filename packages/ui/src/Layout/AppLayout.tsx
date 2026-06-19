@@ -194,26 +194,24 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
 
   const getSidebarStyles = () => {
     if (isMobile) {
-      return sidebarCollapsed ? 'hidden' : 'fixed inset-0 z-50';
+      return sidebarCollapsed ? 'hidden' : '';
     }
 
     if (isTablet) {
-      return sidebarCollapsed ? 'hidden' : 'fixed left-0 top-0 bottom-0 z-40';
+      return sidebarCollapsed ? 'hidden' : '';
     }
 
-    return sidebarCollapsed ? 'w-16' : 'w-64';
+    return '';
   };
 
   const getMainContentStyles = () => {
-    if (isMobile) {
+    if (isMobile || isTablet) {
       return 'w-full';
     }
 
-    if (isTablet) {
-      return 'w-full';
-    }
-
-    return sidebarCollapsed ? 'ml-16' : 'ml-64';
+    return sidebarCollapsed
+      ? 'ml-[var(--lux-sidebar-collapsed-w)]'
+      : 'ml-[var(--lux-sidebar-expanded-w)]';
   };
 
   const getMenuStyles = () => {
@@ -311,9 +309,10 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
           width="normal"
           collapsible={sidebarCollapsible}
           defaultCollapsed={sidebarDefaultCollapsed}
+          onToggle={setSidebarCollapsed}
           showUserSection={true}
           showLogo={true}
-          className={`${getSidebarStyles()} shadow-sm`}
+          className={getSidebarStyles()}
         />
       )}
 

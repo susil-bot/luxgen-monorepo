@@ -9,6 +9,7 @@ import { SessionMonitor } from '../components/auth/SessionMonitor';
 import { SessionSync } from '../components/auth/SessionSync';
 import { AIStudioSidekickPanel } from '../components/agent/AIStudioSidekickPanel';
 import '../styles/globals.css';
+import '../../../packages/ui/src/Sidebar/sidebar.css';
 
 function WebNavigationProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();

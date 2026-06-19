@@ -9,7 +9,7 @@
 
 ## Architecture Summary
 
-The sidebar uses a **dark always-on surface** (#1C1C1E) regardless of the app light/dark mode setting. This matches the reference design and creates strong visual hierarchy.
+The sidebar **follows app theme**: light `--lux-*` tokens on `:root`, dark tokens on `html.dark` (via `ThemeProvider`).
 
 ### Token prefix: `--lux-*`
 

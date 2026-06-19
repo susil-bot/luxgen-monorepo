@@ -180,10 +180,68 @@
 
 /* ── LuxGen Sidebar Design Tokens (--lux-*) ───────────────────────────────────
    Source of truth: packages/ui/src/Sidebar/sidebar.css
-   Duplicated here so Next.js can resolve them without package CSS import setup.
-   When updating tokens, keep both files in sync.
+   Light = :root | Dark = html.dark (follows luxgen-theme / ThemeProvider)
    ─────────────────────────────────────────────────────────────────────────── */
 :root {
+  --lux-sidebar-bg: #f6f6f7;
+  --lux-sidebar-border: rgba(0, 0, 0, 0.08);
+  --lux-sidebar-shadow: 1px 0 0 rgba(0, 0, 0, 0.05);
+  --lux-text-primary: rgba(0, 0, 0, 0.88);
+  --lux-text-secondary: rgba(0, 0, 0, 0.55);
+  --lux-text-tertiary: rgba(0, 0, 0, 0.35);
+  --lux-text-disabled: rgba(0, 0, 0, 0.22);
+  --lux-color-accent: #007aff;
+  --lux-color-accent-tint: rgba(0, 122, 255, 0.12);
+  --lux-color-accent-hover: rgba(0, 122, 255, 0.18);
+  --lux-item-hover-bg: rgba(0, 0, 0, 0.05);
+  --lux-item-active-bg: rgba(0, 122, 255, 0.12);
+  --lux-item-active-hover-bg: rgba(0, 122, 255, 0.16);
+  --lux-search-bg: rgba(0, 0, 0, 0.04);
+  --lux-search-border: rgba(0, 0, 0, 0.08);
+  --lux-search-focus-border: rgba(0, 122, 255, 0.45);
+  --lux-search-text: rgba(0, 0, 0, 0.88);
+  --lux-search-placeholder: rgba(0, 0, 0, 0.35);
+  --lux-separator: rgba(0, 0, 0, 0.08);
+  --lux-subnav-border: rgba(0, 0, 0, 0.14);
+  --lux-subnav-active-bg: #ffffff;
+  --lux-subnav-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --lux-subnav-max-h: 400px;
+  --lux-tooltip-bg: #ffffff;
+  --lux-tooltip-text: rgba(0, 0, 0, 0.88);
+  --lux-tooltip-radius: 6px;
+  --lux-tooltip-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --lux-badge-blue-bg: rgba(0, 122, 255, 0.14);
+  --lux-badge-blue-text: #007aff;
+  --lux-badge-green-bg: rgba(52, 199, 89, 0.14);
+  --lux-badge-green-text: #248a3d;
+  --lux-badge-red-bg: rgba(255, 59, 48, 0.14);
+  --lux-badge-red-text: #d70015;
+  --lux-badge-orange-bg: rgba(255, 149, 0, 0.14);
+  --lux-badge-orange-text: #c93400;
+  --lux-badge-purple-bg: rgba(175, 82, 222, 0.14);
+  --lux-badge-purple-text: #8944ab;
+  --lux-badge-gray-bg: rgba(0, 0, 0, 0.06);
+  --lux-badge-gray-text: rgba(0, 0, 0, 0.55);
+  --lux-sidebar-expanded-w: 240px;
+  --lux-sidebar-collapsed-w: 48px;
+  --lux-item-height: 36px;
+  --lux-item-padding-x: 12px;
+  --lux-item-radius: 8px;
+  --lux-icon-size: 20px;
+  --lux-icon-gap: 10px;
+  --lux-font-size-item: 14px;
+  --lux-font-size-child: 13px;
+  --lux-font-size-section: 11px;
+  --lux-font-weight-item: 500;
+  --lux-header-height: 56px;
+  --lux-transition-collapse: width 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --lux-transition-item: background-color 120ms ease, color 120ms ease;
+  --lux-transition-chevron: transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --lux-transition-subnav: max-height 220ms cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 180ms ease;
+  --lux-transition-tooltip: opacity 100ms ease;
+}
+
+html.dark {
   --lux-sidebar-bg: #1c1c1e;
   --lux-sidebar-border: rgba(255, 255, 255, 0.06);
   --lux-sidebar-shadow: 4px 0 16px rgba(0, 0, 0, 0.2);
@@ -204,10 +262,10 @@
   --lux-search-placeholder: rgba(255, 255, 255, 0.35);
   --lux-separator: rgba(255, 255, 255, 0.07);
   --lux-subnav-border: rgba(10, 132, 255, 0.4);
-  --lux-subnav-max-h: 400px;
+  --lux-subnav-active-bg: rgba(255, 255, 255, 0.14);
+  --lux-subnav-active-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
   --lux-tooltip-bg: #2c2c2e;
   --lux-tooltip-text: rgba(255, 255, 255, 0.92);
-  --lux-tooltip-radius: 6px;
   --lux-tooltip-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   --lux-badge-blue-bg: rgba(10, 132, 255, 0.22);
   --lux-badge-blue-text: #0a84ff;
@@ -221,25 +279,19 @@
   --lux-badge-purple-text: #bf5af2;
   --lux-badge-gray-bg: rgba(255, 255, 255, 0.1);
   --lux-badge-gray-text: rgba(255, 255, 255, 0.55);
-  --lux-sidebar-expanded-w: 240px;
-  --lux-sidebar-collapsed-w: 48px;
-  --lux-item-height: 36px;
-  --lux-item-padding-x: 12px;
-  --lux-item-radius: 8px;
-  --lux-icon-size: 20px;
-  --lux-icon-gap: 10px;
-  --lux-font-size-item: 14px;
-  --lux-font-size-child: 13px;
-  --lux-font-size-section: 11px;
-  --lux-font-weight-item: 500;
-  --lux-header-height: 56px;
-  --lux-transition-collapse: width 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --lux-transition-item: background-color 120ms ease, color 120ms ease;
-  --lux-transition-chevron: transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --lux-transition-subnav: max-height 220ms cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 180ms ease;
-  --lux-transition-tooltip: opacity 100ms ease;
 }
+
 [data-tenant='idea-vibes'] {
+  --lux-color-accent: #af52de;
+  --lux-color-accent-tint: rgba(175, 82, 222, 0.14);
+  --lux-color-accent-hover: rgba(175, 82, 222, 0.2);
+  --lux-item-active-bg: rgba(175, 82, 222, 0.14);
+  --lux-item-active-hover-bg: rgba(175, 82, 222, 0.18);
+  --lux-subnav-border: rgba(175, 82, 222, 0.35);
+  --lux-search-focus-border: rgba(175, 82, 222, 0.45);
+}
+
+html.dark [data-tenant='idea-vibes'] {
   --lux-color-accent: #bf5af2;
   --lux-color-accent-tint: rgba(191, 90, 242, 0.18);
   --lux-color-accent-hover: rgba(191, 90, 242, 0.26);
