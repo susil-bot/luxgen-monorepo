@@ -14,8 +14,8 @@
 | P0 | Dashboard `/dashboard` | GraphQL | ✅ | Loading/empty states use iOS tokens |
 | P0 | Home `/` | redirect | ✅ | iOS landing page |
 | P0 | 404 | — | ✅ | iOS quick-nav buttons |
-| P1 | Users `/users` | mock | ✅ UI | iOS restyle done; GraphQL wiring — Phase 1.1c |
-| P1 | Courses `/courses`, `/courses/[id]` | mock | 🟡 | iOS shell done; GraphQL — Phase 1.1b |
+| P1 | Courses `/courses`, `/courses/[id]` | GraphQL | ✅ | Phase 1.1b — list + detail wired |
+| P1 | Users `/users` | mock | ✅ UI | GraphQL wiring — Phase 1.1c next |
 | P1 | Groups `/groups/*` | GraphQL | ✅ | Phase 1.1 — real data + `ios-metric-tile` dashboard |
 | P2 | Plan gate overlay | `@luxgen/billing` | ✅ | Token names fixed |
 | ✅ | Automations `/automations` | GraphQL | ✅ | Reference implementation |
