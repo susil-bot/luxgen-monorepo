@@ -54,7 +54,7 @@
 
 | # | Task | Area | Status |
 |---|------|------|--------|
-| 1.1 | Wire `/users`, `/courses`, `/groups` to GraphQL (remove mocks) | Web | 🟡 in progress | **Groups done** — PR `feat/phase-1-1-groups-graphql`; users + courses next |
+| 1.1 | Wire `/users`, `/courses`, `/groups` to GraphQL (remove mocks) | Web | 🟡 in progress | Groups ✅ PR #11; **Courses ✅**; users next |
 | 1.2 | Enrollment + progress model | API | ⬜ pending |
 | 1.3 | Wire `/customers` learner page to real data | Web | ⬜ pending |
 | 1.4 | Certificates on course completion | API + Web | ⬜ pending |

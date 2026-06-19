@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { useQuery } from '@apollo/client';
 import {
   AppLayout,
   getDefaultSidebarSections,
-  getDefaultUser,
   getDefaultLogo,
   TenantDebug,
   CourseDetailMenu,
@@ -14,6 +13,10 @@ import {
 import { TenantBanner } from '../../components/tenant/TenantBanner';
 import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
+import { useLayoutUser } from '../../lib/app-layout-user';
+import { getStoredUser } from '../../lib/session';
+import { GET_COURSE } from '../../graphql/queries/courses';
+import { mapApiRoleToUiRole, toCourseOverviewProps, enrolledCount, instructorName, formatCourseDuration } from '../../lib/course-display';
 
 interface CoursePageProps {
   tenant: string;
@@ -22,48 +25,50 @@ interface CoursePageProps {
 export default function CoursePage({ tenant }: CoursePageProps) {
   const router = useRouter();
   const { id } = router.query;
-  const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'learner' | 'user'>('learner');
-  const [loading, setLoading] = useState(true);
-  const [currentPath, setCurrentPath] = useState('');
-
-  // Mock course data
-  const [course] = useState({
-    id: id as string,
-    title: 'Advanced React Development',
-    description: 'Master modern React patterns and best practices',
-    instructor: 'John Doe',
-    duration: '8 weeks',
-    level: 'Intermediate',
-    rating: 4.8,
-    enrolledCount: 1250,
-    thumbnail: '/images/course-thumbnail.jpg',
-  });
-
-  const [analyticsMetrics] = useState({
-    totalEnrollments: 1250,
-    completionRate: 78,
-    averageRating: 4.8,
-    engagementScore: 85,
-  });
-
-  useEffect(() => {
-    // Simulate role detection
-    const role = tenant === 'demo' ? 'admin' : 'learner';
-    setUserRole(role);
-    setCurrentPath(router.asPath);
-    setLoading(false);
-  }, [tenant, router.asPath]);
-
-  const handleNavigate = (path: string) => {
-    console.log('Navigate to:', path);
-    router.push(path);
-  };
-
+  const courseId = typeof id === 'string' ? id : '';
+  const layoutUser = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
+  const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
+  const userRole = mapApiRoleToUiRole(sessionUser?.role);
 
-  if (loading) {
+  const { data, loading, error } = useQuery(GET_COURSE, {
+    variables: { id: courseId },
+    skip: !courseId,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const course = data?.course;
+  const currentPath = router.asPath;
+
+  if (!courseId || (loading && !course)) {
     return <PageLoadingState label="Loading course…" />;
   }
+
+  if (error || !course) {
+    return (
+      <PageEmptyState
+        icon="📚"
+        title="Course not found"
+        subtitle={error?.message ?? 'This course may have been removed.'}
+        action={
+          <button type="button" className="ios-btn-primary mt-4" onClick={() => router.push('/courses')}>
+            Back to courses
+          </button>
+        }
+      />
+    );
+  }
+
+  const overviewCourse = toCourseOverviewProps(course);
+  const isEnrolled = course.students?.some((s: { id: string }) => s.id === sessionUser?.id) ?? false;
+  const enrollmentStatus = isEnrolled ? ('enrolled' as const) : ('not_enrolled' as const);
+
+  const analyticsMetrics = {
+    totalEnrollments: enrolledCount(course),
+    completionRate: course.status === 'COMPLETED' ? 100 : 0,
+    averageRating: 0,
+    engagementScore: Math.min(100, enrolledCount(course) * 10),
+  };
 
   return (
     <>
@@ -75,38 +80,58 @@ export default function CoursePage({ tenant }: CoursePageProps) {
 
       <AppLayout
         sidebarSections={getDefaultSidebarSections()}
-        user={getDefaultUser()}
+        user={layoutUser ?? undefined}
         logo={getDefaultLogo()}
         onUserAction={handleUserAction}
         showSearch={true}
         showNotifications={true}
-        notificationCount={3}
+        notificationCount={0}
         sidebarDefaultCollapsed={false}
         responsive={true}
       >
         <TenantBanner tenant={tenant} />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-2">
-          <div className="mb-6">
-            <h1 className="ios-large-title">{course.title}</h1>
-            <p className="mt-1 text-secondary text-sm">{course.instructor} · {course.duration}</p>
+          <div className="mb-6 flex items-start justify-between flex-wrap gap-4">
+            <div>
+              <h1 className="ios-large-title">{course.title}</h1>
+              <p className="mt-1 text-secondary text-sm">
+                {instructorName(course)} · {formatCourseDuration(course.startDate, course.endDate)}
+              </p>
+            </div>
+            <button type="button" className="ios-btn-secondary" onClick={() => router.push(`/courses/${courseId}/edit`)}>
+              Edit course
+            </button>
           </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <div className="ios-metric-tile">
+              <span className="metric-label">Enrolled</span>
+              <span className="metric-value">{enrolledCount(course)}</span>
+            </div>
+            <div className="ios-metric-tile">
+              <span className="metric-label">Status</span>
+              <span className="metric-value">{course.status ?? 'DRAFT'}</span>
+            </div>
+            <div className="ios-metric-tile">
+              <span className="metric-label">Instructor</span>
+              <span className="metric-value text-lg">{course.instructor?.firstName ?? '—'}</span>
+            </div>
+          </div>
+
           <div className="space-y-8">
-          {/* Course Overview */}
-          <CourseOverview course={course} userRole={userRole} enrollmentStatus="enrolled" />
+            <CourseOverview course={overviewCourse} userRole={userRole} enrollmentStatus={enrollmentStatus} />
 
-          {/* Course Analytics (Admin/Instructor only) */}
-          {(userRole === 'admin' || userRole === 'instructor') && (
-            <CourseAnalytics courseId={course.id} userRole={userRole} metrics={analyticsMetrics} />
-          )}
+            {(userRole === 'admin' || userRole === 'instructor') && (
+              <CourseAnalytics courseId={course.id} userRole={userRole} metrics={analyticsMetrics} />
+            )}
 
-          {/* Course Detail Menu */}
-          <CourseDetailMenu
-            courseId={course.id}
-            userRole={userRole}
-            currentPath={currentPath}
-            onNavigate={handleNavigate}
-          />
+            <CourseDetailMenu
+              courseId={course.id}
+              userRole={userRole}
+              currentPath={currentPath}
+              onNavigate={(path) => void router.push(path)}
+            />
           </div>
         </div>
 
@@ -116,11 +141,10 @@ export default function CoursePage({ tenant }: CoursePageProps) {
   );
 }
 
-export const getServerSideProps = async (context: any) => {
+export const getServerSideProps = async (context: { req: { headers: { host?: string } }; query: { tenant?: string } }) => {
   const host = context.req.headers.host;
-  let tenant = 'demo'; // Default tenant
+  let tenant = 'demo';
 
-  // Extract tenant from subdomain
   if (host && host.includes('.')) {
     const parts = host.split('.');
     if (parts.length > 1) {
@@ -131,14 +155,9 @@ export const getServerSideProps = async (context: any) => {
     }
   }
 
-  // Check query parameter as fallback
   if (context.query.tenant) {
     tenant = context.query.tenant;
   }
 
-  return {
-    props: {
-      tenant,
-    },
-  };
+  return { props: { tenant } };
 };
