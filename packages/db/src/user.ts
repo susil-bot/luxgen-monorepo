@@ -53,6 +53,10 @@ export interface IUser extends Document {
   status: UserStatus;
   tenant: Schema.Types.ObjectId;
   staffNotes?: string;
+  phone?: string;
+  marketingEmail?: boolean;
+  marketingSms?: boolean;
+  marketingWhatsapp?: boolean;
   isActive: boolean;
   metadata: IUserMetadata;
   createdAt: Date;
@@ -102,6 +106,23 @@ const userSchema = new Schema<IUser>(
       type: String,
       default: '',
       trim: true,
+    },
+    phone: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    marketingEmail: {
+      type: Boolean,
+      default: true,
+    },
+    marketingSms: {
+      type: Boolean,
+      default: false,
+    },
+    marketingWhatsapp: {
+      type: Boolean,
+      default: false,
     },
     isActive: {
       type: Boolean,

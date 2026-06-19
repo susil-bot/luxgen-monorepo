@@ -6,6 +6,10 @@ export const userTypeDefs = `
     lastName: String!
     role: UserRole!
     tenant: Tenant!
+    phone: String
+    marketingEmail: Boolean
+    marketingSms: Boolean
+    marketingWhatsapp: Boolean
     createdAt: Date!
     updatedAt: Date!
   }
@@ -30,6 +34,10 @@ export const userTypeDefs = `
     firstName: String
     lastName: String
     role: UserRole
+    phone: String
+    marketingEmail: Boolean
+    marketingSms: Boolean
+    marketingWhatsapp: Boolean
   }
 
   input LoginInput {

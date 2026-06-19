@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import type { OrderDetail, OrderPaymentStatus } from '@luxgen/ui';
+import { parseLegacyOrderId } from '@luxgen/ui';
 import { GET_ACTIVITY_EVENTS } from '../graphql/queries/activity-events';
 import { isMongoObjectId } from './mongo-id';
 import {
@@ -21,14 +22,30 @@ export function mapEnrollmentPaymentStatus(status: string): OrderPaymentStatus {
   }
 }
 
-export function parseOrderId(orderId: string): { courseId: string; studentId: string } | null {
-  const [courseId, studentId] = orderId.split(':');
-  if (!courseId || !studentId) return null;
-  return { courseId, studentId };
+/** Resolve course + student from order row (standard or legacy URL id). */
+export function resolveOrderPair(order: OrderDetail | null | undefined): {
+  courseId: string;
+  studentId: string;
+  subjectId: string;
+} | null {
+  if (!order) return null;
+  if (order.courseId && order.studentId) {
+    return {
+      courseId: order.courseId,
+      studentId: order.studentId,
+      subjectId: order.subjectId ?? `${order.courseId}:${order.studentId}`,
+    };
+  }
+  const legacy = parseLegacyOrderId(order.id);
+  if (legacy) {
+    return { ...legacy, subjectId: order.id };
+  }
+  return null;
 }
 
 export function useOrderEnrollment(order: OrderDetail | null | undefined, tenantId: string | undefined) {
-  const parts = order ? parseOrderId(order.id) : null;
+  const parts = resolveOrderPair(order);
+  const timelineSubjectId = order?.subjectId ?? parts?.subjectId ?? order?.id ?? '';
 
   const { data, refetch } = useQuery(GET_ENROLLMENT, {
     variables: { courseId: parts?.courseId, studentId: parts?.studentId },
@@ -40,14 +57,14 @@ export function useOrderEnrollment(order: OrderDetail | null | undefined, tenant
     refetchQueries: parts
       ? [
           { query: GET_ENROLLMENT, variables: { courseId: parts.courseId, studentId: parts.studentId } },
-          ...(isMongoObjectId(tenantId) && order
+          ...(isMongoObjectId(tenantId) && timelineSubjectId
             ? [
                 {
                   query: GET_ACTIVITY_EVENTS,
                   variables: {
                     tenantId,
                     subjectType: 'ORDER',
-                    subjectId: order.id,
+                    subjectId: timelineSubjectId,
                     first: 50,
                   },
                 },
@@ -113,6 +130,7 @@ export function useOrderEnrollment(order: OrderDetail | null | undefined, tenant
     if (!enrollment) return order;
     return {
       ...order,
+      id: enrollment.id,
       notes: enrollment.notes ?? order.notes,
       paymentStatus: mapEnrollmentPaymentStatus(enrollment.paymentStatus),
     };
@@ -124,5 +142,6 @@ export function useOrderEnrollment(order: OrderDetail | null | undefined, tenant
     onNotesChange,
     savingNotes: saving,
     refetchEnrollment: refetch,
+    timelineSubjectId,
   };
 }

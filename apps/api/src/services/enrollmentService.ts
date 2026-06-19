@@ -17,6 +17,14 @@ function getStripe(): Stripe | null {
 }
 
 export class EnrollmentService {
+  async getById(id: string): Promise<IEnrollment | null> {
+    return Enrollment.findById(id);
+  }
+
+  async listByTenant(tenantId: string): Promise<IEnrollment[]> {
+    return Enrollment.find({ tenant: tenantId }).sort({ enrolledAt: -1 });
+  }
+
   async getByCourseAndStudent(courseId: string, studentId: string): Promise<IEnrollment | null> {
     return Enrollment.findOne({ course: courseId, student: studentId });
   }

@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -8,21 +8,24 @@ import {
   getDefaultLogo,
   getDefaultSidebarSections,
   CustomerDetailView,
-  buildCustomersFromUsers,
   buildCustomerDetailFromUser,
   SnackbarProvider,
+  useSnackbar,
+  type CustomerDetail,
 } from '@luxgen/ui';
 import { PageLoadingState } from '../../../components/common/PageStates';
-import { CreateOrderModal } from '../../../components/commerce/CreateOrderModal';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../../lib/app-layout-user';
 import { getStoredUser } from '../../../lib/session';
 import { GET_COURSES } from '../../../graphql/queries/courses';
 import { GET_USER, GET_USERS } from '../../../graphql/queries/users';
+import { GET_ENROLLMENTS } from '../../../graphql/queries/enrollment';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
 import { useActivityTimeline } from '../../../lib/use-activity-timeline';
 import { useCustomerNotes } from '../../../lib/use-customer-notes';
+import { useCustomerProfile } from '../../../lib/use-customer-profile';
+import { applyProfilePatch, marketingPatch } from '../../../lib/customer-profile';
 import { isMongoObjectId } from '../../../lib/mongo-id';
 import { isLearnerRole } from '../../../lib/user-roles';
 
@@ -38,7 +41,8 @@ function AdminCustomerDetailContent({ tenant }: Props) {
   const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
   const queryTenantId = tenantId ?? sessionUser?.tenant.id;
   const headerProps = useAppLayoutHeader();
-  const [showCreateOrder, setShowCreateOrder] = useState(false);
+  const { showError } = useSnackbar();
+  const [localCustomer, setLocalCustomer] = useState<CustomerDetail | null>(null);
 
   const customerId = typeof router.query.id === 'string' ? router.query.id : '';
 
@@ -60,6 +64,12 @@ function AdminCustomerDetailContent({ tenant }: Props) {
     fetchPolicy: 'cache-and-network',
   });
 
+  const { data: enrollmentsData } = useQuery(GET_ENROLLMENTS, {
+    variables: { tenantId: queryTenantId },
+    skip: !isMongoObjectId(queryTenantId),
+    fetchPolicy: 'cache-and-network',
+  });
+
   const learners = useMemo(
     () => (usersData?.users ?? []).filter((u: { role: string }) => isLearnerRole(u.role)),
     [usersData],
@@ -73,17 +83,31 @@ function AdminCustomerDetailContent({ tenant }: Props) {
       coursesData?.courses,
       learners,
       user.staffNotes ?? '',
+      enrollmentsData?.enrollments,
     );
-  }, [userData?.user, coursesData?.courses, learners]);
+  }, [userData?.user, coursesData?.courses, learners, enrollmentsData?.enrollments]);
 
-  const orderStudents = useMemo(
-    () =>
-      learners.map((u: { id: string; email: string; firstName?: string; lastName?: string }) => ({
-        id: u.id,
-        email: u.email,
-        name: `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || u.email,
-      })),
-    [learners],
+  useEffect(() => {
+    setLocalCustomer(null);
+  }, [customerId, customer?.id]);
+
+  const displayCustomer = localCustomer ?? customer;
+  const { saveProfile, saving: savingMarketing } = useCustomerProfile(customerId);
+
+  const onMarketingChange = useCallback(
+    async (channel: 'email' | 'sms' | 'whatsapp', subscribed: boolean) => {
+      if (!customer) return;
+      const patch = marketingPatch(channel, subscribed, customer);
+      const optimistic = applyProfilePatch(customer, patch);
+      setLocalCustomer(optimistic);
+      try {
+        await saveProfile(patch, optimistic);
+      } catch {
+        setLocalCustomer(null);
+        showError('Failed to save marketing preference');
+      }
+    },
+    [customer, saveProfile, showError],
   );
 
   const loading =
@@ -133,7 +157,7 @@ function AdminCustomerDetailContent({ tenant }: Props) {
       >
         {loading ? (
           <PageLoadingState label="Loading customer…" />
-        ) : !customer ? (
+        ) : !displayCustomer ? (
           <div className="max-w-2xl mx-auto px-4 py-16 text-center">
             <p className="text-secondary">Customer not found</p>
             <Link href="/admin/customers" className="ios-btn-primary mt-4 inline-block">
@@ -142,8 +166,13 @@ function AdminCustomerDetailContent({ tenant }: Props) {
           </div>
         ) : (
           <CustomerDetailView
-            customer={customer}
-            onCreateOrder={() => setShowCreateOrder(true)}
+            customer={displayCustomer}
+            editHref={`/admin/customers/${customerId}/edit`}
+            onCreateOrder={() =>
+              void router.push(`/orders/create?customerId=${encodeURIComponent(customerId)}`)
+            }
+            onMarketingChange={onMarketingChange}
+            savingMarketing={savingMarketing}
             timeline={timeline}
             customerNotes={customerNotes}
             onCustomerNotesChange={onCustomerNotesChange}
@@ -151,18 +180,6 @@ function AdminCustomerDetailContent({ tenant }: Props) {
           />
         )}
       </AppLayout>
-
-      {isMongoObjectId(queryTenantId) && (
-        <CreateOrderModal
-          isOpen={showCreateOrder}
-          onClose={() => setShowCreateOrder(false)}
-          tenantId={queryTenantId}
-          courses={coursesData?.courses ?? []}
-          students={orderStudents}
-          defaultStudentId={customerId}
-          onCreated={(orderId) => void router.push(`/orders/${encodeURIComponent(orderId)}`)}
-        />
-      )}
     </>
   );
 }

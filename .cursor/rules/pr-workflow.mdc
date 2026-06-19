@@ -1,0 +1,27 @@
+---
+description: Separate feature PRs from bugfix PRs — never mix regressions with new features
+alwaysApply: true
+---
+
+# PR workflow — features vs bugs
+
+## Branch and PR types
+
+| Type | Branch prefix | PR title prefix | When to use |
+|------|---------------|-----------------|-------------|
+| **Feature** | `feat/` | `feat(scope):` | New UI, new routes, new GraphQL fields, refactors that add capability |
+| **Bugfix** | `fix/` | `fix(scope):` | Broken CRUD, GraphQL errors, wrong data, layout regressions, failed saves |
+| **Chore** | `chore/` | `chore(scope):` | Docs, cursor rules, CI only |
+
+## Rules
+
+1. **Never mix bugs and features in one PR.** If a feature branch exposes a backend error (500, validation failure, field not persisted), open a **separate `fix/` PR** for the bug. Label it `bug` in the PR description.
+2. **Wire CRUD completely** before calling a feature done: UI field → GraphQL mutation/query → API resolver → DB model. No `readOnly` or `disabled` on fields that should save unless explicitly phased.
+3. **Verify the happy path** after wiring: create → read detail → update → list reflects change.
+4. **Feature PR test plan** must list which fields are persisted. **Bugfix PR** must state what was broken and the exact error fixed.
+
+## Examples
+
+- ✅ `feat(commerce): customer create page with SplitPageLayout` — new page only
+- ✅ `fix(api): persist marketingEmail on updateUser` — bug found while testing feature; separate PR
+- ❌ `feat(commerce): customer pages + fix updateUser 500` — split into two PRs

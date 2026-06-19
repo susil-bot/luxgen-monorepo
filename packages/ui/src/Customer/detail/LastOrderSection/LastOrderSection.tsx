@@ -25,7 +25,7 @@ export function LastOrderSection({
       ) : (
         <>
           <div className="flex flex-wrap items-center gap-2 mb-3">
-            <a href={`/orders/${encodeURIComponent(order.id)}`} className="font-medium" style={{ color: 'var(--color-blue)' }}>
+            <a href={`/orders/${order.id}`} className="font-medium" style={{ color: 'var(--color-blue)' }}>
               {order.orderNumber}
             </a>
             <span className="badge badge-green">{order.paymentStatus}</span>

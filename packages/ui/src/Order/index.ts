@@ -2,6 +2,12 @@ export { OrderListView } from './OrderListView';
 export type { OrderListViewProps } from './OrderListView';
 export { OrderDetailView } from './OrderDetailView';
 export type { OrderDetailViewProps } from './OrderDetailView';
+export { OrderCreateForm } from './OrderCreateForm';
+export type {
+  OrderCreateFormProps,
+  OrderCreateStudentOption,
+  OrderCreateCourseOption,
+} from './OrderCreateForm';
 export { OrderDetailLayout } from './OrderDetailLayout';
 export type { OrderDetailLayoutProps } from './OrderDetailLayout';
 export { OrderDetailHeader } from './OrderDetailHeader';
@@ -15,6 +21,11 @@ export {
   findOrderDetail,
   buildOrderDetail,
   buildOrderId,
+  buildOrderSubjectId,
+  enrollmentPairKey,
+  isLegacyOrderId,
+  isStandardOrderId,
+  parseLegacyOrderId,
   formatOrderListDate,
   formatOrderDate,
   paymentBadgeClass,
@@ -32,6 +43,7 @@ export type {
   OrderFilterTab,
   EnrollmentCourseSource,
   EnrollmentUserSource,
+  OrderEnrollmentSource,
 } from './fetcher';
 
 export { orderFixtures } from './fixture';

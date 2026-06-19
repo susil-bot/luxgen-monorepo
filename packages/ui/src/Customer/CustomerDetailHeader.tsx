@@ -4,6 +4,7 @@ import { CustomerTranslations } from './translations';
 export interface CustomerDetailHeaderProps {
   customer: CustomerDetail;
   backHref?: string;
+  editHref?: string;
 }
 
 function customerInitials(name: string): string {
@@ -13,7 +14,11 @@ function customerInitials(name: string): string {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-export function CustomerDetailHeader({ customer, backHref = '/admin/customers' }: CustomerDetailHeaderProps) {
+export function CustomerDetailHeader({
+  customer,
+  backHref = '/admin/customers',
+  editHref,
+}: CustomerDetailHeaderProps) {
   const t = CustomerTranslations.en;
   const initials = customerInitials(customer.name);
 
@@ -38,6 +43,11 @@ export function CustomerDetailHeader({ customer, backHref = '/admin/customers' }
         <h1 className="text-lg sm:text-xl font-semibold text-primary truncate">{customer.name}</h1>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">
+        {editHref && (
+          <a href={editHref} className="ios-btn-secondary text-sm">
+            Edit
+          </a>
+        )}
         <button type="button" className="ios-btn-secondary text-sm" disabled>
           {t.moreActions}
         </button>

@@ -2,6 +2,10 @@ export { CustomerListView } from './CustomerListView';
 export type { CustomerListViewProps } from './CustomerListView';
 export { CustomerDetailView } from './CustomerDetailView';
 export type { CustomerDetailViewProps } from './CustomerDetailView';
+export { CustomerCreateForm } from './CustomerCreateForm';
+export type { CustomerCreateFormProps } from './CustomerCreateForm';
+export { CustomerEditForm } from './CustomerEditForm';
+export type { CustomerEditFormProps } from './CustomerEditForm';
 export { CustomerDetailHeader } from './CustomerDetailHeader';
 export { CustomerStatsBar } from './CustomerStatsBar';
 export {

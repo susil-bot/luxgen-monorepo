@@ -22,7 +22,12 @@ export interface OrderTimelineEvent {
 }
 
 export interface OrderRow {
+  /** 24-char enrollment ObjectId — used in URLs */
   id: string;
+  /** Legacy composite key for activity timeline (`courseId:studentId`) */
+  subjectId: string;
+  courseId: string;
+  studentId: string;
   orderNumber: string;
   date: string;
   customerId: string;
@@ -65,6 +70,11 @@ export interface EnrollmentUserSource {
   firstName?: string | null;
   lastName?: string | null;
   createdAt?: string;
+  phone?: string | null;
+  marketingEmail?: boolean | null;
+  marketingSms?: boolean | null;
+  marketingWhatsapp?: boolean | null;
+  staffNotes?: string | null;
 }
 
 function userDisplayName(user: EnrollmentUserSource): string {
@@ -154,15 +164,32 @@ export function fulfillmentDisplayLabel(status: OrderFulfillmentStatus): string 
   return labels[status];
 }
 
-export function buildOrderId(courseId: string, studentId: string): string {
-  return `${courseId}:${studentId}`;
-}
+export {
+  buildOrderId,
+  buildOrderSubjectId,
+  enrollmentPairKey,
+  isLegacyOrderId,
+  isStandardOrderId,
+  parseLegacyOrderId,
+} from './orderId';
+export type { OrderEnrollmentSource } from './orderId';
+
+import {
+  buildOrderSubjectId,
+  enrollmentPairKey,
+  isLegacyOrderId,
+} from './orderId';
+import type { OrderEnrollmentSource } from './orderId';
 
 export function buildOrdersFromEnrollments(
   courses: EnrollmentCourseSource[] | null | undefined,
   users: EnrollmentUserSource[] | null | undefined,
+  enrollments?: OrderEnrollmentSource[] | null,
 ): OrderRow[] {
   const userMap = new Map((users ?? []).map((u) => [u.id, u]));
+  const enrollmentByPair = new Map(
+    (enrollments ?? []).map((e) => [enrollmentPairKey(e.courseId, e.studentId), e]),
+  );
   const orders: OrderRow[] = [];
 
   for (const course of courses ?? []) {
@@ -170,12 +197,20 @@ export function buildOrdersFromEnrollments(
       const user = userMap.get(student.id);
       if (!user) continue;
 
-      const orderId = buildOrderId(course.id, student.id);
-      const date = course.updatedAt ?? course.createdAt ?? new Date().toISOString();
+      const pairKey = enrollmentPairKey(course.id, student.id);
+      const enrollment = enrollmentByPair.get(pairKey);
+      const subjectId = buildOrderSubjectId(course.id, student.id);
+      const orderId = enrollment?.id ?? subjectId;
+
+      const date =
+        enrollment?.enrolledAt ?? course.updatedAt ?? course.createdAt ?? new Date().toISOString();
       const archived = course.status === 'ARCHIVED' || course.status === 'CANCELLED';
 
       orders.push({
         id: orderId,
+        subjectId,
+        courseId: course.id,
+        studentId: student.id,
         orderNumber: orderNumberFromId(orderId),
         date,
         customerId: user.id,
@@ -221,7 +256,7 @@ export function buildOrderDetail(
     quantity: 1,
     unitPrice: order.total === '—' ? '0.00' : order.total,
     total: order.total === '—' ? '0.00' : order.total,
-    courseId: course?.id ?? order.id.split(':')[0] ?? '',
+    courseId: course?.id ?? order.courseId,
   };
 
   return {
@@ -258,10 +293,15 @@ export function findOrderDetail(
   orderId: string,
   courses: EnrollmentCourseSource[] | null | undefined,
 ): OrderDetail | null {
-  const order = orders.find((o) => o.id === orderId);
+  const order =
+    orders.find(
+      (o) =>
+        o.id === orderId ||
+        o.subjectId === orderId ||
+        (isLegacyOrderId(orderId) && o.subjectId === orderId),
+    ) ?? null;
   if (!order) return null;
-  const [courseId] = orderId.split(':');
-  const course = courses?.find((c) => c.id === courseId);
+  const course = courses?.find((c) => c.id === order.courseId);
   return buildOrderDetail(order, course);
 }
 

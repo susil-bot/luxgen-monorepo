@@ -35,9 +35,12 @@ Read `skills/<skill-name>/SKILL.md` **first** when a task matches that skill's d
 | Billing / Stripe / plan gates | `skills/billing/SKILL.md` |
 | Business listings / directory | `skills/listings/SKILL.md` |
 | New GraphQL domain / mobile API | `skills/graphql/SKILL.md` |
+| Commerce CRUD / form → API wiring | `skills/fullstack-developer/SKILL.md` |
 | Cloud deploy / Docker / CI | `skills/deployment/SKILL.md` |
 | CSS, colours, typography, layout | `skills/ios-design/SKILL.md` |
 | Any new page | `skills/ios-design/SKILL.md` + `CODEBASE.md` |
+
+**PR policy:** Feature work (`feat/`) and bug fixes (`fix/`) must be separate PRs — see `.cursor/rules/pr-workflow.mdc`.
 
 ---
 
