@@ -38,7 +38,19 @@
 
 ---
 
-## Phase 1 — Core LMS (next)
+## Phase 0b — iOS UI gap sprint
+
+| # | Task | Area | Status | Notes |
+|---|------|------|--------|-------|
+| 0b.1 | Shared `PageLoadingState` / `PageEmptyState` | Web | ✅ done | `components/common/PageStates.tsx` |
+| 0b.2 | Dashboard, home, 404 iOS pass | Web | ✅ done | |
+| 0b.3 | Users page iOS card + table | Web | ✅ done | Data still mock — Phase 1.1 |
+| 0b.4 | Courses list/detail shell | Web | 🟡 partial | iOS headers + loading; mock data |
+| 0b.5 | Groups detail/edit/members pass | Web | 🟡 partial | Loading/empty/forms; stat cards TBD |
+| 0b.6 | PlanGate token fix | Web | ✅ done | |
+| 0b.7 | UI audit doc | Docs | ✅ done | [IOS_UI_AUDIT.md](./IOS_UI_AUDIT.md) |
+
+---
 
 | # | Task | Area | Status |
 |---|------|------|--------|
@@ -70,4 +82,4 @@
 
 ---
 
-*Last updated: Phase 0 complete — server auth + iOS client auth UI.*
+*Last updated: Phase 0 complete + iOS UI gap sprint (see [IOS_UI_AUDIT.md](./IOS_UI_AUDIT.md)).*

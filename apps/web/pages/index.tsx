@@ -1,9 +1,9 @@
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
+import Head from 'next/head';
 import { useGlobalContext } from '@luxgen/ui';
-import { Header } from '../components/layout/Header';
-import { Footer } from '../components/layout/Footer';
+import { PageLoadingState } from '../components/common/PageStates';
 
 interface HomeProps {
   tenant: string | null;
@@ -20,35 +20,34 @@ export default function Home({ tenant: _tenant }: HomeProps) {
   }, [isInitialized, currentTenant, router]);
 
   if (!isInitialized) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
-      </div>
-    );
+    return <PageLoadingState label="Loading…" />;
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <main className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome to LuxGen</h1>
-          <p className="text-xl text-gray-600 mb-8">Your multi-tenant learning management system</p>
-          <div className="space-x-4">
-            <button
-              onClick={() => router.push('/dashboard')}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
-            >
-              Get Started
-            </button>
-            <button className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50">
-              Learn More
-            </button>
+    <>
+      <Head>
+        <title>LuxGen — Multi-tenant LMS</title>
+        <meta name="description" content="Your multi-tenant learning management system" />
+      </Head>
+      <div className="min-h-screen flex flex-col" style={{ background: 'var(--color-bg-primary)' }}>
+        <main className="flex-1 flex items-center justify-center px-6 py-16">
+          <div className="max-w-lg text-center">
+            <h1 className="ios-large-title mb-3">Welcome to LuxGen</h1>
+            <p className="text-secondary text-base mb-10 leading-relaxed">
+              Multi-tenant learning, automations, and AI-assisted delivery — built with an iOS-native feel.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <button type="button" onClick={() => router.push('/login')} className="ios-btn-primary">
+                Sign in
+              </button>
+              <button type="button" onClick={() => router.push('/register')} className="ios-btn-secondary">
+                Create account
+              </button>
+            </div>
           </div>
-        </div>
-      </main>
-      <Footer />
-    </div>
+        </main>
+      </div>
+    </>
   );
 }
 

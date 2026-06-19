@@ -12,6 +12,8 @@ import {
   CourseAnalytics,
 } from '@luxgen/ui';
 import { TenantBanner } from '../../components/tenant/TenantBanner';
+import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
+import { createHandleUserAction } from '../../lib/user-actions';
 
 interface CoursePageProps {
   tenant: string;
@@ -57,12 +59,10 @@ export default function CoursePage({ tenant }: CoursePageProps) {
     router.push(path);
   };
 
+  const handleUserAction = createHandleUserAction(router);
+
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <PageLoadingState label="Loading course…" />;
   }
 
   return (
@@ -77,19 +77,7 @@ export default function CoursePage({ tenant }: CoursePageProps) {
         sidebarSections={getDefaultSidebarSections()}
         user={getDefaultUser()}
         logo={getDefaultLogo()}
-        onUserAction={(action) => {
-          switch (action) {
-            case 'profile':
-              console.log('Navigate to profile');
-              break;
-            case 'settings':
-              console.log('Navigate to settings');
-              break;
-            case 'logout':
-              console.log('Logout');
-              break;
-          }
-        }}
+        onUserAction={handleUserAction}
         showSearch={true}
         showNotifications={true}
         notificationCount={3}
@@ -98,7 +86,12 @@ export default function CoursePage({ tenant }: CoursePageProps) {
       >
         <TenantBanner tenant={tenant} />
 
-        <div className="mt-6 space-y-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-2">
+          <div className="mb-6">
+            <h1 className="ios-large-title">{course.title}</h1>
+            <p className="mt-1 text-secondary text-sm">{course.instructor} · {course.duration}</p>
+          </div>
+          <div className="space-y-8">
           {/* Course Overview */}
           <CourseOverview course={course} userRole={userRole} enrollmentStatus="enrolled" />
 
@@ -114,6 +107,7 @@ export default function CoursePage({ tenant }: CoursePageProps) {
             currentPath={currentPath}
             onNavigate={handleNavigate}
           />
+          </div>
         </div>
 
         <TenantDebug />

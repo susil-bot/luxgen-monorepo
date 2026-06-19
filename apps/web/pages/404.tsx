@@ -104,30 +104,18 @@ const NotFoundPageContent: React.FC = () => {
           showIllustration={true}
           customActions={
             <div className="mt-8 text-center">
-              <p className="text-sm text-gray-500 mb-4">Need help? Try these popular pages:</p>
+              <p className="text-sm text-secondary mb-4">Need help? Try these popular pages:</p>
               <div className="flex flex-wrap justify-center gap-2">
-                <button
-                  onClick={() => router.push('/dashboard')}
-                  className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-                >
+                <button type="button" onClick={() => router.push('/dashboard')} className="ios-btn-secondary">
                   Dashboard
                 </button>
-                <button
-                  onClick={() => router.push('/groups')}
-                  className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-                >
+                <button type="button" onClick={() => router.push('/groups')} className="ios-btn-secondary">
                   Groups
                 </button>
-                <button
-                  onClick={() => router.push('/users')}
-                  className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-                >
+                <button type="button" onClick={() => router.push('/users')} className="ios-btn-secondary">
                   Users
                 </button>
-                <button
-                  onClick={() => router.push('/analytics')}
-                  className="px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-                >
+                <button type="button" onClick={() => router.push('/analytics')} className="ios-btn-secondary">
                   Analytics
                 </button>
               </div>

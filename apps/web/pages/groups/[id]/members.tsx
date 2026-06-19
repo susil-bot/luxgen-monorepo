@@ -13,6 +13,7 @@ import {
   getDefaultLogo,
   getDefaultSidebarSections,
 } from '@luxgen/ui';
+import { PageLoadingState, PageEmptyState } from '../../../components/common/PageStates';
 
 const GroupMembersPageContent: React.FC = () => {
   const router = useRouter();
@@ -306,23 +307,20 @@ const GroupMembersPageContent: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500"></div>
-      </div>
-    );
+    return <PageLoadingState label="Loading members…" />;
   }
 
   if (!group) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Group not found</h1>
-          <button onClick={() => router.push('/groups')} className="text-green-600 hover:text-green-700 font-medium">
-            Back to Groups
+      <PageEmptyState
+        icon="👥"
+        title="Group not found"
+        action={
+          <button type="button" className="ios-btn-primary mt-4" onClick={() => router.push('/groups')}>
+            Back to groups
           </button>
-        </div>
-      </div>
+        }
+      />
     );
   }
 
@@ -354,14 +352,14 @@ const GroupMembersPageContent: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center space-x-3 mb-2">
-                  <button onClick={() => router.push('/groups')} className="text-gray-500 hover:text-gray-700">
+                  <button type="button" onClick={() => router.push('/groups')} className="ios-btn-plain p-1" aria-label="Back to groups">
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
-                  <h1 className="text-3xl font-bold text-gray-900">{group.name}</h1>
+                  <h1 className="ios-large-title">{group.name}</h1>
                 </div>
-                <p className="text-gray-600">{group.description}</p>
+                <p className="text-secondary">{group.description}</p>
               </div>
 
               <div className="flex items-center space-x-3">
