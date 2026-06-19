@@ -9,8 +9,8 @@ export const getAdminDashboardStyles = (theme: TenantTheme, props: AdminDashboar
   const { variant } = props;
 
   const container: CSSProperties = {
-    backgroundColor: theme.colors.background,
-    color: theme.colors.text,
+    backgroundColor: 'var(--color-bg-primary)',
+    color: 'var(--color-label-primary)',
     fontFamily: theme.fonts.primary,
     minHeight: '100vh',
     padding: theme.spacing.lg,

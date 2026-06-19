@@ -4,6 +4,7 @@ import Head from 'next/head';
 import { useQuery } from '@apollo/client';
 import { SnackbarProvider, useSnackbar, AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
 import { useLayoutUser } from '../../lib/app-layout-user';
+import { useAppLayoutHeader } from '../../lib/app-layout-header';
 import { GET_GROUP, GET_GROUP_MEMBERS } from '../../graphql/queries/groups';
 import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
 
@@ -14,6 +15,7 @@ const GroupDetailsPageContent: React.FC = () => {
   const { showSuccess } = useSnackbar();
   const user = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
+  const headerProps = useAppLayoutHeader();
 
   const { data, loading, error } = useQuery(GET_GROUP, {
     variables: { id: groupId },
@@ -87,8 +89,7 @@ const GroupDetailsPageContent: React.FC = () => {
         sidebarSections={getDefaultSidebarSections()}
         user={user ?? undefined}
         onUserAction={handleUserAction}
-        showSearch={false}
-        showNotifications={false}
+        {...headerProps}
         logo={getDefaultLogo()}
         sidebarCollapsible={true}
         sidebarDefaultCollapsed={false}

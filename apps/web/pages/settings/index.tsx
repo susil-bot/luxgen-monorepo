@@ -2,10 +2,11 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
-import { createHandleUserAction } from '../lib/user-actions';
-import { useLayoutUser } from '../lib/app-layout-user';
-import { SETTINGS_GROUPS, SETTINGS_SECTIONS } from '../lib/settings-sections';
-import { getTenantPageProps } from '../lib/tenant-page-props';
+import { createHandleUserAction } from '../../lib/user-actions';
+import { useLayoutUser } from '../../lib/app-layout-user';
+import { useAppLayoutHeader } from '../../lib/app-layout-header';
+import { SETTINGS_GROUPS, SETTINGS_SECTIONS } from '../../lib/settings-sections';
+import { getTenantPageProps } from '../../lib/tenant-page-props';
 
 interface SettingsIndexProps {
   tenant: string;
@@ -15,6 +16,7 @@ export default function SettingsIndexPage({ tenant }: SettingsIndexProps) {
   const router = useRouter();
   const layoutUser = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
+  const headerProps = useAppLayoutHeader();
 
   return (
     <>
@@ -27,8 +29,7 @@ export default function SettingsIndexPage({ tenant }: SettingsIndexProps) {
         user={layoutUser ?? undefined}
         logo={getDefaultLogo()}
         onUserAction={handleUserAction}
-        showSearch={false}
-        showNotifications={false}
+        {...headerProps}
         responsive
       >
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">

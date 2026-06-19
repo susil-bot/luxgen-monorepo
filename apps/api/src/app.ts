@@ -24,6 +24,7 @@ import tenantRoutes from './routes/tenant';
 import tenantConfigRoutes from './routes/tenantConfig';
 import billingRoutes, { stripeWebhookHandler } from './routes/billing';
 import jobsRoutes from './routes/jobs';
+import notificationsRoutes from './routes/notifications';
 
 import { getCorsOrigins } from '@luxgen/config';
 
@@ -74,6 +75,7 @@ app.use('/api/tenant', tenantRoutes);
 app.use('/api/tenant-config', tenantConfigRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/jobs', jobsRoutes);
+app.use('/api/notifications', notificationsRoutes);
 
 // ── GraphQL ───────────────────────────────────────────────────────────────
 const apolloServer = new ApolloServer({

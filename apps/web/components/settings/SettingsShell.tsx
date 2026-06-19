@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
+import { useAppLayoutHeader } from '../../lib/app-layout-header';
 import { SETTINGS_GROUPS, SETTINGS_SECTIONS, type SettingsSectionId } from '../../lib/settings-sections';
 
 interface SettingsShellProps {
@@ -18,6 +19,7 @@ export function SettingsShell({ tenant, activeSection, title, subtitle, children
   const router = useRouter();
   const layoutUser = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
+  const headerProps = useAppLayoutHeader();
 
   return (
     <>
@@ -30,8 +32,7 @@ export function SettingsShell({ tenant, activeSection, title, subtitle, children
         user={layoutUser ?? undefined}
         logo={getDefaultLogo()}
         onUserAction={handleUserAction}
-        showSearch={false}
-        showNotifications={false}
+        {...headerProps}
         responsive
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">

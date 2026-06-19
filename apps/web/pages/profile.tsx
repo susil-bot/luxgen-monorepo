@@ -6,6 +6,7 @@ import { useMutation } from '@apollo/client';
 import { AppLayout, getDefaultLogo, getDefaultSidebarSections, SnackbarProvider, useSnackbar } from '@luxgen/ui';
 import { createHandleUserAction } from '../lib/user-actions';
 import { useLayoutUser } from '../lib/app-layout-user';
+import { useAppLayoutHeader } from '../lib/app-layout-header';
 import { getStoredUser, updateStoredUser } from '../lib/session';
 import { UPDATE_USER } from '../graphql/queries/auth';
 import { getTenantPageProps } from '../lib/tenant-page-props';
@@ -18,6 +19,7 @@ function ProfileContent({ tenant }: ProfilePageProps) {
   const router = useRouter();
   const layoutUser = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
+  const headerProps = useAppLayoutHeader();
   const { showSuccess, showError } = useSnackbar();
   const session = typeof window !== 'undefined' ? getStoredUser() : null;
 
@@ -73,8 +75,7 @@ function ProfileContent({ tenant }: ProfilePageProps) {
         user={layoutUser ?? undefined}
         logo={getDefaultLogo()}
         onUserAction={handleUserAction}
-        showSearch={false}
-        showNotifications={false}
+        {...headerProps}
         responsive
       >
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">

@@ -19,6 +19,9 @@ export interface NavBarProps {
   showNotifications?: boolean;
   notificationCount?: number;
   onNotificationClick?: () => void;
+  showThemeToggle?: boolean;
+  isDarkMode?: boolean;
+  onThemeToggle?: () => void;
   logo?: {
     text: string;
     href: string;
@@ -37,6 +40,9 @@ const NavBarComponent: React.FC<NavBarProps> = ({
   showNotifications = true,
   notificationCount = 0,
   onNotificationClick,
+  showThemeToggle = false,
+  isDarkMode = false,
+  onThemeToggle,
   logo = { text: 'LuxGen', href: '/' },
   variant = 'default',
   position = 'fixed',
@@ -76,7 +82,7 @@ const NavBarComponent: React.FC<NavBarProps> = ({
     >
       <div className="px-4 h-full flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-shrink-0">
           <a
             href={logo.href}
             className="flex items-center gap-2 transition-opacity hover:opacity-80"
@@ -88,19 +94,53 @@ const NavBarComponent: React.FC<NavBarProps> = ({
             >
               L
             </div>
-            <span className="text-base font-semibold">{logo.text}</span>
+            <span className="text-base font-semibold hidden sm:inline">{logo.text}</span>
           </a>
         </div>
 
-        {/* Search Bar */}
+        {/* Search Bar — visible at all breakpoints */}
         {showSearch && (
-          <div className="hidden md:block flex-1 max-w-md mx-4">
+          <div className="flex-1 min-w-0 max-w-md mx-2 sm:mx-4">
             <SearchBar placeholder={searchPlaceholder} onSearch={handleSearch} size="sm" />
           </div>
         )}
 
         {/* Right Section */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+          {/* Light / dark mode */}
+          {showThemeToggle && onThemeToggle && (
+            <button
+              type="button"
+              onClick={onThemeToggle}
+              className="p-2 rounded-lg transition-colors"
+              style={{ color: 'var(--color-label-secondary)' }}
+              aria-label={isDarkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+              title={isDarkMode ? 'Light mode' : 'Dark mode'}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-fill-quaternary)')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+            >
+              {isDarkMode ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"
+                  />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"
+                  />
+                </svg>
+              )}
+            </button>
+          )}
+
           {/* Notifications */}
           {showNotifications && (
             <button

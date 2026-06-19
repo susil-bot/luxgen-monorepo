@@ -78,18 +78,11 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, initialT
         background: newTheme.colors.background,
       });
 
-      // Apply color variables with fallbacks
+      // Tenant accent only — page surfaces use iOS tokens from globals.css
       root.style.setProperty('--color-primary', newTheme.colors?.primary || '#3B82F6');
       root.style.setProperty('--color-secondary', newTheme.colors?.secondary || '#10B981');
       root.style.setProperty('--color-accent', newTheme.colors?.accent || '#8B5CF6');
-      root.style.setProperty('--color-background', newTheme.colors?.background || '#F8FAFC');
-      root.style.setProperty('--color-surface', newTheme.colors?.surface || '#FFFFFF');
-      root.style.setProperty('--color-text', newTheme.colors?.text || '#1F2937');
-      root.style.setProperty('--color-text-secondary', newTheme.colors?.textSecondary || '#6B7280');
-      root.style.setProperty('--color-border', newTheme.colors?.border || '#E5E7EB');
-      root.style.setProperty('--color-success', newTheme.colors?.success || '#10B981');
-      root.style.setProperty('--color-warning', newTheme.colors?.warning || '#F59E0B');
-      root.style.setProperty('--color-error', newTheme.colors?.error || '#EF4444');
+      root.style.setProperty('--color-blue', newTheme.colors?.primary || '#007aff');
 
       // Apply font variables with fallbacks
       root.style.setProperty('--font-primary', newTheme.fonts?.primary || 'Inter');
@@ -158,13 +151,10 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children, initialT
       <div
         style={
           {
-            backgroundColor: theme.colors.background,
-            color: theme.colors.text,
+            backgroundColor: 'var(--color-bg-primary)',
+            color: 'var(--color-label-primary)',
             fontFamily: theme.fonts.primary,
             minHeight: '100vh',
-            '--color-primary': theme.colors.primary,
-            '--color-secondary': theme.colors.secondary,
-            '--color-background': theme.colors.background,
           } as React.CSSProperties
         }
       >
