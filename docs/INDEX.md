@@ -57,6 +57,7 @@
 
 | Document | Description |
 |----------|-------------|
+| [AUTH_UI.md](./AUTH_UI.md) | **Auth UX** — AuthGuard, session notices, iOS banners |
 | [../CODING_STANDARDS.md](../CODING_STANDARDS.md) | TypeScript, React, CSS rules |
 | [SIDEBAR_REDESIGN.md](./SIDEBAR_REDESIGN.md) | Sidebar spec |
 | `skills/ios-design/SKILL.md` | Design tokens & page template |

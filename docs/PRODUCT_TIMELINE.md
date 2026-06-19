@@ -15,6 +15,10 @@
 | 0.4 | GraphQL context rejects missing/invalid JWT on protected operations | API | ✅ done | `secureResolvers` + `assertAuthenticated` |
 | 0.5 | Block deactivated accounts (`isActive` + `UserStatus`) | API | ✅ done | Login REST + GraphQL + auth middleware |
 | 0.6 | Rate-limit login endpoint | API | ✅ done | `loginRateLimitMiddleware` + GraphQL login |
+| 0.7 | Wire AuthGuard in `_app.tsx` (regression fix) | Web | ✅ done | Wrap `<Component />` with `AuthGuard` |
+| 0.8 | iOS auth notice banners on login (`?reason=`) | Web | ✅ done | `AuthNoticeBanner` + `auth-notices.ts` |
+| 0.9 | Session / logout redirects with reason codes | Web | ✅ done | SessionMonitor, Apollo link, `performLogout` |
+| 0.10 | Friendly login errors (rate limit, deactivated) | Web | ✅ done | `formatLoginError()` in login page |
 
 ### Phase 0 — Server details (0.4–0.6)
 
@@ -66,4 +70,4 @@
 
 ---
 
-*Last updated: Phase 0 server auth tasks completed.*
+*Last updated: Phase 0 complete — server auth + iOS client auth UI.*

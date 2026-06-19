@@ -1,5 +1,6 @@
 import type { NextRouter } from 'next/router';
 import { client } from '../graphql/client';
+import { buildLogoutRedirect } from './auth-routes';
 import { clearStoredSession } from './session';
 
 export interface LogoutOptions {
@@ -7,6 +8,8 @@ export interface LogoutOptions {
   router?: Pick<NextRouter, 'push' | 'replace'>;
   /** Defaults to /login */
   redirectTo?: string;
+  /** When true, redirect to login with signed-out notice (default true for router logout) */
+  showLoggedOutNotice?: boolean;
   /** Reset Apollo cache (default true) */
   resetApolloCache?: boolean;
 }
@@ -16,7 +19,8 @@ export interface LogoutOptions {
  * Clears: authToken, currentUser, currentTenant, authTokenExpiresAt
  */
 export function performLogout(options: LogoutOptions = {}): void {
-  const { router, redirectTo = '/login', resetApolloCache = true } = options;
+  const { router, redirectTo, resetApolloCache = true, showLoggedOutNotice = true } = options;
+  const destination = redirectTo ?? (showLoggedOutNotice ? buildLogoutRedirect() : '/login');
 
   clearStoredSession();
 
@@ -25,9 +29,9 @@ export function performLogout(options: LogoutOptions = {}): void {
   }
 
   if (router) {
-    void router.push(redirectTo);
+    void router.push(destination);
   } else if (typeof window !== 'undefined') {
-    window.location.href = redirectTo;
+    window.location.href = destination;
   }
 }
 

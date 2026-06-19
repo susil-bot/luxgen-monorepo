@@ -3,6 +3,7 @@ import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 
 import { buildLoginRedirect } from '../lib/auth-routes';
+import type { AuthRedirectReason } from '../lib/auth-notices';
 import { getGraphqlUrl } from '../lib/urls';
 import { AUTH_STORAGE_KEYS, clearStoredSession, isStoredSessionExpired } from '../lib/session';
 
@@ -52,7 +53,9 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 
   clearStoredSession();
   const returnPath = `${window.location.pathname}${window.location.search}`;
-  window.location.href = buildLoginRedirect(returnPath);
+  const reason: AuthRedirectReason =
+    graphQLErrors?.some((err) => err.extensions?.code === 'FORBIDDEN') ? 'unauthorized' : 'session_expired';
+  window.location.href = buildLoginRedirect(returnPath, reason);
 });
 
 export const client = new ApolloClient({

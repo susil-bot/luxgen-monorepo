@@ -3,6 +3,8 @@
  * Token lives in localStorage — guard runs in the browser after hydration.
  */
 
+import type { AuthRedirectReason } from './auth-notices';
+
 /** Exact paths that never require authentication */
 export const PUBLIC_ROUTES = new Set(['/login', '/register', '/404']);
 
@@ -45,10 +47,19 @@ export function requiresAuth(pathname: string): boolean {
   return PROTECTED_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
 }
 
-export function buildLoginRedirect(returnPath: string): string {
+export function buildLoginRedirect(returnPath: string, reason?: AuthRedirectReason): string {
   const safe =
     returnPath && returnPath !== '/login' && returnPath !== '/register' ? returnPath : '/dashboard';
-  return `/login?redirect=${encodeURIComponent(safe)}`;
+  const params = new URLSearchParams({ redirect: safe });
+  if (reason) {
+    params.set('reason', reason);
+  }
+  return `/login?${params.toString()}`;
+}
+
+/** Login URL after explicit sign-out (no return path) */
+export function buildLogoutRedirect(): string {
+  return '/login?reason=logged_out';
 }
 
 function normalizePath(pathname: string): string {
