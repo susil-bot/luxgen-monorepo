@@ -1,4 +1,10 @@
 import { ITenant } from '@luxgen/db';
+import { getTenantDomain, getTenantWebOrigin } from '@luxgen/config';
+
+const demoDevDomain = getTenantDomain('demo');
+const demoDevOrigin = getTenantWebOrigin('demo');
+const ideaVibesDevDomain = getTenantDomain('idea-vibes');
+const ideaVibesDevOrigin = getTenantWebOrigin('idea-vibes');
 
 /**
  * Demo Tenant Configuration
@@ -25,15 +31,15 @@ export const demoTenantConfig: Partial<ITenant> = {
           border-radius: 8px;
           font-weight: 600;
         }
-      `
+      `,
     },
     security: {
-      allowedDomains: ['demo.localhost', 'demo.example.com'],
-      corsOrigins: ['http://demo.localhost:3000', 'https://demo.example.com'],
+      allowedDomains: [demoDevDomain, 'demo.example.com'],
+      corsOrigins: [demoDevOrigin, 'https://demo.example.com'],
       rateLimiting: {
         enabled: true,
         maxRequests: 2000,
-        windowMs: 900000 // 15 minutes
+        windowMs: 900000, // 15 minutes
       },
       sessionTimeout: 480, // 8 hours
       requireMFA: false,
@@ -42,8 +48,8 @@ export const demoTenantConfig: Partial<ITenant> = {
         requireUppercase: true,
         requireLowercase: true,
         requireNumbers: true,
-        requireSymbols: false
-      }
+        requireSymbols: false,
+      },
     },
     config: {
       features: {
@@ -51,25 +57,25 @@ export const demoTenantConfig: Partial<ITenant> = {
         notifications: true,
         fileUpload: true,
         apiAccess: true,
-        customDomain: false
+        customDomain: false,
       },
       limits: {
         maxUsers: 50,
         maxStorage: 2048, // 2GB
-        maxApiCalls: 20000
+        maxApiCalls: 20000,
       },
       integrations: {
         emailProvider: 'sendgrid',
-        analyticsProvider: 'google-analytics'
-      }
-    }
+        analyticsProvider: 'google-analytics',
+      },
+    },
   },
   metadata: {
     plan: 'pro',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null // Will be set when tenant is created
-  }
+    createdBy: null, // Will be set when tenant is created
+  },
 };
 
 /**
@@ -109,15 +115,15 @@ export const ideaVibesTenantConfig: Partial<ITenant> = {
         .idea-vibes-card:hover {
           transform: translateY(-5px);
         }
-      `
+      `,
     },
     security: {
-      allowedDomains: ['idea-vibes.localhost', 'idea-vibes.example.com'],
-      corsOrigins: ['http://idea-vibes.localhost:3000', 'https://idea-vibes.example.com'],
+      allowedDomains: [ideaVibesDevDomain, 'idea-vibes.example.com'],
+      corsOrigins: [ideaVibesDevOrigin, 'https://idea-vibes.example.com'],
       rateLimiting: {
         enabled: true,
         maxRequests: 5000, // Higher limit for creative platform
-        windowMs: 900000 // 15 minutes
+        windowMs: 900000, // 15 minutes
       },
       sessionTimeout: 720, // 12 hours for creative sessions
       requireMFA: true, // Enhanced security for creative platform
@@ -126,8 +132,8 @@ export const ideaVibesTenantConfig: Partial<ITenant> = {
         requireUppercase: true,
         requireLowercase: true,
         requireNumbers: true,
-        requireSymbols: true
-      }
+        requireSymbols: true,
+      },
     },
     config: {
       features: {
@@ -135,26 +141,26 @@ export const ideaVibesTenantConfig: Partial<ITenant> = {
         notifications: true,
         fileUpload: true,
         apiAccess: true,
-        customDomain: true // Allow custom domains for creative brands
+        customDomain: true, // Allow custom domains for creative brands
       },
       limits: {
         maxUsers: 200,
         maxStorage: 10240, // 10GB for creative content
-        maxApiCalls: 50000
+        maxApiCalls: 50000,
       },
       integrations: {
         emailProvider: 'mailgun',
         paymentProvider: 'stripe',
-        analyticsProvider: 'mixpanel'
-      }
-    }
+        analyticsProvider: 'mixpanel',
+      },
+    },
   },
   metadata: {
     plan: 'enterprise',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null // Will be set when tenant is created
-  }
+    createdBy: null, // Will be set when tenant is created
+  },
 };
 
 /**
@@ -170,7 +176,7 @@ export const defaultTenantConfig: Partial<ITenant> = {
       primaryColor: '#3B82F6',
       secondaryColor: '#6B7280',
       accentColor: '#10B981',
-      fontFamily: 'Inter, system-ui, sans-serif'
+      fontFamily: 'Inter, system-ui, sans-serif',
     },
     security: {
       allowedDomains: [],
@@ -178,7 +184,7 @@ export const defaultTenantConfig: Partial<ITenant> = {
       rateLimiting: {
         enabled: true,
         maxRequests: 1000,
-        windowMs: 900000
+        windowMs: 900000,
       },
       sessionTimeout: 480,
       requireMFA: false,
@@ -187,8 +193,8 @@ export const defaultTenantConfig: Partial<ITenant> = {
         requireUppercase: true,
         requireLowercase: true,
         requireNumbers: true,
-        requireSymbols: false
-      }
+        requireSymbols: false,
+      },
     },
     config: {
       features: {
@@ -196,31 +202,31 @@ export const defaultTenantConfig: Partial<ITenant> = {
         notifications: true,
         fileUpload: true,
         apiAccess: true,
-        customDomain: false
+        customDomain: false,
       },
       limits: {
         maxUsers: 100,
         maxStorage: 1024,
-        maxApiCalls: 10000
+        maxApiCalls: 10000,
       },
-      integrations: {}
-    }
+      integrations: {},
+    },
   },
   metadata: {
     plan: 'free',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null
-  }
+    createdBy: null,
+  },
 };
 
 /**
  * Tenant configuration registry
  */
 export const tenantConfigs = {
-  'demo': demoTenantConfig,
+  demo: demoTenantConfig,
   'idea-vibes': ideaVibesTenantConfig,
-  'default': defaultTenantConfig
+  default: defaultTenantConfig,
 };
 
 /**
@@ -235,24 +241,24 @@ export const getTenantConfig = (subdomain: string): Partial<ITenant> => {
  */
 export const validateTenantConfig = (config: Partial<ITenant>): string[] => {
   const errors: string[] = [];
-  
+
   if (!config.name) {
     errors.push('Tenant name is required');
   }
-  
+
   if (!config.subdomain) {
     errors.push('Tenant subdomain is required');
   } else if (!/^[a-z0-9-]+$/.test(config.subdomain)) {
     errors.push('Subdomain can only contain lowercase letters, numbers, and hyphens');
   }
-  
+
   if (config.settings?.branding?.primaryColor && !/^#[0-9A-Fa-f]{6}$/.test(config.settings.branding.primaryColor)) {
     errors.push('Primary color must be a valid hex color');
   }
-  
+
   if (config.settings?.security?.rateLimiting?.maxRequests && config.settings.security.rateLimiting.maxRequests < 1) {
     errors.push('Rate limiting max requests must be at least 1');
   }
-  
+
   return errors;
 };

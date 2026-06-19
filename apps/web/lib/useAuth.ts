@@ -36,7 +36,11 @@ export const useAuth = () => {
   const [registerMutation, { loading: registerLoading }] = useMutation(REGISTER_MUTATION);
 
   // Get current user query
-  const { data: currentUserData, loading: userLoading, error: userError } = useQuery(GET_CURRENT_USER, {
+  const {
+    data: currentUserData,
+    loading: userLoading,
+    error: userError,
+  } = useQuery(GET_CURRENT_USER, {
     skip: !authState.token,
     errorPolicy: 'all',
   });
@@ -44,21 +48,21 @@ export const useAuth = () => {
   // Update auth state when current user data changes
   useEffect(() => {
     if (currentUserData?.currentUser) {
-      setAuthState(prev => ({
+      setAuthState((prev) => ({
         ...prev,
         user: currentUserData.currentUser,
         loading: false,
         error: null,
       }));
     } else if (userError) {
-      setAuthState(prev => ({
+      setAuthState((prev) => ({
         ...prev,
         user: null,
         loading: false,
         error: userError.message,
       }));
     } else if (!userLoading && !currentUserData?.currentUser) {
-      setAuthState(prev => ({
+      setAuthState((prev) => ({
         ...prev,
         user: null,
         loading: false,
@@ -69,12 +73,12 @@ export const useAuth = () => {
 
   const login = async (email: string, password: string) => {
     try {
-      setAuthState(prev => ({ ...prev, loading: true, error: null }));
+      setAuthState((prev) => ({ ...prev, loading: true, error: null }));
 
       const { data } = await loginMutation({
         variables: {
-          input: { email, password }
-        }
+          input: { email, password },
+        },
       });
 
       if (data?.login) {
@@ -90,7 +94,7 @@ export const useAuth = () => {
       }
     } catch (error: any) {
       const errorMessage = error.message || 'Login failed';
-      setAuthState(prev => ({
+      setAuthState((prev) => ({
         ...prev,
         loading: false,
         error: errorMessage,
@@ -108,12 +112,12 @@ export const useAuth = () => {
     tenantId: string;
   }) => {
     try {
-      setAuthState(prev => ({ ...prev, loading: true, error: null }));
+      setAuthState((prev) => ({ ...prev, loading: true, error: null }));
 
       const { data } = await registerMutation({
         variables: {
-          input: userData
-        }
+          input: userData,
+        },
       });
 
       if (data?.register) {
@@ -129,7 +133,7 @@ export const useAuth = () => {
       }
     } catch (error: any) {
       const errorMessage = error.message || 'Registration failed';
-      setAuthState(prev => ({
+      setAuthState((prev) => ({
         ...prev,
         loading: false,
         error: errorMessage,
@@ -162,7 +166,7 @@ export const useAuth = () => {
     token: authState.token,
     loading: isLoading(),
     error: authState.error,
-    
+
     // Actions
     login,
     register,

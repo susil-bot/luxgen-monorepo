@@ -2,11 +2,7 @@ import React from 'react';
 import { BaseComponentProps, TenantTheme } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
-import { 
-  getLastSurveyStyles, 
-  lastSurveyClasses,
-  lastSurveyCSS 
-} from './styles';
+import { getLastSurveyStyles, lastSurveyClasses, lastSurveyCSS } from './styles';
 
 export interface Survey {
   id: string;
@@ -91,7 +87,7 @@ const LastSurveyComponent: React.FC<LastSurveyProps> = ({
             style={{
               ...styles.status,
               backgroundColor: getStatusColor(survey.status),
-              color: '#FFFFFF'
+              color: '#FFFFFF',
             }}
           >
             {getStatusText(survey.status)}
@@ -99,29 +95,35 @@ const LastSurveyComponent: React.FC<LastSurveyProps> = ({
         </div>
 
         <div style={{ marginBottom: '16px' }}>
-          <h4 style={{
-            fontSize: '1rem',
-            fontWeight: '600',
-            color: tenantTheme.colors.text,
-            margin: 0,
-            marginBottom: '8px'
-          }}>
+          <h4
+            style={{
+              fontSize: '1rem',
+              fontWeight: '600',
+              color: tenantTheme.colors.text,
+              margin: 0,
+              marginBottom: '8px',
+            }}
+          >
             {survey.title}
           </h4>
           {survey.description && (
-            <p style={{
-              fontSize: '0.875rem',
-              color: tenantTheme.colors.textSecondary || '#64748B',
-              margin: 0,
-              marginBottom: '8px'
-            }}>
+            <p
+              style={{
+                fontSize: '0.875rem',
+                color: tenantTheme.colors.textSecondary || '#64748B',
+                margin: 0,
+                marginBottom: '8px',
+              }}
+            >
               {survey.description}
             </p>
           )}
-          <div style={{
-            fontSize: '0.75rem',
-            color: tenantTheme.colors.textSecondary || '#64748B'
-          }}>
+          <div
+            style={{
+              fontSize: '0.75rem',
+              color: tenantTheme.colors.textSecondary || '#64748B',
+            }}
+          >
             Created: {survey.createdAt}
             {survey.expiresAt && ` • Expires: ${survey.expiresAt}`}
           </div>
@@ -130,18 +132,23 @@ const LastSurveyComponent: React.FC<LastSurveyProps> = ({
         {showProgress && (
           <div className={lastSurveyClasses.progress} style={styles.progress}>
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-              <span style={{
-                fontSize: '0.875rem',
-                fontWeight: '500',
-                color: tenantTheme.colors.text
-              }}>
+              <span
+                style={{
+                  fontSize: '0.875rem',
+                  fontWeight: '500',
+                  color: tenantTheme.colors.text,
+                }}
+              >
                 Progress
               </span>
-              <span style={{
-                fontSize: '0.875rem',
-                color: tenantTheme.colors.textSecondary || '#64748B'
-              }}>
-                {survey.totalResponses}{survey.targetResponses ? ` / ${survey.targetResponses}` : ''} responses
+              <span
+                style={{
+                  fontSize: '0.875rem',
+                  color: tenantTheme.colors.textSecondary || '#64748B',
+                }}
+              >
+                {survey.totalResponses}
+                {survey.targetResponses ? ` / ${survey.targetResponses}` : ''} responses
               </span>
             </div>
             <div className={lastSurveyClasses.progressBar} style={styles.progressBar}>
@@ -149,7 +156,7 @@ const LastSurveyComponent: React.FC<LastSurveyProps> = ({
                 className={lastSurveyClasses.progressFill}
                 style={{
                   ...styles.progressFill,
-                  width: `${survey.progress}%`
+                  width: `${survey.progress}%`,
                 }}
               />
             </div>
@@ -160,11 +167,13 @@ const LastSurveyComponent: React.FC<LastSurveyProps> = ({
         )}
 
         {showActions && (
-          <div style={{
-            display: 'flex',
-            gap: '8px',
-            marginTop: '16px'
-          }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '8px',
+              marginTop: '16px',
+            }}
+          >
             <button
               onClick={() => onViewSurvey?.(survey)}
               style={{
@@ -177,7 +186,7 @@ const LastSurveyComponent: React.FC<LastSurveyProps> = ({
                 fontSize: '0.875rem',
                 fontWeight: '500',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
               }}
             >
               View Survey
@@ -193,7 +202,7 @@ const LastSurveyComponent: React.FC<LastSurveyProps> = ({
                 fontSize: '0.875rem',
                 fontWeight: '500',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
               }}
             >
               Edit
@@ -209,7 +218,7 @@ const LastSurveyComponent: React.FC<LastSurveyProps> = ({
                 fontSize: '0.875rem',
                 fontWeight: '500',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.2s ease',
               }}
             >
               Share

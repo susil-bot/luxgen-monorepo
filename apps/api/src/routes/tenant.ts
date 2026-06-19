@@ -11,16 +11,16 @@ const router = Router();
 router.get('/current', async (req: Request, res: Response) => {
   try {
     const tenantContext = getTenantContext(req);
-    
+
     if (!tenantContext) {
       return res.status(404).json({
         success: false,
-        message: 'No tenant context found'
+        message: 'No tenant context found',
       });
     }
 
     const { tenant } = tenantContext;
-    
+
     res.json({
       success: true,
       data: {
@@ -34,15 +34,15 @@ router.get('/current', async (req: Request, res: Response) => {
         features: tenant.settings?.config?.features || {},
         limits: tenant.settings?.config?.limits || {},
         createdAt: tenant.createdAt,
-        lastActive: tenant.metadata?.lastActive || tenant.createdAt
-      }
+        lastActive: tenant.metadata?.lastActive || tenant.createdAt,
+      },
     });
   } catch (error) {
     console.error('Get current tenant error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });
@@ -53,30 +53,30 @@ router.get('/current', async (req: Request, res: Response) => {
 router.get('/config', async (req: Request, res: Response) => {
   try {
     const tenantContext = getTenantContext(req);
-    
+
     if (!tenantContext) {
       return res.status(404).json({
         success: false,
-        message: 'No tenant context found'
+        message: 'No tenant context found',
       });
     }
 
     const { tenant } = tenantContext;
-    
+
     res.json({
       success: true,
       data: {
         branding: tenant.settings?.branding || {},
         security: tenant.settings?.security || {},
-        config: tenant.settings?.config || {}
-      }
+        config: tenant.settings?.config || {},
+      },
     });
   } catch (error) {
     console.error('Get tenant config error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });
@@ -87,11 +87,11 @@ router.get('/config', async (req: Request, res: Response) => {
 router.patch('/branding', async (req: Request, res: Response) => {
   try {
     const tenantContext = getTenantContext(req);
-    
+
     if (!tenantContext) {
       return res.status(404).json({
         success: false,
-        message: 'No tenant context found'
+        message: 'No tenant context found',
       });
     }
 
@@ -102,24 +102,24 @@ router.patch('/branding', async (req: Request, res: Response) => {
     if (!branding) {
       return res.status(400).json({
         success: false,
-        message: 'Branding data is required'
+        message: 'Branding data is required',
       });
     }
 
     // Update tenant branding
     const updatedTenant = await Tenant.findByIdAndUpdate(
       tenantId,
-      { 
+      {
         'settings.branding': { ...tenant.settings.branding, ...branding },
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedTenant) {
       return res.status(404).json({
         success: false,
-        message: 'Tenant not found'
+        message: 'Tenant not found',
       });
     }
 
@@ -127,15 +127,15 @@ router.patch('/branding', async (req: Request, res: Response) => {
       success: true,
       message: 'Branding updated successfully',
       data: {
-        branding: updatedTenant.settings.branding
-      }
+        branding: updatedTenant.settings.branding,
+      },
     });
   } catch (error) {
     console.error('Update tenant branding error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });
@@ -146,11 +146,11 @@ router.patch('/branding', async (req: Request, res: Response) => {
 router.patch('/security', async (req: Request, res: Response) => {
   try {
     const tenantContext = getTenantContext(req);
-    
+
     if (!tenantContext) {
       return res.status(404).json({
         success: false,
-        message: 'No tenant context found'
+        message: 'No tenant context found',
       });
     }
 
@@ -161,24 +161,24 @@ router.patch('/security', async (req: Request, res: Response) => {
     if (!security) {
       return res.status(400).json({
         success: false,
-        message: 'Security data is required'
+        message: 'Security data is required',
       });
     }
 
     // Update tenant security settings
     const updatedTenant = await Tenant.findByIdAndUpdate(
       tenantId,
-      { 
+      {
         'settings.security': { ...tenant.settings.security, ...security },
-        updatedAt: new Date()
+        updatedAt: new Date(),
       },
-      { new: true }
+      { new: true },
     );
 
     if (!updatedTenant) {
       return res.status(404).json({
         success: false,
-        message: 'Tenant not found'
+        message: 'Tenant not found',
       });
     }
 
@@ -186,15 +186,15 @@ router.patch('/security', async (req: Request, res: Response) => {
       success: true,
       message: 'Security settings updated successfully',
       data: {
-        security: updatedTenant.settings.security
-      }
+        security: updatedTenant.settings.security,
+      },
     });
   } catch (error) {
     console.error('Update tenant security error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });
@@ -205,11 +205,11 @@ router.patch('/security', async (req: Request, res: Response) => {
 router.get('/stats', async (req: Request, res: Response) => {
   try {
     const tenantContext = getTenantContext(req);
-    
+
     if (!tenantContext) {
       return res.status(404).json({
         success: false,
-        message: 'No tenant context found'
+        message: 'No tenant context found',
       });
     }
 
@@ -233,16 +233,16 @@ router.get('/stats', async (req: Request, res: Response) => {
         usage: {
           users: userCount,
           storage: 0, // TODO: Calculate actual storage usage
-          apiCalls: 0 // TODO: Calculate actual API calls
-        }
-      }
+          apiCalls: 0, // TODO: Calculate actual API calls
+        },
+      },
     });
   } catch (error) {
     console.error('Get tenant stats error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });
@@ -257,7 +257,7 @@ router.post('/init', async (req: Request, res: Response) => {
     if (!subdomain) {
       return res.status(400).json({
         success: false,
-        message: 'Subdomain is required'
+        message: 'Subdomain is required',
       });
     }
 
@@ -267,20 +267,20 @@ router.post('/init', async (req: Request, res: Response) => {
       return res.status(409).json({
         success: false,
         message: 'Tenant already exists',
-        data: { subdomain: existingTenant.subdomain }
+        data: { subdomain: existingTenant.subdomain },
       });
     }
 
     // Get tenant configuration
     const tenantConfig = getTenantConfig(subdomain);
-    
+
     // Validate configuration
     const errors = validateTenantConfig(tenantConfig);
     if (errors.length > 0) {
       return res.status(400).json({
         success: false,
         message: 'Invalid tenant configuration',
-        errors
+        errors,
       });
     }
 
@@ -296,15 +296,15 @@ router.post('/init', async (req: Request, res: Response) => {
         name: newTenant.name,
         subdomain: newTenant.subdomain,
         status: newTenant.status,
-        plan: newTenant.metadata.plan
-      }
+        plan: newTenant.metadata.plan,
+      },
     });
   } catch (error) {
     console.error('Initialize tenant error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 });

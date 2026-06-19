@@ -7,13 +7,13 @@ export const pageWrapperFixtures = {
     children: 'Default PageWrapper Content',
     padding: '1rem',
   } as PageWrapperProps,
-  
+
   withCustomPadding: {
     tenantTheme: defaultTheme,
     children: 'PageWrapper with custom padding',
     padding: '2rem',
   } as PageWrapperProps,
-  
+
   withCustomTheme: {
     tenantTheme: {
       ...defaultTheme,
@@ -26,14 +26,14 @@ export const pageWrapperFixtures = {
     children: 'PageWrapper with custom theme',
     padding: '1.5rem',
   } as PageWrapperProps,
-  
+
   withClassName: {
     tenantTheme: defaultTheme,
     children: 'PageWrapper with custom className',
     className: 'custom-page-wrapper',
     padding: '1rem',
   } as PageWrapperProps,
-  
+
   withStyle: {
     tenantTheme: defaultTheme,
     children: 'PageWrapper with custom style',

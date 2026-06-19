@@ -28,10 +28,7 @@ const getVariantStyles = (variant: 'default' | 'compact' | 'detailed') => {
 };
 
 // Main function to get all styles for the EngagementTrends component
-export const getEngagementTrendsStyles = (
-  tenantTheme: TenantTheme,
-  variant: 'default' | 'compact' | 'detailed'
-) => {
+export const getEngagementTrendsStyles = (tenantTheme: TenantTheme, variant: 'default' | 'compact' | 'detailed') => {
   const variantStyles = getVariantStyles(variant);
 
   return {

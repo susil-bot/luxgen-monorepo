@@ -27,7 +27,7 @@ const survey = {
   targetResponses: 200,
   createdAt: '2024-01-15',
   expiresAt: '2024-02-15',
-  description: 'Quarterly customer satisfaction assessment'
+  description: 'Quarterly customer satisfaction assessment',
 };
 
 <LastSurvey
@@ -38,22 +38,22 @@ const survey = {
   onViewSurvey={(survey) => console.log('View survey:', survey)}
   onEditSurvey={(survey) => console.log('Edit survey:', survey)}
   onShareSurvey={(survey) => console.log('Share survey:', survey)}
-/>
+/>;
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `title` | `string` | `'Last Survey'` | Component title |
-| `survey` | `Survey` | - | Survey object (required) |
-| `showProgress` | `boolean` | `true` | Show progress bar and completion info |
-| `showActions` | `boolean` | `true` | Show action buttons |
-| `variant` | `'default' \| 'compact' \| 'detailed'` | `'default'` | Component variant |
-| `onViewSurvey` | `(survey: Survey) => void` | - | View survey handler |
-| `onEditSurvey` | `(survey: Survey) => void` | - | Edit survey handler |
-| `onShareSurvey` | `(survey: Survey) => void` | - | Share survey handler |
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
+| Prop            | Type                                   | Default         | Description                           |
+| --------------- | -------------------------------------- | --------------- | ------------------------------------- |
+| `title`         | `string`                               | `'Last Survey'` | Component title                       |
+| `survey`        | `Survey`                               | -               | Survey object (required)              |
+| `showProgress`  | `boolean`                              | `true`          | Show progress bar and completion info |
+| `showActions`   | `boolean`                              | `true`          | Show action buttons                   |
+| `variant`       | `'default' \| 'compact' \| 'detailed'` | `'default'`     | Component variant                     |
+| `onViewSurvey`  | `(survey: Survey) => void`             | -               | View survey handler                   |
+| `onEditSurvey`  | `(survey: Survey) => void`             | -               | Edit survey handler                   |
+| `onShareSurvey` | `(survey: Survey) => void`             | -               | Share survey handler                  |
+| `tenantTheme`   | `TenantTheme`                          | `defaultTheme`  | Theme object for styling              |
 
 ## Survey Interface
 
@@ -74,12 +74,15 @@ interface Survey {
 ## Variants
 
 ### Default
+
 Standard size with full features and action buttons.
 
 ### Compact
+
 Smaller size optimized for dashboards and sidebars.
 
 ### Detailed
+
 Larger size with enhanced spacing for detailed survey information.
 
 ## Examples
@@ -87,12 +90,7 @@ Larger size with enhanced spacing for detailed survey information.
 ### Basic Usage
 
 ```tsx
-<LastSurvey
-  title="Last Survey"
-  survey={survey}
-  showProgress={true}
-  showActions={true}
-/>
+<LastSurvey title="Last Survey" survey={survey} showProgress={true} showActions={true} />
 ```
 
 ### With Custom Styling
@@ -122,24 +120,13 @@ Larger size with enhanced spacing for detailed survey information.
 ### Compact Variant
 
 ```tsx
-<LastSurvey
-  title="Survey"
-  survey={survey}
-  showProgress={false}
-  showActions={false}
-  variant="compact"
-/>
+<LastSurvey title="Survey" survey={survey} showProgress={false} showActions={false} variant="compact" />
 ```
 
 ### Without Actions
 
 ```tsx
-<LastSurvey
-  title="Survey Status"
-  survey={survey}
-  showProgress={true}
-  showActions={false}
-/>
+<LastSurvey title="Survey Status" survey={survey} showProgress={true} showActions={false} />
 ```
 
 ## Status Types
@@ -197,6 +184,7 @@ The component includes comprehensive test coverage:
 - **Edge Cases**: Different statuses, progress states, variant testing
 
 Run tests with:
+
 ```bash
 npm test LastSurvey.spec.js
 ```

@@ -1,6 +1,13 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UserMenu } from '../NavBar/NavBar';
-import { fetchUserForTenant, getUserFromStorage, saveUserToStorage, clearUserFromStorage, updateUserForTenant, logoutUser } from '../services/userService';
+import {
+  fetchUserForTenant,
+  getUserFromStorage,
+  saveUserToStorage,
+  clearUserFromStorage,
+  updateUserForTenant,
+  logoutUser,
+} from '../services/userService';
 
 interface UserContextType {
   user: UserMenu | null;
@@ -18,10 +25,7 @@ interface UserProviderProps {
   currentTenant: string;
 }
 
-export const UserProvider: React.FC<UserProviderProps> = ({
-  children,
-  currentTenant
-}) => {
+export const UserProvider: React.FC<UserProviderProps> = ({ children, currentTenant }) => {
   const [user, setUser] = useState<UserMenu | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -34,7 +38,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
 
       // First try to get user from storage
       const storedUser = getUserFromStorage();
-      
+
       // Check if stored user belongs to current tenant
       if (storedUser && storedUser.tenant?.subdomain === currentTenant) {
         console.log('👤 Using stored user for tenant:', currentTenant);
@@ -61,7 +65,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // Use real API to update user data
       const updatedUser = await updateUserForTenant(currentTenant, updates);
       setUser(updatedUser);
@@ -79,7 +83,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // Use real API to logout
       await logoutUser(currentTenant);
       setUser(null);
@@ -112,14 +116,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     error,
     updateUser,
     logout,
-    refreshUser
+    refreshUser,
   };
 
-  return (
-    <UserContext.Provider value={contextValue}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;
 };
 
 export const useUser = (): UserContextType => {

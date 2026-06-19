@@ -1,3 +1,5 @@
+import { getWebUrl, getTenantWebOrigin } from './urls';
+
 export interface Tenant {
   id: string;
   name: string;
@@ -31,13 +33,8 @@ export const isMultiTenant = (): boolean => {
 };
 
 export const getTenantUrl = (tenant: string, path: string = ''): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const protocol = baseUrl.startsWith('https') ? 'https' : 'http';
-  const domain = baseUrl.replace(/^https?:\/\//, '');
-  
   if (tenant === 'default') {
-    return `${protocol}://${domain}${path}`;
+    return `${getWebUrl()}${path}`;
   }
-  
-  return `${protocol}://${tenant}.${domain}${path}`;
+  return `${getTenantWebOrigin(tenant)}${path}`;
 };

@@ -22,15 +22,11 @@ export class AttendanceTracker {
   }
 
   getAttendanceBySession(sessionId: string): AttendanceRecord[] {
-    return Array.from(this.attendance.values()).filter(
-      record => record.sessionId === sessionId
-    );
+    return Array.from(this.attendance.values()).filter((record) => record.sessionId === sessionId);
   }
 
   getAttendanceByStudent(studentId: string): AttendanceRecord[] {
-    return Array.from(this.attendance.values()).filter(
-      record => record.studentId === studentId
-    );
+    return Array.from(this.attendance.values()).filter((record) => record.studentId === studentId);
   }
 
   getAttendanceStats(sessionId: string): {
@@ -49,7 +45,7 @@ export class AttendanceTracker {
       excused: 0,
     };
 
-    records.forEach(record => {
+    records.forEach((record) => {
       stats[record.status]++;
     });
 

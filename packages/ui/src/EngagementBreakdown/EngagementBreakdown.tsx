@@ -2,11 +2,7 @@ import React from 'react';
 import { BaseComponentProps, TenantTheme } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
-import { 
-  getEngagementBreakdownStyles, 
-  engagementBreakdownClasses,
-  engagementBreakdownCSS 
-} from './styles';
+import { getEngagementBreakdownStyles, engagementBreakdownClasses, engagementBreakdownCSS } from './styles';
 
 export interface EngagementSegment {
   id: string;
@@ -66,18 +62,18 @@ const EngagementBreakdownComponent: React.FC<EngagementBreakdownProps> = ({
 
   // Calculate angles for each segment
   let currentAngle = 0;
-  const segments = data.map(segment => {
+  const segments = data.map((segment) => {
     const segmentAngle = (segment.value / total) * 360;
     const startAngle = currentAngle;
     const endAngle = currentAngle + segmentAngle;
-    
+
     const result = {
       ...segment,
       startAngle,
       endAngle,
-      path: generateSegmentPath(segment, startAngle, endAngle)
+      path: generateSegmentPath(segment, startAngle, endAngle),
     };
-    
+
     currentAngle += segmentAngle;
     return result;
   });
@@ -108,12 +104,7 @@ const EngagementBreakdownComponent: React.FC<EngagementBreakdownProps> = ({
         <div className={engagementBreakdownClasses.chart} style={{ ...styles.chart, height: size + 60 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
             {/* Pie Chart */}
-            <svg
-              width={size}
-              height={size}
-              viewBox={`0 0 ${size} ${size}`}
-              style={{ flexShrink: 0 }}
-            >
+            <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
               {segments.map((segment, index) => (
                 <path
                   key={segment.id}
@@ -138,7 +129,7 @@ const EngagementBreakdownComponent: React.FC<EngagementBreakdownProps> = ({
                       alignItems: 'center',
                       gap: '8px',
                       marginBottom: '12px',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
                     }}
                     onClick={() => onSegmentClick?.(segment)}
                   >
@@ -148,23 +139,27 @@ const EngagementBreakdownComponent: React.FC<EngagementBreakdownProps> = ({
                         height: '12px',
                         borderRadius: '2px',
                         backgroundColor: segment.color,
-                        flexShrink: 0
+                        flexShrink: 0,
                       }}
                     />
                     <div style={{ flex: 1 }}>
-                      <div style={{
-                        fontSize: '0.875rem',
-                        fontWeight: '500',
-                        color: tenantTheme.colors.text,
-                        marginBottom: '2px'
-                      }}>
+                      <div
+                        style={{
+                          fontSize: '0.875rem',
+                          fontWeight: '500',
+                          color: tenantTheme.colors.text,
+                          marginBottom: '2px',
+                        }}
+                      >
                         {segment.label}
                       </div>
                       {showPercentages && (
-                        <div style={{
-                          fontSize: '0.75rem',
-                          color: tenantTheme.colors.textSecondary || '#64748B'
-                        }}>
+                        <div
+                          style={{
+                            fontSize: '0.75rem',
+                            color: tenantTheme.colors.textSecondary || '#64748B',
+                          }}
+                        >
                           {segment.percentage}%
                         </div>
                       )}

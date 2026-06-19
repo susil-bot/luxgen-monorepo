@@ -90,12 +90,12 @@ export * from './context/UserContext';
 export * from './services/userService';
 
 // Tenant Configuration
-export { 
+export {
   getTenantConfig,
   getAvailableTenants,
   getTenantAssets,
   type TenantConfig,
-  type AvailableTenant
+  type AvailableTenant,
 } from './services/tenantService';
 
 // Shared Types and Utilities

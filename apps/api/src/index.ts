@@ -1,4 +1,5 @@
 import { config } from 'dotenv';
+import { getApiUrl, getGraphqlUrl } from '@luxgen/config';
 import { app } from './app';
 import { connectDB } from './db/connect';
 
@@ -15,8 +16,8 @@ async function startServer() {
 
     // Start server
     app.listen(PORT, () => {
-      console.log(`🚀 Server running on http://localhost:${PORT}`);
-      console.log(`📊 GraphQL Playground: http://localhost:${PORT}/graphql`);
+      console.log(`🚀 Server running on ${getApiUrl()}`);
+      console.log(`📊 GraphQL Playground: ${getGraphqlUrl()}`);
     });
   } catch (error) {
     console.error('❌ Failed to start server:', error);

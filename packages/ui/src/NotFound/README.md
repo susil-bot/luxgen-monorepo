@@ -21,9 +21,7 @@ A comprehensive 404 page component with customizable content, search functionali
 import { NotFound } from '@luxgen/ui';
 
 function Custom404Page() {
-  return (
-    <NotFound />
-  );
+  return <NotFound />;
 }
 ```
 
@@ -65,13 +63,7 @@ function Custom404Page() {
     router.push(`/search?q=${encodeURIComponent(query)}`);
   };
 
-  return (
-    <NotFound
-      onGoHome={handleGoHome}
-      onGoBack={handleGoBack}
-      onSearch={handleSearch}
-    />
-  );
+  return <NotFound onGoHome={handleGoHome} onGoBack={handleGoBack} onSearch={handleSearch} />;
 }
 ```
 
@@ -82,7 +74,7 @@ function Custom404Page() {
 <NotFound variant="minimal" />
 
 // Detailed variant with search
-<NotFound 
+<NotFound
   variant="detailed"
   showSearch={true}
   searchPlaceholder="Search for pages, groups, or users..."
@@ -100,29 +92,16 @@ import { NotFound } from '@luxgen/ui';
 function Custom404Page() {
   const customActions = (
     <div className="mt-8 text-center">
-      <p className="text-sm text-gray-500 mb-4">
-        Need help? Try these popular pages:
-      </p>
+      <p className="text-sm text-gray-500 mb-4">Need help? Try these popular pages:</p>
       <div className="flex flex-wrap justify-center gap-2">
-        <button onClick={() => router.push('/dashboard')}>
-          Dashboard
-        </button>
-        <button onClick={() => router.push('/groups')}>
-          Groups
-        </button>
-        <button onClick={() => router.push('/users')}>
-          Users
-        </button>
+        <button onClick={() => router.push('/dashboard')}>Dashboard</button>
+        <button onClick={() => router.push('/groups')}>Groups</button>
+        <button onClick={() => router.push('/users')}>Users</button>
       </div>
     </div>
   );
 
-  return (
-    <NotFound
-      customActions={customActions}
-      variant="detailed"
-    />
-  );
+  return <NotFound customActions={customActions} variant="detailed" />;
 }
 ```
 
@@ -158,35 +137,38 @@ function Custom404Page() {
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Tenant-specific theme configuration |
-| `title` | `string` | `'Page Not Found'` | Main title text |
-| `description` | `string` | `'The page you are looking for does not exist or has been moved.'` | Description text |
-| `showSearch` | `boolean` | `true` | Whether to show search form |
-| `showNavigation` | `boolean` | `true` | Whether to show navigation buttons |
-| `onSearch` | `(query: string) => void` | - | Search form submit handler |
-| `onGoHome` | `() => void` | - | Go home button click handler |
-| `onGoBack` | `() => void` | - | Go back button click handler |
-| `searchPlaceholder` | `string` | `'Search...'` | Search input placeholder |
-| `className` | `string` | `''` | Additional CSS classes |
-| `variant` | `'default' \| 'minimal' \| 'detailed'` | `'default'` | Layout variant |
-| `showIllustration` | `boolean` | `true` | Whether to show 404 illustration |
-| `customActions` | `React.ReactNode` | - | Custom action buttons |
+| Prop                | Type                                   | Default                                                            | Description                         |
+| ------------------- | -------------------------------------- | ------------------------------------------------------------------ | ----------------------------------- |
+| `tenantTheme`       | `TenantTheme`                          | `defaultTheme`                                                     | Tenant-specific theme configuration |
+| `title`             | `string`                               | `'Page Not Found'`                                                 | Main title text                     |
+| `description`       | `string`                               | `'The page you are looking for does not exist or has been moved.'` | Description text                    |
+| `showSearch`        | `boolean`                              | `true`                                                             | Whether to show search form         |
+| `showNavigation`    | `boolean`                              | `true`                                                             | Whether to show navigation buttons  |
+| `onSearch`          | `(query: string) => void`              | -                                                                  | Search form submit handler          |
+| `onGoHome`          | `() => void`                           | -                                                                  | Go home button click handler        |
+| `onGoBack`          | `() => void`                           | -                                                                  | Go back button click handler        |
+| `searchPlaceholder` | `string`                               | `'Search...'`                                                      | Search input placeholder            |
+| `className`         | `string`                               | `''`                                                               | Additional CSS classes              |
+| `variant`           | `'default' \| 'minimal' \| 'detailed'` | `'default'`                                                        | Layout variant                      |
+| `showIllustration`  | `boolean`                              | `true`                                                             | Whether to show 404 illustration    |
+| `customActions`     | `React.ReactNode`                      | -                                                                  | Custom action buttons               |
 
 ## Variants
 
 ### Default
+
 - Standard 404 page with illustration
 - Search form and navigation buttons
 - Balanced layout for most use cases
 
 ### Minimal
+
 - Clean, simple layout
 - Essential navigation only
 - Perfect for mobile or simple designs
 
 ### Detailed
+
 - Comprehensive 404 page
 - Enhanced search functionality
 - Additional help text and actions
@@ -213,6 +195,7 @@ const customStyles = notFoundStyles.title.detailed;
 ## Responsive Design
 
 The component is fully responsive with breakpoints:
+
 - **Mobile**: Stacked layout, full-width buttons
 - **Tablet**: Optimized spacing and sizing
 - **Desktop**: Side-by-side layout, enhanced spacing

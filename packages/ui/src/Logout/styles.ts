@@ -129,11 +129,14 @@ export const getLogoutStyles = ({ variant, disabled, loading }: LogoutStylesProp
         cursor: 'wait',
         opacity: 0.7,
       }),
-      ':hover': !disabled && !loading ? {
-        background: variant === 'danger' ? '#b91c1c' : '#e5e7eb',
-        transform: 'translateY(-1px)',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-      } : {},
+      ':hover':
+        !disabled && !loading
+          ? {
+              background: variant === 'danger' ? '#b91c1c' : '#e5e7eb',
+              transform: 'translateY(-1px)',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            }
+          : {},
     },
     buttonContent: {
       display: 'flex',

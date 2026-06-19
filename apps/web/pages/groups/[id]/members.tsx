@@ -1,7 +1,17 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { GroupMemberList, GroupMember, SnackbarProvider, useSnackbar, AppLayout, getDefaultNavItems, getDefaultUser, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { getClientGraphqlUrl } from '../../../lib/urls';
+import {
+  GroupMemberList,
+  GroupMember,
+  SnackbarProvider,
+  useSnackbar,
+  AppLayout,
+  getDefaultUser,
+  getDefaultLogo,
+  getDefaultSidebarSections,
+} from '@luxgen/ui';
 
 const GroupMembersPageContent: React.FC = () => {
   const router = useRouter();
@@ -42,9 +52,7 @@ const GroupMembersPageContent: React.FC = () => {
 
   const fetchGroup = async () => {
     try {
-      const hostname = window.location.hostname;
-      const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-      const apiUrl = isLocalhost ? `http://localhost:4000/graphql` : '/graphql';
+      const apiUrl = getClientGraphqlUrl();
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -73,7 +81,7 @@ const GroupMembersPageContent: React.FC = () => {
       });
 
       const data = await response.json();
-      
+
       if (data.errors) {
         throw new Error(data.errors[0].message);
       }
@@ -88,9 +96,7 @@ const GroupMembersPageContent: React.FC = () => {
   const fetchMembers = async () => {
     try {
       setLoading(true);
-      const hostname = window.location.hostname;
-      const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-      const apiUrl = isLocalhost ? `http://localhost:4000/graphql` : '/graphql';
+      const apiUrl = getClientGraphqlUrl();
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -135,7 +141,7 @@ const GroupMembersPageContent: React.FC = () => {
       });
 
       const data = await response.json();
-      
+
       if (data.errors) {
         throw new Error(data.errors[0].message);
       }
@@ -151,9 +157,7 @@ const GroupMembersPageContent: React.FC = () => {
 
   const handleRoleChange = async (memberId: string, role: string) => {
     try {
-      const hostname = window.location.hostname;
-      const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-      const apiUrl = isLocalhost ? `http://localhost:4000/graphql` : '/graphql';
+      const apiUrl = getClientGraphqlUrl();
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -181,7 +185,7 @@ const GroupMembersPageContent: React.FC = () => {
       });
 
       const data = await response.json();
-      
+
       if (data.errors) {
         throw new Error(data.errors[0].message);
       }
@@ -200,9 +204,7 @@ const GroupMembersPageContent: React.FC = () => {
     }
 
     try {
-      const hostname = window.location.hostname;
-      const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-      const apiUrl = isLocalhost ? `http://localhost:4000/graphql` : '/graphql';
+      const apiUrl = getClientGraphqlUrl();
 
       const response = await fetch(apiUrl, {
         method: 'POST',
@@ -226,7 +228,7 @@ const GroupMembersPageContent: React.FC = () => {
       });
 
       const data = await response.json();
-      
+
       if (data.errors) {
         throw new Error(data.errors[0].message);
       }
@@ -251,9 +253,7 @@ const GroupMembersPageContent: React.FC = () => {
       }
 
       try {
-        const hostname = window.location.hostname;
-        const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-        const apiUrl = isLocalhost ? `http://${hostname}:4000/graphql` : '/graphql';
+        const apiUrl = getClientGraphqlUrl();
 
         const response = await fetch(apiUrl, {
           method: 'POST',
@@ -275,7 +275,7 @@ const GroupMembersPageContent: React.FC = () => {
         });
 
         const data = await response.json();
-        
+
         if (data.errors) {
           throw new Error(data.errors[0].message);
         }
@@ -331,10 +331,7 @@ const GroupMembersPageContent: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-gray-900 mb-4">Group not found</h1>
-          <button
-            onClick={() => router.push('/groups')}
-            className="text-green-600 hover:text-green-700 font-medium"
-          >
+          <button onClick={() => router.push('/groups')} className="text-green-600 hover:text-green-700 font-medium">
             Back to Groups
           </button>
         </div>
@@ -370,10 +367,7 @@ const GroupMembersPageContent: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center space-x-3 mb-2">
-                  <button
-                    onClick={() => router.push('/groups')}
-                    className="text-gray-500 hover:text-gray-700"
-                  >
+                  <button onClick={() => router.push('/groups')} className="text-gray-500 hover:text-gray-700">
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
@@ -382,7 +376,7 @@ const GroupMembersPageContent: React.FC = () => {
                 </div>
                 <p className="text-gray-600">{group.description}</p>
               </div>
-              
+
               <div className="flex items-center space-x-3">
                 <div
                   className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-semibold"
@@ -391,9 +385,7 @@ const GroupMembersPageContent: React.FC = () => {
                   {group.icon ? (
                     <span className="text-xl">{group.icon}</span>
                   ) : (
-                    <span className="text-xl">
-                      {group.name.charAt(0).toUpperCase()}
-                    </span>
+                    <span className="text-xl">{group.name.charAt(0).toUpperCase()}</span>
                   )}
                 </div>
               </div>

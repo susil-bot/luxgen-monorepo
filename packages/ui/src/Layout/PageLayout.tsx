@@ -85,11 +85,11 @@ const PageLayoutComponent: React.FC<PageLayoutProps> = ({
     if (isMobile) {
       return 'flex-col';
     }
-    
+
     if (isTablet) {
       return 'flex-col';
     }
-    
+
     return 'flex-col';
   };
 
@@ -97,11 +97,11 @@ const PageLayoutComponent: React.FC<PageLayoutProps> = ({
     if (isMobile) {
       return 'fixed top-0 left-0 right-0 z-50';
     }
-    
+
     if (isTablet) {
       return 'sticky top-0 z-40';
     }
-    
+
     return 'sticky top-0 z-30';
   };
 
@@ -109,11 +109,11 @@ const PageLayoutComponent: React.FC<PageLayoutProps> = ({
     if (isMobile) {
       return 'w-full pt-16'; // Account for fixed navbar
     }
-    
+
     if (isTablet) {
       return 'w-full pt-16'; // Account for sticky navbar
     }
-    
+
     return 'w-full pt-16'; // Account for sticky navbar
   };
 
@@ -152,9 +152,7 @@ const PageLayoutComponent: React.FC<PageLayoutProps> = ({
       )}
 
       {/* Main Content */}
-      <main className={getContentStyles()}>
-        {children}
-      </main>
+      <main className={getContentStyles()}>{children}</main>
     </div>
   );
 };

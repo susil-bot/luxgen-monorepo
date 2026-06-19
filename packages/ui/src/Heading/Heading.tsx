@@ -30,7 +30,7 @@ const HeadingComponent: React.FC<HeadingProps> = ({
 }) => {
   const getSizeClass = () => {
     if (size) return size;
-    
+
     const sizeMap = {
       1: '6xl',
       2: '5xl',
@@ -39,13 +39,13 @@ const HeadingComponent: React.FC<HeadingProps> = ({
       5: '2xl',
       6: 'xl',
     };
-    
+
     return sizeMap[level];
   };
 
   const getVariantColor = () => {
     if (color) return color;
-    
+
     const variantColors = {
       primary: tenantTheme.colors.text,
       secondary: tenantTheme.colors.textSecondary,
@@ -54,7 +54,7 @@ const HeadingComponent: React.FC<HeadingProps> = ({
       warning: tenantTheme.colors.warning,
       info: tenantTheme.colors.info,
     };
-    
+
     return variantColors[variant] || tenantTheme.colors.text;
   };
 
@@ -75,13 +75,9 @@ const HeadingComponent: React.FC<HeadingProps> = ({
   const sizeClass = getSizeClass();
 
   const { loading, ...headingProps } = props;
-  
+
   return (
-    <HeadingTag
-      className={`heading heading-${sizeClass} ${className}`}
-      style={styles}
-      {...headingProps}
-    >
+    <HeadingTag className={`heading heading-${sizeClass} ${className}`} style={styles} {...headingProps}>
       {text}
     </HeadingTag>
   );

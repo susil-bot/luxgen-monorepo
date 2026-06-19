@@ -11,7 +11,7 @@ export const headerFixtures = {
       { id: 'courses', label: 'Courses', href: '/courses' },
     ],
   } as HeaderProps,
-  
+
   withoutLogo: {
     tenantTheme: defaultTheme,
     menuItems: [
@@ -19,7 +19,7 @@ export const headerFixtures = {
       { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
     ],
   } as HeaderProps,
-  
+
   withCustomTheme: {
     tenantTheme: {
       ...defaultTheme,
@@ -35,7 +35,7 @@ export const headerFixtures = {
       { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
     ],
   } as HeaderProps,
-  
+
   withManyMenuItems: {
     tenantTheme: defaultTheme,
     logoUrl: '/logo.png',
@@ -49,7 +49,7 @@ export const headerFixtures = {
       { id: 'settings', label: 'Settings', href: '/settings' },
     ],
   } as HeaderProps,
-  
+
   withMenuClick: {
     tenantTheme: defaultTheme,
     logoUrl: '/logo.png',

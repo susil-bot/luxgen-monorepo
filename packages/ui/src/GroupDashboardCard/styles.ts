@@ -27,10 +27,10 @@ export interface GroupDashboardCardStyles {
 
 export const getGroupDashboardCardStyles = (
   tenantTheme: TenantTheme = defaultTheme,
-  variant: 'default' | 'compact' | 'minimal' = 'default'
+  variant: 'default' | 'compact' | 'minimal' = 'default',
 ): GroupDashboardCardStyles => {
   const colors = tenantTheme?.colors || defaultTheme.colors;
-  
+
   const getVariantStyles = () => {
     switch (variant) {
       case 'compact':
@@ -65,8 +65,10 @@ export const getGroupDashboardCardStyles = (
     header: 'flex items-center justify-between mb-4',
     title: `${styles.title} font-semibold text-gray-900`,
     memberAvatars: 'flex items-center -space-x-2',
-    avatar: 'w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600',
-    avatarOverflow: 'w-8 h-8 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600',
+    avatar:
+      'w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600',
+    avatarOverflow:
+      'w-8 h-8 rounded-full border-2 border-white bg-gray-100 flex items-center justify-center text-xs font-medium text-gray-600',
     roleBadge: 'px-3 py-1 rounded-full text-sm font-medium',
     activeUsers: 'mb-4',
     progressBar: 'flex-1 bg-gray-200 rounded-full overflow-hidden',
@@ -77,7 +79,8 @@ export const getGroupDashboardCardStyles = (
     statusBadge: 'px-2 py-1 rounded-full text-xs font-medium',
     footer: 'flex items-center justify-between pt-4 border-t border-gray-100',
     userAvatar: 'w-8 h-8 rounded-full border-2 border-white bg-gray-200 flex items-center justify-center',
-    addUserButton: 'w-8 h-8 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-gray-400 transition-colors duration-200',
+    addUserButton:
+      'w-8 h-8 rounded-full border-2 border-dashed border-gray-300 flex items-center justify-center hover:border-gray-400 transition-colors duration-200',
     counters: 'flex items-center space-x-4',
     counter: 'flex items-center space-x-1 text-gray-600',
     actions: 'mt-4 pt-4 border-t border-gray-100',
@@ -126,7 +129,7 @@ export const getProgressColor = (percentage: number): string => {
 export const getAvatarInitials = (name: string): string => {
   return name
     .split(' ')
-    .map(word => word.charAt(0))
+    .map((word) => word.charAt(0))
     .join('')
     .toUpperCase()
     .slice(0, 2);

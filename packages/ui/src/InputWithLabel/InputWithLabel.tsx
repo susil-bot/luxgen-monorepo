@@ -49,7 +49,7 @@ const InputWithLabelComponent: React.FC<InputWithLabelProps> = ({
         {label}
         {required && <span className="input-with-label-required">*</span>}
       </label>
-      
+
       <input
         type={type}
         className={`input-with-label-input ${size} ${error ? 'error' : ''}`}
@@ -60,14 +60,10 @@ const InputWithLabelComponent: React.FC<InputWithLabelProps> = ({
         required={required}
         {...props}
       />
-      
-      {error && (
-        <p className="input-with-label-error">{error}</p>
-      )}
-      
-      {helperText && !error && (
-        <p className="input-with-label-helper">{helperText}</p>
-      )}
+
+      {error && <p className="input-with-label-error">{error}</p>}
+
+      {helperText && !error && <p className="input-with-label-helper">{helperText}</p>}
     </div>
   );
 };

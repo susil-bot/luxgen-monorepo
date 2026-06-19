@@ -12,9 +12,7 @@ export interface BadgeData {
   hasIcon: boolean;
 }
 
-export const fetchBadgeData = async (
-  tenantId?: string
-): Promise<BadgeData> => {
+export const fetchBadgeData = async (tenantId?: string): Promise<BadgeData> => {
   return {
     tenantTheme: defaultTheme,
     content: 'Badge content',
@@ -27,11 +25,9 @@ export const fetchBadgeData = async (
   };
 };
 
-export const fetchBadgeSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchBadgeSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchBadgeData(tenantId);
-  
+
   const html = `
     <span 
       class="badge badge-${data.variant} badge-${data.size} badge-${data.shape}" 
@@ -42,7 +38,7 @@ export const fetchBadgeSSR = async (
       ${data.closable ? '<button type="button" class="badge-close" aria-label="Close badge">×</button>' : ''}
     </span>
   `;
-  
+
   const styles = `
     .badge {
       display: inline-flex;
@@ -144,6 +140,6 @@ export const fetchBadgeSSR = async (
       justify-content: center;
     }
   `;
-  
+
   return { html, styles };
 };

@@ -2,10 +2,10 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
-    res.status(200).json({ 
+    res.status(200).json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
-      service: 'web'
+      service: 'web',
     });
   } else {
     res.setHeader('Allow', ['GET']);

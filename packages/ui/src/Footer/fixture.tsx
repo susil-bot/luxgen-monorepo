@@ -11,13 +11,13 @@ export const footerFixtures = {
     ],
     copyright: '© 2024 LuxGen. All rights reserved.',
   } as FooterProps,
-  
+
   withoutLinks: {
     tenantTheme: defaultTheme,
     links: [],
     copyright: '© 2024 LuxGen. All rights reserved.',
   } as FooterProps,
-  
+
   withCustomTheme: {
     tenantTheme: {
       ...defaultTheme,
@@ -33,7 +33,7 @@ export const footerFixtures = {
     ],
     copyright: '© 2024 Custom Company. All rights reserved.',
   } as FooterProps,
-  
+
   withManyLinks: {
     tenantTheme: defaultTheme,
     links: [
@@ -48,7 +48,7 @@ export const footerFixtures = {
     ],
     copyright: '© 2024 LuxGen. All rights reserved.',
   } as FooterProps,
-  
+
   withCustomCopyright: {
     tenantTheme: defaultTheme,
     links: [

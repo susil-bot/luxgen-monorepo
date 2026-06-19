@@ -1,5 +1,5 @@
 import { tenantKeyManager } from './tenantKeys';
-import { generateToken, verifyToken } from './jwt';
+import { verifyToken } from './jwt';
 
 export interface KeyRotationResult {
   success: boolean;
@@ -11,10 +11,7 @@ export interface KeyRotationResult {
 /**
  * Rotate keys for a specific tenant
  */
-export const rotateTenantKey = async (
-  tenantId: string, 
-  newKey: string
-): Promise<KeyRotationResult> => {
+export const rotateTenantKey = async (tenantId: string, newKey: string): Promise<KeyRotationResult> => {
   try {
     // Validate that the tenant exists
     if (!tenantKeyManager.hasTenantKey(tenantId)) {
@@ -26,11 +23,11 @@ export const rotateTenantKey = async (
 
     // Store the old key temporarily for token migration
     const oldKey = tenantKeyManager.getTenantKey(tenantId);
-    
+
     // Add the new key with a timestamp suffix
     const newKeyId = `${tenantId}_${Date.now()}`;
     tenantKeyManager.addTenantKey(newKeyId, newKey);
-    
+
     // Keep the old key for a grace period
     const gracePeriodKeyId = `${tenantId}_old_${Date.now()}`;
     tenantKeyManager.addTenantKey(gracePeriodKeyId, oldKey);
@@ -74,7 +71,7 @@ export const validateTenantKey = (key: string): boolean => {
 export const getTenantKeyInfo = (tenantId: string) => {
   const hasKey = tenantKeyManager.hasTenantKey(tenantId);
   const availableTenants = tenantKeyManager.getAvailableTenants();
-  
+
   return {
     tenantId,
     hasKey,
@@ -90,9 +87,9 @@ export const revokeTenantKeys = (tenantId: string): KeyRotationResult => {
   try {
     // Remove all keys for this tenant
     const availableTenants = tenantKeyManager.getAvailableTenants();
-    const tenantKeys = availableTenants.filter(key => key.startsWith(tenantId));
-    
-    tenantKeys.forEach(key => {
+    const tenantKeys = availableTenants.filter((key) => key.startsWith(tenantId));
+
+    tenantKeys.forEach((key) => {
       tenantKeyManager.removeTenantKey(key);
     });
 
@@ -115,10 +112,10 @@ export const revokeTenantKeys = (tenantId: string): KeyRotationResult => {
 export const testTokenWithKeys = (token: string, tenantId: string): boolean => {
   try {
     // Try with current tenant key
-    const currentKey = tenantKeyManager.getTenantKey(tenantId);
+    const _currentKey = tenantKeyManager.getTenantKey(tenantId);
     const decoded = verifyToken(token);
     return !!decoded;
-  } catch (error) {
+  } catch {
     return false;
   }
 };

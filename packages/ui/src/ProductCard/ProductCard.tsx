@@ -2,13 +2,7 @@ import React, { useState } from 'react';
 import { BaseComponentProps, TenantTheme } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
-import { 
-  getProductCardStyles, 
-  getProgressColor, 
-  getTagColor,
-  productCardClasses,
-  productCardCSS 
-} from './styles';
+import { getProductCardStyles, getProgressColor, getTagColor, productCardClasses, productCardCSS } from './styles';
 
 export interface ProductCardProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
@@ -76,13 +70,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
     onViewDetails?.(product.id);
   };
 
-  const styles = getProductCardStyles(
-    tenantTheme,
-    variant,
-    product.tagColor,
-    product.progress?.scoreColor,
-    isLiked
-  );
+  const styles = getProductCardStyles(tenantTheme, variant, product.tagColor, product.progress?.scoreColor, isLiked);
 
   return (
     <>
@@ -93,164 +81,127 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
         onClick={handleViewDetails}
         {...props}
       >
-      {/* Image Section */}
-      <div
-        className={productCardClasses.imageContainer}
-        style={styles.imageContainer}
-      >
-        {!imageError ? (
-          <img
-            src={product.image}
-            alt={product.imageAlt || product.title}
-            className={productCardClasses.image}
-            style={styles.image}
-            onError={() => setImageError(true)}
-          />
-        ) : (
-          <div
-            className={productCardClasses.imagePlaceholder}
-            style={styles.imagePlaceholder}
-          >
-            📷
-          </div>
-        )}
-
-        {/* Like Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleLike();
-          }}
-          className={productCardClasses.likeButton}
-          style={styles.likeButton}
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill={isLiked ? '#EF4444' : 'none'}
-            stroke={isLiked ? '#EF4444' : '#6B7280'}
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
-          </svg>
-        </button>
-      </div>
-
-      {/* Content Section */}
-      <div
-        className={productCardClasses.content}
-        style={styles.content}
-      >
-        {/* Tag */}
-        {product.tag && (
-          <div
-            className={productCardClasses.tag}
-            style={{
-              ...styles.tag,
-              backgroundColor: getTagColor(product.tagColor),
-            }}
-          >
-            {product.tag}
-          </div>
-        )}
-
-        {/* Title */}
-        <h3
-          className={productCardClasses.title}
-          style={styles.title}
-        >
-          {product.title}
-        </h3>
-
-        {/* Progress Indicators */}
-        {showProgress && product.progress && (
-          <div
-            className={productCardClasses.progress}
-            style={styles.progress}
-          >
-            <div style={styles.progressItem}>
-              <div style={styles.progressDot} />
-              <span style={styles.progressText}>
-                {product.progress.status}
-              </span>
+        {/* Image Section */}
+        <div className={productCardClasses.imageContainer} style={styles.imageContainer}>
+          {!imageError ? (
+            <img
+              src={product.image}
+              alt={product.imageAlt || product.title}
+              className={productCardClasses.image}
+              style={styles.image}
+              onError={() => setImageError(true)}
+            />
+          ) : (
+            <div className={productCardClasses.imagePlaceholder} style={styles.imagePlaceholder}>
+              📷
             </div>
-            
-            {product.progress.score !== undefined && (
-              <div style={styles.progressItem}>
-                <div 
-                  style={{
-                    ...styles.progressDot,
-                    backgroundColor: getProgressColor(product.progress.score, product.progress.scoreColor),
-                  }}
-                />
-                <span style={styles.progressText}>
-                  score: {product.progress.score}%
-                </span>
-              </div>
-            )}
-          </div>
-        )}
+          )}
 
-        {/* Price Section */}
-        {showPrice && (product.price || product.originalPrice) && (
-          <div
-            className={productCardClasses.price}
-            style={styles.price}
+          {/* Like Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleLike();
+            }}
+            className={productCardClasses.likeButton}
+            style={styles.likeButton}
           >
-            {product.price && (
-              <span style={styles.currentPrice}>
-                {product.price}
-              </span>
-            )}
-            {product.originalPrice && (
-              <span style={styles.originalPrice}>
-                {product.originalPrice}
-              </span>
-            )}
-            {product.discount && (
-              <span style={styles.discount}>
-                -{product.discount}%
-              </span>
-            )}
-          </div>
-        )}
-
-        {/* Actions */}
-        {showActions && (
-          <div
-            className={productCardClasses.actions}
-            style={styles.actions}
-          >
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                handleEdit();
-              }}
-              className={productCardClasses.editButton}
-              style={styles.editButton}
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill={isLiked ? '#EF4444' : 'none'}
+              stroke={isLiked ? '#EF4444' : '#6B7280'}
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
             >
-              Edit Product
-            </button>
-            
-            {onAddToCart && (
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Content Section */}
+        <div className={productCardClasses.content} style={styles.content}>
+          {/* Tag */}
+          {product.tag && (
+            <div
+              className={productCardClasses.tag}
+              style={{
+                ...styles.tag,
+                backgroundColor: getTagColor(product.tagColor),
+              }}
+            >
+              {product.tag}
+            </div>
+          )}
+
+          {/* Title */}
+          <h3 className={productCardClasses.title} style={styles.title}>
+            {product.title}
+          </h3>
+
+          {/* Progress Indicators */}
+          {showProgress && product.progress && (
+            <div className={productCardClasses.progress} style={styles.progress}>
+              <div style={styles.progressItem}>
+                <div style={styles.progressDot} />
+                <span style={styles.progressText}>{product.progress.status}</span>
+              </div>
+
+              {product.progress.score !== undefined && (
+                <div style={styles.progressItem}>
+                  <div
+                    style={{
+                      ...styles.progressDot,
+                      backgroundColor: getProgressColor(product.progress.score, product.progress.scoreColor),
+                    }}
+                  />
+                  <span style={styles.progressText}>score: {product.progress.score}%</span>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Price Section */}
+          {showPrice && (product.price || product.originalPrice) && (
+            <div className={productCardClasses.price} style={styles.price}>
+              {product.price && <span style={styles.currentPrice}>{product.price}</span>}
+              {product.originalPrice && <span style={styles.originalPrice}>{product.originalPrice}</span>}
+              {product.discount && <span style={styles.discount}>-{product.discount}%</span>}
+            </div>
+          )}
+
+          {/* Actions */}
+          {showActions && (
+            <div className={productCardClasses.actions} style={styles.actions}>
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  handleAddToCart();
+                  handleEdit();
                 }}
-                className={productCardClasses.addToCartButton}
-                style={styles.addToCartButton}
+                className={productCardClasses.editButton}
+                style={styles.editButton}
               >
-                Add to Cart
+                Edit Product
               </button>
-            )}
-          </div>
-        )}
+
+              {onAddToCart && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleAddToCart();
+                  }}
+                  className={productCardClasses.addToCartButton}
+                  style={styles.addToCartButton}
+                >
+                  Add to Cart
+                </button>
+              )}
+            </div>
+          )}
+        </div>
       </div>
-    </div>
     </>
   );
 };

@@ -2,11 +2,7 @@ import React from 'react';
 import { BaseComponentProps, TenantTheme } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
-import { 
-  getPermissionRequestStyles, 
-  permissionRequestClasses,
-  permissionRequestCSS 
-} from './styles';
+import { getPermissionRequestStyles, permissionRequestClasses, permissionRequestCSS } from './styles';
 
 export interface PermissionRequest {
   id: string;
@@ -53,25 +49,26 @@ const PermissionRequestComponent: React.FC<PermissionRequestProps> = ({
   const styles = getPermissionRequestStyles(tenantTheme, variant);
 
   const displayRequests = requests.slice(0, maxItems);
-  const pendingRequests = displayRequests.filter(r => r.status === 'pending');
+  const pendingRequests = displayRequests.filter((r) => r.status === 'pending');
 
   const getAvatarColor = (request: PermissionRequest) => {
     if (request.avatarColor) return request.avatarColor;
-    
+
     // Generate consistent color based on user name
-    const colors = [
-      '#3B82F6', '#10B981', '#F59E0B', '#EF4444', 
-      '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'
-    ];
+    const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'];
     const hash = request.user.name.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
+      a = (a << 5) - a + b.charCodeAt(0);
       return a & a;
     }, 0);
     return colors[Math.abs(hash) % colors.length];
   };
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase();
   };
 
   const getStatusColor = (status: PermissionRequest['status']) => {
@@ -109,14 +106,16 @@ const PermissionRequestComponent: React.FC<PermissionRequestProps> = ({
             {title}
           </h3>
           {pendingRequests.length > 0 && (
-            <span style={{
-              padding: '4px 8px',
-              backgroundColor: '#FEF3C7',
-              color: '#92400E',
-              borderRadius: '6px',
-              fontSize: '0.75rem',
-              fontWeight: '500'
-            }}>
+            <span
+              style={{
+                padding: '4px 8px',
+                backgroundColor: '#FEF3C7',
+                color: '#92400E',
+                borderRadius: '6px',
+                fontSize: '0.75rem',
+                fontWeight: '500',
+              }}
+            >
               {pendingRequests.length} pending
             </span>
           )}
@@ -124,28 +123,26 @@ const PermissionRequestComponent: React.FC<PermissionRequestProps> = ({
 
         <div style={{ marginBottom: '16px' }}>
           {displayRequests.length === 0 ? (
-            <div style={{
-              textAlign: 'center',
-              padding: '24px',
-              color: tenantTheme.colors.textSecondary || '#64748B',
-              fontSize: '0.875rem'
-            }}>
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '24px',
+                color: tenantTheme.colors.textSecondary || '#64748B',
+                fontSize: '0.875rem',
+              }}
+            >
               No permission requests
             </div>
           ) : (
             displayRequests.map((request) => (
-              <div
-                key={request.id}
-                className={permissionRequestClasses.requestItem}
-                style={styles.requestItem}
-              >
+              <div key={request.id} className={permissionRequestClasses.requestItem} style={styles.requestItem}>
                 <div className={permissionRequestClasses.requestUser} style={styles.requestUser}>
                   {/* Avatar */}
                   <div
                     className={permissionRequestClasses.requestAvatar}
                     style={{
                       ...styles.requestAvatar,
-                      backgroundColor: getAvatarColor(request)
+                      backgroundColor: getAvatarColor(request),
                     }}
                   >
                     {request.user.avatar ? (
@@ -156,7 +153,7 @@ const PermissionRequestComponent: React.FC<PermissionRequestProps> = ({
                           width: '100%',
                           height: '100%',
                           borderRadius: '50%',
-                          objectFit: 'cover'
+                          objectFit: 'cover',
                         }}
                       />
                     ) : (
@@ -166,61 +163,75 @@ const PermissionRequestComponent: React.FC<PermissionRequestProps> = ({
 
                   {/* User Info */}
                   <div style={{ flex: 1 }}>
-                    <div style={{
-                      fontSize: '0.875rem',
-                      fontWeight: '600',
-                      color: tenantTheme.colors.text,
-                      marginBottom: '2px'
-                    }}>
+                    <div
+                      style={{
+                        fontSize: '0.875rem',
+                        fontWeight: '600',
+                        color: tenantTheme.colors.text,
+                        marginBottom: '2px',
+                      }}
+                    >
                       {request.user.name}
                     </div>
-                    <div style={{
-                      fontSize: '0.75rem',
-                      color: tenantTheme.colors.textSecondary || '#64748B',
-                      marginBottom: '4px'
-                    }}>
+                    <div
+                      style={{
+                        fontSize: '0.75rem',
+                        color: tenantTheme.colors.textSecondary || '#64748B',
+                        marginBottom: '4px',
+                      }}
+                    >
                       {request.user.email}
                     </div>
-                    <div style={{
-                      fontSize: '0.75rem',
-                      color: tenantTheme.colors.textSecondary || '#64748B'
-                    }}>
+                    <div
+                      style={{
+                        fontSize: '0.75rem',
+                        color: tenantTheme.colors.textSecondary || '#64748B',
+                      }}
+                    >
                       {request.permission} access to {request.resource}
                     </div>
                     {request.reason && (
-                      <div style={{
-                        fontSize: '0.75rem',
-                        color: tenantTheme.colors.textSecondary || '#64748B',
-                        fontStyle: 'italic',
-                        marginTop: '4px'
-                      }}>
+                      <div
+                        style={{
+                          fontSize: '0.75rem',
+                          color: tenantTheme.colors.textSecondary || '#64748B',
+                          fontStyle: 'italic',
+                          marginTop: '4px',
+                        }}
+                      >
                         "{request.reason}"
                       </div>
                     )}
-                    <div style={{
-                      fontSize: '0.75rem',
-                      color: tenantTheme.colors.textSecondary || '#64748B',
-                      marginTop: '4px'
-                    }}>
+                    <div
+                      style={{
+                        fontSize: '0.75rem',
+                        color: tenantTheme.colors.textSecondary || '#64748B',
+                        marginTop: '4px',
+                      }}
+                    >
                       {request.requestedAt}
                     </div>
                   </div>
 
                   {/* Status */}
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'flex-end',
-                    gap: '8px'
-                  }}>
-                    <span style={{
-                      padding: '2px 6px',
-                      backgroundColor: getStatusColor(request.status),
-                      color: '#FFFFFF',
-                      borderRadius: '4px',
-                      fontSize: '0.75rem',
-                      fontWeight: '500'
-                    }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'flex-end',
+                      gap: '8px',
+                    }}
+                  >
+                    <span
+                      style={{
+                        padding: '2px 6px',
+                        backgroundColor: getStatusColor(request.status),
+                        color: '#FFFFFF',
+                        borderRadius: '4px',
+                        fontSize: '0.75rem',
+                        fontWeight: '500',
+                      }}
+                    >
                       {getStatusText(request.status)}
                     </span>
                   </div>
@@ -233,7 +244,7 @@ const PermissionRequestComponent: React.FC<PermissionRequestProps> = ({
                       className={`${permissionRequestClasses.requestButton} ${permissionRequestClasses.approveButton}`}
                       style={{
                         ...styles.requestButton,
-                        ...styles.approveButton
+                        ...styles.approveButton,
                       }}
                       onClick={() => onApprove?.(request)}
                     >
@@ -243,7 +254,7 @@ const PermissionRequestComponent: React.FC<PermissionRequestProps> = ({
                       className={`${permissionRequestClasses.requestButton} ${permissionRequestClasses.denyButton}`}
                       style={{
                         ...styles.requestButton,
-                        ...styles.denyButton
+                        ...styles.denyButton,
                       }}
                       onClick={() => onDeny?.(request)}
                     >
@@ -260,7 +271,7 @@ const PermissionRequestComponent: React.FC<PermissionRequestProps> = ({
                         fontSize: '0.75rem',
                         fontWeight: '500',
                         cursor: 'pointer',
-                        transition: 'all 0.2s ease'
+                        transition: 'all 0.2s ease',
                       }}
                     >
                       Details

@@ -115,15 +115,17 @@ const CountryLanguageDropdownComponent: React.FC<CountryLanguageDropdownProps> =
   };
 
   // Filter countries and languages based on search query
-  const filteredCountries = countries.filter(country =>
-    country.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    country.code.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredCountries = countries.filter(
+    (country) =>
+      country.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      country.code.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const filteredLanguages = languages.filter(language =>
-    language.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    language.nativeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    language.code.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredLanguages = languages.filter(
+    (language) =>
+      language.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      language.nativeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      language.code.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // Get variant styles
@@ -152,16 +154,10 @@ const CountryLanguageDropdownComponent: React.FC<CountryLanguageDropdownProps> =
           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20
         `}
       >
-        {showFlags && (
-          <span className="text-lg">{selectedCountry.flag}</span>
-        )}
-        <span className="text-sm font-medium text-gray-700">
-          {selectedLanguage.name}
-        </span>
+        {showFlags && <span className="text-lg">{selectedCountry.flag}</span>}
+        <span className="text-sm font-medium text-gray-700">{selectedLanguage.name}</span>
         <svg
-          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${
-            isOpen ? 'rotate-180' : ''
-          }`}
+          className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -222,24 +218,24 @@ const CountryLanguageDropdownComponent: React.FC<CountryLanguageDropdownProps> =
                         selectedCountry.code === country.code ? 'bg-blue-50 text-blue-700' : 'text-gray-700'
                       }`}
                     >
-                      {showFlags && (
-                        <span className="text-lg">{country.flag}</span>
-                      )}
+                      {showFlags && <span className="text-lg">{country.flag}</span>}
                       <div className="flex-1">
                         <div className="font-medium">{country.name}</div>
                         <div className="text-xs text-gray-500">{country.code}</div>
                       </div>
                       {selectedCountry.code === country.code && (
                         <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
                         </svg>
                       )}
                     </button>
                   ))
                 ) : (
-                  <div className="px-4 py-8 text-center text-gray-500 text-sm">
-                    No countries found
-                  </div>
+                  <div className="px-4 py-8 text-center text-gray-500 text-sm">No countries found</div>
                 )}
               </div>
             ) : (
@@ -255,21 +251,21 @@ const CountryLanguageDropdownComponent: React.FC<CountryLanguageDropdownProps> =
                     >
                       <div className="flex-1">
                         <div className="font-medium">{language.name}</div>
-                        {showNativeNames && (
-                          <div className="text-xs text-gray-500">{language.nativeName}</div>
-                        )}
+                        {showNativeNames && <div className="text-xs text-gray-500">{language.nativeName}</div>}
                       </div>
                       {selectedLanguage.code === language.code && (
                         <svg className="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
                         </svg>
                       )}
                     </button>
                   ))
                 ) : (
-                  <div className="px-4 py-8 text-center text-gray-500 text-sm">
-                    No languages found
-                  </div>
+                  <div className="px-4 py-8 text-center text-gray-500 text-sm">No languages found</div>
                 )}
               </div>
             )}

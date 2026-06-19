@@ -11,9 +11,7 @@ export interface TextData {
   as: string;
 }
 
-export const fetchTextData = async (
-  tenantId?: string
-): Promise<TextData> => {
+export const fetchTextData = async (tenantId?: string): Promise<TextData> => {
   return {
     tenantTheme: defaultTheme,
     text: 'Text content',
@@ -25,11 +23,9 @@ export const fetchTextData = async (
   };
 };
 
-export const fetchTextSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchTextSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchTextData(tenantId);
-  
+
   const html = `
     <${data.as} 
       class="text text-${data.variant}" 
@@ -38,7 +34,7 @@ export const fetchTextSSR = async (
       ${data.text}
     </${data.as}>
   `;
-  
+
   const styles = `
     .text {
       font-family: var(--font-primary);
@@ -101,6 +97,6 @@ export const fetchTextSSR = async (
       color: var(--color-info);
     }
   `;
-  
+
   return { html, styles };
 };

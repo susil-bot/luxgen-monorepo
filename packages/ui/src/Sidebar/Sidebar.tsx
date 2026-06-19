@@ -81,14 +81,14 @@ const SidebarComponent: React.FC<SidebarProps> = ({
   const { theme } = useTheme();
   const { user: dynamicUser, logout: userLogout } = useUser();
   const tenantLogo = logo || tenantConfig.branding.logo;
-  
+
   // Use dynamic user data if available, fallback to prop
   const currentUser = dynamicUser || user;
 
   // Initialize expanded sections
   useEffect(() => {
     const initialExpanded = new Set<string>();
-    sections.forEach(section => {
+    sections.forEach((section) => {
       if (!section.defaultCollapsed && section.collapsible !== false) {
         initialExpanded.add(section.id);
       }
@@ -118,7 +118,7 @@ const SidebarComponent: React.FC<SidebarProps> = ({
   const handleItemClick = (item: SidebarItem) => {
     setActiveItem(item.id);
     onItemClick?.(item);
-    
+
     if (item.onClick) {
       item.onClick();
     } else if (item.href && !item.external) {
@@ -136,7 +136,7 @@ const SidebarComponent: React.FC<SidebarProps> = ({
   // Get variant styles
   const getVariantStyles = () => {
     const colors = tenantTheme?.colors || defaultTheme.colors;
-    
+
     switch (variant) {
       case 'compact':
         return {
@@ -187,33 +187,30 @@ const SidebarComponent: React.FC<SidebarProps> = ({
       className={`
         ${positionStyles}
         ${styles.container}
-        bg-white border-r border-gray-200 shadow-sm
+        glass border-r
         transition-all duration-300 ease-in-out
         ${isCollapsed ? 'w-16' : ''}
         ${className}
       `}
+      style={{ borderColor: 'var(--color-sidebar-border)' }}
       {...props}
     >
       <div className="flex flex-col h-full">
         {/* Logo Section */}
         {showLogo && (
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div
+            className="flex items-center justify-between p-4 border-b"
+            style={{ borderColor: 'var(--color-separator)' }}
+          >
             {!isCollapsed && (
-              <a
-                href={tenantLogo.href || '/'}
-                className="flex items-center space-x-2 text-xl font-bold text-green-600"
-              >
+              <a href={tenantLogo.href || '/'} className="flex items-center space-x-2 text-xl font-bold text-green-600">
                 {tenantLogo.src ? (
-                  <img
-                    src={tenantLogo.src}
-                    alt={tenantLogo.alt || 'Logo'}
-                    className="h-8 w-8"
-                  />
+                  <img src={tenantLogo.src} alt={tenantLogo.alt || 'Logo'} className="h-8 w-8" />
                 ) : null}
                 <span style={{ color: theme.colors.primary }}>{tenantLogo.text}</span>
               </a>
             )}
-            
+
             {collapsible && (
               <button
                 onClick={handleToggle}
@@ -225,7 +222,12 @@ const SidebarComponent: React.FC<SidebarProps> = ({
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M11 19l-7-7 7-7m8 14l-7-7 7-7"
+                  />
                 </svg>
               </button>
             )}
@@ -239,9 +241,7 @@ const SidebarComponent: React.FC<SidebarProps> = ({
               {/* Section Header */}
               {section.title && !isCollapsed && (
                 <div className="flex items-center justify-between px-4 py-2">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    {section.title}
-                  </h3>
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-tertiary">{section.title}</h3>
                   {section.collapsible !== false && (
                     <button
                       onClick={() => handleSectionToggle(section.id)}
@@ -284,30 +284,20 @@ const SidebarComponent: React.FC<SidebarProps> = ({
 
         {/* User Section */}
         {showUserSection && currentUser && !isCollapsed && (
-          <div className="border-t border-gray-200 p-4">
+          <div className="border-t p-4" style={{ borderColor: 'var(--color-separator)' }}>
             <div className="flex items-center space-x-3">
               {currentUser.avatar ? (
-                <img
-                  src={currentUser.avatar}
-                  alt={currentUser.name}
-                  className="h-8 w-8 rounded-full"
-                />
+                <img src={currentUser.avatar} alt={currentUser.name} className="h-8 w-8 rounded-full" />
               ) : (
                 <div className="h-8 w-8 bg-green-500 rounded-full flex items-center justify-center text-white font-medium">
                   {currentUser.name.charAt(0).toUpperCase()}
                 </div>
               )}
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {currentUser.name}
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {currentUser.role}
-                </p>
+                <p className="text-sm font-medium text-primary truncate">{currentUser.name}</p>
+                <p className="text-xs text-secondary truncate">{currentUser.role}</p>
                 {dynamicUser && dynamicUser.tenant && (
-                  <p className="text-xs text-gray-400 truncate">
-                    {dynamicUser.tenant.name}
-                  </p>
+                  <p className="text-xs text-tertiary truncate">{dynamicUser.tenant.name}</p>
                 )}
               </div>
               <div className="relative">
@@ -316,7 +306,12 @@ const SidebarComponent: React.FC<SidebarProps> = ({
                   className="p-1 rounded text-gray-400 hover:text-gray-600 transition-colors duration-200"
                 >
                   <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"
+                    />
                   </svg>
                 </button>
               </div>
@@ -357,38 +352,23 @@ const SidebarItemComponent: React.FC<{
         className={`
           w-full flex items-center ${styles.item} py-2 text-sm font-medium rounded-md
           transition-colors duration-200
-          ${isActive 
-            ? 'bg-green-50 text-green-700 border-r-2 border-green-500' 
-            : item.children && item.children.length > 0
-              ? 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-          }
+          ${isActive ? 'nav-item active' : 'nav-item'}
           ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         `}
       >
-        {item.icon && (
-          <span className="flex-shrink-0 mr-3">
-            {item.icon}
-          </span>
-        )}
-        
+        {item.icon && <span className="flex-shrink-0 mr-3">{item.icon}</span>}
+
         {!isCollapsed && (
           <>
-            <span className={`flex-1 text-left ${styles.itemText}`}>
-              {item.label}
-            </span>
-            
+            <span className={`flex-1 text-left ${styles.itemText}`}>{item.label}</span>
+
             {item.badge && (
-              <span className="ml-2 px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">
-                {item.badge}
-              </span>
+              <span className="ml-2 px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">{item.badge}</span>
             )}
-            
+
             {item.children && item.children.length > 0 && (
               <svg
-                className={`h-4 w-4 transition-transform duration-200 ${
-                  isExpanded ? 'rotate-180' : ''
-                }`}
+                className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

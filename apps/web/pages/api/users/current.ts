@@ -15,7 +15,7 @@ interface JwtPayload {
 const verifyJwtToken = (token: string): JwtPayload | null => {
   try {
     return jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -25,7 +25,7 @@ const extractTenantFromToken = (token: string): string | null => {
   try {
     const decoded = jwt.decode(token) as JwtPayload;
     return decoded?.tenant || null;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -44,48 +44,53 @@ export default async function getCurrentUser(req: NextApiRequest, res: NextApiRe
   try {
     // Extract authorization token from request headers
     const authToken = req.headers.authorization?.replace('Bearer ', '');
-    
+
     if (!authToken) {
-      return res.status(401).json({ 
+      return res.status(401).json({
         error: 'Authentication required',
-        message: 'No authorization token provided'
+        message: 'No authorization token provided',
       });
     }
 
     // Verify JWT token and extract payload
     const tokenPayload = verifyJwtToken(authToken);
-    
+
     if (!tokenPayload) {
-      return res.status(401).json({ 
+      return res.status(401).json({
         error: 'Invalid token',
-        message: 'Token verification failed'
+        message: 'Token verification failed',
       });
     }
 
     // Verify tenant consistency between token and request
     const tokenTenantId = extractTenantFromToken(authToken);
     if (tokenTenantId && tokenTenantId !== tenant) {
-      return res.status(403).json({ 
+      return res.status(403).json({
         error: 'Tenant mismatch',
-        message: 'Token tenant does not match requested tenant'
+        message: 'Token tenant does not match requested tenant',
       });
     }
 
     // Fetch user data from database
     const userRecord = await User.findById(tokenPayload.id).populate('tenant');
-    
+
     if (!userRecord) {
-      return res.status(404).json({ 
+      return res.status(404).json({
         error: 'User not found',
-        message: 'User does not exist in database'
+        message: 'User does not exist in database',
       });
     }
 
     // Verify user belongs to the requested tenant
-    if (userRecord.tenant && typeof userRecord.tenant === 'object' && 'subdomain' in userRecord.tenant && userRecord.tenant.subdomain !== tenant) {
-      return res.status(403).json({ 
+    if (
+      userRecord.tenant &&
+      typeof userRecord.tenant === 'object' &&
+      'subdomain' in userRecord.tenant &&
+      userRecord.tenant.subdomain !== tenant
+    ) {
+      return res.status(403).json({
         error: 'Access denied',
-        message: 'User does not belong to requested tenant'
+        message: 'User does not belong to requested tenant',
       });
     }
 
@@ -97,9 +102,18 @@ export default async function getCurrentUser(req: NextApiRequest, res: NextApiRe
       role: userRecord.role,
       avatar: (userRecord as any).avatar || undefined,
       tenant: {
-        id: userRecord.tenant && typeof userRecord.tenant === 'object' && '_id' in userRecord.tenant ? (userRecord.tenant as any)._id.toString() : tenant,
-        name: userRecord.tenant && typeof userRecord.tenant === 'object' && 'name' in userRecord.tenant ? userRecord.tenant.name : `${tenant.charAt(0).toUpperCase() + tenant.slice(1)} Company`,
-        subdomain: userRecord.tenant && typeof userRecord.tenant === 'object' && 'subdomain' in userRecord.tenant ? userRecord.tenant.subdomain : tenant,
+        id:
+          userRecord.tenant && typeof userRecord.tenant === 'object' && '_id' in userRecord.tenant
+            ? (userRecord.tenant as any)._id.toString()
+            : tenant,
+        name:
+          userRecord.tenant && typeof userRecord.tenant === 'object' && 'name' in userRecord.tenant
+            ? userRecord.tenant.name
+            : `${tenant.charAt(0).toUpperCase() + tenant.slice(1)} Company`,
+        subdomain:
+          userRecord.tenant && typeof userRecord.tenant === 'object' && 'subdomain' in userRecord.tenant
+            ? userRecord.tenant.subdomain
+            : tenant,
       },
       createdAt: userRecord.createdAt.toISOString(),
       updatedAt: userRecord.updatedAt.toISOString(),
@@ -116,9 +130,9 @@ export default async function getCurrentUser(req: NextApiRequest, res: NextApiRe
     res.status(200).json(userResponse);
   } catch (error) {
     console.error('Error fetching user data:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       error: 'Internal server error',
-      message: error instanceof Error ? error.message : 'Unknown error occurred'
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
     });
   }
 }

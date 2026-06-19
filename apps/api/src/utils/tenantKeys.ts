@@ -13,13 +13,13 @@ export class TenantKeyManager {
 
   private loadTenantKeys(): TenantKeyStore {
     const keyStore: TenantKeyStore = {};
-    
+
     // Load tenant keys from environment variables
     // Pattern: TENANT_<TENANT_ID>_KEY
     const envVars = Object.keys(process.env);
     const tenantKeyPattern = /^TENANT_(.+)_KEY$/;
-    
-    envVars.forEach(envVar => {
+
+    envVars.forEach((envVar) => {
       const match = envVar.match(tenantKeyPattern);
       if (match) {
         const tenantId = match[1].toLowerCase();

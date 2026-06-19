@@ -32,14 +32,12 @@ export const median = (numbers: number[]): number => {
   if (numbers.length === 0) return 0;
   const sorted = [...numbers].sort((a, b) => a - b);
   const middle = Math.floor(sorted.length / 2);
-  return sorted.length % 2 === 0
-    ? (sorted[middle - 1] + sorted[middle]) / 2
-    : sorted[middle];
+  return sorted.length % 2 === 0 ? (sorted[middle - 1] + sorted[middle]) / 2 : sorted[middle];
 };
 
 export const standardDeviation = (numbers: number[]): number => {
   if (numbers.length === 0) return 0;
   const avg = average(numbers);
-  const variance = average(numbers.map(num => Math.pow(num - avg, 2)));
+  const variance = average(numbers.map((num) => Math.pow(num - avg, 2)));
   return Math.sqrt(variance);
 };

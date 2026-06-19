@@ -40,7 +40,7 @@ const KickerComponent: React.FC<KickerProps> = ({
       warning: tenantTheme.colors.warning,
       info: tenantTheme.colors.info,
     };
-    
+
     return variantColors[variant];
   };
 
@@ -62,7 +62,7 @@ const KickerComponent: React.FC<KickerProps> = ({
         lineHeight: '1.4',
       },
     };
-    
+
     return sizeMap[size];
   };
 
@@ -92,14 +92,8 @@ const KickerComponent: React.FC<KickerProps> = ({
       style={styles as React.CSSProperties}
       {...props}
     >
-      {icon && (
-        <span className="kicker-icon">
-          {icon}
-        </span>
-      )}
-      <span className="kicker-content">
-        {children}
-      </span>
+      {icon && <span className="kicker-icon">{icon}</span>}
+      <span className="kicker-content">{children}</span>
     </div>
   );
 };

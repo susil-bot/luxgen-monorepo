@@ -9,9 +9,7 @@ export interface CheckboxData {
   indeterminate: boolean;
 }
 
-export const fetchCheckboxData = async (
-  tenantId?: string
-): Promise<CheckboxData> => {
+export const fetchCheckboxData = async (tenantId?: string): Promise<CheckboxData> => {
   return {
     tenantTheme: defaultTheme,
     checked: false,
@@ -21,11 +19,9 @@ export const fetchCheckboxData = async (
   };
 };
 
-export const fetchCheckboxSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchCheckboxSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchCheckboxData(tenantId);
-  
+
   const html = `
     <div class="checkbox-wrapper" style="font-family: ${data.tenantTheme.fonts.primary}; color: ${data.tenantTheme.colors.text};">
       <label class="checkbox-label">
@@ -46,7 +42,7 @@ export const fetchCheckboxSSR = async (
       </label>
     </div>
   `;
-  
+
   const styles = `
     .checkbox-wrapper {
       display: flex;
@@ -151,6 +147,6 @@ export const fetchCheckboxSSR = async (
       margin-top: 0.25rem;
     }
   `;
-  
+
   return { html, styles };
 };

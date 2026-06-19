@@ -1,31 +1,26 @@
-import { User, UserRole, UserStatus, IUser } from '@luxgen/db';
-import { Tenant } from '@luxgen/db';
+import { User, UserRole, UserStatus } from '@luxgen/db';
 import { UserRegistrationService } from '../../services/userRegistrationService';
 import { logger } from '../../utils/logger';
 
 export const userRoleResolvers = {
   Query: {
-    getUsers: async (_: any, { tenantId, role, status, limit = 50, offset = 0 }: any, context: any) => {
+    getUsers: async (_: any, { tenantId, role, status, limit = 50, offset = 0 }: any, _context: any) => {
       try {
         const query: any = {};
-        
+
         if (tenantId) {
           query.tenant = tenantId;
         }
-        
+
         if (role) {
           query.role = role;
         }
-        
+
         if (status) {
           query.status = status;
         }
 
-        const users = await User.find(query)
-          .populate('tenant')
-          .limit(limit)
-          .skip(offset)
-          .sort({ createdAt: -1 });
+        const users = await User.find(query).populate('tenant').limit(limit).skip(offset).sort({ createdAt: -1 });
 
         return users;
       } catch (error) {
@@ -34,7 +29,7 @@ export const userRoleResolvers = {
       }
     },
 
-    getUserById: async (_: any, { userId }: { userId: string }, context: any) => {
+    getUserById: async (_: any, { userId }: { userId: string }, _context: any) => {
       try {
         const user = await User.findById(userId).populate('tenant');
         if (!user) {
@@ -47,10 +42,10 @@ export const userRoleResolvers = {
       }
     },
 
-    getUsersByRole: async (_: any, { role, tenantId }: { role: UserRole; tenantId?: string }, context: any) => {
+    getUsersByRole: async (_: any, { role, tenantId }: { role: UserRole; tenantId?: string }, _context: any) => {
       try {
         const query: any = { role };
-        
+
         if (tenantId) {
           query.tenant = tenantId;
         }
@@ -63,10 +58,10 @@ export const userRoleResolvers = {
       }
     },
 
-    getPendingUsers: async (_: any, { tenantId }: { tenantId?: string }, context: any) => {
+    getPendingUsers: async (_: any, { tenantId }: { tenantId?: string }, _context: any) => {
       try {
         const query: any = { status: UserStatus.PENDING };
-        
+
         if (tenantId) {
           query.tenant = tenantId;
         }
@@ -79,7 +74,7 @@ export const userRoleResolvers = {
       }
     },
 
-    getUserPermissions: async (_: any, { userId }: { userId: string }, context: any) => {
+    getUserPermissions: async (_: any, { userId }: { userId: string }, _context: any) => {
       try {
         const user = await User.findById(userId);
         if (!user) {
@@ -92,13 +87,13 @@ export const userRoleResolvers = {
       }
     },
 
-    getRoleAssignments: async (_: any, { userId }: { userId: string }, context: any) => {
+    getRoleAssignments: async (_: any, { userId }: { userId: string }, _context: any) => {
       try {
         const user = await User.findById(userId);
         if (!user) {
           throw new Error('User not found');
         }
-        
+
         // Convert tenant roles to role assignments
         const assignments = user.metadata.tenantRoles.map((tenantRole, index) => ({
           id: `${userId}-${index}`,
@@ -107,7 +102,7 @@ export const userRoleResolvers = {
           previousRole: tenantRole.role, // This would need to be tracked separately
           assignedBy: tenantRole.assignedBy,
           assignedAt: tenantRole.assignedAt.toISOString(),
-          reason: 'Role assignment'
+          reason: 'Role assignment',
         }));
 
         return assignments;
@@ -117,12 +112,12 @@ export const userRoleResolvers = {
       }
     },
 
-    getTenantAdmins: async (_: any, { tenantId }: { tenantId: string }, context: any) => {
+    getTenantAdmins: async (_: any, { tenantId }: { tenantId: string }, _context: any) => {
       try {
         const admins = await User.find({
           tenant: tenantId,
           role: { $in: [UserRole.ADMIN, UserRole.SUPER_ADMIN] },
-          status: UserStatus.ACTIVE
+          status: UserStatus.ACTIVE,
         }).populate('tenant');
 
         return admins;
@@ -132,7 +127,11 @@ export const userRoleResolvers = {
       }
     },
 
-    getUserInvitations: async (_: any, { tenantId, status }: { tenantId?: string; status?: string }, context: any) => {
+    getUserInvitations: async (
+      _: any,
+      { tenantId: _tenantId, status: _status }: { tenantId?: string; status?: string },
+      _context: any,
+    ) => {
       try {
         // This would need to be implemented with a separate invitations collection
         // For now, return empty array
@@ -145,7 +144,7 @@ export const userRoleResolvers = {
   },
 
   Mutation: {
-    registerUser: async (_: any, { input }: { input: any }, context: any) => {
+    registerUser: async (_: any, { input }: { input: any }, _context: any) => {
       try {
         const result = await UserRegistrationService.registerUser(input);
         return result;
@@ -154,7 +153,7 @@ export const userRoleResolvers = {
         return {
           success: false,
           message: 'Registration failed',
-          errors: { general: 'Internal server error' }
+          errors: { general: 'Internal server error' },
         };
       }
     },
@@ -163,17 +162,17 @@ export const userRoleResolvers = {
       try {
         // Generate temporary password
         const tempPassword = Math.random().toString(36).slice(-8);
-        
+
         const registrationResult = await UserRegistrationService.registerUser({
           ...input,
-          password: tempPassword
+          password: tempPassword,
         });
 
         if (!registrationResult.success) {
           return {
             success: false,
             message: registrationResult.message,
-            errors: registrationResult.errors
+            errors: registrationResult.errors,
           };
         }
 
@@ -190,16 +189,16 @@ export const userRoleResolvers = {
             invitedBy: input.invitedBy || context.user?._id,
             invitedAt: new Date().toISOString(),
             status: 'pending',
-            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString() // 7 days
+            expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
           },
-          tempPassword
+          tempPassword,
         };
       } catch (error) {
         logger.error('Error inviting user:', error);
         return {
           success: false,
           message: 'User invitation failed',
-          errors: { general: 'Internal server error' }
+          errors: { general: 'Internal server error' },
         };
       }
     },
@@ -210,14 +209,14 @@ export const userRoleResolvers = {
           input.userId,
           input.newRole,
           context.user?._id,
-          context.tenant
+          context.tenant,
         );
 
         if (!result.success) {
           return {
             success: false,
             message: result.message,
-            errors: result.errors
+            errors: result.errors,
           };
         }
 
@@ -231,15 +230,15 @@ export const userRoleResolvers = {
             previousRole: result.user!.role,
             assignedBy: context.user?._id,
             assignedAt: new Date().toISOString(),
-            reason: input.reason || 'Role update'
-          }
+            reason: input.reason || 'Role update',
+          },
         };
       } catch (error) {
         logger.error('Error updating user role:', error);
         return {
           success: false,
           message: 'Role update failed',
-          errors: { general: 'Internal server error' }
+          errors: { general: 'Internal server error' },
         };
       }
     },
@@ -253,19 +252,19 @@ export const userRoleResolvers = {
         return {
           success: false,
           message: 'User activation failed',
-          errors: { general: 'Internal server error' }
+          errors: { general: 'Internal server error' },
         };
       }
     },
 
-    deactivateUser: async (_: any, { userId }: { userId: string }, context: any) => {
+    deactivateUser: async (_: any, { userId }: { userId: string }, _context: any) => {
       try {
         const user = await User.findById(userId);
         if (!user) {
           return {
             success: false,
             message: 'User not found',
-            errors: { user: 'User does not exist' }
+            errors: { user: 'User does not exist' },
           };
         }
 
@@ -275,26 +274,26 @@ export const userRoleResolvers = {
         return {
           success: true,
           message: 'User deactivated successfully',
-          user
+          user,
         };
       } catch (error) {
         logger.error('Error deactivating user:', error);
         return {
           success: false,
           message: 'User deactivation failed',
-          errors: { general: 'Internal server error' }
+          errors: { general: 'Internal server error' },
         };
       }
     },
 
-    suspendUser: async (_: any, { userId, reason }: { userId: string; reason?: string }, context: any) => {
+    suspendUser: async (_: any, { userId, reason: _reason }: { userId: string; reason?: string }, _context: any) => {
       try {
         const user = await User.findById(userId);
         if (!user) {
           return {
             success: false,
             message: 'User not found',
-            errors: { user: 'User does not exist' }
+            errors: { user: 'User does not exist' },
           };
         }
 
@@ -304,26 +303,30 @@ export const userRoleResolvers = {
         return {
           success: true,
           message: 'User suspended successfully',
-          user
+          user,
         };
       } catch (error) {
         logger.error('Error suspending user:', error);
         return {
           success: false,
           message: 'User suspension failed',
-          errors: { general: 'Internal server error' }
+          errors: { general: 'Internal server error' },
         };
       }
     },
 
-    updateUserPermissions: async (_: any, { userId, permissions }: { userId: string; permissions: any }, context: any) => {
+    updateUserPermissions: async (
+      _: any,
+      { userId, permissions }: { userId: string; permissions: any },
+      _context: any,
+    ) => {
       try {
         const user = await User.findById(userId);
         if (!user) {
           return {
             success: false,
             message: 'User not found',
-            errors: { user: 'User does not exist' }
+            errors: { user: 'User does not exist' },
           };
         }
 
@@ -333,33 +336,35 @@ export const userRoleResolvers = {
         return {
           success: true,
           message: 'User permissions updated successfully',
-          user
+          user,
         };
       } catch (error) {
         logger.error('Error updating user permissions:', error);
         return {
           success: false,
           message: 'Permission update failed',
-          errors: { general: 'Internal server error' }
+          errors: { general: 'Internal server error' },
         };
       }
     },
 
-    assignTenantRole: async (_: any, { userId, tenantId, role }: { userId: string; tenantId: string; role: UserRole }, context: any) => {
+    assignTenantRole: async (
+      _: any,
+      { userId, tenantId, role }: { userId: string; tenantId: string; role: UserRole },
+      context: any,
+    ) => {
       try {
         const user = await User.findById(userId);
         if (!user) {
           return {
             success: false,
             message: 'User not found',
-            errors: { user: 'User does not exist' }
+            errors: { user: 'User does not exist' },
           };
         }
 
         // Add or update tenant role
-        const existingRoleIndex = user.metadata.tenantRoles.findIndex(
-          tr => tr.tenantId.toString() === tenantId
-        );
+        const existingRoleIndex = user.metadata.tenantRoles.findIndex((tr) => tr.tenantId.toString() === tenantId);
 
         if (existingRoleIndex >= 0) {
           user.metadata.tenantRoles[existingRoleIndex].role = role;
@@ -370,7 +375,7 @@ export const userRoleResolvers = {
             tenantId: tenantId as any,
             role,
             assignedBy: context.user?._id,
-            assignedAt: new Date()
+            assignedAt: new Date(),
           });
         }
 
@@ -386,47 +391,45 @@ export const userRoleResolvers = {
             previousRole: role,
             assignedBy: context.user?._id,
             assignedAt: new Date().toISOString(),
-            reason: 'Tenant role assignment'
-          }
+            reason: 'Tenant role assignment',
+          },
         };
       } catch (error) {
         logger.error('Error assigning tenant role:', error);
         return {
           success: false,
           message: 'Tenant role assignment failed',
-          errors: { general: 'Internal server error' }
+          errors: { general: 'Internal server error' },
         };
       }
     },
 
-    removeTenantRole: async (_: any, { userId, tenantId }: { userId: string; tenantId: string }, context: any) => {
+    removeTenantRole: async (_: any, { userId, tenantId }: { userId: string; tenantId: string }, _context: any) => {
       try {
         const user = await User.findById(userId);
         if (!user) {
           return {
             success: false,
             message: 'User not found',
-            errors: { user: 'User does not exist' }
+            errors: { user: 'User does not exist' },
           };
         }
 
-        user.metadata.tenantRoles = user.metadata.tenantRoles.filter(
-          tr => tr.tenantId.toString() !== tenantId
-        );
+        user.metadata.tenantRoles = user.metadata.tenantRoles.filter((tr) => tr.tenantId.toString() !== tenantId);
 
         await user.save();
 
         return {
           success: true,
           message: 'Tenant role removed successfully',
-          user
+          user,
         };
       } catch (error) {
         logger.error('Error removing tenant role:', error);
         return {
           success: false,
           message: 'Tenant role removal failed',
-          errors: { general: 'Internal server error' }
+          errors: { general: 'Internal server error' },
         };
       }
     },
@@ -434,13 +437,13 @@ export const userRoleResolvers = {
     bulkUpdateUserRoles: async (_: any, { updates }: { updates: any[] }, context: any) => {
       try {
         const results = [];
-        
+
         for (const update of updates) {
           const result = await UserRegistrationService.updateUserRole(
             update.userId,
             update.newRole,
             context.user?._id,
-            context.tenant
+            context.tenant,
           );
           results.push(result);
         }
@@ -451,7 +454,7 @@ export const userRoleResolvers = {
         return updates.map(() => ({
           success: false,
           message: 'Bulk role update failed',
-          errors: { general: 'Internal server error' }
+          errors: { general: 'Internal server error' },
         }));
       }
     },

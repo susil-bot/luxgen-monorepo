@@ -1,6 +1,6 @@
 /**
  * Centralized Tenant Workflow System
- * 
+ *
  * This system provides a sustainable, scalable approach to tenant management by:
  * 1. Centralizing all tenant configurations in a single workflow object
  * 2. Providing type-safe tenant properties
@@ -16,7 +16,7 @@ export interface TenantWorkflow {
   subdomain: string;
   domain?: string;
   status: 'active' | 'suspended' | 'pending' | 'archived';
-  
+
   // Tenant metadata
   metadata: {
     plan: 'free' | 'pro' | 'enterprise' | 'custom';
@@ -28,7 +28,7 @@ export interface TenantWorkflow {
     region: string;
     timezone: string;
   };
-  
+
   // Branding and UI configuration
   branding: {
     // Visual identity
@@ -39,7 +39,7 @@ export interface TenantWorkflow {
       favicon: string;
       animated?: string;
     };
-    
+
     // Color scheme
     colors: {
       primary: string;
@@ -57,7 +57,7 @@ export interface TenantWorkflow {
         muted: string;
       };
     };
-    
+
     // Typography
     typography: {
       fontFamily: {
@@ -69,16 +69,16 @@ export interface TenantWorkflow {
       fontWeight: Record<string, number>;
       lineHeight: Record<string, number>;
     };
-    
+
     // Spacing and layout
     spacing: Record<string, string>;
     borderRadius: Record<string, string>;
     shadows: Record<string, string>;
-    
+
     // Custom styling
     customCSS?: string;
     customJS?: string;
-    
+
     // Assets
     assets: {
       heroImage?: string;
@@ -88,7 +88,7 @@ export interface TenantWorkflow {
       icons?: Record<string, string>;
     };
   };
-  
+
   // Security configuration
   security: {
     // Authentication
@@ -102,7 +102,7 @@ export interface TenantWorkflow {
       rememberMeDuration: number; // days
       allowedAuthMethods: string[];
     };
-    
+
     // Password policy
     passwordPolicy: {
       minLength: number;
@@ -114,7 +114,7 @@ export interface TenantWorkflow {
       preventUserInfo: boolean;
       preventSequentialChars: boolean;
     };
-    
+
     // Rate limiting
     rateLimiting: {
       enabled: boolean;
@@ -125,7 +125,7 @@ export interface TenantWorkflow {
       keyGenerator: 'ip' | 'user' | 'tenant';
       message: string;
     };
-    
+
     // CORS and domain restrictions
     cors: {
       enabled: boolean;
@@ -135,14 +135,14 @@ export interface TenantWorkflow {
       credentials: boolean;
       maxAge: number;
     };
-    
+
     domainRestrictions: {
       allowedDomains: string[];
       blockedDomains: string[];
       redirectToHttps: boolean;
       enforceSubdomain: boolean;
     };
-    
+
     // Security headers
     securityHeaders: {
       'X-Content-Type-Options': string;
@@ -152,7 +152,7 @@ export interface TenantWorkflow {
       'Permissions-Policy': string;
       'Strict-Transport-Security': string;
     };
-    
+
     // Data protection
     dataProtection: {
       encryptSensitiveData: boolean;
@@ -163,7 +163,7 @@ export interface TenantWorkflow {
       gdprCompliant: boolean;
     };
   };
-  
+
   // Feature configuration
   features: {
     // Core features
@@ -174,7 +174,7 @@ export interface TenantWorkflow {
       profileManagement: boolean;
       settings: boolean;
     };
-    
+
     // Platform features
     platform: {
       analytics: {
@@ -221,7 +221,7 @@ export interface TenantWorkflow {
         sandbox: boolean;
       };
     };
-    
+
     // Business features
     business: {
       customDomain: {
@@ -255,7 +255,7 @@ export interface TenantWorkflow {
         customMetrics: boolean;
       };
     };
-    
+
     // Advanced features
     advanced: {
       multiTenancy: {
@@ -284,7 +284,7 @@ export interface TenantWorkflow {
       };
     };
   };
-  
+
   // Usage limits and quotas
   limits: {
     users: {
@@ -312,7 +312,7 @@ export interface TenantWorkflow {
       current: number;
     };
   };
-  
+
   // Integration configuration
   integrations: {
     email: {
@@ -339,7 +339,7 @@ export interface TenantWorkflow {
       cdn: boolean;
     };
   };
-  
+
   // Workflow-specific configuration
   workflow: {
     // Tenant lifecycle
@@ -355,7 +355,7 @@ export interface TenantWorkflow {
         notificationPeriod: number; // days
       };
     };
-    
+
     // Feature rollouts
     rollouts: {
       featureFlags: Record<string, boolean>;
@@ -363,7 +363,7 @@ export interface TenantWorkflow {
       betaFeatures: string[];
       experimentalFeatures: string[];
     };
-    
+
     // Monitoring and alerts
     monitoring: {
       healthChecks: {
@@ -383,7 +383,7 @@ export interface TenantWorkflow {
       };
     };
   };
-  
+
   // Compliance and governance
   compliance: {
     gdpr: {
@@ -418,91 +418,91 @@ export class TenantWorkflowManager {
   private static instance: TenantWorkflowManager;
   private workflows: Map<string, TenantWorkflow> = new Map();
   private defaultWorkflow: TenantWorkflow;
-  
+
   private constructor() {
     this.defaultWorkflow = this.createDefaultWorkflow();
   }
-  
+
   public static getInstance(): TenantWorkflowManager {
     if (!TenantWorkflowManager.instance) {
       TenantWorkflowManager.instance = new TenantWorkflowManager();
     }
     return TenantWorkflowManager.instance;
   }
-  
+
   /**
    * Register a tenant workflow
    */
   public registerWorkflow(tenantId: string, workflow: TenantWorkflow): void {
     this.workflows.set(tenantId, workflow);
   }
-  
+
   /**
    * Get tenant workflow
    */
   public getWorkflow(tenantId: string): TenantWorkflow | null {
     return this.workflows.get(tenantId) || null;
   }
-  
+
   /**
    * Get all workflows
    */
   public getAllWorkflows(): Map<string, TenantWorkflow> {
     return new Map(this.workflows);
   }
-  
+
   /**
    * Update tenant workflow
    */
   public updateWorkflow(tenantId: string, updates: Partial<TenantWorkflow>): boolean {
     const workflow = this.workflows.get(tenantId);
     if (!workflow) return false;
-    
+
     const updatedWorkflow = { ...workflow, ...updates };
     this.workflows.set(tenantId, updatedWorkflow);
     return true;
   }
-  
+
   /**
    * Remove tenant workflow
    */
   public removeWorkflow(tenantId: string): boolean {
     return this.workflows.delete(tenantId);
   }
-  
+
   /**
    * Validate tenant workflow
    */
   public validateWorkflow(workflow: TenantWorkflow): { valid: boolean; errors: string[] } {
     const errors: string[] = [];
-    
+
     // Required fields validation
     if (!workflow.id) errors.push('Tenant ID is required');
     if (!workflow.name) errors.push('Tenant name is required');
     if (!workflow.subdomain) errors.push('Subdomain is required');
     if (!workflow.status) errors.push('Status is required');
-    
+
     // Subdomain format validation
     if (workflow.subdomain && !/^[a-z0-9-]+$/.test(workflow.subdomain)) {
       errors.push('Subdomain can only contain lowercase letters, numbers, and hyphens');
     }
-    
+
     // Color format validation
     if (workflow.branding?.colors?.primary && !/^#[0-9A-Fa-f]{6}$/.test(workflow.branding.colors.primary)) {
       errors.push('Primary color must be a valid hex color');
     }
-    
+
     // Limits validation
     if (workflow.limits?.users?.max && workflow.limits.users.max < 1) {
       errors.push('User limit must be at least 1');
     }
-    
+
     return {
       valid: errors.length === 0,
-      errors
+      errors,
     };
   }
-  
+
   /**
    * Create default workflow template
    */
@@ -520,14 +520,14 @@ export class TenantWorkflowManager {
         createdBy: 'system',
         tags: [],
         region: 'us-east-1',
-        timezone: 'UTC'
+        timezone: 'UTC',
       },
       branding: {
         logo: {
           primary: '/assets/logos/default-logo.svg',
           secondary: '/assets/logos/default-logo-secondary.svg',
           icon: '/assets/logos/default-icon.svg',
-          favicon: '/assets/favicons/default-favicon.ico'
+          favicon: '/assets/favicons/default-favicon.ico',
         },
         colors: {
           primary: '#3B82F6',
@@ -542,14 +542,14 @@ export class TenantWorkflowManager {
           text: {
             primary: '#0F172A',
             secondary: '#475569',
-            muted: '#94A3B8'
-          }
+            muted: '#94A3B8',
+          },
         },
         typography: {
           fontFamily: {
             primary: 'Inter, system-ui, sans-serif',
             secondary: 'Roboto, sans-serif',
-            mono: 'JetBrains Mono, monospace'
+            mono: 'JetBrains Mono, monospace',
           },
           fontSize: {
             xs: '0.75rem',
@@ -560,7 +560,7 @@ export class TenantWorkflowManager {
             '2xl': '1.5rem',
             '3xl': '1.875rem',
             '4xl': '2.25rem',
-            '5xl': '3rem'
+            '5xl': '3rem',
           },
           fontWeight: {
             light: 300,
@@ -568,13 +568,13 @@ export class TenantWorkflowManager {
             medium: 500,
             semibold: 600,
             bold: 700,
-            extrabold: 800
+            extrabold: 800,
           },
           lineHeight: {
             tight: 1.25,
             normal: 1.5,
-            relaxed: 1.75
-          }
+            relaxed: 1.75,
+          },
         },
         spacing: {
           xs: '0.25rem',
@@ -584,7 +584,7 @@ export class TenantWorkflowManager {
           xl: '2rem',
           '2xl': '3rem',
           '3xl': '4rem',
-          '4xl': '6rem'
+          '4xl': '6rem',
         },
         borderRadius: {
           none: '0',
@@ -594,7 +594,7 @@ export class TenantWorkflowManager {
           lg: '0.5rem',
           xl: '0.75rem',
           '2xl': '1rem',
-          full: '9999px'
+          full: '9999px',
         },
         shadows: {
           sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
@@ -602,13 +602,13 @@ export class TenantWorkflowManager {
           md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
           lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
           xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-          '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+          '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
         },
         assets: {
           heroImage: '/assets/images/default-hero.jpg',
           backgroundPattern: '/assets/patterns/default-pattern.svg',
-          placeholderImage: '/assets/images/default-placeholder.jpg'
-        }
+          placeholderImage: '/assets/images/default-placeholder.jpg',
+        },
       },
       security: {
         authentication: {
@@ -619,7 +619,7 @@ export class TenantWorkflowManager {
           passwordExpiry: 90,
           rememberMe: true,
           rememberMeDuration: 30,
-          allowedAuthMethods: ['password', 'oauth']
+          allowedAuthMethods: ['password', 'oauth'],
         },
         passwordPolicy: {
           minLength: 8,
@@ -629,7 +629,7 @@ export class TenantWorkflowManager {
           requireSymbols: false,
           preventCommonPasswords: true,
           preventUserInfo: true,
-          preventSequentialChars: true
+          preventSequentialChars: true,
         },
         rateLimiting: {
           enabled: true,
@@ -638,7 +638,7 @@ export class TenantWorkflowManager {
           skipSuccessfulRequests: false,
           skipFailedRequests: false,
           keyGenerator: 'ip',
-          message: 'Too many requests, please try again later.'
+          message: 'Too many requests, please try again later.',
         },
         cors: {
           enabled: true,
@@ -646,13 +646,13 @@ export class TenantWorkflowManager {
           methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
           allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization'],
           credentials: true,
-          maxAge: 86400
+          maxAge: 86400,
         },
         domainRestrictions: {
           allowedDomains: [],
           blockedDomains: [],
           redirectToHttps: true,
-          enforceSubdomain: false
+          enforceSubdomain: false,
         },
         securityHeaders: {
           'X-Content-Type-Options': 'nosniff',
@@ -660,7 +660,7 @@ export class TenantWorkflowManager {
           'X-XSS-Protection': '1; mode=block',
           'Referrer-Policy': 'strict-origin-when-cross-origin',
           'Permissions-Policy': 'geolocation=(), microphone=(), camera=()',
-          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains'
+          'Strict-Transport-Security': 'max-age=31536000; includeSubDomains',
         },
         dataProtection: {
           encryptSensitiveData: true,
@@ -668,8 +668,8 @@ export class TenantWorkflowManager {
           dataRetention: 2555,
           anonymizeOnDelete: true,
           auditLogging: true,
-          gdprCompliant: true
-        }
+          gdprCompliant: true,
+        },
       },
       features: {
         core: {
@@ -677,7 +677,7 @@ export class TenantWorkflowManager {
           authentication: true,
           authorization: true,
           profileManagement: true,
-          settings: true
+          settings: true,
         },
         platform: {
           analytics: {
@@ -687,8 +687,8 @@ export class TenantWorkflowManager {
             privacy: {
               anonymizeIP: true,
               respectDoNotTrack: true,
-              cookieConsent: true
-            }
+              cookieConsent: true,
+            },
           },
           notifications: {
             enabled: true,
@@ -696,12 +696,12 @@ export class TenantWorkflowManager {
             templates: {
               welcome: true,
               passwordReset: true,
-              accountLocked: true
+              accountLocked: true,
             },
             preferences: {
               userControllable: true,
-              defaultEnabled: ['email', 'in-app']
-            }
+              defaultEnabled: ['email', 'in-app'],
+            },
           },
           fileUpload: {
             enabled: true,
@@ -710,13 +710,13 @@ export class TenantWorkflowManager {
             storage: {
               provider: 'local',
               bucket: 'uploads',
-              cdn: false
+              cdn: false,
             },
             processing: {
               imageResize: true,
               thumbnailGeneration: true,
-              virusScan: true
-            }
+              virusScan: true,
+            },
           },
           apiAccess: {
             enabled: true,
@@ -724,20 +724,20 @@ export class TenantWorkflowManager {
             rateLimit: 1000,
             authentication: 'bearer',
             documentation: true,
-            sandbox: true
-          }
+            sandbox: true,
+          },
         },
         business: {
           customDomain: {
             enabled: false,
             sslRequired: true,
             dnsValidation: true,
-            maxDomains: 1
+            maxDomains: 1,
           },
           whiteLabel: {
             enabled: false,
             customBranding: false,
-            removePoweredBy: false
+            removePoweredBy: false,
           },
           integrations: {
             enabled: true,
@@ -747,115 +747,115 @@ export class TenantWorkflowManager {
               maxEndpoints: 5,
               retryPolicy: {
                 maxRetries: 3,
-                backoffMultiplier: 2
-              }
-            }
+                backoffMultiplier: 2,
+              },
+            },
           },
           reporting: {
             enabled: true,
             dashboards: true,
             exports: ['pdf', 'csv'],
             scheduledReports: true,
-            customMetrics: false
-          }
+            customMetrics: false,
+          },
         },
         advanced: {
           multiTenancy: {
             enabled: true,
             isolation: 'database',
-            crossTenantAccess: false
+            crossTenantAccess: false,
           },
           auditLogging: {
             enabled: true,
             events: ['user_login', 'user_logout', 'data_access'],
             retention: 2555,
-            encryption: true
+            encryption: true,
           },
           backup: {
             enabled: true,
             frequency: 'daily',
             retention: 30,
             encryption: true,
-            compression: true
+            compression: true,
           },
           monitoring: {
             enabled: true,
             metrics: ['performance', 'errors', 'usage'],
             alerts: true,
-            dashboards: true
-          }
-        }
+            dashboards: true,
+          },
+        },
       },
       limits: {
         users: {
           max: 100,
           current: 0,
-          warningThreshold: 80
+          warningThreshold: 80,
         },
         storage: {
           max: 1024,
           current: 0,
-          warningThreshold: 800
+          warningThreshold: 800,
         },
         apiCalls: {
           max: 10000,
           current: 0,
           resetPeriod: 'monthly',
-          warningThreshold: 8000
+          warningThreshold: 8000,
         },
         customDomains: {
           max: 1,
-          current: 0
+          current: 0,
         },
         integrations: {
           max: 5,
-          current: 0
-        }
+          current: 0,
+        },
       },
       integrations: {
         email: {
           provider: 'sendgrid',
           fromAddress: 'noreply@example.com',
-          templates: {}
+          templates: {},
         },
         payment: {
           provider: 'stripe',
-          currency: 'USD'
+          currency: 'USD',
         },
         analytics: {
-          provider: 'google-analytics'
+          provider: 'google-analytics',
         },
         storage: {
           provider: 'local',
           bucket: 'uploads',
           region: 'us-east-1',
-          cdn: false
-        }
+          cdn: false,
+        },
       },
       workflow: {
         lifecycle: {
           onboarding: {
             enabled: true,
             steps: ['welcome', 'profile_setup', 'feature_tour'],
-            automation: true
+            automation: true,
           },
           offboarding: {
             enabled: true,
             dataRetention: 30,
-            notificationPeriod: 7
-          }
+            notificationPeriod: 7,
+          },
         },
         rollouts: {
           featureFlags: {},
           gradualRollout: {},
           betaFeatures: [],
-          experimentalFeatures: []
+          experimentalFeatures: [],
         },
         monitoring: {
           healthChecks: {
             enabled: true,
             interval: 60,
-            endpoints: ['/health', '/api/status']
+            endpoints: ['/health', '/api/status'],
           },
           alerts: {
             enabled: true,
@@ -863,39 +863,39 @@ export class TenantWorkflowManager {
             thresholds: {
               errorRate: 5,
               responseTime: 2000,
-              cpuUsage: 80
-            }
+              cpuUsage: 80,
+            },
           },
           metrics: {
             enabled: true,
             providers: ['prometheus'],
-            retention: 90
-          }
-        }
+            retention: 90,
+          },
+        },
       },
       compliance: {
         gdpr: {
           enabled: true,
           dataProcessingBasis: 'consent',
           consentRequired: true,
-          rightToErasure: true
+          rightToErasure: true,
         },
         soc2: {
           enabled: false,
           type: 'Type II',
-          lastAudit: new Date()
+          lastAudit: new Date(),
         },
         hipaa: {
           enabled: false,
           baaSigned: false,
-          encryptionRequired: true
+          encryptionRequired: true,
         },
         iso27001: {
           enabled: false,
           certificationDate: new Date(),
-          renewalDate: new Date()
-        }
-      }
+          renewalDate: new Date(),
+        },
+      },
     };
   }
 }
@@ -915,42 +915,44 @@ export class TenantWorkflowUtils {
   public static createFromTemplate(
     tenantId: string,
     template: 'demo' | 'idea-vibes' | 'enterprise' | 'startup',
-    overrides: Partial<TenantWorkflow> = {}
+    overrides: Partial<TenantWorkflow> = {},
   ): TenantWorkflow {
     const baseWorkflow = tenantWorkflowManager.getWorkflow('default')!;
-    
+
     // Apply template-specific configurations
     const templateConfig = this.getTemplateConfig(template);
     const workflow = this.mergeWorkflows(baseWorkflow, templateConfig);
-    
+
     // Apply overrides
     const finalWorkflow = this.mergeWorkflows(workflow, overrides);
-    
+
     // Set tenant ID
     finalWorkflow.id = tenantId;
     finalWorkflow.metadata.createdAt = new Date();
     finalWorkflow.metadata.lastActive = new Date();
-    
+
     return finalWorkflow;
   }
-  
+
   /**
    * Merge two workflows (deep merge)
    */
   public static mergeWorkflows(base: TenantWorkflow, override: Partial<TenantWorkflow>): TenantWorkflow {
-    return JSON.parse(JSON.stringify({
-      ...base,
-      ...override,
-      branding: { ...base.branding, ...override.branding },
-      security: { ...base.security, ...override.security },
-      features: { ...base.features, ...override.features },
-      limits: { ...base.limits, ...override.limits },
-      integrations: { ...base.integrations, ...override.integrations },
-      workflow: { ...base.workflow, ...override.workflow },
-      compliance: { ...base.compliance, ...override.compliance }
-    }));
+    return JSON.parse(
+      JSON.stringify({
+        ...base,
+        ...override,
+        branding: { ...base.branding, ...override.branding },
+        security: { ...base.security, ...override.security },
+        features: { ...base.features, ...override.features },
+        limits: { ...base.limits, ...override.limits },
+        integrations: { ...base.integrations, ...override.integrations },
+        workflow: { ...base.workflow, ...override.workflow },
+        compliance: { ...base.compliance, ...override.compliance },
+      }),
+    );
   }
-  
+
   /**
    * Get template configuration
    */
@@ -959,22 +961,22 @@ export class TenantWorkflowUtils {
       demo: {
         name: 'Demo Platform',
         subdomain: 'demo',
-        metadata: { 
-          plan: 'pro' as const, 
+        metadata: {
+          plan: 'pro' as const,
           tier: 'standard' as const,
           createdAt: new Date(),
           lastActive: new Date(),
           createdBy: 'system',
           tags: ['demo'],
           region: 'us-east-1',
-          timezone: 'UTC'
+          timezone: 'UTC',
         },
         branding: {
           logo: {
             primary: '/assets/logos/demo-logo.svg',
             secondary: '/assets/logos/demo-logo-secondary.svg',
             icon: '/assets/logos/demo-icon.svg',
-            favicon: '/assets/favicons/demo-favicon.ico'
+            favicon: '/assets/favicons/demo-favicon.ico',
           },
           colors: {
             primary: '#1E40AF',
@@ -989,14 +991,14 @@ export class TenantWorkflowUtils {
             text: {
               primary: '#0F172A',
               secondary: '#475569',
-              muted: '#94A3B8'
-            }
+              muted: '#94A3B8',
+            },
           },
           typography: {
             fontFamily: {
               primary: 'Inter, system-ui, sans-serif',
               secondary: 'Roboto, sans-serif',
-              mono: 'JetBrains Mono, monospace'
+              mono: 'JetBrains Mono, monospace',
             },
             fontSize: {
               xs: '0.75rem',
@@ -1007,7 +1009,7 @@ export class TenantWorkflowUtils {
               '2xl': '1.5rem',
               '3xl': '1.875rem',
               '4xl': '2.25rem',
-              '5xl': '3rem'
+              '5xl': '3rem',
             },
             fontWeight: {
               light: 300,
@@ -1015,13 +1017,13 @@ export class TenantWorkflowUtils {
               medium: 500,
               semibold: 600,
               bold: 700,
-              extrabold: 800
+              extrabold: 800,
             },
             lineHeight: {
               tight: 1.25,
               normal: 1.5,
-              relaxed: 1.75
-            }
+              relaxed: 1.75,
+            },
           },
           spacing: {
             xs: '0.25rem',
@@ -1031,7 +1033,7 @@ export class TenantWorkflowUtils {
             xl: '2rem',
             '2xl': '3rem',
             '3xl': '4rem',
-            '4xl': '6rem'
+            '4xl': '6rem',
           },
           borderRadius: {
             none: '0',
@@ -1041,7 +1043,7 @@ export class TenantWorkflowUtils {
             lg: '0.5rem',
             xl: '0.75rem',
             '2xl': '1rem',
-            full: '9999px'
+            full: '9999px',
           },
           shadows: {
             sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
@@ -1049,60 +1051,60 @@ export class TenantWorkflowUtils {
             md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
             lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-            '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+            '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           },
           assets: {
             heroImage: '/assets/images/demo-hero.jpg',
             backgroundPattern: '/assets/patterns/demo-pattern.svg',
-            placeholderImage: '/assets/images/demo-placeholder.jpg'
-          }
+            placeholderImage: '/assets/images/demo-placeholder.jpg',
+          },
         },
         limits: {
-          users: { 
+          users: {
             max: 50,
             current: 0,
-            warningThreshold: 40
+            warningThreshold: 40,
           },
-          storage: { 
+          storage: {
             max: 2048,
             current: 0,
-            warningThreshold: 1600
+            warningThreshold: 1600,
           },
-          apiCalls: { 
+          apiCalls: {
             max: 20000,
             current: 0,
             resetPeriod: 'monthly' as const,
-            warningThreshold: 16000
+            warningThreshold: 16000,
           },
           customDomains: {
             max: 3,
-            current: 0
+            current: 0,
           },
           integrations: {
             max: 10,
-            current: 0
-          }
-        }
+            current: 0,
+          },
+        },
       },
       'idea-vibes': {
         name: 'Idea Vibes',
         subdomain: 'idea-vibes',
-        metadata: { 
-          plan: 'enterprise' as const, 
+        metadata: {
+          plan: 'enterprise' as const,
           tier: 'premium' as const,
           createdAt: new Date(),
           lastActive: new Date(),
           createdBy: 'system',
           tags: ['creative'],
           region: 'us-west-2',
-          timezone: 'UTC'
+          timezone: 'UTC',
         },
         branding: {
           logo: {
             primary: '/assets/logos/idea-vibes-logo.svg',
             secondary: '/assets/logos/idea-vibes-logo-secondary.svg',
             icon: '/assets/logos/idea-vibes-icon.svg',
-            favicon: '/assets/favicons/idea-vibes-favicon.ico'
+            favicon: '/assets/favicons/idea-vibes-favicon.ico',
           },
           colors: {
             primary: '#8B5CF6',
@@ -1117,14 +1119,14 @@ export class TenantWorkflowUtils {
             text: {
               primary: '#0F172A',
               secondary: '#475569',
-              muted: '#94A3B8'
-            }
+              muted: '#94A3B8',
+            },
           },
           typography: {
             fontFamily: {
               primary: 'Poppins, system-ui, sans-serif',
               secondary: 'Open Sans, sans-serif',
-              mono: 'Fira Code, monospace'
+              mono: 'Fira Code, monospace',
             },
             fontSize: {
               xs: '0.75rem',
@@ -1135,7 +1137,7 @@ export class TenantWorkflowUtils {
               '2xl': '1.5rem',
               '3xl': '1.875rem',
               '4xl': '2.25rem',
-              '5xl': '3rem'
+              '5xl': '3rem',
             },
             fontWeight: {
               light: 300,
@@ -1143,13 +1145,13 @@ export class TenantWorkflowUtils {
               medium: 500,
               semibold: 600,
               bold: 700,
-              extrabold: 800
+              extrabold: 800,
             },
             lineHeight: {
               tight: 1.25,
               normal: 1.5,
-              relaxed: 1.75
-            }
+              relaxed: 1.75,
+            },
           },
           spacing: {
             xs: '0.25rem',
@@ -1159,7 +1161,7 @@ export class TenantWorkflowUtils {
             xl: '2rem',
             '2xl': '3rem',
             '3xl': '4rem',
-            '4xl': '6rem'
+            '4xl': '6rem',
           },
           borderRadius: {
             none: '0',
@@ -1169,7 +1171,7 @@ export class TenantWorkflowUtils {
             lg: '0.5rem',
             xl: '0.75rem',
             '2xl': '1rem',
-            full: '9999px'
+            full: '9999px',
           },
           shadows: {
             sm: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
@@ -1177,43 +1179,43 @@ export class TenantWorkflowUtils {
             md: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
             lg: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
             xl: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-            '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
+            '2xl': '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
           },
           assets: {
             heroImage: '/assets/images/idea-vibes-hero.jpg',
             backgroundPattern: '/assets/patterns/idea-vibes-pattern.svg',
-            placeholderImage: '/assets/images/idea-vibes-placeholder.jpg'
-          }
+            placeholderImage: '/assets/images/idea-vibes-placeholder.jpg',
+          },
         },
         limits: {
-          users: { 
+          users: {
             max: 200,
             current: 0,
-            warningThreshold: 160
+            warningThreshold: 160,
           },
-          storage: { 
+          storage: {
             max: 10240,
             current: 0,
-            warningThreshold: 8000
+            warningThreshold: 8000,
           },
-          apiCalls: { 
+          apiCalls: {
             max: 50000,
             current: 0,
             resetPeriod: 'monthly' as const,
-            warningThreshold: 40000
+            warningThreshold: 40000,
           },
           customDomains: {
             max: 5,
-            current: 0
+            current: 0,
           },
           integrations: {
             max: 20,
-            current: 0
-          }
-        }
-      }
+            current: 0,
+          },
+        },
+      },
     };
-    
+
     return templates[template as keyof typeof templates] || {};
   }
 }

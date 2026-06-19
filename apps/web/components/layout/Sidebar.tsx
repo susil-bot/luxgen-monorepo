@@ -12,11 +12,14 @@ export function Sidebar({ tenant }: SidebarProps) {
 
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: '📊' },
+    { name: 'My Learning', href: '/customers', icon: '📖' },
     { name: 'Courses', href: '/courses', icon: '📚' },
-    { name: 'Students', href: '/students', icon: '👥' },
-    { name: 'Instructors', href: '/instructors', icon: '👨‍🏫' },
+    { name: 'Groups', href: '/groups', icon: '👥' },
+    { name: 'Users', href: '/users', icon: '👤' },
     { name: 'Analytics', href: '/analytics', icon: '📈' },
-    { name: 'Settings', href: '/settings', icon: '⚙️' },
+    { name: 'AI Studio', href: '/developer', icon: '🤖' },
+    { name: 'Automations', href: '/automations', icon: '⚡' },
+    { name: 'Agent', href: '/agent', icon: '🧠' },
   ];
 
   const isActive = (href: string) => {
@@ -24,20 +27,11 @@ export function Sidebar({ tenant }: SidebarProps) {
   };
 
   return (
-    <div className={`bg-gray-900 text-white transition-all duration-300 ${
-      isCollapsed ? 'w-16' : 'w-64'
-    }`}>
+    <div className={`bg-gray-900 text-white transition-all duration-300 ${isCollapsed ? 'w-16' : 'w-64'}`}>
       <div className="flex flex-col h-full">
         <div className="flex items-center justify-between p-4">
-          {!isCollapsed && (
-            <h2 className="text-lg font-semibold">
-              {tenant ? `${tenant} Dashboard` : 'Dashboard'}
-            </h2>
-          )}
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-2 rounded-md hover:bg-gray-800"
-          >
+          {!isCollapsed && <h2 className="text-lg font-semibold">{tenant ? `${tenant} Dashboard` : 'Dashboard'}</h2>}
+          <button onClick={() => setIsCollapsed(!isCollapsed)} className="p-2 rounded-md hover:bg-gray-800">
             {isCollapsed ? '→' : '←'}
           </button>
         </div>
@@ -49,9 +43,7 @@ export function Sidebar({ tenant }: SidebarProps) {
                 <Link
                   href={item.href}
                   className={`flex items-center px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive(item.href)
-                      ? 'bg-gray-800 text-white'
-                      : 'text-gray-300 hover:bg-gray-800 hover:text-white'
+                    isActive(item.href) ? 'bg-gray-800 text-white' : 'text-gray-300 hover:bg-gray-800 hover:text-white'
                   }`}
                 >
                   <span className="mr-3">{item.icon}</span>
@@ -64,9 +56,7 @@ export function Sidebar({ tenant }: SidebarProps) {
 
         {!isCollapsed && (
           <div className="p-4 border-t border-gray-800">
-            <div className="text-xs text-gray-400">
-              LuxGen v1.0.0
-            </div>
+            <div className="text-xs text-gray-400">LuxGen v1.0.0</div>
           </div>
         )}
       </div>

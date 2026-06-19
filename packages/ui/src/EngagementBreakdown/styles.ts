@@ -31,7 +31,7 @@ const getVariantStyles = (variant: 'default' | 'compact' | 'detailed') => {
 export const getEngagementBreakdownStyles = (
   tenantTheme: TenantTheme,
   variant: 'default' | 'compact' | 'detailed',
-  size: number
+  size: number,
 ) => {
   const variantStyles = getVariantStyles(variant);
 

@@ -1,1 +1,1 @@
-export const CarouselTranslations = { en: { title: "Carousel" } };
+export const CarouselTranslations = { en: { title: 'Carousel' } };

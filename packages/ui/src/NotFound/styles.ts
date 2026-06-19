@@ -2,10 +2,10 @@
 export const notFoundStyles = {
   // Main container styles
   container: 'min-h-screen flex items-center justify-center px-4 py-8',
-  
+
   // Content wrapper styles
   content: 'max-w-2xl w-full',
-  
+
   // Illustration styles
   illustration: {
     wrapper: 'flex justify-center mb-8',
@@ -14,31 +14,32 @@ export const notFoundStyles = {
     icon: 'absolute inset-0 flex items-center justify-center',
     iconSvg: 'w-32 h-32 text-gray-300',
   },
-  
+
   // Title styles
   title: {
     default: 'text-4xl font-bold text-gray-900 mb-4',
     detailed: 'text-5xl font-bold text-gray-900 mb-6',
     minimal: 'text-4xl font-bold text-gray-900 mb-4',
   },
-  
+
   // Description styles
   description: {
     default: 'text-lg text-gray-600 mb-8 max-w-xl mx-auto',
     detailed: 'text-xl text-gray-600 mb-8 max-w-2xl mx-auto',
     minimal: 'text-gray-600 mb-8',
   },
-  
+
   // Search form styles
   search: {
     form: 'mb-8',
     container: 'flex max-w-sm mx-auto',
     detailedContainer: 'flex max-w-md mx-auto',
-    input: 'flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
+    input:
+      'flex-1 px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent',
     button: 'px-4 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 transition-colors',
     detailedButton: 'px-6 py-2 bg-blue-600 text-white rounded-r-md hover:bg-blue-700 transition-colors',
   },
-  
+
   // Navigation button styles
   navigation: {
     container: 'flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4',
@@ -51,13 +52,13 @@ export const notFoundStyles = {
     detailedHomeButton: 'px-6 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors',
     minimalHomeButton: 'px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors',
   },
-  
+
   // Custom actions styles
   customActions: {
     container: 'mt-6',
     detailedContainer: 'mt-8',
   },
-  
+
   // Help text styles
   helpText: {
     container: 'mt-8 text-center',
@@ -65,21 +66,21 @@ export const notFoundStyles = {
     actionsContainer: 'flex flex-wrap justify-center gap-2',
     actionButton: 'px-4 py-2 text-sm bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors',
   },
-  
+
   // Responsive styles
   responsive: {
     mobile: 'flex-col',
     tablet: 'flex-col',
     desktop: 'flex-row',
   },
-  
+
   // Animation styles
   animation: {
     fadeIn: 'opacity-0 animate-fade-in',
     slideUp: 'transform translate-y-4 animate-slide-up',
     bounce: 'animate-bounce',
   },
-  
+
   // Loading states
   loading: {
     spinner: 'animate-spin rounded-full h-8 w-8 border-b-2 border-gray-600',
@@ -87,20 +88,20 @@ export const notFoundStyles = {
     image: 'opacity-0 transition-opacity duration-300',
     imageLoaded: 'opacity-100 transition-opacity duration-300',
   },
-  
+
   // Error states
   error: {
     container: 'flex items-center justify-center bg-gray-200 text-gray-500',
     text: 'text-sm',
   },
-  
+
   // Accessibility styles
   accessibility: {
     focusRing: 'focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
     screenReader: 'sr-only',
     highContrast: 'text-black bg-white',
   },
-  
+
   // Theme variants
   theme: {
     light: {
@@ -116,7 +117,7 @@ export const notFoundStyles = {
       border: 'border-gray-600',
     },
   },
-  
+
   // Size variants
   size: {
     small: {
@@ -179,7 +180,7 @@ export const getVariantStyles = (variant: 'default' | 'minimal' | 'detailed') =>
     search: variant === 'detailed' ? notFoundStyles.search.detailedContainer : notFoundStyles.search.container,
     navigation: notFoundStyles.navigation[`${variant}Container` as keyof typeof notFoundStyles.navigation],
   };
-  
+
   return baseStyles;
 };
 

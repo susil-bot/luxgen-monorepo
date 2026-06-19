@@ -52,11 +52,11 @@ const SwitchComponent: React.FC<SwitchProps> = ({
           required={required}
           {...props}
         />
-        
+
         <span className={`switch-custom ${size} ${error ? 'error' : ''}`}>
           <span className="switch-thumb"></span>
         </span>
-        
+
         {label && (
           <span className="switch-text">
             {label}
@@ -64,14 +64,10 @@ const SwitchComponent: React.FC<SwitchProps> = ({
           </span>
         )}
       </label>
-      
-      {error && (
-        <p className="switch-error">{error}</p>
-      )}
-      
-      {helperText && !error && (
-        <p className="switch-helper">{helperText}</p>
-      )}
+
+      {error && <p className="switch-error">{error}</p>}
+
+      {helperText && !error && <p className="switch-helper">{helperText}</p>}
     </div>
   );
 };

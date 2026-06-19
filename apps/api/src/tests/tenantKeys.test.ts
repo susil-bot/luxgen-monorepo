@@ -1,15 +1,6 @@
 import { tenantKeyManager } from '../utils/tenantKeys';
-import { 
-  generateToken, 
-  verifyToken, 
-  getTenantFromToken,
-  verifyTokenWithTenant 
-} from '../utils/jwt';
-import { 
-  generateNewTenantKey, 
-  validateTenantKey,
-  rotateTenantKey 
-} from '../utils/keyRotation';
+import { generateToken, verifyToken, getTenantFromToken, verifyTokenWithTenant } from '../utils/jwt';
+import { generateNewTenantKey, validateTenantKey, rotateTenantKey } from '../utils/keyRotation';
 
 describe('Per-Tenant JWT Keys', () => {
   const testTenantId = 'test-tenant';
@@ -53,7 +44,7 @@ describe('Per-Tenant JWT Keys', () => {
         id: 'user123',
         email: 'user@test.com',
         tenant: testTenantId,
-        role: 'STUDENT'
+        role: 'STUDENT',
       };
 
       const token = generateToken(payload, testTenantId);
@@ -66,7 +57,7 @@ describe('Per-Tenant JWT Keys', () => {
         id: 'user123',
         email: 'user@test.com',
         tenant: testTenantId,
-        role: 'STUDENT'
+        role: 'STUDENT',
       };
 
       const token = generateToken(payload, testTenantId);
@@ -83,7 +74,7 @@ describe('Per-Tenant JWT Keys', () => {
         id: 'user123',
         email: 'user@test.com',
         tenant: testTenantId,
-        role: 'STUDENT'
+        role: 'STUDENT',
       };
       validToken = generateToken(payload, testTenantId);
     });
@@ -105,7 +96,7 @@ describe('Per-Tenant JWT Keys', () => {
     it('should fail verification with wrong tenant key', () => {
       const wrongTenantId = 'wrong-tenant';
       tenantKeyManager.addTenantKey(wrongTenantId, 'wrong-key');
-      
+
       const decoded = verifyTokenWithTenant(validToken, wrongTenantId);
       expect(decoded).toBeNull();
     });
@@ -128,7 +119,7 @@ describe('Per-Tenant JWT Keys', () => {
     it('should rotate tenant key', async () => {
       const newKey = generateNewTenantKey(64);
       const result = await rotateTenantKey(testTenantId, newKey);
-      
+
       expect(result.success).toBe(true);
       expect(result.newKeyId).toBeDefined();
     });
@@ -136,7 +127,7 @@ describe('Per-Tenant JWT Keys', () => {
     it('should fail rotation for non-existent tenant', async () => {
       const newKey = generateNewTenantKey(64);
       const result = await rotateTenantKey('non-existent-tenant', newKey);
-      
+
       expect(result.success).toBe(false);
       expect(result.message).toContain('does not exist');
     });
@@ -159,14 +150,14 @@ describe('Per-Tenant JWT Keys', () => {
         id: 'user-a',
         email: 'user@tenant-a.com',
         tenant: tenantAId,
-        role: 'STUDENT'
+        role: 'STUDENT',
       };
 
       const payloadB = {
         id: 'user-b',
         email: 'user@tenant-b.com',
         tenant: tenantBId,
-        role: 'STUDENT'
+        role: 'STUDENT',
       };
 
       tenantAToken = generateToken(payloadA, tenantAId);
@@ -213,11 +204,11 @@ describe('Per-Tenant JWT Keys', () => {
       // Clear the default key to ensure the test works
       const originalDefault = tenantKeyManager['keyStore']['default'];
       delete tenantKeyManager['keyStore']['default'];
-      
+
       expect(() => {
         tenantKeyManager.getTenantKey('non-existent-tenant');
       }).toThrow('No signing key found for tenant: non-existent-tenant');
-      
+
       // Restore the default key
       if (originalDefault) {
         tenantKeyManager['keyStore']['default'] = originalDefault;

@@ -34,7 +34,7 @@ export class BehaviorEngine {
 
   getBehaviorAnalytics(userId: string): BehaviorAnalytics {
     const behaviors = this.getUserBehaviors(userId);
-    
+
     if (behaviors.length === 0) {
       return {
         userId,
@@ -46,17 +46,20 @@ export class BehaviorEngine {
       };
     }
 
-    const actionCounts = behaviors.reduce((acc, behavior) => {
-      acc[behavior.action] = (acc[behavior.action] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const actionCounts = behaviors.reduce(
+      (acc, behavior) => {
+        acc[behavior.action] = (acc[behavior.action] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     const uniqueActions = Object.keys(actionCounts);
-    const mostFrequentAction = Object.entries(actionCounts)
-      .sort(([, a], [, b]) => b - a)[0]?.[0] || '';
+    const mostFrequentAction = Object.entries(actionCounts).sort(([, a], [, b]) => b - a)[0]?.[0] || '';
 
-    const daysSinceFirst = Math.max(1, 
-      Math.ceil((Date.now() - behaviors[0].timestamp.getTime()) / (1000 * 60 * 60 * 24))
+    const daysSinceFirst = Math.max(
+      1,
+      Math.ceil((Date.now() - behaviors[0].timestamp.getTime()) / (1000 * 60 * 60 * 24)),
     );
 
     return {
@@ -71,10 +74,13 @@ export class BehaviorEngine {
 
   getTopActions(limit: number = 10): Array<{ action: string; count: number }> {
     const allBehaviors = Array.from(this.behaviors.values()).flat();
-    const actionCounts = allBehaviors.reduce((acc, behavior) => {
-      acc[behavior.action] = (acc[behavior.action] || 0) + 1;
-      return acc;
-    }, {} as Record<string, number>);
+    const actionCounts = allBehaviors.reduce(
+      (acc, behavior) => {
+        acc[behavior.action] = (acc[behavior.action] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>,
+    );
 
     return Object.entries(actionCounts)
       .map(([action, count]) => ({ action, count }))

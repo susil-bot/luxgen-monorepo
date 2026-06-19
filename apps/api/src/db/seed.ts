@@ -1,3 +1,4 @@
+import { getTenantDomain } from '@luxgen/config';
 import { logger } from '../utils/logger';
 import { connectDB } from './connect';
 import { Group, User, Tenant } from '@luxgen/db';
@@ -6,33 +7,37 @@ import { seedDashboardData } from './dashboardSeed';
 export const seedDatabase = async (): Promise<void> => {
   try {
     console.log('🌱 Starting database seeding...');
-    
+
     // Connect to database
     await connectDB();
     console.log('✅ Connected to database');
-    
+
     // Create sample tenants
     console.log('🏢 Creating tenants...');
     const tenants = await createSampleTenants();
     console.log(`✅ Created ${tenants.length} tenants`);
-    
+
     // Create sample users
     console.log('👥 Creating users...');
     const users = await createSampleUsers(tenants);
     console.log(`✅ Created ${users.length} users`);
-    
+
     // Create sample groups
     console.log('📁 Creating groups...');
     const groups = await createSampleGroups(tenants, users);
     console.log(`✅ Created ${groups.length} groups`);
-    
+
     // Create dashboard data
     console.log('📊 Creating dashboard data...');
     const dashboardData = await seedDashboardData();
-    console.log(`✅ Created dashboard data: ${dashboardData.activities.length} activities, ${dashboardData.surveys.length} surveys, ${dashboardData.permissionRequests.length} requests`);
-    
+    console.log(
+      `✅ Created dashboard data: ${dashboardData.activities.length} activities, ${dashboardData.surveys.length} surveys, ${dashboardData.permissionRequests.length} requests`,
+    );
+
     console.log('🎉 Database seeding completed successfully!');
-    console.log(`📊 Summary: ${tenants.length} tenants, ${users.length} users, ${groups.length} groups, dashboard data seeded`);
+    console.log(
+      `📊 Summary: ${tenants.length} tenants, ${users.length} users, ${groups.length} groups, dashboard data seeded`,
+    );
   } catch (error) {
     console.error('❌ Database seeding error:', error);
     throw error;
@@ -41,13 +46,15 @@ export const seedDatabase = async (): Promise<void> => {
 
 // Run the seed function if this file is executed directly
 if (require.main === module) {
-  seedDatabase().then(() => {
-    console.log('✅ Seed script completed');
-    process.exit(0);
-  }).catch((error) => {
-    console.error('❌ Seed script failed:', error);
-    process.exit(1);
-  });
+  seedDatabase()
+    .then(() => {
+      console.log('✅ Seed script completed');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('❌ Seed script failed:', error);
+      process.exit(1);
+    });
 }
 
 const createSampleTenants = async () => {
@@ -55,7 +62,7 @@ const createSampleTenants = async () => {
     {
       name: 'Demo Company',
       subdomain: 'demo',
-      domain: 'demo.localhost',
+      domain: getTenantDomain('demo'),
       status: 'active',
       metadata: {
         plan: 'enterprise',
@@ -63,14 +70,14 @@ const createSampleTenants = async () => {
         limits: {
           maxUsers: 1000,
           maxGroups: 100,
-          maxStorage: '10GB'
-        }
-      }
+          maxStorage: '10GB',
+        },
+      },
     },
     {
       name: 'Idea Vibes',
       subdomain: 'ideavibes',
-      domain: 'ideavibes.localhost',
+      domain: getTenantDomain('ideavibes'),
       status: 'active',
       metadata: {
         plan: 'pro',
@@ -78,14 +85,14 @@ const createSampleTenants = async () => {
         limits: {
           maxUsers: 500,
           maxGroups: 50,
-          maxStorage: '5GB'
-        }
-      }
+          maxStorage: '5GB',
+        },
+      },
     },
     {
       name: 'ACME Corporation',
       subdomain: 'acme-corp',
-      domain: 'acme-corp.localhost',
+      domain: getTenantDomain('acme-corp'),
       status: 'active',
       metadata: {
         plan: 'free',
@@ -93,10 +100,10 @@ const createSampleTenants = async () => {
         limits: {
           maxUsers: 100,
           maxGroups: 10,
-          maxStorage: '1GB'
-        }
-      }
-    }
+          maxStorage: '1GB',
+        },
+      },
+    },
   ];
 
   const createdTenants = [];
@@ -112,13 +119,13 @@ const createSampleTenants = async () => {
       logger.info(`Tenant already exists: ${existingTenant.name} (${existingTenant.subdomain})`);
     }
   }
-  
+
   return createdTenants;
 };
 
 const createSampleUsers = async (tenants: any[]) => {
   const users = [];
-  
+
   // Create users for Demo Company (7 users)
   const demoUsers = [
     {
@@ -132,8 +139,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'light', notifications: true },
-        permissions: ['all']
-      }
+        permissions: ['all'],
+      },
     },
     {
       firstName: 'Sarah',
@@ -146,8 +153,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'dark', notifications: true },
-        permissions: ['manage_users', 'manage_groups', 'view_reports']
-      }
+        permissions: ['manage_users', 'manage_groups', 'view_reports'],
+      },
     },
     {
       firstName: 'Michael',
@@ -160,8 +167,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'light', notifications: false },
-        permissions: ['manage_groups', 'view_reports']
-      }
+        permissions: ['manage_groups', 'view_reports'],
+      },
     },
     {
       firstName: 'Emma',
@@ -174,8 +181,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'light', notifications: true },
-        permissions: ['manage_users', 'view_reports']
-      }
+        permissions: ['manage_users', 'view_reports'],
+      },
     },
     {
       firstName: 'James',
@@ -188,8 +195,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'dark', notifications: true },
-        permissions: ['view_groups']
-      }
+        permissions: ['view_groups'],
+      },
     },
     {
       firstName: 'Lisa',
@@ -202,8 +209,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'light', notifications: false },
-        permissions: ['view_groups']
-      }
+        permissions: ['view_groups'],
+      },
     },
     {
       firstName: 'Robert',
@@ -216,9 +223,9 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'light', notifications: true },
-        permissions: ['view_groups']
-      }
-    }
+        permissions: ['view_groups'],
+      },
+    },
   ];
 
   // Create users for Idea Vibes (7 users)
@@ -234,8 +241,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'dark', notifications: true },
-        permissions: ['all']
-      }
+        permissions: ['all'],
+      },
     },
     {
       firstName: 'Jennifer',
@@ -248,8 +255,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'light', notifications: true },
-        permissions: ['manage_users', 'manage_groups']
-      }
+        permissions: ['manage_users', 'manage_groups'],
+      },
     },
     {
       firstName: 'Christopher',
@@ -262,8 +269,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'dark', notifications: false },
-        permissions: ['manage_groups', 'view_reports']
-      }
+        permissions: ['manage_groups', 'view_reports'],
+      },
     },
     {
       firstName: 'Amanda',
@@ -276,8 +283,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'light', notifications: true },
-        permissions: ['manage_users', 'view_reports']
-      }
+        permissions: ['manage_users', 'view_reports'],
+      },
     },
     {
       firstName: 'Daniel',
@@ -290,8 +297,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'dark', notifications: true },
-        permissions: ['view_groups']
-      }
+        permissions: ['view_groups'],
+      },
     },
     {
       firstName: 'Michelle',
@@ -304,8 +311,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'light', notifications: false },
-        permissions: ['view_groups']
-      }
+        permissions: ['view_groups'],
+      },
     },
     {
       firstName: 'Kevin',
@@ -318,9 +325,9 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'light', notifications: true },
-        permissions: ['view_groups']
-      }
-    }
+        permissions: ['view_groups'],
+      },
+    },
   ];
 
   // Create users for ACME Corporation (6 users)
@@ -336,8 +343,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'light', notifications: true },
-        permissions: ['all']
-      }
+        permissions: ['all'],
+      },
     },
     {
       firstName: 'Mark',
@@ -350,8 +357,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'dark', notifications: true },
-        permissions: ['manage_users', 'manage_groups']
-      }
+        permissions: ['manage_users', 'manage_groups'],
+      },
     },
     {
       firstName: 'Nancy',
@@ -364,8 +371,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'light', notifications: false },
-        permissions: ['manage_groups', 'view_reports']
-      }
+        permissions: ['manage_groups', 'view_reports'],
+      },
     },
     {
       firstName: 'Steven',
@@ -378,8 +385,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'dark', notifications: true },
-        permissions: ['manage_users', 'view_reports']
-      }
+        permissions: ['manage_users', 'view_reports'],
+      },
     },
     {
       firstName: 'Donna',
@@ -392,8 +399,8 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'light', notifications: true },
-        permissions: ['view_groups']
-      }
+        permissions: ['view_groups'],
+      },
     },
     {
       firstName: 'Paul',
@@ -406,9 +413,9 @@ const createSampleUsers = async (tenants: any[]) => {
       metadata: {
         lastLogin: new Date(),
         preferences: { theme: 'dark', notifications: false },
-        permissions: ['view_groups']
-      }
-    }
+        permissions: ['view_groups'],
+      },
+    },
   ];
 
   // Combine all users
@@ -420,25 +427,29 @@ const createSampleUsers = async (tenants: any[]) => {
       const user = new User(userData);
       await user.save();
       users.push(user);
-      logger.info(`Created user: ${user.firstName} ${user.lastName} (${user.email}) - Role: ${user.role} - Tenant: ${user.tenant}`);
+      logger.info(
+        `Created user: ${user.firstName} ${user.lastName} (${user.email}) - Role: ${user.role} - Tenant: ${user.tenant}`,
+      );
     } else {
       users.push(existingUser);
-      logger.info(`User already exists: ${existingUser.firstName} ${existingUser.lastName} (${existingUser.email}) - Role: ${existingUser.role}`);
+      logger.info(
+        `User already exists: ${existingUser.firstName} ${existingUser.lastName} (${existingUser.email}) - Role: ${existingUser.role}`,
+      );
     }
   }
-  
+
   return users;
 };
 
 const createSampleGroups = async (tenants: any[], users: any[]) => {
   const groups = [];
-  
+
   for (const tenant of tenants) {
-    const tenantUsers = users.filter(user => user.tenant.toString() === tenant._id.toString());
-    const admins = tenantUsers.filter(user => user.role === 'ADMIN');
-    const instructors = tenantUsers.filter(user => user.role === 'INSTRUCTOR');
-    const students = tenantUsers.filter(user => user.role === 'STUDENT');
-    
+    const tenantUsers = users.filter((user) => user.tenant.toString() === tenant._id.toString());
+    const admins = tenantUsers.filter((user) => user.role === 'ADMIN');
+    const _instructors = tenantUsers.filter((user) => user.role === 'INSTRUCTOR');
+    const students = tenantUsers.filter((user) => user.role === 'STUDENT');
+
     const tenantGroups = [
       {
         name: 'Development Team',
@@ -447,13 +458,13 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
         icon: 'code',
         tenant: tenant._id,
         createdBy: admins[0]?._id || tenantUsers[0]?._id,
-        members: [...admins.slice(0, 2), ...students.slice(0, 2)].map(user => user._id),
+        members: [...admins.slice(0, 2), ...students.slice(0, 2)].map((user) => user._id),
         settings: {
           trainingEnabled: true,
           nudgeEnabled: true,
-          reportingEnabled: true
+          reportingEnabled: true,
         },
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Marketing Team',
@@ -462,13 +473,13 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
         icon: 'megaphone',
         tenant: tenant._id,
         createdBy: admins[0]?._id || tenantUsers[0]?._id,
-        members: [...admins.slice(1, 3), ...students.slice(1, 3)].map(user => user._id),
+        members: [...admins.slice(1, 3), ...students.slice(1, 3)].map((user) => user._id),
         settings: {
           trainingEnabled: true,
           nudgeEnabled: false,
-          reportingEnabled: true
+          reportingEnabled: true,
         },
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Sales Team',
@@ -477,13 +488,13 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
         icon: 'trending-up',
         tenant: tenant._id,
         createdBy: admins[0]?._id || tenantUsers[0]?._id,
-        members: [...admins, ...students.slice(0, 3)].map(user => user._id),
+        members: [...admins, ...students.slice(0, 3)].map((user) => user._id),
         settings: {
           trainingEnabled: false,
           nudgeEnabled: true,
-          reportingEnabled: false
+          reportingEnabled: false,
         },
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Support Team',
@@ -492,13 +503,13 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
         icon: 'headphones',
         tenant: tenant._id,
         createdBy: admins[0]?._id || tenantUsers[0]?._id,
-        members: [...admins.slice(0, 1), ...students.slice(0, 2)].map(user => user._id),
+        members: [...admins.slice(0, 1), ...students.slice(0, 2)].map((user) => user._id),
         settings: {
           trainingEnabled: true,
           nudgeEnabled: true,
-          reportingEnabled: true
+          reportingEnabled: true,
         },
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Management Team',
@@ -507,13 +518,13 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
         icon: 'users',
         tenant: tenant._id,
         createdBy: admins[0]?._id || tenantUsers[0]?._id,
-        members: [...admins].map(user => user._id),
+        members: [...admins].map((user) => user._id),
         settings: {
           trainingEnabled: true,
           nudgeEnabled: true,
-          reportingEnabled: true
+          reportingEnabled: true,
         },
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Design Team',
@@ -522,13 +533,13 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
         icon: 'palette',
         tenant: tenant._id,
         createdBy: admins[0]?._id || tenantUsers[0]?._id,
-        members: [...admins.slice(0, 1), ...students.slice(0, 2)].map(user => user._id),
+        members: [...admins.slice(0, 1), ...students.slice(0, 2)].map((user) => user._id),
         settings: {
           trainingEnabled: true,
           nudgeEnabled: true,
-          reportingEnabled: false
+          reportingEnabled: false,
         },
-        isActive: true
+        isActive: true,
       },
       {
         name: 'QA Team',
@@ -537,13 +548,13 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
         icon: 'shield-check',
         tenant: tenant._id,
         createdBy: admins[0]?._id || tenantUsers[0]?._id,
-        members: [...admins.slice(0, 2), ...students.slice(1, 3)].map(user => user._id),
+        members: [...admins.slice(0, 2), ...students.slice(1, 3)].map((user) => user._id),
         settings: {
           trainingEnabled: true,
           nudgeEnabled: false,
-          reportingEnabled: true
+          reportingEnabled: true,
         },
-        isActive: true
+        isActive: true,
       },
       {
         name: 'DevOps Team',
@@ -552,13 +563,13 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
         icon: 'server',
         tenant: tenant._id,
         createdBy: admins[0]?._id || tenantUsers[0]?._id,
-        members: [...admins, ...students].map(user => user._id),
+        members: [...admins, ...students].map((user) => user._id),
         settings: {
           trainingEnabled: false,
           nudgeEnabled: true,
-          reportingEnabled: true
+          reportingEnabled: true,
         },
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Product Team',
@@ -567,13 +578,13 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
         icon: 'lightbulb',
         tenant: tenant._id,
         createdBy: admins[0]?._id || tenantUsers[0]?._id,
-        members: [...admins.slice(0, 1)].map(user => user._id),
+        members: admins.slice(0, 1).map((user) => user._id),
         settings: {
           trainingEnabled: true,
           nudgeEnabled: true,
-          reportingEnabled: true
+          reportingEnabled: true,
         },
-        isActive: true
+        isActive: true,
       },
       {
         name: 'HR Team',
@@ -582,13 +593,13 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
         icon: 'user-group',
         tenant: tenant._id,
         createdBy: admins[0]?._id || tenantUsers[0]?._id,
-        members: [...admins].map(user => user._id),
+        members: [...admins].map((user) => user._id),
         settings: {
           trainingEnabled: true,
           nudgeEnabled: false,
-          reportingEnabled: false
+          reportingEnabled: false,
         },
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Finance Team',
@@ -597,13 +608,13 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
         icon: 'currency-dollar',
         tenant: tenant._id,
         createdBy: admins[0]?._id || tenantUsers[0]?._id,
-        members: [...admins.slice(0, 2), ...students.slice(0, 1)].map(user => user._id),
+        members: [...admins.slice(0, 2), ...students.slice(0, 1)].map((user) => user._id),
         settings: {
           trainingEnabled: false,
           nudgeEnabled: true,
-          reportingEnabled: true
+          reportingEnabled: true,
         },
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Legal Team',
@@ -612,13 +623,13 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
         icon: 'scale',
         tenant: tenant._id,
         createdBy: admins[0]?._id || tenantUsers[0]?._id,
-        members: [...admins.slice(1, 3), ...students.slice(1, 2)].map(user => user._id),
+        members: [...admins.slice(1, 3), ...students.slice(1, 2)].map((user) => user._id),
         settings: {
           trainingEnabled: true,
           nudgeEnabled: true,
-          reportingEnabled: false
+          reportingEnabled: false,
         },
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Research Team',
@@ -627,13 +638,13 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
         icon: 'chart-bar',
         tenant: tenant._id,
         createdBy: admins[0]?._id || tenantUsers[0]?._id,
-        members: [...admins, ...students].map(user => user._id),
+        members: [...admins, ...students].map((user) => user._id),
         settings: {
           trainingEnabled: true,
           nudgeEnabled: false,
-          reportingEnabled: true
+          reportingEnabled: true,
         },
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Security Team',
@@ -642,13 +653,13 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
         icon: 'lock-closed',
         tenant: tenant._id,
         createdBy: admins[0]?._id || tenantUsers[0]?._id,
-        members: [...admins.slice(0, 1), ...students.slice(0, 1)].map(user => user._id),
+        members: [...admins.slice(0, 1), ...students.slice(0, 1)].map((user) => user._id),
         settings: {
           trainingEnabled: true,
           nudgeEnabled: true,
-          reportingEnabled: true
+          reportingEnabled: true,
         },
-        isActive: true
+        isActive: true,
       },
       {
         name: 'Innovation Team',
@@ -657,20 +668,20 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
         icon: 'rocket-launch',
         tenant: tenant._id,
         createdBy: admins[0]?._id || tenantUsers[0]?._id,
-        members: [...admins].map(user => user._id),
+        members: [...admins].map((user) => user._id),
         settings: {
           trainingEnabled: true,
           nudgeEnabled: true,
-          reportingEnabled: true
+          reportingEnabled: true,
         },
-        isActive: true
-      }
+        isActive: true,
+      },
     ];
 
     for (const groupData of tenantGroups) {
-      const existingGroup = await Group.findOne({ 
-        name: groupData.name, 
-        tenant: tenant._id 
+      const existingGroup = await Group.findOne({
+        name: groupData.name,
+        tenant: tenant._id,
       });
       if (!existingGroup) {
         const group = new Group(groupData);
@@ -683,18 +694,18 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
       }
     }
   }
-  
+
   return groups;
 };
 
 export const clearDatabase = async (): Promise<void> => {
   try {
     logger.info('Clearing database...');
-    
+
     // TODO: Implement database clearing
     // - Drop all collections
     // - Or delete all documents
-    
+
     logger.info('Database cleared');
   } catch (error) {
     logger.error('Database clearing error:', error);

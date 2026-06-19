@@ -13,10 +13,7 @@ export interface GraphQLResponse<T = any> {
   }>;
 }
 
-export const fetcher = async <T = any>(
-  query: DocumentNode,
-  variables?: Record<string, any>
-): Promise<T> => {
+export const fetcher = async <T = any>(query: DocumentNode, variables?: Record<string, any>): Promise<T> => {
   try {
     const result = await client.query({
       query,
@@ -35,10 +32,7 @@ export const fetcher = async <T = any>(
   }
 };
 
-export const mutation = async <T = any>(
-  mutation: DocumentNode,
-  variables?: Record<string, any>
-): Promise<T> => {
+export const mutation = async <T = any>(mutation: DocumentNode, variables?: Record<string, any>): Promise<T> => {
   try {
     const result = await client.mutate({
       mutation,

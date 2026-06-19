@@ -14,7 +14,7 @@ export const groupResolvers = {
         isActive?: boolean;
         createdBy?: string;
       },
-      context: Context
+      context: Context,
     ) => {
       return await GroupService.getGroups(context, args);
     },
@@ -34,7 +34,7 @@ export const groupResolvers = {
         role?: string;
         isActive?: boolean;
       },
-      context: Context
+      context: Context,
     ) => {
       return await GroupService.getGroupMembers(context, args);
     },
@@ -50,26 +50,18 @@ export const groupResolvers = {
         role?: string;
         isActive?: boolean;
       },
-      context: Context
+      context: Context,
     ) => {
       return await GroupService.getUserGroups(context, args);
     },
   },
 
   Mutation: {
-    createGroup: async (
-      _: any,
-      { input }: { input: any },
-      context: Context
-    ) => {
+    createGroup: async (_: any, { input }: { input: any }, context: Context) => {
       return await GroupService.createGroup(context, input);
     },
 
-    updateGroup: async (
-      _: any,
-      { input }: { input: any },
-      context: Context
-    ) => {
+    updateGroup: async (_: any, { input }: { input: any }, context: Context) => {
       return await GroupService.updateGroup(context, input);
     },
 
@@ -77,50 +69,30 @@ export const groupResolvers = {
       return await GroupService.deleteGroup(context, id);
     },
 
-    addGroupMember: async (
-      _: any,
-      { input }: { input: any },
-      context: Context
-    ) => {
+    addGroupMember: async (_: any, { input }: { input: any }, context: Context) => {
       return await GroupService.addGroupMember(context, input);
     },
 
-    removeGroupMember: async (
-      _: any,
-      { input }: { input: any },
-      context: Context
-    ) => {
+    removeGroupMember: async (_: any, { input }: { input: any }, context: Context) => {
       return await GroupService.removeGroupMember(context, input);
     },
 
-    updateGroupMember: async (
-      _: any,
-      { input }: { input: any },
-      context: Context
-    ) => {
+    updateGroupMember: async (_: any, { input }: { input: any }, context: Context) => {
       return await GroupService.updateGroupMember(context, input);
     },
 
-    joinGroup: async (
-      _: any,
-      { groupId }: { groupId: string },
-      context: Context
-    ) => {
+    joinGroup: async (_: any, { groupId }: { groupId: string }, context: Context) => {
       return await GroupService.joinGroup(context, groupId);
     },
 
-    leaveGroup: async (
-      _: any,
-      { groupId }: { groupId: string },
-      context: Context
-    ) => {
+    leaveGroup: async (_: any, { groupId }: { groupId: string }, context: Context) => {
       return await GroupService.leaveGroup(context, groupId);
     },
 
     bulkAddGroupMembers: async (
       _: any,
       { groupId, userIds, role }: { groupId: string; userIds: string[]; role?: string },
-      context: Context
+      context: Context,
     ) => {
       return await GroupService.bulkAddGroupMembers(context, groupId, userIds, role);
     },
@@ -128,7 +100,7 @@ export const groupResolvers = {
     bulkRemoveGroupMembers: async (
       _: any,
       { groupId, userIds }: { groupId: string; userIds: string[] },
-      context: Context
+      context: Context,
     ) => {
       return await GroupService.bulkRemoveGroupMembers(context, groupId, userIds);
     },

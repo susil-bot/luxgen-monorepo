@@ -28,68 +28,41 @@ export const LogoutExample: React.FC = () => {
   return (
     <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <h2>Logout Component Examples</h2>
-      
+
       {/* Default Logout */}
       <div>
         <h3>Default Logout</h3>
-        <Logout
-          onLogout={logout}
-          user={exampleUser}
-          showConfirmation={true}
-        />
+        <Logout onLogout={logout} user={exampleUser} showConfirmation={true} />
       </div>
 
       {/* Compact Logout */}
       <div>
         <h3>Compact Logout</h3>
-        <Logout
-          onLogout={logout}
-          user={exampleUser}
-          variant="compact"
-          showConfirmation={false}
-        />
+        <Logout onLogout={logout} user={exampleUser} variant="compact" showConfirmation={false} />
       </div>
 
       {/* Minimal Logout */}
       <div>
         <h3>Minimal Logout</h3>
-        <Logout
-          onLogout={logout}
-          user={exampleUser}
-          variant="minimal"
-          showConfirmation={false}
-        />
+        <Logout onLogout={logout} user={exampleUser} variant="minimal" showConfirmation={false} />
       </div>
 
       {/* Danger Logout */}
       <div>
         <h3>Danger Logout</h3>
-        <Logout
-          onLogout={logout}
-          user={exampleUser}
-          variant="danger"
-          showConfirmation={true}
-        />
+        <Logout onLogout={logout} user={exampleUser} variant="danger" showConfirmation={true} />
       </div>
 
       {/* Without User Info */}
       <div>
         <h3>Logout Without User Info</h3>
-        <Logout
-          onLogout={logout}
-          showConfirmation={false}
-        />
+        <Logout onLogout={logout} showConfirmation={false} />
       </div>
 
       {/* Loading State */}
       <div>
         <h3>Loading State</h3>
-        <Logout
-          onLogout={logout}
-          user={exampleUser}
-          loading={isLoggingOut}
-          showConfirmation={false}
-        />
+        <Logout onLogout={logout} user={exampleUser} loading={isLoggingOut} showConfirmation={false} />
       </div>
 
       {/* Error State */}
@@ -110,21 +83,18 @@ export const HeaderWithLogout: React.FC = () => {
   });
 
   return (
-    <header style={{ 
-      display: 'flex', 
-      justifyContent: 'space-between', 
-      alignItems: 'center',
-      padding: '16px',
-      background: '#f8f9fa',
-      borderBottom: '1px solid #e9ecef'
-    }}>
+    <header
+      style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '16px',
+        background: '#f8f9fa',
+        borderBottom: '1px solid #e9ecef',
+      }}
+    >
       <h1>My Application</h1>
-      <Logout
-        onLogout={logout}
-        user={exampleUser}
-        variant="compact"
-        showConfirmation={true}
-      />
+      <Logout onLogout={logout} user={exampleUser} variant="compact" showConfirmation={true} />
     </header>
   );
 };
@@ -137,18 +107,20 @@ export const UserMenuWithLogout: React.FC = () => {
   });
 
   return (
-    <div style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      gap: '8px',
-      padding: '16px',
-      background: 'white',
-      borderRadius: '8px',
-      boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-    }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '8px',
+        padding: '16px',
+        background: 'white',
+        borderRadius: '8px',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+      }}
+    >
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-        <img 
-          src={exampleUser.avatar} 
+        <img
+          src={exampleUser.avatar}
           alt={exampleUser.name}
           style={{ width: '40px', height: '40px', borderRadius: '50%' }}
         />
@@ -157,12 +129,7 @@ export const UserMenuWithLogout: React.FC = () => {
           <div style={{ fontSize: '14px', color: '#666' }}>{exampleUser.role}</div>
         </div>
       </div>
-      <Logout
-        onLogout={logout}
-        user={exampleUser}
-        variant="minimal"
-        showConfirmation={true}
-      />
+      <Logout onLogout={logout} user={exampleUser} variant="minimal" showConfirmation={true} />
     </div>
   );
 };

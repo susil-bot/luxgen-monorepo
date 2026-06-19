@@ -1,1 +1,1 @@
-export const GridContainerTranslations = { en: { title: "GridContainer" } };
+export const GridContainerTranslations = { en: { title: 'GridContainer' } };

@@ -176,7 +176,7 @@ export const luxgenBrandAssets: BrandAssets = {
       dimensions: { width: 400, height: 300 },
       global: true,
     },
-    'success': {
+    success: {
       id: 'luxgen-illustration-success',
       name: 'Success Illustration',
       type: 'illustration',
@@ -401,13 +401,13 @@ export const defaultAssets: AssetConfig[] = [
   ...Object.values(luxgenBrandAssets.images).filter(Boolean),
   ...Object.values(luxgenBrandAssets.icons),
   ...Object.values(luxgenBrandAssets.illustrations),
-  
+
   // Demo tenant assets
   ...Object.values(demoBrandAssets.logo),
   ...Object.values(demoBrandAssets.images).filter(Boolean),
   ...Object.values(demoBrandAssets.icons),
   ...Object.values(demoBrandAssets.illustrations),
-  
+
   // Idea Vibes tenant assets
   ...Object.values(ideaVibesBrandAssets.logo),
   ...Object.values(ideaVibesBrandAssets.images).filter(Boolean),
@@ -417,9 +417,9 @@ export const defaultAssets: AssetConfig[] = [
 
 // Brand assets by tenant
 export const brandAssetsByTenant = {
-  'demo': demoBrandAssets,
+  demo: demoBrandAssets,
   'idea-vibes': ideaVibesBrandAssets,
-  'default': luxgenBrandAssets,
+  default: luxgenBrandAssets,
 };
 
 // Helper function to get brand assets for a tenant

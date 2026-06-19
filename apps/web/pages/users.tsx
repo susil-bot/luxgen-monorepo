@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
-import { AppLayout, NavItem, UserMenu, getDefaultNavItems, getDefaultUser, getDefaultLogo, getDefaultSidebarSections, TenantDebug, Chip } from '@luxgen/ui';
+import { AppLayout, getDefaultUser, getDefaultLogo, getDefaultSidebarSections, TenantDebug, Chip } from '@luxgen/ui';
 import { TenantBanner } from '../components/tenant/TenantBanner';
 
 interface User {
@@ -49,7 +49,7 @@ export default function UsersPage({ tenant }: UsersPageProps) {
         role: 'Admin',
         plan: 'Enterprise',
         status: 'pending',
-        lastLogin: '2024-01-15'
+        lastLogin: '2024-01-15',
       },
       {
         id: '2',
@@ -60,7 +60,7 @@ export default function UsersPage({ tenant }: UsersPageProps) {
         role: 'Editor',
         plan: 'Team',
         status: 'active',
-        lastLogin: '2024-01-14'
+        lastLogin: '2024-01-14',
       },
       {
         id: '3',
@@ -71,7 +71,7 @@ export default function UsersPage({ tenant }: UsersPageProps) {
         role: 'Author',
         plan: 'Company',
         status: 'active',
-        lastLogin: '2024-01-13'
+        lastLogin: '2024-01-13',
       },
       {
         id: '4',
@@ -82,7 +82,7 @@ export default function UsersPage({ tenant }: UsersPageProps) {
         role: 'Editor',
         plan: 'Team',
         status: 'pending',
-        lastLogin: '2024-01-12'
+        lastLogin: '2024-01-12',
       },
       {
         id: '5',
@@ -93,8 +93,8 @@ export default function UsersPage({ tenant }: UsersPageProps) {
         role: 'Maintainer',
         plan: 'Company',
         status: 'active',
-        lastLogin: '2024-01-11'
-      }
+        lastLogin: '2024-01-11',
+      },
     ];
 
     const mockRoles: Role[] = [
@@ -103,41 +103,41 @@ export default function UsersPage({ tenant }: UsersPageProps) {
         name: 'Administrator',
         description: 'Full system access',
         userCount: 4,
-        users: mockUsers.filter(u => u.role === 'Admin'),
-        permissions: ['read', 'write', 'delete', 'admin']
+        users: mockUsers.filter((u) => u.role === 'Admin'),
+        permissions: ['read', 'write', 'delete', 'admin'],
       },
       {
         id: 'editor',
         name: 'Editor',
         description: 'Content management access',
         userCount: 7,
-        users: mockUsers.filter(u => u.role === 'Editor'),
-        permissions: ['read', 'write']
+        users: mockUsers.filter((u) => u.role === 'Editor'),
+        permissions: ['read', 'write'],
       },
       {
         id: 'author',
         name: 'Author',
         description: 'Content creation access',
         userCount: 5,
-        users: mockUsers.filter(u => u.role === 'Author'),
-        permissions: ['read', 'write']
+        users: mockUsers.filter((u) => u.role === 'Author'),
+        permissions: ['read', 'write'],
       },
       {
         id: 'support',
         name: 'Support',
         description: 'Customer support access',
         userCount: 6,
-        users: mockUsers.filter(u => u.role === 'Support'),
-        permissions: ['read']
+        users: mockUsers.filter((u) => u.role === 'Support'),
+        permissions: ['read'],
       },
       {
         id: 'restricted',
         name: 'Restricted User',
         description: 'Limited access',
         userCount: 10,
-        users: mockUsers.filter(u => u.role === 'Restricted'),
-        permissions: ['read']
-      }
+        users: mockUsers.filter((u) => u.role === 'Restricted'),
+        permissions: ['read'],
+      },
     ];
 
     setUsers(mockUsers);
@@ -145,52 +145,56 @@ export default function UsersPage({ tenant }: UsersPageProps) {
     setLoading(false);
   }, []);
 
-  const filteredUsers = users.filter(user =>
-    user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.role.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredUsers = users.filter(
+    (user) =>
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.role.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
-  const paginatedUsers = filteredUsers.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
+  const paginatedUsers = filteredUsers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
 
   const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
 
   const handleUserSelect = (userId: string) => {
-    setSelectedUsers(prev =>
-      prev.includes(userId)
-        ? prev.filter(id => id !== userId)
-        : [...prev, userId]
-    );
+    setSelectedUsers((prev) => (prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]));
   };
 
   const handleSelectAll = () => {
     if (selectedUsers.length === paginatedUsers.length) {
       setSelectedUsers([]);
     } else {
-      setSelectedUsers(paginatedUsers.map(user => user.id));
+      setSelectedUsers(paginatedUsers.map((user) => user.id));
     }
   };
 
   const getStatusVariant = (status: string) => {
     switch (status) {
-      case 'active': return 'success';
-      case 'pending': return 'warning';
-      case 'inactive': return 'error';
-      default: return 'info';
+      case 'active':
+        return 'success';
+      case 'pending':
+        return 'warning';
+      case 'inactive':
+        return 'error';
+      default:
+        return 'info';
     }
   };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'Admin': return '🔴';
-      case 'Editor': return '✏️';
-      case 'Author': return '⚙️';
-      case 'Maintainer': return '🔄';
-      case 'Subscriber': return '👤';
-      default: return '👤';
+      case 'Admin':
+        return '🔴';
+      case 'Editor':
+        return '✏️';
+      case 'Author':
+        return '⚙️';
+      case 'Maintainer':
+        return '🔄';
+      case 'Subscriber':
+        return '👤';
+      default:
+        return '👤';
     }
   };
 
@@ -227,7 +231,7 @@ export default function UsersPage({ tenant }: UsersPageProps) {
       <Head>
         <title>User Management - {tenant.charAt(0).toUpperCase() + tenant.slice(1)}</title>
       </Head>
-      
+
       <AppLayout
         sidebarSections={getDefaultSidebarSections()}
         user={getDefaultUser(tenant)}
@@ -252,17 +256,18 @@ export default function UsersPage({ tenant }: UsersPageProps) {
         responsive={true}
       >
         <TenantBanner tenant={tenant} />
-        
+
         <div className="mt-6 space-y-8">
           {/* Roles List Section */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <div className="mb-6">
               <h1 className="text-2xl font-bold text-gray-900 mb-2">Roles List</h1>
               <p className="text-gray-600">
-                A role provided access to predefined menus and features so that depending on assigned role an administrator can have access to what he need
+                A role provided access to predefined menus and features so that depending on assigned role an
+                administrator can have access to what he need
               </p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
               {roles.map((role) => (
                 <div key={role.id} className="bg-gray-50 rounded-lg p-4 border border-gray-200">
@@ -275,11 +280,11 @@ export default function UsersPage({ tenant }: UsersPageProps) {
                       Edit Role
                     </button>
                   </div>
-                  
+
                   <div className="mb-3">
                     <p className="text-sm text-gray-600 mb-2">Total {role.userCount} users</p>
                     <div className="flex -space-x-2">
-                      {role.users.slice(0, 4).map((user, index) => (
+                      {role.users.slice(0, 4).map((user, _index) => (
                         <div
                           key={user.id}
                           className="w-8 h-8 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center text-white text-xs font-medium"
@@ -294,7 +299,7 @@ export default function UsersPage({ tenant }: UsersPageProps) {
                       )}
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-gray-600">{role.name}</span>
                     <button className="text-gray-400 hover:text-gray-600">
@@ -306,7 +311,7 @@ export default function UsersPage({ tenant }: UsersPageProps) {
                   </div>
                 </div>
               ))}
-              
+
               {/* Add Role Card */}
               <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-lg p-4 border-2 border-dashed border-blue-300 flex flex-col items-center justify-center text-center">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mb-3">
@@ -332,20 +337,27 @@ export default function UsersPage({ tenant }: UsersPageProps) {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
                   <h2 className="text-xl font-bold text-gray-900">Total users with their roles</h2>
-                  <p className="text-gray-600 mt-1">Find all of your company's administrator accounts and their associate roles.</p>
+                  <p className="text-gray-600 mt-1">
+                    Find all of your company's administrator accounts and their associate roles.
+                  </p>
                 </div>
-                
+
                 <div className="flex flex-col sm:flex-row gap-3">
                   <button
                     onClick={handleExport}
                     className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
                     </svg>
                     EXPORT
                   </button>
-                  
+
                   <div className="relative">
                     <input
                       type="text"
@@ -354,17 +366,32 @@ export default function UsersPage({ tenant }: UsersPageProps) {
                       onChange={(e) => setSearchQuery(e.target.value)}
                       className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     />
-                    <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    <svg
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                      />
                     </svg>
                   </div>
-                  
+
                   <button
                     onClick={handleAddUser}
                     className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+                      />
                     </svg>
                     ADD USER
                   </button>
@@ -385,12 +412,24 @@ export default function UsersPage({ tenant }: UsersPageProps) {
                         className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
                       />
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">USER</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">EMAIL</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ROLE</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PLAN</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      USER
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      EMAIL
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ROLE
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      PLAN
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      STATUS
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      ACTION
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
@@ -434,8 +473,18 @@ export default function UsersPage({ tenant }: UsersPageProps) {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <button className="text-blue-600 hover:text-blue-900">
                           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                            />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                            />
                           </svg>
                         </button>
                       </td>
@@ -460,13 +509,14 @@ export default function UsersPage({ tenant }: UsersPageProps) {
                   <option value={50}>50</option>
                 </select>
               </div>
-              
+
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-700">
-                  {((currentPage - 1) * rowsPerPage) + 1}-{Math.min(currentPage * rowsPerPage, filteredUsers.length)} of {filteredUsers.length}
+                  {(currentPage - 1) * rowsPerPage + 1}-{Math.min(currentPage * rowsPerPage, filteredUsers.length)} of{' '}
+                  {filteredUsers.length}
                 </span>
                 <button
-                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
                   className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -475,7 +525,7 @@ export default function UsersPage({ tenant }: UsersPageProps) {
                   </svg>
                 </button>
                 <button
-                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
                   className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
@@ -487,7 +537,7 @@ export default function UsersPage({ tenant }: UsersPageProps) {
             </div>
           </div>
         </div>
-        
+
         <TenantDebug />
       </AppLayout>
     </>
@@ -497,7 +547,7 @@ export default function UsersPage({ tenant }: UsersPageProps) {
 export const getServerSideProps = async (context: any) => {
   const host = context.req.headers.host;
   let tenant = 'demo'; // Default tenant
-  
+
   // Extract tenant from subdomain
   if (host && host.includes('.')) {
     const parts = host.split('.');
@@ -508,15 +558,15 @@ export const getServerSideProps = async (context: any) => {
       }
     }
   }
-  
+
   // Check query parameter as fallback
   if (context.query.tenant) {
     tenant = context.query.tenant;
   }
-  
+
   return {
     props: {
-      tenant
-    }
+      tenant,
+    },
   };
 };

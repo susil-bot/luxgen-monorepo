@@ -5,11 +5,7 @@ import { defaultTheme } from '../theme';
 import { PageLayout } from '../Layout';
 import { UserDashboard } from '../UserDashboard';
 import { getDefaultNavItems, getDefaultUser, getDefaultLogo } from '../Layout/DefaultNavigation';
-import {
-  getUserDashboardLayoutStyles,
-  userDashboardLayoutClasses,
-  userDashboardLayoutCSS
-} from './styles';
+import { getUserDashboardLayoutStyles, userDashboardLayoutClasses, userDashboardLayoutCSS } from './styles';
 
 export interface UserDashboardLayoutProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
@@ -85,9 +81,35 @@ export interface UserDashboardLayoutProps extends BaseComponentProps {
   mobileBreakpoint?: number;
   tabletBreakpoint?: number;
   desktopBreakpoint?: number;
-  onCourseClick?: (course: { id: string; title: string; description?: string; progress: number; status: 'not-started' | 'in-progress' | 'completed'; instructor: string; duration: string; thumbnail?: string; lastAccessed?: string }) => void;
-  onActivityClick?: (activity: { id: string; type: 'course' | 'quiz' | 'assignment' | 'announcement'; title: string; description?: string; time: string; status: 'new' | 'completed' | 'pending'; courseTitle?: string }) => void;
-  onAnnouncementClick?: (announcement: { id: string; title: string; content: string; author: string; createdAt: string; priority: 'low' | 'medium' | 'high'; isRead: boolean }) => void;
+  onCourseClick?: (course: {
+    id: string;
+    title: string;
+    description?: string;
+    progress: number;
+    status: 'not-started' | 'in-progress' | 'completed';
+    instructor: string;
+    duration: string;
+    thumbnail?: string;
+    lastAccessed?: string;
+  }) => void;
+  onActivityClick?: (activity: {
+    id: string;
+    type: 'course' | 'quiz' | 'assignment' | 'announcement';
+    title: string;
+    description?: string;
+    time: string;
+    status: 'new' | 'completed' | 'pending';
+    courseTitle?: string;
+  }) => void;
+  onAnnouncementClick?: (announcement: {
+    id: string;
+    title: string;
+    content: string;
+    author: string;
+    createdAt: string;
+    priority: 'low' | 'medium' | 'high';
+    isRead: boolean;
+  }) => void;
 }
 
 const UserDashboardLayoutComponent: React.FC<UserDashboardLayoutProps> = ({
@@ -123,7 +145,11 @@ const UserDashboardLayoutComponent: React.FC<UserDashboardLayoutProps> = ({
   return (
     <>
       <style>{userDashboardLayoutCSS}</style>
-      <div className={`${userDashboardLayoutClasses.container} ${className}`} style={{ ...styles.container, ...style }} {...props}>
+      <div
+        className={`${userDashboardLayoutClasses.container} ${className}`}
+        style={{ ...styles.container, ...style }}
+        {...props}
+      >
         <PageLayout
           tenantTheme={tenantTheme}
           navItems={navItems}

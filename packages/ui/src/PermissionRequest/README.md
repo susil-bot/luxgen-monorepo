@@ -27,7 +27,7 @@ const requests = [
     resource: 'User Management',
     requestedAt: '2 hours ago',
     reason: 'Need to manage user accounts for new project',
-    status: 'pending'
+    status: 'pending',
   },
   {
     id: '2',
@@ -35,8 +35,8 @@ const requests = [
     permission: 'Editor',
     resource: 'Content Management',
     requestedAt: '1 day ago',
-    status: 'approved'
-  }
+    status: 'approved',
+  },
 ];
 
 <PermissionRequest
@@ -47,22 +47,22 @@ const requests = [
   onApprove={(request) => console.log('Approve:', request)}
   onDeny={(request) => console.log('Deny:', request)}
   onViewDetails={(request) => console.log('Details:', request)}
-/>
+/>;
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `title` | `string` | `'Permission Requests'` | Component title |
-| `requests` | `PermissionRequest[]` | `[]` | Array of permission request objects |
-| `maxItems` | `number` | `5` | Maximum number of requests to display |
-| `showActions` | `boolean` | `true` | Show action buttons for pending requests |
-| `variant` | `'default' \| 'compact' \| 'detailed'` | `'default'` | Component variant |
-| `onApprove` | `(request: PermissionRequest) => void` | - | Approve request handler |
-| `onDeny` | `(request: PermissionRequest) => void` | - | Deny request handler |
-| `onViewDetails` | `(request: PermissionRequest) => void` | - | View details handler |
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
+| Prop            | Type                                   | Default                 | Description                              |
+| --------------- | -------------------------------------- | ----------------------- | ---------------------------------------- |
+| `title`         | `string`                               | `'Permission Requests'` | Component title                          |
+| `requests`      | `PermissionRequest[]`                  | `[]`                    | Array of permission request objects      |
+| `maxItems`      | `number`                               | `5`                     | Maximum number of requests to display    |
+| `showActions`   | `boolean`                              | `true`                  | Show action buttons for pending requests |
+| `variant`       | `'default' \| 'compact' \| 'detailed'` | `'default'`             | Component variant                        |
+| `onApprove`     | `(request: PermissionRequest) => void` | -                       | Approve request handler                  |
+| `onDeny`        | `(request: PermissionRequest) => void` | -                       | Deny request handler                     |
+| `onViewDetails` | `(request: PermissionRequest) => void` | -                       | View details handler                     |
+| `tenantTheme`   | `TenantTheme`                          | `defaultTheme`          | Theme object for styling                 |
 
 ## PermissionRequest Interface
 
@@ -87,12 +87,15 @@ interface PermissionRequest {
 ## Variants
 
 ### Default
+
 Standard size with full features and action buttons.
 
 ### Compact
+
 Smaller size optimized for dashboards and sidebars.
 
 ### Detailed
+
 Larger size with enhanced spacing for detailed request information.
 
 ## Examples
@@ -100,12 +103,7 @@ Larger size with enhanced spacing for detailed request information.
 ### Basic Usage
 
 ```tsx
-<PermissionRequest
-  title="Permission Requests"
-  requests={requests}
-  maxItems={5}
-  showActions={true}
-/>
+<PermissionRequest title="Permission Requests" requests={requests} maxItems={5} showActions={true} />
 ```
 
 ### With Custom Styling
@@ -135,24 +133,13 @@ Larger size with enhanced spacing for detailed request information.
 ### Compact Variant
 
 ```tsx
-<PermissionRequest
-  title="Requests"
-  requests={requests}
-  maxItems={3}
-  showActions={false}
-  variant="compact"
-/>
+<PermissionRequest title="Requests" requests={requests} maxItems={3} showActions={false} variant="compact" />
 ```
 
 ### Without Actions
 
 ```tsx
-<PermissionRequest
-  title="Permission Status"
-  requests={requests}
-  maxItems={5}
-  showActions={false}
-/>
+<PermissionRequest title="Permission Status" requests={requests} maxItems={5} showActions={false} />
 ```
 
 ## Status Types
@@ -213,6 +200,7 @@ The component includes comprehensive test coverage:
 - **Edge Cases**: Different statuses, empty states, variant testing
 
 Run tests with:
+
 ```bash
 npm test PermissionRequest.spec.js
 ```

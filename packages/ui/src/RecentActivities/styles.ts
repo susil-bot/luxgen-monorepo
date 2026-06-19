@@ -37,10 +37,7 @@ const getVariantStyles = (variant: 'default' | 'compact' | 'detailed') => {
 };
 
 // Main function to get all styles for the RecentActivities component
-export const getRecentActivitiesStyles = (
-  tenantTheme: TenantTheme,
-  variant: 'default' | 'compact' | 'detailed'
-) => {
+export const getRecentActivitiesStyles = (tenantTheme: TenantTheme, variant: 'default' | 'compact' | 'detailed') => {
   const variantStyles = getVariantStyles(variant);
 
   return {

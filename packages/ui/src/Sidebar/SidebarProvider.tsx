@@ -48,13 +48,16 @@ export const SidebarProvider: React.FC<SidebarProviderProps> = ({
     onToggle?.(newCollapsed);
   }, [isCollapsed, onToggle]);
 
-  const setCollapsed = useCallback((collapsed: boolean) => {
-    setIsCollapsed(collapsed);
-    onToggle?.(collapsed);
-  }, [onToggle]);
+  const setCollapsed = useCallback(
+    (collapsed: boolean) => {
+      setIsCollapsed(collapsed);
+      onToggle?.(collapsed);
+    },
+    [onToggle],
+  );
 
   const toggleSection = useCallback((sectionId: string) => {
-    setExpandedSections(prev => {
+    setExpandedSections((prev) => {
       const newExpanded = new Set(prev);
       if (newExpanded.has(sectionId)) {
         newExpanded.delete(sectionId);
@@ -65,14 +68,20 @@ export const SidebarProvider: React.FC<SidebarProviderProps> = ({
     });
   }, []);
 
-  const handleItemClick = useCallback((item: SidebarItem) => {
-    setActiveItem(item.id);
-    onItemClick?.(item);
-  }, [onItemClick]);
+  const handleItemClick = useCallback(
+    (item: SidebarItem) => {
+      setActiveItem(item.id);
+      onItemClick?.(item);
+    },
+    [onItemClick],
+  );
 
-  const handleUserAction = useCallback((action: 'profile' | 'settings' | 'logout') => {
-    onUserAction?.(action);
-  }, [onUserAction]);
+  const handleUserAction = useCallback(
+    (action: 'profile' | 'settings' | 'logout') => {
+      onUserAction?.(action);
+    },
+    [onUserAction],
+  );
 
   const contextValue: SidebarContextType = {
     isCollapsed,
@@ -86,9 +95,5 @@ export const SidebarProvider: React.FC<SidebarProviderProps> = ({
     onUserAction: handleUserAction,
   };
 
-  return (
-    <SidebarContext.Provider value={contextValue}>
-      {children}
-    </SidebarContext.Provider>
-  );
+  return <SidebarContext.Provider value={contextValue}>{children}</SidebarContext.Provider>;
 };

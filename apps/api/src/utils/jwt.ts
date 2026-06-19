@@ -20,7 +20,7 @@ export interface JwtHeader {
 export const generateToken = (payload: JwtPayload, tenantId?: string): string => {
   const keyId = tenantId || payload.tenant || 'default';
   const secret = tenantKeyManager.getTenantKey(keyId);
-  
+
   return jwt.sign(payload, secret, {
     expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as any,
     header: {
@@ -58,7 +58,7 @@ export const verifyToken = (token: string): JwtPayload | null => {
 export const decodeToken = (token: string): JwtPayload | null => {
   try {
     return jwt.decode(token) as JwtPayload;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -69,7 +69,7 @@ export const decodeToken = (token: string): JwtPayload | null => {
 export const decodeTokenHeader = (token: string): JwtHeader | null => {
   try {
     return jwt.decode(token, { complete: true })?.header as JwtHeader;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -89,7 +89,7 @@ export const verifyTokenWithTenant = (token: string, tenantId: string): JwtPaylo
   try {
     const secret = tenantKeyManager.getTenantKey(tenantId);
     return jwt.verify(token, secret) as JwtPayload;
-  } catch (error) {
+  } catch {
     return null;
   }
 };

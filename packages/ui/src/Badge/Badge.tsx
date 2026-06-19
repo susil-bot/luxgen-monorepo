@@ -40,7 +40,7 @@ const BadgeComponent: React.FC<BadgeProps> = ({
       warning: tenantTheme.colors.warning,
       info: tenantTheme.colors.info,
     };
-    
+
     return variantColors[variant];
   };
 
@@ -53,7 +53,7 @@ const BadgeComponent: React.FC<BadgeProps> = ({
       warning: `${tenantTheme.colors.warning}20`,
       info: `${tenantTheme.colors.info}20`,
     };
-    
+
     return variantBackgrounds[variant];
   };
 
@@ -75,7 +75,7 @@ const BadgeComponent: React.FC<BadgeProps> = ({
         minHeight: '1.75rem',
       },
     };
-    
+
     return sizeMap[size];
   };
 
@@ -85,7 +85,7 @@ const BadgeComponent: React.FC<BadgeProps> = ({
       pill: '9999px',
       square: '0',
     };
-    
+
     return shapeMap[shape];
   };
 
@@ -121,23 +121,11 @@ const BadgeComponent: React.FC<BadgeProps> = ({
   };
 
   return (
-    <span
-      className={`badge badge-${variant} badge-${size} badge-${shape} ${className}`}
-      style={styles}
-      {...props}
-    >
-      {icon && !dot && (
-        <span className="badge-icon">
-          {icon}
-        </span>
-      )}
-      
-      {!dot && (
-        <span className="badge-content">
-          {children}
-        </span>
-      )}
-      
+    <span className={`badge badge-${variant} badge-${size} badge-${shape} ${className}`} style={styles} {...props}>
+      {icon && !dot && <span className="badge-icon">{icon}</span>}
+
+      {!dot && <span className="badge-content">{children}</span>}
+
       {closable && !dot && (
         <button
           type="button"

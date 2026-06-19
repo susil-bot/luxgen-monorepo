@@ -2,120 +2,99 @@ import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { typeDefs } from './schema';
-import { resolvers } from './schema';
+
+import { typeDefs, resolvers } from './schema';
 import { context } from './context';
+import { errorHandler, notFoundHandler } from './utils/errorHandler';
+
+// Middleware
 import { authMiddleware } from './middleware/auth';
-import { tenantMiddleware } from './middleware/tenant';
-import {
-  tenantRoutingMiddleware,
-  tenantAuthMiddleware,
-  tenantSecurityMiddleware
-} from './middleware/tenantRouting';
+import { tenantRoutingMiddleware, tenantAuthMiddleware, tenantSecurityMiddleware } from './middleware/tenantRouting';
 import {
   tenantHeadersMiddleware,
   tenantBrandingMiddleware,
   tenantSecurityHeadersMiddleware,
-  tenantRateLimitMiddleware
+  tenantRateLimitMiddleware,
 } from './middleware/tenantHeaders';
-// import {
-//   tenantWorkflowMiddleware,
-//   tenantFeatureMiddleware,
-//   tenantLimitMiddleware,
-//   tenantUsageTrackingMiddleware,
-//   tenantComplianceMiddleware
-// } from './middleware/tenantWorkflow';
+
+// Routes
 import authRoutes from './routes/auth';
 import adminRoutes from './routes/admin';
 import tenantRoutes from './routes/tenant';
 import tenantConfigRoutes from './routes/tenantConfig';
+import billingRoutes, { stripeWebhookHandler } from './routes/billing';
+import jobsRoutes from './routes/jobs';
+
+import { getCorsOrigins } from '@luxgen/config';
+
+const CORS_ORIGINS = getCorsOrigins();
 
 const app = express();
 
-// Security middleware
+// ── Security ───────────────────────────────────────────────────────────────
 app.use(helmet());
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no origin (like mobile apps or curl requests)
-    if (!origin) return callback(null, true);
-    
-    const allowedOrigins = [
-      'http://localhost:3000',
-      'http://demo.localhost:3000',
-      'http://idea-vibes.localhost:3000',
-      process.env.CORS_ORIGIN || 'http://localhost:3000'
-    ];
-    
-    if (allowedOrigins.includes(origin)) {
-      return callback(null, true);
-    }
-    
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || CORS_ORIGINS.includes(origin)) return callback(null, true);
+      callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+  }),
+);
 
-// Body parsing middleware
+// ── Stripe webhook (raw body — must register before express.json) ───────────
+app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), stripeWebhookHandler);
+
+// ── Body parsing ───────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Centralized tenant workflow middleware (must be first)
-// app.use(tenantWorkflowMiddleware);
-
-// Legacy tenant routing middleware (for backward compatibility)
+// ── Tenant resolution (must run before auth) ───────────────────────────────
 app.use(tenantRoutingMiddleware);
-
-// Tenant security middleware
 app.use(tenantSecurityMiddleware);
-
-// Tenant headers middleware
 app.use(tenantHeadersMiddleware);
 app.use(tenantBrandingMiddleware);
 app.use(tenantSecurityHeadersMiddleware);
 app.use(tenantRateLimitMiddleware);
 
-// Authentication middleware
+// ── Authentication ─────────────────────────────────────────────────────────
 app.use(tenantAuthMiddleware);
 app.use(authMiddleware);
 
-// Legacy tenant middleware (for backward compatibility)
-// app.use(tenantMiddleware); // Commented out as it overwrites the tenant object
-
-// Health check endpoint
-app.get('/health', (req, res) => {
+// ── Health check ──────────────────────────────────────────────────────────
+app.get('/health', (_req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// API Routes
+// ── REST routes ───────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/tenant', tenantRoutes);
 app.use('/api/tenant-config', tenantConfigRoutes);
+app.use('/api/billing', billingRoutes);
+app.use('/api/jobs', jobsRoutes);
 
-// Create Apollo Server
-const server = new ApolloServer({
+// ── GraphQL ───────────────────────────────────────────────────────────────
+const apolloServer = new ApolloServer({
   typeDefs,
   resolvers,
   context,
   introspection: process.env.APOLLO_INTROSPECTION === 'true',
   formatError: (error) => {
     console.error('GraphQL Error:', error);
-    return {
-      message: error.message,
-      locations: error.locations,
-      path: error.path,
-    };
+    return { message: error.message, locations: error.locations, path: error.path };
   },
 });
 
-// Start Apollo Server and apply middleware
-const startServer = async () => {
-  await server.start();
-  server.applyMiddleware({ app: app as any, path: '/graphql' });
-  console.log('✅ Apollo Server middleware applied to /graphql');
+const startApollo = async () => {
+  await apolloServer.start();
+  apolloServer.applyMiddleware({ app: app as any, path: '/graphql' });
+  // Error handlers must register AFTER Apollo so /graphql is matched first
+  app.use(notFoundHandler);
+  app.use(errorHandler);
 };
 
-// Start the server
-startServer().catch(console.error);
+startApollo().catch(console.error);
 
 export { app };

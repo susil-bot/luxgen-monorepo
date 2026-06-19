@@ -1,52 +1,99 @@
 import { Course, ICourse } from '@luxgen/db';
+import { logger } from '../utils/logger';
+
+export interface CreateCourseInput {
+  title: string;
+  description?: string;
+  instructorId: string;
+  tenantId: string;
+  startDate?: Date;
+  endDate?: Date;
+}
+
+export interface UpdateCourseInput {
+  title?: string;
+  description?: string;
+  instructorId?: string;
+  startDate?: Date;
+  endDate?: Date;
+  status?: string;
+}
+
+const POPULATE = [
+  { path: 'instructor', populate: { path: 'tenant' } },
+  { path: 'students', populate: { path: 'tenant' } },
+  { path: 'tenant' },
+];
 
 export class CourseService {
   async getCourseById(id: string): Promise<ICourse | null> {
-    // TODO: Implement database query
-    console.log('Getting course by ID:', id);
-    return null;
+    return Course.findById(id).populate(POPULATE);
   }
 
   async getCoursesByTenant(tenantId: string): Promise<ICourse[]> {
-    // TODO: Implement database query
-    console.log('Getting courses by tenant:', tenantId);
-    return [];
+    return Course.find({ tenant: tenantId }).populate(POPULATE);
   }
 
   async getCoursesByInstructor(instructorId: string): Promise<ICourse[]> {
-    // TODO: Implement database query
-    console.log('Getting courses by instructor:', instructorId);
-    return [];
+    return Course.find({ instructor: instructorId }).populate(POPULATE);
   }
 
-  async createCourse(input: any): Promise<ICourse> {
-    // TODO: Implement database creation
-    console.log('Creating course:', input);
-    throw new Error('Not implemented');
+  async createCourse(input: CreateCourseInput): Promise<ICourse> {
+    const course = new Course({
+      title: input.title,
+      description: input.description,
+      instructor: input.instructorId,
+      tenant: input.tenantId,
+      startDate: input.startDate,
+      endDate: input.endDate,
+      students: [],
+    });
+
+    await course.save();
+    await course.populate(POPULATE);
+
+    logger.info(`Course created: ${course.title}`);
+    return course;
   }
 
-  async updateCourse(id: string, input: any): Promise<ICourse> {
-    // TODO: Implement database update
-    console.log('Updating course:', id, input);
-    throw new Error('Not implemented');
+  async updateCourse(id: string, input: UpdateCourseInput): Promise<ICourse> {
+    const update: Record<string, unknown> = {};
+    if (input.title !== undefined) update.title = input.title;
+    if (input.description !== undefined) update.description = input.description;
+    if (input.instructorId !== undefined) update.instructor = input.instructorId;
+    if (input.startDate !== undefined) update.startDate = input.startDate;
+    if (input.endDate !== undefined) update.endDate = input.endDate;
+    if (input.status !== undefined) update.status = input.status;
+
+    const course = await Course.findByIdAndUpdate(id, { $set: update }, { new: true }).populate(POPULATE);
+    if (!course) throw new Error('Course not found');
+    return course;
   }
 
   async deleteCourse(id: string): Promise<boolean> {
-    // TODO: Implement database deletion
-    console.log('Deleting course:', id);
-    throw new Error('Not implemented');
+    const result = await Course.findByIdAndDelete(id);
+    if (result) logger.info(`Course deleted: ${id}`);
+    return !!result;
   }
 
   async enrollStudent(courseId: string, studentId: string): Promise<ICourse> {
-    // TODO: Implement student enrollment
-    console.log('Enrolling student:', studentId, 'in course:', courseId);
-    throw new Error('Not implemented');
+    const course = await Course.findByIdAndUpdate(
+      courseId,
+      { $addToSet: { students: studentId } },
+      { new: true },
+    ).populate(POPULATE);
+    if (!course) throw new Error('Course not found');
+    logger.info(`Student ${studentId} enrolled in course ${courseId}`);
+    return course;
   }
 
   async unenrollStudent(courseId: string, studentId: string): Promise<ICourse> {
-    // TODO: Implement student unenrollment
-    console.log('Unenrolling student:', studentId, 'from course:', courseId);
-    throw new Error('Not implemented');
+    const course = await Course.findByIdAndUpdate(courseId, { $pull: { students: studentId } }, { new: true }).populate(
+      POPULATE,
+    );
+    if (!course) throw new Error('Course not found');
+    logger.info(`Student ${studentId} unenrolled from course ${courseId}`);
+    return course;
   }
 }
 

@@ -1,10 +1,6 @@
 const { default: styled } = require('styled-components');
 
-const {
-  getTypographyStyles,
-  calculateSpacing,
-  getColorToken
-} = require('../../utils');
+const { getTypographyStyles, calculateSpacing, getColorToken } = require('../../utils');
 
 const { hideVisually } = require('../../utils/accessibility');
 const { INTERACTIVE, BREAKPOINTS } = require('../../utils/constants');
@@ -12,15 +8,10 @@ const { BaseButton } = require('../../utils/base/BaseButton');
 const { getButtonColors } = require('./utils');
 const { typographyTokens } = require('./typography');
 
-const typeStyleList = [
-  'primary-pair',
-  'utility',
-  'utility-pair-inverted',
-  'utility-inverted'
-];
+const typeStyleList = ['primary-pair', 'utility', 'utility-pair-inverted', 'utility-inverted'];
 
 const ButtonWrapper = styled(BaseButton).withConfig({
-  displayName: 'ButtonWrapper'
+  displayName: 'ButtonWrapper',
 })`
   .spinner {
     transform: scale(1.125);
@@ -55,41 +46,33 @@ const ButtonWrapper = styled(BaseButton).withConfig({
 
   ${({ shouldUseFullWidth }) => shouldUseFullWidth && 'width: 100%;'}
 
-display: ${({ isLink, isStaticText, isInline }) =>
-    isLink || isStaticText || isInline ? 'inline-flex' : 'flex'};
+display: ${({ isLink, isStaticText, isInline }) => (isLink || isStaticText || isInline ? 'inline-flex' : 'flex')};
   position: relative;
   align-items: center;
   z-index: 1;
   border-radius: ${({ cornerRadius, size }) => {
     if (cornerRadius === 'FullyRoundedCorner') return '50px';
-    if (cornerRadius === 'RoundedCorner')
-      return size === 'small' ? '2px' : '4px';
+    if (cornerRadius === 'RoundedCorner') return size === 'small' ? '2px' : '4px';
     return '0px';
   }};
 
   padding: ${({ isInline, hasPriceSection, size, isIconButton }) => {
     if (!hasPriceSection) {
-      if (size === 'small' && !!isInline === false)
-        return isIconButton ? '0' : `0 12px`;
-      return isInline || isIconButton === true
-        ? `${calculateSpacing(2)}`
-        : `0 ${calculateSpacing(2)}`;
+      if (size === 'small' && !!isInline === false) return isIconButton ? '0' : `0 12px`;
+      return isInline || isIconButton === true ? `${calculateSpacing(2)}` : `0 ${calculateSpacing(2)}`;
     }
     return '';
   }};
   min-width: ${({ isInline, size, isIconButton }) => {
-    if (size === 'small' && !!isInline === false)
-      return isIconButton ? '32px' : calculateSpacing(5);
+    if (size === 'small' && !!isInline === false) return isIconButton ? '32px' : calculateSpacing(5);
     return isInline || isIconButton ? 'auto' : calculateSpacing(5);
   }};
   height: ${({ isInline, size, isIconButton }) => {
-    if (size === 'small' && !!isInline === false)
-      return isIconButton ? '32px' : '32px';
+    if (size === 'small' && !!isInline === false) return isIconButton ? '32px' : '32px';
     return isInline || isIconButton ? 'auto' : calculateSpacing(6);
   }};
 
-  min-height: ${({ isInline, isIconButton }) =>
-    isInline || isIconButton ? 'auto' : '0'};
+  min-height: ${({ isInline, isIconButton }) => (isInline || isIconButton ? 'auto' : '0')};
 
   &.button--utility + &.button--utility {
     margin-top: ${calculateSpacing(2)};
@@ -105,8 +88,7 @@ display: ${({ isLink, isStaticText, isInline }) =>
 
   @media (min-width: ${BREAKPOINTS.md}) {
     min-width: ${({ isInline, size, isIconButton }) => {
-      if (size === 'small' && !!isInline === false)
-        return isIconButton ? calculateSpacing(4) : calculateSpacing(10);
+      if (size === 'small' && !!isInline === false) return isIconButton ? calculateSpacing(4) : calculateSpacing(10);
       return isInline || isIconButton ? 'auto' : calculateSpacing(20);
     }};
   }
@@ -136,10 +118,8 @@ display: ${({ isLink, isStaticText, isInline }) =>
 
     && {
       border-color: ${({ typeStyle }) => {
-        if (typeStyle === 'primary' || typeStyle === 'utility-pair')
-          return `rgba(255, 255, 255, 0.2);`;
-        else if (typeStyleList.includes(typeStyle))
-          return `rgba(0, 0, 0, 0.2);`;
+        if (typeStyle === 'primary' || typeStyle === 'utility-pair') return `rgba(255, 255, 255, 0.2);`;
+        else if (typeStyleList.includes(typeStyle)) return `rgba(0, 0, 0, 0.2);`;
         return null;
       }};
     }
@@ -150,10 +130,8 @@ display: ${({ isLink, isStaticText, isInline }) =>
     z-index: -1;
     background: ${({ typeStyle, isIconButton }) => {
       if (!isIconButton) {
-        if (typeStyle === 'primary' || typeStyle === 'utility-pair')
-          return `rgba(255, 255, 255, 0.2);`;
-        else if (typeStyleList.includes(typeStyle))
-          return `rgba(0, 0, 0, 0.2);`;
+        if (typeStyle === 'primary' || typeStyle === 'utility-pair') return `rgba(255, 255, 255, 0.2);`;
+        else if (typeStyleList.includes(typeStyle)) return `rgba(0, 0, 0, 0.2);`;
       }
       return null;
     }};
@@ -165,8 +143,7 @@ display: ${({ isLink, isStaticText, isInline }) =>
   &:active {
     outline: none;
     ${({ typeStyle }) => {
-      if (typeStyle === 'secondary' || typeStyle === 'inverted-text')
-        return `filter: brightness(80%);`;
+      if (typeStyle === 'secondary' || typeStyle === 'inverted-text') return `filter: brightness(80%);`;
       else if (typeStyle === 'utility-pair-secondary') return `opacity: .8`;
       return null;
     }};
@@ -177,11 +154,9 @@ display: ${({ isLink, isStaticText, isInline }) =>
     `
     margin-top: ${calculateSpacing(2)};`}
 
-  ${({ theme, typeStyle, isInverted, isSpecial }) =>
-    getButtonColors(theme, typeStyle, isInverted, isSpecial)}
+  ${({ theme, typeStyle, isInverted, isSpecial }) => getButtonColors(theme, typeStyle, isInverted, isSpecial)}
 
-  ${({ theme, typeStyle }) =>
-    getTypographyStyles(theme, typographyTokens[typeStyle])}
+  ${({ theme, typeStyle }) => getTypographyStyles(theme, typographyTokens[typeStyle])}
 `;
 
 const ButtonLabel = styled.span.withConfig({ displayName: 'ButtonLabel' })`
@@ -210,22 +185,18 @@ const ButtonLabel = styled.span.withConfig({ displayName: 'ButtonLabel' })`
 `;
 
 const ButtonIconWrapper = styled.div.withConfig({
-  displayName: 'ButtonIconWrapper'
+  displayName: 'ButtonIconWrapper',
 })`
   padding-right: ${({ iconPosition, isIconButton }) => {
-    return iconPosition === 'before' && !isIconButton
-      ? calculateSpacing(1)
-      : '0';
+    return iconPosition === 'before' && !isIconButton ? calculateSpacing(1) : '0';
   }};
   padding-left: ${({ iconPosition, isIconButton }) => {
-    return iconPosition === 'after' && !isIconButton
-      ? calculateSpacing(1)
-      : '0';
+    return iconPosition === 'after' && !isIconButton ? calculateSpacing(1) : '0';
   }};
 `;
 
 const ButtonCountWrapper = styled.div.withConfig({
-  displayName: 'ButtonCountWrapper'
+  displayName: 'ButtonCountWrapper',
 })`
   margin-right: ${calculateSpacing(1.5)};
   border: 1px solid;
@@ -252,7 +223,7 @@ const ButtonIcon = styled.span.withConfig({ displayName: 'ButtonIcon' })`
 `;
 
 const ButtonPriceWrapper = styled.div.withConfig({
-  displayName: 'ButtonPriceWrapper'
+  displayName: 'ButtonPriceWrapper',
 })`
   display: flex;
   flex-direction: row;
@@ -272,7 +243,7 @@ const ButtonPriceWrapper = styled.div.withConfig({
 `;
 
 const ButtonPriceLabel = styled.span.withConfig({
-  displayName: 'ButtonPriceLabel'
+  displayName: 'ButtonPriceLabel',
 })`
   font-variant-ligatures: none;
   padding: ${calculateSpacing(1)} 0;
@@ -289,5 +260,5 @@ module.exports = {
   ButtonIcon,
   ButtonPriceWrapper,
   ButtonCountWrapper,
-  ButtonPriceLabel
+  ButtonPriceLabel,
 };

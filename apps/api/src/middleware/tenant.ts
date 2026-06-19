@@ -1,26 +1,14 @@
 import { Request, Response, NextFunction } from 'express';
 
-declare global {
-  namespace Express {
-    interface Request {
-      tenant?: string;
-    }
-  }
-}
-
-export const tenantMiddleware = (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const host = req.headers.host;
-    const subdomain = host?.split('.')[0];
-    
-    // Extract tenant from subdomain or header
-    const tenant = subdomain || req.headers['x-tenant'] as string || 'default';
-    
-    req.tenant = tenant;
-    next();
-  } catch (error) {
-    console.error('Tenant middleware error:', error);
-    req.tenant = 'default';
-    next();
-  }
+/**
+ * @deprecated Use tenantRoutingMiddleware from ./tenantRouting instead.
+ * This middleware is kept for reference only and must not be registered
+ * in app.ts — it would overwrite the full ITenant object set by tenantRoutingMiddleware
+ * with a plain string, breaking all downstream code that reads tenant settings.
+ */
+export const tenantMiddleware = (req: Request, _res: Response, next: NextFunction) => {
+  const host = req.headers.host;
+  const subdomain = host?.split('.')[0];
+  req.subdomain = subdomain || 'default';
+  next();
 };

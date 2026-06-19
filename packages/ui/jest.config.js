@@ -2,7 +2,14 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   roots: ['<rootDir>/src'],
-  testMatch: ['**/__tests__/**/*.ts', '**/__tests__/**/*.tsx', '**/?(*.)+(spec|test).ts', '**/?(*.)+(spec|test).tsx', '**/?(*.)+(spec|test).js', '**/?(*.)+(spec|test).jsx'],
+  testMatch: [
+    '**/__tests__/**/*.ts',
+    '**/__tests__/**/*.tsx',
+    '**/?(*.)+(spec|test).ts',
+    '**/?(*.)+(spec|test).tsx',
+    '**/?(*.)+(spec|test).js',
+    '**/?(*.)+(spec|test).jsx',
+  ],
   transform: {
     '^.+\\.(ts|tsx)$': 'ts-jest',
     '^.+\\.(js|jsx)$': 'babel-jest',

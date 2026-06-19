@@ -268,6 +268,10 @@ coverage/
 .nyc_output/
 junit.xml
 
+# Agent Studio — staged files awaiting user approval (never commit)
+.agent-staging/
+.agent-worktrees/
+
 # Misc
 *.tgz
 *.tar.gz

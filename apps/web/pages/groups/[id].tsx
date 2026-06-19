@@ -1,8 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { SnackbarProvider, useSnackbar, AppLayout, getDefaultUser, getDefaultLogo, getDefaultSidebarSections, Button } from '@luxgen/ui';
-import { graphql } from 'graphql';
+import {
+  SnackbarProvider,
+  useSnackbar,
+  AppLayout,
+  getDefaultUser,
+  getDefaultLogo,
+  getDefaultSidebarSections,
+  Button,
+} from '@luxgen/ui';
 
 interface GroupDetailsData {
   id: string;
@@ -33,7 +40,7 @@ interface GroupDetailsData {
 const GroupDetailsPageContent: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
-  const { showSuccess, showError, showInfo } = useSnackbar();
+  const { showSuccess, showError: _showError, showInfo: _showInfo } = useSnackbar();
   const [user, setUser] = useState<any>(null);
   const [group, setGroup] = useState<GroupDetailsData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -62,9 +69,7 @@ const GroupDetailsPageContent: React.FC = () => {
   // Load group data
   useEffect(() => {
     if (id) {
-      // Simulate API call
-
-      connect with real db through graphql
+      // Simulate API call (TODO: connect with real db through graphql)
       setTimeout(() => {
         setGroup({
           id: id as string,
@@ -87,7 +92,7 @@ const GroupDetailsPageContent: React.FC = () => {
             { id: '1', action: 'New member joined', user: 'Alice Brown', timestamp: '2 hours ago' },
             { id: '2', action: 'Group settings updated', user: 'John Doe', timestamp: '1 day ago' },
             { id: '3', action: 'Member role changed', user: 'Bob Johnson', timestamp: '2 days ago' },
-          ]
+          ],
         });
         setIsLoading(false);
       }, 1000);
@@ -129,7 +134,7 @@ const GroupDetailsPageContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-base">
         <div className="text-center">
           <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading group details...</p>
@@ -140,15 +145,10 @@ const GroupDetailsPageContent: React.FC = () => {
 
   if (!group) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-base">
         <div className="text-center">
           <div className="text-gray-600 text-xl mb-4">Group not found</div>
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => router.push('/groups/dashboard')}
-            className="px-4 py-2"
-          >
+          <Button variant="primary" size="md" onClick={() => router.push('/groups/dashboard')} className="px-4 py-2">
             Back to Groups
           </Button>
         </div>
@@ -179,9 +179,9 @@ const GroupDetailsPageContent: React.FC = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">{group.name}</h1>
-                <p className="mt-2 text-gray-600">{group.description}</p>
-                <div className="mt-2 flex items-center space-x-4 text-sm text-gray-500">
+                <h1 className="text-3xl font-bold text-primary">{group.name}</h1>
+                <p className="mt-2 text-secondary">{group.description}</p>
+                <div className="mt-2 flex items-center space-x-4 text-sm text-tertiary">
                   <span>Created: {new Date(group.createdAt).toLocaleDateString()}</span>
                   <span>•</span>
                   <span>Status: {group.status}</span>
@@ -190,20 +190,10 @@ const GroupDetailsPageContent: React.FC = () => {
                 </div>
               </div>
               <div className="flex space-x-3">
-                <Button
-                  variant="outline"
-                  size="md"
-                  onClick={() => router.back()}
-                  className="px-4 py-2"
-                >
+                <Button variant="outline" size="md" onClick={() => router.back()} className="px-4 py-2">
                   Back
                 </Button>
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={handleEditGroup}
-                  className="px-4 py-2"
-                >
+                <Button variant="primary" size="md" onClick={handleEditGroup} className="px-4 py-2">
                   Edit Group
                 </Button>
               </div>
@@ -212,21 +202,26 @@ const GroupDetailsPageContent: React.FC = () => {
 
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="stat-card">
               <div className="flex items-center">
                 <div className="p-2 bg-blue-100 rounded-lg">
                   <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Members</p>
-                  <p className="text-2xl font-semibold text-gray-900">{group.totalUsers}</p>
+                  <p className="text-sm font-medium text-secondary">Total Members</p>
+                  <p className="text-2xl font-semibold text-primary">{group.totalUsers}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="stat-card">
               <div className="flex items-center">
                 <div className="p-2 bg-green-100 rounded-lg">
                   <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -234,22 +229,27 @@ const GroupDetailsPageContent: React.FC = () => {
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Active Members</p>
-                  <p className="text-2xl font-semibold text-gray-900">{group.activeUsers}</p>
+                  <p className="text-sm font-medium text-secondary">Active Members</p>
+                  <p className="text-2xl font-semibold text-primary">{group.activeUsers}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="stat-card">
               <div className="flex items-center">
                 <div className="p-2 bg-yellow-100 rounded-lg">
                   <svg className="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Capacity</p>
-                  <p className="text-2xl font-semibold text-gray-900">{group.maxUsers === -1 ? '∞' : group.maxUsers}</p>
+                  <p className="text-sm font-medium text-secondary">Capacity</p>
+                  <p className="text-2xl font-semibold text-primary">{group.maxUsers === -1 ? '∞' : group.maxUsers}</p>
                 </div>
               </div>
             </div>
@@ -258,33 +258,35 @@ const GroupDetailsPageContent: React.FC = () => {
           {/* Content Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Members List */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="surface p-6" style={{ borderRadius: 'var(--radius-xl)' }}>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">Members</h3>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleManageMembers}
-                  className="px-3 py-1"
-                >
+                <h3 className="text-base font-semibold text-primary">Members</h3>
+                <Button variant="outline" size="sm" onClick={handleManageMembers} className="px-3 py-1">
                   Manage
                 </Button>
               </div>
               <div className="space-y-3">
                 {group.members.map((member) => (
-                  <div key={member.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={member.id}
+                    className="flex items-center justify-between p-3 rounded-xl"
+                    style={{ backgroundColor: 'var(--color-fill-quaternary)' }}
+                  >
                     <div className="flex items-center">
                       <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                        {member.name.split(' ').map(n => n[0]).join('')}
+                        {member.name
+                          .split(' ')
+                          .map((n) => n[0])
+                          .join('')}
                       </div>
                       <div className="ml-3">
-                        <p className="font-medium text-gray-900">{member.name}</p>
-                        <p className="text-sm text-gray-600">{member.email}</p>
+                        <p className="font-medium text-primary">{member.name}</p>
+                        <p className="text-sm text-secondary">{member.email}</p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium text-gray-900">{member.role}</p>
-                      <p className="text-xs text-gray-500">Joined {new Date(member.joinedAt).toLocaleDateString()}</p>
+                      <p className="text-sm font-medium text-primary">{member.role}</p>
+                      <p className="text-xs text-tertiary">Joined {new Date(member.joinedAt).toLocaleDateString()}</p>
                     </div>
                   </div>
                 ))}
@@ -292,8 +294,8 @@ const GroupDetailsPageContent: React.FC = () => {
             </div>
 
             {/* Recent Activity */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Recent Activity</h3>
+            <div className="surface p-6" style={{ borderRadius: 'var(--radius-xl)' }}>
+              <h3 className="text-base font-semibold text-primary mb-4">Recent Activity</h3>
               <div className="space-y-3">
                 {group.recentActivity.map((activity) => (
                   <div key={activity.id} className="flex items-start">
@@ -301,9 +303,9 @@ const GroupDetailsPageContent: React.FC = () => {
                       <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
                     </div>
                     <div className="ml-3">
-                      <p className="text-sm text-gray-900">{activity.action}</p>
-                      <p className="text-sm text-gray-600">by {activity.user}</p>
-                      <p className="text-xs text-gray-500">{activity.timestamp}</p>
+                      <p className="text-sm text-primary">{activity.action}</p>
+                      <p className="text-sm text-secondary">by {activity.user}</p>
+                      <p className="text-xs text-tertiary">{activity.timestamp}</p>
                     </div>
                   </div>
                 ))}
@@ -312,15 +314,17 @@ const GroupDetailsPageContent: React.FC = () => {
           </div>
 
           {/* Danger Zone */}
-          <div className="mt-8 bg-red-50 border border-red-200 rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-red-900 mb-2">Danger Zone</h3>
-            <p className="text-sm text-red-700 mb-4">Once you delete a group, there is no going back. Please be certain.</p>
-            <Button
-              variant="danger"
-              size="md"
-              onClick={handleDeleteGroup}
-              className="px-4 py-2"
-            >
+          <div
+            className="mt-8 p-6 rounded-xl"
+            style={{ backgroundColor: 'rgba(255,59,48,0.08)', border: '1px solid rgba(255,59,48,0.2)' }}
+          >
+            <h3 className="text-base font-semibold mb-2" style={{ color: 'var(--color-red)' }}>
+              Danger Zone
+            </h3>
+            <p className="text-sm mb-4" style={{ color: 'var(--color-red)', opacity: 0.8 }}>
+              Once you delete a group, there is no going back. Please be certain.
+            </p>
+            <Button variant="danger" size="md" onClick={handleDeleteGroup} className="px-4 py-2">
               Delete Group
             </Button>
           </div>

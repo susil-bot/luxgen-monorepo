@@ -1,6 +1,15 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
-import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo, TenantDebug, CourseMenu, CourseOverview, CourseAnalytics } from '@luxgen/ui';
+import {
+  AppLayout,
+  getDefaultSidebarSections,
+  getDefaultUser,
+  getDefaultLogo,
+  TenantDebug,
+  CourseMenu,
+  CourseOverview,
+  CourseAnalytics,
+} from '@luxgen/ui';
 import { TenantBanner } from '../components/tenant/TenantBanner';
 
 interface CoursesPageProps {
@@ -21,14 +30,14 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
     level: 'Intermediate',
     rating: 4.8,
     enrolledCount: 1250,
-    thumbnail: '/images/course-thumbnail.jpg'
+    thumbnail: '/images/course-thumbnail.jpg',
   });
 
   const [analyticsMetrics] = useState({
     totalEnrollments: 1250,
     completionRate: 78,
     averageRating: 4.8,
-    engagementScore: 85
+    engagementScore: 85,
   });
 
   useEffect(() => {
@@ -56,7 +65,7 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
       <Head>
         <title>Courses - {tenant.charAt(0).toUpperCase() + tenant.slice(1)}</title>
       </Head>
-      
+
       <AppLayout
         sidebarSections={getDefaultSidebarSections()}
         user={getDefaultUser()}
@@ -81,32 +90,20 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
         responsive={true}
       >
         <TenantBanner tenant={tenant} />
-        
+
         <div className="mt-6 space-y-8">
           {/* Course Overview */}
-          <CourseOverview
-            course={sampleCourse}
-            userRole={userRole}
-            enrollmentStatus="enrolled"
-          />
+          <CourseOverview course={sampleCourse} userRole={userRole} enrollmentStatus="enrolled" />
 
           {/* Course Analytics (Admin/Instructor only) */}
           {(userRole === 'admin' || userRole === 'instructor') && (
-            <CourseAnalytics
-              courseId={sampleCourse.id}
-              userRole={userRole}
-              metrics={analyticsMetrics}
-            />
+            <CourseAnalytics courseId={sampleCourse.id} userRole={userRole} metrics={analyticsMetrics} />
           )}
 
           {/* Course Menu */}
-          <CourseMenu
-            userRole={userRole}
-            courseId={sampleCourse.id}
-            onNavigate={handleNavigate}
-          />
+          <CourseMenu userRole={userRole} courseId={sampleCourse.id} onNavigate={handleNavigate} />
         </div>
-        
+
         <TenantDebug />
       </AppLayout>
     </>
@@ -116,7 +113,7 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
 export const getServerSideProps = async (context: any) => {
   const host = context.req.headers.host;
   let tenant = 'demo'; // Default tenant
-  
+
   // Extract tenant from subdomain
   if (host && host.includes('.')) {
     const parts = host.split('.');
@@ -127,16 +124,15 @@ export const getServerSideProps = async (context: any) => {
       }
     }
   }
-  
+
   // Check query parameter as fallback
   if (context.query.tenant) {
     tenant = context.query.tenant;
   }
-  
+
   return {
     props: {
-      tenant
-    }
+      tenant,
+    },
   };
 };
-

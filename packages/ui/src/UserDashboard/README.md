@@ -24,14 +24,14 @@ const userDashboardData = {
   currentTenant: {
     name: 'Ideavibes',
     subdomain: 'ideavibes',
-    logo: '/logos/ideavibes.png'
+    logo: '/logos/ideavibes.png',
   },
   user: {
     name: 'John Doe',
     email: 'john@example.com',
     avatar: '/avatars/john.jpg',
     initials: 'JD',
-    role: 'Student'
+    role: 'Student',
   },
   stats: {
     totalCourses: 12,
@@ -39,7 +39,7 @@ const userDashboardData = {
     completionRate: 87,
     myCourses: 5,
     completedCourses: 3,
-    inProgressCourses: 2
+    inProgressCourses: 2,
   },
   myCourses: [
     {
@@ -51,8 +51,8 @@ const userDashboardData = {
       instructor: 'Jane Smith',
       duration: '8 weeks',
       thumbnail: '/thumbnails/react.jpg',
-      lastAccessed: '2 hours ago'
-    }
+      lastAccessed: '2 hours ago',
+    },
   ],
   recentActivities: [
     {
@@ -61,8 +61,8 @@ const userDashboardData = {
       title: 'Completed React Fundamentals Quiz',
       courseTitle: 'Advanced React Development',
       time: '1 hour ago',
-      status: 'completed'
-    }
+      status: 'completed',
+    },
   ],
   announcements: [
     {
@@ -72,13 +72,13 @@ const userDashboardData = {
       author: 'Admin Team',
       createdAt: '2024-01-20',
       priority: 'medium',
-      isRead: false
-    }
+      isRead: false,
+    },
   ],
   quickActions: [
     { id: '1', label: 'Browse Courses', onClick: () => console.log('Browse Courses') },
-    { id: '2', label: 'View Progress', onClick: () => console.log('View Progress') }
-  ]
+    { id: '2', label: 'View Progress', onClick: () => console.log('View Progress') },
+  ],
 };
 
 <UserDashboard
@@ -87,27 +87,27 @@ const userDashboardData = {
   onCourseClick={(course) => console.log('Course clicked:', course)}
   onActivityClick={(activity) => console.log('Activity clicked:', activity)}
   onAnnouncementClick={(announcement) => console.log('Announcement clicked:', announcement)}
-/>
+/>;
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `title` | `string` | `'Welcome to Ideavibes'` | Main dashboard title |
-| `subtitle` | `string` | `'Your learning management dashboard'` | Dashboard subtitle |
-| `currentTenant` | `object` | - | Current tenant information |
-| `user` | `object` | - | Current user information |
-| `stats` | `object` | - | User statistics (totalCourses, activeStudents, completionRate, etc.) |
-| `myCourses` | `array` | `[]` | User's enrolled courses |
-| `recentActivities` | `array` | `[]` | Recent user activities |
-| `announcements` | `array` | `[]` | Important announcements |
-| `quickActions` | `array` | `[]` | Quick action buttons |
-| `variant` | `'default' \| 'compact' \| 'detailed'` | `'default'` | Dashboard layout variant |
-| `loading` | `boolean` | `false` | Show loading state |
-| `onCourseClick` | `function` | - | Callback for course clicks |
-| `onActivityClick` | `function` | - | Callback for activity clicks |
-| `onAnnouncementClick` | `function` | - | Callback for announcement clicks |
+| Prop                  | Type                                   | Default                                | Description                                                          |
+| --------------------- | -------------------------------------- | -------------------------------------- | -------------------------------------------------------------------- |
+| `title`               | `string`                               | `'Welcome to Ideavibes'`               | Main dashboard title                                                 |
+| `subtitle`            | `string`                               | `'Your learning management dashboard'` | Dashboard subtitle                                                   |
+| `currentTenant`       | `object`                               | -                                      | Current tenant information                                           |
+| `user`                | `object`                               | -                                      | Current user information                                             |
+| `stats`               | `object`                               | -                                      | User statistics (totalCourses, activeStudents, completionRate, etc.) |
+| `myCourses`           | `array`                                | `[]`                                   | User's enrolled courses                                              |
+| `recentActivities`    | `array`                                | `[]`                                   | Recent user activities                                               |
+| `announcements`       | `array`                                | `[]`                                   | Important announcements                                              |
+| `quickActions`        | `array`                                | `[]`                                   | Quick action buttons                                                 |
+| `variant`             | `'default' \| 'compact' \| 'detailed'` | `'default'`                            | Dashboard layout variant                                             |
+| `loading`             | `boolean`                              | `false`                                | Show loading state                                                   |
+| `onCourseClick`       | `function`                             | -                                      | Callback for course clicks                                           |
+| `onActivityClick`     | `function`                             | -                                      | Callback for activity clicks                                         |
+| `onAnnouncementClick` | `function`                             | -                                      | Callback for announcement clicks                                     |
 
 ## Multi-Tenant Features
 

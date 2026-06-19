@@ -13,7 +13,9 @@
     "seed": "ts-node src/db/seed.ts"
   },
   "dependencies": {
+    "@luxgen/agent": "*",
     "@luxgen/auth": "*",
+    "@luxgen/billing": "*",
     "@luxgen/config": "*",
     "@luxgen/core": "*",
     "@luxgen/db": "*",
@@ -27,7 +29,8 @@
     "graphql-tools": "^9.0.0",
     "helmet": "^7.0.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^7.5.0"
+    "mongoose": "^7.5.0",
+    "stripe": "^17.4.0"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.0",

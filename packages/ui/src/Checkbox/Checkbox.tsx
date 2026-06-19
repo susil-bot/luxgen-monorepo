@@ -57,14 +57,9 @@ const CheckboxComponent: React.FC<CheckboxProps> = ({
           }}
           {...props}
         />
-        
+
         <span className={`checkbox-custom ${error ? 'error' : ''}`}>
-          <svg
-            className="checkbox-icon"
-            viewBox="0 0 16 16"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
+          <svg className="checkbox-icon" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path
               d="M13.5 4.5L6 12L2.5 8.5"
               stroke="currentColor"
@@ -82,7 +77,7 @@ const CheckboxComponent: React.FC<CheckboxProps> = ({
             />
           </svg>
         </span>
-        
+
         {label && (
           <span className="checkbox-text">
             {label}
@@ -90,14 +85,10 @@ const CheckboxComponent: React.FC<CheckboxProps> = ({
           </span>
         )}
       </label>
-      
-      {error && (
-        <p className="checkbox-error">{error}</p>
-      )}
-      
-      {helperText && !error && (
-        <p className="checkbox-helper">{helperText}</p>
-      )}
+
+      {error && <p className="checkbox-error">{error}</p>}
+
+      {helperText && !error && <p className="checkbox-helper">{helperText}</p>}
     </div>
   );
 };

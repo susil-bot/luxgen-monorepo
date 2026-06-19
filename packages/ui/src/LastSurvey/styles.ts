@@ -31,10 +31,7 @@ const getVariantStyles = (variant: 'default' | 'compact' | 'detailed') => {
 };
 
 // Main function to get all styles for the LastSurvey component
-export const getLastSurveyStyles = (
-  tenantTheme: TenantTheme,
-  variant: 'default' | 'compact' | 'detailed'
-) => {
+export const getLastSurveyStyles = (tenantTheme: TenantTheme, variant: 'default' | 'compact' | 'detailed') => {
   const variantStyles = getVariantStyles(variant);
 
   return {

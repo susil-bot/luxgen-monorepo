@@ -17,7 +17,7 @@ const {
   ButtonIcon,
   ButtonCountWrapper,
   ButtonPriceLabel,
-  ButtonPriceWrapper
+  ButtonPriceWrapper,
 } = require('./styles');
 
 const layoutMapping = {
@@ -29,7 +29,7 @@ const layoutMapping = {
   'utility-text': 'secondary',
   'inverted-filled': 'utility-inverted',
   'inverted-outlined': 'utility-pair-inverted',
-  'inverted-text': 'inverted-text'
+  'inverted-text': 'inverted-text',
 };
 
 const getUpdatedButtonProps = (isDisabled, shouldShowLoadingState, label) => {
@@ -43,8 +43,7 @@ const layoutStyle = (buttonStyle, typesStyle) => {
   if (typesStyle) {
     const typeStyleArr = typesStyle.split('-');
     const temp =
-      typeStyleArr[typeStyleArr.length - 1] === 'inverted' &&
-      typesStyle === 'utility-inverted'
+      typeStyleArr[typeStyleArr.length - 1] === 'inverted' && typesStyle === 'utility-inverted'
         ? `${typeStyleArr[typeStyleArr.length - 1]}-${buttonStyle}`
         : `${typesStyle}-${buttonStyle}`;
     if (layoutMapping[temp]) return layoutMapping[temp];
@@ -98,22 +97,18 @@ const Button = ({
   trackingNamespace,
   isInverted = false,
   variations = {
-    typeStyle: 'primary'
+    typeStyle: 'primary',
   },
-  variationName
+  variationName,
 }) => {
   React.useEffect(() => {
     window.Tracking.TRACK_COMPONENT.broadcast(TrackComponentChannel.RENDER, {
       name: 'Button',
-      variation: variationName
+      variation: variationName,
     });
   }, [variationName]);
 
-  const { showLoader, buttonLabel } = getUpdatedButtonProps(
-    isDisabled,
-    shouldShowLoadingState,
-    label
-  );
+  const { showLoader, buttonLabel } = getUpdatedButtonProps(isDisabled, shouldShowLoadingState, label);
 
   const shouldRenderLoaderOnButton = shouldShowLoadingState && showLoader;
 
@@ -122,7 +117,7 @@ const Button = ({
     link: 'a',
     reset: 'button',
     submit: 'button',
-    text: 'div'
+    text: 'div',
   };
   const TagName = tags[inputKind];
   const anchorProps =
@@ -131,7 +126,7 @@ const Button = ({
           'aria-disabled': isLinkDisabled,
           href,
           rel,
-          target
+          target,
         }
       : {};
 
@@ -143,7 +138,7 @@ const Button = ({
   if (shouldEnableBundleComponentAnalytics) {
     analyticsDataAttribute = componentTracking.addDataSectionTitleAttribute(
       shouldEnableBundleComponentAnalytics,
-      trackingNamespace || label
+      trackingNamespace || label,
     );
   }
 
@@ -158,24 +153,13 @@ const Button = ({
       isIconButton={isIconButton}
       size={size}
     >
-      <ButtonIcon
-        className="button-icon"
-        as={Icon}
-        size={size}
-        isinline={isInline}
-      />
+      <ButtonIcon className="button-icon" as={Icon} size={size} isinline={isInline} />
     </ButtonIconWrapper>
   );
 
   const price = (
-    <ButtonPriceWrapper
-      as="span"
-      className={classnames('button', 'button-price')}
-    >
-      <ButtonPriceLabel
-        className="button__label"
-        dangerouslySetInnerHTML={{ __html: priceLabel }}
-      />
+    <ButtonPriceWrapper as="span" className={classnames('button', 'button-price')}>
+      <ButtonPriceLabel className="button__label" dangerouslySetInnerHTML={{ __html: priceLabel }} />
     </ButtonPriceWrapper>
   );
 
@@ -204,7 +188,9 @@ const Button = ({
       event.preventDefault();
       return;
     }
-    onClickHandler && onClickHandler(event);
+    if (onClickHandler) {
+      onClickHandler(event);
+    }
     if (shouldEnableClickTracking) {
       snowplowClickHandler(isLink, label, href, subject, 'click', componentId);
     }
@@ -222,12 +208,9 @@ const Button = ({
       className={classnames(
         'button',
         {
-          [`button--${layoutStyle(btnStyle, typeStyle)}`]: layoutStyle(
-            btnStyle,
-            typeStyle
-          )
+          [`button--${layoutStyle(btnStyle, typeStyle)}`]: layoutStyle(btnStyle, typeStyle),
         },
-        className
+        className,
       )}
       cornerRadius={cornerRadius}
       isInline={isInline}
@@ -238,7 +221,7 @@ const Button = ({
       typeStyle={layoutStyle(btnStyle, typeStyle)}
       data-event-click={JSON.stringify({
         element: 'Button',
-        outgoingURL: href
+        outgoingURL: href,
       })}
       data-testid="Button"
       aria-disabled={isDisabled}
@@ -258,10 +241,7 @@ const Button = ({
     >
       {shouldRenderLoaderOnButton && <Loader className="spinner" />}
       {hasLabelCount && Count}
-      {(isIconButton || hasEnableIcon) &&
-        Icon &&
-        iconPosition === 'before' &&
-        buttonIcon}
+      {(isIconButton || hasEnableIcon) && Icon && iconPosition === 'before' && buttonIcon}
       <ButtonLabel
         className="button__label"
         dangerouslySetInnerHTML={{ __html: renderLabelHTML() }}
@@ -271,10 +251,7 @@ const Button = ({
         hasMultipleLines={hasMultipleLines}
       />
       {hasPriceSection && price}
-      {(isIconButton || hasEnableIcon) &&
-        Icon &&
-        iconPosition === 'after' &&
-        buttonIcon}
+      {(isIconButton || hasEnableIcon) && Icon && iconPosition === 'after' && buttonIcon}
     </ButtonWrapper>
   );
 };
@@ -287,11 +264,7 @@ Button.propTypes = {
   ButtonIcon: PropTypes.func,
   className: PropTypes.string,
   componentId: PropTypes.string,
-  cornerRadius: PropTypes.oneOf([
-    'NoCornerRadius',
-    'RoundedCorner',
-    'FullyRoundedCorner'
-  ]),
+  cornerRadius: PropTypes.oneOf(['NoCornerRadius', 'RoundedCorner', 'FullyRoundedCorner']),
   countValue: PropTypes.number,
   dataAttrs: PropTypes.object,
   form: PropTypes.string,
@@ -328,8 +301,8 @@ Button.propTypes = {
   trackingNamespace: PropTypes.string,
   variationName: PropTypes.string,
   variations: PropTypes.shape({
-    typeStyle: PropTypes.oneOf(['primary', 'utility', 'utility-inverted'])
-  })
+    typeStyle: PropTypes.oneOf(['primary', 'utility', 'utility-inverted']),
+  }),
 };
 
 module.exports = Button;

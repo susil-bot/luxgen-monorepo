@@ -20,17 +20,19 @@ export const requireRole = (requiredRole: UserRole) => {
         return res.status(401).json({
           success: false,
           message: 'Authentication required',
-          error: 'User not authenticated'
+          error: 'User not authenticated',
         });
       }
 
       // Check if user has the required role
       if (req.user.role !== requiredRole) {
-        logger.warn(`Access denied: User ${req.user.email} (${req.user.role}) attempted to access ${requiredRole} resource`);
+        logger.warn(
+          `Access denied: User ${req.user.email} (${req.user.role}) attempted to access ${requiredRole} resource`,
+        );
         return res.status(403).json({
           success: false,
           message: 'Insufficient privileges',
-          error: `Required role: ${requiredRole}, User role: ${req.user.role}`
+          error: `Required role: ${requiredRole}, User role: ${req.user.role}`,
         });
       }
 
@@ -39,7 +41,7 @@ export const requireRole = (requiredRole: UserRole) => {
         return res.status(403).json({
           success: false,
           message: 'Account is not active',
-          error: `User status: ${req.user.status}`
+          error: `User status: ${req.user.status}`,
         });
       }
 
@@ -50,7 +52,7 @@ export const requireRole = (requiredRole: UserRole) => {
       return res.status(500).json({
         success: false,
         message: 'Internal server error during role verification',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
       });
     }
   };
@@ -66,21 +68,21 @@ export const requirePermissions = (requiredPermissions: string[]) => {
         return res.status(401).json({
           success: false,
           message: 'Authentication required',
-          error: 'User not authenticated'
+          error: 'User not authenticated',
         });
       }
 
       // Check if user has all required permissions
-      const hasAllPermissions = requiredPermissions.every(permission => 
-        hasPermission(req.user!.role, permission)
-      );
+      const hasAllPermissions = requiredPermissions.every((permission) => hasPermission(req.user!.role, permission));
 
       if (!hasAllPermissions) {
-        logger.warn(`Access denied: User ${req.user.email} lacks required permissions: ${requiredPermissions.join(', ')}`);
+        logger.warn(
+          `Access denied: User ${req.user.email} lacks required permissions: ${requiredPermissions.join(', ')}`,
+        );
         return res.status(403).json({
           success: false,
           message: 'Insufficient permissions',
-          error: `Required permissions: ${requiredPermissions.join(', ')}`
+          error: `Required permissions: ${requiredPermissions.join(', ')}`,
         });
       }
 
@@ -91,7 +93,7 @@ export const requirePermissions = (requiredPermissions: string[]) => {
       return res.status(500).json({
         success: false,
         message: 'Internal server error during permission verification',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
       });
     }
   };
@@ -106,7 +108,7 @@ export const canManageUsers = async (req: RoleManagementRequest, res: Response, 
       return res.status(401).json({
         success: false,
         message: 'Authentication required',
-        error: 'User not authenticated'
+        error: 'User not authenticated',
       });
     }
 
@@ -124,7 +126,7 @@ export const canManageUsers = async (req: RoleManagementRequest, res: Response, 
           return res.status(404).json({
             success: false,
             message: 'User not found',
-            error: 'Target user does not exist'
+            error: 'Target user does not exist',
           });
         }
 
@@ -133,7 +135,7 @@ export const canManageUsers = async (req: RoleManagementRequest, res: Response, 
           return res.status(403).json({
             success: false,
             message: 'Cannot manage users from other tenants',
-            error: 'Cross-tenant user management not allowed'
+            error: 'Cross-tenant user management not allowed',
           });
         }
       }
@@ -144,14 +146,14 @@ export const canManageUsers = async (req: RoleManagementRequest, res: Response, 
     return res.status(403).json({
       success: false,
       message: 'Insufficient privileges to manage users',
-      error: `Role ${req.user.role} cannot manage users`
+      error: `Role ${req.user.role} cannot manage users`,
     });
   } catch (error) {
     logger.error('User management middleware error:', error);
     return res.status(500).json({
       success: false,
       message: 'Internal server error during user management verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 };
@@ -165,7 +167,7 @@ export const canManageTenants = async (req: RoleManagementRequest, res: Response
       return res.status(401).json({
         success: false,
         message: 'Authentication required',
-        error: 'User not authenticated'
+        error: 'User not authenticated',
       });
     }
 
@@ -174,7 +176,7 @@ export const canManageTenants = async (req: RoleManagementRequest, res: Response
       return res.status(403).json({
         success: false,
         message: 'Insufficient privileges to manage tenants',
-        error: `Role ${req.user.role} cannot manage tenants`
+        error: `Role ${req.user.role} cannot manage tenants`,
       });
     }
 
@@ -184,7 +186,7 @@ export const canManageTenants = async (req: RoleManagementRequest, res: Response
     return res.status(500).json({
       success: false,
       message: 'Internal server error during tenant management verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 };
@@ -198,7 +200,7 @@ export const canInviteUsers = async (req: RoleManagementRequest, res: Response, 
       return res.status(401).json({
         success: false,
         message: 'Authentication required',
-        error: 'User not authenticated'
+        error: 'User not authenticated',
       });
     }
 
@@ -207,7 +209,7 @@ export const canInviteUsers = async (req: RoleManagementRequest, res: Response, 
       return res.status(403).json({
         success: false,
         message: 'Insufficient privileges to invite users',
-        error: `Role ${req.user.role} cannot invite users`
+        error: `Role ${req.user.role} cannot invite users`,
       });
     }
 
@@ -217,7 +219,7 @@ export const canInviteUsers = async (req: RoleManagementRequest, res: Response, 
     return res.status(500).json({
       success: false,
       message: 'Internal server error during invitation verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 };
@@ -231,7 +233,7 @@ export const canApproveRequests = async (req: RoleManagementRequest, res: Respon
       return res.status(401).json({
         success: false,
         message: 'Authentication required',
-        error: 'User not authenticated'
+        error: 'User not authenticated',
       });
     }
 
@@ -240,7 +242,7 @@ export const canApproveRequests = async (req: RoleManagementRequest, res: Respon
       return res.status(403).json({
         success: false,
         message: 'Insufficient privileges to approve requests',
-        error: `Role ${req.user.role} cannot approve requests`
+        error: `Role ${req.user.role} cannot approve requests`,
       });
     }
 
@@ -250,7 +252,7 @@ export const canApproveRequests = async (req: RoleManagementRequest, res: Respon
     return res.status(500).json({
       success: false,
       message: 'Internal server error during approval verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 };
@@ -264,12 +266,12 @@ export const requireTenantAccess = async (req: RoleManagementRequest, res: Respo
       return res.status(401).json({
         success: false,
         message: 'Authentication required',
-        error: 'User not authenticated'
+        error: 'User not authenticated',
       });
     }
 
     const requestedTenant = req.params.tenantId || req.query.tenantId || req.body.tenantId;
-    
+
     // Super admins can access all tenants
     if (req.user.role === UserRole.SUPER_ADMIN) {
       req.tenantContext = requestedTenant || req.user.tenant.toString();
@@ -281,7 +283,7 @@ export const requireTenantAccess = async (req: RoleManagementRequest, res: Respo
       return res.status(403).json({
         success: false,
         message: 'Access denied to requested tenant',
-        error: 'Cannot access resources from other tenants'
+        error: 'Cannot access resources from other tenants',
       });
     }
 
@@ -292,7 +294,7 @@ export const requireTenantAccess = async (req: RoleManagementRequest, res: Respo
     return res.status(500).json({
       success: false,
       message: 'Internal server error during tenant access verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
     });
   }
 };

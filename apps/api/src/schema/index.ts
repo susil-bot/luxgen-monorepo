@@ -8,6 +8,10 @@ import { courseTypeDefs } from './course/typeDefs';
 import { groupTypeDefs } from './group/typeDefs';
 import { dashboardTypeDefs } from './dashboard/typeDefs';
 import { userRoleTypeDefs } from './userRole/typeDefs';
+import { automationTypeDefs } from './automation/typeDefs';
+import { billingTypeDefs } from './billing/typeDefs';
+import { marketplaceTypeDefs } from './marketplace/typeDefs';
+import { listingTypeDefs } from './listing/typeDefs';
 
 // Import resolvers
 import { tenantResolvers } from './tenant/resolvers';
@@ -16,6 +20,10 @@ import { courseResolvers } from './course/resolvers';
 import { groupResolvers } from './group/resolvers';
 import { dashboardResolvers } from './dashboard/resolvers';
 import { userRoleResolvers } from './userRole/resolvers';
+import { automationResolvers } from './automation/resolvers';
+import { billingResolvers } from './billing/resolvers';
+import { marketplaceResolvers } from './marketplace/resolvers';
+import { listingResolvers } from './listing/resolvers';
 
 // Base schema
 const baseTypeDefs = `
@@ -44,6 +52,10 @@ export const typeDefs = mergeTypeDefs([
   groupTypeDefs,
   dashboardTypeDefs,
   userRoleTypeDefs,
+  automationTypeDefs,
+  billingTypeDefs,
+  marketplaceTypeDefs,
+  listingTypeDefs,
 ]);
 
 // Scalar resolvers
@@ -87,6 +99,10 @@ export const resolvers: any = mergeResolvers([
   groupResolvers,
   dashboardResolvers,
   userRoleResolvers,
+  automationResolvers,
+  billingResolvers,
+  marketplaceResolvers,
+  listingResolvers,
 ]);
 
 // Create executable schema

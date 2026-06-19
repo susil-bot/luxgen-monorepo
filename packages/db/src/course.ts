@@ -20,43 +20,48 @@ export interface ICourse extends Document {
   updatedAt: Date;
 }
 
-const courseSchema = new Schema<ICourse>({
-  title: {
-    type: String,
-    required: true,
-    trim: true,
+const courseSchema = new Schema<ICourse>(
+  {
+    title: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    description: {
+      type: String,
+      trim: true,
+    },
+    instructor: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
+    students: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
+    ],
+    tenant: {
+      type: Schema.Types.ObjectId,
+      ref: 'Tenant',
+      required: true,
+    },
+    startDate: {
+      type: Date,
+    },
+    endDate: {
+      type: Date,
+    },
+    status: {
+      type: String,
+      enum: Object.values(CourseStatus),
+      default: CourseStatus.DRAFT,
+    },
   },
-  description: {
-    type: String,
-    trim: true,
+  {
+    timestamps: true,
   },
-  instructor: {
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  students: [{
-    type: Schema.Types.ObjectId,
-    ref: 'User',
-  }],
-  tenant: {
-    type: Schema.Types.ObjectId,
-    ref: 'Tenant',
-    required: true,
-  },
-  startDate: {
-    type: Date,
-  },
-  endDate: {
-    type: Date,
-  },
-  status: {
-    type: String,
-    enum: Object.values(CourseStatus),
-    default: CourseStatus.DRAFT,
-  },
-}, {
-  timestamps: true,
-});
+);
 
 export const Course = model<ICourse>('Course', courseSchema);

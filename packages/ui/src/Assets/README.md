@@ -5,6 +5,7 @@ A comprehensive asset management system for the LuxGen application, providing gl
 ## 🎯 Overview
 
 The Assets package provides:
+
 - **Global Asset Management**: Application-wide asset management
 - **Tenant-Specific Assets**: Custom branding for different tenants
 - **Asset Components**: Reusable React components for displaying assets
@@ -45,12 +46,12 @@ function App() {
 
 function YourComponent() {
   const { getAsset, getBrandAssets, loading } = useAssetManager();
-  
+
   const logo = getAsset('demo-logo-primary');
   const brandAssets = getBrandAssets();
-  
+
   if (loading) return <div>Loading assets...</div>;
-  
+
   return <img src={logo?.url} alt={logo?.alt} />;
 }
 ```
@@ -61,14 +62,14 @@ function YourComponent() {
 import { AssetImage, AssetLogo, AssetBackground } from '@luxgen/ui';
 
 // Display an image asset
-<AssetImage 
+<AssetImage
   asset={logoAsset}
   className="w-32 h-32"
   fallback="/default-logo.png"
 />
 
 // Display brand logo
-<AssetLogo 
+<AssetLogo
   brandAssets={brandAssets}
   variant="primary"
   size={40}
@@ -76,7 +77,7 @@ import { AssetImage, AssetLogo, AssetBackground } from '@luxgen/ui';
 />
 
 // Use as background
-<AssetBackground 
+<AssetBackground
   asset={backgroundAsset}
   className="h-screen"
   overlay={true}
@@ -102,6 +103,7 @@ interface AssetManagerProviderProps {
 ```
 
 **Props:**
+
 - `children`: React children
 - `defaultAssets`: Default asset configuration
 - `defaultBrandAssets`: Default brand assets
@@ -125,6 +127,7 @@ interface AssetImageProps {
 ```
 
 **Features:**
+
 - Automatic loading states
 - Error handling with fallbacks
 - Lazy loading support
@@ -146,6 +149,7 @@ interface AssetIconProps {
 ```
 
 **Features:**
+
 - Customizable size
 - Color theming
 - SVG support
@@ -167,6 +171,7 @@ interface AssetLogoProps {
 ```
 
 **Features:**
+
 - Multiple logo variants
 - Text display options
 - Brand consistency
@@ -188,6 +193,7 @@ interface AssetBackgroundProps {
 ```
 
 **Features:**
+
 - Overlay support
 - Custom positioning
 - Responsive backgrounds
@@ -260,12 +266,12 @@ const animationStyles = getAnimationStyles('fadeIn');
 ### Custom Styling
 
 ```tsx
-<AssetImage 
+<AssetImage
   asset={asset}
   className="w-32 h-32 rounded-lg shadow-lg"
-  style={{ 
+  style={{
     filter: 'brightness(1.1)',
-    transition: 'transform 0.2s ease'
+    transition: 'transform 0.2s ease',
   }}
 />
 ```
@@ -273,11 +279,16 @@ const animationStyles = getAnimationStyles('fadeIn');
 ## 🏢 Tenant Configuration
 
 ### Demo Tenant
+
 ```typescript
 const demoBrandAssets = {
   logo: {
-    primary: { /* Demo logo config */ },
-    icon: { /* Demo icon config */ },
+    primary: {
+      /* Demo logo config */
+    },
+    icon: {
+      /* Demo icon config */
+    },
   },
   colors: {
     primary: '#1E40AF',
@@ -291,11 +302,16 @@ const demoBrandAssets = {
 ```
 
 ### Idea Vibes Tenant
+
 ```typescript
 const ideaVibesBrandAssets = {
   logo: {
-    primary: { /* Idea Vibes logo config */ },
-    icon: { /* Idea Vibes icon config */ },
+    primary: {
+      /* Idea Vibes logo config */
+    },
+    icon: {
+      /* Idea Vibes icon config */
+    },
   },
   colors: {
     primary: '#7C3AED',
@@ -311,6 +327,7 @@ const ideaVibesBrandAssets = {
 ## 📡 API Integration
 
 ### Global Assets
+
 ```
 GET /api/assets/global
 ```
@@ -318,6 +335,7 @@ GET /api/assets/global
 Returns global assets and LuxGen brand assets.
 
 ### Tenant Assets
+
 ```
 GET /api/assets/tenant/[tenantId]
 ```
@@ -325,6 +343,7 @@ GET /api/assets/tenant/[tenantId]
 Returns tenant-specific assets and brand configuration.
 
 ### Response Format
+
 ```typescript
 interface AssetApiResponse {
   assets: AssetConfig[];
@@ -337,6 +356,7 @@ interface AssetApiResponse {
 ## 🧪 Testing
 
 ### Component Testing
+
 ```typescript
 import { render, screen } from '@testing-library/react';
 import { AssetManagerProvider, AssetImage } from '@luxgen/ui';
@@ -347,12 +367,13 @@ test('renders asset image', () => {
       <AssetImage asset={mockAsset} />
     </AssetManagerProvider>
   );
-  
+
   expect(screen.getByAltText('Test Asset')).toBeInTheDocument();
 });
 ```
 
 ### Mock Assets
+
 ```typescript
 const mockAsset: AssetConfig = {
   id: 'test-asset',
@@ -367,18 +388,21 @@ const mockAsset: AssetConfig = {
 ## 🎯 Best Practices
 
 ### Performance
+
 - **Lazy Loading**: Use lazy loading for non-critical assets
 - **Preloading**: Preload critical assets
 - **Optimization**: Optimize asset sizes and formats
 - **Caching**: Implement proper caching strategies
 
 ### Accessibility
+
 - **Alt Text**: Always provide meaningful alt text
 - **Focus Management**: Ensure keyboard navigation
 - **Screen Readers**: Test with screen readers
 - **Color Contrast**: Maintain proper contrast ratios
 
 ### Error Handling
+
 - **Fallbacks**: Provide fallback images
 - **Error States**: Handle loading and error states
 - **Retry Logic**: Implement retry mechanisms
@@ -387,6 +411,7 @@ const mockAsset: AssetConfig = {
 ## 🔧 Configuration
 
 ### Environment Variables
+
 ```bash
 # Asset CDN URL
 ASSET_CDN_URL=https://cdn.example.com
@@ -399,6 +424,7 @@ ASSET_OPTIMIZATION=true
 ```
 
 ### Build Configuration
+
 ```typescript
 // next.config.js
 module.exports = {
@@ -412,6 +438,7 @@ module.exports = {
 ## 🚀 Advanced Usage
 
 ### Custom Asset Types
+
 ```typescript
 interface CustomAssetConfig extends AssetConfig {
   customProperty: string;
@@ -423,17 +450,19 @@ interface CustomAssetConfig extends AssetConfig {
 ```
 
 ### Dynamic Asset Loading
+
 ```typescript
 const loadTenantAssets = async (tenantId: string) => {
   const response = await fetch(`/api/assets/tenant/${tenantId}`);
   const { assets, brandAssets } = await response.json();
-  
+
   // Process and cache assets
   return { assets, brandAssets };
 };
 ```
 
 ### Asset Optimization
+
 ```typescript
 const optimizeAsset = (asset: AssetConfig) => {
   // Implement asset optimization logic
@@ -469,6 +498,7 @@ const optimizeAsset = (asset: AssetConfig) => {
    - Update type definitions
 
 ### Debug Tools
+
 - Use browser dev tools to inspect asset loading
 - Check network tab for failed requests
 - Verify asset URLs in console
@@ -477,12 +507,14 @@ const optimizeAsset = (asset: AssetConfig) => {
 ## 📈 Performance Metrics
 
 ### Key Metrics
+
 - **Asset Load Time**: < 2 seconds
 - **Bundle Size**: Monitor asset bundle size
 - **Cache Hit Rate**: > 80%
 - **Error Rate**: < 1%
 
 ### Monitoring
+
 - **Asset Performance**: Track loading times
 - **Error Tracking**: Monitor failed requests
 - **Usage Analytics**: Track asset usage
@@ -491,6 +523,7 @@ const optimizeAsset = (asset: AssetConfig) => {
 ## 🔄 Migration Guide
 
 ### From Legacy Assets
+
 ```typescript
 // Old way
 const logoUrl = '/assets/logo.png';
@@ -502,12 +535,13 @@ const logoUrl = logo?.url;
 ```
 
 ### Updating Existing Components
+
 ```typescript
 // Before
 <img src="/assets/logo.png" alt="Logo" />
 
 // After
-<AssetImage 
+<AssetImage
   asset={logoAsset}
   alt="Logo"
   className="w-32 h-32"
@@ -517,6 +551,7 @@ const logoUrl = logo?.url;
 ## 📞 Support
 
 For questions or issues:
+
 1. Check the troubleshooting section
 2. Review the API documentation
 3. Create an issue in the repository

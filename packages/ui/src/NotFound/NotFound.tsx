@@ -66,17 +66,10 @@ const NotFoundComponent: React.FC<NotFoundProps> = ({
       <div className="flex justify-center mb-8">
         <div className="relative">
           {/* 404 Number */}
-          <div className="text-9xl font-bold text-gray-200 select-none">
-            404
-          </div>
+          <div className="text-9xl font-bold text-gray-200 select-none">404</div>
           {/* Illustration */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <svg
-              className="w-32 h-32 text-gray-300"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
+            <svg className="w-32 h-32 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -122,7 +115,7 @@ const NotFoundComponent: React.FC<NotFoundProps> = ({
             {getIllustration()}
             <h1 className="text-5xl font-bold text-gray-900 mb-6">{title}</h1>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">{description}</p>
-            
+
             {showSearch && (
               <form onSubmit={handleSearch} className="mb-8">
                 <div className="flex max-w-md mx-auto">
@@ -159,11 +152,7 @@ const NotFoundComponent: React.FC<NotFoundProps> = ({
               </div>
             )}
 
-            {customActions && (
-              <div className="mt-8">
-                {customActions}
-              </div>
-            )}
+            {customActions && <div className="mt-8">{customActions}</div>}
           </div>
         );
 
@@ -173,7 +162,7 @@ const NotFoundComponent: React.FC<NotFoundProps> = ({
             {getIllustration()}
             <h1 className="text-4xl font-bold text-gray-900 mb-4">{title}</h1>
             <p className="text-lg text-gray-600 mb-8 max-w-xl mx-auto">{description}</p>
-            
+
             {showSearch && (
               <form onSubmit={handleSearch} className="mb-8">
                 <div className="flex max-w-sm mx-auto">
@@ -210,27 +199,21 @@ const NotFoundComponent: React.FC<NotFoundProps> = ({
               </div>
             )}
 
-            {customActions && (
-              <div className="mt-6">
-                {customActions}
-              </div>
-            )}
+            {customActions && <div className="mt-6">{customActions}</div>}
           </div>
         );
     }
   };
 
   return (
-    <div 
+    <div
       className={`min-h-screen flex items-center justify-center px-4 py-8 ${className}`}
       style={{
         backgroundColor: tenantTheme.colors.background,
         color: tenantTheme.colors.text,
       }}
     >
-      <div className="max-w-2xl w-full">
-        {getContent()}
-      </div>
+      <div className="max-w-2xl w-full">{getContent()}</div>
     </div>
   );
 };

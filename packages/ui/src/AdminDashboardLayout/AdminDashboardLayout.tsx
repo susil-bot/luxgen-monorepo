@@ -4,12 +4,13 @@ import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 import { AppLayout } from '../Layout';
 import { AdminDashboard } from '../AdminDashboard';
-import { getDefaultSidebarSections, getDefaultNavItems, getDefaultUser, getDefaultLogo } from '../Layout/DefaultNavigation';
 import {
-  getAdminDashboardLayoutStyles,
-  adminDashboardLayoutClasses,
-  adminDashboardLayoutCSS
-} from './styles';
+  getDefaultSidebarSections,
+  getDefaultNavItems,
+  getDefaultUser,
+  getDefaultLogo,
+} from '../Layout/DefaultNavigation';
+import { getAdminDashboardLayoutStyles, adminDashboardLayoutClasses, adminDashboardLayoutCSS } from './styles';
 
 export interface AdminDashboardLayoutProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
@@ -103,15 +104,85 @@ export interface AdminDashboardLayoutProps extends BaseComponentProps {
   tabletBreakpoint?: number;
   desktopBreakpoint?: number;
   onRetentionPointClick?: (point: { date: string; value: number; label?: string }) => void;
-  onEngagementSegmentClick?: (segment: { id: string; label: string; value: number; color: string; percentage: number }) => void;
+  onEngagementSegmentClick?: (segment: {
+    id: string;
+    label: string;
+    value: number;
+    color: string;
+    percentage: number;
+  }) => void;
   onTrendsPointClick?: (point: { label: string; interactions: number; completions: number }) => void;
-  onActivityClick?: (activity: { id: string; user: { name: string; avatar?: string; initials?: string }; action: string; time: string; status: 'online' | 'offline'; avatarColor?: string }) => void;
-  onSurveyView?: (survey: { id: string; title: string; status: 'active' | 'completed' | 'draft' | 'closed'; progress: number; totalResponses: number; targetResponses?: number; createdAt: string; expiresAt?: string; description?: string }) => void;
-  onSurveyEdit?: (survey: { id: string; title: string; status: 'active' | 'completed' | 'draft' | 'closed'; progress: number; totalResponses: number; targetResponses?: number; createdAt: string; expiresAt?: string; description?: string }) => void;
-  onSurveyShare?: (survey: { id: string; title: string; status: 'active' | 'completed' | 'draft' | 'closed'; progress: number; totalResponses: number; targetResponses?: number; createdAt: string; expiresAt?: string; description?: string }) => void;
-  onPermissionApprove?: (request: { id: string; user: { name: string; email: string; avatar?: string; initials?: string }; permission: string; resource: string; requestedAt: string; reason?: string; status: 'pending' | 'approved' | 'denied'; avatarColor?: string }) => void;
-  onPermissionDeny?: (request: { id: string; user: { name: string; email: string; avatar?: string; initials?: string }; permission: string; resource: string; requestedAt: string; reason?: string; status: 'pending' | 'approved' | 'denied'; avatarColor?: string }) => void;
-  onPermissionViewDetails?: (request: { id: string; user: { name: string; email: string; avatar?: string; initials?: string }; permission: string; resource: string; requestedAt: string; reason?: string; status: 'pending' | 'approved' | 'denied'; avatarColor?: string }) => void;
+  onActivityClick?: (activity: {
+    id: string;
+    user: { name: string; avatar?: string; initials?: string };
+    action: string;
+    time: string;
+    status: 'online' | 'offline';
+    avatarColor?: string;
+  }) => void;
+  onSurveyView?: (survey: {
+    id: string;
+    title: string;
+    status: 'active' | 'completed' | 'draft' | 'closed';
+    progress: number;
+    totalResponses: number;
+    targetResponses?: number;
+    createdAt: string;
+    expiresAt?: string;
+    description?: string;
+  }) => void;
+  onSurveyEdit?: (survey: {
+    id: string;
+    title: string;
+    status: 'active' | 'completed' | 'draft' | 'closed';
+    progress: number;
+    totalResponses: number;
+    targetResponses?: number;
+    createdAt: string;
+    expiresAt?: string;
+    description?: string;
+  }) => void;
+  onSurveyShare?: (survey: {
+    id: string;
+    title: string;
+    status: 'active' | 'completed' | 'draft' | 'closed';
+    progress: number;
+    totalResponses: number;
+    targetResponses?: number;
+    createdAt: string;
+    expiresAt?: string;
+    description?: string;
+  }) => void;
+  onPermissionApprove?: (request: {
+    id: string;
+    user: { name: string; email: string; avatar?: string; initials?: string };
+    permission: string;
+    resource: string;
+    requestedAt: string;
+    reason?: string;
+    status: 'pending' | 'approved' | 'denied';
+    avatarColor?: string;
+  }) => void;
+  onPermissionDeny?: (request: {
+    id: string;
+    user: { name: string; email: string; avatar?: string; initials?: string };
+    permission: string;
+    resource: string;
+    requestedAt: string;
+    reason?: string;
+    status: 'pending' | 'approved' | 'denied';
+    avatarColor?: string;
+  }) => void;
+  onPermissionViewDetails?: (request: {
+    id: string;
+    user: { name: string; email: string; avatar?: string; initials?: string };
+    permission: string;
+    resource: string;
+    requestedAt: string;
+    reason?: string;
+    status: 'pending' | 'approved' | 'denied';
+    avatarColor?: string;
+  }) => void;
 }
 
 const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
@@ -158,7 +229,11 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
   return (
     <>
       <style>{adminDashboardLayoutCSS}</style>
-      <div className={`${adminDashboardLayoutClasses.container} ${className}`} style={{ ...styles.container, ...style }} {...props}>
+      <div
+        className={`${adminDashboardLayoutClasses.container} ${className}`}
+        style={{ ...styles.container, ...style }}
+        {...props}
+      >
         <AppLayout
           tenantTheme={tenantTheme}
           navItems={navItems}

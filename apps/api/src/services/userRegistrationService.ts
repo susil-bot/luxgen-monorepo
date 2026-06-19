@@ -39,35 +39,31 @@ export class UserRegistrationService {
         return {
           success: false,
           message: 'Invalid tenant',
-          errors: { tenant: 'Tenant not found' }
+          errors: { tenant: 'Tenant not found' },
         };
       }
 
       // Check if user already exists
-      const existingUser = await User.findOne({ 
-        email: data.email.toLowerCase().trim() 
+      const existingUser = await User.findOne({
+        email: data.email.toLowerCase().trim(),
       });
-      
+
       if (existingUser) {
         return {
           success: false,
           message: 'User already exists',
-          errors: { email: 'Email is already registered' }
+          errors: { email: 'Email is already registered' },
         };
       }
 
       // Validate role assignment
-      const roleValidation = await this.validateRoleAssignment(
-        data.role, 
-        data.tenantId, 
-        data.invitedBy
-      );
-      
+      const roleValidation = await this.validateRoleAssignment(data.role, data.tenantId, data.invitedBy);
+
       if (!roleValidation.valid) {
         return {
           success: false,
           message: 'Invalid role assignment',
-          errors: { role: roleValidation.reason }
+          errors: { role: roleValidation.reason },
         };
       }
 
@@ -87,12 +83,14 @@ export class UserRegistrationService {
           language: data.metadata?.preferences?.language || 'en',
         },
         permissions: defaultPermissions,
-        tenantRoles: [{
-          tenantId: data.tenantId,
-          role: data.role,
-          assignedBy: data.invitedBy || data.tenantId, // Use tenant as fallback
-          assignedAt: new Date(),
-        }],
+        tenantRoles: [
+          {
+            tenantId: data.tenantId,
+            role: data.role,
+            assignedBy: data.invitedBy || data.tenantId, // Use tenant as fallback
+            assignedAt: new Date(),
+          },
+        ],
       };
 
       // Create new user
@@ -116,15 +114,14 @@ export class UserRegistrationService {
       return {
         success: true,
         user: newUser,
-        message: 'User registered successfully'
+        message: 'User registered successfully',
       };
-
     } catch (error) {
       logger.error('User registration error:', error);
       return {
         success: false,
         message: 'Registration failed',
-        errors: { general: 'Internal server error' }
+        errors: { general: 'Internal server error' },
       };
     }
   }
@@ -133,16 +130,16 @@ export class UserRegistrationService {
    * Validate if a role can be assigned
    */
   private static async validateRoleAssignment(
-    role: UserRole, 
-    tenantId: string, 
-    invitedBy?: string
+    role: UserRole,
+    tenantId: string,
+    invitedBy?: string,
   ): Promise<{ valid: boolean; reason?: string }> {
     // Super admin can only be assigned by existing super admins
     if (role === UserRole.SUPER_ADMIN) {
       if (!invitedBy) {
         return { valid: false, reason: 'Super admin role requires invitation from existing super admin' };
       }
-      
+
       const inviter = await User.findById(invitedBy);
       if (!inviter || inviter.role !== UserRole.SUPER_ADMIN) {
         return { valid: false, reason: 'Only super admins can assign super admin role' };
@@ -161,12 +158,12 @@ export class UserRegistrationService {
 
     // Check if tenant already has an admin (for first admin assignment)
     if (role === UserRole.ADMIN) {
-      const existingAdmin = await User.findOne({ 
-        tenant: tenantId, 
+      const existingAdmin = await User.findOne({
+        tenant: tenantId,
         role: UserRole.ADMIN,
-        status: UserStatus.ACTIVE 
+        status: UserStatus.ACTIVE,
       });
-      
+
       if (!existingAdmin && !invitedBy) {
         // First admin in tenant - this is allowed
         return { valid: true };
@@ -202,7 +199,7 @@ export class UserRegistrationService {
         permissions.canInviteUsers = true;
         permissions.canApproveRequests = true;
         break;
-      
+
       case UserRole.ADMIN:
         permissions.canManageUsers = true;
         permissions.canManageCourses = true;
@@ -212,7 +209,7 @@ export class UserRegistrationService {
         permissions.canInviteUsers = true;
         permissions.canApproveRequests = true;
         break;
-      
+
       case UserRole.USER:
         // Users have minimal permissions by default
         break;
@@ -229,7 +226,7 @@ export class UserRegistrationService {
     if (role === UserRole.SUPER_ADMIN || role === UserRole.ADMIN) {
       return UserStatus.ACTIVE;
     }
-    
+
     // Students and instructors need approval
     return UserStatus.PENDING;
   }
@@ -238,10 +235,10 @@ export class UserRegistrationService {
    * Update user role and permissions
    */
   static async updateUserRole(
-    userId: string, 
-    newRole: UserRole, 
+    userId: string,
+    newRole: UserRole,
     updatedBy: string,
-    tenantId: string
+    tenantId: string,
   ): Promise<UserRegistrationResult> {
     try {
       const user = await User.findById(userId);
@@ -249,7 +246,7 @@ export class UserRegistrationService {
         return {
           success: false,
           message: 'User not found',
-          errors: { user: 'User does not exist' }
+          errors: { user: 'User does not exist' },
         };
       }
 
@@ -259,19 +256,17 @@ export class UserRegistrationService {
         return {
           success: false,
           message: 'Invalid role assignment',
-          errors: { role: roleValidation.reason }
+          errors: { role: roleValidation.reason },
         };
       }
 
       // Update user role and permissions
       user.role = newRole;
       user.metadata.permissions = this.getDefaultPermissions(newRole);
-      
+
       // Add to tenant roles if not already present
-      const existingTenantRole = user.metadata.tenantRoles.find(
-        tr => tr.tenantId.toString() === tenantId
-      );
-      
+      const existingTenantRole = user.metadata.tenantRoles.find((tr) => tr.tenantId.toString() === tenantId);
+
       if (existingTenantRole) {
         existingTenantRole.role = newRole;
         existingTenantRole.assignedBy = updatedBy;
@@ -292,15 +287,14 @@ export class UserRegistrationService {
       return {
         success: true,
         user,
-        message: 'User role updated successfully'
+        message: 'User role updated successfully',
       };
-
     } catch (error) {
       logger.error('User role update error:', error);
       return {
         success: false,
         message: 'Role update failed',
-        errors: { general: 'Internal server error' }
+        errors: { general: 'Internal server error' },
       };
     }
   }
@@ -315,7 +309,7 @@ export class UserRegistrationService {
         return {
           success: false,
           message: 'User not found',
-          errors: { user: 'User does not exist' }
+          errors: { user: 'User does not exist' },
         };
       }
 
@@ -327,15 +321,14 @@ export class UserRegistrationService {
       return {
         success: true,
         user,
-        message: 'User activated successfully'
+        message: 'User activated successfully',
       };
-
     } catch (error) {
       logger.error('User activation error:', error);
       return {
         success: false,
         message: 'User activation failed',
-        errors: { general: 'Internal server error' }
+        errors: { general: 'Internal server error' },
       };
     }
   }

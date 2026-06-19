@@ -2,15 +2,9 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useQuery } from '@apollo/client';
-import { AdminDashboardLayout, UserMenu, TenantDebug } from '@luxgen/ui';
-import { TenantBanner } from '../components/tenant/TenantBanner';
+import { AdminDashboardLayout, UserMenu } from '@luxgen/ui';
 import { GET_DASHBOARD_DATA } from '../graphql/queries/dashboard';
-import { 
-  transformDashboardData, 
-  transformUserData, 
-  handleDashboardAction, 
-  handleUserAction 
-} from '../lib/transformer';
+import { transformDashboardData, transformUserData, handleDashboardAction, handleUserAction } from '../lib/transformer';
 
 interface DashboardProps {
   tenant: string;
@@ -21,7 +15,11 @@ export default function Dashboard({ tenant }: DashboardProps) {
   const [user, setUser] = useState<UserMenu | null>(() => transformUserData(tenant));
 
   // GraphQL query for dashboard data with error handling
-  const { data: dashboardData, loading: dataLoading, error: dataError } = useQuery(GET_DASHBOARD_DATA, {
+  const {
+    data: dashboardData,
+    loading: dataLoading,
+    error: dataError,
+  } = useQuery(GET_DASHBOARD_DATA, {
     variables: { tenant },
     errorPolicy: 'ignore', // Ignore GraphQL errors and continue
     fetchPolicy: 'cache-first',
@@ -61,7 +59,7 @@ export default function Dashboard({ tenant }: DashboardProps) {
   if (dataError) {
     console.warn('GraphQL Error (continuing with default data):', dataError);
   }
-  
+
   // Transform data using the transformer
   const transformedDashboardData = transformDashboardData(dashboardData, tenant);
 
@@ -82,44 +80,54 @@ export default function Dashboard({ tenant }: DashboardProps) {
         <title>Dashboard - {tenant.charAt(0).toUpperCase() + tenant.slice(1)}</title>
         <meta name="description" content="Learning management dashboard" />
       </Head>
-      
+
       <AdminDashboardLayout
         currentTenant={{
           name: tenant.charAt(0).toUpperCase() + tenant.slice(1),
-          subdomain: tenant
+          subdomain: tenant,
         }}
-        user={user ? {
-          name: user.name,
-          email: user.email,
-          role: user.role || 'User',
-          initials: user.name.split(' ').map(n => n[0]).join('')
-        } : undefined}
+        user={
+          user
+            ? {
+                name: user.name,
+                email: user.email,
+                role: user.role || 'User',
+                initials: user.name
+                  .split(' ')
+                  .map((n) => n[0])
+                  .join(''),
+              }
+            : undefined
+        }
         bannerCarousel={{
           banners: [
             {
               id: '1',
               title: 'Welcome to Ideavibes',
               description: 'Your learning management dashboard',
-              image: 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80',
-              buttonText: 'Get Started'
+              image:
+                'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80',
+              buttonText: 'Get Started',
             },
             {
               id: '2',
               title: 'Explore New Courses',
               description: 'Discover our latest learning content and enhance your skills',
-              image: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-              buttonText: 'Browse Courses'
+              image:
+                'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+              buttonText: 'Browse Courses',
             },
             {
               id: '3',
               title: 'Track Your Progress',
               description: 'Monitor your learning journey and achieve your goals',
-              image: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-              buttonText: 'View Analytics'
-            }
+              image:
+                'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
+              buttonText: 'View Analytics',
+            },
           ],
           autoPlay: true,
-          interval: 5000
+          interval: 5000,
         }}
         dashboardData={transformedDashboardData}
         variant="default"
@@ -138,14 +146,13 @@ export default function Dashboard({ tenant }: DashboardProps) {
         onDenyRequest={(request: any) => console.log('Deny request:', request)}
         onViewDetails={(request: any) => console.log('View details:', request)}
       />
-      
     </>
   );
 }
 
 export async function getServerSideProps(context: any) {
   const { tenant } = context.query;
-  
+
   return {
     props: {
       tenant: tenant || 'demo',

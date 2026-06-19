@@ -1,0 +1,131 @@
+import type { NextApiRequest, NextApiResponse } from 'next';
+import {
+  runAgentLoop,
+  pingOllama,
+  findAvailableModel,
+  ensureGitSession,
+  bindSessionAuth,
+  appendAuditEntry,
+} from '@luxgen/agent';
+import { requireAgentStudio } from '../../../lib/agent-auth';
+import { getOllamaUrl } from '@luxgen/config';
+
+type EventType = 'text' | 'tool_start' | 'tool_result' | 'file_staged' | 'error' | 'done' | 'heartbeat';
+
+function sendEvent(res: NextApiResponse, type: EventType, data: Record<string, unknown> = {}) {
+  res.write(`data: ${JSON.stringify({ type, ...data })}\n\n`);
+  (res as NextApiResponse & { flush?: () => void }).flush?.();
+}
+
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  if (req.method !== 'POST') {
+    res.status(405).json({ error: 'Method not allowed' });
+    return;
+  }
+
+  const OLLAMA_HOST = getOllamaUrl();
+  const DEFAULT_MODEL = process.env.OLLAMA_MODEL || 'qwen2.5-coder:7b';
+
+  const {
+    messages,
+    sessionId,
+    model: requestedModel,
+    temperature: requestedTemp,
+    maxTokens: requestedMaxTokens,
+    toolFilter,
+    systemPrompt: requestedSystem,
+  } = req.body as {
+    messages: Array<{ role: 'user' | 'assistant'; content: string }>;
+    sessionId: string;
+    model?: string;
+    temperature?: number;
+    maxTokens?: number;
+    toolFilter?: string[];
+    systemPrompt?: string;
+  };
+
+  if (!messages || !sessionId) {
+    res.status(400).json({ error: 'Missing messages or sessionId' });
+    return;
+  }
+
+  const auth = await requireAgentStudio(req, res);
+  if (!auth) return;
+
+  bindSessionAuth(sessionId, auth, { mode: 'interactive' });
+  await appendAuditEntry({
+    sessionId,
+    tenantId: auth.tenantId,
+    userId: auth.userId,
+    action: 'run_started',
+    details: { mode: 'interactive' },
+  }).catch(() => {});
+
+  const reachable = await pingOllama(OLLAMA_HOST);
+  if (!reachable) {
+    res.status(503).json({ error: `Ollama not reachable at ${OLLAMA_HOST}. Run: docker compose up ollama` });
+    return;
+  }
+
+  const requestedModelVal = requestedModel || DEFAULT_MODEL;
+  const available = await findAvailableModel(OLLAMA_HOST, requestedModelVal);
+  if (!available) {
+    res.status(503).json({ error: 'No Ollama models available. Pull a model first.' });
+    return;
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('X-Accel-Buffering', 'no');
+  res.status(200);
+  res.flushHeaders();
+
+  let isCancelled = false;
+
+  const heartbeatInterval = setInterval(() => {
+    if (isCancelled) {
+      clearInterval(heartbeatInterval);
+      return;
+    }
+    sendEvent(res, 'heartbeat', { ts: Date.now() });
+  }, 15_000);
+
+  req.on('close', () => {
+    isCancelled = true;
+    clearInterval(heartbeatInterval);
+  });
+
+  const connectionTimer = setTimeout(() => {
+    if (!isCancelled) {
+      isCancelled = true;
+      sendEvent(res, 'error', { message: 'Connection timed out after 2 minutes.' });
+      res.end();
+    }
+  }, 120_000);
+
+  try {
+    await ensureGitSession(sessionId);
+
+    await runAgentLoop({
+      sessionId,
+      messages,
+      ollamaHost: OLLAMA_HOST,
+      model: requestedModelVal,
+      temperature: requestedTemp,
+      maxTokens: requestedMaxTokens,
+      toolFilter,
+      systemPrompt: requestedSystem,
+      shouldCancel: () => isCancelled,
+      onEvent: (event) => {
+        if (isCancelled && event.type !== 'done') return;
+        const { type, ...rest } = event;
+        sendEvent(res, type as EventType, rest);
+      },
+    });
+  } finally {
+    clearInterval(heartbeatInterval);
+    clearTimeout(connectionTimer);
+    res.end();
+  }
+}

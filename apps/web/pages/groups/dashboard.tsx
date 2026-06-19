@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { SnackbarProvider, useSnackbar, AppLayout, getDefaultNavItems, getDefaultUser, getDefaultLogo, getDefaultSidebarSections, Button } from '@luxgen/ui';
+import {
+  SnackbarProvider,
+  useSnackbar,
+  AppLayout,
+  getDefaultUser,
+  getDefaultLogo,
+  getDefaultSidebarSections,
+  Button,
+} from '@luxgen/ui';
 
 interface GroupDashboardData {
   id: string;
@@ -24,9 +32,9 @@ interface GroupDashboardData {
 
 const GroupDashboardPageContent: React.FC = () => {
   const router = useRouter();
-  const { showSuccess, showError, showInfo } = useSnackbar();
+  const { showSuccess: _showSuccess, showError: _showError, showInfo: _showInfo } = useSnackbar();
   const [user, setUser] = useState<any>(null);
-  const [groups, setGroups] = useState<GroupDashboardData[]>([
+  const [groups, _setGroups] = useState<GroupDashboardData[]>([
     {
       id: '1',
       name: 'Development Team',
@@ -94,7 +102,7 @@ const GroupDashboardPageContent: React.FC = () => {
     router.push(`/groups/${groupId}`);
   };
 
-  const handleManageUsers = (groupId: string) => {
+  const _handleManageUsers = (groupId: string) => {
     router.push(`/groups/${groupId}/members`);
   };
 
@@ -155,36 +163,31 @@ const GroupDashboardPageContent: React.FC = () => {
         <meta name="description" content="Group management dashboard for admins and super admins" />
       </Head>
 
-             <AppLayout
-               sidebarSections={getDefaultSidebarSections()}
-               user={user}
-               onUserAction={handleUserAction}
-               onSearch={handleSearch}
-               onNotificationClick={handleNotificationClick}
-               showSearch={true}
-               showNotifications={true}
-               notificationCount={3}
-               searchPlaceholder="Search groups, users..."
-               logo={getDefaultLogo()}
-               sidebarCollapsible={true}
-               sidebarDefaultCollapsed={false}
-               responsive={true}
-             >
+      <AppLayout
+        sidebarSections={getDefaultSidebarSections()}
+        user={user}
+        onUserAction={handleUserAction}
+        onSearch={handleSearch}
+        onNotificationClick={handleNotificationClick}
+        showSearch={true}
+        showNotifications={true}
+        notificationCount={3}
+        searchPlaceholder="Search groups, users..."
+        logo={getDefaultLogo()}
+        sidebarCollapsible={true}
+        sidebarDefaultCollapsed={false}
+        responsive={true}
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Group Dashboard</h1>
-                <p className="mt-2 text-gray-600">Manage and monitor your groups</p>
+                <h1 className="text-3xl font-bold text-primary">Group Dashboard</h1>
+                <p className="mt-2 text-secondary">Manage and monitor your groups</p>
               </div>
               <div className="flex space-x-3">
-                <Button
-                  variant="primary"
-                  size="md"
-                  onClick={() => router.push('/groups/create')}
-                  className="px-4 py-2"
-                >
+                <Button variant="primary" size="md" onClick={() => router.push('/groups/create')} className="px-4 py-2">
                   Create Group
                 </Button>
                 <Button
@@ -201,37 +204,47 @@ const GroupDashboardPageContent: React.FC = () => {
 
           {/* Statistics Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="stat-card">
               <div className="flex items-center">
                 <div className="p-2 bg-blue-100 rounded-lg">
                   <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Groups</p>
-                  <p className="text-2xl font-semibold text-gray-900">{groups.length}</p>
+                  <p className="text-sm font-medium text-secondary">Total Groups</p>
+                  <p className="text-2xl font-semibold text-primary">{groups.length}</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="stat-card">
               <div className="flex items-center">
                 <div className="p-2 bg-green-100 rounded-lg">
                   <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Users</p>
-                  <p className="text-2xl font-semibold text-gray-900">
+                  <p className="text-sm font-medium text-secondary">Total Users</p>
+                  <p className="text-2xl font-semibold text-primary">
                     {groups.reduce((sum, group) => sum + group.totalUsers, 0)}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="stat-card">
               <div className="flex items-center">
                 <div className="p-2 bg-yellow-100 rounded-lg">
                   <svg className="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -239,24 +252,29 @@ const GroupDashboardPageContent: React.FC = () => {
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Active Users</p>
-                  <p className="text-2xl font-semibold text-gray-900">
+                  <p className="text-sm font-medium text-secondary">Active Users</p>
+                  <p className="text-2xl font-semibold text-primary">
                     {groups.reduce((sum, group) => sum + group.activeUsers, 0)}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <div className="stat-card">
               <div className="flex items-center">
                 <div className="p-2 bg-purple-100 rounded-lg">
                   <svg className="h-6 w-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
+                    />
                   </svg>
                 </div>
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Tasks</p>
-                  <p className="text-2xl font-semibold text-gray-900">
+                  <p className="text-sm font-medium text-secondary">Total Tasks</p>
+                  <p className="text-2xl font-semibold text-primary">
                     {groups.reduce((sum, group) => sum + (group.tasks || 0), 0)}
                   </p>
                 </div>
@@ -267,26 +285,21 @@ const GroupDashboardPageContent: React.FC = () => {
           {/* Groups Dashboard Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {groups.map((group) => (
-              <div key={group.id} className="p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow duration-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">{group.name}</h3>
-                <p className="text-sm text-gray-600 mb-4">Total Users: {group.totalUsers}</p>
-                <p className="text-sm text-gray-600 mb-4">Active Users: {group.activeUsers}</p>
-                <p className="text-sm text-gray-600 mb-4">Status: {group.status}</p>
+              <div
+                key={group.id}
+                className="surface p-6 hover:shadow-md transition-shadow duration-200"
+                style={{ borderRadius: 'var(--radius-xl)' }}
+              >
+                <h3 className="text-base font-semibold text-primary mb-2">{group.name}</h3>
+                <p className="text-sm text-secondary mb-1">
+                  Total: {group.totalUsers} • Active: {group.activeUsers}
+                </p>
+                <p className="text-sm text-secondary mb-4">Status: {group.status}</p>
                 <div className="flex space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEditGroup(group.id)}
-                    className="px-3 py-1"
-                  >
+                  <Button variant="outline" size="sm" onClick={() => handleEditGroup(group.id)} className="px-3 py-1">
                     Edit
                   </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleViewDetails(group.id)}
-                    className="px-3 py-1"
-                  >
+                  <Button variant="outline" size="sm" onClick={() => handleViewDetails(group.id)} className="px-3 py-1">
                     View Details
                   </Button>
                 </div>
@@ -295,19 +308,23 @@ const GroupDashboardPageContent: React.FC = () => {
           </div>
 
           {/* Quick Actions */}
-          <div className="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+          <div className="mt-8 surface p-6" style={{ borderRadius: 'var(--radius-xl)' }}>
+            <h3 className="text-base font-semibold text-primary mb-4">Quick Actions</h3>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <button
                 onClick={() => router.push('/groups/create')}
-                className="p-4 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors duration-200 w-full"
+                className="p-4 rounded-xl w-full transition-all duration-200 hover:opacity-80"
+                style={{
+                  border: '1.5px dashed var(--color-separator-opaque)',
+                  backgroundColor: 'var(--color-fill-quaternary)',
+                }}
               >
                 <div className="text-center">
                   <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>
-                  <p className="mt-2 text-sm font-medium text-gray-900">Create New Group</p>
-                  <p className="text-sm text-gray-600">Set up a new group for your team</p>
+                  <p className="mt-2 text-sm font-medium text-primary">Create New Group</p>
+                  <p className="text-sm text-secondary">Set up a new group for your team</p>
                 </div>
               </button>
 
@@ -317,10 +334,15 @@ const GroupDashboardPageContent: React.FC = () => {
               >
                 <div className="text-center">
                   <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
+                    />
                   </svg>
-                  <p className="mt-2 text-sm font-medium text-gray-900">Invite Users</p>
-                  <p className="text-sm text-gray-600">Add new members to your groups</p>
+                  <p className="mt-2 text-sm font-medium text-primary">Invite Users</p>
+                  <p className="text-sm text-secondary">Add new members to your groups</p>
                 </div>
               </button>
 
@@ -330,16 +352,21 @@ const GroupDashboardPageContent: React.FC = () => {
               >
                 <div className="text-center">
                   <svg className="mx-auto h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
                   </svg>
-                  <p className="mt-2 text-sm font-medium text-gray-900">View Reports</p>
-                  <p className="text-sm text-gray-600">Generate group performance reports</p>
+                  <p className="mt-2 text-sm font-medium text-primary">View Reports</p>
+                  <p className="text-sm text-secondary">Generate group performance reports</p>
                 </div>
               </button>
             </div>
           </div>
         </div>
-             </AppLayout>
+      </AppLayout>
     </>
   );
 };

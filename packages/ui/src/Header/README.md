@@ -42,14 +42,14 @@ import { Header } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `logoUrl` | `string` | - | URL of the logo image |
-| `menuItems` | `MenuItem[]` | `[]` | Array of menu items |
-| `onMenuClick` | `(item: MenuItem) => void` | - | Click handler for menu items |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
+| Prop          | Type                       | Default        | Description                  |
+| ------------- | -------------------------- | -------------- | ---------------------------- |
+| `tenantTheme` | `TenantTheme`              | `defaultTheme` | Theme object for styling     |
+| `logoUrl`     | `string`                   | -              | URL of the logo image        |
+| `menuItems`   | `MenuItem[]`               | `[]`           | Array of menu items          |
+| `onMenuClick` | `(item: MenuItem) => void` | -              | Click handler for menu items |
+| `className`   | `string`                   | `''`           | Additional CSS classes       |
+| `style`       | `CSSProperties`            | `{}`           | Inline styles                |
 
 ## MenuItem Interface
 
@@ -122,26 +122,19 @@ test('renders with menu items', () => {
     { id: 'home', label: 'Home', href: '/' },
     { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
   ];
-  
+
   render(<Header menuItems={menuItems} />);
-  
+
   expect(screen.getByText('Home')).toBeInTheDocument();
   expect(screen.getByText('Dashboard')).toBeInTheDocument();
 });
 
 test('calls onMenuClick when menu item is clicked', () => {
   const mockOnMenuClick = jest.fn();
-  const menuItems = [
-    { id: 'home', label: 'Home', href: '/' },
-  ];
-  
-  render(
-    <Header 
-      menuItems={menuItems} 
-      onMenuClick={mockOnMenuClick} 
-    />
-  );
-  
+  const menuItems = [{ id: 'home', label: 'Home', href: '/' }];
+
+  render(<Header menuItems={menuItems} onMenuClick={mockOnMenuClick} />);
+
   fireEvent.click(screen.getByText('Home'));
   expect(mockOnMenuClick).toHaveBeenCalledWith(menuItems[0]);
 });
@@ -150,6 +143,7 @@ test('calls onMenuClick when menu item is clicked', () => {
 ## Examples
 
 ### Basic Header
+
 ```tsx
 <Header
   logoUrl="/logo.png"
@@ -162,27 +156,29 @@ test('calls onMenuClick when menu item is clicked', () => {
 ```
 
 ### Header with Icons
+
 ```tsx
 <Header
   logoUrl="/logo.png"
   menuItems={[
-    { 
-      id: 'home', 
-      label: 'Home', 
+    {
+      id: 'home',
+      label: 'Home',
       href: '/',
-      icon: <HomeIcon />
+      icon: <HomeIcon />,
     },
-    { 
-      id: 'dashboard', 
-      label: 'Dashboard', 
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
       href: '/dashboard',
-      icon: <DashboardIcon />
+      icon: <DashboardIcon />,
     },
   ]}
 />
 ```
 
 ### Header with Menu Click Handler
+
 ```tsx
 <Header
   logoUrl="/logo.png"

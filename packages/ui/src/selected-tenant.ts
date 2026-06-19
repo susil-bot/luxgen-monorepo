@@ -9,11 +9,11 @@ export const TENANT_CONFIG = {
   name: 'Demo Tenant',
   subdomain: 'demo',
   logo: {
-  "src": "/logos/demo-logo.svg",
-  "text": "LuxGen",
-  "alt": "LuxGen Demo Logo",
-  "href": "/"
-},
+    src: '/logos/demo-logo.svg',
+    text: 'LuxGen',
+    alt: 'LuxGen Demo Logo',
+    href: '/',
+  },
   primaryColor: '#3B82F6',
 };
 

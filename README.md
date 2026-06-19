@@ -5,6 +5,10 @@ A comprehensive multi-tenant platform built with Next.js, Node.js, and MongoDB. 
 ## ✨ Key Features
 
 - **🏢 Multi-Tenant Architecture**: Dynamic tenant detection via subdomains and query parameters
+- **⚡ Automations**: Trigger → action workflows with plan gates (Pro+)
+- **💳 Billing**: Stripe subscriptions, usage metering, template marketplace
+- **🤖 Agent Studio**: Enterprise AI-assisted code changes (`@luxgen/agent`)
+- **📋 Business Listings**: Directory with editorial review and subscription lifecycle
 - **🎨 Theme System**: CSS custom properties with tenant-specific branding
 - **📱 Responsive Design**: Mobile-first UI components with breakpoint management
 - **🔐 Authentication**: JWT-based auth with per-tenant key rotation
@@ -88,9 +92,22 @@ docker-compose -f docker-compose.yml -f docker-compose.dev.yml down
 
 ## 📚 Documentation
 
-- [Developer Knowledge Base](./docs/DEVELOPER_KNOWLEDGE_BASE.md)
-- [API Documentation](./docs/auth-api.md)
-- [Tenant Keys Documentation](./docs/tenant-keys.md)
+**Start at [docs/INDEX.md](./docs/INDEX.md)** — full hub for developers, product, and AI agents.
+
+| Perspective | Document |
+|-------------|----------|
+| Developer onboarding | [docs/DEVELOPER_GUIDE.md](./docs/DEVELOPER_GUIDE.md) |
+| AI coding agents | [AGENTS.md](./AGENTS.md) → [docs/AI_AGENT_GUIDE.md](./docs/AI_AGENT_GUIDE.md) |
+| Business & strategy | [docs/BUSINESS_STRATEGY_2026.md](./docs/BUSINESS_STRATEGY_2026.md) |
+| Business ↔ engineering | [docs/BUSINESS_TECH_TRANSLATION.md](./docs/BUSINESS_TECH_TRANSLATION.md) |
+| Feature catalog | [docs/FEATURE_CATALOG.md](./docs/FEATURE_CATALOG.md) |
+| Architecture | [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md) |
+| API reference | [docs/API_REFERENCE.md](./docs/API_REFERENCE.md) |
+| Repo map | [CODEBASE.md](./CODEBASE.md) |
+
+Phase docs: [Billing](./docs/PHASE_9_BILLING.md) · [Marketplace](./docs/PHASE_10_MARKETPLACE.md) · [Listings](./docs/LISTING_SUBSCRIPTION_LIFECYCLE.md)
+
+**Deploy (free tier):** [docs/deployment/FREE_TIER_CLOUD.md](./docs/deployment/FREE_TIER_CLOUD.md) · **Repo layout:** [REPO_STRUCTURE.md](./REPO_STRUCTURE.md)
 
 ## 🛠️ Development
 
@@ -113,12 +130,15 @@ The platform follows a multi-tenant architecture with:
 
 ## 📦 Packages
 
-- **@luxgen/api**: GraphQL API with authentication and tenant management
-- **@luxgen/web**: Next.js frontend with tenant-aware routing
-- **@luxgen/ui**: Shared UI component library
-- **@luxgen/auth**: Authentication and authorization utilities
-- **@luxgen/db**: Database models and connections
-- **@luxgen/core**: Core business logic and services
-- **@luxgen/shared**: Shared utilities and types
-- **@luxgen/config**: Configuration management
-- **@luxgen/utils**: Utility functions
+| Package | Purpose |
+|---------|---------|
+| **apps/web** | Next.js frontend — LMS, billing, automations, listings, agent UI |
+| **apps/api** | GraphQL + REST + Stripe webhooks |
+| **apps/agent-worker** | Headless agent jobs (Redis) |
+| **@luxgen/ui** | Shared UI component library |
+| **@luxgen/db** | Mongoose models |
+| **@luxgen/agent** | Agent orchestrator, git pipeline, automation bridge |
+| **@luxgen/billing** | Plans, feature gates, usage limits |
+| **@luxgen/auth** | JWT helpers |
+| **@luxgen/config** | Configuration utilities |
+| **@luxgen/utils** | Utility functions |

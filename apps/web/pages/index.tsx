@@ -9,7 +9,7 @@ interface HomeProps {
   tenant: string | null;
 }
 
-export default function Home({ tenant }: HomeProps) {
+export default function Home({ tenant: _tenant }: HomeProps) {
   const router = useRouter();
   const { isInitialized, currentTenant } = useGlobalContext();
 
@@ -32,14 +32,10 @@ export default function Home({ tenant }: HomeProps) {
       <Header />
       <main className="container mx-auto px-4 py-8">
         <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Welcome to LuxGen
-          </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            Your multi-tenant learning management system
-          </p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-4">Welcome to LuxGen</h1>
+          <p className="text-xl text-gray-600 mb-8">Your multi-tenant learning management system</p>
           <div className="space-x-4">
-            <button 
+            <button
               onClick={() => router.push('/dashboard')}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
             >

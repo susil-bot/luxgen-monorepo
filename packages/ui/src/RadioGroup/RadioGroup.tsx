@@ -51,13 +51,10 @@ const RadioGroupComponent: React.FC<RadioGroupProps> = ({
           {required && <span className="radio-group-required">*</span>}
         </label>
       )}
-      
+
       <div className={`radio-group ${orientation}`}>
         {options.map((option) => (
-          <label
-            key={option.value}
-            className={`radio-option ${disabled || option.disabled ? 'disabled' : ''}`}
-          >
+          <label key={option.value} className={`radio-option ${disabled || option.disabled ? 'disabled' : ''}`}>
             <input
               type="radio"
               name={name}
@@ -68,23 +65,19 @@ const RadioGroupComponent: React.FC<RadioGroupProps> = ({
               required={required}
               className="radio-input"
             />
-            
+
             <span className={`radio-custom ${error ? 'error' : ''}`}>
               <span className="radio-dot"></span>
             </span>
-            
+
             <span className="radio-text">{option.label}</span>
           </label>
         ))}
       </div>
-      
-      {error && (
-        <p className="radio-group-error">{error}</p>
-      )}
-      
-      {helperText && !error && (
-        <p className="radio-group-helper">{helperText}</p>
-      )}
+
+      {error && <p className="radio-group-error">{error}</p>}
+
+      {helperText && !error && <p className="radio-group-helper">{helperText}</p>}
     </div>
   );
 };

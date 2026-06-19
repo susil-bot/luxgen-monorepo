@@ -12,9 +12,7 @@ export interface HeadingData {
   variant: string;
 }
 
-export const fetchHeadingData = async (
-  tenantId?: string
-): Promise<HeadingData> => {
+export const fetchHeadingData = async (tenantId?: string): Promise<HeadingData> => {
   return {
     tenantTheme: defaultTheme,
     level: 1,
@@ -27,11 +25,9 @@ export const fetchHeadingData = async (
   };
 };
 
-export const fetchHeadingSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchHeadingSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchHeadingData(tenantId);
-  
+
   const html = `
     <h${data.level} 
       class="heading heading-${data.size}" 
@@ -40,7 +36,7 @@ export const fetchHeadingSSR = async (
       ${data.text}
     </h${data.level}>
   `;
-  
+
   const styles = `
     .heading {
       font-family: var(--font-primary);
@@ -118,6 +114,6 @@ export const fetchHeadingSSR = async (
       color: var(--color-info);
     }
   `;
-  
+
   return { html, styles };
 };

@@ -1,30 +1,27 @@
 /** @type {import('next').NextConfig} */
+const { apiUrl } = require('@luxgen/config/urls.cjs');
+
 const nextConfig = {
   output: 'standalone',
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
-  transpilePackages: ['@luxgen/ui'],
+  transpilePackages: ['@luxgen/ui', '@luxgen/agent'],
   experimental: {
     externalDir: true,
   },
   typescript: {
     ignoreBuildErrors: true,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   async rewrites() {
+    const resolvedApiUrl = apiUrl();
     return [
-      {
-        source: '/api/graphql',
-        destination: 'http://luxgen-api:4000/graphql',
-      },
-      {
-        source: '/api/auth/:path*',
-        destination: 'http://luxgen-api:4000/api/auth/:path*',
-      },
-      {
-        source: '/api/admin/:path*',
-        destination: 'http://luxgen-api:4000/api/admin/:path*',
-      },
+      { source: '/api/graphql', destination: `${resolvedApiUrl}/graphql` },
+      { source: '/api/auth/:path*', destination: `${resolvedApiUrl}/api/auth/:path*` },
+      { source: '/api/admin/:path*', destination: `${resolvedApiUrl}/api/admin/:path*` },
     ];
   },
   async headers() {

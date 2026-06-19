@@ -29,7 +29,7 @@ const TextComponent: React.FC<TextProps> = ({
 }) => {
   const getVariantColor = () => {
     if (color) return color;
-    
+
     const variantColors: Record<string, string> = {
       primary: tenantTheme.colors.text,
       secondary: tenantTheme.colors.textSecondary,
@@ -44,7 +44,7 @@ const TextComponent: React.FC<TextProps> = ({
       lead: tenantTheme.colors.text,
       caption: tenantTheme.colors.textSecondary,
     };
-    
+
     return variantColors[variant] || tenantTheme.colors.text;
   };
 
@@ -57,13 +57,13 @@ const TextComponent: React.FC<TextProps> = ({
       lead: '1.25rem',
       muted: '1rem',
     };
-    
+
     return sizeMap[variant];
   };
 
   const getVariantWeight = () => {
     if (weight !== 'normal') return weight;
-    
+
     const weightMap = {
       caption: 'normal',
       small: 'normal',
@@ -72,7 +72,7 @@ const TextComponent: React.FC<TextProps> = ({
       lead: 'medium',
       muted: 'normal',
     };
-    
+
     return weightMap[variant];
   };
 
@@ -91,11 +91,7 @@ const TextComponent: React.FC<TextProps> = ({
   };
 
   return (
-    <Component
-      className={`text text-${variant} ${className}`}
-      style={styles}
-      {...props}
-    >
+    <Component className={`text text-${variant} ${className}`} style={styles} {...props}>
       {text}
     </Component>
   );

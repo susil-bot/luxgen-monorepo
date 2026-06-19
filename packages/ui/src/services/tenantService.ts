@@ -3,6 +3,8 @@
  * Fetches tenant configurations from the API instead of using hardcoded configs
  */
 
+import { getApiUrl, getTenantDomain } from '@luxgen/config';
+
 export interface TenantConfig {
   id: string;
   name: string;
@@ -49,10 +51,10 @@ export const getTenantConfig = async (tenantId: string): Promise<TenantConfig> =
   // Temporarily use fallback to test if the issue is with API connectivity
   console.log('🔍 Using fallback config for testing:', tenantId);
   return getDefaultTenantConfig(tenantId);
-  
+
   /* Original API call - temporarily disabled for testing
   try {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const API_BASE_URL = getApiUrl();
     console.log('🔍 Fetching tenant config for:', tenantId, 'from:', API_BASE_URL);
     const response = await fetch(`${API_BASE_URL}/api/tenant-config/config/${tenantId}`);
     
@@ -82,19 +84,19 @@ export const getTenantConfig = async (tenantId: string): Promise<TenantConfig> =
  */
 export const getAvailableTenants = async (): Promise<AvailableTenant[]> => {
   try {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const API_BASE_URL = getApiUrl();
     const response = await fetch(`${API_BASE_URL}/api/tenant-config/available`);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch available tenants: ${response.status}`);
     }
-    
+
     const result = await response.json();
-    
+
     if (!result.success) {
       throw new Error(result.message || 'Failed to fetch available tenants');
     }
-    
+
     return result.data;
   } catch (error) {
     console.error('Error in getAvailableTenants:', error);
@@ -107,19 +109,19 @@ export const getAvailableTenants = async (): Promise<AvailableTenant[]> => {
  */
 export const getTenantAssets = async (tenantId: string) => {
   try {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const API_BASE_URL = getApiUrl();
     const response = await fetch(`${API_BASE_URL}/api/tenant-config/assets/${tenantId}`);
-    
+
     if (!response.ok) {
       throw new Error(`Failed to fetch tenant assets: ${response.status}`);
     }
-    
+
     const result = await response.json();
-    
+
     if (!result.success) {
       throw new Error(result.message || 'Failed to fetch tenant assets');
     }
-    
+
     return result.brandAssets;
   } catch (error) {
     console.error(`Error in getTenantAssets for ${tenantId}:`, error);
@@ -135,7 +137,7 @@ const getDefaultTenantConfig = (tenantId: string): TenantConfig => {
     id: tenantId,
     name: `${tenantId.charAt(0).toUpperCase() + tenantId.slice(1)} Company`,
     subdomain: tenantId,
-    domain: `${tenantId}.localhost`,
+    domain: getTenantDomain(tenantId),
     status: 'active',
     theme: {
       colors: {

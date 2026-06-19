@@ -11,7 +11,7 @@ interface HeaderProps {
 }
 
 export function Header({ user }: HeaderProps) {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [_isMenuOpen, _setIsMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -22,9 +22,7 @@ export function Header({ user }: HeaderProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <h1 className="text-xl font-semibold text-gray-900">
-              LuxGen
-            </h1>
+            <h1 className="text-xl font-semibold text-gray-900">LuxGen</h1>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -33,27 +31,16 @@ export function Header({ user }: HeaderProps) {
                 <span className="text-sm text-gray-700">
                   Welcome, {user.firstName} {user.lastName}
                 </span>
-                <Button
-                  onClick={handleLogout}
-                  variant="outline"
-                  size="sm"
-                >
+                <Button onClick={handleLogout} variant="outline" size="sm">
                   Logout
                 </Button>
               </div>
             ) : (
               <div className="flex items-center space-x-4">
-                <Button
-                  href="/login"
-                  variant="outline"
-                  size="sm"
-                >
+                <Button href="/login" variant="outline" size="sm">
                   Login
                 </Button>
-                <Button
-                  href="/register"
-                  size="sm"
-                >
+                <Button href="/register" size="sm">
                   Sign Up
                 </Button>
               </div>

@@ -1,7 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
-import { SnackbarProvider, useSnackbar, AppLayout, getDefaultUser, getDefaultLogo, getDefaultSidebarSections, Button } from '@luxgen/ui';
+import {
+  SnackbarProvider,
+  useSnackbar,
+  AppLayout,
+  getDefaultUser,
+  getDefaultLogo,
+  getDefaultSidebarSections,
+  Button,
+} from '@luxgen/ui';
 
 interface GroupEditData {
   id: string;
@@ -15,7 +23,7 @@ interface GroupEditData {
 const EditGroupPageContent: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
-  const { showSuccess, showError, showInfo } = useSnackbar();
+  const { showSuccess, showError, showInfo: _showInfo } = useSnackbar();
   const [user, setUser] = useState<any>(null);
   const [formData, setFormData] = useState<GroupEditData>({
     id: '',
@@ -91,11 +99,11 @@ const EditGroupPageContent: React.FC = () => {
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       showSuccess('Group updated successfully!');
       router.push(`/groups/${id}`);
-    } catch (error) {
+    } catch {
       showError('Failed to update group. Please try again.');
     } finally {
       setIsSaving(false);
@@ -105,9 +113,9 @@ const EditGroupPageContent: React.FC = () => {
   // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
     }));
   };
 
@@ -148,12 +156,7 @@ const EditGroupPageContent: React.FC = () => {
                 <h1 className="text-3xl font-bold text-gray-900">Edit Group</h1>
                 <p className="mt-2 text-gray-600">Update group settings and information</p>
               </div>
-              <Button
-                variant="outline"
-                size="md"
-                onClick={() => router.push(`/groups/${id}`)}
-                className="px-4 py-2"
-              >
+              <Button variant="outline" size="md" onClick={() => router.push(`/groups/${id}`)} className="px-4 py-2">
                 Cancel
               </Button>
             </div>
@@ -252,20 +255,10 @@ const EditGroupPageContent: React.FC = () => {
 
               {/* Submit Buttons */}
               <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                <Button
-                  variant="outline"
-                  size="md"
-                  onClick={() => router.push(`/groups/${id}`)}
-                  className="px-6 py-2"
-                >
+                <Button variant="outline" size="md" onClick={() => router.push(`/groups/${id}`)} className="px-6 py-2">
                   Cancel
                 </Button>
-                <Button
-                  variant="primary"
-                  size="md"
-                  disabled={isSaving || !formData.name.trim()}
-                  className="px-6 py-2"
-                >
+                <Button variant="primary" size="md" disabled={isSaving || !formData.name.trim()} className="px-6 py-2">
                   {isSaving ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>

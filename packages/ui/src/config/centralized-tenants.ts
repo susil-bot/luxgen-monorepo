@@ -1,6 +1,6 @@
 /**
  * Centralized Tenant Configuration Wrapper
- * 
+ *
  * This file provides a clean interface to the centralized tenant configurations
  * from the packages/db package, ensuring proper TypeScript types.
  */
@@ -12,11 +12,11 @@ export { demo, ideaVibes, acmeCorp, type TenantConfig };
 
 // Tenant configurations map
 export const tenantConfigs: Record<string, TenantConfig> = {
-  'demo': demo,
-  'ideavibes': ideaVibes,
+  demo: demo,
+  ideavibes: ideaVibes,
   'idea-vibes': ideaVibes, // Keep both for compatibility
   'acme-corp': acmeCorp,
-  'acmecorp': acmeCorp, // Add without hyphen for consistency
+  acmecorp: acmeCorp, // Add without hyphen for consistency
 };
 
 // Get tenant configuration

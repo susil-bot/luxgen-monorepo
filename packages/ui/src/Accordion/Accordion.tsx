@@ -40,7 +40,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
   ...props
 }) => {
   const [openItems, setOpenItems] = useState<Set<string>>(
-    new Set(items.filter(item => item.defaultOpen).map(item => item.id))
+    new Set(items.filter((item) => item.defaultOpen).map((item) => item.id)),
   );
 
   const handleToggle = (itemId: string) => {
@@ -91,7 +91,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
         overflow: 'visible',
       },
     };
-    
+
     return variantStyles[variant];
   };
 
@@ -110,7 +110,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
         padding: '1.25rem 1.5rem',
       },
     };
-    
+
     return sizeStyles[size];
   };
 
@@ -125,11 +125,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
   };
 
   return (
-    <div
-      className={`accordion accordion-${variant} accordion-${size} ${className}`}
-      style={styles}
-      {...props}
-    >
+    <div className={`accordion accordion-${variant} accordion-${size} ${className}`} style={styles} {...props}>
       {items.map((item, index) => {
         const isOpen = openItems.has(item.id);
         const isDisabled = item.disabled;
@@ -168,7 +164,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
               <span className="accordion-title" style={{ flex: 1 }}>
                 {item.title}
               </span>
-              
+
               {showIcon && (
                 <span
                   className="accordion-icon"

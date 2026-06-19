@@ -1,306 +1,225 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { withSSR } from '../ssr';
-import { defaultTheme, TenantTheme } from '../theme';
-import { Button } from '../Button';
-import { Input } from '../Input';
-import { Select } from '../Select';
-
-export interface GroupMember {
-  id: string;
-  user: {
-    id: string;
-    email: string;
-    firstName: string;
-    lastName: string;
-    role: string;
-  };
-  role: 'ADMIN' | 'MODERATOR' | 'MEMBER';
-  joinedAt: string;
-  isActive: boolean;
-  permissions?: {
-    canInviteMembers: boolean;
-    canRemoveMembers: boolean;
-    canEditGroup: boolean;
-    canViewReports: boolean;
-    canManageTraining: boolean;
-    canSendNudges: boolean;
-  };
-}
 
 export interface GroupMemberListProps {
-  tenantTheme?: TenantTheme;
-  members: GroupMember[];
-  onRoleChange?: (memberId: string, role: string) => void;
-  onRemoveMember?: (memberId: string) => void;
-  onUpdatePermissions?: (memberId: string, permissions: any) => void;
-  onAddMembers?: () => void;
+  members: Array<{
+    id: string;
+    user: {
+      firstName: string;
+      lastName: string;
+      email: string;
+    };
+    role: string;
+    joinedAt: string;
+    permissions: string[];
+  }>;
+  selectedMembers?: string[];
+  onSelectMember?: (memberId: string) => void;
+  onSelectAll?: () => void;
   onBulkAction?: (action: string, memberIds: string[]) => void;
+  onManagePermissions?: (memberId: string) => void;
+  onRemoveMember?: (memberId: string) => void;
   className?: string;
-  showActions?: boolean;
-  showPermissions?: boolean;
-  allowRoleChange?: boolean;
-  allowMemberRemoval?: boolean;
-  currentUserRole?: string;
+  showFilters?: boolean;
+  showBulkActions?: boolean;
 }
 
 const GroupMemberListComponent: React.FC<GroupMemberListProps> = ({
-  tenantTheme = defaultTheme,
   members,
-  onRoleChange,
-  onRemoveMember,
-  onUpdatePermissions,
-  onAddMembers,
+  selectedMembers = [],
+  onSelectMember,
+  onSelectAll,
   onBulkAction,
+  onManagePermissions,
+  onRemoveMember,
   className = '',
-  showActions = true,
-  showPermissions = true,
-  allowRoleChange = true,
-  allowMemberRemoval = true,
-  currentUserRole = 'MEMBER',
+  showFilters = true,
+  showBulkActions = true,
   ...props
 }) => {
-  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [roleFilter, setRoleFilter] = useState('');
-
-  const filteredMembers = members.filter((member) => {
-    const matchesSearch = 
-      member.user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      member.user.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesRole = !roleFilter || member.role === roleFilter;
-    
-    return matchesSearch && matchesRole;
-  });
-
-  const handleSelectMember = (memberId: string) => {
-    setSelectedMembers(prev => 
-      prev.includes(memberId) 
-        ? prev.filter(id => id !== memberId)
-        : [...prev, memberId]
-    );
-  };
-
-  const handleSelectAll = () => {
-    if (selectedMembers.length === filteredMembers.length) {
-      setSelectedMembers([]);
-    } else {
-      setSelectedMembers(filteredMembers.map(member => member.id));
-    }
-  };
-
-  const getRoleColor = (role: string) => {
-    switch (role) {
-      case 'ADMIN':
-        return 'bg-red-100 text-red-800';
-      case 'MODERATOR':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'MEMBER':
-        return 'bg-green-100 text-green-800';
+  const getRoleBadgeVariant = (role: string) => {
+    switch (role.toLowerCase()) {
+      case 'super admin':
+        return 'badge-purple';
+      case 'admin':
+        return 'badge-blue';
+      case 'instructor':
+        return 'badge-green';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'badge-gray';
     }
   };
 
-  const canManageMembers = ['ADMIN', 'SUPER_ADMIN'].includes(currentUserRole);
+  const getPermissionBadgeVariant = (permission: string) => {
+    switch (permission.toLowerCase()) {
+      case 'admin':
+        return 'badge-red';
+      case 'edit':
+        return 'badge-blue';
+      case 'view':
+        return 'badge-gray';
+      default:
+        return 'badge-gray';
+    }
+  };
 
   return (
-    <div className={`bg-white rounded-lg shadow-sm border border-gray-200 ${className}`} {...props}>
+    <div className={`surface ${className}`} {...props}>
       {/* Header */}
-      <div className="px-6 py-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold text-gray-900">
-              Group Members ({members.length})
-            </h3>
-            <p className="text-sm text-gray-600">
-              Manage group members and their permissions
-            </p>
-          </div>
-          
-          {onAddMembers && canManageMembers && (
-            <Button onClick={onAddMembers} size="sm">
-              Add Members
-            </Button>
-          )}
+      <div
+        className="px-6 py-4 flex items-center justify-between"
+        style={{ borderBottom: '1px solid var(--color-separator)' }}
+      >
+        <div>
+          <h3 className="text-base font-semibold text-primary">Group Members ({members.length})</h3>
+          <p className="text-xs text-secondary mt-0.5">Manage group members and their permissions</p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-        <div className="flex items-center space-x-4">
-          <div className="flex-1">
-            <Input
-              placeholder="Search members..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="max-w-sm"
-            />
+      {showFilters && (
+        <div className="px-6 py-3" style={{ backgroundColor: 'var(--color-fill-quaternary)' }}>
+          <div className="flex items-center gap-4">
+            <div className="flex-1">
+              <input type="text" placeholder="Search members..." className="input-field text-sm" />
+            </div>
+            <select className="input-field text-sm w-40">
+              <option value="">All Roles</option>
+              <option value="admin">Admin</option>
+              <option value="instructor">Instructor</option>
+              <option value="learner">Learner</option>
+            </select>
           </div>
-          
-          <Select
-            value={roleFilter}
-            onChange={setRoleFilter}
-            options={[
-              { value: '', label: 'All Roles' },
-              { value: 'ADMIN', label: 'Admin' },
-              { value: 'MODERATOR', label: 'Moderator' },
-              { value: 'MEMBER', label: 'Member' },
-            ]}
-            className="w-40"
-          />
         </div>
-      </div>
+      )}
 
       {/* Bulk Actions */}
-      {selectedMembers.length > 0 && onBulkAction && (
-        <div className="px-6 py-3 bg-blue-50 border-b border-blue-200">
+      {showBulkActions && selectedMembers.length > 0 && (
+        <div
+          className="px-6 py-3"
+          style={{ backgroundColor: 'rgba(10, 132, 255, 0.08)', borderBottom: '1px solid rgba(10, 132, 255, 0.2)' }}
+        >
           <div className="flex items-center justify-between">
-            <span className="text-sm text-blue-800">
-              {selectedMembers.length} member(s) selected
+            <span className="text-sm" style={{ color: 'var(--color-blue)' }}>
+              {selectedMembers.length} member{selectedMembers.length !== 1 ? 's' : ''} selected
             </span>
-            <div className="flex items-center space-x-2">
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onBulkAction('changeRole', selectedMembers)}
-              >
-                Change Role
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => onBulkAction('remove', selectedMembers)}
-              >
+            <div className="flex gap-2">
+              <button className="ios-btn-plain text-xs">Change Role</button>
+              <button className="ios-btn-plain text-xs" style={{ color: 'var(--color-red)' }}>
                 Remove
-              </Button>
+              </button>
             </div>
           </div>
         </div>
       )}
 
       {/* Members List */}
-      <div className="divide-y divide-gray-200">
-        {filteredMembers.length === 0 ? (
-          <div className="px-6 py-8 text-center">
-            <div className="text-gray-500">
-              {searchTerm || roleFilter ? 'No members found matching your criteria' : 'No members in this group'}
-            </div>
-          </div>
-        ) : (
-          filteredMembers.map((member) => (
-            <div key={member.id} className="px-6 py-4 hover:bg-gray-50">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                  {/* Checkbox */}
-                  {canManageMembers && (
-                    <input
-                      type="checkbox"
-                      checked={selectedMembers.includes(member.id)}
-                      onChange={() => handleSelectMember(member.id)}
-                      className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
-                    />
-                  )}
+      <div className="divide-y" style={{ borderColor: 'var(--color-separator)' }}>
+        {members.map((member) => (
+          <div key={member.id} className="px-6 py-4 hover:bg-[var(--color-fill-quaternary)] transition-colors">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {onSelectMember && (
+                  <input
+                    type="checkbox"
+                    checked={selectedMembers.includes(member.id)}
+                    onChange={() => onSelectMember(member.id)}
+                    className="h-4 w-4 rounded"
+                    style={{ accentColor: 'var(--color-blue)' }}
+                  />
+                )}
+                {/* Avatar */}
+                <div
+                  className="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium"
+                  style={{ backgroundColor: 'var(--color-blue)', color: 'white' }}
+                >
+                  {member.user.firstName.charAt(0)}
+                  {member.user.lastName.charAt(0)}
+                </div>
 
-                  {/* Avatar */}
-                  <div className="w-10 h-10 bg-gray-300 rounded-full flex items-center justify-center">
-                    <span className="text-sm font-medium text-gray-700">
-                      {member.user.firstName.charAt(0)}{member.user.lastName.charAt(0)}
+                {/* Member Info */}
+                <div>
+                  <h4 className="text-sm font-medium text-primary truncate">
+                    {member.user.firstName} {member.user.lastName}
+                  </h4>
+                  <p className="text-xs text-secondary">{member.user.email}</p>
+                  <p className="text-xs text-secondary mt-0.5">
+                    Joined {new Date(member.joinedAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {/* Permissions */}
+                <div className="flex flex-wrap gap-1.5">
+                  {member.permissions.slice(0, 2).map((permission) => (
+                    <span key={permission} className={`badge ${getPermissionBadgeVariant(permission)} text-xs`}>
+                      {permission}
                     </span>
-                  </div>
-
-                  {/* Member Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center space-x-2">
-                      <h4 className="text-sm font-medium text-gray-900 truncate">
-                        {member.user.firstName} {member.user.lastName}
-                      </h4>
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getRoleColor(member.role)}`}>
-                        {member.role}
-                      </span>
-                    </div>
-                    <p className="text-sm text-gray-600">{member.user.email}</p>
-                    <p className="text-xs text-gray-500">
-                      Joined {new Date(member.joinedAt).toLocaleDateString()}
-                    </p>
-                  </div>
+                  ))}
+                  {member.permissions.length > 2 && (
+                    <span className="badge badge-gray text-xs">+{member.permissions.length - 2}</span>
+                  )}
                 </div>
 
                 {/* Actions */}
-                {showActions && canManageMembers && (
-                  <div className="flex items-center space-x-2">
-                    {allowRoleChange && onRoleChange && (
-                      <Select
-                        value={member.role}
-                        onChange={(role) => onRoleChange(member.id, role)}
-                        options={[
-                          { value: 'MEMBER', label: 'Member' },
-                          { value: 'MODERATOR', label: 'Moderator' },
-                          { value: 'ADMIN', label: 'Admin' },
-                        ]}
-                        size="sm"
-                        className="w-32"
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => onManagePermissions?.(member.id)}
+                    className="p-2 rounded-lg transition-colors"
+                    style={{ color: 'var(--color-label-tertiary)' }}
+                    title="Manage Permissions"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
                       />
-                    )}
-                    
-                    {allowMemberRemoval && onRemoveMember && (
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => onRemoveMember(member.id)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        Remove
-                      </Button>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Permissions */}
-              {showPermissions && member.permissions && (
-                <div className="mt-3 ml-14">
-                  <div className="text-xs text-gray-500 mb-2">Permissions:</div>
-                  <div className="flex flex-wrap gap-2">
-                    {Object.entries(member.permissions).map(([key, value]) => (
-                      <span
-                        key={key}
-                        className={`px-2 py-1 text-xs rounded ${
-                          value 
-                            ? 'bg-green-100 text-green-800' 
-                            : 'bg-gray-100 text-gray-600'
-                        }`}
-                      >
-                        {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
-                      </span>
-                    ))}
-                  </div>
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => onRemoveMember?.(member.id)}
+                    className="p-2 rounded-lg transition-colors"
+                    style={{ color: 'var(--color-label-tertiary)' }}
+                    title="Remove Member"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
-          ))
-        )}
+          </div>
+        ))}
       </div>
 
       {/* Footer */}
-      {filteredMembers.length > 0 && (
-        <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
-          <div className="flex items-center justify-between text-sm text-gray-600">
-            <span>
-              Showing {filteredMembers.length} of {members.length} members
-            </span>
-            {canManageMembers && (
-              <button
-                onClick={handleSelectAll}
-                className="text-blue-600 hover:text-blue-700"
-              >
-                {selectedMembers.length === filteredMembers.length ? 'Deselect All' : 'Select All'}
-              </button>
-            )}
-          </div>
+      <div
+        className="px-6 py-3 flex items-center justify-between text-xs text-secondary"
+        style={{ borderTop: '1px solid var(--color-separator)' }}
+      >
+        <span>
+          Showing {members.length} of {members.length} members
+        </span>
+        <div className="flex items-center gap-4">
+          <button className="ios-btn-plain text-xs">Export</button>
+          <button className="ios-btn-plain text-xs">Invite Members</button>
         </div>
-      )}
+      </div>
     </div>
   );
 };

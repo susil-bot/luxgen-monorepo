@@ -79,27 +79,27 @@ import { Card } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `children` | `React.ReactNode` | - | Card content |
-| `title` | `React.ReactNode` | - | Card title |
-| `description` | `React.ReactNode` | - | Card description |
-| `icon` | `React.ReactNode` | - | Card icon |
-| `variant` | `'default' | 'elevated' | 'outlined' | 'filled'` | `'default'` | Card variant |
-| `size` | `'small' | 'medium' | 'large'` | `'medium'` | Card size |
-| `padding` | `'none' | 'small' | 'medium' | 'large'` | `'medium'` | Card padding |
-| `shadow` | `'none' | 'small' | 'medium' | 'large'` | `'medium'` | Card shadow |
-| `hover` | `boolean` | `false` | Enable hover effects |
-| `clickable` | `boolean` | `false` | Make card clickable |
-| `onClick` | `() => void` | - | Click handler |
-| `header` | `React.ReactNode` | - | Custom header content |
-| `footer` | `React.ReactNode` | - | Custom footer content |
-| `image` | `string` | - | Image URL |
-| `imageAlt` | `string` | `''` | Image alt text |
-| `imagePosition` | `'top' | 'bottom' | 'left' | 'right'` | `'top'` | Image position |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
+| Prop            | Type              | Default        | Description              |
+| --------------- | ----------------- | -------------- | ------------------------ | ---------- | ----------- | -------------- |
+| `tenantTheme`   | `TenantTheme`     | `defaultTheme` | Theme object for styling |
+| `children`      | `React.ReactNode` | -              | Card content             |
+| `title`         | `React.ReactNode` | -              | Card title               |
+| `description`   | `React.ReactNode` | -              | Card description         |
+| `icon`          | `React.ReactNode` | -              | Card icon                |
+| `variant`       | `'default'        | 'elevated'     | 'outlined'               | 'filled'`  | `'default'` | Card variant   |
+| `size`          | `'small'          | 'medium'       | 'large'`                 | `'medium'` | Card size   |
+| `padding`       | `'none'           | 'small'        | 'medium'                 | 'large'`   | `'medium'`  | Card padding   |
+| `shadow`        | `'none'           | 'small'        | 'medium'                 | 'large'`   | `'medium'`  | Card shadow    |
+| `hover`         | `boolean`         | `false`        | Enable hover effects     |
+| `clickable`     | `boolean`         | `false`        | Make card clickable      |
+| `onClick`       | `() => void`      | -              | Click handler            |
+| `header`        | `React.ReactNode` | -              | Custom header content    |
+| `footer`        | `React.ReactNode` | -              | Custom footer content    |
+| `image`         | `string`          | -              | Image URL                |
+| `imageAlt`      | `string`          | `''`           | Image alt text           |
+| `imagePosition` | `'top'            | 'bottom'       | 'left'                   | 'right'`   | `'top'`     | Image position |
+| `className`     | `string`          | `''`           | Additional CSS classes   |
+| `style`         | `CSSProperties`   | `{}`           | Inline styles            |
 
 ## SSR Usage
 
@@ -134,7 +134,9 @@ The component uses CSS custom properties for theming:
   background-color: var(--color-background);
   border: none;
   border-radius: 0.5rem;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
 }
 ```
 
@@ -154,28 +156,23 @@ The component uses CSS custom properties for theming:
 ## Interactive Features
 
 ### Clickable Cards
+
 ```tsx
-<Card
-  clickable
-  onClick={() => handleCardClick()}
->
+<Card clickable onClick={() => handleCardClick()}>
   Clickable content
 </Card>
 ```
 
 ### Hover Effects
+
 ```tsx
-<Card hover>
-  Content with hover effects
-</Card>
+<Card hover>Content with hover effects</Card>
 ```
 
 ### Image Positioning
+
 ```tsx
-<Card
-  image="image.jpg"
-  imagePosition="left"
->
+<Card image="image.jpg" imagePosition="left">
   Content with left image
 </Card>
 ```
@@ -196,23 +193,27 @@ import { Card } from '@luxgen/ui';
 
 test('renders with content', () => {
   render(<Card>Test content</Card>);
-  
+
   expect(screen.getByText('Test content')).toBeInTheDocument();
 });
 
 test('renders with title', () => {
   render(<Card title="Test Title">Content</Card>);
-  
+
   expect(screen.getByText('Test Title')).toBeInTheDocument();
 });
 
 test('calls onClick when clicked', () => {
   const onClick = jest.fn();
-  render(<Card clickable onClick={onClick}>Content</Card>);
-  
+  render(
+    <Card clickable onClick={onClick}>
+      Content
+    </Card>,
+  );
+
   const card = screen.getByText('Content').closest('.card');
   fireEvent.click(card!);
-  
+
   expect(onClick).toHaveBeenCalledTimes(1);
 });
 ```
@@ -220,6 +221,7 @@ test('calls onClick when clicked', () => {
 ## Examples
 
 ### Basic Card
+
 ```tsx
 <Card>
   <div>Simple card content</div>
@@ -227,16 +229,15 @@ test('calls onClick when clicked', () => {
 ```
 
 ### Card with Title and Description
+
 ```tsx
-<Card
-  title="Product Name"
-  description="Product description"
->
+<Card title="Product Name" description="Product description">
   <div>Product details</div>
 </Card>
 ```
 
 ### Elevated Card
+
 ```tsx
 <Card variant="elevated" title="Featured Content">
   <div>Elevated card content</div>
@@ -244,44 +245,33 @@ test('calls onClick when clicked', () => {
 ```
 
 ### Clickable Card
+
 ```tsx
-<Card
-  clickable
-  onClick={() => navigate('/product/123')}
-  title="Product Card"
->
+<Card clickable onClick={() => navigate('/product/123')} title="Product Card">
   <div>Click to view product</div>
 </Card>
 ```
 
 ### Card with Image
+
 ```tsx
-<Card
-  title="Image Card"
-  image="https://example.com/image.jpg"
-  imageAlt="Card image"
->
+<Card title="Image Card" image="https://example.com/image.jpg" imageAlt="Card image">
   <div>Card with image</div>
 </Card>
 ```
 
 ### Card with Header and Footer
+
 ```tsx
-<Card
-  title="Card Title"
-  header={<div>Custom header</div>}
-  footer={<div>Custom footer</div>}
->
+<Card title="Card Title" header={<div>Custom header</div>} footer={<div>Custom footer</div>}>
   <div>Card content</div>
 </Card>
 ```
 
 ### Custom Themed Card
+
 ```tsx
-<Card
-  tenantTheme={customTheme}
-  title="Themed Card"
->
+<Card tenantTheme={customTheme} title="Themed Card">
   <div>Custom themed content</div>
 </Card>
 ```

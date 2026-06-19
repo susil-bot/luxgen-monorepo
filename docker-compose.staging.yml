@@ -1,0 +1,148 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# LuxGen Staging Environment
+# Usage: docker compose -f docker-compose.staging.yml up -d
+#        docker compose -f docker-compose.staging.yml --env-file .env.staging up -d
+# ─────────────────────────────────────────────────────────────────────────────
+
+services:
+
+  # ── MongoDB ─────────────────────────────────────────────────────────────────
+  mongodb:
+    image: mongo:7.0
+    container_name: luxgen-mongodb-staging
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_ROOT_USERNAME:-admin}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_ROOT_PASSWORD:-staging-password-change-me}
+      MONGO_INITDB_DATABASE: luxgen_staging
+    volumes:
+      - mongodb_staging_data:/data/db
+    networks:
+      - luxgen-staging-network
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── Redis ────────────────────────────────────────────────────────────────────
+  redis:
+    image: redis:7.2-alpine
+    container_name: luxgen-redis-staging
+    restart: unless-stopped
+    volumes:
+      - redis_staging_data:/data
+    networks:
+      - luxgen-staging-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── API ──────────────────────────────────────────────────────────────────────
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+      target: runner
+    container_name: luxgen-api-staging
+    restart: unless-stopped
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: staging
+      PORT: 4000
+      LOG_LEVEL: info
+      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME:-admin}:${MONGO_ROOT_PASSWORD:-staging-password-change-me}@mongodb:27017/luxgen_staging?authSource=admin
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
+      APOLLO_INTROSPECTION: "true"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - luxgen-staging-network
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:4000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # ── Web ──────────────────────────────────────────────────────────────────────
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      target: runner
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL:-http://localhost:3000}
+        NEXT_PUBLIC_APP_ENV: staging
+    container_name: luxgen-web-staging
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: staging
+      API_URL: http://api:4000
+      OLLAMA_HOST: ${OLLAMA_HOST:-http://ollama:11434}
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-qwen2.5-coder:7b}
+    depends_on:
+      api:
+        condition: service_healthy
+    networks:
+      - luxgen-staging-network
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+
+  # ── Ollama (Local LLM for Agent Studio) ──────────────────────────────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: luxgen-ollama-staging
+    restart: unless-stopped
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_staging_data:/root/.ollama
+    networks:
+      - luxgen-staging-network
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  ollama-model-pull:
+    image: ollama/ollama:latest
+    container_name: luxgen-ollama-pull-staging
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    command: ["pull", "${OLLAMA_MODEL:-qwen2.5-coder:7b}"]
+    networks:
+      - luxgen-staging-network
+    restart: "no"
+
+volumes:
+  mongodb_staging_data:
+    driver: local
+  redis_staging_data:
+    driver: local
+  ollama_staging_data:
+    driver: local
+
+networks:
+  luxgen-staging-network:
+    driver: bridge

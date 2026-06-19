@@ -78,7 +78,7 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   const [menuCollapsed, setMenuCollapsed] = useState(menuDefaultCollapsed);
   const [hasError, setHasError] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  
+
   // Refs for analytics and performance tracking
   const layoutRef = useRef<HTMLDivElement>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout>();
@@ -88,33 +88,42 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   const { theme } = useTheme();
 
   // Analytics tracking functions
-  const trackLayoutEvent = useCallback((eventName: string, properties?: Record<string, any>) => {
-    if (typeof window !== 'undefined' && (window as any).gtag) {
-      (window as any).gtag('event', eventName, {
-        tenant: currentTenant,
-        ...properties,
-      });
-    }
-    console.log(`📊 Layout Event: ${eventName}`, { tenant: currentTenant, ...properties });
-  }, [currentTenant]);
+  const trackLayoutEvent = useCallback(
+    (eventName: string, properties?: Record<string, any>) => {
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', eventName, {
+          tenant: currentTenant,
+          ...properties,
+        });
+      }
+      console.log(`📊 Layout Event: ${eventName}`, { tenant: currentTenant, ...properties });
+    },
+    [currentTenant],
+  );
 
-  const trackUserInteraction = useCallback((action: string, target: string) => {
-    trackLayoutEvent('user_interaction', {
-      action,
-      target,
-      timestamp: Date.now(),
-    });
-  }, [trackLayoutEvent]);
+  const trackUserInteraction = useCallback(
+    (action: string, target: string) => {
+      trackLayoutEvent('user_interaction', {
+        action,
+        target,
+        timestamp: Date.now(),
+      });
+    },
+    [trackLayoutEvent],
+  );
 
   // Error handling
-  const handleError = useCallback((error: Error, errorInfo?: any) => {
-    console.error('AppLayout Error:', error, errorInfo);
-    setHasError(true);
-    trackLayoutEvent('layout_error', {
-      error: error.message,
-      stack: error.stack,
-    });
-  }, [trackLayoutEvent]);
+  const handleError = useCallback(
+    (error: Error, errorInfo?: any) => {
+      console.error('AppLayout Error:', error, errorInfo);
+      setHasError(true);
+      trackLayoutEvent('layout_error', {
+        error: error.message,
+        stack: error.stack,
+      });
+    },
+    [trackLayoutEvent],
+  );
 
   // Performance tracking
   const trackPerformance = useCallback(() => {
@@ -136,12 +145,11 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
       setIsMobile(width < mobileBreakpoint);
       setIsTablet(width >= mobileBreakpoint && width < tabletBreakpoint);
       setIsDesktop(width >= desktopBreakpoint);
-      
+
       // Track responsive breakpoint changes
       trackLayoutEvent('responsive_change', {
         width,
-        breakpoint: width < mobileBreakpoint ? 'mobile' : 
-                   width < tabletBreakpoint ? 'tablet' : 'desktop',
+        breakpoint: width < mobileBreakpoint ? 'mobile' : width < tabletBreakpoint ? 'tablet' : 'desktop',
       });
     };
 
@@ -154,11 +162,11 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
     if (isMobile) {
       return 'flex-col';
     }
-    
+
     if (isTablet) {
       return 'flex-col';
     }
-    
+
     return 'flex-row';
   };
 
@@ -166,11 +174,11 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
     if (isMobile) {
       return sidebarCollapsed ? 'hidden' : 'fixed inset-0 z-50';
     }
-    
+
     if (isTablet) {
       return sidebarCollapsed ? 'hidden' : 'fixed left-0 top-0 bottom-0 z-40';
     }
-    
+
     return sidebarCollapsed ? 'w-16' : 'w-64';
   };
 
@@ -178,11 +186,11 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
     if (isMobile) {
       return 'w-full';
     }
-    
+
     if (isTablet) {
       return 'w-full';
     }
-    
+
     return sidebarCollapsed ? 'ml-16' : 'ml-64';
   };
 
@@ -190,11 +198,11 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
     if (isMobile) {
       return 'fixed top-0 left-0 right-0 z-50';
     }
-    
+
     if (isTablet) {
       return 'sticky top-0 z-40';
     }
-    
+
     return 'sticky top-0 z-30';
   };
 
@@ -212,7 +220,7 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
     const initializeLayout = async () => {
       try {
         setIsLoading(true);
-        
+
         // Track layout initialization
         trackLayoutEvent('layout_initialized', {
           tenant: currentTenant,
@@ -222,7 +230,7 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
 
         // Track performance after a short delay
         setTimeout(trackPerformance, 1000);
-        
+
         setIsLoading(false);
       } catch (error) {
         handleError(error as Error);
@@ -245,9 +253,12 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   // Show loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: theme.colors.background }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: theme.colors.background }}
+      >
         <div className="text-center">
-          <div 
+          <div
             className="animate-spin rounded-full h-32 w-32 border-b-2 mx-auto mb-4"
             style={{ borderColor: theme.colors.primary }}
           ></div>
@@ -260,11 +271,19 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   // Show error state
   if (hasError) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: theme.colors.background }}>
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ backgroundColor: theme.colors.background }}
+      >
         <div className="text-center p-8">
           <div className="mb-4">
             <svg className="mx-auto h-12 w-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 19.5c-.77.833.192 2.5 1.732 2.5z"
+              />
             </svg>
           </div>
           <h2 className="text-lg font-semibold text-gray-900 mb-2">Layout Error</h2>
@@ -282,63 +301,60 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   }
 
   return (
-    <div 
+    <div
       ref={layoutRef}
-      className={`flex h-screen ${className}`} 
+      className={`flex h-screen ${className}`}
       style={{ backgroundColor: theme.colors.background }}
       {...props}
     >
-        {/* Sidebar - Always rendered */}
-        {sidebarSections.length > 0 && (
-          <Sidebar
-            sections={sidebarSections}
-            user={user}
-            onUserAction={onUserAction}
-            logo={logo}
-            variant="default"
-            position="fixed"
-            width="normal"
-            collapsible={sidebarCollapsible}
-            defaultCollapsed={sidebarCollapsed}
-            showUserSection={true}
-            showLogo={true}
-            className={`${getSidebarStyles()} shadow-sm`}
-          />
-        )}
+      {/* Sidebar - Always rendered */}
+      {sidebarSections.length > 0 && (
+        <Sidebar
+          sections={sidebarSections}
+          user={user}
+          onUserAction={onUserAction}
+          logo={logo}
+          variant="default"
+          position="fixed"
+          width="normal"
+          collapsible={sidebarCollapsible}
+          defaultCollapsed={sidebarCollapsed}
+          showUserSection={true}
+          showLogo={true}
+          className={`${getSidebarStyles()} shadow-sm`}
+        />
+      )}
 
-        {/* Main Content Area */}
-        <div className="flex flex-col flex-1">
-          {/* NavBar - Always rendered */}
-          <NavBar
-            user={user}
-            onUserAction={onUserAction}
-            showSearch={showSearch}
-            onSearch={onSearch}
-            searchPlaceholder={searchPlaceholder}
-            showNotifications={showNotifications}
-            notificationCount={notificationCount}
-            onNotificationClick={onNotificationClick}
-            logo={logo}
-            variant="default"
-            position="fixed"
-            className="shadow-sm"
-          />
+      {/* Main Content Area */}
+      <div className="flex flex-col flex-1">
+        {/* NavBar - Always rendered */}
+        <NavBar
+          user={user}
+          onUserAction={onUserAction}
+          showSearch={showSearch}
+          onSearch={onSearch}
+          searchPlaceholder={searchPlaceholder}
+          showNotifications={showNotifications}
+          notificationCount={notificationCount}
+          onNotificationClick={onNotificationClick}
+          logo={logo}
+          variant="default"
+          position="fixed"
+          className="shadow-sm"
+        />
 
-          {/* Main Content - Dynamic children */}
-          <main className={`flex-1 overflow-y-auto p-4 ${getMainContentStyles()}`} style={{ paddingTop: '80px' }}>
-            {children}
-          </main>
-        </div>
-
-        {/* Mobile Overlay */}
-        {isMobile && !sidebarCollapsed && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
-            onClick={handleSidebarToggle}
-          />
-        )}
+        {/* Main Content - Dynamic children */}
+        <main className={`flex-1 overflow-y-auto p-4 ${getMainContentStyles()}`} style={{ paddingTop: '80px' }}>
+          {children}
+        </main>
       </div>
-    );
-  };
+
+      {/* Mobile Overlay */}
+      {isMobile && !sidebarCollapsed && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={handleSidebarToggle} />
+      )}
+    </div>
+  );
+};
 
 export const AppLayout = withSSR(AppLayoutComponent);

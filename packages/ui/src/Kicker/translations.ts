@@ -1,1 +1,1 @@
-export const KickerTranslations = { en: { title: "Kicker" } };
+export const KickerTranslations = { en: { title: 'Kicker' } };

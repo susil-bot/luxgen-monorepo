@@ -30,10 +30,7 @@ export const getSizeStyles = (size: 'small' | 'medium' | 'large') => {
   return sizes[size];
 };
 
-export const getVariantStyles = (
-  variant: 'default' | 'outline' | 'ghost',
-  tenantTheme: TenantTheme
-) => {
+export const getVariantStyles = (variant: 'default' | 'outline' | 'ghost', tenantTheme: TenantTheme) => {
   // Theme-aware colors
   const primaryColor = tenantTheme.colors.primary || '#3B82F6';
   const lightPrimary = tenantTheme.colors.primaryLight || '#E3F2FD';
@@ -84,12 +81,12 @@ export const getArrowStyles = (
   size: 'small' | 'medium' | 'large',
   variant: 'default' | 'outline' | 'ghost',
   disabled: boolean,
-  tenantTheme: TenantTheme
+  tenantTheme: TenantTheme,
 ): ArrowStyles => {
   const sizeStyles = getSizeStyles(size);
   const variantStyles = getVariantStyles(variant, tenantTheme);
   const directionStyles = getDirectionStyles(direction);
-  
+
   return {
     button: {
       display: 'inline-flex',
@@ -204,7 +201,7 @@ export const getArrowConfig = (
   size: 'small' | 'medium' | 'large' = 'medium',
   variant: 'default' | 'outline' | 'ghost' = 'default',
   disabled: boolean = false,
-  tenantTheme: TenantTheme
+  tenantTheme: TenantTheme,
 ) => {
   return {
     styles: getArrowStyles(direction, size, variant, disabled, tenantTheme),

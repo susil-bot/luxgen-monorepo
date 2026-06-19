@@ -18,9 +18,7 @@ export interface CardData {
   hasFooter: boolean;
 }
 
-export const fetchCardData = async (
-  tenantId?: string
-): Promise<CardData> => {
+export const fetchCardData = async (tenantId?: string): Promise<CardData> => {
   return {
     tenantTheme: defaultTheme,
     title: 'Card Title',
@@ -39,14 +37,14 @@ export const fetchCardData = async (
   };
 };
 
-export const fetchCardSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchCardSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchCardData(tenantId);
-  
+
   const html = `
     <div class="card card-${data.variant} card-${data.size}" style="font-family: ${data.tenantTheme.fonts.primary}; color: ${data.tenantTheme.colors.text}; background-color: ${data.tenantTheme.colors.background}; border: 1px solid ${data.tenantTheme.colors.border}; border-radius: 0.5rem; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); padding: 1rem; font-size: 1rem; min-height: 10rem; position: relative; overflow: hidden; display: flex; flex-direction: column;">
-      ${data.hasHeader ? `
+      ${
+        data.hasHeader
+          ? `
         <div class="card-header" style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; padding: 1rem; padding-bottom: 0;">
           ${data.hasIcon ? `<div class="card-icon" style="display: flex; align-items: center; justify-content: center; width: 2rem; height: 2rem; color: ${data.tenantTheme.colors.primary}; font-size: 1.25rem;">🔖</div>` : ''}
           <div style="flex: 1;">
@@ -54,20 +52,26 @@ export const fetchCardSSR = async (
             <p class="card-description" style="margin: 0.25rem 0 0 0; font-size: 0.875rem; color: ${data.tenantTheme.colors.textSecondary}; line-height: 1.5;">${data.description}</p>
           </div>
         </div>
-      ` : ''}
+      `
+          : ''
+      }
       
       <div class="card-content" style="flex: 1; padding: 1rem; padding-top: ${data.hasHeader ? '0' : '1rem'};">
         ${data.content}
       </div>
       
-      ${data.hasFooter ? `
+      ${
+        data.hasFooter
+          ? `
         <div class="card-footer" style="padding: 1rem; padding-top: 0; border-top: 1px solid ${data.tenantTheme.colors.border}; margin-top: auto;">
           Footer content
         </div>
-      ` : ''}
+      `
+          : ''
+      }
     </div>
   `;
-  
+
   const styles = `
     .card {
       font-family: var(--font-primary);
@@ -173,6 +177,6 @@ export const fetchCardSSR = async (
       margin-top: auto;
     }
   `;
-  
+
   return { html, styles };
 };

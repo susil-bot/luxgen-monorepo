@@ -15,11 +15,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
     // Get tenant-specific brand assets
     const brandAssets = getBrandAssetsForTenant(tenantId);
-    
+
     // Filter assets for this tenant
-    const tenantAssets = defaultAssets.filter(asset => 
-      asset.tenant === tenantId || asset.global
-    );
+    const tenantAssets = defaultAssets.filter((asset) => asset.tenant === tenantId || asset.global);
 
     const response = {
       assets: tenantAssets,
@@ -31,9 +29,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     res.status(200).json(response);
   } catch (error) {
     console.error('Error fetching tenant assets:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Internal server error',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 }

@@ -1,10 +1,11 @@
+import { getMongoUri } from '@luxgen/config';
 import mongoose from 'mongoose';
 import { logger } from '../utils/logger';
 
 export const connectDB = async (): Promise<void> => {
   try {
-    const mongoURI = process.env.MONGODB_URI || 'mongodb://localhost:27017/luxgen';
-    
+    const mongoURI = getMongoUri();
+
     await mongoose.connect(mongoURI, {
       // Remove deprecated options
     });

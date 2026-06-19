@@ -52,23 +52,23 @@ import { TextArea } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `value` | `string` | - | Current value |
-| `onChange` | `(value: string) => void` | - | Change handler |
-| `placeholder` | `string` | - | Placeholder text |
-| `rows` | `number` | `4` | Number of visible rows |
-| `disabled` | `boolean` | `false` | Disabled state |
-| `readOnly` | `boolean` | `false` | Read-only state |
-| `maxLength` | `number` | - | Maximum character length |
-| `minLength` | `number` | - | Minimum character length |
-| `required` | `boolean` | `false` | Required field |
-| `label` | `string` | - | Label text |
-| `helperText` | `string` | - | Helper text |
-| `error` | `string` | - | Error message |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
+| Prop          | Type                      | Default        | Description              |
+| ------------- | ------------------------- | -------------- | ------------------------ |
+| `tenantTheme` | `TenantTheme`             | `defaultTheme` | Theme object for styling |
+| `value`       | `string`                  | -              | Current value            |
+| `onChange`    | `(value: string) => void` | -              | Change handler           |
+| `placeholder` | `string`                  | -              | Placeholder text         |
+| `rows`        | `number`                  | `4`            | Number of visible rows   |
+| `disabled`    | `boolean`                 | `false`        | Disabled state           |
+| `readOnly`    | `boolean`                 | `false`        | Read-only state          |
+| `maxLength`   | `number`                  | -              | Maximum character length |
+| `minLength`   | `number`                  | -              | Minimum character length |
+| `required`    | `boolean`                 | `false`        | Required field           |
+| `label`       | `string`                  | -              | Label text               |
+| `helperText`  | `string`                  | -              | Helper text              |
+| `error`       | `string`                  | -              | Error message            |
+| `className`   | `string`                  | `''`           | Additional CSS classes   |
+| `style`       | `CSSProperties`           | `{}`           | Inline styles            |
 
 ## SSR Usage
 
@@ -129,15 +129,8 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { TextArea } from '@luxgen/ui';
 
 test('renders with label and validation', () => {
-  render(
-    <TextArea
-      label="Message"
-      placeholder="Enter message..."
-      required
-      error="This field is required"
-    />
-  );
-  
+  render(<TextArea label="Message" placeholder="Enter message..." required error="This field is required" />);
+
   expect(screen.getByText('Message')).toBeInTheDocument();
   expect(screen.getByText('*')).toBeInTheDocument();
   expect(screen.getByText('This field is required')).toBeInTheDocument();
@@ -145,16 +138,11 @@ test('renders with label and validation', () => {
 
 test('calls onChange when value changes', () => {
   const mockOnChange = jest.fn();
-  render(
-    <TextArea
-      placeholder="Enter message..."
-      onChange={mockOnChange}
-    />
-  );
-  
+  render(<TextArea placeholder="Enter message..." onChange={mockOnChange} />);
+
   const textarea = screen.getByRole('textbox');
   fireEvent.change(textarea, { target: { value: 'New value' } });
-  
+
   expect(mockOnChange).toHaveBeenCalledWith('New value');
 });
 ```
@@ -162,14 +150,13 @@ test('calls onChange when value changes', () => {
 ## Examples
 
 ### Basic TextArea
+
 ```tsx
-<TextArea
-  placeholder="Enter your message..."
-  rows={4}
-/>
+<TextArea placeholder="Enter your message..." rows={4} />
 ```
 
 ### TextArea with Validation
+
 ```tsx
 <TextArea
   label="Feedback"
@@ -182,6 +169,7 @@ test('calls onChange when value changes', () => {
 ```
 
 ### TextArea with Character Limit
+
 ```tsx
 <TextArea
   label="Comment"
@@ -195,21 +183,13 @@ test('calls onChange when value changes', () => {
 ```
 
 ### Disabled TextArea
+
 ```tsx
-<TextArea
-  label="Read-only Content"
-  value="This content cannot be edited"
-  rows={4}
-  readOnly
-/>
+<TextArea label="Read-only Content" value="This content cannot be edited" rows={4} readOnly />
 ```
 
 ### TextArea with Custom Theme
+
 ```tsx
-<TextArea
-  tenantTheme={customTheme}
-  label="Message"
-  placeholder="Enter your message..."
-  rows={4}
-/>
+<TextArea tenantTheme={customTheme} label="Message" placeholder="Enter your message..." rows={4} />
 ```

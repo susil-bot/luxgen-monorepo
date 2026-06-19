@@ -10,7 +10,7 @@ export interface JwtPayload {
 export const generateToken = (payload: JwtPayload): string => {
   const secret = process.env.JWT_SECRET || 'your-secret-key';
   const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
-  
+
   return jwt.sign(payload, secret, { expiresIn: expiresIn as any });
 };
 
@@ -18,7 +18,7 @@ export const verifyToken = (token: string): JwtPayload | null => {
   try {
     const secret = process.env.JWT_SECRET || 'your-secret-key';
     return jwt.verify(token, secret) as JwtPayload;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 };
@@ -26,7 +26,7 @@ export const verifyToken = (token: string): JwtPayload | null => {
 export const decodeToken = (token: string): JwtPayload | null => {
   try {
     return jwt.decode(token) as JwtPayload;
-  } catch (error) {
+  } catch (_error) {
     return null;
   }
 };

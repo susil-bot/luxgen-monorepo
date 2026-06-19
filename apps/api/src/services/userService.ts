@@ -1,48 +1,94 @@
 import { User, IUser } from '@luxgen/db';
-import { hashPassword, verifyPassword } from '@luxgen/auth';
-import { generateToken } from '@luxgen/auth';
+import { verifyPassword } from '@luxgen/auth';
+import { generateToken } from '../utils/jwt';
+import { logger } from '../utils/logger';
+import { UserRegistrationService, UserRegistrationData } from './userRegistrationService';
+
+export interface LoginInput {
+  email: string;
+  password: string;
+  tenantId?: string;
+}
+
+export interface AuthResult {
+  token: string;
+  user: IUser;
+}
+
+export interface UpdateUserInput {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+}
 
 export class UserService {
   async getUserById(id: string): Promise<IUser | null> {
-    // TODO: Implement database query
-    console.log('Getting user by ID:', id);
-    return null;
+    return User.findById(id).populate('tenant');
   }
 
   async getUsersByTenant(tenantId: string): Promise<IUser[]> {
-    // TODO: Implement database query
-    console.log('Getting users by tenant:', tenantId);
-    return [];
+    return User.find({ tenant: tenantId }).populate('tenant');
   }
 
-  async createUser(input: any): Promise<IUser> {
-    // TODO: Implement database creation
-    console.log('Creating user:', input);
-    throw new Error('Not implemented');
+  async createUser(input: UserRegistrationData): Promise<IUser> {
+    const result = await UserRegistrationService.registerUser(input);
+    if (!result.success || !result.user) {
+      throw new Error(result.message);
+    }
+    return result.user;
   }
 
-  async updateUser(id: string, input: any): Promise<IUser> {
-    // TODO: Implement database update
-    console.log('Updating user:', id, input);
-    throw new Error('Not implemented');
+  async updateUser(id: string, input: UpdateUserInput): Promise<IUser> {
+    const user = await User.findByIdAndUpdate(id, input, { new: true }).populate('tenant');
+    if (!user) throw new Error('User not found');
+    return user;
   }
 
   async deleteUser(id: string): Promise<boolean> {
-    // TODO: Implement database deletion
-    console.log('Deleting user:', id);
-    throw new Error('Not implemented');
+    const result = await User.findByIdAndDelete(id);
+    return !!result;
   }
 
-  async login(input: { email: string; password: string }): Promise<{ token: string; user: IUser }> {
-    // TODO: Implement login logic
-    console.log('User login:', input.email);
-    throw new Error('Not implemented');
+  async login({ email, password, tenantId }: LoginInput): Promise<AuthResult> {
+    const query: Record<string, unknown> = { email: email.toLowerCase().trim() };
+    if (tenantId) query.tenant = tenantId;
+
+    const user = await User.findOne(query).populate('tenant');
+    if (!user) throw new Error('Invalid email or password');
+
+    const isValid = await verifyPassword(password, user.password);
+    if (!isValid) throw new Error('Invalid email or password');
+
+    const token = generateToken(
+      {
+        id: (user as any)._id.toString(),
+        email: user.email,
+        tenant: (user.tenant as any)._id?.toString(),
+        role: user.role,
+      },
+      (user.tenant as any)._id?.toString(),
+    );
+
+    logger.info(`User login: ${user.email}`);
+    return { token, user };
   }
 
-  async register(input: any): Promise<{ token: string; user: IUser }> {
-    // TODO: Implement registration logic
-    console.log('User registration:', input.email);
-    throw new Error('Not implemented');
+  async register(input: UserRegistrationData): Promise<AuthResult> {
+    const user = await this.createUser(input);
+
+    const token = generateToken(
+      {
+        id: (user as any)._id.toString(),
+        email: user.email,
+        tenant: (user.tenant as any)._id?.toString(),
+        role: user.role,
+      },
+      (user.tenant as any)._id?.toString(),
+    );
+
+    logger.info(`User registered: ${user.email}`);
+    return { token, user };
   }
 }
 

@@ -22,21 +22,21 @@ interface RealUserData {
  */
 export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> => {
   console.log('👤 Fetching real user data for tenant:', tenantId);
-  
+
   try {
     // Skip tenant config for now to avoid dependency issues
-    
+
     // Make real API call to fetch user data
     const response = await fetch(`/api/users/me?tenant=${tenantId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
         'X-Tenant-ID': tenantId,
-        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}`,
+        Authorization: `Bearer ${localStorage.getItem('authToken') || ''}`,
       },
       credentials: 'include', // Include cookies for authentication
     });
-    
+
     if (!response.ok) {
       // If no auth token or authentication failed, fall back to tenant-based user generation
       if (response.status === 401 || response.status === 403) {
@@ -45,9 +45,9 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
       }
       throw new Error(`Failed to fetch user data: ${response.status} ${response.statusText}`);
     }
-    
+
     const realUserData: RealUserData = await response.json();
-    
+
     // Transform real data to UserMenu format
     const userMenu: UserMenu = {
       name: realUserData.name,
@@ -59,7 +59,7 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
         subdomain: realUserData.tenant.subdomain,
       },
     };
-    
+
     console.log('👤 Real user data loaded:', {
       tenant: tenantId,
       name: userMenu.name,
@@ -67,26 +67,25 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
       role: userMenu.role,
       tenantName: userMenu.tenant?.name,
     });
-    
+
     // Save to localStorage for persistence
     saveUserToStorage(userMenu);
-    
+
     return userMenu;
-    
   } catch (error) {
     console.error('Failed to fetch real user data:', error);
-    
+
     // Check if it's an API endpoint not found error
     if (error instanceof Error && error.message === 'API_ENDPOINT_NOT_FOUND') {
       console.log('👤 API endpoints not implemented yet, using tenant-based user generation');
-      
+
       // First check if we have a stored user for this tenant
       const storedUser = getUserFromStorage();
       if (storedUser && storedUser.tenant?.subdomain === tenantId) {
         console.log('👤 Using stored user data:', storedUser);
         return storedUser;
       }
-      
+
       // Generate user based on tenant configuration
       const tenantConfig = await getTenantConfig(tenantId);
       const tenantBasedUser: UserMenu = {
@@ -99,20 +98,20 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
           subdomain: tenantConfig.subdomain,
         },
       };
-      
+
       // Save to localStorage for persistence
       saveUserToStorage(tenantBasedUser);
       console.log('👤 Generated tenant-based user:', tenantBasedUser);
       return tenantBasedUser;
     }
-    
+
     // Fallback to localStorage if available
     const storedUser = getUserFromStorage();
     if (storedUser && storedUser.tenant?.subdomain === tenantId) {
       console.log('👤 Using stored user data as fallback');
       return storedUser;
     }
-    
+
     // Final fallback - create user based on tenant configuration
     const tenantConfig = await getTenantConfig(tenantId);
     const fallbackUser: UserMenu = {
@@ -124,7 +123,7 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
         subdomain: tenantConfig.subdomain,
       },
     };
-    
+
     console.log('👤 Using final fallback user data:', fallbackUser);
     return fallbackUser;
   }
@@ -135,7 +134,7 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
  */
 export const getUserFromStorage = (): UserMenu | null => {
   if (typeof window === 'undefined') return null;
-  
+
   try {
     const userData = localStorage.getItem('luxgen_user');
     return userData ? JSON.parse(userData) : null;
@@ -150,7 +149,7 @@ export const getUserFromStorage = (): UserMenu | null => {
  */
 export const saveUserToStorage = (user: UserMenu): void => {
   if (typeof window === 'undefined') return;
-  
+
   try {
     localStorage.setItem('luxgen_user', JSON.stringify(user));
     console.log('👤 User data saved to storage');
@@ -164,7 +163,7 @@ export const saveUserToStorage = (user: UserMenu): void => {
  */
 export const clearUserFromStorage = (): void => {
   if (typeof window === 'undefined') return;
-  
+
   try {
     localStorage.removeItem('luxgen_user');
     console.log('👤 User data cleared from storage');
@@ -178,7 +177,7 @@ export const clearUserFromStorage = (): void => {
  */
 export const updateUserForTenant = async (tenantId: string, updates: Partial<UserMenu>): Promise<UserMenu> => {
   console.log('👤 Updating real user data for tenant:', tenantId, updates);
-  
+
   try {
     // Make API call to update user data
     const response = await fetch(`/api/users/me?tenant=${tenantId}`, {
@@ -190,7 +189,7 @@ export const updateUserForTenant = async (tenantId: string, updates: Partial<Use
       credentials: 'include',
       body: JSON.stringify(updates),
     });
-    
+
     if (!response.ok) {
       // If API endpoint doesn't exist (404) or server error (500), fall back to local update
       if (response.status === 404 || response.status === 500) {
@@ -199,10 +198,10 @@ export const updateUserForTenant = async (tenantId: string, updates: Partial<Use
       }
       throw new Error(`Failed to update user data: ${response.status} ${response.statusText}`);
     }
-    
+
     const updatedUserData: RealUserData = await response.json();
     const tenantConfig = await getTenantConfig(tenantId);
-    
+
     // Transform to UserMenu format
     const updatedUser: UserMenu = {
       name: updatedUserData.name,
@@ -214,27 +213,26 @@ export const updateUserForTenant = async (tenantId: string, updates: Partial<Use
         subdomain: tenantConfig.subdomain,
       },
     };
-    
+
     // Save to localStorage
     saveUserToStorage(updatedUser);
-    
+
     console.log('👤 User data updated successfully:', updatedUser);
     return updatedUser;
-    
   } catch (error) {
     console.error('Failed to update user data:', error);
-    
+
     // Check if it's an API endpoint not found error
     if (error instanceof Error && error.message === 'API_ENDPOINT_NOT_FOUND') {
       console.log('👤 Update API not implemented yet, using local update');
-      
+
       // Fallback to local update
       const currentUser = await fetchUserForTenant(tenantId);
       const updatedUser = { ...currentUser, ...updates };
       saveUserToStorage(updatedUser);
       return updatedUser;
     }
-    
+
     // Other errors - fallback to local update
     const currentUser = await fetchUserForTenant(tenantId);
     const updatedUser = { ...currentUser, ...updates };
@@ -246,9 +244,12 @@ export const updateUserForTenant = async (tenantId: string, updates: Partial<Use
 /**
  * Authenticate user with real credentials
  */
-export const authenticateUser = async (tenantId: string, credentials: { email: string; password: string }): Promise<UserMenu> => {
+export const authenticateUser = async (
+  tenantId: string,
+  credentials: { email: string; password: string },
+): Promise<UserMenu> => {
   console.log('🔐 Authenticating user for tenant:', tenantId);
-  
+
   try {
     const response = await fetch(`/api/auth/login?tenant=${tenantId}`, {
       method: 'POST',
@@ -259,19 +260,23 @@ export const authenticateUser = async (tenantId: string, credentials: { email: s
       credentials: 'include',
       body: JSON.stringify(credentials),
     });
-    
+
     if (!response.ok) {
       // If API endpoint doesn't exist (404) or server error (500), fall back to tenant-based authentication
       if (response.status === 404 || response.status === 500) {
-        console.log('👤 Auth API endpoint not available (status:', response.status, '), using tenant-based authentication');
+        console.log(
+          '👤 Auth API endpoint not available (status:',
+          response.status,
+          '), using tenant-based authentication',
+        );
         throw new Error('API_ENDPOINT_NOT_FOUND');
       }
       throw new Error(`Authentication failed: ${response.status} ${response.statusText}`);
     }
-    
+
     const authData = await response.json();
     const tenantConfig = await getTenantConfig(tenantId);
-    
+
     const userMenu: UserMenu = {
       name: authData.user.name,
       email: authData.user.email,
@@ -282,25 +287,24 @@ export const authenticateUser = async (tenantId: string, credentials: { email: s
         subdomain: tenantConfig.subdomain,
       },
     };
-    
+
     saveUserToStorage(userMenu);
     console.log('🔐 User authenticated successfully:', userMenu);
     return userMenu;
-    
   } catch (error) {
     console.error('Authentication failed:', error);
-    
+
     // Check if it's an API endpoint not found error
     if (error instanceof Error && error.message === 'API_ENDPOINT_NOT_FOUND') {
       console.log('👤 Auth API not implemented yet, using tenant-based authentication');
-      
+
       // Generate user based on actual credentials and tenant configuration
       const tenantConfig = await getTenantConfig(tenantId);
-      
+
       // Extract name from email (e.g., "susilkhan@gmail.com" -> "Susilkhan")
       const emailName = credentials.email.split('@')[0];
       const displayName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
-      
+
       const demoUser: UserMenu = {
         name: `${displayName} from ${tenantConfig.name}`, // Use actual user name from email
         email: credentials.email, // Use the actual email provided
@@ -311,12 +315,12 @@ export const authenticateUser = async (tenantId: string, credentials: { email: s
           subdomain: tenantConfig.subdomain,
         },
       };
-      
+
       saveUserToStorage(demoUser);
       console.log('👤 Generated user for authentication:', demoUser);
       return demoUser;
     }
-    
+
     throw error;
   }
 };
@@ -326,7 +330,7 @@ export const authenticateUser = async (tenantId: string, credentials: { email: s
  */
 export const logoutUser = async (tenantId: string): Promise<void> => {
   console.log('🚪 Logging out user for tenant:', tenantId);
-  
+
   try {
     const response = await fetch(`/api/auth/logout?tenant=${tenantId}`, {
       method: 'POST',
@@ -336,7 +340,7 @@ export const logoutUser = async (tenantId: string): Promise<void> => {
       },
       credentials: 'include',
     });
-    
+
     if (!response.ok) {
       if (response.status === 404 || response.status === 500) {
         console.log('👤 Logout API endpoint not available (status:', response.status, '), clearing local data only');
@@ -344,7 +348,6 @@ export const logoutUser = async (tenantId: string): Promise<void> => {
         console.warn('Logout API call failed, but clearing local data');
       }
     }
-    
   } catch (error) {
     console.warn('Logout API call failed, but clearing local data:', error);
   } finally {

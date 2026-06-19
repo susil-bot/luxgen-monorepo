@@ -43,21 +43,21 @@ const groupData = {
   onViewDetails={() => console.log('View details')}
   onManageUsers={() => console.log('Manage users')}
   showActions={true}
-/>
+/>;
 ```
 
 ## Props
 
 ### GroupDashboardCardProps
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `group` | `GroupData` | ✅ | - | Group data object |
-| `onEdit` | `() => void` | ❌ | - | Edit group callback |
-| `onViewDetails` | `() => void` | ❌ | - | View details callback |
-| `onManageUsers` | `() => void` | ❌ | - | Manage users callback |
-| `className` | `string` | ❌ | `''` | Additional CSS classes |
-| `showActions` | `boolean` | ❌ | `true` | Show action buttons |
+| Prop            | Type         | Required | Default | Description            |
+| --------------- | ------------ | -------- | ------- | ---------------------- |
+| `group`         | `GroupData`  | ✅       | -       | Group data object      |
+| `onEdit`        | `() => void` | ❌       | -       | Edit group callback    |
+| `onViewDetails` | `() => void` | ❌       | -       | View details callback  |
+| `onManageUsers` | `() => void` | ❌       | -       | Manage users callback  |
+| `className`     | `string`     | ❌       | `''`    | Additional CSS classes |
+| `showActions`   | `boolean`    | ❌       | `true`  | Show action buttons    |
 
 ### GroupData Interface
 
@@ -85,11 +85,13 @@ interface GroupData {
 ## Design Elements
 
 ### Header Section
+
 - **Total Users Display**: Shows "Total X Users" with member count
 - **Member Avatars**: Overlapping circular avatars with overflow indicator
 - **Avatar Overflow**: Shows "+N" when more than 3 members
 
 ### Role Badge
+
 - **Centered Display**: Role badge in the center of the card
 - **Color Coding**:
   - Super Admin: Blue
@@ -98,11 +100,13 @@ interface GroupData {
   - Member: Green
 
 ### Active Users Section
+
 - **Progress Bar**: Visual representation of active vs total users
 - **Percentage Display**: Shows active users ratio
 - **Document Icon**: Purple icon indicating progress tracking
 
 ### Status Section
+
 - **Edit User Label**: "Edit User" text with document icon
 - **Status Badge**: Color-coded status indicator
 - **Status Colors**:
@@ -112,12 +116,14 @@ interface GroupData {
   - Backlog: Orange
 
 ### Footer Section
+
 - **User Avatar**: Default user icon
 - **Add User Button**: Dashed border button for adding users
 - **Task Counter**: Document icon with task count
 - **Comment Counter**: Chat icon with comment count
 
 ### Actions Section
+
 - **View Details**: Link to view group details
 - **Edit Button**: Icon button for editing group
 
@@ -145,12 +151,14 @@ The component uses Tailwind CSS classes for styling:
 ## Color Schemes
 
 ### Role Colors
+
 - **Super Admin**: `bg-blue-100 text-blue-800`
 - **Admin**: `bg-purple-100 text-purple-800`
 - **Moderator**: `bg-yellow-100 text-yellow-800`
 - **Member**: `bg-green-100 text-green-800`
 
 ### Status Colors
+
 - **Active**: `bg-green-100 text-green-800`
 - **Inactive**: `bg-gray-100 text-gray-800`
 - **Pending**: `bg-yellow-100 text-yellow-800`
@@ -174,6 +182,7 @@ The component is fully responsive and adapts to different screen sizes:
 ## Examples
 
 ### Basic Usage
+
 ```tsx
 <GroupDashboardCard
   group={groupData}
@@ -184,20 +193,15 @@ The component is fully responsive and adapts to different screen sizes:
 ```
 
 ### Without Actions
+
 ```tsx
-<GroupDashboardCard
-  group={groupData}
-  showActions={false}
-/>
+<GroupDashboardCard group={groupData} showActions={false} />
 ```
 
 ### Custom Styling
+
 ```tsx
-<GroupDashboardCard
-  group={groupData}
-  className="custom-card-class"
-  onEdit={handleEdit}
-/>
+<GroupDashboardCard group={groupData} className="custom-card-class" onEdit={handleEdit} />
 ```
 
 ## Integration
@@ -244,11 +248,7 @@ The component integrates seamlessly with the LuxGen UI system:
 Enable debug mode by adding `data-debug="true"` to the component:
 
 ```tsx
-<GroupDashboardCard
-  group={groupData}
-  data-debug="true"
-  onEdit={handleEdit}
-/>
+<GroupDashboardCard group={groupData} data-debug="true" onEdit={handleEdit} />
 ```
 
 ## Contributing

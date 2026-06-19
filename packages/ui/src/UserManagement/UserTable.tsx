@@ -17,7 +17,7 @@ export const UserTable: React.FC<UserTableProps> = ({
   onRowsPerPageChange,
   onExport,
   onAddUser,
-  onUserAction
+  onUserAction,
 }) => {
   const totalPages = Math.ceil(users.length / rowsPerPage);
   const startIndex = (currentPage - 1) * rowsPerPage;
@@ -47,20 +47,27 @@ export const UserTable: React.FC<UserTableProps> = ({
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
             <h2 className="text-xl font-bold text-gray-900">Total users with their roles</h2>
-            <p className="text-gray-600 mt-1">Find all of your company's administrator accounts and their associate roles.</p>
+            <p className="text-gray-600 mt-1">
+              Find all of your company's administrator accounts and their associate roles.
+            </p>
           </div>
-          
+
           <div className="flex flex-col sm:flex-row gap-3">
             <button
               onClick={onExport}
               className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
               </svg>
               EXPORT
             </button>
-            
+
             <div className="relative">
               <input
                 type="text"
@@ -69,11 +76,21 @@ export const UserTable: React.FC<UserTableProps> = ({
                 onChange={(e) => onSearchChange?.(e.target.value)}
                 className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
-              <svg className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              <svg
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
             </div>
-            
+
             <button
               onClick={onAddUser}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
@@ -138,7 +155,7 @@ export const UserTable: React.FC<UserTableProps> = ({
             <option value={50}>50</option>
           </select>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <span className="text-sm text-gray-700">
             {startIndex + 1}-{endIndex} of {users.length}

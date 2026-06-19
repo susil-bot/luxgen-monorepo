@@ -43,10 +43,13 @@ export const validateLogin = (req: Request, res: Response, next: NextFunction) =
     return res.status(400).json({
       success: false,
       message: 'Validation failed',
-      errors: errors.reduce((acc, error) => {
-        acc[error.field] = error.message;
-        return acc;
-      }, {} as Record<string, string>)
+      errors: errors.reduce(
+        (acc, error) => {
+          acc[error.field] = error.message;
+          return acc;
+        },
+        {} as Record<string, string>,
+      ),
     });
   }
 
@@ -73,10 +76,13 @@ export const validateRegister = (req: Request, res: Response, next: NextFunction
     return res.status(400).json({
       success: false,
       message: 'Validation failed',
-      errors: errors.reduce((acc, error) => {
-        acc[error.field] = error.message;
-        return acc;
-      }, {} as Record<string, string>)
+      errors: errors.reduce(
+        (acc, error) => {
+          acc[error.field] = error.message;
+          return acc;
+        },
+        {} as Record<string, string>,
+      ),
     });
   }
 

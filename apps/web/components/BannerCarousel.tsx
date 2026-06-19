@@ -20,7 +20,7 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
   banners,
   autoPlay = true,
   interval = 5000,
-  className = ''
+  className = '',
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -28,9 +28,7 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
     if (!autoPlay || banners.length <= 1) return;
 
     const timer = setInterval(() => {
-      setCurrentIndex((prevIndex) => 
-        prevIndex === banners.length - 1 ? 0 : prevIndex + 1
-      );
+      setCurrentIndex((prevIndex) => (prevIndex === banners.length - 1 ? 0 : prevIndex + 1));
     }, interval);
 
     return () => clearInterval(timer);
@@ -55,9 +53,11 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
   const currentBanner = banners[currentIndex];
 
   return (
-    <div className={`relative w-full h-64 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg overflow-hidden ${className}`}>
+    <div
+      className={`relative w-full h-64 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg overflow-hidden ${className}`}
+    >
       {/* Background Image */}
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${currentBanner.image})` }}
       >
@@ -107,9 +107,7 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
               key={index}
               onClick={() => goToSlide(index)}
               className={`w-3 h-3 rounded-full transition-all ${
-                index === currentIndex 
-                  ? 'bg-white' 
-                  : 'bg-white bg-opacity-50 hover:bg-opacity-75'
+                index === currentIndex ? 'bg-white' : 'bg-white bg-opacity-50 hover:bg-opacity-75'
               }`}
             />
           ))}

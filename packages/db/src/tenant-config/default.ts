@@ -1,6 +1,6 @@
 /**
  * Default Tenant Configuration
- * 
+ *
  * This is the base configuration that all tenants extend from.
  * Each tenant can override specific properties while inheriting the rest.
  */

@@ -22,7 +22,7 @@ const retentionData = [
   { date: 'Feb', value: 450 },
   { date: 'Mar', value: 500 },
   { date: 'Apr', value: 480 },
-  { date: 'May', value: 550 }
+  { date: 'May', value: 550 },
 ];
 
 <UserRetention
@@ -33,23 +33,23 @@ const retentionData = [
   showGrid={true}
   showLegend={true}
   onDataPointClick={(point) => console.log('Point clicked:', point)}
-/>
+/>;
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `title` | `string` | `'User Retention Trends'` | Chart title |
-| `data` | `RetentionDataPoint[]` | `[]` | Array of data points |
-| `height` | `number` | `300` | Chart height in pixels |
-| `color` | `string` | `theme.primary` | Line and fill color |
-| `showGrid` | `boolean` | `true` | Show grid lines |
-| `showTooltip` | `boolean` | `true` | Show tooltips on hover |
-| `showLegend` | `boolean` | `true` | Show legend |
-| `variant` | `'default' \| 'compact' \| 'detailed'` | `'default'` | Component variant |
-| `onDataPointClick` | `(point: RetentionDataPoint) => void` | - | Data point click handler |
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
+| Prop               | Type                                   | Default                   | Description              |
+| ------------------ | -------------------------------------- | ------------------------- | ------------------------ |
+| `title`            | `string`                               | `'User Retention Trends'` | Chart title              |
+| `data`             | `RetentionDataPoint[]`                 | `[]`                      | Array of data points     |
+| `height`           | `number`                               | `300`                     | Chart height in pixels   |
+| `color`            | `string`                               | `theme.primary`           | Line and fill color      |
+| `showGrid`         | `boolean`                              | `true`                    | Show grid lines          |
+| `showTooltip`      | `boolean`                              | `true`                    | Show tooltips on hover   |
+| `showLegend`       | `boolean`                              | `true`                    | Show legend              |
+| `variant`          | `'default' \| 'compact' \| 'detailed'` | `'default'`               | Component variant        |
+| `onDataPointClick` | `(point: RetentionDataPoint) => void`  | -                         | Data point click handler |
+| `tenantTheme`      | `TenantTheme`                          | `defaultTheme`            | Theme object for styling |
 
 ## RetentionDataPoint Interface
 
@@ -64,12 +64,15 @@ interface RetentionDataPoint {
 ## Variants
 
 ### Default
+
 Standard size with full features and legend.
 
 ### Compact
+
 Smaller size optimized for dashboards and sidebars.
 
 ### Detailed
+
 Larger size with enhanced spacing for detailed analysis.
 
 ## Examples
@@ -82,7 +85,7 @@ Larger size with enhanced spacing for detailed analysis.
   data={[
     { date: 'Jan', value: 400 },
     { date: 'Feb', value: 450 },
-    { date: 'Mar', value: 500 }
+    { date: 'Mar', value: 500 },
   ]}
 />
 ```
@@ -108,12 +111,7 @@ Larger size with enhanced spacing for detailed analysis.
 ### Compact Variant
 
 ```tsx
-<UserRetention
-  title="Retention"
-  data={retentionData}
-  variant="compact"
-  showLegend={false}
-/>
+<UserRetention title="Retention" data={retentionData} variant="compact" showLegend={false} />
 ```
 
 ## Styling
@@ -150,6 +148,7 @@ The component includes comprehensive test coverage:
 - **Edge Cases**: Empty states, error handling, variant testing
 
 Run tests with:
+
 ```bash
 npm test UserRetention.spec.js
 ```

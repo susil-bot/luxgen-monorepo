@@ -19,27 +19,27 @@ To provide a consistent navigation experience across all pages with tenant-speci
 
 ## Props
 
-| Property                    | Type                    | Default     | Description                                                                                                                        |
-| --------------------------- | ----------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| logo                        | Object                  | -           | Logo configuration (src, alt, text, href)                                                                                         |
-| user                        | UserMenu                | null        | User information for authentication                                                                                               |
-| onUserAction                | Function                | -           | Callback for user actions (profile, settings, logout)                                                                             |
-| onMobileMenuToggle          | Function                | -           | Callback for mobile menu toggle                                                                                                   |
-| className                   | String                  | ''          | Additional CSS classes                                                                                                             |
-| variant                     | String                  | 'default'   | NavBar variant ('default', 'transparent', 'solid', 'minimal')                                                                     |
-| position                    | String                  | 'sticky'    | NavBar position ('fixed', 'sticky', 'static')                                                                                     |
-| showUserMenu                | Boolean                 | true        | Show user menu                                                                                                                     |
-| showMobileMenu              | Boolean                 | true        | Show mobile menu button                                                                                                            |
-| showSearch                  | Boolean                 | false       | Show search bar                                                                                                                     |
-| onSearch                    | Function                | -           | Callback for search functionality                                                                                                  |
-| searchPlaceholder           | String                  | 'Search...' | Placeholder text for search input                                                                                                  |
-| showNotifications           | Boolean                 | false       | Show notifications                                                                                                                  |
-| notificationCount           | Number                  | 0           | Number of notifications to display                                                                                                 |
-| onNotificationClick         | Function                | -           | Callback for notification interactions                                                                                              |
-| responsive                  | Boolean                 | true        | Enable responsive behavior                                                                                                          |
-| mobileBreakpoint            | Number                  | 640         | Mobile breakpoint in pixels                                                                                                        |
-| tabletBreakpoint            | Number                  | 768         | Tablet breakpoint in pixels                                                                                                        |
-| desktopBreakpoint           | Number                  | 1024        | Desktop breakpoint in pixels                                                                                                       |
+| Property            | Type     | Default     | Description                                                   |
+| ------------------- | -------- | ----------- | ------------------------------------------------------------- |
+| logo                | Object   | -           | Logo configuration (src, alt, text, href)                     |
+| user                | UserMenu | null        | User information for authentication                           |
+| onUserAction        | Function | -           | Callback for user actions (profile, settings, logout)         |
+| onMobileMenuToggle  | Function | -           | Callback for mobile menu toggle                               |
+| className           | String   | ''          | Additional CSS classes                                        |
+| variant             | String   | 'default'   | NavBar variant ('default', 'transparent', 'solid', 'minimal') |
+| position            | String   | 'sticky'    | NavBar position ('fixed', 'sticky', 'static')                 |
+| showUserMenu        | Boolean  | true        | Show user menu                                                |
+| showMobileMenu      | Boolean  | true        | Show mobile menu button                                       |
+| showSearch          | Boolean  | false       | Show search bar                                               |
+| onSearch            | Function | -           | Callback for search functionality                             |
+| searchPlaceholder   | String   | 'Search...' | Placeholder text for search input                             |
+| showNotifications   | Boolean  | false       | Show notifications                                            |
+| notificationCount   | Number   | 0           | Number of notifications to display                            |
+| onNotificationClick | Function | -           | Callback for notification interactions                        |
+| responsive          | Boolean  | true        | Enable responsive behavior                                    |
+| mobileBreakpoint    | Number   | 640         | Mobile breakpoint in pixels                                   |
+| tabletBreakpoint    | Number   | 768         | Tablet breakpoint in pixels                                   |
+| desktopBreakpoint   | Number   | 1024        | Desktop breakpoint in pixels                                  |
 
 ## Component Usage
 
@@ -56,7 +56,7 @@ import { NavBar } from '@luxgen/ui';
   showNotifications={true}
   notificationCount={3}
   onNotificationClick={handleNotificationClick}
-/>
+/>;
 ```
 
 ### With Custom Logo
@@ -67,7 +67,7 @@ import { NavBar } from '@luxgen/ui';
     src: '/logo.png',
     alt: 'Company Logo',
     text: 'My Company',
-    href: '/'
+    href: '/',
   }}
   user={user}
   onUserAction={handleUserAction}
@@ -88,7 +88,7 @@ const handleSearch = (query) => {
   searchPlaceholder="Search products..."
   user={user}
   onUserAction={handleUserAction}
-/>
+/>;
 ```
 
 ### With Notifications
@@ -105,7 +105,7 @@ const handleNotificationClick = () => {
   onNotificationClick={handleNotificationClick}
   user={user}
   onUserAction={handleUserAction}
-/>
+/>;
 ```
 
 ## User Menu
@@ -114,11 +114,12 @@ const handleNotificationClick = () => {
 
 ```typescript
 interface UserMenu {
-  avatar?: string;           // User avatar image URL
-  name: string;              // User's full name
-  email: string;             // User's email address
-  role?: string;             // User's role (Admin, User, etc.)
-  tenant?: {                 // Tenant information
+  avatar?: string; // User avatar image URL
+  name: string; // User's full name
+  email: string; // User's email address
+  role?: string; // User's role (Admin, User, etc.)
+  tenant?: {
+    // Tenant information
     name: string;
     subdomain: string;
   };
@@ -130,7 +131,7 @@ interface UserMenu {
 The `onUserAction` callback receives the following actions:
 
 - `'profile'`: User clicked "Your Profile"
-- `'settings'`: User clicked "Settings"  
+- `'settings'`: User clicked "Settings"
 - `'logout'`: User clicked "Sign out"
 
 ```jsx
@@ -262,7 +263,7 @@ The NavBar automatically uses tenant-specific branding:
   }
 }
 
-// Idea Vibes tenant  
+// Idea Vibes tenant
 {
   branding: {
     logo: {
@@ -377,7 +378,7 @@ const MyPage = () => {
     name: 'John Doe',
     email: 'john@example.com',
     role: 'Admin',
-    avatar: '/avatar.jpg'
+    avatar: '/avatar.jpg',
   };
 
   const handleUserAction = (action) => {
@@ -432,7 +433,7 @@ export default MyPage;
   onUserAction={handleUserAction}
   style={{
     backgroundColor: 'var(--color-primary)',
-    color: 'white'
+    color: 'white',
   }}
 />
 ```

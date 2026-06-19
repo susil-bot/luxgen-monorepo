@@ -10,7 +10,9 @@
   },
   "dependencies": {
     "@apollo/client": "^3.8.0",
+    "@luxgen/agent": "*",
     "@luxgen/auth": "*",
+    "@luxgen/billing": "*",
     "@luxgen/config": "*",
     "@luxgen/db": "*",
     "@luxgen/ui": "*",

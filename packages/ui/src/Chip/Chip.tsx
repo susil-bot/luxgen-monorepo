@@ -32,34 +32,35 @@ export const Chip: React.FC<ChipProps> = ({
   selected = false,
   ...props
 }) => {
-  const baseClasses = 'inline-flex items-center gap-1.5 font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1';
-  
+  const baseClasses =
+    'inline-flex items-center gap-1.5 font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1';
+
   const variantClasses = {
-    primary: 'bg-[var(--color-primary)] text-white hover:bg-[var(--color-primary)]/90',
-    secondary: 'bg-[var(--color-secondary)] text-white hover:bg-[var(--color-secondary)]/90',
-    success: 'bg-green-100 text-green-800 hover:bg-green-200',
-    error: 'bg-red-100 text-red-800 hover:bg-red-200',
-    warning: 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200',
-    info: 'bg-blue-100 text-blue-800 hover:bg-blue-200',
-    outline: 'border border-[var(--color-primary)] text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10'
+    primary: 'badge badge-blue',
+    secondary: 'badge badge-gray',
+    success: 'badge badge-green',
+    error: 'badge badge-red',
+    warning: 'badge badge-orange',
+    info: 'badge badge-blue',
+    outline: 'badge badge-gray',
   };
 
   const sizeClasses = {
     small: 'px-2 py-1 text-xs',
     medium: 'px-3 py-1.5 text-sm',
-    large: 'px-4 py-2 text-base'
+    large: 'px-4 py-2 text-base',
   };
 
   const shapeClasses = {
     rounded: 'rounded-md',
     pill: 'rounded-full',
-    square: 'rounded-none'
+    square: 'rounded-none',
   };
 
   const stateClasses = {
     disabled: 'opacity-50 cursor-not-allowed',
     selected: 'ring-2 ring-[var(--color-primary)] ring-offset-1',
-    clickable: 'cursor-pointer hover:scale-105'
+    clickable: 'cursor-pointer hover:scale-105',
   };
 
   const chipClasses = [
@@ -70,8 +71,10 @@ export const Chip: React.FC<ChipProps> = ({
     disabled ? stateClasses.disabled : '',
     selected ? stateClasses.selected : '',
     onClick && !disabled ? stateClasses.clickable : '',
-    className || ''
-  ].filter(Boolean).join(' ');
+    className || '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   const handleClose = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -91,7 +94,7 @@ export const Chip: React.FC<ChipProps> = ({
       className={chipClasses}
       style={{
         maxWidth: maxWidth,
-        ...style
+        ...style,
       }}
       onClick={handleClick}
       role={onClick ? 'button' : undefined}
@@ -104,16 +107,10 @@ export const Chip: React.FC<ChipProps> = ({
       }}
       {...props}
     >
-      {icon && (
-        <span className="flex-shrink-0">
-          {icon}
-        </span>
-      )}
-      
-      <span className="truncate">
-        {label}
-      </span>
-      
+      {icon && <span className="flex-shrink-0">{icon}</span>}
+
+      <span className="truncate">{label}</span>
+
       {closable && (
         <button
           type="button"
@@ -129,12 +126,7 @@ export const Chip: React.FC<ChipProps> = ({
             viewBox="0 0 24 24"
             xmlns="http://www.w3.org/2000/svg"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M6 18L18 6M6 6l12 12"
-            />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
         </button>
       )}

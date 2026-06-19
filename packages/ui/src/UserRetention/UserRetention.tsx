@@ -2,11 +2,7 @@ import React from 'react';
 import { BaseComponentProps, TenantTheme } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
-import { 
-  getUserRetentionStyles, 
-  userRetentionClasses,
-  userRetentionCSS 
-} from './styles';
+import { getUserRetentionStyles, userRetentionClasses, userRetentionCSS } from './styles';
 
 export interface RetentionDataPoint {
   date: string;
@@ -45,8 +41,8 @@ const UserRetentionComponent: React.FC<UserRetentionProps> = ({
   const styles = getUserRetentionStyles(tenantTheme, variant, color);
 
   // Calculate chart dimensions and scaling
-  const maxValue = Math.max(...data.map(d => d.value));
-  const minValue = Math.min(...data.map(d => d.value));
+  const maxValue = Math.max(...data.map((d) => d.value));
+  const minValue = Math.min(...data.map((d) => d.value));
   const valueRange = maxValue - minValue;
   const padding = 40;
   const chartWidth = 500;
@@ -55,20 +51,20 @@ const UserRetentionComponent: React.FC<UserRetentionProps> = ({
   // Generate SVG path for the line
   const generatePath = () => {
     if (data.length < 2) return '';
-    
+
     const points = data.map((point, index) => {
       const x = (index / (data.length - 1)) * (chartWidth - padding * 2) + padding;
       const y = chartHeight - ((point.value - minValue) / valueRange) * (chartHeight - padding * 2) + padding;
       return `${x},${y}`;
     });
-    
+
     return `M ${points.join(' L ')}`;
   };
 
   // Generate area path for gradient fill
   const generateAreaPath = () => {
     if (data.length < 2) return '';
-    
+
     const linePath = generatePath();
     const firstPoint = data[0];
     const lastPoint = data[data.length - 1];
@@ -76,7 +72,7 @@ const UserRetentionComponent: React.FC<UserRetentionProps> = ({
     const lastX = chartWidth - padding;
     const firstY = chartHeight - ((firstPoint.value - minValue) / valueRange) * (chartHeight - padding * 2) + padding;
     const lastY = chartHeight - ((lastPoint.value - minValue) / valueRange) * (chartHeight - padding * 2) + padding;
-    
+
     return `${linePath} L ${lastX},${chartHeight} L ${firstX},${chartHeight} Z`;
   };
 
@@ -104,12 +100,7 @@ const UserRetentionComponent: React.FC<UserRetentionProps> = ({
           {title}
         </h3>
         <div className={userRetentionClasses.chart} style={{ ...styles.chart, height }}>
-          <svg
-            width="100%"
-            height={height}
-            viewBox={`0 0 ${chartWidth} ${height}`}
-            style={{ overflow: 'visible' }}
-          >
+          <svg width="100%" height={height} viewBox={`0 0 ${chartWidth} ${height}`} style={{ overflow: 'visible' }}>
             {/* Grid lines */}
             {showGrid && (
               <g>
@@ -151,10 +142,7 @@ const UserRetentionComponent: React.FC<UserRetentionProps> = ({
             </defs>
 
             {/* Area fill */}
-            <path
-              d={generateAreaPath()}
-              fill="url(#retentionGradient)"
-            />
+            <path d={generateAreaPath()} fill="url(#retentionGradient)" />
 
             {/* Line */}
             <path
@@ -170,7 +158,7 @@ const UserRetentionComponent: React.FC<UserRetentionProps> = ({
             {data.map((point, index) => {
               const x = (index / (data.length - 1)) * (chartWidth - padding * 2) + padding;
               const y = chartHeight - ((point.value - minValue) / valueRange) * (chartHeight - padding * 2) + padding;
-              
+
               return (
                 <circle
                   key={index}
@@ -209,8 +197,8 @@ const UserRetentionComponent: React.FC<UserRetentionProps> = ({
         {showLegend && (
           <div className={userRetentionClasses.legend} style={styles.legend}>
             <div className={userRetentionClasses.legendItem} style={styles.legendItem}>
-              <div 
-                className={userRetentionClasses.legendColor} 
+              <div
+                className={userRetentionClasses.legendColor}
                 style={{ ...styles.legendColor, backgroundColor: styles.lineColor }}
               />
               <span className={userRetentionClasses.legendText} style={styles.legendText}>

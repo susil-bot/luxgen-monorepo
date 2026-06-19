@@ -11,9 +11,7 @@ export interface InputWithLabelData {
   size: 'sm' | 'md' | 'lg';
 }
 
-export const fetchInputWithLabelData = async (
-  tenantId?: string
-): Promise<InputWithLabelData> => {
+export const fetchInputWithLabelData = async (tenantId?: string): Promise<InputWithLabelData> => {
   return {
     tenantTheme: defaultTheme,
     label: 'Input Label',
@@ -25,11 +23,9 @@ export const fetchInputWithLabelData = async (
   };
 };
 
-export const fetchInputWithLabelSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchInputWithLabelSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchInputWithLabelData(tenantId);
-  
+
   const html = `
     <div class="input-with-label-wrapper" style="font-family: ${data.tenantTheme.fonts.primary}; color: ${data.tenantTheme.colors.text};">
       <label class="input-with-label-label">
@@ -46,7 +42,7 @@ export const fetchInputWithLabelSSR = async (
       />
     </div>
   `;
-  
+
   const styles = `
     .input-with-label-wrapper {
       display: flex;
@@ -129,6 +125,6 @@ export const fetchInputWithLabelSSR = async (
       margin-top: 0.25rem;
     }
   `;
-  
+
   return { html, styles };
 };

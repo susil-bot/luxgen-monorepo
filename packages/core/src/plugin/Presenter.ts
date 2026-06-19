@@ -1,7 +1,6 @@
 import { ComponentType } from 'react';
 import { Plugin } from './Plugin';
 import { PhaseSet } from './PhaseSet';
-import { WorkflowContext } from './WorkflowContext';
 
 /**
  * Presenter is a plugin that is associated with specific routes on content types.
@@ -19,7 +18,7 @@ export class Presenter extends Plugin {
     contentType: string,
     phaseSet: PhaseSet,
     component?: ComponentType,
-    tenant?: string
+    tenant?: string,
   ) {
     super(name, phaseSet, component);
     this.route = route;
@@ -38,7 +37,7 @@ export class Presenter extends Plugin {
     const routeMatch = this.route === route || this.route === '*' || route.startsWith(this.route);
     const contentTypeMatch = this.contentType === contentType || this.contentType === '*';
     const tenantMatch = !this.tenant || !tenant || this.tenant === tenant;
-    
+
     return routeMatch && contentTypeMatch && tenantMatch;
   }
 
@@ -60,14 +59,7 @@ export class Presenter extends Plugin {
       return acc.prepend(plugin.phaseSet);
     }, this.phaseSet);
 
-    return new Presenter(
-      this.name,
-      this.route,
-      this.contentType,
-      combinedPhaseSet,
-      this.component!,
-      this.tenant
-    );
+    return new Presenter(this.name, this.route, this.contentType, combinedPhaseSet, this.component!, this.tenant);
   }
 
   /**
@@ -80,14 +72,7 @@ export class Presenter extends Plugin {
       return acc.append(plugin.phaseSet);
     }, this.phaseSet);
 
-    return new Presenter(
-      this.name,
-      this.route,
-      this.contentType,
-      combinedPhaseSet,
-      this.component!,
-      this.tenant
-    );
+    return new Presenter(this.name, this.route, this.contentType, combinedPhaseSet, this.component!, this.tenant);
   }
 
   /**
@@ -95,14 +80,16 @@ export class Presenter extends Plugin {
    * @param overrides - Properties to override
    * @returns new presenter instance
    */
-  public clone(overrides: Partial<Pick<Presenter, 'name' | 'route' | 'contentType' | 'component' | 'phaseSet' | 'tenant'>> = {}): Presenter {
+  public clone(
+    overrides: Partial<Pick<Presenter, 'name' | 'route' | 'contentType' | 'component' | 'phaseSet' | 'tenant'>> = {},
+  ): Presenter {
     return new Presenter(
       overrides.name ?? this.name,
       overrides.route ?? this.route,
       overrides.contentType ?? this.contentType,
       overrides.phaseSet ?? this.phaseSet,
       overrides.component ?? this.component!,
-      overrides.tenant ?? this.tenant
+      overrides.tenant ?? this.tenant,
     );
   }
 }
@@ -121,7 +108,7 @@ export function createArticlePresenter(
   route: string,
   component: ComponentType,
   phaseSet: PhaseSet,
-  tenant?: string
+  tenant?: string,
 ): Presenter {
   return new Presenter(name, route, 'article', phaseSet, component, tenant);
 }
@@ -140,7 +127,7 @@ export function createBundlePresenter(
   route: string,
   component: ComponentType,
   phaseSet: PhaseSet,
-  tenant?: string
+  tenant?: string,
 ): Presenter {
   return new Presenter(name, route, 'bundle', phaseSet, component, tenant);
 }
@@ -159,7 +146,7 @@ export function createSearchPresenter(
   route: string,
   component: ComponentType,
   phaseSet: PhaseSet,
-  tenant?: string
+  tenant?: string,
 ): Presenter {
   return new Presenter(name, route, 'search', phaseSet, component, tenant);
 }
@@ -178,7 +165,7 @@ export function createCollectionPresenter(
   route: string,
   component: ComponentType,
   phaseSet: PhaseSet,
-  tenant?: string
+  tenant?: string,
 ): Presenter {
   return new Presenter(name, route, 'collection', phaseSet, component, tenant);
 }

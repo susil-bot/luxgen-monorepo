@@ -14,7 +14,7 @@ export const badgeStyles = {
       white-space: nowrap;
     }
   `,
-  
+
   sizes: {
     small: css`
       .badge-small {
@@ -38,7 +38,7 @@ export const badgeStyles = {
       }
     `,
   },
-  
+
   shapes: {
     rounded: css`
       .badge-rounded {
@@ -56,7 +56,7 @@ export const badgeStyles = {
       }
     `,
   },
-  
+
   variants: {
     primary: css`
       .badge-primary {
@@ -101,7 +101,7 @@ export const badgeStyles = {
       }
     `,
   },
-  
+
   dot: css`
     .badge-dot {
       width: 0.5rem;
@@ -111,7 +111,7 @@ export const badgeStyles = {
       border-radius: 50%;
     }
   `,
-  
+
   close: css`
     .badge-close {
       background: none;
@@ -126,17 +126,17 @@ export const badgeStyles = {
       font-size: 0.75rem;
       transition: opacity 0.2s ease;
     }
-    
+
     .badge-close:hover {
       opacity: 0.7;
     }
-    
+
     .badge-close:focus {
       outline: 2px solid var(--color-primary);
       outline-offset: 2px;
     }
   `,
-  
+
   icon: css`
     .badge-icon {
       display: flex;
@@ -145,7 +145,7 @@ export const badgeStyles = {
       font-size: 0.875em;
     }
   `,
-  
+
   content: css`
     .badge-content {
       display: flex;
@@ -154,21 +154,21 @@ export const badgeStyles = {
       min-width: 0;
     }
   `,
-  
+
   hover: css`
     .badge:hover {
       transform: translateY(-1px);
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     }
   `,
-  
+
   focus: css`
     .badge:focus {
       outline: 2px solid var(--color-primary);
       outline-offset: 2px;
     }
   `,
-  
+
   disabled: css`
     .badge-disabled {
       opacity: 0.5;
@@ -176,7 +176,7 @@ export const badgeStyles = {
       pointer-events: none;
     }
   `,
-  
+
   responsive: css`
     @media (max-width: 768px) {
       .badge-large {
@@ -186,7 +186,7 @@ export const badgeStyles = {
       }
     }
   `,
-  
+
   darkMode: css`
     @media (prefers-color-scheme: dark) {
       .badge-primary {
@@ -194,7 +194,7 @@ export const badgeStyles = {
         background-color: var(--color-primary-30);
         border-color: var(--color-primary-50);
       }
-      
+
       .badge-secondary {
         color: var(--color-text-light);
         background-color: var(--color-text-secondary-30);
@@ -202,12 +202,12 @@ export const badgeStyles = {
       }
     }
   `,
-  
+
   animations: css`
     .badge {
       animation: fadeIn 0.2s ease-in-out;
     }
-    
+
     @keyframes fadeIn {
       from {
         opacity: 0;
@@ -218,11 +218,11 @@ export const badgeStyles = {
         transform: scale(1);
       }
     }
-    
+
     .badge-close {
       animation: slideIn 0.2s ease-in-out;
     }
-    
+
     @keyframes slideIn {
       from {
         opacity: 0;

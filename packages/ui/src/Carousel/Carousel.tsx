@@ -52,11 +52,11 @@ const CarouselComponent: React.FC<CarouselProps> = ({
 
   const goToSlide = (index: number) => {
     if (isTransitioning) return;
-    
+
     setIsTransitioning(true);
     setCurrentIndex(index);
     onSlideChange?.(index);
-    
+
     setTimeout(() => setIsTransitioning(false), 300);
   };
 
@@ -214,9 +214,10 @@ const CarouselComponent: React.FC<CarouselProps> = ({
                 height: '0.75rem',
                 borderRadius: '50%',
                 border: 'none',
-                background: index === Math.floor(currentIndex / slidesToShow) 
-                  ? tenantTheme.colors.primary 
-                  : tenantTheme.colors.border,
+                background:
+                  index === Math.floor(currentIndex / slidesToShow)
+                    ? tenantTheme.colors.primary
+                    : tenantTheme.colors.border,
                 margin: '0 0.25rem',
                 cursor: 'pointer',
                 transition: 'background-color 0.2s ease',

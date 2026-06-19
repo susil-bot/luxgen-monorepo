@@ -40,10 +40,7 @@ const getVariantStyles = (variant: 'default' | 'compact' | 'detailed') => {
 };
 
 // Main function to get all styles for the PermissionRequest component
-export const getPermissionRequestStyles = (
-  tenantTheme: TenantTheme,
-  variant: 'default' | 'compact' | 'detailed'
-) => {
+export const getPermissionRequestStyles = (tenantTheme: TenantTheme, variant: 'default' | 'compact' | 'detailed') => {
   const variantStyles = getVariantStyles(variant);
 
   return {

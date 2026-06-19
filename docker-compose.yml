@@ -174,10 +174,44 @@ services:
   #   networks:
   #     - luxgen-network
 
+  # Local LLM — Ollama serving Qwen2.5-Coder:7b for Agent Studio
+  ollama:
+    image: ollama/ollama:latest
+    container_name: luxgen-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - luxgen-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # Pulls qwen2.5-coder:7b into the ollama volume (~4.7 GB, runs once)
+  ollama-model-pull:
+    image: ollama/ollama:latest
+    container_name: luxgen-ollama-pull
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    command: ["pull", "qwen2.5-coder:7b"]
+    networks:
+      - luxgen-network
+    restart: "no"
+
 volumes:
   mongodb_data:
     driver: local
   redis_data:
+    driver: local
+  ollama_data:
     driver: local
 
 networks:

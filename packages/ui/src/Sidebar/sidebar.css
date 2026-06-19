@@ -1,0 +1,650 @@
+/*
+ * ─────────────────────────────────────────────────────────────────────────────
+ * LuxGen Sidebar Design Tokens
+ * ─────────────────────────────────────────────────────────────────────────────
+ *
+ * HOW TO USE:
+ *   Import this file once in the app entry point:
+ *     → apps/web/styles/globals.css  (add: @import '@luxgen/ui/src/Sidebar/sidebar.css';)
+ *     OR copy the :root block into globals.css (already done for the web app).
+ *
+ * ALL sidebar components reference var(--lux-*) tokens — never raw colours or
+ * hardcoded Tailwind colour classes (text-gray-*, bg-green-*, etc.).
+ *
+ * Token prefix: --lux-
+ * ─────────────────────────────────────────────────────────────────────────────
+ */
+
+:root {
+  /* ── Surface ──────────────────────────────────────────────────────────────── */
+  /* The sidebar is always dark, regardless of app light/dark mode toggle.      */
+  /* Always dark for strong visual hierarchy, independent of light/dark mode.     */
+  --lux-sidebar-bg: #1c1c1e; /* macOS system dark surface */
+  --lux-sidebar-border: rgba(255, 255, 255, 0.06);
+  --lux-sidebar-shadow: 4px 0 16px rgba(0, 0, 0, 0.2);
+
+  /* ── Text on dark sidebar ─────────────────────────────────────────────────── */
+  --lux-text-primary: rgba(255, 255, 255, 0.92);
+  --lux-text-secondary: rgba(255, 255, 255, 0.55);
+  --lux-text-tertiary: rgba(255, 255, 255, 0.32);
+  --lux-text-disabled: rgba(255, 255, 255, 0.22);
+
+  /* ── Accent ───────────────────────────────────────────────────────────────── */
+  /* iOS dark-mode blue — brighter than light-mode blue for legibility on dark. */
+  --lux-color-accent: #0a84ff;
+  --lux-color-accent-tint: rgba(10, 132, 255, 0.18);
+  --lux-color-accent-hover: rgba(10, 132, 255, 0.26);
+
+  /* ── Item backgrounds ─────────────────────────────────────────────────────── */
+  --lux-item-hover-bg: rgba(255, 255, 255, 0.06);
+  --lux-item-active-bg: rgba(10, 132, 255, 0.18);
+  --lux-item-active-hover-bg: rgba(10, 132, 255, 0.26);
+
+  /* ── Search field ─────────────────────────────────────────────────────────── */
+  --lux-search-bg: rgba(255, 255, 255, 0.07);
+  --lux-search-border: rgba(255, 255, 255, 0.1);
+  --lux-search-focus-border: rgba(10, 132, 255, 0.6);
+  --lux-search-text: rgba(255, 255, 255, 0.92);
+  --lux-search-placeholder: rgba(255, 255, 255, 0.35);
+
+  /* ── Separators ───────────────────────────────────────────────────────────── */
+  --lux-separator: rgba(255, 255, 255, 0.07);
+
+  /* ── Sub-navigation ───────────────────────────────────────────────────────── */
+  --lux-subnav-border: rgba(10, 132, 255, 0.4); /* left indent border */
+  --lux-subnav-max-h: 400px; /* safe upper bound for animation */
+
+  /* ── Tooltip (collapsed mode labels) ─────────────────────────────────────── */
+  --lux-tooltip-bg: #2c2c2e;
+  --lux-tooltip-text: rgba(255, 255, 255, 0.92);
+  --lux-tooltip-radius: 6px;
+  --lux-tooltip-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+
+  /* ── Badge ────────────────────────────────────────────────────────────────── */
+  --lux-badge-blue-bg: rgba(10, 132, 255, 0.22);
+  --lux-badge-blue-text: #0a84ff;
+  --lux-badge-green-bg: rgba(48, 209, 88, 0.2);
+  --lux-badge-green-text: #30d158;
+  --lux-badge-red-bg: rgba(255, 69, 58, 0.2);
+  --lux-badge-red-text: #ff453a;
+  --lux-badge-orange-bg: rgba(255, 159, 10, 0.2);
+  --lux-badge-orange-text: #ff9f0a;
+  --lux-badge-purple-bg: rgba(191, 90, 242, 0.2);
+  --lux-badge-purple-text: #bf5af2;
+  --lux-badge-gray-bg: rgba(255, 255, 255, 0.1);
+  --lux-badge-gray-text: rgba(255, 255, 255, 0.55);
+
+  /* ── Dimensions ───────────────────────────────────────────────────────────── */
+  --lux-sidebar-expanded-w: 240px;
+  --lux-sidebar-collapsed-w: 48px;
+  --lux-item-height: 36px;
+  --lux-item-padding-x: 12px;
+  --lux-item-radius: 8px;
+  --lux-icon-size: 20px;
+  --lux-icon-gap: 10px; /* gap between icon and label */
+  --lux-font-size-item: 14px;
+  --lux-font-size-child: 13px;
+  --lux-font-size-section: 11px;
+  --lux-font-weight-item: 500;
+  --lux-header-height: 56px;
+  --lux-search-height: 44px; /* search zone including padding */
+  --lux-footer-min-h: 120px; /* footer zone minimum height */
+
+  /* ── Animations ───────────────────────────────────────────────────────────── */
+  --lux-transition-collapse: width 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --lux-transition-item: background-color 120ms ease, color 120ms ease;
+  --lux-transition-icon: color 120ms ease, opacity 120ms ease;
+  --lux-transition-chevron: transform 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --lux-transition-subnav: max-height 220ms cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 180ms ease;
+  --lux-transition-tooltip: opacity 100ms ease;
+  --lux-transition-overlay: opacity 250ms ease;
+}
+
+/* ── Tenant-specific accent overrides ─────────────────────────────────────────
+   Applied via data-tenant attribute on <body> or on the sidebar element itself.
+   e.g. <aside data-tenant="idea-vibes"> or <body data-tenant="idea-vibes">
+   ─────────────────────────────────────────────────────────────────────────── */
+
+[data-tenant='idea-vibes'],
+[data-tenant='idea-vibes'] * {
+  --lux-color-accent: #bf5af2; /* iOS purple */
+  --lux-color-accent-tint: rgba(191, 90, 242, 0.18);
+  --lux-color-accent-hover: rgba(191, 90, 242, 0.26);
+  --lux-item-active-bg: rgba(191, 90, 242, 0.18);
+  --lux-item-active-hover-bg: rgba(191, 90, 242, 0.26);
+  --lux-subnav-border: rgba(191, 90, 242, 0.4);
+  --lux-search-focus-border: rgba(191, 90, 242, 0.6);
+}
+
+[data-tenant='demo'],
+[data-tenant='demo'] * {
+  /* demo uses the default blue — explicitly listed for clarity */
+  --lux-color-accent: #0a84ff;
+}
+
+/* ── Base structural classes ──────────────────────────────────────────────────
+   These are low-level structural rules used by all sidebar components.
+   Component-specific rules live in each component's inline styles or JSX.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.lux-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: var(--lux-sidebar-expanded-w);
+  background-color: var(--lux-sidebar-bg);
+  border-right: 1px solid var(--lux-sidebar-border);
+  box-shadow: var(--lux-sidebar-shadow);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 40;
+  transition: var(--lux-transition-collapse);
+  /* Prevent text selection during drag */
+  user-select: none;
+}
+
+.lux-sidebar[data-collapsed='true'] {
+  width: var(--lux-sidebar-collapsed-w);
+}
+
+/* ── Nav item base ────────────────────────────────────────────────────────── */
+
+.lux-nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--lux-icon-gap);
+  width: 100%;
+  height: var(--lux-item-height);
+  padding: 0 var(--lux-item-padding-x);
+  border-radius: var(--lux-item-radius);
+  border: none;
+  background: transparent;
+  color: var(--lux-text-secondary);
+  font-size: var(--lux-font-size-item);
+  font-weight: var(--lux-font-weight-item);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  transition: var(--lux-transition-item);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.lux-nav-item:hover:not(:disabled):not(.lux-nav-item--disabled) {
+  background-color: var(--lux-item-hover-bg);
+  color: var(--lux-text-primary);
+}
+
+.lux-nav-item--active {
+  background-color: var(--lux-item-active-bg);
+  color: var(--lux-text-primary);
+}
+
+.lux-nav-item--active:hover {
+  background-color: var(--lux-item-active-hover-bg);
+}
+
+/* Ancestor active: parent of the active child — slightly highlighted */
+.lux-nav-item--ancestor-active {
+  color: var(--lux-text-primary);
+}
+
+.lux-nav-item--disabled {
+  color: var(--lux-text-disabled);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.lux-nav-item:focus-visible {
+  outline: 2px solid var(--lux-color-accent);
+  outline-offset: -2px;
+}
+
+/* ── Nav item children ────────────────────────────────────────────────────── */
+
+.lux-nav-item__icon {
+  flex-shrink: 0;
+  width: var(--lux-icon-size);
+  height: var(--lux-icon-size);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--lux-text-tertiary);
+  transition: var(--lux-transition-icon);
+}
+
+.lux-nav-item:hover .lux-nav-item__icon,
+.lux-nav-item--active .lux-nav-item__icon,
+.lux-nav-item--ancestor-active .lux-nav-item__icon {
+  color: var(--lux-color-accent);
+}
+
+.lux-nav-item__label {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  /* Animate out on collapse */
+  transition:
+    opacity 150ms ease,
+    width 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.lux-sidebar[data-collapsed='true'] .lux-nav-item__label {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.lux-nav-item__badge {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+/* Badge colour variants */
+.lux-nav-item__badge--blue {
+  background: var(--lux-badge-blue-bg);
+  color: var(--lux-badge-blue-text);
+}
+.lux-nav-item__badge--green {
+  background: var(--lux-badge-green-bg);
+  color: var(--lux-badge-green-text);
+}
+.lux-nav-item__badge--red {
+  background: var(--lux-badge-red-bg);
+  color: var(--lux-badge-red-text);
+}
+.lux-nav-item__badge--orange {
+  background: var(--lux-badge-orange-bg);
+  color: var(--lux-badge-orange-text);
+}
+.lux-nav-item__badge--purple {
+  background: var(--lux-badge-purple-bg);
+  color: var(--lux-badge-purple-text);
+}
+.lux-nav-item__badge--gray {
+  background: var(--lux-badge-gray-bg);
+  color: var(--lux-badge-gray-text);
+}
+
+.lux-nav-item__chevron {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  color: var(--lux-text-tertiary);
+  transition: var(--lux-transition-chevron);
+}
+
+.lux-nav-item__chevron--open {
+  transform: rotate(90deg);
+}
+
+/* ── Sub-navigation accordion ─────────────────────────────────────────────── */
+
+.lux-subnav {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: var(--lux-transition-subnav);
+}
+
+.lux-subnav--open {
+  max-height: var(--lux-subnav-max-h);
+  opacity: 1;
+}
+
+.lux-subnav__inner {
+  padding: 2px 0 4px 0;
+  /* Left indent + accent border */
+  margin-left: calc(var(--lux-item-padding-x) + var(--lux-icon-size) / 2);
+  border-left: 2px solid var(--lux-subnav-border);
+  padding-left: calc(var(--lux-icon-size) / 2 + 4px);
+}
+
+.lux-subnav__item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 32px; /* slightly shorter than parent items */
+  padding: 0 8px;
+  border-radius: var(--lux-item-radius);
+  border: none;
+  background: transparent;
+  color: var(--lux-text-secondary);
+  font-size: var(--lux-font-size-child);
+  font-weight: var(--lux-font-weight-item);
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: var(--lux-transition-item);
+}
+
+.lux-subnav__item:hover {
+  background-color: var(--lux-item-hover-bg);
+  color: var(--lux-text-primary);
+}
+
+.lux-subnav__item--active {
+  color: var(--lux-color-accent);
+  font-weight: 600;
+}
+
+/* ── Tooltip (shown on hover in icon-only collapsed mode) ─────────────────── */
+
+.lux-tooltip-wrap {
+  position: relative;
+}
+
+.lux-tooltip {
+  position: absolute;
+  left: calc(var(--lux-sidebar-collapsed-w) + 8px);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--lux-tooltip-bg);
+  color: var(--lux-tooltip-text);
+  font-size: 13px;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 5px 10px;
+  border-radius: var(--lux-tooltip-radius);
+  box-shadow: var(--lux-tooltip-shadow);
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0;
+  transition: var(--lux-transition-tooltip);
+}
+
+/* CSS triangle arrow pointing left */
+.lux-tooltip::before {
+  content: '';
+  position: absolute;
+  right: 100%;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 5px solid transparent;
+  border-right-color: var(--lux-tooltip-bg);
+}
+
+.lux-sidebar[data-collapsed='true'] .lux-tooltip-wrap:hover .lux-tooltip {
+  opacity: 1;
+}
+
+/* Hide tooltip when sidebar is expanded */
+.lux-sidebar:not([data-collapsed='true']) .lux-tooltip {
+  display: none;
+}
+
+/* ── Separator ────────────────────────────────────────────────────────────── */
+
+.lux-separator {
+  height: 1px;
+  background-color: var(--lux-separator);
+  margin: 6px 0;
+}
+
+/* ── Search field ─────────────────────────────────────────────────────────── */
+
+.lux-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 10px;
+  padding: 7px 10px;
+  background: var(--lux-search-bg);
+  border: 1px solid var(--lux-search-border);
+  border-radius: 8px;
+  transition: border-color 150ms ease;
+}
+
+.lux-search:focus-within {
+  border-color: var(--lux-search-focus-border);
+}
+
+.lux-search__icon {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--lux-search-placeholder);
+}
+
+.lux-search__input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 13px;
+  color: var(--lux-search-text);
+  font-family: inherit;
+  min-width: 0;
+}
+
+.lux-search__input::placeholder {
+  color: var(--lux-search-placeholder);
+}
+
+.lux-search__shortcut {
+  flex-shrink: 0;
+  font-size: 11px;
+  color: var(--lux-text-tertiary);
+  background: rgba(255, 255, 255, 0.07);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+/* Hide search in collapsed mode */
+.lux-sidebar[data-collapsed='true'] .lux-search {
+  display: none;
+}
+
+/* ── Header (tenant / store selector) ────────────────────────────────────── */
+
+.lux-sidebar-header {
+  height: var(--lux-header-height);
+  display: flex;
+  align-items: center;
+  padding: 0 10px;
+  border-bottom: 1px solid var(--lux-separator);
+  flex-shrink: 0;
+  gap: 10px;
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.lux-sidebar-header:hover {
+  background-color: var(--lux-item-hover-bg);
+}
+
+.lux-sidebar-header__avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: #fff;
+  background-color: var(--lux-color-accent);
+  overflow: hidden;
+}
+
+.lux-sidebar-header__info {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  transition:
+    opacity 150ms ease,
+    width 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.lux-sidebar[data-collapsed='true'] .lux-sidebar-header__info {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.lux-sidebar-header__name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--lux-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lux-sidebar-header__sub {
+  font-size: 11px;
+  color: var(--lux-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lux-sidebar-header__chevron {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  color: var(--lux-text-tertiary);
+  transition: var(--lux-transition-chevron);
+}
+
+.lux-sidebar[data-collapsed='true'] .lux-sidebar-header__chevron {
+  display: none;
+}
+
+/* ── Footer (sticky bottom zone) ─────────────────────────────────────────── */
+
+.lux-sidebar-footer {
+  flex-shrink: 0;
+  border-top: 1px solid var(--lux-separator);
+  padding: 6px 0 8px;
+}
+
+.lux-sidebar-footer__user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  margin: 0 4px;
+  border-radius: var(--lux-item-radius);
+  cursor: pointer;
+  transition: background-color 120ms ease;
+}
+
+.lux-sidebar-footer__user:hover {
+  background-color: var(--lux-item-hover-bg);
+}
+
+.lux-sidebar-footer__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  color: #fff;
+  background: linear-gradient(135deg, var(--lux-color-accent), #5856d6);
+  overflow: hidden;
+}
+
+.lux-sidebar-footer__name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--lux-text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1;
+  min-width: 0;
+  transition: opacity 150ms ease;
+}
+
+.lux-sidebar[data-collapsed='true'] .lux-sidebar-footer__name {
+  opacity: 0;
+  width: 0;
+  overflow: hidden;
+}
+
+.lux-sidebar-footer__role {
+  font-size: 11px;
+  color: var(--lux-text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Collapse toggle button ───────────────────────────────────────────────── */
+
+.lux-collapse-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  border: 1px solid var(--lux-separator);
+  background: transparent;
+  color: var(--lux-text-tertiary);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    background-color 120ms ease,
+    color 120ms ease;
+}
+
+.lux-collapse-btn:hover {
+  background-color: var(--lux-item-hover-bg);
+  color: var(--lux-text-primary);
+}
+
+/* ── Mobile overlay ───────────────────────────────────────────────────────── */
+
+.lux-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 39; /* just below sidebar's z-40 */
+  opacity: 0;
+  pointer-events: none;
+  transition: var(--lux-transition-overlay);
+}
+
+.lux-overlay--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* On mobile: sidebar starts off-screen, slides in */
+@media (max-width: 767px) {
+  .lux-sidebar {
+    transform: translateX(-100%);
+    transition:
+      transform 250ms cubic-bezier(0.25, 0.46, 0.45, 0.94),
+      var(--lux-transition-collapse);
+  }
+
+  .lux-sidebar[data-mobile-open='true'] {
+    transform: translateX(0);
+    width: var(--lux-sidebar-expanded-w); /* always full width on mobile */
+  }
+}

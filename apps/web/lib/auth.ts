@@ -37,7 +37,7 @@ export const getCurrentUser = async (): Promise<User | null> => {
   try {
     const response = await fetch('/api/auth/me', {
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 

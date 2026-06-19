@@ -1,17 +1,58 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { SnackbarProvider, AppLayout, getDefaultUser, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
 
-export default function GroupsPage() {
+const GroupsPageContent: React.FC = () => {
   const router = useRouter();
+  const [user, setUser] = useState<any>(null);
 
-  const handleCreateGroup = () => {
-    router.push('/groups/create');
+  useEffect(() => {
+    const userData = localStorage.getItem('user');
+    if (userData) {
+      try {
+        const parsedUser = JSON.parse(userData);
+        setUser({
+          name: `${parsedUser.firstName} ${parsedUser.lastName}`,
+          email: parsedUser.email,
+          role: parsedUser.role,
+          tenant: parsedUser.tenant,
+        });
+      } catch {
+        setUser(getDefaultUser());
+      }
+    } else {
+      setUser(getDefaultUser());
+    }
+  }, []);
+
+  const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
+    switch (action) {
+      case 'profile':
+        router.push('/profile');
+        break;
+      case 'settings':
+        router.push('/settings');
+        break;
+      case 'logout':
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        router.push('/login');
+        break;
+    }
   };
 
-  const handleViewAnalytics = () => {
-    router.push('/groups/analytics');
-  };
+  const groups = [
+    {
+      id: '1',
+      name: 'Development Team',
+      description: 'Software development and engineering team',
+      members: 12,
+      status: 'Active',
+    },
+    { id: '2', name: 'Marketing Team', description: 'Marketing and communications team', members: 8, status: 'Active' },
+    { id: '3', name: 'Design Team', description: 'UI/UX design and creative team', members: 6, status: 'Active' },
+  ];
 
   return (
     <>
@@ -19,71 +60,102 @@ export default function GroupsPage() {
         <title>Groups - LuxGen</title>
         <meta name="description" content="Manage your groups and team members" />
       </Head>
-      
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Groups</h1>
-            <p className="mt-2 text-gray-600">Manage your groups and team members</p>
-          </div>
 
-          {/* Action Buttons */}
-          <div className="mb-8 flex space-x-4">
-            <button
-              onClick={handleCreateGroup}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-            >
-              Create New Group
-            </button>
-            <button
-              onClick={handleViewAnalytics}
-              className="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700"
-            >
-              View Analytics
-            </button>
+      <AppLayout
+        sidebarSections={getDefaultSidebarSections()}
+        user={user}
+        onUserAction={handleUserAction}
+        showSearch={false}
+        showNotifications={false}
+        logo={getDefaultLogo()}
+        sidebarCollapsible={true}
+        sidebarDefaultCollapsed={false}
+        responsive={true}
+      >
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          {/* iOS Large Title header */}
+          <div className="mb-8 flex items-end justify-between">
+            <div>
+              <h1 className="ios-large-title">Groups</h1>
+              <p className="mt-1 text-secondary text-sm">Manage your groups and team members</p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={() => router.push('/groups/create')} className="ios-btn-primary">
+                + Create Group
+              </button>
+              <button onClick={() => router.push('/groups/analytics')} className="ios-btn-secondary">
+                Analytics
+              </button>
+            </div>
           </div>
 
           {/* Groups Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Sample Group Cards */}
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Development Team</h3>
-              <p className="text-gray-600 mb-4">Software development and engineering team</p>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">12 members</span>
-                <div className="flex space-x-2">
-                  <button className="text-blue-600 hover:text-blue-800 text-sm">Edit</button>
-                  <button className="text-red-600 hover:text-red-800 text-sm">Delete</button>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {groups.map((group) => (
+              <div
+                key={group.id}
+                className="ios-card p-5 transition-all duration-200 hover:shadow-md"
+                style={{ cursor: 'pointer' }}
+                onClick={() => router.push(`/groups/${group.id}`)}
+              >
+                <div className="flex items-start justify-between mb-4">
+                  <div className="ios-avatar ios-avatar-md" style={{ borderRadius: 'var(--radius-lg)' }}>
+                    {group.name.charAt(0)}
+                  </div>
+                  <span className="badge badge-green">{group.status}</span>
                 </div>
-              </div>
-            </div>
 
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Marketing Team</h3>
-              <p className="text-gray-600 mb-4">Marketing and communications team</p>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">8 members</span>
-                <div className="flex space-x-2">
-                  <button className="text-blue-600 hover:text-blue-800 text-sm">Edit</button>
-                  <button className="text-red-600 hover:text-red-800 text-sm">Delete</button>
-                </div>
-              </div>
-            </div>
+                <h3 className="text-base font-semibold text-primary mb-1">{group.name}</h3>
+                <p className="text-sm text-secondary mb-4 leading-relaxed">{group.description}</p>
 
-            <div className="bg-white shadow rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Design Team</h3>
-              <p className="text-gray-600 mb-4">UI/UX design and creative team</p>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-500">6 members</span>
-                <div className="flex space-x-2">
-                  <button className="text-blue-600 hover:text-blue-800 text-sm">Edit</button>
-                  <button className="text-red-600 hover:text-red-800 text-sm">Delete</button>
+                <div
+                  className="flex items-center justify-between pt-3"
+                  style={{ borderTop: '1px solid var(--color-separator)' }}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      className="text-secondary"
+                    >
+                      <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                      <circle cx="9" cy="7" r="4" />
+                      <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+                    </svg>
+                    <span className="text-xs text-secondary">{group.members} members</span>
+                  </div>
+                  <div className="flex gap-3" onClick={(e) => e.stopPropagation()}>
+                    <button
+                      onClick={() => router.push(`/groups/${group.id}/edit`)}
+                      className="ios-btn-plain text-sm py-1 px-2"
+                    >
+                      Edit
+                    </button>
+                    <button
+                      onClick={() => router.push(`/groups/${group.id}`)}
+                      className="ios-btn-plain text-sm py-1 px-2"
+                    >
+                      View
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            ))}
           </div>
         </div>
-      </div>
+      </AppLayout>
     </>
+  );
+};
+
+export default function GroupsPage() {
+  return (
+    <SnackbarProvider position="top-right" maxSnackbars={3}>
+      <GroupsPageContent />
+    </SnackbarProvider>
   );
 }

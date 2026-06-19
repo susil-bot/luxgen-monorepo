@@ -57,7 +57,7 @@ const TextAreaComponent: React.FC<TextAreaProps> = ({
           {required && <span className="textarea-required">*</span>}
         </label>
       )}
-      
+
       <textarea
         className={`textarea ${error ? 'error' : ''}`}
         style={baseStyles}
@@ -72,14 +72,10 @@ const TextAreaComponent: React.FC<TextAreaProps> = ({
         rows={rows}
         {...props}
       />
-      
-      {error && (
-        <p className="textarea-error">{error}</p>
-      )}
-      
-      {helperText && !error && (
-        <p className="textarea-helper">{helperText}</p>
-      )}
+
+      {error && <p className="textarea-error">{error}</p>}
+
+      {helperText && !error && <p className="textarea-helper">{helperText}</p>}
     </div>
   );
 };

@@ -1,1 +1,1 @@
-export const InputWithLabelTranslations = { en: { title: "InputWithLabel" } };
+export const InputWithLabelTranslations = { en: { title: 'InputWithLabel' } };

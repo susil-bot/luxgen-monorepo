@@ -23,10 +23,10 @@ export class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     console.error('ErrorBoundary caught an error:', error, errorInfo);
-    
+
     // Call the onError callback if provided
     this.props.onError?.(error, errorInfo);
-    
+
     // In production, you might want to send this to an error reporting service
     if (process.env.NODE_ENV === 'production') {
       // Example: Send to error reporting service
@@ -44,12 +44,7 @@ export class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-screen flex items-center justify-center bg-gray-50">
           <div className="text-center p-8">
             <div className="mb-4">
-              <svg
-                className="mx-auto h-12 w-12 text-red-500"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
+              <svg className="mx-auto h-12 w-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -58,9 +53,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">
-              Something went wrong
-            </h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-2">Something went wrong</h2>
             <p className="text-gray-600 mb-4">
               We're sorry, but something unexpected happened. Please try refreshing the page.
             </p>
@@ -72,9 +65,7 @@ export class ErrorBoundary extends Component<Props, State> {
             </button>
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className="mt-4 text-left">
-                <summary className="cursor-pointer text-sm text-gray-500">
-                  Error Details (Development)
-                </summary>
+                <summary className="cursor-pointer text-sm text-gray-500">Error Details (Development)</summary>
                 <pre className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded overflow-auto">
                   {this.state.error.stack}
                 </pre>

@@ -11,7 +11,7 @@ export class HeadPlugin extends Plugin {
     const phaseSet = new PhaseSet(
       [
         // Fetchers
-        createFetcher('siteMetadata', async (workflowContext) => {
+        createFetcher('siteMetadata', async (_workflowContext) => {
           return {
             title: 'Luxgen Monorepo',
             description: 'A comprehensive monorepo with UI components and plugin system',
@@ -37,7 +37,7 @@ export class HeadPlugin extends Plugin {
         createTransformer('headData', (workflowContext) => {
           const siteMetadata = workflowContext.fetched.siteMetadata;
           const pageMetadata = workflowContext.fetched.pageMetadata;
-          
+
           return {
             title: `${pageMetadata.title} | ${siteMetadata.title}`,
             description: pageMetadata.description || siteMetadata.description,
@@ -60,7 +60,7 @@ export class HeadPlugin extends Plugin {
             },
           };
         }),
-      ]
+      ],
     );
 
     super('plugin-head', phaseSet);

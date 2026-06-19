@@ -33,7 +33,7 @@ export const useLogout = (options: UseLogoutOptions = {}): UseLogoutReturn => {
     try {
       // Clear storage if enabled
       if (clearStorage) {
-        storageKeys.forEach(key => {
+        storageKeys.forEach((key) => {
           localStorage.removeItem(key);
           sessionStorage.removeItem(key);
         });
@@ -41,7 +41,7 @@ export const useLogout = (options: UseLogoutOptions = {}): UseLogoutReturn => {
 
       // Clear any cookies (if using document.cookie)
       if (typeof document !== 'undefined') {
-        document.cookie.split(';').forEach(cookie => {
+        document.cookie.split(';').forEach((cookie) => {
           const eqPos = cookie.indexOf('=');
           const name = eqPos > -1 ? cookie.substr(0, eqPos) : cookie;
           document.cookie = `${name.trim()}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`;

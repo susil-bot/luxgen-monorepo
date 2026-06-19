@@ -16,7 +16,7 @@ export const CourseDetailMenu: React.FC<CourseDetailMenuProps> = ({
   userRole,
   currentPath,
   onNavigate,
-  className = ''
+  className = '',
 }) => {
   const learnerMenuItems = getCourseDetailMenu(courseId, userRole);
   const adminMenuItems = getCourseManagementMenu(courseId, userRole);
@@ -34,33 +34,27 @@ export const CourseDetailMenu: React.FC<CourseDetailMenuProps> = ({
   return (
     <div className={`course-detail-menu ${className}`}>
       {/* Learner/User Menu */}
-      <div className="mb-8">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">Course Navigation</h3>
+      <div className="mb-6">
+        <h3 className="text-sm font-semibold text-primary mb-3">Course Navigation</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
           {learnerMenuItems.map((item) => (
             <button
               key={item.id}
               onClick={() => handleItemClick(item.href || '')}
-              className={`p-3 rounded-lg border text-left transition-all duration-200 ${
-                isActive(item.href || '')
-                  ? 'border-blue-500 bg-blue-50 text-blue-900'
-                  : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+              className={`stat-card p-3 text-left transition-all duration-200 ${
+                isActive(item.href || '') ? 'ios-card-row' : ''
               }`}
+              style={{
+                border: isActive(item.href || '') ? '2px solid var(--color-blue)' : '1px solid var(--color-separator)',
+              }}
             >
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center gap-3">
                 <span className="text-lg">{item.icon}</span>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium">{item.label}</div>
-                  <div className="text-xs text-gray-500 mt-1">{item.description}</div>
+                  <div className="text-sm font-medium text-primary">{item.label}</div>
+                  <div className="text-xs text-secondary mt-0.5">{item.description}</div>
                 </div>
-                {item.badge && (
-                  <Chip
-                    label={item.badge.toString()}
-                    variant="info"
-                    size="small"
-                    shape="pill"
-                  />
-                )}
+                {item.badge && <Chip label={item.badge.toString()} variant="info" size="small" shape="pill" />}
               </div>
             </button>
           ))}
@@ -69,33 +63,29 @@ export const CourseDetailMenu: React.FC<CourseDetailMenuProps> = ({
 
       {/* Admin/Instructor Management Menu */}
       {(userRole === 'admin' || userRole === 'instructor') && (
-        <div className="mb-8">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Course Management</h3>
+        <div className="mb-6">
+          <h3 className="text-sm font-semibold text-primary mb-3">Course Management</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
             {adminMenuItems.map((item) => (
               <button
                 key={item.id}
                 onClick={() => handleItemClick(item.href || '')}
-                className={`p-3 rounded-lg border text-left transition-all duration-200 ${
-                  isActive(item.href || '')
-                    ? 'border-green-500 bg-green-50 text-green-900'
-                    : 'border-gray-200 hover:border-green-300 hover:bg-green-50'
+                className={`stat-card p-3 text-left transition-all duration-200 ${
+                  isActive(item.href || '') ? 'ios-card-row' : ''
                 }`}
+                style={{
+                  border: isActive(item.href || '')
+                    ? '2px solid var(--color-green)'
+                    : '1px solid var(--color-separator)',
+                }}
               >
-                <div className="flex items-center space-x-3">
+                <div className="flex items-center gap-3">
                   <span className="text-lg">{item.icon}</span>
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm font-medium">{item.label}</div>
-                    <div className="text-xs text-gray-500 mt-1">{item.description}</div>
+                    <div className="text-sm font-medium text-primary">{item.label}</div>
+                    <div className="text-xs text-secondary mt-0.5">{item.description}</div>
                   </div>
-                  {item.badge && (
-                    <Chip
-                      label={item.badge.toString()}
-                      variant="success"
-                      size="small"
-                      shape="pill"
-                    />
-                  )}
+                  {item.badge && <Chip label={item.badge.toString()} variant="success" size="small" shape="pill" />}
                 </div>
               </button>
             ))}
@@ -104,23 +94,19 @@ export const CourseDetailMenu: React.FC<CourseDetailMenuProps> = ({
       )}
 
       {/* Role Information */}
-      <div className="bg-gray-50 rounded-lg p-4">
-        <div className="flex items-center space-x-3">
+      <div className="glass rounded-xl p-4">
+        <div className="flex items-center gap-3">
           <div className="flex-shrink-0">
-            <span className="text-2xl">
-              {userRole === 'admin' ? '👑' : userRole === 'instructor' ? '👨‍🏫' : '👨‍🎓'}
-            </span>
+            <span className="text-2xl">{userRole === 'admin' ? '👑' : userRole === 'instructor' ? '👨‍🏫' : '👨‍🎓'}</span>
           </div>
           <div>
-            <h4 className="text-sm font-medium text-gray-900">
-              {userRole === 'admin' ? 'Administrator' : 
-               userRole === 'instructor' ? 'Instructor' : 'Learner'}
+            <h4 className="text-sm font-medium text-primary">
+              {userRole === 'admin' ? 'Administrator' : userRole === 'instructor' ? 'Instructor' : 'Learner'}
             </h4>
-            <p className="text-xs text-gray-600 mt-1">
-              {userRole === 'admin' || userRole === 'instructor' 
+            <p className="text-xs text-secondary mt-0.5">
+              {userRole === 'admin' || userRole === 'instructor'
                 ? 'Full course management and analytics access'
-                : 'Course enrollment and learning access'
-              }
+                : 'Course enrollment and learning access'}
             </p>
           </div>
         </div>

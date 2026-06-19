@@ -1,0 +1,72 @@
+# Render Blueprint — LuxGen monorepo
+# Docs: docs/deployment/FREE_TIER_CLOUD.md
+# Deploy: Render Dashboard → New Blueprint → connect repo
+
+services:
+  - type: web
+    name: luxgen-api
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "4000"
+      - key: APOLLO_INTROSPECTION
+        value: "false"
+      - key: BILLING_DEV_MODE
+        value: "false"
+      - key: LOG_LEVEL
+        value: info
+      - key: EMAIL_PROVIDER
+        value: log
+      # Set these in Render dashboard (secrets):
+      - key: MONGODB_URI
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        sync: false
+      - key: WEB_APP_URL
+        sync: false
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: STRIPE_PRICE_STARTER
+        sync: false
+      - key: STRIPE_PRICE_PRO
+        sync: false
+      - key: STRIPE_PRICE_BUSINESS
+        sync: false
+      - key: STRIPE_PRICE_LISTING
+        sync: false
+      - key: JOBS_API_KEY
+        generateValue: true
+
+# Optional: deploy web on Render instead of Vercel (uses free tier hours)
+#  - type: web
+#    name: luxgen-web
+#    runtime: docker
+#    plan: free
+#    dockerfilePath: ./apps/web/Dockerfile
+#    dockerContext: .
+#    healthCheckPath: /api/health
+#    envVars:
+#      - key: NODE_ENV
+#        value: production
+#      - key: API_URL
+#        fromService:
+#          name: luxgen-api
+#          type: web
+#          property: hostport
+#      - key: NEXT_PUBLIC_GRAPHQL_URL
+#        sync: false
+#      - key: NEXT_PUBLIC_APP_URL
+#        sync: false

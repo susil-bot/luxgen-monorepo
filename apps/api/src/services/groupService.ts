@@ -1,5 +1,5 @@
 import { Context } from '../context';
-import { Group, GroupMember, IGroup, IGroupMember, Tenant } from '@luxgen/db';
+import { Group, GroupMember, Tenant } from '@luxgen/db';
 import { Types } from 'mongoose';
 
 export class GroupService {
@@ -14,7 +14,7 @@ export class GroupService {
       search?: string;
       isActive?: boolean;
       createdBy?: string;
-    }
+    },
   ) {
     const { tenant } = context;
 
@@ -24,7 +24,7 @@ export class GroupService {
 
     // Find tenant by subdomain or use default
     let tenantId: string | null = null;
-    
+
     if (tenant && tenant !== 'demo') {
       const tenantDoc = await Tenant.findOne({ subdomain: tenant });
       if (tenantDoc) {
@@ -37,12 +37,12 @@ export class GroupService {
         tenantId = demoTenant._id.toString();
       }
     }
-    
+
     let query: any = { isActive: true };
     if (tenantId) {
       query.tenant = tenantId;
     }
-    
+
     console.log('🔍 GroupService query:', query);
     console.log('🔍 Tenant ID:', tenantId);
 
@@ -82,10 +82,7 @@ export class GroupService {
     const sort = args.before ? { _id: -1 } : { _id: 1 };
     const limit = args.first || args.last || 10;
 
-    const groups = await Group.find(query)
-      .sort(sort)
-      .limit(limit)
-      .lean();
+    const groups = await Group.find(query).sort(sort).limit(limit).lean();
 
     // Reverse if using before cursor
     if (args.before) {
@@ -160,7 +157,7 @@ export class GroupService {
       before?: string;
       role?: string;
       isActive?: boolean;
-    }
+    },
   ) {
     const { tenant } = context;
 
@@ -196,10 +193,7 @@ export class GroupService {
     const sort = args.before ? { _id: -1 } : { _id: 1 };
     const limit = args.first || args.last || 10;
 
-    const members = await GroupMember.find(query)
-      .sort(sort)
-      .limit(limit)
-      .lean();
+    const members = await GroupMember.find(query).sort(sort).limit(limit).lean();
 
     if (args.before) {
       members.reverse();
@@ -243,7 +237,7 @@ export class GroupService {
       before?: string;
       role?: string;
       isActive?: boolean;
-    }
+    },
   ) {
     const { tenant } = context;
 
@@ -279,10 +273,7 @@ export class GroupService {
     const sort = args.before ? { _id: -1 } : { _id: 1 };
     const limit = args.first || args.last || 10;
 
-    const members = await GroupMember.find(query)
-      .sort(sort)
-      .limit(limit)
-      .lean();
+    const members = await GroupMember.find(query).sort(sort).limit(limit).lean();
 
     if (args.before) {
       members.reverse();
@@ -381,7 +372,7 @@ export class GroupService {
           settings: input.settings,
         },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!group) {
@@ -517,7 +508,7 @@ export class GroupService {
           permissions: input.permissions,
         },
       },
-      { new: true }
+      { new: true },
     );
 
     if (!member) {
@@ -622,12 +613,7 @@ export class GroupService {
   }
 
   // Bulk add group members
-  static async bulkAddGroupMembers(
-    context: Context,
-    groupId: string,
-    userIds: string[],
-    role: string = 'member'
-  ) {
+  static async bulkAddGroupMembers(context: Context, groupId: string, userIds: string[], role: string = 'member') {
     const { tenant } = context;
 
     if (!tenant) {
@@ -656,11 +642,7 @@ export class GroupService {
   }
 
   // Bulk remove group members
-  static async bulkRemoveGroupMembers(
-    context: Context,
-    groupId: string,
-    userIds: string[]
-  ) {
+  static async bulkRemoveGroupMembers(context: Context, groupId: string, userIds: string[]) {
     const { tenant } = context;
 
     if (!tenant) {

@@ -1,18 +1,10 @@
 const { getColorToken } = require('../../utils');
 
 const { colorTokens } = require('./colors');
-const {
-  nonURLClickEvent
-} = require('../../helpers/analytics/snowplow-tracking');
+const { nonURLClickEvent } = require('../../helpers/analytics/snowplow-tracking');
 const { trackNavigationClick } = require('../../helpers/tracking');
 
-const getStylesForState = (
-  theme,
-  typeStyle,
-  buttonState,
-  isInverted,
-  isSpecial
-) => {
+const getStylesForState = (theme, typeStyle, buttonState, isInverted, isSpecial) => {
   const typeStyleColors = colorTokens[typeStyle];
   const stateColors = typeStyleColors && typeStyleColors[buttonState];
 
@@ -27,10 +19,7 @@ const getStylesForState = (
   }
   if (isSpecial) {
     textColor = getColorToken(theme, 'colors.background.white');
-    backgroundColor = getColorToken(
-      theme,
-      'colors.consumption.lead.special.background'
-    );
+    backgroundColor = getColorToken(theme, 'colors.consumption.lead.special.background');
     borderColor = getColorToken(theme, 'colors.background.white');
   }
   return `
@@ -76,14 +65,7 @@ const getButtonColors = (theme, typeStyle, isInverted, isSpecial) => {
   `;
 };
 
-const snowplowClickHandler = (
-  isLink,
-  label,
-  href,
-  subject = 'button',
-  type = 'click',
-  componentId = null
-) => {
+const snowplowClickHandler = (isLink, label, href, subject = 'button', type = 'click', componentId = null) => {
   if (!isLink && label) {
     nonURLClickEvent(label, href);
   }
@@ -96,5 +78,5 @@ const snowplowClickHandler = (
 module.exports = {
   getButtonColors,
   getStylesForState,
-  snowplowClickHandler
+  snowplowClickHandler,
 };

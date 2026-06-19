@@ -1,115 +1,83 @@
-import React, { useState, memo } from 'react';
-import { SidebarItem as SidebarItemType } from './Sidebar';
+import React from 'react';
+import { withSSR } from '../ssr';
 
 export interface SidebarItemProps {
-  item: SidebarItemType;
-  isActive: boolean;
-  isCollapsed: boolean;
-  onClick: () => void;
-  variant: 'default' | 'compact' | 'minimal';
-  depth?: number;
+  id: string;
+  label: string;
+  icon?: React.ReactNode;
+  href?: string;
+  badge?: string | number;
+  disabled?: boolean;
+  isActive?: boolean;
+  onClick?: () => void;
   className?: string;
+  level?: number;
 }
 
 const SidebarItemComponent: React.FC<SidebarItemProps> = ({
-  item,
-  isActive,
-  isCollapsed,
+  id,
+  label,
+  icon,
+  href,
+  badge,
+  disabled = false,
+  isActive = false,
   onClick,
-  variant,
-  depth = 0,
   className = '',
+  level = 0,
+  ...props
 }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  const baseClasses = 'flex items-center gap-3 px-3 py-2 rounded-lg transition-all duration-150';
+
+  const stateClasses = disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer';
+
+  const activeClasses = isActive ? 'ios-card-row' : 'hover:bg-[var(--color-fill-quaternary)]';
+
+  const textClasses = isActive ? 'text-primary font-medium' : 'text-secondary';
+
+  const iconClasses = isActive ? '' : '';
 
   const handleClick = () => {
-    if (item.children && item.children.length > 0) {
-      setIsExpanded(!isExpanded);
+    if (!disabled) {
+      onClick?.();
     }
-    onClick();
-  };
-
-  const getItemStyles = () => {
-    const baseStyles = 'w-full flex items-center py-2 text-sm font-medium rounded-md transition-colors duration-200';
-    const activeStyles = isActive 
-      ? 'bg-green-50 text-green-700 border-r-2 border-green-500' 
-      : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900';
-    const disabledStyles = item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer';
-    
-    const paddingStyles = depth > 0 ? 'pl-8' : 'px-4';
-    const variantStyles = variant === 'compact' ? 'justify-center px-3' : variant === 'minimal' ? 'justify-center px-2' : 'justify-start px-4';
-    
-    return `${baseStyles} ${activeStyles} ${disabledStyles} ${paddingStyles} ${variantStyles}`;
-  };
-
-  const getTextStyles = () => {
-    if (isCollapsed || variant === 'compact' || variant === 'minimal') {
-      return 'hidden';
-    }
-    return 'flex-1 text-left';
   };
 
   return (
-    <div className={className}>
-      <button
-        onClick={handleClick}
-        disabled={item.disabled}
-        className={getItemStyles()}
-        title={isCollapsed ? item.label : undefined}
-      >
-        {item.icon && (
-          <span className="flex-shrink-0 mr-3">
-            {item.icon}
-          </span>
-        )}
-        
-        {!isCollapsed && (
-          <>
-            <span className={getTextStyles()}>
-              {item.label}
-            </span>
-            
-            {item.badge && (
-              <span className="ml-2 px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">
-                {item.badge}
-              </span>
-            )}
-            
-            {item.children && item.children.length > 0 && (
-              <svg
-                className={`h-4 w-4 transition-transform duration-200 ${
-                  isExpanded ? 'rotate-180' : ''
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            )}
-          </>
-        )}
-      </button>
+    <div
+      id={id}
+      className={`${baseClasses} ${activeClasses} ${stateClasses} ${className}`}
+      onClick={handleClick}
+      style={{ paddingLeft: `${12 + level * 16}px` }}
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      onKeyDown={(e) => {
+        if (!disabled && (e.key === 'Enter' || e.key === ' ')) {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
+      {...props}
+    >
+      {/* Icon */}
+      {icon && (
+        <span
+          className={`flex-shrink-0 ${iconClasses}`}
+          style={{ color: isActive ? 'var(--color-blue)' : 'var(--color-label-tertiary)' }}
+        >
+          {icon}
+        </span>
+      )}
 
-      {/* Sub-menu items */}
-      {item.children && item.children.length > 0 && isExpanded && !isCollapsed && (
-        <div className="ml-4 mt-1 space-y-1">
-          {item.children.map((child) => (
-            <SidebarItem
-              key={child.id}
-              item={child}
-              isActive={false}
-              isCollapsed={isCollapsed}
-              onClick={() => {}}
-              variant={variant}
-              depth={depth + 1}
-            />
-          ))}
-        </div>
+      {/* Label */}
+      <span className={`flex-1 text-sm ${textClasses} truncate`}>{label}</span>
+
+      {/* Badge */}
+      {badge !== undefined && (
+        <span className={`badge ${isActive ? 'badge-blue' : 'badge-gray'} text-xs`}>{badge}</span>
       )}
     </div>
   );
 };
 
-export const SidebarItem = memo(SidebarItemComponent);
-SidebarItem.displayName = 'SidebarItem';
+export const SidebarItem = withSSR(SidebarItemComponent);

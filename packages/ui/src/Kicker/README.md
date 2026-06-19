@@ -51,20 +51,20 @@ import { Kicker } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `children` | `React.ReactNode` | - | Kicker content |
-| `variant` | `'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info'` | `'primary'` | Kicker variant |
-| `size` | `'small' | 'medium' | 'large'` | `'medium'` | Kicker size |
-| `weight` | `'light' | 'normal' | 'medium' | 'semibold' | 'bold'` | `'medium'` | Font weight |
-| `align` | `'left' | 'center' | 'right'` | `'left'` | Text alignment |
-| `uppercase` | `boolean` | `true` | Transform text to uppercase |
-| `underline` | `boolean` | `false` | Add underline decoration |
-| `icon` | `React.ReactNode` | - | Icon to display |
-| `iconPosition` | `'left' | 'right'` | `'left'` | Icon position |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
+| Prop           | Type              | Default        | Description                 |
+| -------------- | ----------------- | -------------- | --------------------------- | ------------- | -------------- | ---------- | ----------- | -------------- |
+| `tenantTheme`  | `TenantTheme`     | `defaultTheme` | Theme object for styling    |
+| `children`     | `React.ReactNode` | -              | Kicker content              |
+| `variant`      | `'primary'        | 'secondary'    | 'success'                   | 'error'       | 'warning'      | 'info'`    | `'primary'` | Kicker variant |
+| `size`         | `'small'          | 'medium'       | 'large'`                    | `'medium'`    | Kicker size    |
+| `weight`       | `'light'          | 'normal'       | 'medium'                    | 'semibold'    | 'bold'`        | `'medium'` | Font weight |
+| `align`        | `'left'           | 'center'       | 'right'`                    | `'left'`      | Text alignment |
+| `uppercase`    | `boolean`         | `true`         | Transform text to uppercase |
+| `underline`    | `boolean`         | `false`        | Add underline decoration    |
+| `icon`         | `React.ReactNode` | -              | Icon to display             |
+| `iconPosition` | `'left'           | 'right'`       | `'left'`                    | Icon position |
+| `className`    | `string`          | `''`           | Additional CSS classes      |
+| `style`        | `CSSProperties`   | `{}`           | Inline styles               |
 
 ## SSR Usage
 
@@ -116,6 +116,7 @@ The component uses CSS custom properties for theming:
 ## Typography Options
 
 ### Font Weights
+
 - **light**: 300
 - **normal**: 400
 - **medium**: 500
@@ -123,29 +124,34 @@ The component uses CSS custom properties for theming:
 - **bold**: 700
 
 ### Text Alignment
+
 - **left**: Left aligned (default)
 - **center**: Center aligned
 - **right**: Right aligned
 
 ### Text Transform
+
 - **uppercase**: Transform to uppercase (default)
 - **none**: No transformation
 
 ## Interactive Features
 
 ### Icons
+
 ```tsx
 <Kicker icon="🔖">Kicker with icon</Kicker>
 <Kicker icon={<Icon name="star" />}>Kicker with component icon</Kicker>
 ```
 
 ### Icon Position
+
 ```tsx
 <Kicker icon="🔖" iconPosition="left">Left icon</Kicker>
 <Kicker icon="🔖" iconPosition="right">Right icon</Kicker>
 ```
 
 ### Underline
+
 ```tsx
 <Kicker underline>Underlined kicker</Kicker>
 ```
@@ -166,20 +172,20 @@ import { Kicker } from '@luxgen/ui';
 
 test('renders with content', () => {
   render(<Kicker>Test kicker</Kicker>);
-  
+
   expect(screen.getByText('Test kicker')).toBeInTheDocument();
 });
 
 test('renders with different variants', () => {
   render(<Kicker variant="success">Success kicker</Kicker>);
-  
+
   const kicker = screen.getByText('Success kicker');
   expect(kicker).toHaveClass('kicker-success');
 });
 
 test('renders with icon', () => {
   render(<Kicker icon="🔖">Kicker with icon</Kicker>);
-  
+
   expect(screen.getByText('Kicker with icon')).toBeInTheDocument();
   expect(screen.getByText('🔖')).toBeInTheDocument();
 });
@@ -188,6 +194,7 @@ test('renders with icon', () => {
 ## Examples
 
 ### Basic Kickers
+
 ```tsx
 <Kicker>Featured</Kicker>
 <Kicker>New</Kicker>
@@ -196,6 +203,7 @@ test('renders with icon', () => {
 ```
 
 ### Status Kickers
+
 ```tsx
 <Kicker variant="success">Active</Kicker>
 <Kicker variant="error">Inactive</Kicker>
@@ -204,6 +212,7 @@ test('renders with icon', () => {
 ```
 
 ### Size Variations
+
 ```tsx
 <Kicker size="small">Small</Kicker>
 <Kicker size="medium">Medium</Kicker>
@@ -211,6 +220,7 @@ test('renders with icon', () => {
 ```
 
 ### Styled Kickers
+
 ```tsx
 <Kicker weight="bold" align="center">
   Centered bold kicker
@@ -226,22 +236,22 @@ test('renders with icon', () => {
 ```
 
 ### Icon Kickers
+
 ```tsx
 <Kicker icon="🔖">Kicker with icon</Kicker>
 <Kicker icon="⭐" iconPosition="right">Right icon</Kicker>
 ```
 
 ### Custom Themed Kickers
+
 ```tsx
-<Kicker
-  tenantTheme={customTheme}
-  variant="primary"
->
+<Kicker tenantTheme={customTheme} variant="primary">
   Custom themed kicker
 </Kicker>
 ```
 
 ### Complex Content
+
 ```tsx
 <Kicker>
   <Icon name="star" />

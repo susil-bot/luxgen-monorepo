@@ -1,20 +1,27 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { NotFound, AssetManagerProvider, useAssetManager, AppLayout, getDefaultNavItems, getDefaultUser, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import {
+  NotFound,
+  AssetManagerProvider,
+  useAssetManager,
+  AppLayout,
+  getDefaultUser,
+  getDefaultLogo,
+  getDefaultSidebarSections,
+} from '@luxgen/ui';
 import { getBrandAssetsForTenant } from '@luxgen/ui/src/Assets/DefaultBrandAssets';
 
 const NotFoundPageContent: React.FC = () => {
   const router = useRouter();
   const { getBrandAssets } = useAssetManager();
   const [user, setUser] = useState<any>(null);
-  
+
   // Get tenant from subdomain or default to 'demo'
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
-  const tenantId = hostname.includes('idea-vibes') ? 'idea-vibes' : 
-                   hostname.includes('demo') ? 'demo' : 'default';
-  
-  const brandAssets = getBrandAssets(tenantId);
+  const tenantId = hostname.includes('idea-vibes') ? 'idea-vibes' : hostname.includes('demo') ? 'demo' : 'default';
+
+  const _brandAssets = getBrandAssets(tenantId);
 
   // Load user data
   useEffect(() => {
@@ -81,7 +88,7 @@ const NotFoundPageContent: React.FC = () => {
         <meta name="description" content="The page you are looking for does not exist." />
         <meta name="robots" content="noindex, nofollow" />
       </Head>
-      
+
       <AppLayout
         sidebarSections={getDefaultSidebarSections()}
         user={user}
@@ -110,9 +117,7 @@ const NotFoundPageContent: React.FC = () => {
           showIllustration={true}
           customActions={
             <div className="mt-8 text-center">
-              <p className="text-sm text-gray-500 mb-4">
-                Need help? Try these popular pages:
-              </p>
+              <p className="text-sm text-gray-500 mb-4">Need help? Try these popular pages:</p>
               <div className="flex flex-wrap justify-center gap-2">
                 <button
                   onClick={() => router.push('/dashboard')}
@@ -150,17 +155,12 @@ const NotFoundPageContent: React.FC = () => {
 export default function Custom404() {
   // Get tenant from subdomain or default to 'demo'
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
-  const tenantId = hostname.includes('idea-vibes') ? 'idea-vibes' : 
-                   hostname.includes('demo') ? 'demo' : 'default';
-  
+  const tenantId = hostname.includes('idea-vibes') ? 'idea-vibes' : hostname.includes('demo') ? 'demo' : 'default';
+
   const brandAssets = getBrandAssetsForTenant(tenantId);
 
   return (
-    <AssetManagerProvider
-      defaultBrandAssets={brandAssets}
-      tenantId={tenantId}
-      autoLoad={false}
-    >
+    <AssetManagerProvider defaultBrandAssets={brandAssets} tenantId={tenantId} autoLoad={false}>
       <NotFoundPageContent />
     </AssetManagerProvider>
   );

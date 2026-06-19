@@ -169,17 +169,17 @@ export class WorkflowContext {
       this.transformed = { ...this.transformed, ...other.transformed };
       this.metadata = { ...this.metadata, ...other.metadata };
     } else {
-      Object.keys(other.fetched).forEach(key => {
+      Object.keys(other.fetched).forEach((key) => {
         if (this.fetched[key] === undefined) {
           this.fetched[key] = other.fetched[key];
         }
       });
-      Object.keys(other.transformed).forEach(key => {
+      Object.keys(other.transformed).forEach((key) => {
         if (this.transformed[key] === undefined) {
           this.transformed[key] = other.transformed[key];
         }
       });
-      Object.keys(other.metadata).forEach(key => {
+      Object.keys(other.metadata).forEach((key) => {
         if (this.metadata[key] === undefined) {
           this.metadata[key] = other.metadata[key];
         }

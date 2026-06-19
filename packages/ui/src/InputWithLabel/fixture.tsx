@@ -9,7 +9,7 @@ export const inputWithLabelFixtures = {
     placeholder: 'Enter text...',
     value: '',
   } as InputWithLabelProps,
-  
+
   withValue: {
     tenantTheme: defaultTheme,
     label: 'Input Label',
@@ -17,7 +17,7 @@ export const inputWithLabelFixtures = {
     placeholder: 'Enter text...',
     value: 'Sample text',
   } as InputWithLabelProps,
-  
+
   withError: {
     tenantTheme: defaultTheme,
     label: 'Input Label',
@@ -26,7 +26,7 @@ export const inputWithLabelFixtures = {
     value: '',
     error: 'This field is required',
   } as InputWithLabelProps,
-  
+
   withHelperText: {
     tenantTheme: defaultTheme,
     label: 'Input Label',
@@ -35,7 +35,7 @@ export const inputWithLabelFixtures = {
     value: '',
     helperText: 'Please enter your text here',
   } as InputWithLabelProps,
-  
+
   required: {
     tenantTheme: defaultTheme,
     label: 'Required Input',
@@ -44,7 +44,7 @@ export const inputWithLabelFixtures = {
     value: '',
     required: true,
   } as InputWithLabelProps,
-  
+
   disabled: {
     tenantTheme: defaultTheme,
     label: 'Disabled Input',
@@ -53,7 +53,7 @@ export const inputWithLabelFixtures = {
     value: 'Disabled value',
     disabled: true,
   } as InputWithLabelProps,
-  
+
   email: {
     tenantTheme: defaultTheme,
     label: 'Email Address',
@@ -62,7 +62,7 @@ export const inputWithLabelFixtures = {
     value: '',
     required: true,
   } as InputWithLabelProps,
-  
+
   password: {
     tenantTheme: defaultTheme,
     label: 'Password',
@@ -71,7 +71,7 @@ export const inputWithLabelFixtures = {
     value: '',
     required: true,
   } as InputWithLabelProps,
-  
+
   small: {
     tenantTheme: defaultTheme,
     label: 'Small Input',
@@ -80,7 +80,7 @@ export const inputWithLabelFixtures = {
     value: '',
     size: 'sm' as const,
   } as InputWithLabelProps,
-  
+
   large: {
     tenantTheme: defaultTheme,
     label: 'Large Input',
@@ -89,7 +89,7 @@ export const inputWithLabelFixtures = {
     value: '',
     size: 'lg' as const,
   } as InputWithLabelProps,
-  
+
   withCustomTheme: {
     tenantTheme: {
       ...defaultTheme,

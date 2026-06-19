@@ -39,42 +39,48 @@ export interface IGroupMember extends Document {
   updatedAt: Date;
 }
 
-const GroupSchema = new Schema<IGroup>({
-  name: { type: String, required: true, trim: true },
-  description: { type: String, trim: true },
-  color: { type: String, trim: true },
-  icon: { type: String, trim: true },
-  tenant: { type: String, required: true, index: true },
-  createdBy: { type: String, required: true, index: true },
-  isActive: { type: Boolean, default: true },
-  settings: {
-    allowSelfJoin: { type: Boolean, default: false },
-    requireApproval: { type: Boolean, default: true },
-    maxMembers: { type: Number },
-    allowFileSharing: { type: Boolean, default: true },
-    allowComments: { type: Boolean, default: true },
-    allowNudges: { type: Boolean, default: true },
-    canSendNudges: { type: Boolean, default: false },
+const GroupSchema = new Schema<IGroup>(
+  {
+    name: { type: String, required: true, trim: true },
+    description: { type: String, trim: true },
+    color: { type: String, trim: true },
+    icon: { type: String, trim: true },
+    tenant: { type: String, required: true, index: true },
+    createdBy: { type: String, required: true, index: true },
+    isActive: { type: Boolean, default: true },
+    settings: {
+      allowSelfJoin: { type: Boolean, default: false },
+      requireApproval: { type: Boolean, default: true },
+      maxMembers: { type: Number },
+      allowFileSharing: { type: Boolean, default: true },
+      allowComments: { type: Boolean, default: true },
+      allowNudges: { type: Boolean, default: true },
+      canSendNudges: { type: Boolean, default: false },
+    },
   },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true,
+  },
+);
 
-const GroupMemberSchema = new Schema<IGroupMember>({
-  groupId: { type: String, required: true, index: true },
-  userId: { type: String, required: true, index: true },
-  role: { type: String, enum: ['admin', 'moderator', 'member'], default: 'member' },
-  joinedAt: { type: Date, default: Date.now },
-  isActive: { type: Boolean, default: true },
-  permissions: {
-    canInvite: { type: Boolean, default: false },
-    canRemove: { type: Boolean, default: false },
-    canEdit: { type: Boolean, default: false },
-    canDelete: { type: Boolean, default: false },
+const GroupMemberSchema = new Schema<IGroupMember>(
+  {
+    groupId: { type: String, required: true, index: true },
+    userId: { type: String, required: true, index: true },
+    role: { type: String, enum: ['admin', 'moderator', 'member'], default: 'member' },
+    joinedAt: { type: Date, default: Date.now },
+    isActive: { type: Boolean, default: true },
+    permissions: {
+      canInvite: { type: Boolean, default: false },
+      canRemove: { type: Boolean, default: false },
+      canEdit: { type: Boolean, default: false },
+      canDelete: { type: Boolean, default: false },
+    },
   },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true,
+  },
+);
 
 // Indexes for better performance
 GroupSchema.index({ tenant: 1, isActive: 1 });

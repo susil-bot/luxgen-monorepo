@@ -55,22 +55,28 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const [menuItems, setMenuItems] = useState<MenuItem[]>(initialItems);
 
-  const setActiveItem = useCallback((itemId: string | null) => {
-    setActiveItemState(itemId);
-    if (onActiveChange) {
-      onActiveChange(itemId);
-    }
-  }, [onActiveChange]);
+  const setActiveItem = useCallback(
+    (itemId: string | null) => {
+      setActiveItemState(itemId);
+      if (onActiveChange) {
+        onActiveChange(itemId);
+      }
+    },
+    [onActiveChange],
+  );
 
-  const setExpandedItems = useCallback((items: Set<string>) => {
-    setExpandedItemsState(items);
-    if (onExpandedChange) {
-      onExpandedChange(items);
-    }
-  }, [onExpandedChange]);
+  const setExpandedItems = useCallback(
+    (items: Set<string>) => {
+      setExpandedItemsState(items);
+      if (onExpandedChange) {
+        onExpandedChange(items);
+      }
+    },
+    [onExpandedChange],
+  );
 
   const toggleExpanded = useCallback((itemId: string) => {
-    setExpandedItemsState(prev => {
+    setExpandedItemsState((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(itemId)) {
         newSet.delete(itemId);
@@ -81,15 +87,18 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({
     });
   }, []);
 
-  const setCollapsed = useCallback((newCollapsed: boolean) => {
-    setCollapsedState(newCollapsed);
-    if (onCollapsedChange) {
-      onCollapsedChange(newCollapsed);
-    }
-  }, [onCollapsedChange]);
+  const setCollapsed = useCallback(
+    (newCollapsed: boolean) => {
+      setCollapsedState(newCollapsed);
+      if (onCollapsedChange) {
+        onCollapsedChange(newCollapsed);
+      }
+    },
+    [onCollapsedChange],
+  );
 
   const toggleCollapsed = useCallback(() => {
-    setCollapsedState(prev => {
+    setCollapsedState((prev) => {
       const newCollapsed = !prev;
       if (onCollapsedChange) {
         onCollapsedChange(newCollapsed);
@@ -100,19 +109,19 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({
 
   const addMenuItem = useCallback((item: MenuItem, parentId?: string) => {
     if (parentId) {
-      setMenuItems(prev => {
+      setMenuItems((prev) => {
         const addToParent = (items: MenuItem[]): MenuItem[] => {
-          return items.map(parentItem => {
+          return items.map((parentItem) => {
             if (parentItem.id === parentId) {
               return {
                 ...parentItem,
-                children: [...(parentItem.children || []), item]
+                children: [...(parentItem.children || []), item],
               };
             }
             if (parentItem.children) {
               return {
                 ...parentItem,
-                children: addToParent(parentItem.children)
+                children: addToParent(parentItem.children),
               };
             }
             return parentItem;
@@ -121,21 +130,21 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({
         return addToParent(prev);
       });
     } else {
-      setMenuItems(prev => [...prev, item]);
+      setMenuItems((prev) => [...prev, item]);
     }
   }, []);
 
   const removeMenuItem = useCallback((itemId: string) => {
-    setMenuItems(prev => {
+    setMenuItems((prev) => {
       const removeFromItems = (items: MenuItem[]): MenuItem[] => {
-        return items.filter(item => {
+        return items.filter((item) => {
           if (item.id === itemId) {
             return false;
           }
           if (item.children) {
             return {
               ...item,
-              children: removeFromItems(item.children)
+              children: removeFromItems(item.children),
             };
           }
           return true;
@@ -146,16 +155,16 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({
   }, []);
 
   const updateMenuItem = useCallback((itemId: string, updates: Partial<MenuItem>) => {
-    setMenuItems(prev => {
+    setMenuItems((prev) => {
       const updateInItems = (items: MenuItem[]): MenuItem[] => {
-        return items.map(item => {
+        return items.map((item) => {
           if (item.id === itemId) {
             return { ...item, ...updates };
           }
           if (item.children) {
             return {
               ...item,
-              children: updateInItems(item.children)
+              children: updateInItems(item.children),
             };
           }
           return item;
@@ -165,38 +174,44 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({
     });
   }, []);
 
-  const getMenuItem = useCallback((itemId: string): MenuItem | null => {
-    const findInItems = (items: MenuItem[]): MenuItem | null => {
-      for (const item of items) {
-        if (item.id === itemId) {
-          return item;
+  const getMenuItem = useCallback(
+    (itemId: string): MenuItem | null => {
+      const findInItems = (items: MenuItem[]): MenuItem | null => {
+        for (const item of items) {
+          if (item.id === itemId) {
+            return item;
+          }
+          if (item.children) {
+            const found = findInItems(item.children);
+            if (found) return found;
+          }
         }
-        if (item.children) {
-          const found = findInItems(item.children);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-    return findInItems(menuItems);
-  }, [menuItems]);
+        return null;
+      };
+      return findInItems(menuItems);
+    },
+    [menuItems],
+  );
 
-  const getMenuPath = useCallback((itemId: string): string[] => {
-    const findPath = (items: MenuItem[], path: string[] = []): string[] | null => {
-      for (const item of items) {
-        const currentPath = [...path, item.id];
-        if (item.id === itemId) {
-          return currentPath;
+  const getMenuPath = useCallback(
+    (itemId: string): string[] => {
+      const findPath = (items: MenuItem[], path: string[] = []): string[] | null => {
+        for (const item of items) {
+          const currentPath = [...path, item.id];
+          if (item.id === itemId) {
+            return currentPath;
+          }
+          if (item.children) {
+            const found = findPath(item.children, currentPath);
+            if (found) return found;
+          }
         }
-        if (item.children) {
-          const found = findPath(item.children, currentPath);
-          if (found) return found;
-        }
-      }
-      return null;
-    };
-    return findPath(menuItems) || [];
-  }, [menuItems]);
+        return null;
+      };
+      return findPath(menuItems) || [];
+    },
+    [menuItems],
+  );
 
   const resetMenu = useCallback(() => {
     setActiveItemState(null);
@@ -227,9 +242,5 @@ export const MenuProvider: React.FC<MenuProviderProps> = ({
     resetMenu,
   };
 
-  return (
-    <MenuContext.Provider value={contextValue}>
-      {children}
-    </MenuContext.Provider>
-  );
+  return <MenuContext.Provider value={contextValue}>{children}</MenuContext.Provider>;
 };

@@ -1,135 +1,102 @@
 import React from 'react';
 import { CourseOverviewProps } from './types';
-import { Chip } from '../Chip';
 
 export const CourseOverview: React.FC<CourseOverviewProps> = ({
   course,
   userRole,
-  enrollmentStatus = 'not_enrolled'
+  enrollmentStatus = 'not_enrolled',
 }) => {
-  const getEnrollmentButton = () => {
+  const renderActionButton = () => {
     switch (enrollmentStatus) {
       case 'enrolled':
-        return (
-          <button className="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition-colors">
-            Continue Learning
-          </button>
-        );
+        return <button className="ios-btn-primary">Continue Learning</button>;
       case 'completed':
-        return (
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            View Certificate
-          </button>
-        );
+        return <button className="ios-btn-primary">View Certificate</button>;
       default:
-        return (
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            Enroll Now
-          </button>
-        );
+        return <button className="ios-btn-primary">Enroll Now</button>;
     }
   };
 
-  const getRoleActions = () => {
+  const renderManagementActions = () => {
     if (userRole === 'admin' || userRole === 'instructor') {
       return (
-        <div className="flex space-x-2">
-          <button className="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 transition-colors">
-            Edit Course
-          </button>
-          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
-            View Analytics
-          </button>
+        <div className="flex gap-3 mt-3">
+          <button className="ios-btn-secondary text-sm">Edit Course</button>
+          <button className="ios-btn-secondary text-sm">View Analytics</button>
         </div>
       );
     }
-    return getEnrollmentButton();
+    return null;
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+    <div className="surface overflow-hidden">
       {/* Course Header */}
-      <div className="relative">
-        <div className="h-48 bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
-          <div className="text-center text-white">
-            <h1 className="text-3xl font-bold mb-2">{course.title}</h1>
-            <p className="text-lg opacity-90">{course.description}</p>
+      <div
+        className="p-6"
+        style={{
+          background: 'linear-gradient(135deg, var(--color-blue) 0%, var(--color-purple) 100%)',
+        }}
+      >
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-2">
+              <span className="badge badge-white/20 text-white text-xs">{course.level}</span>
+              <span className="badge badge-white/20 text-white text-xs">{course.duration}</span>
+            </div>
+            <h2 className="text-2xl font-bold text-white mb-2">{course.title}</h2>
+            <p className="text-white/80 text-sm">{course.description}</p>
           </div>
-        </div>
-        <div className="absolute top-4 right-4">
-          <Chip
-            label={course.level}
-            variant="outline"
-            size="small"
-            shape="pill"
-          />
         </div>
       </div>
 
-      {/* Course Info */}
-      <div className="p-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{course.rating}</div>
-            <div className="text-sm text-gray-600">Rating</div>
-            <div className="flex justify-center mt-1">
-              {[...Array(5)].map((_, i) => (
-                <span
-                  key={i}
-                  className={`text-sm ${
-                    i < Math.floor(course.rating) ? 'text-yellow-400' : 'text-gray-300'
-                  }`}
-                >
-                  ★
-                </span>
-              ))}
-            </div>
-          </div>
-          
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{course.enrolledCount}</div>
-            <div className="text-sm text-gray-600">Enrolled</div>
-          </div>
-          
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{course.duration}</div>
-            <div className="text-sm text-gray-600">Duration</div>
-          </div>
-          
-          <div className="text-center">
-            <div className="text-2xl font-bold text-gray-900">{course.instructor}</div>
-            <div className="text-sm text-gray-600">Instructor</div>
+      {/* Course Stats */}
+      <div className="px-6 py-4 grid grid-cols-4 gap-4">
+        <div className="text-center">
+          <div className="text-xl font-bold text-primary">{course.rating}</div>
+          <div className="text-xs text-secondary mt-0.5">Rating</div>
+          <div className="flex justify-center mt-1 gap-0.5">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <span
+                key={i}
+                className="text-xs"
+                style={{
+                  color: i < Math.floor(course.rating) ? 'var(--color-orange)' : 'var(--color-fill-quaternary)',
+                }}
+              >
+                ★
+              </span>
+            ))}
           </div>
         </div>
-
-        {/* Course Thumbnail */}
-        <div className="mb-6">
-          <img
-            src={course.thumbnail}
-            alt={course.title}
-            className="w-full h-48 object-cover rounded-lg"
-          />
+        <div className="text-center">
+          <div className="text-xl font-bold text-primary">{course.enrolledCount.toLocaleString()}</div>
+          <div className="text-xs text-secondary mt-0.5">Enrolled</div>
         </div>
+        <div className="text-center">
+          <div className="text-xl font-bold text-primary">{course.duration}</div>
+          <div className="text-xs text-secondary mt-0.5">Duration</div>
+        </div>
+        <div className="text-center">
+          <div className="text-xl font-bold text-primary">{course.instructor}</div>
+          <div className="text-xs text-secondary mt-0.5">Instructor</div>
+        </div>
+      </div>
 
-        {/* Actions */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <Chip
-              label={enrollmentStatus === 'enrolled' ? 'Enrolled' : 
-                     enrollmentStatus === 'completed' ? 'Completed' : 'Available'}
-              variant={enrollmentStatus === 'enrolled' ? 'success' : 
-                       enrollmentStatus === 'completed' ? 'info' : 'outline'}
-              size="medium"
-              shape="pill"
-            />
-            <span className="text-sm text-gray-600">
-              {userRole === 'admin' || userRole === 'instructor' ? 'Management Access' : 'Learning Access'}
-            </span>
-          </div>
-          
-          <div className="flex space-x-2">
-            {getRoleActions()}
-          </div>
+      {/* Course Actions */}
+      <div
+        className="px-6 py-4 flex items-center justify-between"
+        style={{ borderTop: '1px solid var(--color-separator)' }}
+      >
+        <div className="flex items-center gap-3">
+          {renderActionButton()}
+          {renderManagementActions()}
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-secondary">
+            {userRole === 'admin' || userRole === 'instructor' ? 'Management Access' : 'Learning Access'}
+          </span>
+          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: 'var(--color-green)' }} />
         </div>
       </div>
     </div>

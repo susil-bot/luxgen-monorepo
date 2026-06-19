@@ -21,21 +21,21 @@ To provide a flexible chip component for displaying tags, labels, categories, an
 
 ## Props
 
-| Property                    | Type                    | Default     | Description                                                                                                                        |
-| --------------------------- | ----------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| label                       | String                  | -           | Required text content for the chip                                                                                                |
-| variant                     | String                  | 'primary'   | Chip variant ('primary', 'secondary', 'success', 'error', 'warning', 'info', 'outline')                                          |
-| size                        | String                  | 'medium'    | Chip size ('small', 'medium', 'large')                                                                                            |
-| shape                       | String                  | 'rounded'   | Chip shape ('rounded', 'pill', 'square')                                                                                         |
-| closable                    | Boolean                 | false       | Show close button                                                                                                                 |
-| onClose                     | Function                | -           | Callback when close button is clicked                                                                                            |
-| icon                        | ReactNode               | -           | Optional icon to display                                                                                                          |
-| maxWidth                    | String/Number           | -           | Maximum width for the chip                                                                                                        |
-| className                   | String                  | ''          | Additional CSS classes                                                                                                             |
-| style                       | Object                  | -           | Inline styles                                                                                                                       |
-| disabled                    | Boolean                 | false       | Disable the chip                                                                                                                  |
-| onClick                     | Function                | -           | Click handler for interactive chips                                                                                               |
-| selected                    | Boolean                 | false       | Show selected state                                                                                                               |
+| Property  | Type          | Default   | Description                                                                             |
+| --------- | ------------- | --------- | --------------------------------------------------------------------------------------- |
+| label     | String        | -         | Required text content for the chip                                                      |
+| variant   | String        | 'primary' | Chip variant ('primary', 'secondary', 'success', 'error', 'warning', 'info', 'outline') |
+| size      | String        | 'medium'  | Chip size ('small', 'medium', 'large')                                                  |
+| shape     | String        | 'rounded' | Chip shape ('rounded', 'pill', 'square')                                                |
+| closable  | Boolean       | false     | Show close button                                                                       |
+| onClose   | Function      | -         | Callback when close button is clicked                                                   |
+| icon      | ReactNode     | -         | Optional icon to display                                                                |
+| maxWidth  | String/Number | -         | Maximum width for the chip                                                              |
+| className | String        | ''        | Additional CSS classes                                                                  |
+| style     | Object        | -         | Inline styles                                                                           |
+| disabled  | Boolean       | false     | Disable the chip                                                                        |
+| onClick   | Function      | -         | Click handler for interactive chips                                                     |
+| selected  | Boolean       | false     | Show selected state                                                                     |
 
 ## Component Usage
 
@@ -80,11 +80,7 @@ import { Chip } from '@luxgen/ui';
 ### Closable Chips
 
 ```jsx
-<Chip
-  label="Closable"
-  closable={true}
-  onClose={() => console.log('Chip closed')}
-/>
+<Chip label="Closable" closable={true} onClose={() => console.log('Chip closed')} />
 ```
 
 ### With Icons
@@ -123,11 +119,7 @@ import { StarIcon, HeartIcon } from '@luxgen/ui';
 ### Disabled Chips
 
 ```jsx
-<Chip
-  label="Disabled"
-  disabled={true}
-  variant="primary"
-/>
+<Chip label="Disabled" disabled={true} variant="primary" />
 ```
 
 ## Variants
@@ -271,11 +263,7 @@ import { StarIcon, HeartIcon } from '@luxgen/ui';
 ### Clickable Chips
 
 ```jsx
-<Chip
-  label="Click me"
-  onClick={() => console.log('Clicked')}
-  variant="primary"
-/>
+<Chip label="Click me" onClick={() => console.log('Clicked')} variant="primary" />
 ```
 
 - Cursor pointer on hover
@@ -285,12 +273,7 @@ import { StarIcon, HeartIcon } from '@luxgen/ui';
 ### Selected State
 
 ```jsx
-<Chip
-  label="Selected"
-  selected={true}
-  onClick={() => console.log('Selected')}
-  variant="primary"
-/>
+<Chip label="Selected" selected={true} onClick={() => console.log('Selected')} variant="primary" />
 ```
 
 - Ring border around chip
@@ -300,11 +283,7 @@ import { StarIcon, HeartIcon } from '@luxgen/ui';
 ### Disabled State
 
 ```jsx
-<Chip
-  label="Disabled"
-  disabled={true}
-  variant="primary"
-/>
+<Chip label="Disabled" disabled={true} variant="primary" />
 ```
 
 - Reduced opacity
@@ -316,11 +295,7 @@ import { StarIcon, HeartIcon } from '@luxgen/ui';
 ### Basic Closable
 
 ```jsx
-<Chip
-  label="Remove me"
-  closable={true}
-  onClose={() => console.log('Removed')}
-/>
+<Chip label="Remove me" closable={true} onClose={() => console.log('Removed')} />
 ```
 
 ### Closable with Custom Handler
@@ -331,11 +306,7 @@ const handleClose = (chipLabel) => {
   // Remove from state
 };
 
-<Chip
-  label="Tag"
-  closable={true}
-  onClose={() => handleClose('Tag')}
-/>
+<Chip label="Tag" closable={true} onClose={() => handleClose('Tag')} />;
 ```
 
 ## Icon Integration
@@ -392,11 +363,7 @@ Icons are positioned to the left of the label text and are flex-shrink-0 to prev
 ### Custom Classes
 
 ```jsx
-<Chip
-  label="Custom"
-  className="my-custom-chip"
-  variant="primary"
-/>
+<Chip label="Custom" className="my-custom-chip" variant="primary" />
 ```
 
 ### Inline Styles
@@ -406,7 +373,7 @@ Icons are positioned to the left of the label text and are flex-shrink-0 to prev
   label="Styled"
   style={{
     backgroundColor: '#ff6b6b',
-    color: 'white'
+    color: 'white',
   }}
 />
 ```
@@ -417,8 +384,8 @@ The chip component uses CSS custom properties for tenant-aware theming:
 
 ```css
 .chip {
-  --color-primary: #3B82F6;
-  --color-secondary: #10B981;
+  --color-primary: #3b82f6;
+  --color-secondary: #10b981;
 }
 ```
 
@@ -430,15 +397,10 @@ The chip component uses CSS custom properties for tenant-aware theming:
 const tags = ['React', 'TypeScript', 'JavaScript', 'CSS', 'HTML'];
 
 <div className="flex flex-wrap gap-2">
-  {tags.map(tag => (
-    <Chip
-      key={tag}
-      label={tag}
-      variant="outline"
-      onClick={() => console.log(`Selected: ${tag}`)}
-    />
+  {tags.map((tag) => (
+    <Chip key={tag} label={tag} variant="outline" onClick={() => console.log(`Selected: ${tag}`)} />
   ))}
-</div>
+</div>;
 ```
 
 ### Filter Chips
@@ -449,21 +411,21 @@ const [selectedFilters, setSelectedFilters] = useState([]);
 const filters = ['All', 'Active', 'Inactive', 'Pending'];
 
 <div className="flex flex-wrap gap-2">
-  {filters.map(filter => (
+  {filters.map((filter) => (
     <Chip
       key={filter}
       label={filter}
       variant={selectedFilters.includes(filter) ? 'primary' : 'outline'}
       onClick={() => {
         if (selectedFilters.includes(filter)) {
-          setSelectedFilters(prev => prev.filter(f => f !== filter));
+          setSelectedFilters((prev) => prev.filter((f) => f !== filter));
         } else {
-          setSelectedFilters(prev => [...prev, filter]);
+          setSelectedFilters((prev) => [...prev, filter]);
         }
       }}
     />
   ))}
-</div>
+</div>;
 ```
 
 ### Status Indicators
@@ -473,18 +435,14 @@ const statuses = [
   { label: 'Published', variant: 'success' },
   { label: 'Draft', variant: 'warning' },
   { label: 'Archived', variant: 'info' },
-  { label: 'Deleted', variant: 'error' }
+  { label: 'Deleted', variant: 'error' },
 ];
 
 <div className="flex flex-wrap gap-2">
-  {statuses.map(status => (
-    <Chip
-      key={status.label}
-      label={status.label}
-      variant={status.variant}
-    />
+  {statuses.map((status) => (
+    <Chip key={status.label} label={status.label} variant={status.variant} />
   ))}
-</div>
+</div>;
 ```
 
 ### Removable Tags
@@ -493,20 +451,14 @@ const statuses = [
 const [tags, setTags] = useState(['React', 'TypeScript', 'JavaScript']);
 
 const removeTag = (tagToRemove) => {
-  setTags(prev => prev.filter(tag => tag !== tagToRemove));
+  setTags((prev) => prev.filter((tag) => tag !== tagToRemove));
 };
 
 <div className="flex flex-wrap gap-2">
-  {tags.map(tag => (
-    <Chip
-      key={tag}
-      label={tag}
-      variant="primary"
-      closable={true}
-      onClose={() => removeTag(tag)}
-    />
+  {tags.map((tag) => (
+    <Chip key={tag} label={tag} variant="primary" closable={true} onClose={() => removeTag(tag)} />
   ))}
-</div>
+</div>;
 ```
 
 ## Troubleshooting

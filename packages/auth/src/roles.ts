@@ -53,12 +53,7 @@ export const ROLE_PERMISSIONS = {
     'request:deny',
     'manage_tenant_users',
   ],
-  [UserRole.USER]: [
-    'course:read',
-    'group:read',
-    'profile:read',
-    'profile:write',
-  ],
+  [UserRole.USER]: ['course:read', 'group:read', 'profile:read', 'profile:write'],
 };
 
 export const hasPermission = (role: UserRole, permission: string): boolean => {

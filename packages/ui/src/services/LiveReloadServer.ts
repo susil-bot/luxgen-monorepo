@@ -11,7 +11,7 @@ class LivereloadServer {
     this.io = require('socket.io')(config.socket_port);
     this.server = Hapi.server({
       port: config.server_port,
-      host: 'localhost'
+      host: 'localhost',
     });
   }
 
@@ -22,7 +22,7 @@ class LivereloadServer {
       handler: () => {
         this.io.sockets.emit('refresh');
         return { success: true };
-      }
+      },
     });
     await this.server.start();
     console.log(`Livereload server running on port ${config.server_port}`);

@@ -1,1 +1,1 @@
-export const SelectTranslations = { en: { title: "Select" } };
+export const SelectTranslations = { en: { title: 'Select' } };

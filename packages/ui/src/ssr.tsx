@@ -8,10 +8,7 @@ export interface SSRProps {
   isServer?: boolean;
 }
 
-export const createSSRComponent = <P extends object>(
-  Component: React.ComponentType<P>,
-  defaultProps?: Partial<P>
-) => {
+export const createSSRComponent = <P extends object>(Component: React.ComponentType<P>, defaultProps?: Partial<P>) => {
   return (props: P & SSRProps) => {
     const mergedProps = { ...defaultProps, ...props } as P;
     return React.createElement(Component, mergedProps);
@@ -64,12 +61,10 @@ export const getServerStyles = (theme: TenantTheme = defaultTheme): string => {
   `;
 };
 
-export const withSSR = <P extends object>(
-  Component: React.ComponentType<P>
-) => {
+export const withSSR = <P extends object>(Component: React.ComponentType<P>) => {
   return (props: P & SSRProps) => {
     const { tenantTheme = defaultTheme, isServer = false, ...restProps } = props;
-    
+
     if (isServer) {
       const styles = getServerStyles(tenantTheme);
       return (
@@ -79,7 +74,7 @@ export const withSSR = <P extends object>(
         </>
       );
     }
-    
+
     return <Component {...(restProps as P)} />;
   };
 };

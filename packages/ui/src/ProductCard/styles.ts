@@ -51,10 +51,10 @@ export const getProductCardStyles = (
   variant: 'default' | 'compact' | 'detailed',
   tagColor?: string,
   scoreColor?: string,
-  liked: boolean = false
+  liked: boolean = false,
 ): ProductCardStyles => {
   const variantStyles = getVariantStyles(variant);
-  
+
   return {
     card: {
       width: variantStyles.width,
@@ -246,11 +246,11 @@ export const getProgressColor = (score?: number, customColor?: string): string =
   if (customColor) {
     return customColor;
   }
-  
+
   if (score === undefined) {
     return '#F59E0B';
   }
-  
+
   if (score >= 80) return '#10B981'; // green
   if (score >= 60) return '#F59E0B'; // yellow
   if (score >= 40) return '#F97316'; // orange

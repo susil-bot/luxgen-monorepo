@@ -10,9 +10,7 @@ export interface SelectData {
   multi: boolean;
 }
 
-export const fetchSelectData = async (
-  tenantId?: string
-): Promise<SelectData> => {
+export const fetchSelectData = async (tenantId?: string): Promise<SelectData> => {
   const defaultOptions: SelectOption[] = [
     { value: 'option1', label: 'Option 1' },
     { value: 'option2', label: 'Option 2' },
@@ -29,19 +27,19 @@ export const fetchSelectData = async (
   };
 };
 
-export const fetchSelectSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchSelectSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchSelectData(tenantId);
-  
+
   const optionsHtml = data.options
-    .map(option => `
+    .map(
+      (option) => `
       <option value="${option.value}" ${option.disabled ? 'disabled' : ''}>
         ${option.label}
       </option>
-    `)
+    `,
+    )
     .join('');
-  
+
   const html = `
     <div class="select-wrapper" style="font-family: ${data.tenantTheme.fonts.primary}; color: ${data.tenantTheme.colors.text};">
       <div class="select-container">
@@ -58,7 +56,7 @@ export const fetchSelectSSR = async (
       </div>
     </div>
   `;
-  
+
   const styles = `
     .select-wrapper {
       display: flex;
@@ -122,6 +120,6 @@ export const fetchSelectSSR = async (
       margin: 0;
     }
   `;
-  
+
   return { html, styles };
 };

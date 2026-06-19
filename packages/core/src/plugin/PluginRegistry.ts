@@ -108,12 +108,9 @@ export class PluginRegistry {
    * @param pluginNames - Optional array of plugin names to execute
    * @returns Promise that resolves when the workflow is complete
    */
-  public async executeWorkflow(
-    workflowContext: WorkflowContext,
-    pluginNames?: string[]
-  ): Promise<void> {
-    const pluginsToExecute = pluginNames 
-      ? pluginNames.map(name => this.getPlugin(name)).filter(Boolean) as Plugin[]
+  public async executeWorkflow(workflowContext: WorkflowContext, pluginNames?: string[]): Promise<void> {
+    const pluginsToExecute = pluginNames
+      ? (pluginNames.map((name) => this.getPlugin(name)).filter(Boolean) as Plugin[])
       : this.getAllPlugins();
 
     for (const plugin of pluginsToExecute) {
@@ -131,7 +128,7 @@ export class PluginRegistry {
   public async executePresenterWorkflow(
     presenter: Presenter,
     workflowContext: WorkflowContext,
-    sharedPluginNames?: string[]
+    sharedPluginNames?: string[],
   ): Promise<void> {
     // Execute shared plugins first
     if (sharedPluginNames) {
@@ -153,9 +150,7 @@ export class PluginRegistry {
    * @returns Array of plugins in the category
    */
   public getPluginsByCategory(category: string): Plugin[] {
-    return this.getAllPlugins().filter(plugin => 
-      plugin.name.includes(category)
-    );
+    return this.getAllPlugins().filter((plugin) => plugin.name.includes(category));
   }
 
   /**
@@ -164,9 +159,7 @@ export class PluginRegistry {
    * @returns Array of presenters for the content type
    */
   public getPresentersByContentType(contentType: string): Presenter[] {
-    return this.getAllPresenters().filter(presenter => 
-      presenter.contentType === contentType
-    );
+    return this.getAllPresenters().filter((presenter) => presenter.contentType === contentType);
   }
 
   /**
@@ -175,9 +168,7 @@ export class PluginRegistry {
    * @returns Array of presenters for the tenant
    */
   public getPresentersByTenant(tenant: string): Presenter[] {
-    return this.getAllPresenters().filter(presenter => 
-      presenter.tenant === tenant
-    );
+    return this.getAllPresenters().filter((presenter) => presenter.tenant === tenant);
   }
 
   /**

@@ -21,6 +21,8 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@luxgen/billing": ["./packages/billing/src"],
+      "@luxgen/agent": ["./packages/agent/src"],
       "@luxgen/db": ["./packages/db/src"],
       "@luxgen/auth": ["./packages/auth/src"],
       "@luxgen/core": ["./packages/core/src"],

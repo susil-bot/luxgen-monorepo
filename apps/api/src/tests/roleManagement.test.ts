@@ -1,14 +1,14 @@
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
-import { Request, Response, NextFunction } from 'express';
-import { 
-  requireRole, 
-  requirePermissions, 
-  canManageUsers, 
+import { Response, NextFunction } from 'express';
+import {
+  requireRole,
+  requirePermissions,
+  canManageUsers,
   canManageTenants,
   canInviteUsers,
   canApproveRequests,
   requireTenantAccess,
-  logRoleAccess
+  logRoleAccess,
 } from '../middleware/roleManagement';
 import { UserRole, UserStatus, hasPermission } from '@luxgen/auth';
 import { User } from '@luxgen/db';
@@ -27,11 +27,11 @@ describe('Role Management Middleware', () => {
       user: null,
       params: {},
       query: {},
-      body: {}
+      body: {},
     };
     mockRes = {
       status: jest.fn().mockReturnThis(),
-      json: jest.fn().mockReturnThis()
+      json: jest.fn().mockReturnThis(),
     };
     mockNext = jest.fn();
     jest.clearAllMocks();
@@ -47,7 +47,7 @@ describe('Role Management Middleware', () => {
         _id: 'user123',
         email: 'admin@example.com',
         role: UserRole.ADMIN,
-        status: UserStatus.ACTIVE
+        status: UserStatus.ACTIVE,
       };
 
       const middleware = requireRole(UserRole.ADMIN);
@@ -62,7 +62,7 @@ describe('Role Management Middleware', () => {
         _id: 'user123',
         email: 'student@example.com',
         role: UserRole.USER,
-        status: UserStatus.ACTIVE
+        status: UserStatus.ACTIVE,
       };
 
       const middleware = requireRole(UserRole.ADMIN);
@@ -72,7 +72,7 @@ describe('Role Management Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         message: 'Insufficient privileges',
-        error: 'Required role: ADMIN, User role: STUDENT'
+        error: 'Required role: ADMIN, User role: STUDENT',
       });
       expect(mockNext).not.toHaveBeenCalled();
     });
@@ -82,7 +82,7 @@ describe('Role Management Middleware', () => {
         _id: 'user123',
         email: 'admin@example.com',
         role: UserRole.ADMIN,
-        status: UserStatus.INACTIVE
+        status: UserStatus.INACTIVE,
       };
 
       const middleware = requireRole(UserRole.ADMIN);
@@ -92,7 +92,7 @@ describe('Role Management Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         message: 'Account is not active',
-        error: 'User status: INACTIVE'
+        error: 'User status: INACTIVE',
       });
     });
 
@@ -104,7 +104,7 @@ describe('Role Management Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         message: 'Authentication required',
-        error: 'User not authenticated'
+        error: 'User not authenticated',
       });
     });
 
@@ -113,7 +113,7 @@ describe('Role Management Middleware', () => {
         _id: 'user123',
         email: 'admin@example.com',
         role: UserRole.ADMIN,
-        status: UserStatus.ACTIVE
+        status: UserStatus.ACTIVE,
       };
 
       // Mock an error in the middleware
@@ -128,7 +128,7 @@ describe('Role Management Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         message: 'Internal server error during role verification',
-        error: 'Test error'
+        error: 'Test error',
       });
     });
   });
@@ -138,7 +138,7 @@ describe('Role Management Middleware', () => {
       mockReq.user = {
         _id: 'user123',
         email: 'admin@example.com',
-        role: UserRole.ADMIN
+        role: UserRole.ADMIN,
       };
 
       (hasPermission as jest.Mock).mockReturnValue(true);
@@ -154,7 +154,7 @@ describe('Role Management Middleware', () => {
       mockReq.user = {
         _id: 'user123',
         email: 'student@example.com',
-        role: UserRole.STUDENT
+        role: UserRole.STUDENT,
       };
 
       (hasPermission as jest.Mock).mockReturnValue(false);
@@ -166,7 +166,7 @@ describe('Role Management Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         message: 'Insufficient permissions',
-        error: 'Required permissions: user:read, user:write'
+        error: 'Required permissions: user:read, user:write',
       });
     });
 
@@ -178,7 +178,7 @@ describe('Role Management Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         message: 'Authentication required',
-        error: 'User not authenticated'
+        error: 'User not authenticated',
       });
     });
   });
@@ -189,7 +189,7 @@ describe('Role Management Middleware', () => {
         _id: 'superadmin123',
         email: 'superadmin@example.com',
         role: UserRole.SUPER_ADMIN,
-        tenant: 'tenant123'
+        tenant: 'tenant123',
       };
 
       await canManageUsers(mockReq, mockRes, mockNext);
@@ -201,14 +201,14 @@ describe('Role Management Middleware', () => {
     it('should allow admin to manage users in same tenant', async () => {
       const mockTargetUser = {
         _id: 'target123',
-        tenant: 'tenant123'
+        tenant: 'tenant123',
       };
 
       mockReq.user = {
         _id: 'admin123',
         email: 'admin@example.com',
         role: UserRole.ADMIN,
-        tenant: 'tenant123'
+        tenant: 'tenant123',
       };
       mockReq.params.userId = 'target123';
 
@@ -223,14 +223,14 @@ describe('Role Management Middleware', () => {
     it('should deny admin access to users in different tenant', async () => {
       const mockTargetUser = {
         _id: 'target123',
-        tenant: 'different-tenant'
+        tenant: 'different-tenant',
       };
 
       mockReq.user = {
         _id: 'admin123',
         email: 'admin@example.com',
         role: UserRole.ADMIN,
-        tenant: 'tenant123'
+        tenant: 'tenant123',
       };
       mockReq.params.userId = 'target123';
 
@@ -242,7 +242,7 @@ describe('Role Management Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         message: 'Cannot manage users from other tenants',
-        error: 'Cross-tenant user management not allowed'
+        error: 'Cross-tenant user management not allowed',
       });
     });
 
@@ -250,7 +250,7 @@ describe('Role Management Middleware', () => {
       mockReq.user = {
         _id: 'student123',
         email: 'student@example.com',
-        role: UserRole.STUDENT
+        role: UserRole.STUDENT,
       };
 
       await canManageUsers(mockReq, mockRes, mockNext);
@@ -259,7 +259,7 @@ describe('Role Management Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         message: 'Insufficient privileges to manage users',
-        error: 'Role USER cannot manage users'
+        error: 'Role USER cannot manage users',
       });
     });
 
@@ -268,7 +268,7 @@ describe('Role Management Middleware', () => {
         _id: 'admin123',
         email: 'admin@example.com',
         role: UserRole.ADMIN,
-        tenant: 'tenant123'
+        tenant: 'tenant123',
       };
       mockReq.params.userId = 'nonexistent';
 
@@ -280,7 +280,7 @@ describe('Role Management Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         message: 'User not found',
-        error: 'Target user does not exist'
+        error: 'Target user does not exist',
       });
     });
   });
@@ -290,7 +290,7 @@ describe('Role Management Middleware', () => {
       mockReq.user = {
         _id: 'superadmin123',
         email: 'superadmin@example.com',
-        role: UserRole.SUPER_ADMIN
+        role: UserRole.SUPER_ADMIN,
       };
 
       await canManageTenants(mockReq, mockRes, mockNext);
@@ -303,7 +303,7 @@ describe('Role Management Middleware', () => {
       mockReq.user = {
         _id: 'admin123',
         email: 'admin@example.com',
-        role: UserRole.ADMIN
+        role: UserRole.ADMIN,
       };
 
       await canManageTenants(mockReq, mockRes, mockNext);
@@ -312,7 +312,7 @@ describe('Role Management Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         message: 'Insufficient privileges to manage tenants',
-        error: 'Role ADMIN cannot manage tenants'
+        error: 'Role ADMIN cannot manage tenants',
       });
     });
   });
@@ -322,7 +322,7 @@ describe('Role Management Middleware', () => {
       mockReq.user = {
         _id: 'admin123',
         email: 'admin@example.com',
-        role: UserRole.ADMIN
+        role: UserRole.ADMIN,
       };
 
       (hasPermission as jest.Mock).mockReturnValue(true);
@@ -337,7 +337,7 @@ describe('Role Management Middleware', () => {
       mockReq.user = {
         _id: 'student123',
         email: 'student@example.com',
-        role: UserRole.STUDENT
+        role: UserRole.STUDENT,
       };
 
       (hasPermission as jest.Mock).mockReturnValue(false);
@@ -348,7 +348,7 @@ describe('Role Management Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         message: 'Insufficient privileges to invite users',
-        error: 'Role USER cannot invite users'
+        error: 'Role USER cannot invite users',
       });
     });
   });
@@ -358,7 +358,7 @@ describe('Role Management Middleware', () => {
       mockReq.user = {
         _id: 'admin123',
         email: 'admin@example.com',
-        role: UserRole.ADMIN
+        role: UserRole.ADMIN,
       };
 
       (hasPermission as jest.Mock).mockReturnValue(true);
@@ -373,7 +373,7 @@ describe('Role Management Middleware', () => {
       mockReq.user = {
         _id: 'student123',
         email: 'student@example.com',
-        role: UserRole.STUDENT
+        role: UserRole.STUDENT,
       };
 
       (hasPermission as jest.Mock).mockReturnValue(false);
@@ -384,7 +384,7 @@ describe('Role Management Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         message: 'Insufficient privileges to approve requests',
-        error: 'Role USER cannot approve requests'
+        error: 'Role USER cannot approve requests',
       });
     });
   });
@@ -395,7 +395,7 @@ describe('Role Management Middleware', () => {
         _id: 'superadmin123',
         email: 'superadmin@example.com',
         role: UserRole.SUPER_ADMIN,
-        tenant: 'tenant123'
+        tenant: 'tenant123',
       };
       mockReq.params.tenantId = 'different-tenant';
 
@@ -411,7 +411,7 @@ describe('Role Management Middleware', () => {
         _id: 'user123',
         email: 'user@example.com',
         role: UserRole.USER,
-        tenant: 'tenant123'
+        tenant: 'tenant123',
       };
       mockReq.params.tenantId = 'tenant123';
 
@@ -427,7 +427,7 @@ describe('Role Management Middleware', () => {
         _id: 'user123',
         email: 'user@example.com',
         role: UserRole.USER,
-        tenant: 'tenant123'
+        tenant: 'tenant123',
       };
       mockReq.params.tenantId = 'different-tenant';
 
@@ -437,7 +437,7 @@ describe('Role Management Middleware', () => {
       expect(mockRes.json).toHaveBeenCalledWith({
         success: false,
         message: 'Access denied to requested tenant',
-        error: 'Cannot access resources from other tenants'
+        error: 'Cannot access resources from other tenants',
       });
     });
 
@@ -446,7 +446,7 @@ describe('Role Management Middleware', () => {
         _id: 'user123',
         email: 'user@example.com',
         role: UserRole.USER,
-        tenant: 'tenant123'
+        tenant: 'tenant123',
       };
 
       await requireTenantAccess(mockReq, mockRes, mockNext);
@@ -459,35 +459,31 @@ describe('Role Management Middleware', () => {
   describe('logRoleAccess', () => {
     it('should log role access attempts', () => {
       const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
-      
+
       mockReq.user = {
         _id: 'user123',
         email: 'user@example.com',
-        role: UserRole.STUDENT
+        role: UserRole.STUDENT,
       };
 
       const middleware = logRoleAccess('test resource');
       middleware(mockReq, mockRes, mockNext);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Role access: User user@example.com (STUDENT) accessing test resource'
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('Role access: User user@example.com (STUDENT) accessing test resource');
       expect(mockNext).toHaveBeenCalled();
-      
+
       consoleSpy.mockRestore();
     });
 
     it('should handle missing user gracefully', () => {
       const consoleSpy = jest.spyOn(console, 'info').mockImplementation();
-      
+
       const middleware = logRoleAccess('test resource');
       middleware(mockReq, mockRes, mockNext);
 
-      expect(consoleSpy).toHaveBeenCalledWith(
-        'Role access: User undefined (undefined) accessing test resource'
-      );
+      expect(consoleSpy).toHaveBeenCalledWith('Role access: User undefined (undefined) accessing test resource');
       expect(mockNext).toHaveBeenCalled();
-      
+
       consoleSpy.mockRestore();
     });
   });

@@ -126,7 +126,7 @@ export interface TransformedDashboardData {
 /**
  * Default fallback data when GraphQL fails
  */
-export const getDefaultDashboardData = (tenant: string): DashboardData => ({
+export const getDefaultDashboardData = (_tenant: string): DashboardData => ({
   stats: {
     totalCourses: 12,
     activeStudents: 156,
@@ -204,10 +204,7 @@ export const getDefaultDashboardData = (tenant: string): DashboardData => ({
 /**
  * Transform GraphQL dashboard data to component format
  */
-export const transformDashboardData = (
-  graphqlData: any,
-  tenant: string
-): TransformedDashboardData => {
+export const transformDashboardData = (graphqlData: any, tenant: string): TransformedDashboardData => {
   // Use GraphQL data if available, otherwise use defaults
   const data = graphqlData?.getDashboardData || getDefaultDashboardData(tenant);
 
@@ -221,15 +218,21 @@ export const transformDashboardData = (
       completionRate: data.stats?.completionRate || 87,
       totalUsers: data.stats?.totalGroups || 8,
     },
-    retentionData: data.userRetention ? [{
-      date: data.userRetention.period,
-      value: data.userRetention.retention,
-      label: data.userRetention.period,
-    }] : [{
-      date: '30d',
-      value: 85,
-      label: '30 days',
-    }],
+    retentionData: data.userRetention
+      ? [
+          {
+            date: data.userRetention.period,
+            value: data.userRetention.retention,
+            label: data.userRetention.period,
+          },
+        ]
+      : [
+          {
+            date: '30d',
+            value: 85,
+            label: '30 days',
+          },
+        ],
     engagementData: data.engagementBreakdown?.map((item: any) => ({
       id: item.category.toLowerCase().replace(/\s+/g, '-'),
       label: item.category,
@@ -241,15 +244,20 @@ export const transformDashboardData = (
       { id: 'groups', label: 'Groups', value: 30, color: '#10B981', percentage: 30 },
       { id: 'discussions', label: 'Discussions', value: 25, color: '#F59E0B', percentage: 25 },
     ],
-    trendsData: data.engagementTrends?.map((item: any) => ({
-      label: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      interactions: item.activeUsers,
-      completions: item.completedCourses,
-    })) || Array.from({ length: 7 }, (_, i) => ({
-      label: new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      interactions: Math.floor(Math.random() * 50) + 100,
-      completions: Math.floor(Math.random() * 20) + 10,
-    })),
+    trendsData:
+      data.engagementTrends?.map((item: any) => ({
+        label: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        interactions: item.activeUsers,
+        completions: item.completedCourses,
+      })) ||
+      Array.from({ length: 7 }, (_, i) => ({
+        label: new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        }),
+        interactions: Math.floor(Math.random() * 50) + 100,
+        completions: Math.floor(Math.random() * 20) + 10,
+      })),
     activitiesData: data.recentActivities?.map((activity: any) => ({
       id: activity.id,
       user: {
@@ -294,41 +302,44 @@ export const transformDashboardData = (
         avatarColor: '#8B5CF6',
       },
     ],
-    surveyData: data.lastSurvey ? {
-      id: data.lastSurvey.id,
-      title: data.lastSurvey.title,
-      description: data.lastSurvey.description,
-      status: data.lastSurvey.status,
-      progress: data.lastSurvey.progress,
-      totalQuestions: data.lastSurvey.totalQuestions,
-      completedQuestions: data.lastSurvey.completedQuestions,
-      createdAt: data.lastSurvey.createdAt,
-      expiresAt: data.lastSurvey.expiresAt,
-      totalResponses: data.lastSurvey.responses,
-      targetResponses: 100,
-    } : {
-      id: 'default-survey',
-      title: 'Default Survey',
-      description: 'No survey data available',
-      status: 'inactive',
-      progress: 0,
-      totalQuestions: 0,
-      completedQuestions: 0,
-      createdAt: new Date().toISOString(),
-      expiresAt: new Date().toISOString(),
-      totalResponses: 0,
-      targetResponses: 100,
-    },
-    requestsData: data.permissionRequests?.map((request: any) => ({
-      id: request.id,
-      user: request.user,
-      userAvatar: request.userAvatar,
-      requestType: request.requestType,
-      description: request.description,
-      status: request.status,
-      requestedAt: request.requestedAt,
-      metadata: request.metadata,
-    })) || [],
+    surveyData: data.lastSurvey
+      ? {
+          id: data.lastSurvey.id,
+          title: data.lastSurvey.title,
+          description: data.lastSurvey.description,
+          status: data.lastSurvey.status,
+          progress: data.lastSurvey.progress,
+          totalQuestions: data.lastSurvey.totalQuestions,
+          completedQuestions: data.lastSurvey.completedQuestions,
+          createdAt: data.lastSurvey.createdAt,
+          expiresAt: data.lastSurvey.expiresAt,
+          totalResponses: data.lastSurvey.responses,
+          targetResponses: 100,
+        }
+      : {
+          id: 'default-survey',
+          title: 'Default Survey',
+          description: 'No survey data available',
+          status: 'inactive',
+          progress: 0,
+          totalQuestions: 0,
+          completedQuestions: 0,
+          createdAt: new Date().toISOString(),
+          expiresAt: new Date().toISOString(),
+          totalResponses: 0,
+          targetResponses: 100,
+        },
+    requestsData:
+      data.permissionRequests?.map((request: any) => ({
+        id: request.id,
+        user: request.user,
+        userAvatar: request.userAvatar,
+        requestType: request.requestType,
+        description: request.description,
+        status: request.status,
+        requestedAt: request.requestedAt,
+        metadata: request.metadata,
+      })) || [],
   };
 };
 

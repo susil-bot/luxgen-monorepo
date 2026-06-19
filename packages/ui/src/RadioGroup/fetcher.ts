@@ -10,9 +10,7 @@ export interface RadioGroupData {
   orientation: 'horizontal' | 'vertical';
 }
 
-export const fetchRadioGroupData = async (
-  tenantId?: string
-): Promise<RadioGroupData> => {
+export const fetchRadioGroupData = async (tenantId?: string): Promise<RadioGroupData> => {
   const defaultOptions: RadioOption[] = [
     { value: 'option1', label: 'Option 1' },
     { value: 'option2', label: 'Option 2' },
@@ -29,13 +27,12 @@ export const fetchRadioGroupData = async (
   };
 };
 
-export const fetchRadioGroupSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchRadioGroupSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchRadioGroupData(tenantId);
-  
+
   const optionsHtml = data.options
-    .map(option => `
+    .map(
+      (option) => `
       <label class="radio-option">
         <input 
           type="radio" 
@@ -48,9 +45,10 @@ export const fetchRadioGroupSSR = async (
         </span>
         <span class="radio-text">${option.label}</span>
       </label>
-    `)
+    `,
+    )
     .join('');
-  
+
   const html = `
     <div class="radio-group-wrapper" style="font-family: ${data.tenantTheme.fonts.primary}; color: ${data.tenantTheme.colors.text};">
       <div class="radio-group ${data.orientation}">
@@ -58,7 +56,7 @@ export const fetchRadioGroupSSR = async (
       </div>
     </div>
   `;
-  
+
   const styles = `
     .radio-group-wrapper {
       display: flex;
@@ -174,6 +172,6 @@ export const fetchRadioGroupSSR = async (
       margin-top: 0.25rem;
     }
   `;
-  
+
   return { html, styles };
 };

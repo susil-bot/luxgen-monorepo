@@ -30,11 +30,7 @@ export const Table = <T,>({
   }
 
   if (data.length === 0) {
-    return (
-      <div className="text-center py-8 text-gray-500">
-        {emptyMessage}
-      </div>
-    );
+    return <div className="text-center py-8 text-gray-500">{emptyMessage}</div>;
   }
 
   return (
@@ -56,14 +52,8 @@ export const Table = <T,>({
           {data.map((item, rowIndex) => (
             <tr key={rowIndex}>
               {columns.map((column, colIndex) => (
-                <td
-                  key={colIndex}
-                  className="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
-                >
-                  {column.render
-                    ? column.render(item[column.key], item)
-                    : String(item[column.key])
-                  }
+                <td key={colIndex} className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                  {column.render ? column.render(item[column.key], item) : String(item[column.key])}
                 </td>
               ))}
             </tr>

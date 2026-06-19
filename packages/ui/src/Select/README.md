@@ -66,23 +66,23 @@ import { Select } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `options` | `SelectOption[]` | `[]` | Array of select options |
-| `value` | `string \| string[]` | - | Current value(s) |
-| `onChange` | `(value: string \| string[]) => void` | - | Change handler |
-| `placeholder` | `string` | `'Select an option...'` | Placeholder text |
-| `disabled` | `boolean` | `false` | Disabled state |
-| `required` | `boolean` | `false` | Required field |
-| `multi` | `boolean` | `false` | Multi-selection mode |
-| `searchable` | `boolean` | `false` | Searchable dropdown |
-| `clearable` | `boolean` | `false` | Clear button for selected values |
-| `label` | `string` | - | Label text |
-| `helperText` | `string` | - | Helper text |
-| `error` | `string` | - | Error message |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
+| Prop          | Type                                  | Default                 | Description                      |
+| ------------- | ------------------------------------- | ----------------------- | -------------------------------- |
+| `tenantTheme` | `TenantTheme`                         | `defaultTheme`          | Theme object for styling         |
+| `options`     | `SelectOption[]`                      | `[]`                    | Array of select options          |
+| `value`       | `string \| string[]`                  | -                       | Current value(s)                 |
+| `onChange`    | `(value: string \| string[]) => void` | -                       | Change handler                   |
+| `placeholder` | `string`                              | `'Select an option...'` | Placeholder text                 |
+| `disabled`    | `boolean`                             | `false`                 | Disabled state                   |
+| `required`    | `boolean`                             | `false`                 | Required field                   |
+| `multi`       | `boolean`                             | `false`                 | Multi-selection mode             |
+| `searchable`  | `boolean`                             | `false`                 | Searchable dropdown              |
+| `clearable`   | `boolean`                             | `false`                 | Clear button for selected values |
+| `label`       | `string`                              | -                       | Label text                       |
+| `helperText`  | `string`                              | -                       | Helper text                      |
+| `error`       | `string`                              | -                       | Error message                    |
+| `className`   | `string`                              | `''`                    | Additional CSS classes           |
+| `style`       | `CSSProperties`                       | `{}`                    | Inline styles                    |
 
 ## SelectOption Interface
 
@@ -135,16 +135,13 @@ The component uses CSS custom properties for theming:
 ## Selection Modes
 
 ### Single Selection
+
 ```tsx
-<Select
-  options={options}
-  value={selectedValue}
-  onChange={setSelectedValue}
-  placeholder="Select one option..."
-/>
+<Select options={options} value={selectedValue} onChange={setSelectedValue} placeholder="Select one option..." />
 ```
 
 ### Multi Selection
+
 ```tsx
 <Select
   options={options}
@@ -156,12 +153,9 @@ The component uses CSS custom properties for theming:
 ```
 
 ### Searchable
+
 ```tsx
-<Select
-  options={options}
-  searchable
-  placeholder="Search and select..."
-/>
+<Select options={options} searchable placeholder="Search and select..." />
 ```
 
 ## Accessibility
@@ -184,39 +178,35 @@ test('renders with options', () => {
     { value: 'option1', label: 'Option 1' },
     { value: 'option2', label: 'Option 2' },
   ];
-  
+
   render(<Select options={options} />);
-  
+
   expect(screen.getByText('Select an option...')).toBeInTheDocument();
 });
 
 test('opens dropdown when clicked', () => {
-  const options = [
-    { value: 'option1', label: 'Option 1' },
-  ];
-  
+  const options = [{ value: 'option1', label: 'Option 1' }];
+
   render(<Select options={options} />);
-  
+
   const selectTrigger = screen.getByText('Select an option...');
   fireEvent.click(selectTrigger);
-  
+
   expect(screen.getByText('Option 1')).toBeInTheDocument();
 });
 
 test('calls onChange when option is selected', () => {
   const mockOnChange = jest.fn();
-  const options = [
-    { value: 'option1', label: 'Option 1' },
-  ];
-  
+  const options = [{ value: 'option1', label: 'Option 1' }];
+
   render(<Select options={options} onChange={mockOnChange} />);
-  
+
   const selectTrigger = screen.getByText('Select an option...');
   fireEvent.click(selectTrigger);
-  
+
   const option1 = screen.getByText('Option 1');
   fireEvent.click(option1);
-  
+
   expect(mockOnChange).toHaveBeenCalledWith('option1');
 });
 ```
@@ -224,6 +214,7 @@ test('calls onChange when option is selected', () => {
 ## Examples
 
 ### Basic Select
+
 ```tsx
 <Select
   options={[
@@ -236,6 +227,7 @@ test('calls onChange when option is selected', () => {
 ```
 
 ### Multi-Select with Search
+
 ```tsx
 <Select
   options={fruitOptions}
@@ -248,6 +240,7 @@ test('calls onChange when option is selected', () => {
 ```
 
 ### Select with Validation
+
 ```tsx
 <Select
   label="Country"
@@ -261,20 +254,13 @@ test('calls onChange when option is selected', () => {
 ```
 
 ### Disabled Select
+
 ```tsx
-<Select
-  options={options}
-  value="option1"
-  disabled
-  placeholder="This select is disabled"
-/>
+<Select options={options} value="option1" disabled placeholder="This select is disabled" />
 ```
 
 ### Select with Custom Theme
+
 ```tsx
-<Select
-  tenantTheme={customTheme}
-  options={options}
-  placeholder="Custom themed select..."
-/>
+<Select tenantTheme={customTheme} options={options} placeholder="Custom themed select..." />
 ```

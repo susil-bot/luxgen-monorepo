@@ -27,11 +27,7 @@ const GridContainerComponent: React.FC<GridContainerProps> = ({
   };
 
   return (
-    <div
-      className={`grid-container ${className}`}
-      style={styles}
-      {...props}
-    >
+    <div className={`grid-container ${className}`} style={styles} {...props}>
       {children}
     </div>
   );

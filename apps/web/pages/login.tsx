@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useMutation } from '@apollo/client';
@@ -25,23 +25,21 @@ const LoginPageContent: React.FC = () => {
           input: {
             email: data.email,
             password: data.password,
-          }
-        }
+          },
+        },
       });
 
       if (result.data?.login) {
         const { token, user } = result.data.login;
-        
+
         // Store token and user data in localStorage
         localStorage.setItem('authToken', token);
         localStorage.setItem('currentUser', JSON.stringify(user));
         localStorage.setItem('currentTenant', user.tenant.subdomain);
 
         showSuccess(`Login successful! Welcome ${user.firstName} ${user.lastName}`);
-        
 
-          router.push('/dashboard');
-      
+        router.push('/dashboard');
       }
     } catch (error: any) {
       console.error('Login error:', error);
@@ -63,7 +61,7 @@ const LoginPageContent: React.FC = () => {
         showError(`${provider} login is not yet implemented. Please use email/password.`);
         setLoading(false);
       }, 2000);
-    } catch (error) {
+    } catch {
       showError(`Failed to connect with ${provider}. Please try again.`);
       setLoading(false);
     }
@@ -83,9 +81,12 @@ const LoginPageContent: React.FC = () => {
         <title>Login - LuxGen</title>
         <meta name="description" content="Sign in to your LuxGen account" />
       </Head>
-      
+
       <PageWrapper>
-        <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <div
+          className="min-h-screen flex items-center justify-center p-4"
+          style={{ backgroundColor: 'var(--color-bg-primary)' }}
+        >
           <div className="w-full max-w-7xl mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Left Section - Login Form */}
@@ -107,9 +108,10 @@ const LoginPageContent: React.FC = () => {
               <div className="order-1 md:order-2">
                 <RegisterVisual
                   testimonial={{
-                    quote: "Thanks to this platform, I quickly found my dream job! Easy to navigate, countless opportunities, and excellent results. Highly recommended!",
-                    author: "Emily Kuper",
-                    stats: "Satisfied Customer"
+                    quote:
+                      'Thanks to this platform, I quickly found my dream job! Easy to navigate, countless opportunities, and excellent results. Highly recommended!',
+                    author: 'Emily Kuper',
+                    stats: 'Satisfied Customer',
                   }}
                 />
               </div>

@@ -1,10 +1,5 @@
 import React from 'react';
-import { 
-  getArrowStyles, 
-  getArrowConfig,
-  arrowClasses,
-  arrowCSS 
-} from './styles';
+import { getArrowStyles, getArrowConfig, arrowClasses, arrowCSS } from './styles';
 import { defaultTheme } from '../theme';
 
 export interface ArrowProps {
@@ -28,22 +23,22 @@ export const Arrow: React.FC<ArrowProps> = ({
   className = '',
   'aria-label': ariaLabel,
   'data-testid': dataTestId,
-  tenantTheme = defaultTheme
+  tenantTheme = defaultTheme,
 }) => {
   const styles = getArrowStyles(direction, size, variant, disabled, tenantTheme);
 
   return (
     <>
       <style>{arrowCSS}</style>
-          <button
-            className={`${arrowClasses.button} ${className}`}
-            style={styles.button}
-            onClick={onClick}
-            disabled={disabled}
-            aria-label={ariaLabel || `Navigate ${direction}`}
-            data-testid={dataTestId}
-            type="button"
-          >
+      <button
+        className={`${arrowClasses.button} ${className}`}
+        style={styles.button}
+        onClick={onClick}
+        disabled={disabled}
+        aria-label={ariaLabel || `Navigate ${direction}`}
+        data-testid={dataTestId}
+        type="button"
+      >
         <svg
           className={arrowClasses.svg}
           style={styles.svg}

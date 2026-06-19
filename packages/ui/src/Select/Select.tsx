@@ -39,21 +39,17 @@ const SelectComponent: React.FC<SelectProps> = ({
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredOptions = searchable
-    ? options.filter(option =>
-        option.label.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+    ? options.filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
     : options;
 
-  const selectedOptions = multi
-    ? (Array.isArray(value) ? value : [])
-    : (value ? [value] : []);
+  const selectedOptions = multi ? (Array.isArray(value) ? value : []) : value ? [value] : [];
 
   const handleSelect = (option: SelectOption) => {
     if (disabled || option.disabled) return;
 
     if (multi) {
       const newValue = selectedOptions.includes(option.value)
-        ? selectedOptions.filter(v => v !== option.value)
+        ? selectedOptions.filter((v) => v !== option.value)
         : [...selectedOptions, option.value];
       onChange?.(newValue);
     } else {
@@ -81,7 +77,7 @@ const SelectComponent: React.FC<SelectProps> = ({
           {required && <span className="select-required">*</span>}
         </label>
       )}
-      
+
       <div className="select-container">
         <div
           className={`select-trigger ${error ? 'error' : ''} ${disabled ? 'disabled' : ''}`}
@@ -93,7 +89,7 @@ const SelectComponent: React.FC<SelectProps> = ({
               selectedOptions.length > 0 ? (
                 <div className="select-multi-value">
                   {selectedOptions.map((val, index) => {
-                    const option = options.find(opt => opt.value === val);
+                    const option = options.find((opt) => opt.value === val);
                     return (
                       <span key={index} className="select-multi-tag">
                         {option?.label}
@@ -116,25 +112,21 @@ const SelectComponent: React.FC<SelectProps> = ({
               )
             ) : (
               <span className="select-single-value">
-                {value ? options.find(opt => opt.value === value)?.label : placeholder}
+                {value ? options.find((opt) => opt.value === value)?.label : placeholder}
               </span>
             )}
           </div>
-          
+
           <div className="select-actions">
             {clearable && value && (
-              <button
-                type="button"
-                className="select-clear"
-                onClick={handleClear}
-              >
+              <button type="button" className="select-clear" onClick={handleClear}>
                 ×
               </button>
             )}
             <span className="select-arrow">▼</span>
           </div>
         </div>
-        
+
         {isOpen && (
           <div className="select-dropdown">
             {searchable && (
@@ -148,7 +140,7 @@ const SelectComponent: React.FC<SelectProps> = ({
                 />
               </div>
             )}
-            
+
             <div className="select-options">
               {filteredOptions.map((option) => (
                 <div
@@ -171,14 +163,10 @@ const SelectComponent: React.FC<SelectProps> = ({
           </div>
         )}
       </div>
-      
-      {error && (
-        <p className="select-error">{error}</p>
-      )}
-      
-      {helperText && !error && (
-        <p className="select-helper">{helperText}</p>
-      )}
+
+      {error && <p className="select-error">{error}</p>}
+
+      {helperText && !error && <p className="select-helper">{helperText}</p>}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useMutation } from '@apollo/client';
@@ -20,7 +20,7 @@ const RegisterPageContent: React.FC = () => {
       // Get current hostname to determine tenant
       const hostname = window.location.hostname;
       let tenantId = 'demo'; // default tenant
-      
+
       if (hostname.includes('ideavibes')) {
         tenantId = 'ideavibes';
       } else if (hostname.includes('acme-corp')) {
@@ -33,9 +33,9 @@ const RegisterPageContent: React.FC = () => {
 
       // Map role from form to GraphQL enum
       const roleMapping: { [key: string]: string } = {
-        'USER': 'STUDENT',
-        'ADMIN': 'INSTRUCTOR', 
-        'SUPER_ADMIN': 'ADMIN'
+        USER: 'STUDENT',
+        ADMIN: 'INSTRUCTOR',
+        SUPER_ADMIN: 'ADMIN',
       };
 
       const graphqlRole = roleMapping[data.role] || 'STUDENT';
@@ -49,23 +49,22 @@ const RegisterPageContent: React.FC = () => {
             firstName: data.firstName,
             lastName: data.lastName,
             role: graphqlRole,
-            tenantId: tenantId
-          }
-        }
+            tenantId: tenantId,
+          },
+        },
       });
 
       if (result.data?.register) {
         const { token, user } = result.data.register;
-        
+
         // Store token in localStorage
         localStorage.setItem('authToken', token);
         localStorage.setItem('currentUser', JSON.stringify(user));
         localStorage.setItem('currentTenant', user.tenant.subdomain);
 
-        const roleDisplayName = data.role === 'SUPER_ADMIN' ? 'Super Admin' : 
-                               data.role === 'ADMIN' ? 'Admin' : 'User';
+        const roleDisplayName = data.role === 'SUPER_ADMIN' ? 'Super Admin' : data.role === 'ADMIN' ? 'Admin' : 'User';
         showSuccess(`Registration successful! Welcome ${data.firstName} ${data.lastName} as ${roleDisplayName}`);
-        
+
         // Redirect after a short delay
         setTimeout(() => {
           router.push('/login');
@@ -83,7 +82,7 @@ const RegisterPageContent: React.FC = () => {
   const handleSocialLogin = async (provider: 'google' | 'linkedin' | 'github') => {
     setLoading(true);
     showInfo(`Redirecting to ${provider}...`);
-    
+
     try {
       // TODO: Implement actual social login
       // For now, just show a message
@@ -91,7 +90,7 @@ const RegisterPageContent: React.FC = () => {
         showError(`${provider} registration is not yet implemented. Please use email/password.`);
         setLoading(false);
       }, 2000);
-    } catch (error) {
+    } catch {
       showError(`Failed to connect with ${provider}. Please try again.`);
       setLoading(false);
     }
@@ -130,9 +129,10 @@ const RegisterPageContent: React.FC = () => {
               <div className="order-1 md:order-2">
                 <RegisterVisual
                   testimonial={{
-                    quote: "Join thousands of professionals who have found their dream careers through our platform. Start your journey today!",
-                    author: "Join Our Community",
-                    stats: "Over 10,000+ successful placements"
+                    quote:
+                      'Join thousands of professionals who have found their dream careers through our platform. Start your journey today!',
+                    author: 'Join Our Community',
+                    stats: 'Over 10,000+ successful placements',
                   }}
                 />
               </div>

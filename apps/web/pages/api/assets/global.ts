@@ -9,7 +9,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     // Return global assets and brand assets
     const response = {
-      assets: defaultAssets.filter(asset => asset.global),
+      assets: defaultAssets.filter((asset) => asset.global),
       brandAssets: luxgenBrandAssets,
       timestamp: new Date().toISOString(),
     };
@@ -17,9 +17,9 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     res.status(200).json(response);
   } catch (error) {
     console.error('Error fetching global assets:', error);
-    res.status(500).json({ 
+    res.status(500).json({
       message: 'Internal server error',
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 }

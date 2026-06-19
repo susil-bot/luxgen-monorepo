@@ -25,10 +25,7 @@ export interface ProductCardData {
   showPrice: boolean;
 }
 
-export const fetchProductCardData = async (
-  productId: string,
-  tenantId?: string
-): Promise<ProductCardData> => {
+export const fetchProductCardData = async (productId: string, tenantId?: string): Promise<ProductCardData> => {
   // Mock data - replace with actual API call
   const mockProduct = {
     id: productId,
@@ -48,16 +45,17 @@ export const fetchProductCardData = async (
   };
 
   // Mock tenant theme - replace with actual tenant lookup
-  const tenantTheme = tenantId === 'premium' 
-    ? {
-        ...defaultTheme,
-        colors: {
-          ...defaultTheme.colors,
-          primary: '#8B5CF6',
-          primaryDark: '#7C3AED',
-        },
-      }
-    : defaultTheme;
+  const tenantTheme =
+    tenantId === 'premium'
+      ? {
+          ...defaultTheme,
+          colors: {
+            ...defaultTheme.colors,
+            primary: '#8B5CF6',
+            primaryDark: '#7C3AED',
+          },
+        }
+      : defaultTheme;
 
   return {
     product: mockProduct,
@@ -71,10 +69,10 @@ export const fetchProductCardData = async (
 
 export const fetchProductCardSSR = async (
   productId: string,
-  tenantId?: string
+  tenantId?: string,
 ): Promise<{ html: string; styles: string }> => {
   const data = await fetchProductCardData(productId, tenantId);
-  
+
   const html = `
     <div class="product-card product-card-${data.variant}" style="
       width: ${data.variant === 'compact' ? '240px' : data.variant === 'detailed' ? '320px' : '280px'};
@@ -137,7 +135,9 @@ export const fetchProductCardSSR = async (
         flex-direction: column;
         gap: 12px;
       ">
-        ${data.product.tag ? `
+        ${
+          data.product.tag
+            ? `
           <!-- Tag -->
           <div class="product-card-tag" style="
             display: inline-block;
@@ -151,7 +151,9 @@ export const fetchProductCardSSR = async (
           ">
             ${data.product.tag}
           </div>
-        ` : ''}
+        `
+            : ''
+        }
 
         <!-- Title -->
         <h3 class="product-card-title" style="
@@ -168,7 +170,9 @@ export const fetchProductCardSSR = async (
           ${data.product.title}
         </h3>
 
-        ${data.showProgress && data.product.progress ? `
+        ${
+          data.showProgress && data.product.progress
+            ? `
           <!-- Progress Indicators -->
           <div class="product-card-progress" style="
             display: flex;
@@ -195,7 +199,9 @@ export const fetchProductCardSSR = async (
               </span>
             </div>
             
-            ${data.product.progress.score !== undefined ? `
+            ${
+              data.product.progress.score !== undefined
+                ? `
               <div style="
                 display: flex;
                 align-items: center;
@@ -215,11 +221,17 @@ export const fetchProductCardSSR = async (
                   score: ${data.product.progress.score}%
                 </span>
               </div>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
-        ` : ''}
+        `
+            : ''
+        }
 
-        ${data.showPrice && (data.product.price || data.product.originalPrice) ? `
+        ${
+          data.showPrice && (data.product.price || data.product.originalPrice)
+            ? `
           <!-- Price Section -->
           <div class="product-card-price" style="
             display: flex;
@@ -227,7 +239,9 @@ export const fetchProductCardSSR = async (
             gap: 8px;
             margin-top: auto;
           ">
-            ${data.product.price ? `
+            ${
+              data.product.price
+                ? `
               <span style="
                 font-size: 1.125rem;
                 font-weight: 600;
@@ -235,8 +249,12 @@ export const fetchProductCardSSR = async (
               ">
                 ${data.product.price}
               </span>
-            ` : ''}
-            ${data.product.originalPrice ? `
+            `
+                : ''
+            }
+            ${
+              data.product.originalPrice
+                ? `
               <span style="
                 font-size: 0.875rem;
                 color: #9CA3AF;
@@ -244,8 +262,12 @@ export const fetchProductCardSSR = async (
               ">
                 ${data.product.originalPrice}
               </span>
-            ` : ''}
-            ${data.product.discount ? `
+            `
+                : ''
+            }
+            ${
+              data.product.discount
+                ? `
               <span style="
                 font-size: 0.75rem;
                 color: #EF4444;
@@ -256,11 +278,17 @@ export const fetchProductCardSSR = async (
               ">
                 -${data.product.discount}%
               </span>
-            ` : ''}
+            `
+                : ''
+            }
           </div>
-        ` : ''}
+        `
+            : ''
+        }
 
-        ${data.showActions ? `
+        ${
+          data.showActions
+            ? `
           <!-- Actions -->
           <div class="product-card-actions" style="
             display: flex;
@@ -282,7 +310,9 @@ export const fetchProductCardSSR = async (
               Edit Product
             </button>
           </div>
-        ` : ''}
+        `
+            : ''
+        }
       </div>
     </div>
   `;

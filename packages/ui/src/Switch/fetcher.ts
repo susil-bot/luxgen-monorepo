@@ -9,9 +9,7 @@ export interface SwitchData {
   size: 'sm' | 'md' | 'lg';
 }
 
-export const fetchSwitchData = async (
-  tenantId?: string
-): Promise<SwitchData> => {
+export const fetchSwitchData = async (tenantId?: string): Promise<SwitchData> => {
   return {
     tenantTheme: defaultTheme,
     checked: false,
@@ -21,11 +19,9 @@ export const fetchSwitchData = async (
   };
 };
 
-export const fetchSwitchSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchSwitchSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchSwitchData(tenantId);
-  
+
   const html = `
     <div class="switch-wrapper" style="font-family: ${data.tenantTheme.fonts.primary}; color: ${data.tenantTheme.colors.text};">
       <label class="switch-label">
@@ -43,7 +39,7 @@ export const fetchSwitchSSR = async (
       </label>
     </div>
   `;
-  
+
   const styles = `
     .switch-wrapper {
       display: flex;
@@ -168,6 +164,6 @@ export const fetchSwitchSSR = async (
       margin-top: 0.25rem;
     }
   `;
-  
+
   return { html, styles };
 };

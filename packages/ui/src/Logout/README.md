@@ -34,7 +34,7 @@ const MyComponent = () => {
         name: 'John Doe',
         email: 'john@example.com',
         role: 'ADMIN',
-        avatar: 'https://example.com/avatar.jpg'
+        avatar: 'https://example.com/avatar.jpg',
       }}
     />
   );
@@ -44,12 +44,7 @@ const MyComponent = () => {
 ### With Confirmation
 
 ```tsx
-<Logout
-  onLogout={handleLogout}
-  onCancel={() => console.log('Logout cancelled')}
-  showConfirmation={true}
-  user={user}
-/>
+<Logout onLogout={handleLogout} onCancel={() => console.log('Logout cancelled')} showConfirmation={true} user={user} />
 ```
 
 ### Different Variants
@@ -79,16 +74,16 @@ const MyComponent = () => {
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `onLogout` | `() => Promise<void> \| void` | - | **Required.** Function called when logout is confirmed |
-| `onCancel` | `() => void` | - | Function called when logout is cancelled |
-| `user` | `LogoutUser` | - | User information to display |
-| `variant` | `'default' \| 'compact' \| 'minimal' \| 'danger'` | `'default'` | Visual variant of the component |
-| `showConfirmation` | `boolean` | `true` | Whether to show confirmation dialog |
-| `className` | `string` | `''` | Additional CSS class name |
-| `disabled` | `boolean` | `false` | Whether the logout button is disabled |
-| `loading` | `boolean` | `false` | Whether the component is in loading state |
+| Prop               | Type                                              | Default     | Description                                            |
+| ------------------ | ------------------------------------------------- | ----------- | ------------------------------------------------------ |
+| `onLogout`         | `() => Promise<void> \| void`                     | -           | **Required.** Function called when logout is confirmed |
+| `onCancel`         | `() => void`                                      | -           | Function called when logout is cancelled               |
+| `user`             | `LogoutUser`                                      | -           | User information to display                            |
+| `variant`          | `'default' \| 'compact' \| 'minimal' \| 'danger'` | `'default'` | Visual variant of the component                        |
+| `showConfirmation` | `boolean`                                         | `true`      | Whether to show confirmation dialog                    |
+| `className`        | `string`                                          | `''`        | Additional CSS class name                              |
+| `disabled`         | `boolean`                                         | `false`     | Whether the logout button is disabled                  |
+| `loading`          | `boolean`                                         | `false`     | Whether the component is in loading state              |
 
 ## User Object
 
@@ -106,21 +101,25 @@ interface LogoutUser {
 ## Variants
 
 ### Default
+
 - Full button with text and icon
 - User information display
 - Standard styling
 
 ### Compact
+
 - Smaller button size
 - Reduced padding and font size
 - Suitable for headers and toolbars
 
 ### Minimal
+
 - Icon-only button
 - No text display
 - Suitable for dropdowns and menus
 
 ### Danger
+
 - Red color scheme
 - Emphasizes destructive action
 - Suitable for critical logout scenarios
@@ -156,11 +155,7 @@ The component includes built-in error handling:
 <header className="app-header">
   <div className="header-content">
     <h1>My App</h1>
-    <Logout
-      onLogout={handleLogout}
-      variant="compact"
-      user={currentUser}
-    />
+    <Logout onLogout={handleLogout} variant="compact" user={currentUser} />
   </div>
 </header>
 ```
@@ -170,11 +165,7 @@ The component includes built-in error handling:
 ```tsx
 <div className="user-menu">
   <div className="user-info">
-    <Logout
-      onLogout={handleLogout}
-      variant="minimal"
-      user={currentUser}
-    />
+    <Logout onLogout={handleLogout} variant="minimal" user={currentUser} />
   </div>
 </div>
 ```
@@ -183,12 +174,7 @@ The component includes built-in error handling:
 
 ```tsx
 <div className="admin-panel">
-  <Logout
-    onLogout={handleLogout}
-    variant="danger"
-    showConfirmation={true}
-    user={adminUser}
-  />
+  <Logout onLogout={handleLogout} variant="danger" showConfirmation={true} user={adminUser} />
 </div>
 ```
 

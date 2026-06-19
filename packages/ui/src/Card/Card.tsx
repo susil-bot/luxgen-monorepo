@@ -69,7 +69,7 @@ const CardComponent: React.FC<CardProps> = ({
         borderRadius: '0.5rem',
       },
     };
-    
+
     return variantStyles[variant];
   };
 
@@ -88,7 +88,7 @@ const CardComponent: React.FC<CardProps> = ({
         minHeight: '12rem',
       },
     };
-    
+
     return sizeStyles[size];
   };
 
@@ -99,7 +99,7 @@ const CardComponent: React.FC<CardProps> = ({
       medium: '1rem',
       large: '1.5rem',
     };
-    
+
     return paddingStyles[padding];
   };
 
@@ -110,7 +110,7 @@ const CardComponent: React.FC<CardProps> = ({
       medium: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
       large: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
     };
-    
+
     return shadowStyles[shadow];
   };
 
@@ -143,7 +143,7 @@ const CardComponent: React.FC<CardProps> = ({
 
   const renderImage = () => {
     if (!image) return null;
-    
+
     return (
       <img
         src={image}
@@ -160,7 +160,7 @@ const CardComponent: React.FC<CardProps> = ({
 
   const renderHeader = () => {
     if (!header && !title && !icon) return null;
-    
+
     return (
       <div
         className="card-header"
@@ -225,7 +225,7 @@ const CardComponent: React.FC<CardProps> = ({
 
   const renderFooter = () => {
     if (!footer) return null;
-    
+
     return (
       <div
         className="card-footer"
@@ -250,10 +250,10 @@ const CardComponent: React.FC<CardProps> = ({
     >
       {image && imagePosition === 'top' && renderImage()}
       {image && imagePosition === 'left' && renderImage()}
-      
+
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column' } as React.CSSProperties}>
         {renderHeader()}
-        
+
         <div
           className="card-content"
           style={{
@@ -264,10 +264,10 @@ const CardComponent: React.FC<CardProps> = ({
         >
           {children}
         </div>
-        
+
         {renderFooter()}
       </div>
-      
+
       {image && imagePosition === 'right' && renderImage()}
       {image && imagePosition === 'bottom' && renderImage()}
     </div>

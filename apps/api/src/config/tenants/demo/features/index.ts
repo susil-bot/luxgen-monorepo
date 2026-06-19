@@ -10,7 +10,7 @@ export const demoFeaturesConfig = {
     authentication: true,
     authorization: true,
     profileManagement: true,
-    settings: true
+    settings: true,
   },
 
   // Platform features
@@ -23,8 +23,8 @@ export const demoFeaturesConfig = {
       privacy: {
         anonymizeIP: true,
         respectDoNotTrack: true,
-        cookieConsent: true
-      }
+        cookieConsent: true,
+      },
     },
     notifications: {
       enabled: true,
@@ -33,12 +33,12 @@ export const demoFeaturesConfig = {
         welcome: true,
         passwordReset: true,
         accountLocked: true,
-        securityAlert: true
+        securityAlert: true,
       },
       preferences: {
         userControllable: true,
-        defaultEnabled: ['email', 'in-app']
-      }
+        defaultEnabled: ['email', 'in-app'],
+      },
     },
     fileUpload: {
       enabled: true,
@@ -47,13 +47,13 @@ export const demoFeaturesConfig = {
       storage: {
         provider: 'local', // 'local' | 's3' | 'gcs'
         bucket: 'demo-uploads',
-        cdn: false
+        cdn: false,
       },
       processing: {
         imageResize: true,
         thumbnailGeneration: true,
-        virusScan: true
-      }
+        virusScan: true,
+      },
     },
     apiAccess: {
       enabled: true,
@@ -61,8 +61,8 @@ export const demoFeaturesConfig = {
       rateLimit: 1000,
       authentication: 'bearer',
       documentation: true,
-      sandbox: true
-    }
+      sandbox: true,
+    },
   },
 
   // Business features
@@ -71,38 +71,32 @@ export const demoFeaturesConfig = {
       enabled: false,
       sslRequired: true,
       dnsValidation: true,
-      maxDomains: 1
+      maxDomains: 1,
     },
     whiteLabel: {
       enabled: false,
       customBranding: false,
-      removePoweredBy: false
+      removePoweredBy: false,
     },
     integrations: {
       enabled: true,
-      available: [
-        'slack',
-        'microsoft-teams',
-        'google-workspace',
-        'salesforce',
-        'hubspot'
-      ],
+      available: ['slack', 'microsoft-teams', 'google-workspace', 'salesforce', 'hubspot'],
       webhooks: {
         enabled: true,
         maxEndpoints: 5,
         retryPolicy: {
           maxRetries: 3,
-          backoffMultiplier: 2
-        }
-      }
+          backoffMultiplier: 2,
+        },
+      },
     },
     reporting: {
       enabled: true,
       dashboards: true,
       exports: ['pdf', 'csv', 'excel'],
       scheduledReports: true,
-      customMetrics: false
-    }
+      customMetrics: false,
+    },
   },
 
   // Advanced features
@@ -110,33 +104,27 @@ export const demoFeaturesConfig = {
     multiTenancy: {
       enabled: true,
       isolation: 'database', // 'database' | 'schema' | 'table'
-      crossTenantAccess: false
+      crossTenantAccess: false,
     },
     auditLogging: {
       enabled: true,
-      events: [
-        'user_login',
-        'user_logout',
-        'data_access',
-        'data_modification',
-        'admin_actions'
-      ],
+      events: ['user_login', 'user_logout', 'data_access', 'data_modification', 'admin_actions'],
       retention: 2555, // days
-      encryption: true
+      encryption: true,
     },
     backup: {
       enabled: true,
       frequency: 'daily',
       retention: 30, // days
       encryption: true,
-      compression: true
+      compression: true,
     },
     monitoring: {
       enabled: true,
       metrics: ['performance', 'errors', 'usage'],
       alerts: true,
-      dashboards: true
-    }
+      dashboards: true,
+    },
   },
 
   // Limits and quotas
@@ -144,23 +132,23 @@ export const demoFeaturesConfig = {
     users: {
       max: 50,
       current: 0,
-      warningThreshold: 40
+      warningThreshold: 40,
     },
     storage: {
       max: 2048, // MB
       current: 0,
-      warningThreshold: 1800
+      warningThreshold: 1800,
     },
     apiCalls: {
       max: 20000,
       current: 0,
       resetPeriod: 'monthly',
-      warningThreshold: 18000
+      warningThreshold: 18000,
     },
     customDomains: {
       max: 1,
-      current: 0
-    }
+      current: 0,
+    },
   },
 
   // Feature flags
@@ -169,6 +157,6 @@ export const demoFeaturesConfig = {
     'beta-features': false,
     'experimental-ui': false,
     'advanced-analytics': false,
-    'ai-assistant': false
-  }
+    'ai-assistant': false,
+  },
 };

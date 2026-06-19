@@ -14,7 +14,7 @@ export class NavigationPlugin extends Plugin {
         // Fetchers
         createFetcher('navigationData', async (workflowContext) => {
           const { tenant } = workflowContext;
-          
+
           // Base navigation structure
           const baseNavigation = {
             main: [
@@ -45,7 +45,7 @@ export class NavigationPlugin extends Plugin {
         }),
         createFetcher('userNavigation', async (workflowContext) => {
           const { user } = workflowContext;
-          
+
           if (!user) {
             return {
               authenticated: false,
@@ -77,7 +77,7 @@ export class NavigationPlugin extends Plugin {
         createTransformer('navigationMenu', (workflowContext) => {
           const navigationData = workflowContext.fetched.navigationData;
           const userNavigation = workflowContext.fetched.userNavigation;
-          
+
           return {
             main: navigationData.main,
             footer: navigationData.footer,
@@ -89,16 +89,13 @@ export class NavigationPlugin extends Plugin {
         createTransformer('mobileNavigation', (workflowContext) => {
           const navigationData = workflowContext.fetched.navigationData;
           const userNavigation = workflowContext.fetched.userNavigation;
-          
+
           return {
             isOpen: false,
-            items: [
-              ...navigationData.main,
-              ...(userNavigation.authenticated ? userNavigation.items : []),
-            ],
+            items: [...navigationData.main, ...(userNavigation.authenticated ? userNavigation.items : [])],
           };
         }),
-      ]
+      ],
     );
 
     super('plugin-navigation', phaseSet);
@@ -112,7 +109,7 @@ export class NavigationPlugin extends Plugin {
   private async getTenantNavigation(tenant: string): Promise<any> {
     // This would typically fetch from a database or configuration service
     const tenantConfigs: Record<string, any> = {
-      'luxgen': {
+      luxgen: {
         main: [
           { label: 'Home', href: '/', active: true },
           { label: 'Products', href: '/products' },
@@ -121,7 +118,7 @@ export class NavigationPlugin extends Plugin {
           { label: 'Contact', href: '/contact' },
         ],
       },
-      'demo': {
+      demo: {
         main: [
           { label: 'Demo', href: '/demo', active: true },
           { label: 'Features', href: '/features' },
@@ -142,11 +139,11 @@ export class NavigationPlugin extends Plugin {
     const { request } = workflowContext;
     const path = request?.path || '/';
     const segments = path.split('/').filter(Boolean);
-    
+
     const breadcrumbs = [{ label: 'Home', href: '/' }];
-    
+
     let currentPath = '';
-    segments.forEach((segment: string, index: number) => {
+    segments.forEach((segment: string, _index: number) => {
       currentPath += `/${segment}`;
       breadcrumbs.push({
         label: segment.charAt(0).toUpperCase() + segment.slice(1),

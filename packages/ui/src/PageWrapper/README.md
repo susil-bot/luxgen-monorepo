@@ -33,13 +33,13 @@ import { PageWrapper } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `padding` | `string` | `'1rem'` | Padding for the wrapper |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
-| `children` | `ReactNode` | - | Content to render |
+| Prop          | Type            | Default        | Description              |
+| ------------- | --------------- | -------------- | ------------------------ |
+| `tenantTheme` | `TenantTheme`   | `defaultTheme` | Theme object for styling |
+| `padding`     | `string`        | `'1rem'`       | Padding for the wrapper  |
+| `className`   | `string`        | `''`           | Additional CSS classes   |
+| `style`       | `CSSProperties` | `{}`           | Inline styles            |
+| `children`    | `ReactNode`     | -              | Content to render        |
 
 ## SSR Usage
 
@@ -87,6 +87,7 @@ test('renders with default props', () => {
 ## Examples
 
 ### Basic Page
+
 ```tsx
 <PageWrapper>
   <Header />
@@ -99,6 +100,7 @@ test('renders with default props', () => {
 ```
 
 ### With Custom Theme
+
 ```tsx
 const customTheme = {
   colors: {
@@ -111,10 +113,11 @@ const customTheme = {
 
 <PageWrapper tenantTheme={customTheme}>
   <h1>Custom Themed Page</h1>
-</PageWrapper>
+</PageWrapper>;
 ```
 
 ### With Custom Padding
+
 ```tsx
 <PageWrapper padding="2rem">
   <h1>Page with more padding</h1>

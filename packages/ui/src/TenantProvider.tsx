@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import { getTenantDomain } from '@luxgen/config';
 import { TenantConfig, getTenantConfig } from './services/tenantService';
 
 interface TenantContextType {
@@ -23,10 +24,7 @@ interface TenantProviderProps {
   defaultTenant?: string;
 }
 
-export const TenantProvider: React.FC<TenantProviderProps> = ({
-  children,
-  defaultTenant = 'demo'
-}) => {
+export const TenantProvider: React.FC<TenantProviderProps> = ({ children, defaultTenant = 'demo' }) => {
   const [currentTenant, setCurrentTenant] = useState<string>(defaultTenant);
   const [tenantConfig, setTenantConfig] = useState<TenantConfig | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -36,10 +34,10 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({
     console.log('🔄 TenantProvider: Starting to load tenant config for:', tenantId);
     try {
       setIsLoading(true);
-      
+
       // Add a small delay to simulate async operation
-      await new Promise(resolve => setTimeout(resolve, 100));
-      
+      await new Promise((resolve) => setTimeout(resolve, 100));
+
       const config = await getTenantConfig(tenantId);
       console.log('✅ TenantProvider: Successfully loaded tenant config:', config);
       setTenantConfig(config);
@@ -50,7 +48,7 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({
         id: tenantId,
         name: `${tenantId.charAt(0).toUpperCase() + tenantId.slice(1)} Company`,
         subdomain: tenantId,
-        domain: `${tenantId}.localhost`,
+        domain: getTenantDomain(tenantId),
         status: 'active',
         theme: {
           colors: {
@@ -86,29 +84,29 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({
   // Detect tenant from subdomain or query parameter
   useEffect(() => {
     console.log('🔄 TenantProvider useEffect triggered');
-    
+
     const detectTenant = () => {
       if (typeof window !== 'undefined') {
         const hostname = window.location.hostname;
         const urlParams = new URLSearchParams(window.location.search);
         const queryTenant = urlParams.get('tenant');
-        
+
         // Extract subdomain
         const parts = hostname.split('.');
         let detectedTenant = defaultTenant;
-        
+
         if (parts.length > 1) {
           const subdomain = parts[0];
           if (subdomain !== 'www' && subdomain !== 'localhost' && subdomain !== '127.0.0.1') {
             detectedTenant = subdomain;
           }
         }
-        
+
         // Check query parameter as fallback
         if (queryTenant) {
           detectedTenant = queryTenant;
         }
-        
+
         console.log('🔄 TenantProvider detected tenant:', detectedTenant);
         return detectedTenant;
       } else {
@@ -123,17 +121,23 @@ export const TenantProvider: React.FC<TenantProviderProps> = ({
     loadTenantConfig(detectedTenant);
   }, [defaultTenant, loadTenantConfig]);
 
-  const setTenant = useCallback((tenantId: string) => {
-    setCurrentTenant(tenantId);
-    loadTenantConfig(tenantId);
-  }, [loadTenantConfig]);
+  const setTenant = useCallback(
+    (tenantId: string) => {
+      setCurrentTenant(tenantId);
+      loadTenantConfig(tenantId);
+    },
+    [loadTenantConfig],
+  );
 
   // Show loading state
   if (isLoading || !tenantConfig) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 mx-auto mb-4" style={{ borderColor: '#3B82F6' }}></div>
+          <div
+            className="animate-spin rounded-full h-32 w-32 border-b-2 mx-auto mb-4"
+            style={{ borderColor: '#3B82F6' }}
+          ></div>
           <p className="text-gray-600">Loading tenant configuration...</p>
         </div>
       </div>

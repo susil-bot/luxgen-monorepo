@@ -1,9 +1,8 @@
 import { Router, Request, Response } from 'express';
-import { User, IUser } from '@luxgen/db';
+import { User } from '@luxgen/db';
 import { UserRole } from '@luxgen/auth';
-import { hashPassword, verifyPassword } from '@luxgen/auth';
+import { verifyPassword } from '@luxgen/auth';
 import { generateToken } from '../utils/jwt';
-import { userService } from '../services/userService';
 import { validateLogin, validateRegister } from '../middleware/validation';
 import { UserRegistrationService } from '../services/userRegistrationService';
 import { requireRole, canInviteUsers, logRoleAccess } from '../middleware/roleManagement';
@@ -16,9 +15,9 @@ router.post('/login', validateLogin, async (req: Request, res: Response) => {
     const { email, password, tenant } = req.body;
 
     // Find user by email
-    const user = await User.findOne({ 
+    const user = await User.findOne({
       email: email.toLowerCase().trim(),
-      ...(tenant && { tenant }) // Include tenant filter if provided
+      ...(tenant && { tenant }), // Include tenant filter if provided
     }).populate('tenant');
 
     if (!user) {
@@ -28,7 +27,7 @@ router.post('/login', validateLogin, async (req: Request, res: Response) => {
         errors: {
           email: 'Invalid email or password',
           password: 'Invalid email or password',
-        }
+        },
       });
     }
 
@@ -41,7 +40,7 @@ router.post('/login', validateLogin, async (req: Request, res: Response) => {
         errors: {
           email: 'Invalid email or password',
           password: 'Invalid email or password',
-        }
+        },
       });
     }
 
@@ -54,12 +53,15 @@ router.post('/login', validateLogin, async (req: Request, res: Response) => {
     // }
 
     // Generate JWT token with tenant-specific key
-    const token = generateToken({
-      id: user._id.toString(),
-      email: user.email,
-      tenant: user.tenant._id?.toString(),
-      role: user.role,
-    }, user.tenant._id?.toString());
+    const token = generateToken(
+      {
+        id: user._id.toString(),
+        email: user.email,
+        tenant: user.tenant._id?.toString(),
+        role: user.role,
+      },
+      user.tenant._id?.toString(),
+    );
 
     // Return success response
     res.json({
@@ -80,9 +82,8 @@ router.post('/login', validateLogin, async (req: Request, res: Response) => {
           },
         },
         expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-      }
+      },
     });
-
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({
@@ -97,7 +98,7 @@ router.post('/login', validateLogin, async (req: Request, res: Response) => {
 router.post('/register', validateRegister, async (req: Request, res: Response) => {
   try {
     const { email, password, firstName, lastName, role } = req.body;
-    
+
     // Get tenant from request (set by middleware)
     const tenantId = req.tenantId;
     if (!tenantId) {
@@ -105,8 +106,8 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
         success: false,
         message: 'Tenant context required',
         errors: {
-          tenant: 'No tenant context found'
-        }
+          tenant: 'No tenant context found',
+        },
       });
     }
 
@@ -124,7 +125,7 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
       return res.status(400).json({
         success: false,
         message: registrationResult.message,
-        errors: registrationResult.errors
+        errors: registrationResult.errors,
       });
     }
 
@@ -132,12 +133,15 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
     await newUser.populate('tenant');
 
     // Generate JWT token with tenant-specific key
-    const token = generateToken({
-      id: newUser._id.toString(),
-      email: newUser.email,
-      tenant: newUser.tenant._id?.toString(),
-      role: newUser.role,
-    }, newUser.tenant._id?.toString());
+    const token = generateToken(
+      {
+        id: newUser._id.toString(),
+        email: newUser.email,
+        tenant: newUser.tenant._id?.toString(),
+        role: newUser.role,
+      },
+      newUser.tenant._id?.toString(),
+    );
 
     // Return success response
     res.status(201).json({
@@ -159,9 +163,8 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
           },
         },
         expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-      }
+      },
     });
-
   } catch (error) {
     console.error('Registration error:', error);
     res.status(500).json({
@@ -203,9 +206,8 @@ router.get('/me', async (req: Request, res: Response) => {
           name: user.tenant.name,
           subdomain: user.tenant.subdomain,
         },
-      }
+      },
     });
-
   } catch (error) {
     console.error('Get user error:', error);
     res.status(500).json({
@@ -225,72 +227,68 @@ router.post('/logout', (req: Request, res: Response) => {
 });
 
 // Invite user endpoint
-router.post('/invite', 
-  canInviteUsers, 
-  logRoleAccess('user invitation'),
-  async (req: Request, res: Response) => {
-    try {
-      const { email, firstName, lastName, role } = req.body;
-      const tenantId = req.tenantId;
-      const invitedBy = req.user?._id.toString();
+router.post('/invite', canInviteUsers, logRoleAccess('user invitation'), async (req: Request, res: Response) => {
+  try {
+    const { email, firstName, lastName, role } = req.body;
+    const tenantId = req.tenantId;
+    const invitedBy = req.user?._id.toString();
 
-      if (!tenantId || !invitedBy) {
-        return res.status(400).json({
-          success: false,
-          message: 'Tenant context and authentication required'
-        });
-      }
-
-      // Generate temporary password
-      const tempPassword = Math.random().toString(36).slice(-8);
-
-      const registrationResult = await UserRegistrationService.registerUser({
-        email,
-        password: tempPassword,
-        firstName,
-        lastName,
-        role: role || UserRole.USER,
-        tenantId,
-        invitedBy,
-      });
-
-      if (!registrationResult.success) {
-        return res.status(400).json({
-          success: false,
-          message: registrationResult.message,
-          errors: registrationResult.errors
-        });
-      }
-
-      res.status(201).json({
-        success: true,
-        message: 'User invited successfully',
-        data: {
-          user: {
-            id: registrationResult.user!._id,
-            email: registrationResult.user!.email,
-            firstName: registrationResult.user!.firstName,
-            lastName: registrationResult.user!.lastName,
-            role: registrationResult.user!.role,
-            status: registrationResult.user!.status,
-          },
-          tempPassword, // In production, this should be sent via email
-        }
-      });
-
-    } catch (error) {
-      console.error('User invitation error:', error);
-      res.status(500).json({
+    if (!tenantId || !invitedBy) {
+      return res.status(400).json({
         success: false,
-        message: 'Internal server error',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        message: 'Tenant context and authentication required',
       });
     }
+
+    // Generate temporary password
+    const tempPassword = Math.random().toString(36).slice(-8);
+
+    const registrationResult = await UserRegistrationService.registerUser({
+      email,
+      password: tempPassword,
+      firstName,
+      lastName,
+      role: role || UserRole.USER,
+      tenantId,
+      invitedBy,
+    });
+
+    if (!registrationResult.success) {
+      return res.status(400).json({
+        success: false,
+        message: registrationResult.message,
+        errors: registrationResult.errors,
+      });
+    }
+
+    res.status(201).json({
+      success: true,
+      message: 'User invited successfully',
+      data: {
+        user: {
+          id: registrationResult.user!._id,
+          email: registrationResult.user!.email,
+          firstName: registrationResult.user!.firstName,
+          lastName: registrationResult.user!.lastName,
+          role: registrationResult.user!.role,
+          status: registrationResult.user!.status,
+        },
+        tempPassword, // In production, this should be sent via email
+      },
+    });
+  } catch (error) {
+    console.error('User invitation error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
   }
-);
+});
 
 // Update user role endpoint
-router.put('/users/:userId/role', 
+router.put(
+  '/users/:userId/role',
   requireRole(UserRole.ADMIN),
   logRoleAccess('role update'),
   async (req: Request, res: Response) => {
@@ -303,22 +301,17 @@ router.put('/users/:userId/role',
       if (!tenantId || !updatedBy) {
         return res.status(400).json({
           success: false,
-          message: 'Tenant context and authentication required'
+          message: 'Tenant context and authentication required',
         });
       }
 
-      const updateResult = await UserRegistrationService.updateUserRole(
-        userId,
-        role,
-        updatedBy,
-        tenantId
-      );
+      const updateResult = await UserRegistrationService.updateUserRole(userId, role, updatedBy, tenantId);
 
       if (!updateResult.success) {
         return res.status(400).json({
           success: false,
           message: updateResult.message,
-          errors: updateResult.errors
+          errors: updateResult.errors,
         });
       }
 
@@ -331,10 +324,9 @@ router.put('/users/:userId/role',
             email: updateResult.user!.email,
             role: updateResult.user!.role,
             status: updateResult.user!.status,
-          }
-        }
+          },
+        },
       });
-
     } catch (error) {
       console.error('Role update error:', error);
       res.status(500).json({
@@ -343,11 +335,12 @@ router.put('/users/:userId/role',
         error: process.env.NODE_ENV === 'development' ? error.message : undefined,
       });
     }
-  }
+  },
 );
 
 // Activate user endpoint
-router.put('/users/:userId/activate', 
+router.put(
+  '/users/:userId/activate',
   requireRole(UserRole.ADMIN),
   logRoleAccess('user activation'),
   async (req: Request, res: Response) => {
@@ -358,7 +351,7 @@ router.put('/users/:userId/activate',
       if (!activatedBy) {
         return res.status(400).json({
           success: false,
-          message: 'Authentication required'
+          message: 'Authentication required',
         });
       }
 
@@ -368,7 +361,7 @@ router.put('/users/:userId/activate',
         return res.status(400).json({
           success: false,
           message: activationResult.message,
-          errors: activationResult.errors
+          errors: activationResult.errors,
         });
       }
 
@@ -380,10 +373,9 @@ router.put('/users/:userId/activate',
             id: activationResult.user!._id,
             email: activationResult.user!.email,
             status: activationResult.user!.status,
-          }
-        }
+          },
+        },
       });
-
     } catch (error) {
       console.error('User activation error:', error);
       res.status(500).json({
@@ -392,7 +384,7 @@ router.put('/users/:userId/activate',
         error: process.env.NODE_ENV === 'development' ? error.message : undefined,
       });
     }
-  }
+  },
 );
 
 export default router;

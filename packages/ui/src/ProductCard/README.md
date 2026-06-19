@@ -46,61 +46,66 @@ const product = {
   showActions={true}
   showProgress={true}
   showPrice={true}
-/>
+/>;
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `product` | `Product` | - | **Required.** Product data object |
-| `onEdit` | `(id: string) => void` | - | Edit button click handler |
-| `onLike` | `(id: string, liked: boolean) => void` | - | Like button click handler |
-| `onAddToCart` | `(id: string) => void` | - | Add to cart button click handler |
-| `onViewDetails` | `(id: string) => void` | - | Card click handler |
-| `liked` | `boolean` | `false` | Initial liked state |
-| `variant` | `'default' \| 'compact' \| 'detailed'` | `'default'` | Card size variant |
-| `showActions` | `boolean` | `true` | Show action buttons |
-| `showProgress` | `boolean` | `true` | Show progress indicators |
-| `showPrice` | `boolean` | `true` | Show price information |
-| `className` | `string` | `''` | Additional CSS classes |
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
+| Prop            | Type                                   | Default        | Description                       |
+| --------------- | -------------------------------------- | -------------- | --------------------------------- |
+| `product`       | `Product`                              | -              | **Required.** Product data object |
+| `onEdit`        | `(id: string) => void`                 | -              | Edit button click handler         |
+| `onLike`        | `(id: string, liked: boolean) => void` | -              | Like button click handler         |
+| `onAddToCart`   | `(id: string) => void`                 | -              | Add to cart button click handler  |
+| `onViewDetails` | `(id: string) => void`                 | -              | Card click handler                |
+| `liked`         | `boolean`                              | `false`        | Initial liked state               |
+| `variant`       | `'default' \| 'compact' \| 'detailed'` | `'default'`    | Card size variant                 |
+| `showActions`   | `boolean`                              | `true`         | Show action buttons               |
+| `showProgress`  | `boolean`                              | `true`         | Show progress indicators          |
+| `showPrice`     | `boolean`                              | `true`         | Show price information            |
+| `className`     | `string`                               | `''`           | Additional CSS classes            |
+| `tenantTheme`   | `TenantTheme`                          | `defaultTheme` | Theme object for styling          |
 
 ## Product Interface
 
 ```tsx
 interface Product {
-  id: string;                    // Unique identifier
-  title: string;                 // Product title
-  tag?: string;                 // Product tag text
-  tagColor?: string;             // Tag background color
-  image: string;                 // Product image URL
-  imageAlt?: string;             // Image alt text
-  progress?: {                   // Progress information
-    status: string;              // Status text (e.g., "Completed")
-    score?: number;              // Score percentage
-    scoreColor?: string;         // Score indicator color
+  id: string; // Unique identifier
+  title: string; // Product title
+  tag?: string; // Product tag text
+  tagColor?: string; // Tag background color
+  image: string; // Product image URL
+  imageAlt?: string; // Image alt text
+  progress?: {
+    // Progress information
+    status: string; // Status text (e.g., "Completed")
+    score?: number; // Score percentage
+    scoreColor?: string; // Score indicator color
   };
-  price?: string;                // Current price
-  originalPrice?: string;        // Original price (strikethrough)
-  discount?: number;             // Discount percentage
+  price?: string; // Current price
+  originalPrice?: string; // Original price (strikethrough)
+  discount?: number; // Discount percentage
 }
 ```
 
 ## Variants
 
 ### Default
+
 Standard product card with full features and medium size.
 
 ### Compact
+
 Smaller card for grid layouts with essential information only.
 
 ### Detailed
+
 Larger card with enhanced spacing and additional visual elements.
 
 ## Examples
 
 ### Basic Product Card
+
 ```tsx
 const basicProduct = {
   id: '1',
@@ -108,10 +113,11 @@ const basicProduct = {
   image: '/product.jpg',
 };
 
-<ProductCard product={basicProduct} />
+<ProductCard product={basicProduct} />;
 ```
 
 ### Complete Product Card
+
 ```tsx
 const completeProduct = {
   id: '2',
@@ -138,15 +144,18 @@ const completeProduct = {
   onViewDetails={(id) => handleViewDetails(id)}
   liked={true}
   variant="detailed"
-/>
+/>;
 ```
 
 ### Compact Grid Layout
+
 ```tsx
-const products = [/* array of products */];
+const products = [
+  /* array of products */
+];
 
 <div className="grid grid-cols-3 gap-4">
-  {products.map(product => (
+  {products.map((product) => (
     <ProductCard
       key={product.id}
       product={product}
@@ -154,12 +163,13 @@ const products = [/* array of products */];
       onViewDetails={(id) => navigate(`/products/${id}`)}
     />
   ))}
-</div>
+</div>;
 ```
 
 ## Styling
 
 ### Custom Tag Colors
+
 ```tsx
 const product = {
   // ... other properties
@@ -169,6 +179,7 @@ const product = {
 ```
 
 ### Custom Progress Colors
+
 ```tsx
 const product = {
   // ... other properties
@@ -181,6 +192,7 @@ const product = {
 ```
 
 ### CSS Customization
+
 ```css
 .product-card {
   transition: all 0.2s ease;
@@ -203,16 +215,19 @@ const product = {
 ## Interactive Features
 
 ### Like Functionality
+
 - Heart icon that fills when liked
 - Smooth color transition
 - Prevents card click when like button is clicked
 
 ### Image Hover Effects
+
 - Subtle scale animation on hover
 - Smooth transitions
 - Error state with placeholder
 
 ### Action Buttons
+
 - Edit button for product management
 - Add to cart button (when handler provided)
 - Hover effects and transitions
@@ -220,16 +235,19 @@ const product = {
 ## Accessibility
 
 ### Keyboard Navigation
+
 - All interactive elements are keyboard accessible
 - Proper focus management
 - Tab order follows logical flow
 
 ### Screen Reader Support
+
 - Proper alt text for images
 - Semantic HTML structure
 - ARIA labels for interactive elements
 
 ### Color Contrast
+
 - Meets WCAG AA standards
 - High contrast text and backgrounds
 - Color is not the only indicator of state
@@ -237,11 +255,13 @@ const product = {
 ## Performance
 
 ### Image Optimization
+
 - Lazy loading support
 - Error handling with fallback
 - Optimized hover effects
 
 ### Event Handling
+
 - Efficient event delegation
 - Proper cleanup of event listeners
 - Optimized re-renders
@@ -249,14 +269,15 @@ const product = {
 ## Integration
 
 ### With State Management
+
 ```tsx
 const [likedProducts, setLikedProducts] = useState(new Set());
 
 const handleLike = (id, liked) => {
   if (liked) {
-    setLikedProducts(prev => new Set([...prev, id]));
+    setLikedProducts((prev) => new Set([...prev, id]));
   } else {
-    setLikedProducts(prev => {
+    setLikedProducts((prev) => {
       const newSet = new Set(prev);
       newSet.delete(id);
       return newSet;
@@ -264,14 +285,11 @@ const handleLike = (id, liked) => {
   }
 };
 
-<ProductCard
-  product={product}
-  liked={likedProducts.has(product.id)}
-  onLike={handleLike}
-/>
+<ProductCard product={product} liked={likedProducts.has(product.id)} onLike={handleLike} />;
 ```
 
 ### With Routing
+
 ```tsx
 import { useNavigate } from 'react-router-dom';
 
@@ -281,12 +299,13 @@ const navigate = useNavigate();
   product={product}
   onViewDetails={(id) => navigate(`/products/${id}`)}
   onEdit={(id) => navigate(`/products/${id}/edit`)}
-/>
+/>;
 ```
 
 ## Testing
 
 The component includes comprehensive Jest tests covering:
+
 - Rendering with different props
 - Image handling and error states
 - Interactive functionality
@@ -294,6 +313,7 @@ The component includes comprehensive Jest tests covering:
 - Edge cases and error handling
 
 Run tests with:
+
 ```bash
 npm test ProductCard.spec.js
 ```

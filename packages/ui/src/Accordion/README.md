@@ -62,20 +62,20 @@ import { Accordion } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `items` | `AccordionItem[]` | - | Array of accordion items |
-| `allowMultiple` | `boolean` | `false` | Allow multiple items to be open |
-| `allowNone` | `boolean` | `true` | Allow all items to be closed |
-| `variant` | `'default' | 'bordered' | 'filled' | 'minimal'` | `'default'` | Accordion variant |
-| `size` | `'small' | 'medium' | 'large'` | `'medium'` | Accordion size |
-| `iconPosition` | `'left' | 'right'` | `'right'` | Icon position |
-| `showIcon` | `boolean` | `true` | Show expand/collapse icon |
-| `onToggle` | `(itemId: string, isOpen: boolean) => void` | - | Callback when item is toggled |
-| `onItemClick` | `(item: AccordionItem, index: number) => void` | - | Callback when item is clicked |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
+| Prop            | Type                                           | Default        | Description                     |
+| --------------- | ---------------------------------------------- | -------------- | ------------------------------- | ------------- | -------------- | ----------------- |
+| `tenantTheme`   | `TenantTheme`                                  | `defaultTheme` | Theme object for styling        |
+| `items`         | `AccordionItem[]`                              | -              | Array of accordion items        |
+| `allowMultiple` | `boolean`                                      | `false`        | Allow multiple items to be open |
+| `allowNone`     | `boolean`                                      | `true`         | Allow all items to be closed    |
+| `variant`       | `'default'                                     | 'bordered'     | 'filled'                        | 'minimal'`    | `'default'`    | Accordion variant |
+| `size`          | `'small'                                       | 'medium'       | 'large'`                        | `'medium'`    | Accordion size |
+| `iconPosition`  | `'left'                                        | 'right'`       | `'right'`                       | Icon position |
+| `showIcon`      | `boolean`                                      | `true`         | Show expand/collapse icon       |
+| `onToggle`      | `(itemId: string, isOpen: boolean) => void`    | -              | Callback when item is toggled   |
+| `onItemClick`   | `(item: AccordionItem, index: number) => void` | -              | Callback when item is clicked   |
+| `className`     | `string`                                       | `''`           | Additional CSS classes          |
+| `style`         | `CSSProperties`                                | `{}`           | Inline styles                   |
 
 ## AccordionItem Interface
 
@@ -148,24 +148,19 @@ The component uses CSS custom properties for theming:
 ## Interactive Features
 
 ### Multiple Selection
+
 ```tsx
-<Accordion
-  items={items}
-  allowMultiple
-  allowNone
-/>
+<Accordion items={items} allowMultiple allowNone />
 ```
 
 ### Icon Configuration
+
 ```tsx
-<Accordion
-  items={items}
-  iconPosition="left"
-  showIcon={true}
-/>
+<Accordion items={items} iconPosition="left" showIcon={true} />
 ```
 
 ### Disabled Items
+
 ```tsx
 <Accordion
   items={[
@@ -203,37 +198,33 @@ test('renders with items', () => {
     { id: '1', title: 'Section 1', content: <div>Content 1</div> },
     { id: '2', title: 'Section 2', content: <div>Content 2</div> },
   ];
-  
+
   render(<Accordion items={items} />);
-  
+
   expect(screen.getByText('Section 1')).toBeInTheDocument();
   expect(screen.getByText('Section 2')).toBeInTheDocument();
 });
 
 test('toggles items on click', () => {
-  const items = [
-    { id: '1', title: 'Section 1', content: <div>Content 1</div> },
-  ];
-  
+  const items = [{ id: '1', title: 'Section 1', content: <div>Content 1</div> }];
+
   render(<Accordion items={items} />);
-  
+
   const trigger = screen.getByText('Section 1');
   fireEvent.click(trigger);
-  
+
   expect(screen.getByText('Content 1')).toBeInTheDocument();
 });
 
 test('calls onToggle when item is clicked', () => {
   const onToggle = jest.fn();
-  const items = [
-    { id: '1', title: 'Section 1', content: <div>Content 1</div> },
-  ];
-  
+  const items = [{ id: '1', title: 'Section 1', content: <div>Content 1</div> }];
+
   render(<Accordion items={items} onToggle={onToggle} />);
-  
+
   const trigger = screen.getByText('Section 1');
   fireEvent.click(trigger);
-  
+
   expect(onToggle).toHaveBeenCalledWith('1', true);
 });
 ```
@@ -241,6 +232,7 @@ test('calls onToggle when item is clicked', () => {
 ## Examples
 
 ### Basic Accordion
+
 ```tsx
 <Accordion
   items={[
@@ -259,6 +251,7 @@ test('calls onToggle when item is clicked', () => {
 ```
 
 ### FAQ Accordion
+
 ```tsx
 <Accordion
   items={[
@@ -281,25 +274,19 @@ test('calls onToggle when item is clicked', () => {
 ```
 
 ### Multiple Selection
+
 ```tsx
-<Accordion
-  items={items}
-  allowMultiple
-  allowNone
-/>
+<Accordion items={items} allowMultiple allowNone />
 ```
 
 ### Custom Styled Accordion
+
 ```tsx
-<Accordion
-  items={items}
-  variant="bordered"
-  size="large"
-  iconPosition="left"
-/>
+<Accordion items={items} variant="bordered" size="large" iconPosition="left" />
 ```
 
 ### Disabled Items
+
 ```tsx
 <Accordion
   items={[
@@ -319,6 +306,7 @@ test('calls onToggle when item is clicked', () => {
 ```
 
 ### With Callbacks
+
 ```tsx
 <Accordion
   items={items}

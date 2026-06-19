@@ -1,1 +1,1 @@
-export const TextAreaTranslations = { en: { title: "TextArea" } };
+export const TextAreaTranslations = { en: { title: 'TextArea' } };

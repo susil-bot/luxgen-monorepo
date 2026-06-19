@@ -8,9 +8,7 @@ export interface HeaderData {
   menuItems: MenuItem[];
 }
 
-export const fetchHeaderData = async (
-  tenantId?: string
-): Promise<HeaderData> => {
+export const fetchHeaderData = async (tenantId?: string): Promise<HeaderData> => {
   // In a real implementation, this would fetch tenant-specific header data
   const defaultMenuItems: MenuItem[] = [
     { id: 'home', label: 'Home', href: '/' },
@@ -26,15 +24,13 @@ export const fetchHeaderData = async (
   };
 };
 
-export const fetchHeaderSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchHeaderSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchHeaderData(tenantId);
-  
+
   const menuItemsHtml = data.menuItems
-    .map(item => `<a href="${item.href}" class="header-nav-item">${item.label}</a>`)
+    .map((item) => `<a href="${item.href}" class="header-nav-item">${item.label}</a>`)
     .join('');
-  
+
   const html = `
     <header class="header" style="background-color: ${data.tenantTheme.colors.surface}; border-bottom: 1px solid ${data.tenantTheme.colors.border}; color: ${data.tenantTheme.colors.text}; font-family: ${data.tenantTheme.fonts.primary};">
       <div class="header-container">
@@ -43,7 +39,7 @@ export const fetchHeaderSSR = async (
       </div>
     </header>
   `;
-  
+
   const styles = `
     .header {
       position: sticky;
@@ -72,6 +68,6 @@ export const fetchHeaderSSR = async (
       font-weight: 500;
     }
   `;
-  
+
   return { html, styles };
 };
