@@ -59,3 +59,20 @@ export function formatLoginError(message: string): string {
 
   return message;
 }
+
+/** Map registration GraphQL errors to friendly snackbar copy */
+export function formatRegisterError(message: string): string {
+  const lower = message.toLowerCase();
+
+  if (lower.includes('already exists') || lower.includes('duplicate')) {
+    return 'An account with this email already exists. Try signing in instead.';
+  }
+  if (lower.includes('password') && lower.includes('short')) {
+    return 'Password is too short. Use at least 8 characters.';
+  }
+  if (lower.includes('invalid email')) {
+    return 'Please enter a valid email address.';
+  }
+
+  return formatLoginError(message);
+}

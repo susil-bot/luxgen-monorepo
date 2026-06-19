@@ -11,6 +11,7 @@ import {
   getDefaultSidebarSections,
   Button,
 } from '@luxgen/ui';
+import { PageLoadingState } from '../../../components/common/PageStates';
 
 interface GroupEditData {
   id: string;
@@ -107,14 +108,7 @@ const EditGroupPageContent: React.FC = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading group details...</p>
-        </div>
-      </div>
-    );
+    return <PageLoadingState label="Loading group…" />;
   }
 
   return (
@@ -140,8 +134,8 @@ const EditGroupPageContent: React.FC = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-gray-900">Edit Group</h1>
-                <p className="mt-2 text-gray-600">Update group settings and information</p>
+                <h1 className="ios-large-title">Edit Group</h1>
+                <p className="mt-1 text-secondary text-sm">Update group settings and information</p>
               </div>
               <Button variant="outline" size="md" onClick={() => router.push(`/groups/${id}`)} className="px-4 py-2">
                 Cancel
@@ -150,11 +144,10 @@ const EditGroupPageContent: React.FC = () => {
           </div>
 
           {/* Form */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+          <div className="ios-card p-6">
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Group Name */}
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="ios-form-group">
+                <label htmlFor="name" className="text-sm text-secondary">
                   Group Name *
                 </label>
                 <input
@@ -164,14 +157,13 @@ const EditGroupPageContent: React.FC = () => {
                   value={formData.name}
                   onChange={handleInputChange}
                   required
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="ios-input"
                   placeholder="Enter group name"
                 />
               </div>
 
-              {/* Description */}
-              <div>
-                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="ios-form-group">
+                <label htmlFor="description" className="text-sm text-secondary">
                   Description
                 </label>
                 <textarea
@@ -180,23 +172,16 @@ const EditGroupPageContent: React.FC = () => {
                   value={formData.description}
                   onChange={handleInputChange}
                   rows={4}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="ios-input min-h-[100px]"
                   placeholder="Describe the purpose of this group"
                 />
               </div>
 
-              {/* Max Users */}
-              <div>
-                <label htmlFor="maxUsers" className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="ios-form-group">
+                <label htmlFor="maxUsers" className="text-sm text-secondary">
                   Maximum Users
                 </label>
-                <select
-                  id="maxUsers"
-                  name="maxUsers"
-                  value={formData.maxUsers}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
+                <select id="maxUsers" name="maxUsers" value={formData.maxUsers} onChange={handleInputChange} className="ios-input">
                   <option value={5}>5 users</option>
                   <option value={10}>10 users</option>
                   <option value={25}>25 users</option>
@@ -206,18 +191,11 @@ const EditGroupPageContent: React.FC = () => {
                 </select>
               </div>
 
-              {/* Status */}
-              <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700 mb-2">
+              <div className="ios-form-group">
+                <label htmlFor="status" className="text-sm text-secondary">
                   Status
                 </label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
+                <select id="status" name="status" value={formData.status} onChange={handleInputChange} className="ios-input">
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
                   <option value="Pending">Pending</option>
@@ -233,21 +211,21 @@ const EditGroupPageContent: React.FC = () => {
                   name="isPublic"
                   checked={formData.isPublic}
                   onChange={handleInputChange}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  className="h-4 w-4"
+                  style={{ accentColor: 'var(--color-blue)' }}
                 />
-                <label htmlFor="isPublic" className="ml-2 block text-sm text-gray-700">
+                <label htmlFor="isPublic" className="ml-2 text-sm text-secondary">
                   Make this group public (visible to all users)
                 </label>
               </div>
 
-              {/* Submit Buttons */}
-              <div className="flex justify-end space-x-3 pt-6 border-t border-gray-200">
-                <Button variant="outline" size="md" onClick={() => router.push(`/groups/${id}`)} className="px-6 py-2">
+              <div className="flex justify-end gap-3 pt-6" style={{ borderTop: '1px solid var(--color-separator)' }}>
+                <button type="button" className="ios-btn-secondary" onClick={() => router.push(`/groups/${id}`)}>
                   Cancel
-                </Button>
-                <Button variant="primary" size="md" disabled={isSaving || !formData.name.trim()} className="px-6 py-2">
-                  {isSaving ? 'Saving...' : 'Save Changes'}
-                </Button>
+                </button>
+                <button type="submit" className="ios-btn-primary" disabled={isSaving || !formData.name.trim()}>
+                  {isSaving ? 'Saving…' : 'Save Changes'}
+                </button>
               </div>
             </form>
           </div>

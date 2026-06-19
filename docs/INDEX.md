@@ -58,6 +58,7 @@
 | Document | Description |
 |----------|-------------|
 | [AUTH_UI.md](./AUTH_UI.md) | **Auth UX** — AuthGuard, session notices, iOS banners |
+| [IOS_UI_AUDIT.md](./IOS_UI_AUDIT.md) | **UI coverage audit** — feature vs iOS compliance tracker |
 | [../CODING_STANDARDS.md](../CODING_STANDARDS.md) | TypeScript, React, CSS rules |
 | [SIDEBAR_REDESIGN.md](./SIDEBAR_REDESIGN.md) | Sidebar spec |
 | `skills/ios-design/SKILL.md` | Design tokens & page template |

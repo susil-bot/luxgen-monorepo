@@ -5,6 +5,7 @@ import { useQuery } from '@apollo/client';
 import { AdminDashboardLayout, UserMenu } from '@luxgen/ui';
 import { GET_DASHBOARD_DATA } from '../graphql/queries/dashboard';
 import { transformDashboardData, transformUserData, handleDashboardAction, handleUserAction } from '../lib/transformer';
+import { PageEmptyState, PageLoadingState } from '../components/common/PageStates';
 
 interface DashboardProps {
   tenant: string;
@@ -45,14 +46,7 @@ export default function Dashboard({ tenant }: DashboardProps) {
 
   // Show loading state
   if (dataLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading dashboard...</p>
-        </div>
-      </div>
-    );
+    return <PageLoadingState label="Loading dashboard…" />;
   }
 
   // Log GraphQL errors but don't block the UI
@@ -65,12 +59,11 @@ export default function Dashboard({ tenant }: DashboardProps) {
 
   if (!transformedDashboardData) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <div className="text-gray-600 text-xl mb-4">No dashboard data available</div>
-          <p className="text-gray-500">Please check your connection and try again</p>
-        </div>
-      </div>
+      <PageEmptyState
+        icon="📊"
+        title="No dashboard data"
+        subtitle="Check your connection and try again."
+      />
     );
   }
 
