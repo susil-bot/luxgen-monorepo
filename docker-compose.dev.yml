@@ -1,12 +1,11 @@
 # ─────────────────────────────────────────────────────────────────────────────
 # LuxGen Development Overrides
-# Usage: docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
-#        OR simply: make dev-full
+# Usage: make dev-docker   OR   npm run dev:docker
 #
-# This file OVERRIDES services in docker-compose.yml for development:
-#   - Adds hot-reload volumes for api and web
-#   - Enables debug ports
-#   - Adds dev-only admin UIs (mongo-express, redis-commander)
+# Full stack with hot reload + persistent volumes:
+#   - mongodb_data / redis_data survive `docker compose down`
+#   - API auto-seeds on first boot only (SEED_IF_EMPTY + empty volume)
+#   - Re-run: make dev-docker (no manual seed unless you `make db-reset`)
 # ─────────────────────────────────────────────────────────────────────────────
 
 services:
@@ -23,14 +22,18 @@ services:
       PORT: 4000
       MONGODB_URI: mongodb://admin:password123@mongodb:27017/luxgen_dev?authSource=admin
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: dev-jwt-secret-change-in-production
+      JWT_SECRET: dev-jwt-secret-change-in-production-min-32-chars
+      JWT_EXPIRES_IN: 7d
+      SEED_IF_EMPTY: "true"
+      TENANT_DEMO_KEY: demo-tenant-signing-key-dev-32chars-min
+      TENANT_IDEA-VIBES_KEY: idea-vibes-signing-key-dev-32chars-min
       CORS_ORIGIN: http://localhost:3000
       APOLLO_INTROSPECTION: "true"
     volumes:
-      - .:/app                    # full monorepo mounted for hot reload
-      - /app/node_modules         # anonymous volume — prevents host override
+      - .:/app
+      - /app/node_modules
       - /app/apps/api/node_modules
-    command: ["sh", "-c", "npm install && npm run dev:api"]
+    command: ["sh", "scripts/docker/api-dev-entrypoint.sh"]
     ports:
       - "4000:4000"
       - "9229:9229"
@@ -39,6 +42,12 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      interval: 15s
+      timeout: 10s
+      retries: 12
+      start_period: 180s
 
   # ── Web — dev override (Next.js hot reload) ───────────────────────────────
   web:
@@ -49,6 +58,7 @@ services:
       NODE_ENV: development
       NEXT_TELEMETRY_DISABLED: "1"
       NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_GRAPHQL_URL: http://localhost:4000/graphql
       NEXT_PUBLIC_APP_URL: http://localhost:3000
       NEXT_PUBLIC_APP_ENV: development
       API_URL: http://api:4000
@@ -59,11 +69,18 @@ services:
       - /app/node_modules
       - /app/apps/web/.next
       - /app/apps/web/node_modules
-    command: ["sh", "-c", "npm install && npm run dev:web"]
+    command: ["sh", "scripts/docker/web-dev-entrypoint.sh"]
     ports:
       - "3000:3000"
     depends_on:
-      - api
+      api:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s
 
   # ── Mongo Express (dev only) ───────────────────────────────────────────────
   mongo-express:
