@@ -14,6 +14,7 @@ import { billingTypeDefs } from './billing/typeDefs';
 import { marketplaceTypeDefs } from './marketplace/typeDefs';
 import { listingTypeDefs } from './listing/typeDefs';
 import { activityEventTypeDefs } from './activityEvent/typeDefs';
+import { enrollmentTypeDefs } from './enrollment/typeDefs';
 
 // Import resolvers
 import { tenantResolvers } from './tenant/resolvers';
@@ -27,6 +28,7 @@ import { billingResolvers } from './billing/resolvers';
 import { marketplaceResolvers } from './marketplace/resolvers';
 import { listingResolvers } from './listing/resolvers';
 import { activityEventResolvers } from './activityEvent/resolvers';
+import { enrollmentResolvers } from './enrollment/resolvers';
 
 // Base schema
 const baseTypeDefs = `
@@ -60,6 +62,7 @@ export const typeDefs = mergeTypeDefs([
   marketplaceTypeDefs,
   listingTypeDefs,
   activityEventTypeDefs,
+  enrollmentTypeDefs,
 ]);
 
 // Scalar resolvers
@@ -108,6 +111,7 @@ const mergedResolvers = mergeResolvers([
   marketplaceResolvers,
   listingResolvers,
   activityEventResolvers,
+  enrollmentResolvers,
 ]);
 
 export const resolvers: any = secureResolvers(mergedResolvers);

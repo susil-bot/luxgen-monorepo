@@ -135,11 +135,13 @@ When no MongoDB events exist, `activityEventService.list()` **synthesizes** read
 
 ### Phase 2 — Writable audit surfaces
 
-- [ ] Persist **order notes** via GraphQL; emit `order.note_added`
-- [ ] Persist **customer notes**; emit `customer.note_added`
-- [ ] `updateUser` → `customer.updated` events
-- [ ] `unenrollStudent` → `order.cancelled` / `order.refunded`
-- [ ] Stripe webhook → `order.payment_confirmed`
+- [x] Persist **order notes** via `Enrollment` model + `updateOrderNotes` mutation
+- [x] Persist **customer notes** on `User.staffNotes` + `updateCustomerNotes` mutation
+- [x] Emit `order.note_added` and `customer.note_added` timeline events
+- [x] `unenrollStudent` → `order.cancelled` + `customer.order_cancelled` events
+- [x] Stripe `checkout.session.completed` with `metadata.type=enrollment` → `order.payment_confirmed`
+- [x] `createOrderCheckoutSession` + `confirmOrderPaymentDev` for checkout testing
+- [ ] `updateUser` → `customer.updated` events (Phase 2b)
 
 ### Phase 3 — Automation & apps
 
@@ -161,9 +163,9 @@ When no MongoDB events exist, `activityEventService.list()` **synthesizes** read
 
 | Layer | Path |
 |-------|------|
-| DB | `packages/db/src/activity-event.ts` |
-| API service | `apps/api/src/services/activityEventService.ts` |
-| GraphQL | `apps/api/src/schema/activityEvent/` |
+| DB | `packages/db/src/activity-event.ts`, `packages/db/src/enrollment.ts` |
+| API service | `apps/api/src/services/activityEventService.ts`, `apps/api/src/services/enrollmentService.ts` |
+| GraphQL | `apps/api/src/schema/activityEvent/`, `apps/api/src/schema/enrollment/` |
 | UI | `packages/ui/src/Timeline/` |
 | Web queries | `apps/web/graphql/queries/activity-events.ts` |
 | Web hook | `apps/web/lib/use-activity-timeline.ts` |

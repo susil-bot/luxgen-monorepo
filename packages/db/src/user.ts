@@ -49,6 +49,7 @@ export interface IUser extends Document {
   role: UserRole;
   status: UserStatus;
   tenant: Schema.Types.ObjectId;
+  staffNotes?: string;
   isActive: boolean;
   metadata: IUserMetadata;
   createdAt: Date;
@@ -93,6 +94,11 @@ const userSchema = new Schema<IUser>(
       type: Schema.Types.ObjectId,
       ref: 'Tenant',
       required: true,
+    },
+    staffNotes: {
+      type: String,
+      default: '',
+      trim: true,
     },
     isActive: {
       type: Boolean,

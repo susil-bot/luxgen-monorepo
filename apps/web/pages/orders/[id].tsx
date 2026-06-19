@@ -20,6 +20,7 @@ import { GET_USERS } from '../../graphql/queries/users';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
 import { useActivityTimeline } from '../../lib/use-activity-timeline';
+import { useOrderEnrollment } from '../../lib/use-order-enrollment';
 
 interface Props {
   tenant: string;
@@ -49,11 +50,19 @@ function OrderDetailPageContent({ tenant }: Props) {
     fetchPolicy: 'cache-and-network',
   });
 
-  const order = useMemo(() => {
+  const baseOrder = useMemo(() => {
     const orders = buildOrdersFromEnrollments(coursesData?.courses, usersData?.users);
     return findOrderDetail(orders, orderId, coursesData?.courses);
   }, [coursesData, usersData, orderId]);
 
+  const {
+    order: orderWithEnrollment,
+    notes,
+    onNotesChange,
+    savingNotes,
+  } = useOrderEnrollment(baseOrder, queryTenantId);
+
+  const order = orderWithEnrollment ?? baseOrder;
   const loading = !orderId || ((coursesLoading || usersLoading) && !order);
 
   const staffInitials =
@@ -89,7 +98,13 @@ function OrderDetailPageContent({ tenant }: Props) {
             </Link>
           </div>
         ) : (
-          <OrderDetailView order={order} timeline={timeline} />
+          <OrderDetailView
+            order={order}
+            timeline={timeline}
+            notes={notes}
+            onNotesChange={onNotesChange}
+            savingNotes={savingNotes}
+          />
         )}
       </AppLayout>
     </>

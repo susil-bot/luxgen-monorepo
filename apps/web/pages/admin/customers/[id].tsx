@@ -22,6 +22,7 @@ import { GET_USERS } from '../../../graphql/queries/users';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
 import { useActivityTimeline } from '../../../lib/use-activity-timeline';
+import { useCustomerNotes } from '../../../lib/use-customer-notes';
 
 interface Props {
   tenant: string;
@@ -85,6 +86,12 @@ function AdminCustomerDetailContent({ tenant }: Props) {
 
   const timeline = useActivityTimeline(queryTenantId, 'CUSTOMER', customerId, staffInitials);
 
+  const {
+    notes: customerNotes,
+    onNotesChange: onCustomerNotesChange,
+    savingNotes: savingCustomerNotes,
+  } = useCustomerNotes(customerId, queryTenantId, customer?.notes ?? '');
+
   return (
     <>
       <Head>
@@ -113,6 +120,9 @@ function AdminCustomerDetailContent({ tenant }: Props) {
             customer={customer}
             onCreateOrder={() => setShowCreateOrder(true)}
             timeline={timeline}
+            customerNotes={customerNotes}
+            onCustomerNotesChange={onCustomerNotesChange}
+            savingCustomerNotes={savingCustomerNotes}
           />
         )}
       </AppLayout>

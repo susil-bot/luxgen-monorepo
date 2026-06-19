@@ -8,6 +8,7 @@ export const GET_USER = gql`
       firstName
       lastName
       role
+      staffNotes
       tenant {
         id
         name
@@ -68,6 +69,15 @@ export const UPDATE_USER = gql`
       firstName
       lastName
       role
+    }
+  }
+`;
+
+export const UPDATE_CUSTOMER_NOTES = gql`
+  mutation UpdateCustomerNotes($input: UpdateCustomerNotesInput!) {
+    updateCustomerNotes(input: $input) {
+      id
+      staffNotes
     }
   }
 `;

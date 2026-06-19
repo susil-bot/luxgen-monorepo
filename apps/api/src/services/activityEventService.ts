@@ -304,6 +304,104 @@ export class ActivityEventService {
       actorName: actor?.name ?? 'LuxGen',
     });
   }
+
+  async recordOrderNoteAdded(
+    tenantId: string,
+    orderSubjectId: string,
+    notes: string,
+    actor?: { id: string; name: string },
+  ) {
+    return this.record({
+      tenantId,
+      subjectType: ActivitySubjectType.ORDER,
+      subjectId: orderSubjectId,
+      kind: ActivityEventKind.SYSTEM,
+      eventType: 'order.note_added',
+      message: 'You added a note to this order.',
+      actorType: actor ? ActivityActorType.STAFF : ActivityActorType.SYSTEM,
+      actorId: actor?.id,
+      actorName: actor?.name,
+      metadata: { notePreview: notes.slice(0, 200) },
+    });
+  }
+
+  async recordCustomerNoteAdded(
+    tenantId: string,
+    customerId: string,
+    notes: string,
+    actor?: { id: string; name: string },
+  ) {
+    return this.record({
+      tenantId,
+      subjectType: ActivitySubjectType.CUSTOMER,
+      subjectId: customerId,
+      kind: ActivityEventKind.SYSTEM,
+      eventType: 'customer.note_added',
+      message: 'You added a note to this customer.',
+      actorType: actor ? ActivityActorType.STAFF : ActivityActorType.SYSTEM,
+      actorId: actor?.id,
+      actorName: actor?.name,
+      metadata: { notePreview: notes.slice(0, 200) },
+    });
+  }
+
+  async recordOrderCancelled(
+    tenantId: string,
+    orderSubjectId: string,
+    courseTitle: string,
+    customerEmail: string,
+    actor?: { id: string; name: string },
+  ) {
+    const [courseId, studentId] = orderSubjectId.split(':');
+    await this.record({
+      tenantId,
+      subjectType: ActivitySubjectType.ORDER,
+      subjectId: orderSubjectId,
+      kind: ActivityEventKind.FIELD_CHANGE,
+      eventType: 'order.cancelled',
+      message: `Order cancelled — unenrolled from ${courseTitle}`,
+      actorType: actor ? ActivityActorType.STAFF : ActivityActorType.SYSTEM,
+      actorId: actor?.id,
+      actorName: actor?.name ?? 'LuxGen',
+      field: 'status',
+      oldValue: 'active',
+      newValue: 'cancelled',
+      metadata: { courseId, studentId, customerEmail },
+    });
+    if (studentId) {
+      await this.record({
+        tenantId,
+        subjectType: ActivitySubjectType.CUSTOMER,
+        subjectId: studentId,
+        kind: ActivityEventKind.SYSTEM,
+        eventType: 'customer.order_cancelled',
+        message: `Enrollment cancelled for ${courseTitle}`,
+        actorType: actor ? ActivityActorType.STAFF : ActivityActorType.SYSTEM,
+        actorId: actor?.id,
+        actorName: actor?.name ?? 'LuxGen',
+        metadata: { orderId: orderSubjectId, courseId },
+      });
+    }
+  }
+
+  async recordOrderPaymentConfirmed(
+    tenantId: string,
+    orderSubjectId: string,
+    courseTitle: string,
+    stripeSessionId?: string,
+  ) {
+    return this.record({
+      tenantId,
+      subjectType: ActivitySubjectType.ORDER,
+      subjectId: orderSubjectId,
+      kind: ActivityEventKind.SYSTEM,
+      eventType: 'order.payment_confirmed',
+      message: `Payment confirmed for ${courseTitle}`,
+      actorType: ActivityActorType.APP,
+      actorName: 'Stripe',
+      metadata: { stripeSessionId },
+    });
+  }
 }
 
 export const activityEventService = new ActivityEventService();
