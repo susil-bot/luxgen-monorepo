@@ -1,0 +1,58 @@
+/**
+ * Route access policy for client-side AuthGuard.
+ * Token lives in localStorage — guard runs in the browser after hydration.
+ */
+
+/** Exact paths that never require authentication */
+export const PUBLIC_ROUTES = new Set(['/login', '/register', '/404']);
+
+/** Path prefixes accessible without login (public directory, static assets) */
+export const PUBLIC_PREFIXES = ['/listings'];
+
+/** Admin/app areas that always require a valid session */
+export const PROTECTED_PREFIXES = [
+  '/dashboard',
+  '/users',
+  '/courses',
+  '/groups',
+  '/agent',
+  '/automations',
+  '/billing',
+  '/analytics',
+  '/customers',
+  '/developer',
+  '/marketplace',
+  '/admin',
+  '/banner-demo',
+];
+
+export function isPublicRoute(pathname: string): boolean {
+  const path = normalizePath(pathname);
+
+  if (PUBLIC_ROUTES.has(path)) return true;
+  if (path === '/') return true;
+
+  // Public directory index only — /listings/my and /listings/apply require auth
+  if (path === '/listings') return true;
+
+  return PUBLIC_PREFIXES.some((prefix) => path === prefix);
+}
+
+export function requiresAuth(pathname: string): boolean {
+  const path = normalizePath(pathname);
+  if (isPublicRoute(path)) return false;
+
+  return PROTECTED_PREFIXES.some((prefix) => path === prefix || path.startsWith(`${prefix}/`));
+}
+
+export function buildLoginRedirect(returnPath: string): string {
+  const safe =
+    returnPath && returnPath !== '/login' && returnPath !== '/register' ? returnPath : '/dashboard';
+  return `/login?redirect=${encodeURIComponent(safe)}`;
+}
+
+function normalizePath(pathname: string): string {
+  const base = pathname.split('?')[0].split('#')[0];
+  if (base.length > 1 && base.endsWith('/')) return base.slice(0, -1);
+  return base || '/';
+}
