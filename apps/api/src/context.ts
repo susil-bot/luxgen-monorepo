@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { IUser } from '@luxgen/db';
+import { IUser, ITenant } from '@luxgen/db';
 import type { AuthErrorCode } from './types/auth';
 import { buildGraphQLContext } from './context/buildContext';
 
@@ -7,7 +7,12 @@ export interface GraphQLContext {
   req: Request;
   res: Response;
   user?: IUser;
+  /** Subdomain string — kept for backward compatibility with existing resolvers */
   tenant?: string;
+  /** Full tenant document resolved by tenantRoutingMiddleware (available on HTTP requests) */
+  tenantDoc?: ITenant;
+  /** MongoDB ObjectId string for the resolved tenant */
+  tenantId?: string;
   authError?: AuthErrorCode;
 }
 
@@ -19,6 +24,8 @@ export const context = ({ req, res }: { req: Request; res: Response }): GraphQLC
     res,
     user: req.user,
     tenant: tenantSubdomain,
+    tenantDoc: req.tenant,
+    tenantId: req.tenantId,
     authError: req.authError,
   };
 };

@@ -10,9 +10,8 @@ export interface RoleManagementRequest extends Request {
   tenantContext?: string;
 }
 
-/**
- * Middleware to check if user has required role
- */
+const errMsg = (e: unknown) => (e instanceof Error ? e.message : undefined);
+
 export const requireRole = (requiredRole: UserRole) => {
   return async (req: RoleManagementRequest, res: Response, next: NextFunction) => {
     try {
@@ -24,7 +23,6 @@ export const requireRole = (requiredRole: UserRole) => {
         });
       }
 
-      // Check if user has the required role
       if (req.user.role !== requiredRole) {
         logger.warn(
           `Access denied: User ${req.user.email} (${req.user.role}) attempted to access ${requiredRole} resource`,
@@ -36,7 +34,6 @@ export const requireRole = (requiredRole: UserRole) => {
         });
       }
 
-      // Check if user is active
       if (req.user.status !== UserStatus.ACTIVE) {
         return res.status(403).json({
           success: false,
@@ -52,15 +49,12 @@ export const requireRole = (requiredRole: UserRole) => {
       return res.status(500).json({
         success: false,
         message: 'Internal server error during role verification',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        error: process.env.NODE_ENV === 'development' ? errMsg(error) : undefined,
       });
     }
   };
 };
 
-/**
- * Middleware to check if user has required permissions
- */
 export const requirePermissions = (requiredPermissions: string[]) => {
   return async (req: RoleManagementRequest, res: Response, next: NextFunction) => {
     try {
@@ -72,8 +66,9 @@ export const requirePermissions = (requiredPermissions: string[]) => {
         });
       }
 
-      // Check if user has all required permissions
-      const hasAllPermissions = requiredPermissions.every((permission) => hasPermission(req.user!.role, permission));
+      const hasAllPermissions = requiredPermissions.every((permission) =>
+        hasPermission(req.user!.role as any, permission),
+      );
 
       if (!hasAllPermissions) {
         logger.warn(
@@ -93,15 +88,12 @@ export const requirePermissions = (requiredPermissions: string[]) => {
       return res.status(500).json({
         success: false,
         message: 'Internal server error during permission verification',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        error: process.env.NODE_ENV === 'development' ? errMsg(error) : undefined,
       });
     }
   };
 };
 
-/**
- * Middleware to check if user can manage other users
- */
 export const canManageUsers = async (req: RoleManagementRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
@@ -112,12 +104,10 @@ export const canManageUsers = async (req: RoleManagementRequest, res: Response, 
       });
     }
 
-    // Super admins can manage all users
     if (req.user.role === UserRole.SUPER_ADMIN) {
       return next();
     }
 
-    // Admins can manage users in their tenant
     if (req.user.role === UserRole.ADMIN) {
       const targetUserId = req.params.userId || req.body.userId;
       if (targetUserId) {
@@ -130,7 +120,6 @@ export const canManageUsers = async (req: RoleManagementRequest, res: Response, 
           });
         }
 
-        // Check if target user is in the same tenant
         if (targetUser.tenant.toString() !== req.user.tenant.toString()) {
           return res.status(403).json({
             success: false,
@@ -142,7 +131,6 @@ export const canManageUsers = async (req: RoleManagementRequest, res: Response, 
       return next();
     }
 
-    // Other roles cannot manage users
     return res.status(403).json({
       success: false,
       message: 'Insufficient privileges to manage users',
@@ -153,14 +141,11 @@ export const canManageUsers = async (req: RoleManagementRequest, res: Response, 
     return res.status(500).json({
       success: false,
       message: 'Internal server error during user management verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' ? errMsg(error) : undefined,
     });
   }
 };
 
-/**
- * Middleware to check if user can manage tenants
- */
 export const canManageTenants = async (req: RoleManagementRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
@@ -171,7 +156,6 @@ export const canManageTenants = async (req: RoleManagementRequest, res: Response
       });
     }
 
-    // Only super admins can manage tenants
     if (req.user.role !== UserRole.SUPER_ADMIN) {
       return res.status(403).json({
         success: false,
@@ -186,14 +170,11 @@ export const canManageTenants = async (req: RoleManagementRequest, res: Response
     return res.status(500).json({
       success: false,
       message: 'Internal server error during tenant management verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' ? errMsg(error) : undefined,
     });
   }
 };
 
-/**
- * Middleware to check if user can invite other users
- */
 export const canInviteUsers = async (req: RoleManagementRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
@@ -204,8 +185,7 @@ export const canInviteUsers = async (req: RoleManagementRequest, res: Response, 
       });
     }
 
-    // Check if user has invite permission
-    if (!hasPermission(req.user.role, 'invite:send')) {
+    if (!hasPermission(req.user.role as any, 'invite:send')) {
       return res.status(403).json({
         success: false,
         message: 'Insufficient privileges to invite users',
@@ -219,14 +199,11 @@ export const canInviteUsers = async (req: RoleManagementRequest, res: Response, 
     return res.status(500).json({
       success: false,
       message: 'Internal server error during invitation verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' ? errMsg(error) : undefined,
     });
   }
 };
 
-/**
- * Middleware to check if user can approve requests
- */
 export const canApproveRequests = async (req: RoleManagementRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
@@ -237,8 +214,7 @@ export const canApproveRequests = async (req: RoleManagementRequest, res: Respon
       });
     }
 
-    // Check if user has approval permission
-    if (!hasPermission(req.user.role, 'request:approve')) {
+    if (!hasPermission(req.user.role as any, 'request:approve')) {
       return res.status(403).json({
         success: false,
         message: 'Insufficient privileges to approve requests',
@@ -252,14 +228,11 @@ export const canApproveRequests = async (req: RoleManagementRequest, res: Respon
     return res.status(500).json({
       success: false,
       message: 'Internal server error during approval verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' ? errMsg(error) : undefined,
     });
   }
 };
 
-/**
- * Middleware to check if user can access tenant-specific resources
- */
 export const requireTenantAccess = async (req: RoleManagementRequest, res: Response, next: NextFunction) => {
   try {
     if (!req.user) {
@@ -272,13 +245,11 @@ export const requireTenantAccess = async (req: RoleManagementRequest, res: Respo
 
     const requestedTenant = req.params.tenantId || req.query.tenantId || req.body.tenantId;
 
-    // Super admins can access all tenants
     if (req.user.role === UserRole.SUPER_ADMIN) {
       req.tenantContext = requestedTenant || req.user.tenant.toString();
       return next();
     }
 
-    // Other users can only access their own tenant
     if (requestedTenant && requestedTenant !== req.user.tenant.toString()) {
       return res.status(403).json({
         success: false,
@@ -294,14 +265,11 @@ export const requireTenantAccess = async (req: RoleManagementRequest, res: Respo
     return res.status(500).json({
       success: false,
       message: 'Internal server error during tenant access verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' ? errMsg(error) : undefined,
     });
   }
 };
 
-/**
- * Middleware to log role-based access attempts
- */
 export const logRoleAccess = (resource: string) => {
   return (req: RoleManagementRequest, res: Response, next: NextFunction) => {
     if (req.user) {

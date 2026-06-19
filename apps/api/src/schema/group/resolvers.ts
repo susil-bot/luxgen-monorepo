@@ -1,4 +1,4 @@
-import { Context } from '../../context';
+import { GraphQLContext } from '../../context';
 import { GroupService } from '../../services/groupService';
 
 export const groupResolvers = {
@@ -14,12 +14,12 @@ export const groupResolvers = {
         isActive?: boolean;
         createdBy?: string;
       },
-      context: Context,
+      context: GraphQLContext,
     ) => {
       return await GroupService.getGroups(context, args);
     },
 
-    group: async (_: any, { id }: { id: string }, context: Context) => {
+    group: async (_: any, { id }: { id: string }, context: GraphQLContext) => {
       return await GroupService.getGroupById(context, id);
     },
 
@@ -34,7 +34,7 @@ export const groupResolvers = {
         role?: string;
         isActive?: boolean;
       },
-      context: Context,
+      context: GraphQLContext,
     ) => {
       return await GroupService.getGroupMembers(context, args);
     },
@@ -50,49 +50,49 @@ export const groupResolvers = {
         role?: string;
         isActive?: boolean;
       },
-      context: Context,
+      context: GraphQLContext,
     ) => {
       return await GroupService.getUserGroups(context, args);
     },
   },
 
   Mutation: {
-    createGroup: async (_: any, { input }: { input: any }, context: Context) => {
+    createGroup: async (_: any, { input }: { input: any }, context: GraphQLContext) => {
       return await GroupService.createGroup(context, input);
     },
 
-    updateGroup: async (_: any, { input }: { input: any }, context: Context) => {
+    updateGroup: async (_: any, { input }: { input: any }, context: GraphQLContext) => {
       return await GroupService.updateGroup(context, input);
     },
 
-    deleteGroup: async (_: any, { id }: { id: string }, context: Context) => {
+    deleteGroup: async (_: any, { id }: { id: string }, context: GraphQLContext) => {
       return await GroupService.deleteGroup(context, id);
     },
 
-    addGroupMember: async (_: any, { input }: { input: any }, context: Context) => {
+    addGroupMember: async (_: any, { input }: { input: any }, context: GraphQLContext) => {
       return await GroupService.addGroupMember(context, input);
     },
 
-    removeGroupMember: async (_: any, { input }: { input: any }, context: Context) => {
+    removeGroupMember: async (_: any, { input }: { input: any }, context: GraphQLContext) => {
       return await GroupService.removeGroupMember(context, input);
     },
 
-    updateGroupMember: async (_: any, { input }: { input: any }, context: Context) => {
+    updateGroupMember: async (_: any, { input }: { input: any }, context: GraphQLContext) => {
       return await GroupService.updateGroupMember(context, input);
     },
 
-    joinGroup: async (_: any, { groupId }: { groupId: string }, context: Context) => {
+    joinGroup: async (_: any, { groupId }: { groupId: string }, context: GraphQLContext) => {
       return await GroupService.joinGroup(context, groupId);
     },
 
-    leaveGroup: async (_: any, { groupId }: { groupId: string }, context: Context) => {
+    leaveGroup: async (_: any, { groupId }: { groupId: string }, context: GraphQLContext) => {
       return await GroupService.leaveGroup(context, groupId);
     },
 
     bulkAddGroupMembers: async (
       _: any,
       { groupId, userIds, role }: { groupId: string; userIds: string[]; role?: string },
-      context: Context,
+      context: GraphQLContext,
     ) => {
       return await GroupService.bulkAddGroupMembers(context, groupId, userIds, role);
     },
@@ -100,36 +100,36 @@ export const groupResolvers = {
     bulkRemoveGroupMembers: async (
       _: any,
       { groupId, userIds }: { groupId: string; userIds: string[] },
-      context: Context,
+      context: GraphQLContext,
     ) => {
       return await GroupService.bulkRemoveGroupMembers(context, groupId, userIds);
     },
   },
 
   Group: {
-    tenant: async (parent: any, _: any, context: Context) => {
+    tenant: async (parent: any, _: any, context: GraphQLContext) => {
       return await GroupService.getGroupTenant(context, parent.id);
     },
 
-    createdBy: async (parent: any, _: any, context: Context) => {
+    createdBy: async (parent: any, _: any, context: GraphQLContext) => {
       return await GroupService.getGroupCreator(context, parent.id);
     },
 
-    members: async (parent: any, _: any, context: Context) => {
+    members: async (parent: any, _: any, context: GraphQLContext) => {
       return await GroupService.getGroupMembersList(context, parent.id);
     },
 
-    memberCount: async (parent: any, _: any, context: Context) => {
+    memberCount: async (parent: any, _: any, context: GraphQLContext) => {
       return await GroupService.getGroupMemberCount(context, parent.id);
     },
   },
 
   GroupMember: {
-    user: async (parent: any, _: any, context: Context) => {
+    user: async (parent: any, _: any, context: GraphQLContext) => {
       return await GroupService.getGroupMemberUser(context, parent.id);
     },
 
-    group: async (parent: any, _: any, context: Context) => {
+    group: async (parent: any, _: any, context: GraphQLContext) => {
       return await GroupService.getGroupMemberGroup(context, parent.id);
     },
   },

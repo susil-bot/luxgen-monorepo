@@ -51,7 +51,7 @@ export function getTokenExpiresAt(token: string): number | null {
 export function isTokenExpired(token: string | null, skewMs = 30_000): boolean {
   if (!token) return true;
   const expiresAt = getTokenExpiresAt(token);
-  if (!expiresAt) return false;
+  if (!expiresAt) return true; // no exp claim = treat as expired (security default)
   return Date.now() >= expiresAt - skewMs;
 }
 
@@ -122,8 +122,7 @@ export function clearStoredSession(): void {
 }
 
 export function getMsUntilExpiry(): number | null {
-  const token =
-    typeof window !== 'undefined' ? localStorage.getItem(AUTH_STORAGE_KEYS.token) : null;
+  const token = typeof window !== 'undefined' ? localStorage.getItem(AUTH_STORAGE_KEYS.token) : null;
   if (!token) return null;
 
   const expiresAt = getStoredTokenExpiresAt() ?? getTokenExpiresAt(token);

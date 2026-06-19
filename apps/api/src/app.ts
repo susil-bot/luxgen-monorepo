@@ -1,6 +1,7 @@
 import { createServer, type Server as HttpServer } from 'http';
 import { execute, subscribe } from 'graphql';
-import { SubscriptionServer } from 'subscriptions-transport-ws';
+import { useServer } from 'graphql-ws/lib/use/ws';
+import { WebSocketServer } from 'ws';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import cors from 'cors';
@@ -80,10 +81,8 @@ app.use('/api/billing', billingRoutes);
 app.use('/api/jobs', jobsRoutes);
 app.use('/api/notifications', notificationsRoutes);
 
-const executableSchema = schema;
-
 const apolloServer = new ApolloServer({
-  schema: executableSchema,
+  schema,
   context,
   introspection: process.env.APOLLO_INTROSPECTION === 'true',
   formatError: (error) => {
@@ -93,7 +92,8 @@ const apolloServer = new ApolloServer({
 });
 
 let httpServer: HttpServer | null = null;
-let subscriptionServer: SubscriptionServer | null = null;
+let wsServer: WebSocketServer | null = null;
+let wsCleanup: (() => Promise<void>) | null = null;
 
 const startApollo = async () => {
   await apolloServer.start();
@@ -107,36 +107,43 @@ export async function createAppServer(): Promise<HttpServer> {
 
   httpServer = createServer(app);
 
-  subscriptionServer = SubscriptionServer.create(
+  // graphql-ws replaces the deprecated subscriptions-transport-ws
+  wsServer = new WebSocketServer({ server: httpServer, path: apolloServer.graphqlPath });
+
+  const cleanup = useServer(
     {
-      schema: executableSchema,
+      schema,
       execute,
       subscribe,
-      onConnect: async (connectionParams: Record<string, unknown>) => {
-        const ctx = await buildGraphQLContext({
+      context: async (ctx: { connectionParams?: Record<string, unknown> }) => {
+        const params = (ctx.connectionParams ?? {}) as Record<string, string>;
+        const gqlCtx = await buildGraphQLContext({
           headers: {
-            authorization: (connectionParams.authorization as string) ?? '',
-            'x-tenant': (connectionParams['x-tenant'] as string) ?? '',
+            authorization: params.authorization ?? '',
+            'x-tenant': params['x-tenant'] ?? '',
           },
         });
-        if (!ctx.user) {
-          throw new Error('Authentication required');
-        }
-        return ctx as GraphQLContext;
+        if (!gqlCtx.user) throw new Error('Authentication required');
+        return gqlCtx as GraphQLContext;
       },
     },
-    {
-      server: httpServer,
-      path: apolloServer.graphqlPath,
-    },
+    wsServer,
   );
+
+  wsCleanup = async () => {
+    await cleanup.dispose();
+  };
 
   return httpServer;
 }
 
 export async function stopAppServer(): Promise<void> {
-  subscriptionServer?.close();
-  subscriptionServer = null;
+  if (wsCleanup) {
+    await wsCleanup();
+    wsCleanup = null;
+  }
+  wsServer?.close();
+  wsServer = null;
   if (httpServer) {
     await new Promise<void>((resolve, reject) => {
       httpServer!.close((err) => (err ? reject(err) : resolve()));

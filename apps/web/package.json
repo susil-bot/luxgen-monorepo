@@ -19,6 +19,7 @@
     "@luxgen/ui": "*",
     "@luxgen/utils": "*",
     "graphql": "^16.8.0",
+    "graphql-ws": "^5.16.0",
     "next": "^14.0.0",
     "react": "^18.0.0",
     "react-dom": "^18.0.0"

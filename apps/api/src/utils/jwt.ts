@@ -39,8 +39,9 @@ export const verifyToken = (token: string): JwtPayload | null => {
     // First decode the header to get the key ID
     const header = jwt.decode(token, { complete: true })?.header as JwtHeader;
     if (!header?.kid) {
-      // Fallback to default key if no key ID
-      return jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+      const secret = process.env.JWT_SECRET;
+      if (!secret) throw new Error('JWT_SECRET is not configured');
+      return jwt.verify(token, secret) as JwtPayload;
     }
 
     // Get the tenant-specific key

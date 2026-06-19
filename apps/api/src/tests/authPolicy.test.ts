@@ -35,9 +35,7 @@ describe('authPolicy', () => {
     });
 
     expect(resolvers.Mutation.login(null, {}, { req: {} as any, res: {} as any })).toBe('ok');
-    expect(() => resolvers.Mutation.deleteUser(null, {}, { req: {} as any, res: {} as any })).toThrow(
-      GraphQLError,
-    );
+    expect(() => resolvers.Mutation.deleteUser(null, {}, { req: {} as any, res: {} as any })).toThrow(GraphQLError);
   });
 });
 
@@ -58,11 +56,11 @@ describe('isAccountActive', () => {
 describe('loginRateLimit', () => {
   beforeEach(() => resetLoginRateLimitStore());
 
-  it('blocks after max attempts', () => {
+  it('blocks after max attempts', async () => {
     const req = { ip: '127.0.0.1', socket: {} } as any;
     for (let i = 0; i < 10; i++) {
-      checkLoginRateLimit(req, 'test@example.com');
+      await checkLoginRateLimit(req, 'test@example.com');
     }
-    expect(() => checkLoginRateLimit(req, 'test@example.com')).toThrow('Too many login attempts');
+    await expect(checkLoginRateLimit(req, 'test@example.com')).rejects.toThrow('Too many login attempts');
   });
 });

@@ -1,4 +1,5 @@
 import { GraphQLError } from 'graphql';
+import type { TemplateCategory } from '@luxgen/db';
 import { marketplaceService } from '../../services/marketplaceService';
 import { usageService, UsageLimitError } from '../../services/usageService';
 import { requireFeature } from '../../middleware/planGate';
@@ -15,7 +16,8 @@ function toGqlPlan(plan: string): string {
 
 function handleUsageError(e: unknown): never {
   if (e instanceof UsageLimitError) {
-    throw new GraphQLError(e.message, { extensions: { code: e.code, ...e.toJSON() } });
+    const { code: _code, ...rest } = e.toJSON();
+    throw new GraphQLError(e.message, { extensions: { code: e.code, ...rest } });
   }
   throw e;
 }
@@ -24,7 +26,7 @@ export const marketplaceResolvers = {
   Query: {
     automationTemplates: async (_: unknown, { category, featured }: { category?: string; featured?: boolean }) => {
       const items = await marketplaceService.listTemplates({
-        category: fromGqlCategory(category) as Parameters<typeof marketplaceService.listTemplates>[0]['category'],
+        category: fromGqlCategory(category) as TemplateCategory | undefined,
         featured,
       });
       return items.map((t) => marketplaceService.toGraphQL(t));

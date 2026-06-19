@@ -58,13 +58,13 @@ export class UserService {
     return !!result;
   }
 
-  async login({ email, password, tenantId, req }: LoginInput): Promise<AuthResult> {
+  async login({ email, password, tenantId: inputTenantId, req }: LoginInput): Promise<AuthResult> {
     if (req) {
-      checkLoginRateLimit(req, email);
+      await checkLoginRateLimit(req, email);
     }
 
     const query: Record<string, unknown> = { email: email.toLowerCase().trim() };
-    if (tenantId) query.tenant = tenantId;
+    if (inputTenantId) query.tenant = inputTenantId;
 
     const user = await User.findOne(query).populate('tenant');
     if (!user) throw new Error('Invalid email or password');
@@ -76,14 +76,12 @@ export class UserService {
       throw new Error(ACCOUNT_DEACTIVATED_MESSAGE);
     }
 
+    const tenantId = (user.tenant as any)?._id?.toString();
+    if (!tenantId) throw new Error('User has no associated tenant');
+
     const token = generateToken(
-      {
-        id: (user as any)._id.toString(),
-        email: user.email,
-        tenant: (user.tenant as any)._id?.toString(),
-        role: user.role,
-      },
-      (user.tenant as any)._id?.toString(),
+      { id: (user as any)._id.toString(), email: user.email, tenant: tenantId, role: user.role },
+      tenantId,
     );
 
     logger.info(`User login: ${user.email}`);
@@ -93,14 +91,12 @@ export class UserService {
   async register(input: UserRegistrationData): Promise<AuthResult> {
     const user = await this.createUser(input);
 
+    const tenantId = (user.tenant as any)?._id?.toString();
+    if (!tenantId) throw new Error('User has no associated tenant');
+
     const token = generateToken(
-      {
-        id: (user as any)._id.toString(),
-        email: user.email,
-        tenant: (user.tenant as any)._id?.toString(),
-        role: user.role,
-      },
-      (user.tenant as any)._id?.toString(),
+      { id: (user as any)._id.toString(), email: user.email, tenant: tenantId, role: user.role },
+      tenantId,
     );
 
     logger.info(`User registered: ${user.email}`);

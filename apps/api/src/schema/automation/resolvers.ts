@@ -89,7 +89,8 @@ export const automationResolvers = {
         await usageService.assertAutomationCreateAllowed(input.tenantId);
       } catch (e) {
         if (e instanceof UsageLimitError) {
-          throw new GraphQLError(e.message, { extensions: { code: e.code, ...e.toJSON() } });
+          const { code: _code, ...rest } = e.toJSON();
+          throw new GraphQLError(e.message, { extensions: { code: e.code, ...rest } });
         }
         throw e;
       }

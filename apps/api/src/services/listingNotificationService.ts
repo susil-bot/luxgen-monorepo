@@ -1,6 +1,7 @@
 import { EmailNotificationLog, type ListingEmailTemplate, type IEmailNotificationLog } from '@luxgen/db';
 import { LISTING_EMAIL_TEMPLATES, type ListingEmailContext } from '../notifications/listing-templates';
 import { getWebUrl } from '@luxgen/config';
+import { logger } from '../utils/logger';
 
 export class ListingNotificationService {
   private buildUrls(ctx: Pick<ListingEmailContext, 'tenantId' | 'listingId'>) {

@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express';
-import { User, type IUser } from '@luxgen/db';
+import { User, Tenant, type IUser, type ITenant } from '@luxgen/db';
 import { verifyToken, getTenantFromToken } from '../utils/jwt';
 import { isAccountActive } from '../utils/accountStatus';
 import type { GraphQLContext } from '../context';
@@ -9,6 +9,17 @@ export async function buildGraphQLContext(req: Partial<Request>, res?: Response)
   const headers = req.headers ?? {};
   const tenantSubdomain =
     req.subdomain || req.tenant?.subdomain || (headers['x-tenant'] as string | undefined) || 'demo';
+
+  // Resolve tenant document and ID (needed by services — avoids per-service DB lookups)
+  let tenantDoc: ITenant | undefined = req.tenant as ITenant | undefined;
+  let tenantId: string | undefined = req.tenantId;
+  if (!tenantDoc && tenantSubdomain) {
+    const found = (await Tenant.findOne({ subdomain: tenantSubdomain, status: 'active' }).lean()) as ITenant | null;
+    if (found) {
+      tenantDoc = found;
+      tenantId = (found._id as any).toString();
+    }
+  }
 
   const token = (headers.authorization as string | undefined)?.replace('Bearer ', '');
   let user: IUser | undefined;
@@ -45,6 +56,8 @@ export async function buildGraphQLContext(req: Partial<Request>, res?: Response)
     res: res as Response,
     user,
     tenant: tenantSubdomain,
+    tenantDoc,
+    tenantId,
     authError,
   };
 }

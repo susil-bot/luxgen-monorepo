@@ -121,12 +121,15 @@ export const activityEventResolvers = {
   },
   Subscription: {
     activityEventAdded: {
-      subscribe: withFilter(
-        () => activityPubSub.asyncIterator(ACTIVITY_EVENT_ADDED),
+      subscribe: (withFilter as any)(
+        () => (activityPubSub as any).asyncIterator(ACTIVITY_EVENT_ADDED),
         (
-          payload: { activityEventAdded: { tenantId: string; subjectType: string; subjectId: string }; topic: string },
+          payload:
+            | { activityEventAdded: { tenantId: string; subjectType: string; subjectId: string }; topic: string }
+            | undefined,
           variables: { tenantId: string; subjectType: string; subjectId: string },
         ) => {
+          if (!payload) return false;
           const expected = timelineTopic(
             variables.tenantId,
             variables.subjectType as ActivitySubjectType,
@@ -135,8 +138,7 @@ export const activityEventResolvers = {
           return payload.topic === expected;
         },
       ),
-      resolve: (payload: { activityEventAdded: ReturnType<typeof mapEvent> }) =>
-        mapEvent(payload.activityEventAdded),
+      resolve: (payload: { activityEventAdded: ReturnType<typeof mapEvent> }) => mapEvent(payload.activityEventAdded),
     },
   },
 };

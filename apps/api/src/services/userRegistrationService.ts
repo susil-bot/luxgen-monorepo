@@ -63,7 +63,7 @@ export class UserRegistrationService {
         return {
           success: false,
           message: 'Invalid role assignment',
-          errors: { role: roleValidation.reason },
+          errors: { role: roleValidation.reason ?? 'Invalid role' },
         };
       }
 
@@ -121,7 +121,9 @@ export class UserRegistrationService {
       const detail = error instanceof Error ? error.message : 'Internal server error';
       return {
         success: false,
-        message: detail.includes('validation failed') ? 'Invalid user data — check role and required fields' : 'Registration failed',
+        message: detail.includes('validation failed')
+          ? 'Invalid user data — check role and required fields'
+          : 'Registration failed',
         errors: { general: detail },
       };
     }
@@ -262,7 +264,7 @@ export class UserRegistrationService {
         return {
           success: false,
           message: 'Invalid role assignment',
-          errors: { role: roleValidation.reason },
+          errors: { role: roleValidation.reason ?? 'Invalid role' },
         };
       }
 
@@ -275,7 +277,7 @@ export class UserRegistrationService {
 
       if (existingTenantRole) {
         existingTenantRole.role = newRole;
-        existingTenantRole.assignedBy = updatedBy;
+        existingTenantRole.assignedBy = updatedBy as any;
         existingTenantRole.assignedAt = new Date();
       } else {
         user.metadata.tenantRoles.push({

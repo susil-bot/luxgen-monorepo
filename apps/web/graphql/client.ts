@@ -1,7 +1,8 @@
 import { ApolloClient, InMemoryCache, createHttpLink, from, split } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
-import { WebSocketLink } from '@apollo/client/link/ws';
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
+import { createClient } from 'graphql-ws';
 import { getMainDefinition } from '@apollo/client/utilities';
 
 import { buildLoginRedirect } from '../lib/auth-routes';
@@ -14,22 +15,23 @@ const httpLink = createHttpLink({
   uri: getClientGraphqlUrl(),
 });
 
-function createWsLink(): WebSocketLink | null {
+// connectionParams is a function so it re-reads storage on every reconnect,
+// ensuring rotated or refreshed tokens are always sent correctly.
+function createWsLink(): GraphQLWsLink | null {
   if (typeof window === 'undefined') return null;
-  const token = localStorage.getItem(AUTH_STORAGE_KEYS.token);
-  const tenant = localStorage.getItem(AUTH_STORAGE_KEYS.tenant);
-  const hostTenant = getHostTenantSubdomain();
-
-  return new WebSocketLink({
-    uri: getClientGraphqlWsUrl(),
-    options: {
-      reconnect: true,
-      connectionParams: {
-        authorization: token ? `Bearer ${token}` : '',
-        'x-tenant': tenant || hostTenant || '',
+  return new GraphQLWsLink(
+    createClient({
+      url: getClientGraphqlWsUrl(),
+      connectionParams: () => {
+        const token = localStorage.getItem(AUTH_STORAGE_KEYS.token);
+        const tenant = localStorage.getItem(AUTH_STORAGE_KEYS.tenant);
+        return {
+          authorization: token ? `Bearer ${token}` : '',
+          'x-tenant': tenant || getHostTenantSubdomain() || '',
+        };
       },
-    },
-  });
+    }),
+  );
 }
 
 const wsLink = createWsLink();
@@ -46,9 +48,7 @@ const splitLink =
   );
 
 const authLink = setContext((_, { headers }) => {
-  if (typeof window === 'undefined') {
-    return { headers };
-  }
+  if (typeof window === 'undefined') return { headers };
 
   const token = localStorage.getItem(AUTH_STORAGE_KEYS.token);
   const tenant = localStorage.getItem(AUTH_STORAGE_KEYS.tenant);
@@ -60,6 +60,12 @@ const authLink = setContext((_, { headers }) => {
 
   if (token && isSessionTenantMismatch(getStoredUser())) {
     clearStoredSession();
+    // Redirect immediately rather than silently dropping auth and letting the
+    // next request fail with a generic UNAUTHENTICATED error.
+    if (typeof window !== 'undefined') {
+      const returnPath = `${window.location.pathname}${window.location.search}`;
+      window.location.href = buildLoginRedirect(returnPath, 'tenant_mismatch');
+    }
     return { headers };
   }
 
@@ -78,9 +84,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (typeof window === 'undefined') return;
 
   const statusCode =
-    networkError && 'statusCode' in networkError
-      ? (networkError as { statusCode?: number }).statusCode
-      : undefined;
+    networkError && 'statusCode' in networkError ? (networkError as { statusCode?: number }).statusCode : undefined;
 
   const reason = resolveAuthRedirectReason(graphQLErrors, statusCode);
   if (!reason) return;
@@ -94,11 +98,7 @@ export const client = new ApolloClient({
   link: from([errorLink, authLink, splitLink || httpLink]),
   cache: new InMemoryCache(),
   defaultOptions: {
-    watchQuery: {
-      errorPolicy: 'all',
-    },
-    query: {
-      errorPolicy: 'all',
-    },
+    watchQuery: { errorPolicy: 'all' },
+    query: { errorPolicy: 'all' },
   },
 });
