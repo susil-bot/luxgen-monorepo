@@ -39,7 +39,11 @@ const LoginPageContent: React.FC = () => {
 
         showSuccess(`Login successful! Welcome ${user.firstName} ${user.lastName}`);
 
-        router.push('/dashboard');
+        const redirect =
+          typeof router.query.redirect === 'string' && router.query.redirect.startsWith('/')
+            ? router.query.redirect
+            : '/dashboard';
+        router.push(redirect);
       }
     } catch (error: any) {
       console.error('Login error:', error);

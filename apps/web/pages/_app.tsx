@@ -3,6 +3,7 @@ import { ApolloProvider } from '@apollo/client';
 import { client } from '../graphql/client';
 import { GlobalProvider } from '@luxgen/ui';
 import { ThemeProvider } from '../lib/theme';
+import { AuthGuard } from '../components/auth/AuthGuard';
 import '../styles/globals.css';
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -10,7 +11,9 @@ export default function App({ Component, pageProps }: AppProps) {
     <ApolloProvider client={client}>
       <ThemeProvider>
         <GlobalProvider initialTenant={pageProps.tenant || 'demo'}>
-          <Component {...pageProps} />
+          <AuthGuard>
+            <Component {...pageProps} />
+          </AuthGuard>
         </GlobalProvider>
       </ThemeProvider>
     </ApolloProvider>
