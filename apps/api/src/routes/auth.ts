@@ -4,13 +4,15 @@ import { UserRole } from '@luxgen/auth';
 import { verifyPassword } from '@luxgen/auth';
 import { generateToken } from '../utils/jwt';
 import { validateLogin, validateRegister } from '../middleware/validation';
+import { loginRateLimitMiddleware } from '../middleware/loginRateLimit';
+import { isAccountActive, ACCOUNT_DEACTIVATED_MESSAGE } from '../utils/accountStatus';
 import { UserRegistrationService } from '../services/userRegistrationService';
 import { requireRole, canInviteUsers, logRoleAccess } from '../middleware/roleManagement';
 
 const router = Router();
 
 // Login endpoint
-router.post('/login', validateLogin, async (req: Request, res: Response) => {
+router.post('/login', loginRateLimitMiddleware, validateLogin, async (req: Request, res: Response) => {
   try {
     const { email, password, tenant } = req.body;
 
@@ -44,13 +46,12 @@ router.post('/login', validateLogin, async (req: Request, res: Response) => {
       });
     }
 
-    // Check if user is active (you can add an isActive field to the user model)
-    // if (!user.isActive) {
-    //   return res.status(401).json({
-    //     success: false,
-    //     message: 'Account is deactivated',
-    //   });
-    // }
+    if (!isAccountActive(user)) {
+      return res.status(403).json({
+        success: false,
+        message: ACCOUNT_DEACTIVATED_MESSAGE,
+      });
+    }
 
     // Generate JWT token with tenant-specific key
     const token = generateToken(
