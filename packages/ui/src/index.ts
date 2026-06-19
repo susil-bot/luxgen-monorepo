@@ -3,6 +3,18 @@ export * from './PageWrapper';
 export * from './Header';
 export * from './Footer';
 export * from './GridContainer';
+export { SplitPageLayout } from './SplitPageLayout/SplitPageLayout';
+export type { SplitPageLayoutProps } from './SplitPageLayout/SplitPageLayout';
+export { SplitPageSection } from './SplitPageLayout/SplitPageSection';
+export type { SplitPageSectionProps } from './SplitPageLayout/SplitPageSection';
+export {
+  splitPagePresets,
+  splitPageDefaults,
+  splitPageStyles,
+} from './SplitPageLayout/fetcher';
+export type { SplitPageVariant, SplitPageLayoutPreset } from './SplitPageLayout/fetcher';
+export { splitPageLayoutFixtures } from './SplitPageLayout/fixture';
+export { SplitPageLayoutTranslations } from './SplitPageLayout/translations';
 export * from './Layout';
 
 // Navigation Components
@@ -47,6 +59,9 @@ export * from './Carousel';
 export * from './Accordion';
 export * from './Card';
 export * from './ProductCard';
+export * from './ProductEdit';
+export * from './Order';
+export * from './Customer';
 export * from './Modal';
 export * from './Table';
 

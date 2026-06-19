@@ -1,0 +1,26 @@
+import type { OrderDetail, OrderRow } from './fetcher';
+import { buildOrderDetail } from './fetcher';
+
+const sampleOrder: OrderRow = {
+  id: 'course-1:student-1',
+  orderNumber: '#1042',
+  date: new Date().toISOString(),
+  customerId: 'student-1',
+  customerName: 'Jane Smith',
+  customerEmail: 'jane@example.com',
+  paymentStatus: 'paid',
+  fulfillmentStatus: 'partial',
+  total: '99.00',
+  itemCount: 1,
+  courseTitle: 'Introduction to Product Design',
+  archived: false,
+};
+
+export const orderFixtures = {
+  listRows: [sampleOrder],
+  detail: buildOrderDetail(sampleOrder, {
+    id: 'course-1',
+    title: 'Introduction to Product Design',
+    status: 'PUBLISHED',
+  }) satisfies OrderDetail,
+};

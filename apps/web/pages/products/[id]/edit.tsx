@@ -3,21 +3,25 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMutation, useQuery } from '@apollo/client';
-import { AppLayout, getDefaultLogo, getDefaultSidebarSections, SnackbarProvider, useSnackbar } from '@luxgen/ui';
+import {
+  AppLayout,
+  getDefaultLogo,
+  getDefaultSidebarSections,
+  SnackbarProvider,
+  useSnackbar,
+  ProductEditForm,
+  DEFAULT_PRODUCT_EDIT_META,
+  mapCourseToProductEditState,
+  buildCourseUpdateInput,
+  type ProductEditMeta,
+  type ProductSeo,
+  type ProductStatus,
+} from '@luxgen/ui';
 import { PageLoadingState } from '../../../components/common/PageStates';
-import { ProductEditForm } from '../../../components/products/edit/ProductEditForm';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import { useLayoutUser } from '../../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
 import { GET_COURSE, UPDATE_COURSE } from '../../../graphql/queries/courses';
-import {
-  DEFAULT_PRODUCT_EDIT_META,
-  parseProductEditRecord,
-  serializeProductEditRecord,
-  type ProductEditMeta,
-} from '../../../lib/product-edit-meta';
-import type { ProductSeo } from '../../../lib/product-seo';
-import { courseToProductRow, type ProductStatus } from '../../../lib/product-display';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 
 interface Props {
@@ -51,23 +55,12 @@ function EditProductContent({ tenant }: Props) {
     const course = data?.course;
     if (!course) return;
 
-    const parsed = parseProductEditRecord(course.description);
-    setTitle(course.title ?? '');
-    setBodyHtml(parsed.bodyHtml);
-    setSeo(
-      parsed.seo.metaTitle
-        ? parsed.seo
-        : { ...parsed.seo, metaTitle: course.title ?? '' },
-    );
-    setStatus((course.status as ProductStatus) ?? 'DRAFT');
-
-    const row = courseToProductRow(course);
-    setMeta({
-      ...parsed.meta,
-      vendor: parsed.meta.vendor || row.vendor,
-      sku: parsed.meta.sku || row.sku,
-      productType: parsed.meta.productType || row.productType,
-    });
+    const state = mapCourseToProductEditState(course);
+    setTitle(state.title);
+    setBodyHtml(state.bodyHtml);
+    setSeo(state.seo);
+    setStatus(state.status);
+    setMeta(state.meta);
   }, [data]);
 
   const handleMetaChange = (patch: Partial<ProductEditMeta>) => {
@@ -88,11 +81,7 @@ function EditProductContent({ tenant }: Props) {
       await updateCourse({
         variables: {
           id: courseId,
-          input: {
-            title: title.trim(),
-            description: serializeProductEditRecord(bodyHtml, seo, meta),
-            status,
-          },
+          input: buildCourseUpdateInput({ title, bodyHtml, seo, meta, status }),
         },
       });
       showSuccess('Product saved');

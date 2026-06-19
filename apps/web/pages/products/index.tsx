@@ -134,7 +134,7 @@ function ProductsPage({ tenant }: ProductsPageProps) {
         {...headerProps}
         responsive
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        <div className="split-page admin-list-page max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div>
               <h1 className="ios-large-title">Products</h1>

@@ -1,13 +1,26 @@
 import { useState } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMutation } from '@apollo/client';
-import { AppLayout, getDefaultLogo, getDefaultSidebarSections, SnackbarProvider, useSnackbar } from '@luxgen/ui';
+import {
+  AppLayout,
+  getDefaultLogo,
+  getDefaultSidebarSections,
+  SnackbarProvider,
+  useSnackbar,
+  ProductEditForm,
+  ProductEditTranslations,
+  DEFAULT_PRODUCT_EDIT_META,
+  buildCourseCreateInput,
+  buildCourseUpdateInput,
+  type ProductEditMeta,
+  type ProductSeo,
+  type ProductStatus,
+} from '@luxgen/ui';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../lib/app-layout-user';
 import { getStoredUser } from '../../lib/session';
-import { CREATE_COURSE } from '../../graphql/queries/courses';
+import { CREATE_COURSE, UPDATE_COURSE } from '../../graphql/queries/courses';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
 
@@ -25,37 +38,69 @@ function CreateProductContent({ tenant }: Props) {
   const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
 
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
+  const [bodyHtml, setBodyHtml] = useState('');
+  const [seo, setSeo] = useState<ProductSeo>({ metaTitle: '', metaDescription: '', urlHandle: '' });
+  const [meta, setMeta] = useState<ProductEditMeta>({ ...DEFAULT_PRODUCT_EDIT_META });
+  const [status, setStatus] = useState<ProductStatus>('DRAFT');
+  const [saving, setSaving] = useState(false);
 
-  const [createCourse, { loading }] = useMutation(CREATE_COURSE);
+  const [createCourse] = useMutation(CREATE_COURSE);
+  const [updateCourse] = useMutation(UPDATE_COURSE);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleMetaChange = (patch: Partial<ProductEditMeta>) => {
+    setMeta((prev) => ({ ...prev, ...patch }));
+  };
+
+  const handleSeoChange = (patch: Partial<ProductSeo>) => {
+    setSeo((prev) => ({ ...prev, ...patch }));
+  };
+
+  const handleSave = async () => {
+    if (!title.trim()) {
+      showError('Title is required');
+      return;
+    }
+
     const instructorId = sessionUser?.id;
-    const tid = tenantId ?? sessionUser?.tenant.id;
+    const tid = tenantId ?? sessionUser?.tenant.id ?? tenant;
     if (!instructorId || !tid) {
       showError('Sign in required');
       return;
     }
 
+    setSaving(true);
     try {
       const { data } = await createCourse({
         variables: {
-          input: {
-            title: title.trim(),
-            description: description.trim() || undefined,
-            instructorId,
-            tenantId: tid,
-          },
+          input: buildCourseCreateInput({ title, bodyHtml, seo, meta }, instructorId, tid),
         },
       });
+
+      const id = data?.createCourse?.id as string | undefined;
+      if (!id) {
+        showError('Create failed — no product id returned');
+        return;
+      }
+
+      if (status !== 'DRAFT') {
+        await updateCourse({
+          variables: {
+            id,
+            input: buildCourseUpdateInput({ title, bodyHtml, seo, meta, status }),
+          },
+        });
+      }
+
       showSuccess('Product created');
-      const id = data?.createCourse?.id;
-      void router.push(id ? `/products/${id}/edit` : '/products');
-    } catch (err: unknown) {
+      void router.push(`/products/${id}/edit`);
+    } catch (err) {
       showError(err instanceof Error ? err.message : 'Create failed');
+    } finally {
+      setSaving(false);
     }
   };
+
+  const t = ProductEditTranslations.en;
 
   return (
     <>
@@ -71,32 +116,24 @@ function CreateProductContent({ tenant }: Props) {
         {...headerProps}
         responsive
       >
-        <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
-          <Link href="/products" className="ios-btn-plain text-sm">
-            ← Products
-          </Link>
-          <h1 className="ios-large-title">Add product</h1>
-
-          <form onSubmit={(e) => void handleSubmit(e)} className="ios-card p-6 space-y-4">
-            <div className="ios-form-group">
-              <label htmlFor="title">Title</label>
-              <input id="title" className="ios-input" required value={title} onChange={(e) => setTitle(e.target.value)} />
-            </div>
-            <div className="ios-form-group">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                className="ios-input min-h-[120px]"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-              />
-            </div>
-            <p className="text-xs text-tertiary">Creates a Course (draft). Pricing, variants, SEO — Phase 2.</p>
-            <button type="submit" className="ios-btn-primary" disabled={loading}>
-              {loading ? 'Creating…' : 'Save product'}
-            </button>
-          </form>
-        </div>
+        <ProductEditForm
+          tenant={tenant}
+          title={title}
+          bodyHtml={bodyHtml}
+          seo={seo}
+          meta={meta}
+          status={status}
+          enrollmentCount={0}
+          saving={saving}
+          saveLabel={t.create}
+          savingLabel={t.creating}
+          onTitleChange={setTitle}
+          onBodyChange={setBodyHtml}
+          onSeoChange={handleSeoChange}
+          onMetaChange={handleMetaChange}
+          onStatusChange={setStatus}
+          onSave={() => void handleSave()}
+        />
       </AppLayout>
     </>
   );

@@ -1,0 +1,1 @@
+export { CustomerNotesSection } from './CustomerNotesSection';
