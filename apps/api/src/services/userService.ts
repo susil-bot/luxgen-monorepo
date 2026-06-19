@@ -2,12 +2,16 @@ import { User, IUser } from '@luxgen/db';
 import { verifyPassword } from '@luxgen/auth';
 import { generateToken } from '../utils/jwt';
 import { logger } from '../utils/logger';
+import { isAccountActive, ACCOUNT_DEACTIVATED_MESSAGE } from '../utils/accountStatus';
+import { checkLoginRateLimit } from '../middleware/loginRateLimit';
+import type { Request } from 'express';
 import { UserRegistrationService, UserRegistrationData } from './userRegistrationService';
 
 export interface LoginInput {
   email: string;
   password: string;
   tenantId?: string;
+  req?: Request;
 }
 
 export interface AuthResult {
@@ -50,7 +54,11 @@ export class UserService {
     return !!result;
   }
 
-  async login({ email, password, tenantId }: LoginInput): Promise<AuthResult> {
+  async login({ email, password, tenantId, req }: LoginInput): Promise<AuthResult> {
+    if (req) {
+      checkLoginRateLimit(req, email);
+    }
+
     const query: Record<string, unknown> = { email: email.toLowerCase().trim() };
     if (tenantId) query.tenant = tenantId;
 
@@ -59,6 +67,10 @@ export class UserService {
 
     const isValid = await verifyPassword(password, user.password);
     if (!isValid) throw new Error('Invalid email or password');
+
+    if (!isAccountActive(user)) {
+      throw new Error(ACCOUNT_DEACTIVATED_MESSAGE);
+    }
 
     const token = generateToken(
       {

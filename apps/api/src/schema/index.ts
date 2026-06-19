@@ -1,5 +1,6 @@
 import { makeExecutableSchema } from 'graphql-tools';
 import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge';
+import { secureResolvers } from '../graphql/authPolicy';
 
 // Import type definitions
 import { tenantTypeDefs } from './tenant/typeDefs';
@@ -90,8 +91,8 @@ const scalarResolvers = {
   },
 };
 
-// Merge all resolvers
-export const resolvers: any = mergeResolvers([
+// Merge all resolvers, then enforce auth on protected Query/Mutation fields
+const mergedResolvers = mergeResolvers([
   scalarResolvers,
   tenantResolvers,
   userResolvers,
@@ -104,6 +105,8 @@ export const resolvers: any = mergeResolvers([
   marketplaceResolvers,
   listingResolvers,
 ]);
+
+export const resolvers: any = secureResolvers(mergedResolvers);
 
 // Create executable schema
 export const schema = makeExecutableSchema({

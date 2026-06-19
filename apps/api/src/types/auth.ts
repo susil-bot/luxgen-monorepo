@@ -1,0 +1,1 @@
+export type AuthErrorCode = 'INVALID_TOKEN' | 'ACCOUNT_DEACTIVATED' | 'TENANT_MISMATCH';
