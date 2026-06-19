@@ -92,10 +92,13 @@ export function CreateOrderModal({
         {noStudents ? (
           <p className="text-sm text-secondary">No customers available. Add a customer first.</p>
         ) : (
-          <div className="ios-form-group">
-            <label className="text-sm text-secondary mb-1 block">Customer</label>
+          <div className="space-y-1.5">
+            <label htmlFor="create-order-customer" className="text-sm font-medium text-secondary block">
+              Customer
+            </label>
             <select
-              className="ios-input"
+              id="create-order-customer"
+              className="ios-input w-full"
               value={studentId}
               onChange={(e) => setStudentId(e.target.value)}
               disabled={Boolean(defaultStudentId)}
@@ -112,9 +115,16 @@ export function CreateOrderModal({
         {noStudents ? null : noCourses ? (
           <p className="text-sm text-secondary">This customer is already enrolled in all courses.</p>
         ) : (
-          <div className="ios-form-group">
-            <label className="text-sm text-secondary mb-1 block">Course</label>
-            <select className="ios-input" value={courseId} onChange={(e) => setCourseId(e.target.value)}>
+          <div className="space-y-1.5">
+            <label htmlFor="create-order-course" className="text-sm font-medium text-secondary block">
+              Course
+            </label>
+            <select
+              id="create-order-course"
+              className="ios-input w-full"
+              value={courseId}
+              onChange={(e) => setCourseId(e.target.value)}
+            >
               {availableCourses.map((c) => (
                 <option key={c.id} value={c.id}>
                   {c.title}

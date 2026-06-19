@@ -22,6 +22,9 @@ export const GET_COURSE = gql`
       endDate
       status
       createdAt
+      tenant {
+        id
+      }
     }
   }
 `;

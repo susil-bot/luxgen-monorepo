@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import type { OrderDetail, OrderPaymentStatus } from '@luxgen/ui';
 import { GET_ACTIVITY_EVENTS } from '../graphql/queries/activity-events';
+import { isMongoObjectId } from './mongo-id';
 import {
   GET_ENROLLMENT,
   UPDATE_ORDER_NOTES,
@@ -39,7 +40,7 @@ export function useOrderEnrollment(order: OrderDetail | null | undefined, tenant
     refetchQueries: parts
       ? [
           { query: GET_ENROLLMENT, variables: { courseId: parts.courseId, studentId: parts.studentId } },
-          ...(tenantId && order
+          ...(isMongoObjectId(tenantId) && order
             ? [
                 {
                   query: GET_ACTIVITY_EVENTS,

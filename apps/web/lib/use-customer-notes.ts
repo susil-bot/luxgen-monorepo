@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import { GET_ACTIVITY_EVENTS } from '../graphql/queries/activity-events';
 import { GET_USER, UPDATE_CUSTOMER_NOTES } from '../graphql/queries/users';
+import { isMongoObjectId } from './mongo-id';
 
 export function useCustomerNotes(
   customerId: string | undefined,
@@ -16,7 +17,7 @@ export function useCustomerNotes(
 
   const [updateNotes] = useMutation(UPDATE_CUSTOMER_NOTES, {
     refetchQueries:
-      tenantId && customerId
+      isMongoObjectId(tenantId) && customerId
         ? [
             { query: GET_USER, variables: { id: customerId } },
             {

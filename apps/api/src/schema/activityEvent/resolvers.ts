@@ -4,6 +4,19 @@ import { ACTIVITY_EVENT_ADDED, activityPubSub, timelineTopic } from '../../lib/a
 import type { GraphQLContext } from '../../context';
 import type { ActivitySubjectType } from '@luxgen/db';
 
+function eventId(event: {
+  _id?: { toString(): string };
+  id?: string;
+  subjectType: string;
+  subjectId: string;
+  eventType: string;
+  createdAt: Date;
+}): string {
+  const fromDb = event._id?.toString?.() ?? event.id;
+  if (fromDb) return fromDb;
+  return `synth-${event.subjectType}-${event.subjectId}-${event.eventType}-${new Date(event.createdAt).getTime()}`;
+}
+
 function mapEvent(event: {
   _id?: { toString(): string };
   id?: string;
@@ -22,7 +35,7 @@ function mapEvent(event: {
   criticalAlert?: boolean;
 }) {
   return {
-    id: event._id?.toString?.() ?? event.id,
+    id: eventId(event),
     subjectType: event.subjectType,
     subjectId: event.subjectId,
     kind: event.kind,

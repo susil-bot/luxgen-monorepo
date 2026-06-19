@@ -9,7 +9,7 @@ import {
   getDefaultSidebarSections,
   CustomerDetailView,
   buildCustomersFromUsers,
-  findCustomerDetail,
+  buildCustomerDetailFromUser,
   SnackbarProvider,
 } from '@luxgen/ui';
 import { PageLoadingState } from '../../../components/common/PageStates';
@@ -18,11 +18,13 @@ import { createHandleUserAction } from '../../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../../lib/app-layout-user';
 import { getStoredUser } from '../../../lib/session';
 import { GET_COURSES } from '../../../graphql/queries/courses';
-import { GET_USERS } from '../../../graphql/queries/users';
+import { GET_USER, GET_USERS } from '../../../graphql/queries/users';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
 import { useActivityTimeline } from '../../../lib/use-activity-timeline';
 import { useCustomerNotes } from '../../../lib/use-customer-notes';
+import { isMongoObjectId } from '../../../lib/mongo-id';
+import { isLearnerRole } from '../../../lib/user-roles';
 
 interface Props {
   tenant: string;
@@ -34,36 +36,45 @@ function AdminCustomerDetailContent({ tenant }: Props) {
   const layoutUser = useLayoutUser();
   const tenantId = useAppTenantId();
   const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
-  const queryTenantId = tenantId ?? sessionUser?.tenant.id ?? tenant;
+  const queryTenantId = tenantId ?? sessionUser?.tenant.id;
   const headerProps = useAppLayoutHeader();
   const [showCreateOrder, setShowCreateOrder] = useState(false);
 
   const customerId = typeof router.query.id === 'string' ? router.query.id : '';
 
+  const { data: userData, loading: userLoading } = useQuery(GET_USER, {
+    variables: { id: customerId },
+    skip: !customerId,
+    fetchPolicy: 'cache-and-network',
+  });
+
   const { data: coursesData, loading: coursesLoading } = useQuery(GET_COURSES, {
     variables: { tenantId: queryTenantId },
-    skip: !queryTenantId,
+    skip: !isMongoObjectId(queryTenantId),
     fetchPolicy: 'cache-and-network',
   });
 
   const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
     variables: { tenantId: queryTenantId },
-    skip: !queryTenantId,
+    skip: !isMongoObjectId(queryTenantId),
     fetchPolicy: 'cache-and-network',
   });
 
   const learners = useMemo(
-    () =>
-      (usersData?.users ?? []).filter(
-        (u: { role: string }) => u.role === 'STUDENT' || u.role === 'student',
-      ),
+    () => (usersData?.users ?? []).filter((u: { role: string }) => isLearnerRole(u.role)),
     [usersData],
   );
 
   const customer = useMemo(() => {
-    const customers = buildCustomersFromUsers(learners, coursesData?.courses);
-    return findCustomerDetail(customers, customerId, coursesData?.courses, learners);
-  }, [coursesData, learners, customerId]);
+    const user = userData?.user;
+    if (!user || !isLearnerRole(user.role)) return null;
+    return buildCustomerDetailFromUser(
+      user,
+      coursesData?.courses,
+      learners,
+      user.staffNotes ?? '',
+    );
+  }, [userData?.user, coursesData?.courses, learners]);
 
   const orderStudents = useMemo(
     () =>
@@ -75,7 +86,10 @@ function AdminCustomerDetailContent({ tenant }: Props) {
     [learners],
   );
 
-  const loading = !customerId || ((coursesLoading || usersLoading) && !customer);
+  const loading =
+    !customerId ||
+    (userLoading && !userData) ||
+    ((coursesLoading || usersLoading) && !coursesData && !usersData && !customer);
 
   const staffInitials =
     layoutUser?.name
@@ -87,20 +101,21 @@ function AdminCustomerDetailContent({ tenant }: Props) {
   const mentionOptions = useMemo(
     () =>
       (usersData?.users ?? [])
-        .filter((u: { role: string }) => u.role !== 'STUDENT' && u.role !== 'student')
+        .filter((u: { role: string }) => !isLearnerRole(u.role))
         .map((u: { email?: string; firstName?: string }) =>
           (u.email?.split('@')[0] || u.firstName || 'staff').toLowerCase(),
         ),
     [usersData],
   );
 
-  const timeline = useActivityTimeline(queryTenantId, 'CUSTOMER', customerId, staffInitials, mentionOptions);
+  const timelineTenantId = isMongoObjectId(queryTenantId) ? queryTenantId : undefined;
+  const timeline = useActivityTimeline(timelineTenantId, 'CUSTOMER', customerId, staffInitials, mentionOptions);
 
   const {
     notes: customerNotes,
     onNotesChange: onCustomerNotesChange,
     savingNotes: savingCustomerNotes,
-  } = useCustomerNotes(customerId, queryTenantId, customer?.notes ?? '');
+  } = useCustomerNotes(customerId, timelineTenantId, customer?.notes ?? '');
 
   return (
     <>
@@ -137,7 +152,7 @@ function AdminCustomerDetailContent({ tenant }: Props) {
         )}
       </AppLayout>
 
-      {queryTenantId && (
+      {isMongoObjectId(queryTenantId) && (
         <CreateOrderModal
           isOpen={showCreateOrder}
           onClose={() => setShowCreateOrder(false)}

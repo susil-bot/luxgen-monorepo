@@ -11,6 +11,7 @@ import {
   ADD_ACTIVITY_COMMENT,
   GET_ACTIVITY_EVENTS,
 } from '../graphql/queries/activity-events';
+import { isMongoObjectId } from './mongo-id';
 
 interface GraphQLActivityEvent {
   id: string;
@@ -67,13 +68,13 @@ export function useActivityTimeline(
 
   const { data, refetch, fetchMore } = useQuery(GET_ACTIVITY_EVENTS, {
     variables: { tenantId, subjectType, subjectId, first: PAGE_SIZE },
-    skip: !tenantId || !subjectId,
+    skip: !isMongoObjectId(tenantId) || !subjectId,
     fetchPolicy: 'cache-and-network',
   });
 
   useSubscription(ACTIVITY_EVENT_ADDED, {
     variables: { tenantId, subjectType, subjectId },
-    skip: !tenantId || !subjectId,
+    skip: !isMongoObjectId(tenantId) || !subjectId,
     onData: ({ data: subData }) => {
       const node = subData.data?.activityEventAdded as GraphQLActivityEvent | undefined;
       if (!node) return;
@@ -156,7 +157,7 @@ export function useActivityTimeline(
     setCommentAttachments((prev) => prev.filter((a) => a.url !== url));
   }, []);
 
-  if (!tenantId || !subjectId) return undefined;
+  if (!isMongoObjectId(tenantId) || !subjectId) return undefined;
 
   return {
     events,

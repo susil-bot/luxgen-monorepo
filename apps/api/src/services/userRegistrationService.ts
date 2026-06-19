@@ -100,7 +100,7 @@ export class UserRegistrationService {
         firstName: data.firstName.trim(),
         lastName: data.lastName.trim(),
         role: data.role,
-        status: this.getInitialStatus(data.role),
+        status: this.getInitialStatus(data.role, data.invitedBy),
         tenant: data.tenantId,
         isActive: true,
         metadata,
@@ -118,10 +118,11 @@ export class UserRegistrationService {
       };
     } catch (error) {
       logger.error('User registration error:', error);
+      const detail = error instanceof Error ? error.message : 'Internal server error';
       return {
         success: false,
-        message: 'Registration failed',
-        errors: { general: 'Internal server error' },
+        message: detail.includes('validation failed') ? 'Invalid user data — check role and required fields' : 'Registration failed',
+        errors: { general: detail },
       };
     }
   }
@@ -211,7 +212,9 @@ export class UserRegistrationService {
         break;
 
       case UserRole.USER:
-        // Users have minimal permissions by default
+      case UserRole.STUDENT:
+      case UserRole.INSTRUCTOR:
+        // Learners — minimal permissions by default
         break;
     }
 
@@ -221,13 +224,16 @@ export class UserRegistrationService {
   /**
    * Get initial status for a role
    */
-  private static getInitialStatus(role: UserRole): UserStatus {
-    // Super admins and admins are active immediately
+  private static getInitialStatus(role: UserRole, invitedBy?: string): UserStatus {
     if (role === UserRole.SUPER_ADMIN || role === UserRole.ADMIN) {
       return UserStatus.ACTIVE;
     }
 
-    // Students and instructors need approval
+    // Staff-created learners are active immediately; self-registration stays pending
+    if ((role === UserRole.STUDENT || role === UserRole.INSTRUCTOR || role === UserRole.USER) && invitedBy) {
+      return UserStatus.ACTIVE;
+    }
+
     return UserStatus.PENDING;
   }
 

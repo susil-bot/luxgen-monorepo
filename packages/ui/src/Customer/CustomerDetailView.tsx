@@ -8,6 +8,7 @@ import { MetafieldsSection } from './detail/MetafieldsSection';
 import { CustomerHistorySection } from './detail/CustomerHistorySection';
 import { CustomerContactSection } from './detail/CustomerContactSection';
 import { MarketingSection } from './detail/MarketingSection';
+import { TaxDetailsSection } from './detail/TaxDetailsSection/TaxDetailsSection';
 import { StoreCreditSection } from './detail/StoreCreditSection';
 import { CustomerTagsSection } from './detail/CustomerTagsSection';
 import { CustomerNotesSection } from './detail/CustomerNotesSection';
@@ -21,6 +22,11 @@ export interface CustomerDetailViewProps {
   savingCustomerNotes?: boolean;
 }
 
+/**
+ * Shopify admin customer profile — main + aside via SplitPageLayout.
+ * Main: last order, metafields, blocks (customer history).
+ * Aside: contact, marketing, tax, store credit, tags, notes.
+ */
 export function CustomerDetailView({
   customer,
   onCreateOrder,
@@ -32,6 +38,7 @@ export function CustomerDetailView({
   return (
     <SplitPageLayout
       variant="main-aside"
+      className="w-full min-h-0"
       header={
         <>
           <CustomerDetailHeader customer={customer} />
@@ -49,6 +56,7 @@ export function CustomerDetailView({
         <>
           <CustomerContactSection customer={customer} />
           <MarketingSection customer={customer} />
+          <TaxDetailsSection />
           <StoreCreditSection customer={customer} />
           <CustomerTagsSection customer={customer} />
           <CustomerNotesSection

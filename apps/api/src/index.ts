@@ -20,7 +20,14 @@ async function startServer() {
     }
 
     const httpServer = await createAppServer();
-    startTimelineRedisBridge();
+    try {
+      startTimelineRedisBridge();
+    } catch (err) {
+      console.warn(
+        '[timeline-redis-bridge] Disabled:',
+        err instanceof Error ? err.message : String(err),
+      );
+    }
     httpServer.listen(PORT, () => {
       console.log(`🚀 Server running on ${getApiUrl()}`);
       console.log(`📊 GraphQL Playground: ${getGraphqlUrl()}`);
