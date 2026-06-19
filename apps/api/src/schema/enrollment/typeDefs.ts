@@ -50,6 +50,8 @@ export const enrollmentTypeDefs = `
 
   extend type Query {
     enrollment(courseId: ID!, studentId: ID!): Enrollment
+    enrollmentById(id: ID!): Enrollment
+    enrollments(tenantId: ID!): [Enrollment!]!
   }
 
   extend type Mutation {

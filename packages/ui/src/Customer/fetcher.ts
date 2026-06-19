@@ -1,7 +1,7 @@
 /** Customer data layer — Shopify customers mapped to LuxGen learners (STUDENT users). */
 
 import type { OrderRow } from '../Order/fetcher';
-import { buildOrdersFromEnrollments, type EnrollmentCourseSource, type EnrollmentUserSource } from '../Order/fetcher';
+import { buildOrdersFromEnrollments, type EnrollmentCourseSource, type EnrollmentUserSource, type OrderEnrollmentSource } from '../Order/fetcher';
 
 export type CustomerFilterTab = 'all' | 'subscribed' | 'active' | 'archived';
 
@@ -40,6 +40,7 @@ export interface CustomerDetail extends CustomerRow {
   phone: string;
   marketingEmail: boolean;
   marketingSms: boolean;
+  marketingWhatsapp: boolean;
   storeCredit: string;
   notes: string;
   orders: CustomerOrderSummary[];
@@ -71,8 +72,9 @@ function deriveRfmGroup(orderCount: number): string {
 export function buildCustomersFromUsers(
   users: EnrollmentUserSource[] | null | undefined,
   courses: EnrollmentCourseSource[] | null | undefined,
+  enrollments?: OrderEnrollmentSource[] | null,
 ): CustomerRow[] {
-  const orders = buildOrdersFromEnrollments(courses, users);
+  const orders = buildOrdersFromEnrollments(courses, users, enrollments);
   const orderCountByUser = new Map<string, number>();
 
   for (const order of orders) {
@@ -140,6 +142,7 @@ export function buildCustomerDetail(
     phone: '—',
     marketingEmail: true,
     marketingSms: false,
+    marketingWhatsapp: false,
     storeCredit: 'None',
     notes: '',
     orders: customerOrders,
@@ -178,10 +181,11 @@ export function findCustomerDetail(
   customerId: string,
   courses: EnrollmentCourseSource[] | null | undefined,
   users: EnrollmentUserSource[] | null | undefined,
+  enrollments?: OrderEnrollmentSource[] | null,
 ): CustomerDetail | null {
   const customer = customers.find((c) => c.id === customerId);
   if (!customer) return null;
-  const orders = buildOrdersFromEnrollments(courses, users);
+  const orders = buildOrdersFromEnrollments(courses, users, enrollments);
   return buildCustomerDetail(customer, orders);
 }
 
@@ -191,8 +195,9 @@ export function buildCustomerDetailFromUser(
   courses: EnrollmentCourseSource[] | null | undefined,
   users: EnrollmentUserSource[] | null | undefined,
   staffNotes?: string,
+  enrollments?: OrderEnrollmentSource[] | null,
 ): CustomerDetail {
-  const orders = buildOrdersFromEnrollments(courses, users);
+  const orders = buildOrdersFromEnrollments(courses, users, enrollments);
   const orderCount = orders.filter((o) => o.customerId === user.id).length;
   const row: CustomerRow = {
     id: user.id,
@@ -206,6 +211,10 @@ export function buildCustomerDetailFromUser(
     tags: orderCount > 0 ? ['Active learner'] : [],
   };
   const detail = buildCustomerDetail(row, orders);
+  detail.phone = user.phone?.trim() || '—';
+  detail.marketingEmail = user.marketingEmail ?? true;
+  detail.marketingSms = user.marketingSms ?? false;
+  detail.marketingWhatsapp = user.marketingWhatsapp ?? false;
   if (staffNotes !== undefined) {
     detail.notes = staffNotes;
   }

@@ -36,6 +36,14 @@ export const enrollmentResolvers = {
       const doc = await enrollmentService.getByCourseAndStudent(courseId, studentId);
       return doc ? mapEnrollment(doc) : null;
     },
+    enrollmentById: async (_: unknown, { id }: { id: string }) => {
+      const doc = await enrollmentService.getById(id);
+      return doc ? mapEnrollment(doc) : null;
+    },
+    enrollments: async (_: unknown, { tenantId }: { tenantId: string }) => {
+      const docs = await enrollmentService.listByTenant(tenantId);
+      return docs.map(mapEnrollment);
+    },
   },
   Mutation: {
     updateOrderNotes: async (

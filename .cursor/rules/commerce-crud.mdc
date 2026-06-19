@@ -1,0 +1,63 @@
+---
+description: Commerce admin CRUD — wire every editable field UI → GraphQL → API → DB
+globs: apps/web/pages/**/customers/**,apps/web/pages/**/orders/**,apps/web/pages/**/products/**,packages/ui/src/Customer/**,packages/ui/src/Order/**,packages/ui/src/ProductEdit/**,apps/api/src/schema/**,apps/api/src/services/**
+alwaysApply: false
+---
+
+# Commerce CRUD wiring
+
+Load **`skills/fullstack-developer/SKILL.md`** for LuxGen stack context.
+
+## Layer stack (never skip a layer)
+
+```
+Page (apps/web/pages) → @luxgen/ui form/view → GraphQL (apps/web/graphql) → resolver → service → @luxgen/db
+```
+
+## Entity map
+
+| Entity | Create | Read | Update | Delete |
+|--------|--------|------|--------|--------|
+| **Customer** | `createUser` (STUDENT) | `GET_USER` | `updateUser` + `updateCustomerNotes` | `deleteUser` (staff only) |
+| **Product** | `createCourse` | `GET_COURSE` | `updateCourse` | `deleteCourse` |
+| **Order** | `enrollStudent` → enrollment id | `enrollments` / `enrollmentById` | `updateOrderNotes` | `cancelEnrollment` |
+
+## Field wiring checklist
+
+Before marking a form field done:
+
+1. Field exists on **Mongo model** (`packages/db`)
+2. Field on **GraphQL type + input** (`apps/api/src/schema`)
+3. **Resolver** passes through to service
+4. **Query/mutation** in `apps/web/graphql/queries/`
+5. **Page state** loads from query, saves via mutation
+6. **Error surfaced** via `useSnackbar` — no silent failures
+
+## Customer fields (current)
+
+| UI field | Mutation | Notes |
+|----------|----------|-------|
+| First / last name, email | `updateUser` | Required on edit |
+| Phone | `updateUser.phone` | |
+| Marketing checkboxes | `updateUser.marketing*` | Auto-save on detail; batch on edit |
+| Staff notes | `updateCustomerNotes` | Debounced on detail |
+
+## Product fields (current)
+
+| UI section | Persists via |
+|------------|--------------|
+| Title, description, SEO, meta, status | `updateCourse` / `buildCourseUpdateInput` |
+| Media, variants, delivery | Phase — keep `disabled`, do not fake save |
+
+## Order fields (current)
+
+| UI field | Mutation |
+|----------|----------|
+| Notes | `updateOrderNotes` |
+| Customer + course on create | `enrollStudent` |
+
+## When save fails
+
+1. Fix in a **`fix/` branch**, not the open `feat/` PR
+2. Root-cause: network tab → GraphQL errors → resolver → schema mismatch
+3. Add the field to all layers if missing

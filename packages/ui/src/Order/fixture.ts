@@ -2,7 +2,10 @@ import type { OrderDetail, OrderRow } from './fetcher';
 import { buildOrderDetail } from './fetcher';
 
 const sampleOrder: OrderRow = {
-  id: 'course-1:student-1',
+  id: '674a1b2c3d4e5f6789012345',
+  subjectId: 'course-1:student-1',
+  courseId: 'course-1',
+  studentId: 'student-1',
   orderNumber: '#1042',
   date: new Date().toISOString(),
   customerId: 'student-1',

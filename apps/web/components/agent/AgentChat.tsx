@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { AIStudioSidekickFooter } from '@luxgen/ui';
 
 export interface ChatMessage {
   id: string;
@@ -26,6 +27,8 @@ interface AgentChatProps {
   maxTokens?: number;
   toolFilter?: string[];
   systemPrompt?: string;
+  /** `sidekick` = Shopify Sidekick docked panel (compact messages + footer input). */
+  layout?: 'default' | 'sidekick';
 }
 
 const TOOL_ICONS: Record<string, string> = {
@@ -67,9 +70,23 @@ function ToolBadge({ event }: { event: ToolEvent }) {
   );
 }
 
-function MessageBubble({ message }: { message: ChatMessage }) {
+function MessageBubble({ message, layout = 'default' }: { message: ChatMessage; layout?: 'default' | 'sidekick' }) {
   const isUser = message.role === 'user';
 
+  if (layout === 'sidekick') {
+    return (
+      <div className={`lux-sidekick-msg ${isUser ? 'lux-sidekick-msg--user' : 'lux-sidekick-msg--agent'}`}>
+        {message.toolEvents && message.toolEvents.length > 0 && (
+          <div className="lux-sidekick-tools">
+            {message.toolEvents.map((e) => (
+              <ToolBadge key={e.id} event={e} />
+            ))}
+          </div>
+        )}
+        {message.content && <div className="lux-sidekick-msg-content">{message.content}</div>}
+      </div>
+    );
+  }
   return (
     <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4 animate-slide-up`}>
       {!isUser && (
@@ -124,6 +141,7 @@ export default function AgentChat({
   maxTokens,
   toolFilter,
   systemPrompt,
+  layout = 'default',
 }: AgentChatProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
@@ -142,11 +160,13 @@ export default function AgentChat({
         id: 'welcome',
         role: 'assistant',
         content:
-          "👋 Hi! I'm LuxGen Dev Agent.\n\nDescribe what you want to build — a new page, a feature, a component, or a backend endpoint. I'll read the codebase, write the code, and show you exactly what I'm going to change before anything is applied.",
+          layout === 'sidekick'
+            ? "Hi! I'm your LuxGen assistant.\n\nAsk about customers, orders, products, or describe a feature you want to build — I'll read the codebase and stage changes for your review."
+            : "👋 Hi! I'm LuxGen Dev Agent.\n\nDescribe what you want to build — a new page, a feature, a component, or a backend endpoint. I'll read the codebase, write the code, and show you exactly what I'm going to change before anything is applied.",
         timestamp: Date.now(),
       },
     ]);
-  }, []);
+  }, [layout]);
 
   const sendMessage = useCallback(async () => {
     const text = input.trim();
@@ -277,12 +297,14 @@ export default function AgentChat({
     }
   };
 
+  const isSidekick = layout === 'sidekick';
+
   return (
-    <div className="flex flex-col h-full">
+    <div className={isSidekick ? 'lux-sidekick-chat' : 'flex flex-col h-full'}>
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
+      <div className={isSidekick ? 'lux-sidekick-messages' : 'flex-1 overflow-y-auto px-4 py-4'}>
         {messages.map((msg) => (
-          <MessageBubble key={msg.id} message={msg} />
+          <MessageBubble key={msg.id} message={msg} layout={layout} />
         ))}
         {isStreaming && messages[messages.length - 1]?.content === '' && (
           <div className="flex items-center gap-2 px-4 py-2">
@@ -303,42 +325,51 @@ export default function AgentChat({
         <div ref={bottomRef} />
       </div>
 
-      {/* Input */}
-      <div
-        className="p-4 border-t"
-        style={{ borderColor: 'var(--color-separator)', backgroundColor: 'var(--color-bg-secondary)' }}
-      >
-        <div className="flex items-end gap-3">
-          <textarea
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Describe what you want to build… (Enter to send, Shift+Enter for new line)"
-            rows={2}
-            className="flex-1 resize-none input-field"
-            disabled={isStreaming}
-            style={{ minHeight: '56px', maxHeight: '160px' }}
-          />
-          <button
-            onClick={sendMessage}
-            disabled={!input.trim() || isStreaming}
-            className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white transition-all"
-            style={{
-              backgroundColor: !input.trim() || isStreaming ? 'var(--color-fill-secondary)' : 'var(--color-blue)',
-              color: !input.trim() || isStreaming ? 'var(--color-label-tertiary)' : 'white',
-            }}
-          >
-            {isStreaming ? (
-              <div className="w-4 h-4 border-2 border-current rounded-full border-t-transparent animate-spin-ios" />
-            ) : (
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
-              </svg>
-            )}
-          </button>
+      {isSidekick ? (
+        <AIStudioSidekickFooter
+          value={input}
+          onChange={setInput}
+          onSubmit={sendMessage}
+          disabled={isStreaming}
+          placeholder="Ask anything…"
+        />
+      ) : (
+        <div
+          className="p-4 border-t"
+          style={{ borderColor: 'var(--color-separator)', backgroundColor: 'var(--color-bg-secondary)' }}
+        >
+          <div className="flex items-end gap-3">
+            <textarea
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              placeholder="Describe what you want to build… (Enter to send, Shift+Enter for new line)"
+              rows={2}
+              className="flex-1 resize-none input-field"
+              disabled={isStreaming}
+              style={{ minHeight: '56px', maxHeight: '160px' }}
+            />
+            <button
+              onClick={sendMessage}
+              disabled={!input.trim() || isStreaming}
+              className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white transition-all"
+              style={{
+                backgroundColor: !input.trim() || isStreaming ? 'var(--color-fill-secondary)' : 'var(--color-blue)',
+                color: !input.trim() || isStreaming ? 'var(--color-label-tertiary)' : 'white',
+              }}
+            >
+              {isStreaming ? (
+                <div className="w-4 h-4 border-2 border-current rounded-full border-t-transparent animate-spin-ios" />
+              ) : (
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z" />
+                </svg>
+              )}
+            </button>
+          </div>
+          {isStreaming && <p className="text-xs text-tertiary mt-2">Agent is working… Press Escape to stop.</p>}
         </div>
-        {isStreaming && <p className="text-xs text-tertiary mt-2">Agent is working… Press Escape to stop.</p>}
-      </div>
+      )}
     </div>
   );
 }

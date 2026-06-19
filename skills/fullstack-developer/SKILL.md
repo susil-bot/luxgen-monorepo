@@ -296,3 +296,49 @@ npx prisma migrate dev --name init
 # Generate Prisma client
 npx prisma generate
 ```
+
+---
+
+## LuxGen monorepo — commerce CRUD
+
+Use this section when wiring admin **customers**, **products**, or **orders** in this repo.
+
+### Stack
+
+| Layer | Path |
+|-------|------|
+| Pages | `apps/web/pages/admin/customers`, `orders`, `products` |
+| UI forms | `packages/ui/src/Customer`, `Order`, `ProductEdit` |
+| GraphQL client | `apps/web/graphql/queries/` |
+| API | `apps/api/src/schema/`, `apps/api/src/services/` |
+| DB models | `packages/db/src/` |
+
+### PR separation (required)
+
+- **Feature PR** (`feat/`): new pages, layout, fields that work end-to-end.
+- **Bugfix PR** (`fix/`): anything that errors at runtime, fails to persist, or schema mismatch.
+- Never combine — see `.cursor/rules/pr-workflow.mdc`.
+
+### Wiring checklist per field
+
+1. Mongo schema field (`packages/db`)
+2. GraphQL type + input (`typeDefs.ts`)
+3. Service + resolver
+4. `GET_*` / `UPDATE_*` in `apps/web/graphql/queries/`
+5. Page loads + saves with `useSnackbar` on failure
+
+### Entity mutations
+
+| Entity | Create | Update |
+|--------|--------|--------|
+| Customer | `createUser` (role STUDENT) | `updateUser`, `updateCustomerNotes` |
+| Product | `createCourse` | `updateCourse` via `buildCourseUpdateInput` |
+| Order | `enrollStudent` | `updateOrderNotes`; URL id = enrollment `_id` |
+
+### Layout pattern
+
+Use `EntityFormPageLayout` + `useCommercePageShell` for create/edit pages. Detail pages use view components with inline save (notes, marketing) where appropriate.
+
+### Tenant ID
+
+GraphQL `tenantId` must be a **Mongo ObjectId**, not subdomain string (`demo`). Use `useAppTenantId()` from `apps/web/lib/app-layout-user.ts`.

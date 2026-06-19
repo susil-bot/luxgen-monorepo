@@ -5,6 +5,7 @@ import {
   ActivitySubjectType,
   Course,
   User,
+  Enrollment,
   type IActivityEvent,
 } from '@luxgen/db';
 import mongoose from 'mongoose';
@@ -284,7 +285,17 @@ export class ActivityEventService {
     }
 
     if (subjectType === ActivitySubjectType.ORDER) {
-      const [courseId, studentId] = subjectId.split(':');
+      let courseId: string | undefined;
+      let studentId: string | undefined;
+      if (subjectId.includes(':')) {
+        [courseId, studentId] = subjectId.split(':');
+      } else if (mongoose.isValidObjectId(subjectId)) {
+        const enrollment = await Enrollment.findById(subjectId);
+        if (enrollment) {
+          courseId = enrollment.course.toString();
+          studentId = enrollment.student.toString();
+        }
+      }
       if (!courseId || !studentId) return [];
       const course = await Course.findById(courseId);
       const student = await User.findById(studentId);
@@ -423,6 +434,25 @@ export class ActivityEventService {
       kind: ActivityEventKind.SYSTEM,
       eventType: 'customer.created',
       message: `Customer account created (${email})`,
+      actorType: actor ? ActivityActorType.STAFF : ActivityActorType.APP,
+      actorId: actor?.id,
+      actorName: actor?.name ?? 'LuxGen',
+    });
+  }
+
+  async recordCustomerUpdated(
+    tenantId: string,
+    userId: string,
+    message: string,
+    actor?: { id: string; name: string },
+  ) {
+    return this.record({
+      tenantId,
+      subjectType: ActivitySubjectType.CUSTOMER,
+      subjectId: userId,
+      kind: ActivityEventKind.SYSTEM,
+      eventType: 'customer.updated',
+      message,
       actorType: actor ? ActivityActorType.STAFF : ActivityActorType.APP,
       actorId: actor?.id,
       actorName: actor?.name ?? 'LuxGen',

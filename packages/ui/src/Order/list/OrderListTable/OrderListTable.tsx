@@ -13,7 +13,7 @@ export interface OrderListTableProps {
   orderHref?: (orderId: string) => string;
 }
 
-export function OrderListTable({ orders, orderHref = (id) => `/orders/${encodeURIComponent(id)}` }: OrderListTableProps) {
+export function OrderListTable({ orders, orderHref = (id) => `/orders/${id}` }: OrderListTableProps) {
   const t = OrderTranslations.en;
 
   if (orders.length === 0) {

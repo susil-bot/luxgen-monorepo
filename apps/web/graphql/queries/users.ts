@@ -9,6 +9,10 @@ export const GET_USER = gql`
       lastName
       role
       staffNotes
+      phone
+      marketingEmail
+      marketingSms
+      marketingWhatsapp
       tenant {
         id
         name
@@ -69,6 +73,11 @@ export const UPDATE_USER = gql`
       firstName
       lastName
       role
+      phone
+      marketingEmail
+      marketingSms
+      marketingWhatsapp
+      staffNotes
     }
   }
 `;

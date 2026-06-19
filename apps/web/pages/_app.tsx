@@ -2,11 +2,12 @@ import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import { ApolloProvider } from '@apollo/client';
 import { client } from '../graphql/client';
-import { GlobalProvider, NavigationProvider } from '@luxgen/ui';
+import { GlobalProvider, NavigationProvider, AIStudioProvider, AIStudioPanelSlot } from '@luxgen/ui';
 import { ThemeProvider } from '../lib/theme';
 import { AuthGuard } from '../components/auth/AuthGuard';
 import { SessionMonitor } from '../components/auth/SessionMonitor';
 import { SessionSync } from '../components/auth/SessionSync';
+import { AIStudioSidekickPanel } from '../components/agent/AIStudioSidekickPanel';
 import '../styles/globals.css';
 
 function WebNavigationProvider({ children }: { children: React.ReactNode }) {
@@ -30,13 +31,18 @@ export default function App({ Component, pageProps }: AppProps) {
     <ApolloProvider client={client}>
       <ThemeProvider>
         <GlobalProvider initialTenant={pageProps.tenant || 'demo'}>
-          <WebNavigationProvider>
-            <SessionMonitor />
-            <SessionSync />
-            <AuthGuard>
-              <Component {...pageProps} />
-            </AuthGuard>
-          </WebNavigationProvider>
+          <AIStudioProvider>
+            <WebNavigationProvider>
+              <SessionMonitor />
+              <SessionSync />
+              <AIStudioPanelSlot>
+                <AIStudioSidekickPanel />
+              </AIStudioPanelSlot>
+              <AuthGuard>
+                <Component {...pageProps} />
+              </AuthGuard>
+            </WebNavigationProvider>
+          </AIStudioProvider>
         </GlobalProvider>
       </ThemeProvider>
     </ApolloProvider>

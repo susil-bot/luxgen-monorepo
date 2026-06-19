@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useMutation } from '@apollo/client';
-import { Modal, useSnackbar, buildOrderId } from '@luxgen/ui';
+import { useMutation, useApolloClient } from '@apollo/client';
+import { Modal, useSnackbar } from '@luxgen/ui';
 import { ENROLL_STUDENT, GET_COURSES } from '../../graphql/queries/courses';
+import { GET_ENROLLMENT } from '../../graphql/queries/enrollment';
 
 export interface CreateOrderCourseOption {
   id: string;
@@ -35,6 +36,7 @@ export function CreateOrderModal({
   onCreated,
 }: CreateOrderModalProps) {
   const { showSuccess, showError } = useSnackbar();
+  const client = useApolloClient();
   const [enrollStudent, { loading }] = useMutation(ENROLL_STUDENT, {
     refetchQueries: [{ query: GET_COURSES, variables: { tenantId } }],
   });
@@ -72,7 +74,16 @@ export function CreateOrderModal({
 
     try {
       await enrollStudent({ variables: { courseId, studentId } });
-      const orderId = buildOrderId(courseId, studentId);
+      const { data: enrollmentData } = await client.query({
+        query: GET_ENROLLMENT,
+        variables: { courseId, studentId },
+        fetchPolicy: 'network-only',
+      });
+      const orderId = enrollmentData?.enrollment?.id as string | undefined;
+      if (!orderId) {
+        showError('Order created but enrollment id was not found.');
+        return;
+      }
       showSuccess('Order created — enrollment added.');
       handleClose();
       onCreated?.(orderId);

@@ -1,6 +1,8 @@
 import type { ProductEditMeta, ProductSeo, ProductStatus } from './fetcher';
-import { ProductEditLayout } from './ProductEditLayout';
-import { ProductEditHeader } from './ProductEditHeader';
+import { statusBadgeClass, statusDisplayLabel } from './fetcher';
+import { EntityFormPageLayout } from '../SplitPageLayout/EntityFormPageLayout';
+import { SplitPageHeader } from '../SplitPageLayout/SplitPageHeader';
+import { ProductEditTranslations } from './translations';
 import { TitleDescriptionSection } from './sections/TitleDescriptionSection';
 import { MediaSection } from './sections/MediaSection';
 import { CategorySection } from './sections/CategorySection';
@@ -60,16 +62,27 @@ export function ProductEditForm({
   timeline,
 }: ProductEditFormProps) {
   return (
-    <ProductEditLayout
+    <EntityFormPageLayout
       header={
-        <ProductEditHeader
-          title={title}
-          status={status}
-          saving={saving}
-          backHref={backHref}
-          saveLabel={saveLabel}
-          savingLabel={savingLabel}
-          onSave={onSave}
+        <SplitPageHeader
+          backHref={backHref ?? '/products'}
+          backLabel={ProductEditTranslations.en.backToProducts}
+          title={title || ProductEditTranslations.en.untitledProduct}
+          badges={
+            <span className={`badge ${statusBadgeClass(status)} flex-shrink-0`}>
+              {statusDisplayLabel(status)}
+            </span>
+          }
+          actions={
+            <>
+              <button type="button" className="ios-btn-secondary text-sm" disabled>
+                {ProductEditTranslations.en.moreActions}
+              </button>
+              <button type="button" className="ios-btn-primary text-sm" disabled={saving} onClick={onSave}>
+                {saving ? (savingLabel ?? ProductEditTranslations.en.saving) : (saveLabel ?? ProductEditTranslations.en.save)}
+              </button>
+            </>
+          }
         />
       }
       main={
@@ -106,7 +119,7 @@ export function ProductEditForm({
           )}
         </>
       }
-      sidebar={
+      aside={
         <>
           <StatusSection status={status} onStatusChange={onStatusChange} />
           <PublishingSection />

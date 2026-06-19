@@ -7,6 +7,12 @@ export { SplitPageLayout } from './SplitPageLayout/SplitPageLayout';
 export type { SplitPageLayoutProps } from './SplitPageLayout/SplitPageLayout';
 export { SplitPageSection } from './SplitPageLayout/SplitPageSection';
 export type { SplitPageSectionProps } from './SplitPageLayout/SplitPageSection';
+export { SplitPageHeader } from './SplitPageLayout/SplitPageHeader';
+export type { SplitPageHeaderProps } from './SplitPageLayout/SplitPageHeader';
+export { EntityFormPageLayout } from './SplitPageLayout/EntityFormPageLayout';
+export type { EntityFormPageLayoutProps } from './SplitPageLayout/EntityFormPageLayout';
+export { SplitPageFormField } from './SplitPageLayout/SplitPageFormField';
+export type { SplitPageFormFieldProps } from './SplitPageLayout/SplitPageFormField';
 export {
   splitPagePresets,
   splitPageDefaults,
@@ -21,6 +27,7 @@ export * from './Layout';
 export * from './NavBar';
 export * from './Sidebar';
 export * from './Menu';
+export * from './AIStudio';
 
 // Form Components
 export * from './Button';

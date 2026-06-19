@@ -8,6 +8,8 @@ import { MenuLayer, MenuItem } from '../Menu';
 import { useGlobalContext } from '../context/GlobalContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigation } from '../context/NavigationContext';
+import { AIStudioSidekick } from '../AIStudio';
+import { useAIStudioOptional } from '../AIStudio/AIStudioContext';
 // import { ErrorBoundary } from '../ErrorBoundary';
 
 export interface AppLayoutProps {
@@ -26,6 +28,8 @@ export interface AppLayoutProps {
   onNotificationClick?: () => void;
   showSearch?: boolean;
   showNotifications?: boolean;
+  showAIStudio?: boolean;
+  onAIStudioClick?: () => void;
   notificationCount?: number;
   searchPlaceholder?: string;
   showThemeToggle?: boolean;
@@ -61,7 +65,9 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   onSearch,
   onNotificationClick,
   showSearch = true,
-  showNotifications = true,
+  showNotifications = false,
+  showAIStudio = true,
+  onAIStudioClick,
   notificationCount = 0,
   searchPlaceholder = 'Search...',
   showThemeToggle = false,
@@ -101,6 +107,7 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   const navigation = useNavigation();
   const resolvedPathname = pathname ?? navigation.pathname;
   const resolvedNavigate = onNavigate ?? navigation.onNavigate;
+  const aiStudio = useAIStudioOptional();
 
   // Analytics tracking functions
   const trackLayoutEvent = useCallback(
@@ -310,31 +317,57 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
         />
       )}
 
-      {/* Main Content Area */}
-      <div className="flex flex-col flex-1">
-        {/* NavBar - Always rendered */}
-        <NavBar
-          user={user}
-          onUserAction={onUserAction}
-          showSearch={showSearch}
-          onSearch={onSearch}
-          searchPlaceholder={searchPlaceholder}
-          showNotifications={showNotifications}
-          notificationCount={notificationCount}
-          onNotificationClick={onNotificationClick}
-          showThemeToggle={showThemeToggle}
-          isDarkMode={isDarkMode}
-          onThemeToggle={onThemeToggle}
-          logo={logo}
-          variant="default"
-          position="fixed"
-          className="shadow-sm"
-        />
+      {/* Main Content Area + optional Sidekick column */}
+      <div className="flex flex-1 min-w-0">
+        <div className="flex flex-col flex-1 min-w-0">
+          {/* NavBar - Always rendered */}
+          <NavBar
+            user={user}
+            onUserAction={onUserAction}
+            showSearch={showSearch}
+            onSearch={onSearch}
+            searchPlaceholder={searchPlaceholder}
+            showNotifications={showNotifications}
+            notificationCount={notificationCount}
+            onNotificationClick={onNotificationClick}
+            showAIStudio={showAIStudio && !!aiStudio}
+            onAIStudioClick={onAIStudioClick}
+            showThemeToggle={showThemeToggle}
+            isDarkMode={isDarkMode}
+            onThemeToggle={onThemeToggle}
+            logo={logo}
+            variant="default"
+            position="fixed"
+            className="shadow-sm"
+          />
 
-        {/* Main Content - Dynamic children */}
-        <main className={`flex-1 overflow-y-auto p-4 ${getMainContentStyles()}`} style={{ paddingTop: '80px' }}>
-          {children}
-        </main>
+          {/* Main Content - Dynamic children */}
+          <main className={`flex-1 overflow-y-auto p-4 ${getMainContentStyles()}`} style={{ paddingTop: '80px' }}>
+            {children}
+          </main>
+        </div>
+
+        {aiStudio && (
+          <AIStudioSidekick
+            open={aiStudio.isOpen}
+            onClose={aiStudio.close}
+            title={aiStudio.title}
+            onPopOut={() => {
+              if (typeof window !== 'undefined') window.location.href = '/developer';
+            }}
+            onNewConversation={() => {
+              if (typeof window !== 'undefined') window.location.reload();
+            }}
+          >
+            {aiStudio.panelContent ?? (
+              <div className="lux-sidekick-empty">
+                <p style={{ color: 'var(--color-label-secondary)', fontSize: 14, lineHeight: 1.5 }}>
+                  Ask AI Studio about this page, your customers, or what to build next.
+                </p>
+              </div>
+            )}
+          </AIStudioSidekick>
+        )}
       </div>
 
       {/* Mobile Overlay */}

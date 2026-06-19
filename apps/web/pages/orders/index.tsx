@@ -13,14 +13,15 @@ import {
   type OrderFilterTab,
 } from '@luxgen/ui';
 import { PageLoadingState } from '../../components/common/PageStates';
-import { CreateOrderModal } from '../../components/commerce/CreateOrderModal';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../lib/app-layout-user';
 import { getStoredUser } from '../../lib/session';
 import { GET_COURSES } from '../../graphql/queries/courses';
 import { GET_USERS } from '../../graphql/queries/users';
+import { GET_ENROLLMENTS } from '../../graphql/queries/enrollment';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
+import { isMongoObjectId } from '../../lib/mongo-id';
 
 interface OrdersPageProps {
   tenant: string;
@@ -37,7 +38,6 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
 
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<OrderFilterTab>('all');
-  const [showCreateOrder, setShowCreateOrder] = useState(false);
 
   const { data: coursesData, loading: coursesLoading } = useQuery(GET_COURSES, {
     variables: { tenantId: queryTenantId },
@@ -51,32 +51,25 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
     fetchPolicy: 'cache-and-network',
   });
 
+  const { data: enrollmentsData, loading: enrollmentsLoading } = useQuery(GET_ENROLLMENTS, {
+    variables: { tenantId: queryTenantId },
+    skip: !isMongoObjectId(queryTenantId),
+    fetchPolicy: 'cache-and-network',
+  });
+
   useEffect(() => {
     const q = router.query.search;
     if (typeof q === 'string') setSearch(q);
   }, [router.query.search]);
 
-  const learners = useMemo(
-    () =>
-      (usersData?.users ?? []).filter(
-        (u: { role: string }) => u.role === 'STUDENT' || u.role === 'student',
-      ),
-    [usersData],
-  );
-
-  const orderStudents = useMemo(
-    () =>
-      learners.map((u: { id: string; email: string; firstName?: string; lastName?: string }) => ({
-        id: u.id,
-        email: u.email,
-        name: `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || u.email,
-      })),
-    [learners],
-  );
-
   const allOrders = useMemo(
-    () => buildOrdersFromEnrollments(coursesData?.courses, usersData?.users),
-    [coursesData, usersData],
+    () =>
+      buildOrdersFromEnrollments(
+        coursesData?.courses,
+        usersData?.users,
+        enrollmentsData?.enrollments,
+      ),
+    [coursesData, usersData, enrollmentsData],
   );
 
   const tabCounts = useMemo(
@@ -107,7 +100,7 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
     return rows;
   }, [allOrders, activeTab, search]);
 
-  const loading = (coursesLoading || usersLoading) && allOrders.length === 0;
+  const loading = (coursesLoading || usersLoading || enrollmentsLoading) && allOrders.length === 0;
 
   return (
     <>
@@ -133,21 +126,10 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
             search={search}
             onSearchChange={setSearch}
             tabCounts={tabCounts}
-            onCreateOrder={() => setShowCreateOrder(true)}
+            onCreateOrder={() => void router.push('/orders/create')}
           />
         )}
       </AppLayout>
-
-      {queryTenantId && (
-        <CreateOrderModal
-          isOpen={showCreateOrder}
-          onClose={() => setShowCreateOrder(false)}
-          tenantId={queryTenantId}
-          courses={coursesData?.courses ?? []}
-          students={orderStudents}
-          onCreated={(orderId) => void router.push(`/orders/${encodeURIComponent(orderId)}`)}
-        />
-      )}
     </>
   );
 }

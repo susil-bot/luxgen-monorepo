@@ -24,6 +24,10 @@ export interface UpdateUserInput {
   firstName?: string;
   lastName?: string;
   role?: string;
+  phone?: string;
+  marketingEmail?: boolean;
+  marketingSms?: boolean;
+  marketingWhatsapp?: boolean;
 }
 
 export class UserService {

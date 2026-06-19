@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { withSSR } from '../ssr';
 import { SearchBar } from '../SearchBar';
+import { AIStudioLogo } from '../AIStudio';
+import { useAIStudioOptional } from '../AIStudio/AIStudioContext';
 
 export interface UserMenu {
   name: string;
@@ -19,6 +21,9 @@ export interface NavBarProps {
   showNotifications?: boolean;
   notificationCount?: number;
   onNotificationClick?: () => void;
+  /** Shopify Sidekick-style AI Studio trigger (replaces notifications when true). */
+  showAIStudio?: boolean;
+  onAIStudioClick?: () => void;
   showThemeToggle?: boolean;
   isDarkMode?: boolean;
   onThemeToggle?: () => void;
@@ -37,9 +42,11 @@ const NavBarComponent: React.FC<NavBarProps> = ({
   showSearch = true,
   onSearch,
   searchPlaceholder = 'Search',
-  showNotifications = true,
+  showNotifications = false,
   notificationCount = 0,
   onNotificationClick,
+  showAIStudio = true,
+  onAIStudioClick,
   showThemeToggle = false,
   isDarkMode = false,
   onThemeToggle,
@@ -51,6 +58,15 @@ const NavBarComponent: React.FC<NavBarProps> = ({
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const aiStudio = useAIStudioOptional();
+
+  const handleAIStudioClick = () => {
+    if (onAIStudioClick) {
+      onAIStudioClick();
+      return;
+    }
+    aiStudio?.toggle();
+  };
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -141,12 +157,37 @@ const NavBarComponent: React.FC<NavBarProps> = ({
             </button>
           )}
 
-          {/* Notifications */}
+          {/* AI Studio (Shopify Sidekick trigger) */}
+          {showAIStudio && (
+            <button
+              type="button"
+              onClick={handleAIStudioClick}
+              className="relative p-1.5 rounded-lg transition-colors"
+              style={{
+                color: 'var(--color-label-secondary)',
+                backgroundColor: aiStudio?.isOpen ? 'var(--color-fill-tertiary)' : 'transparent',
+              }}
+              aria-label="Open AI Studio"
+              title="AI Studio"
+              onMouseEnter={(e) => {
+                if (!aiStudio?.isOpen) e.currentTarget.style.backgroundColor = 'var(--color-fill-quaternary)';
+              }}
+              onMouseLeave={(e) => {
+                if (!aiStudio?.isOpen) e.currentTarget.style.backgroundColor = 'transparent';
+              }}
+            >
+              <AIStudioLogo size={18} />
+            </button>
+          )}
+
+          {/* Legacy notifications bell */}
           {showNotifications && (
             <button
+              type="button"
               onClick={onNotificationClick}
               className="relative p-2 rounded-lg transition-colors"
               style={{ color: 'var(--color-label-secondary)' }}
+              aria-label="Notifications"
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-fill-quaternary)')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >

@@ -1,6 +1,6 @@
 import type { CustomerDetail } from './fetcher';
 import type { TimelineActivityProps } from '../Timeline';
-import { SplitPageLayout } from '../SplitPageLayout';
+import { EntityFormPageLayout } from '../SplitPageLayout/EntityFormPageLayout';
 import { CustomerDetailHeader } from './CustomerDetailHeader';
 import { CustomerStatsBar } from './CustomerStatsBar';
 import { LastOrderSection } from './detail/LastOrderSection';
@@ -16,6 +16,9 @@ import { CustomerNotesSection } from './detail/CustomerNotesSection';
 export interface CustomerDetailViewProps {
   customer: CustomerDetail;
   onCreateOrder?: () => void;
+  editHref?: string;
+  onMarketingChange?: (channel: 'email' | 'sms' | 'whatsapp', subscribed: boolean) => void;
+  savingMarketing?: boolean;
   timeline?: TimelineActivityProps;
   customerNotes?: string;
   onCustomerNotesChange?: (value: string) => void;
@@ -30,18 +33,21 @@ export interface CustomerDetailViewProps {
 export function CustomerDetailView({
   customer,
   onCreateOrder,
+  editHref,
+  onMarketingChange,
+  savingMarketing,
   timeline,
   customerNotes,
   onCustomerNotesChange,
   savingCustomerNotes,
 }: CustomerDetailViewProps) {
   return (
-    <SplitPageLayout
+    <EntityFormPageLayout
       variant="main-aside"
       className="w-full min-h-0"
       header={
         <>
-          <CustomerDetailHeader customer={customer} />
+          <CustomerDetailHeader customer={customer} editHref={editHref} />
           <CustomerStatsBar customer={customer} />
         </>
       }
@@ -55,7 +61,11 @@ export function CustomerDetailView({
       aside={
         <>
           <CustomerContactSection customer={customer} />
-          <MarketingSection customer={customer} />
+          <MarketingSection
+            customer={customer}
+            onMarketingChange={onMarketingChange}
+            saving={savingMarketing}
+          />
           <TaxDetailsSection />
           <StoreCreditSection customer={customer} />
           <CustomerTagsSection customer={customer} />

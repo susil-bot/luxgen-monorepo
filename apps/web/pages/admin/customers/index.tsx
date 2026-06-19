@@ -13,15 +13,14 @@ import {
   type CustomerFilterTab,
 } from '@luxgen/ui';
 import { PageLoadingState } from '../../../components/common/PageStates';
-import { CreateCustomerModal } from '../../../components/commerce/CreateCustomerModal';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../../lib/app-layout-user';
 import { getStoredUser } from '../../../lib/session';
 import { GET_COURSES } from '../../../graphql/queries/courses';
 import { GET_USERS } from '../../../graphql/queries/users';
+import { GET_ENROLLMENTS } from '../../../graphql/queries/enrollment';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
-import { isMongoObjectId } from '../../../lib/mongo-id';
 import { isLearnerRole } from '../../../lib/user-roles';
 
 interface Props {
@@ -39,7 +38,6 @@ function AdminCustomersPageContent({ tenant }: Props) {
 
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<CustomerFilterTab>('all');
-  const [showCreateCustomer, setShowCreateCustomer] = useState(false);
 
   const { data: coursesData, loading: coursesLoading } = useQuery(GET_COURSES, {
     variables: { tenantId: queryTenantId },
@@ -53,6 +51,12 @@ function AdminCustomersPageContent({ tenant }: Props) {
     fetchPolicy: 'cache-and-network',
   });
 
+  const { data: enrollmentsData } = useQuery(GET_ENROLLMENTS, {
+    variables: { tenantId: queryTenantId },
+    skip: !queryTenantId,
+    fetchPolicy: 'cache-and-network',
+  });
+
   useEffect(() => {
     const q = router.query.search;
     if (typeof q === 'string') setSearch(q);
@@ -60,8 +64,8 @@ function AdminCustomersPageContent({ tenant }: Props) {
 
   const allCustomers = useMemo(() => {
     const learners = (usersData?.users ?? []).filter((u: { role: string }) => isLearnerRole(u.role));
-    return buildCustomersFromUsers(learners, coursesData?.courses);
-  }, [coursesData, usersData]);
+    return buildCustomersFromUsers(learners, coursesData?.courses, enrollmentsData?.enrollments);
+  }, [coursesData, usersData, enrollmentsData]);
 
   const customers = useMemo(() => {
     let rows = filterCustomersByTab(allCustomers, activeTab);
@@ -102,19 +106,10 @@ function AdminCustomersPageContent({ tenant }: Props) {
             onTabChange={setActiveTab}
             search={search}
             onSearchChange={setSearch}
-            onAddCustomer={() => setShowCreateCustomer(true)}
+            onAddCustomer={() => void router.push('/admin/customers/create')}
           />
         )}
       </AppLayout>
-
-      {isMongoObjectId(queryTenantId) && (
-        <CreateCustomerModal
-          isOpen={showCreateCustomer}
-          onClose={() => setShowCreateCustomer(false)}
-          tenantId={queryTenantId}
-          onCreated={(id) => void router.push(`/admin/customers/${id}`)}
-        />
-      )}
     </>
   );
 }

@@ -1,5 +1,33 @@
 import { gql } from '@apollo/client';
 
+export const GET_ENROLLMENTS = gql`
+  query GetEnrollments($tenantId: ID!) {
+    enrollments(tenantId: $tenantId) {
+      id
+      courseId
+      studentId
+      notes
+      paymentStatus
+      enrolledAt
+    }
+  }
+`;
+
+export const GET_ENROLLMENT_BY_ID = gql`
+  query GetEnrollmentById($id: ID!) {
+    enrollmentById(id: $id) {
+      id
+      courseId
+      studentId
+      notes
+      paymentStatus
+      paidAt
+      cancelledAt
+      enrolledAt
+    }
+  }
+`;
+
 export const GET_ENROLLMENT = gql`
   query GetEnrollment($courseId: ID!, $studentId: ID!) {
     enrollment(courseId: $courseId, studentId: $studentId) {
