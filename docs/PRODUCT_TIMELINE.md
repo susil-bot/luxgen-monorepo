@@ -44,7 +44,7 @@
 |---|------|------|--------|-------|
 | 0b.1 | Shared `PageLoadingState` / `PageEmptyState` | Web | ✅ done | `components/common/PageStates.tsx` |
 | 0b.2 | Dashboard, home, 404 iOS pass | Web | ✅ done | |
-| 0b.3 | Users page iOS card + table | Web | ✅ done | Data still mock — Phase 1.1 |
+| 0b.3 | Users page iOS card + table | Web | ✅ done | GraphQL wired — Phase 1.1c |
 | 0b.4 | Courses list/detail shell | Web | 🟡 partial | iOS headers + loading; mock data |
 | 0b.5 | Groups detail/edit/members pass | Web | 🟡 partial | Loading/empty/forms; stat cards TBD |
 | 0b.6 | PlanGate token fix | Web | ✅ done | |
@@ -54,7 +54,7 @@
 
 | # | Task | Area | Status |
 |---|------|------|--------|
-| 1.1 | Wire `/users`, `/courses`, `/groups` to GraphQL (remove mocks) | Web | 🟡 in progress | **Groups done** — PR `feat/phase-1-1-groups-graphql`; users + courses next |
+| 1.1 | Wire `/users`, `/courses`, `/groups` to GraphQL (remove mocks) | Web | ✅ done | Groups #11, courses #12, users #13 |
 | 1.2 | Enrollment + progress model | API | ⬜ pending |
 | 1.3 | Wire `/customers` learner page to real data | Web | ⬜ pending |
 | 1.4 | Certificates on course completion | API + Web | ⬜ pending |
