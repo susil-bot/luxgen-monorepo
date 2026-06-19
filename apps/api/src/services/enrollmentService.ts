@@ -1,12 +1,5 @@
 import Stripe from 'stripe';
-import {
-  Enrollment,
-  EnrollmentPaymentStatus,
-  Course,
-  User,
-  enrollmentSubjectId,
-  type IEnrollment,
-} from '@luxgen/db';
+import { Enrollment, EnrollmentPaymentStatus, Course, User, enrollmentSubjectId, type IEnrollment } from '@luxgen/db';
 import { activityEventService } from './activityEventService';
 import { isBillingDevMode, isStripeEnabled } from './billingService';
 import { logger } from '../utils/logger';
@@ -58,7 +51,7 @@ export class EnrollmentService {
     notes: string,
     actor?: { id: string; name: string },
   ): Promise<IEnrollment> {
-    let enrollment = await Enrollment.findOne({ course: courseId, student: studentId });
+    let enrollment = (await Enrollment.findOne({ course: courseId, student: studentId })) as IEnrollment | null;
     if (!enrollment) {
       const course = await Course.findById(courseId);
       if (!course) throw new Error('Course not found');
@@ -92,12 +85,7 @@ export class EnrollmentService {
     await user.save();
 
     if (notes.trim() && notes !== previous) {
-      await activityEventService.recordCustomerNoteAdded(
-        user.tenant.toString(),
-        customerId,
-        notes,
-        actor,
-      );
+      await activityEventService.recordCustomerNoteAdded(user.tenant.toString(), customerId, notes, actor);
     }
 
     return {
@@ -177,8 +165,7 @@ export class EnrollmentService {
     successUrl: string;
     cancelUrl: string;
   }): Promise<{ url: string; sessionId: string }> {
-    const { tenantId, courseId, studentId, amountCents, courseTitle, customerEmail, successUrl, cancelUrl } =
-      options;
+    const { tenantId, courseId, studentId, amountCents, courseTitle, customerEmail, successUrl, cancelUrl } = options;
 
     await this.ensureEnrollment(tenantId, courseId, studentId);
 

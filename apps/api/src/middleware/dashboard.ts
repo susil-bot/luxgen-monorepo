@@ -41,7 +41,7 @@ export const dashboardAuthMiddleware = async (req: DashboardRequest, res: Respon
     // Set dashboard user and tenant
     req.dashboardUser = user;
     req.dashboardTenant = user.tenant.toString();
-    req.dashboardPermissions = user.metadata?.permissions || [];
+    req.dashboardPermissions = (user.metadata?.permissions as unknown as string[]) || [];
 
     logger.info(`Dashboard access granted for user ${user.email} in tenant ${req.dashboardTenant}`);
     next();

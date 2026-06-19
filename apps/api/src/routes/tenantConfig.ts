@@ -24,6 +24,8 @@ router.get('/config/:subdomain', async (req: Request, res: Response) => {
     }
 
     // Return tenant configuration in the format expected by frontend
+    const meta = tenant.metadata as any;
+    const b = tenant.settings?.branding;
     const config = {
       id: tenant.subdomain,
       name: tenant.name,
@@ -32,25 +34,25 @@ router.get('/config/:subdomain', async (req: Request, res: Response) => {
       status: tenant.status,
       theme: {
         colors: {
-          primary: tenant.metadata?.branding?.primaryColor || '#3B82F6',
-          secondary: tenant.metadata?.branding?.secondaryColor || '#10B981',
-          background: tenant.metadata?.branding?.backgroundColor || '#F8FAFC',
-          text: tenant.metadata?.branding?.textColor || '#1F2937',
+          primary: meta?.branding?.primaryColor || b?.primaryColor || '#3B82F6',
+          secondary: meta?.branding?.secondaryColor || b?.secondaryColor || '#10B981',
+          background: meta?.branding?.backgroundColor || '#F8FAFC',
+          text: meta?.branding?.textColor || '#1F2937',
         },
         fonts: {
-          primary: tenant.metadata?.branding?.primaryFont || 'Inter',
-          secondary: tenant.metadata?.branding?.secondaryFont || 'Inter',
+          primary: meta?.branding?.primaryFont || b?.fontFamily || 'Inter',
+          secondary: meta?.branding?.secondaryFont || b?.fontFamily || 'Inter',
         },
       },
       branding: {
         logo: {
-          text: tenant.metadata?.branding?.logoText || tenant.name,
-          image: tenant.metadata?.branding?.logoImage || null,
+          text: meta?.branding?.logoText || tenant.name,
+          image: meta?.branding?.logoImage || b?.logo || null,
         },
-        favicon: tenant.metadata?.branding?.favicon || null,
+        favicon: meta?.branding?.favicon || b?.favicon || null,
       },
-      features: tenant.metadata?.features || [],
-      limits: tenant.metadata?.limits || {},
+      features: meta?.features || [],
+      limits: meta?.limits || {},
       plan: tenant.metadata?.plan || 'free',
       createdAt: tenant.createdAt,
       updatedAt: tenant.updatedAt,
@@ -120,18 +122,19 @@ router.get('/assets/:subdomain', async (req: Request, res: Response) => {
       });
     }
 
+    const branding = tenant.settings?.branding as unknown as Record<string, string | undefined> | undefined;
     const assets = {
       logo: {
-        text: tenant.metadata?.branding?.logoText || tenant.name,
-        image: tenant.metadata?.branding?.logoImage || null,
+        text: branding?.logoText || branding?.logo || tenant.name,
+        image: branding?.logoImage || branding?.logo || null,
       },
-      favicon: tenant.metadata?.branding?.favicon || null,
-      background: tenant.metadata?.branding?.backgroundImage || null,
+      favicon: branding?.favicon || null,
+      background: branding?.backgroundImage || null,
       colors: {
-        primary: tenant.metadata?.branding?.primaryColor || '#3B82F6',
-        secondary: tenant.metadata?.branding?.secondaryColor || '#10B981',
-        background: tenant.metadata?.branding?.backgroundColor || '#F8FAFC',
-        text: tenant.metadata?.branding?.textColor || '#1F2937',
+        primary: branding?.primaryColor || '#3B82F6',
+        secondary: branding?.secondaryColor || '#10B981',
+        background: branding?.backgroundColor || '#F8FAFC',
+        text: branding?.textColor || '#1F2937',
       },
     };
 

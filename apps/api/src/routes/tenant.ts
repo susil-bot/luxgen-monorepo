@@ -42,7 +42,8 @@ router.get('/current', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error:
+        process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
@@ -76,7 +77,8 @@ router.get('/config', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error:
+        process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
@@ -135,7 +137,8 @@ router.patch('/branding', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error:
+        process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
@@ -166,7 +169,7 @@ router.patch('/general', async (req: Request, res: Response) => {
     }
     if (regional) {
       const existingRegional =
-        (tenant.settings?.config as Record<string, unknown> | undefined)?.regional ?? {};
+        (tenant.settings?.config as unknown as Record<string, unknown> | undefined)?.regional ?? {};
       update['settings.config.regional'] = { ...existingRegional, ...regional };
     }
 
@@ -179,7 +182,7 @@ router.patch('/general', async (req: Request, res: Response) => {
       });
     }
 
-    const config = updatedTenant.settings?.config as Record<string, unknown> | undefined;
+    const config = updatedTenant.settings?.config as unknown as Record<string, unknown> | undefined;
 
     res.json({
       success: true,
@@ -253,7 +256,8 @@ router.patch('/security', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error:
+        process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
@@ -301,7 +305,8 @@ router.get('/stats', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error:
+        process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
@@ -363,7 +368,8 @@ router.post('/init', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error:
+        process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });

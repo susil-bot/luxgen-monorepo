@@ -7,8 +7,8 @@ export * from './tenant-config';
 // Export models and interfaces with explicit names
 export type { ITenant } from './tenant';
 export { Tenant } from './tenant';
-export type { IUser } from './user';
-export { User } from './user';
+export type { IUser, IUserPermissions } from './user';
+export { User, UserRole, UserStatus } from './user';
 export type { ICourse } from './course';
 export { Course } from './course';
 export type { IGroup, IGroupMember } from './group';
@@ -36,7 +36,7 @@ export type { IBusinessListing, ApplicationStatus, PublicationStatus, IStatusHis
 export { BusinessListing } from './business-listing';
 export type { IActivityEvent } from './activity-event';
 export { ActivityEvent, ActivitySubjectType, ActivityEventKind, ActivityActorType } from './activity-event';
-export type { IEnrollment, EnrollmentPaymentStatus } from './enrollment';
-export { Enrollment, enrollmentSubjectId } from './enrollment';
+export type { IEnrollment } from './enrollment';
+export { Enrollment, enrollmentSubjectId, EnrollmentPaymentStatus } from './enrollment';
 export type { IEmailNotificationLog, ListingEmailTemplate } from './email-notification-log';
 export { EmailNotificationLog } from './email-notification-log';

@@ -1,6 +1,30 @@
 import request from 'supertest';
 import { app } from '../app';
 
+// Stub Mongoose models so tenantRoutingMiddleware and authMiddleware don't
+// throw when Mongoose is not connected in the test environment.
+// Returns query-like objects (with .lean() / .populate()) to match the real API.
+jest.mock('@luxgen/db', () => {
+  const queryStub = () => ({
+    lean: jest.fn().mockResolvedValue(null),
+    populate: jest.fn().mockResolvedValue(null),
+    exec: jest.fn().mockResolvedValue(null),
+  });
+  return {
+    Tenant: {
+      findOne: jest.fn(queryStub),
+      findById: jest.fn(queryStub),
+      findByIdAndUpdate: jest.fn().mockResolvedValue(null),
+    },
+    User: {
+      findOne: jest.fn(queryStub),
+      findById: jest.fn(queryStub),
+    },
+    UserRole: { USER: 'user', ADMIN: 'admin', INSTRUCTOR: 'instructor' },
+    UserStatus: { ACTIVE: 'active', PENDING: 'pending', SUSPENDED: 'suspended', INACTIVE: 'inactive' },
+  };
+});
+
 describe('Authentication API', () => {
   describe('POST /api/auth/login', () => {
     it('should return validation error for missing email', async () => {

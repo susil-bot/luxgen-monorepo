@@ -37,13 +37,7 @@ export const courseResolvers = {
         '';
 
       if (input.status && existing && input.status !== existing.status) {
-        await activityEventService.recordProductStatusChange(
-          tenantId,
-          id,
-          existing.status,
-          input.status,
-          actor,
-        );
+        await activityEventService.recordProductStatusChange(tenantId, id, existing.status, input.status, actor);
       } else {
         await activityEventService.recordProductUpdated(tenantId, id, 'Product details updated', actor);
       }
@@ -58,7 +52,7 @@ export const courseResolvers = {
       context: GraphQLContext,
     ) => {
       const course = await courseService.enrollStudent(courseId, studentId);
-      const student = course.students?.find((s: { id?: string; _id?: { toString(): string } }) => {
+      const student = (course.students as any[])?.find((s: { id?: string; _id?: { toString(): string } }) => {
         const sid = s.id ?? s._id?.toString?.();
         return sid === studentId;
       }) as { email?: string } | undefined;

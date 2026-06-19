@@ -12,6 +12,7 @@ import { Tenant, TenantSubscription, type ITenantSubscription } from '@luxgen/db
 import { listingSubscriptionService } from './listingSubscriptionService';
 import { enrollmentService } from './enrollmentService';
 import { logger } from '../utils/logger';
+import { getRedisClient } from '../lib/redis';
 
 const STRIPE_PRICE_ENV: Record<Exclude<PlanTier, 'free' | 'enterprise'>, string> = {
   starter: 'STRIPE_PRICE_STARTER',
@@ -23,13 +24,16 @@ export function isStripeEnabled(): boolean {
   return Boolean(process.env.STRIPE_SECRET_KEY?.startsWith('sk_'));
 }
 
+// Explicit opt-in only — never piggyback on NODE_ENV to bypass billing
 export function isBillingDevMode(): boolean {
-  return process.env.BILLING_DEV_MODE === 'true' || process.env.NODE_ENV === 'development';
+  return process.env.BILLING_DEV_MODE === 'true';
 }
 
+// Singleton Stripe client — avoid re-instantiating on every call
+let _stripe: Stripe | null = null;
 function getStripe(): Stripe | null {
   if (!isStripeEnabled()) return null;
-  return new Stripe(process.env.STRIPE_SECRET_KEY!);
+  return (_stripe ??= new Stripe(process.env.STRIPE_SECRET_KEY!));
 }
 
 function getPriceIdForPlan(plan: PlanTier): string | null {
@@ -53,7 +57,8 @@ export class BillingService {
       return normalizePlan(sub.plan);
     }
 
-    const tenant = await Tenant.findOne({ subdomain: tenantId });
+    // tenantId may be a MongoDB ObjectId string or a subdomain — support both
+    const tenant = (await Tenant.findById(tenantId).lean()) ?? (await Tenant.findOne({ subdomain: tenantId }).lean());
     if (tenant?.metadata?.plan) {
       return normalizePlan(tenant.metadata.plan);
     }
@@ -65,14 +70,10 @@ export class BillingService {
     let sub = await TenantSubscription.findOne({ tenantId });
     if (sub) return sub;
 
-    const tenant = await Tenant.findOne({ subdomain: tenantId });
+    const tenant = (await Tenant.findById(tenantId).lean()) ?? (await Tenant.findOne({ subdomain: tenantId }).lean());
     const plan = normalizePlan(tenant?.metadata?.plan);
 
-    sub = await TenantSubscription.create({
-      tenantId,
-      plan,
-      status: plan === 'free' ? 'active' : 'active',
-    });
+    sub = await TenantSubscription.create({ tenantId, plan, status: 'active' });
     return sub;
   }
 
@@ -156,10 +157,7 @@ export class BillingService {
     let customerId = sub.stripeCustomerId;
 
     if (!customerId) {
-      const customer = await stripe.customers.create({
-        email: customerEmail,
-        metadata: { tenantId },
-      });
+      const customer = await stripe.customers.create({ email: customerEmail, metadata: { tenantId } });
       customerId = customer.id;
       await TenantSubscription.updateOne({ tenantId }, { $set: { stripeCustomerId: customerId } });
     }
@@ -171,9 +169,7 @@ export class BillingService {
       success_url: successUrl,
       cancel_url: cancelUrl,
       metadata: { tenantId, plan },
-      subscription_data: {
-        metadata: { tenantId, plan },
-      },
+      subscription_data: { metadata: { tenantId, plan } },
     });
 
     if (!session.url) throw new Error('Stripe did not return a checkout URL');
@@ -183,9 +179,7 @@ export class BillingService {
   async createBillingPortalSession(tenantId: string, returnUrl: string): Promise<{ url: string }> {
     const stripe = getStripe();
     if (!stripe) {
-      if (isBillingDevMode()) {
-        return { url: returnUrl };
-      }
+      if (isBillingDevMode()) return { url: returnUrl };
       throw new Error('Stripe is not configured.');
     }
 
@@ -198,7 +192,6 @@ export class BillingService {
       customer: sub.stripeCustomerId,
       return_url: returnUrl,
     });
-
     return { url: session.url };
   }
 
@@ -213,11 +206,24 @@ export class BillingService {
   async handleStripeWebhook(rawBody: Buffer, signature: string): Promise<void> {
     const stripe = getStripe();
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
-    if (!stripe || !webhookSecret) {
-      throw new Error('Stripe webhook not configured');
-    }
+    if (!stripe || !webhookSecret) throw new Error('Stripe webhook not configured');
 
     const event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+
+    // Idempotency guard: skip if this event was already processed (Stripe delivers at-least-once)
+    const redis = getRedisClient();
+    if (redis && redis.status === 'ready') {
+      try {
+        const idempotencyKey = `luxgen:stripe:processed:${event.id}`;
+        const set = await redis.set(idempotencyKey, '1', 'EX', 7 * 24 * 3600, 'NX'); // 7-day TTL
+        if (!set) {
+          logger.debug(`Stripe event ${event.id} already processed, skipping`);
+          return;
+        }
+      } catch {
+        // Redis unavailable — proceed without dedup (acceptable: handlers are idempotent)
+      }
+    }
 
     const handledListing = await listingSubscriptionService.handleStripeEvent(event);
     if (handledListing) return;

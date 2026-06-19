@@ -40,7 +40,7 @@ export const rotateTenantKey = async (tenantId: string, newKey: string): Promise
   } catch (error) {
     return {
       success: false,
-      message: `Failed to rotate key for tenant ${tenantId}: ${error.message}`,
+      message: `Failed to rotate key for tenant ${tenantId}: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 };
@@ -101,7 +101,7 @@ export const revokeTenantKeys = (tenantId: string): KeyRotationResult => {
   } catch (error) {
     return {
       success: false,
-      message: `Failed to revoke keys for tenant ${tenantId}: ${error.message}`,
+      message: `Failed to revoke keys for tenant ${tenantId}: ${error instanceof Error ? error.message : String(error)}`,
     };
   }
 };

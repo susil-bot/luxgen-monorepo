@@ -1,5 +1,6 @@
 // Test setup file
 import dotenv from 'dotenv';
+import { resetLoginRateLimitStore } from '../middleware/loginRateLimit';
 
 // Load environment variables for testing
 dotenv.config({ path: '.env.test' });
@@ -35,3 +36,8 @@ jest.mock('../utils/logger', () => ({
     debug: jest.fn(),
   },
 }));
+
+// Reset in-memory rate-limit store before each test to prevent cross-test accumulation
+beforeEach(() => {
+  resetLoginRateLimitStore();
+});

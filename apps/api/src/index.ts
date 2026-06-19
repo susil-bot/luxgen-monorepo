@@ -7,6 +7,14 @@ import { startTimelineRedisBridge } from './lib/timelineRedisBridge';
 
 config();
 
+const REQUIRED_ENV = ['JWT_SECRET', 'MONGODB_URI'] as const;
+for (const key of REQUIRED_ENV) {
+  if (!process.env[key]) {
+    console.error(`❌ Missing required environment variable: ${key}`);
+    process.exit(1);
+  }
+}
+
 const PORT = process.env.PORT || 4000;
 
 async function startServer() {
@@ -23,10 +31,7 @@ async function startServer() {
     try {
       startTimelineRedisBridge();
     } catch (err) {
-      console.warn(
-        '[timeline-redis-bridge] Disabled:',
-        err instanceof Error ? err.message : String(err),
-      );
+      console.warn('[timeline-redis-bridge] Disabled:', err instanceof Error ? err.message : String(err));
     }
     httpServer.listen(PORT, () => {
       console.log(`🚀 Server running on ${getApiUrl()}`);
