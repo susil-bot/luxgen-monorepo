@@ -1,45 +1,29 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { useMutation } from '@apollo/client';
 import { createHandleUserAction } from '../../lib/user-actions';
+import { useLayoutUser } from '../../lib/app-layout-user';
+import { CREATE_GROUP } from '../../graphql/queries/groups';
 import {
   SnackbarProvider,
   useSnackbar,
   AppLayout,
-  getDefaultUser,
   getDefaultLogo,
   getDefaultSidebarSections,
 } from '@luxgen/ui';
 
 const CreateGroupPageContent: React.FC = () => {
   const router = useRouter();
-  const { showSuccess } = useSnackbar();
-  const [user, setUser] = useState<any>(null);
+  const { showSuccess, showError } = useSnackbar();
+  const user = useLayoutUser();
+  const [createGroup, { loading: isCreating }] = useMutation(CREATE_GROUP);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     maxUsers: '',
     isPublic: false,
   });
-
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser({
-          name: `${parsedUser.firstName} ${parsedUser.lastName}`,
-          email: parsedUser.email,
-          role: parsedUser.role,
-          tenant: parsedUser.tenant,
-        });
-      } catch {
-        setUser(getDefaultUser());
-      }
-    } else {
-      setUser(getDefaultUser());
-    }
-  }, []);
 
   const handleUserAction = createHandleUserAction(router);
 
@@ -51,10 +35,27 @@ const CreateGroupPageContent: React.FC = () => {
     }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    showSuccess('Group created successfully!');
-    router.push('/groups');
+    try {
+      const { data } = await createGroup({
+        variables: {
+          input: {
+            name: formData.name,
+            description: formData.description,
+            settings: {
+              maxMembers: formData.maxUsers ? Number(formData.maxUsers) : undefined,
+              allowSelfJoin: formData.isPublic,
+            },
+          },
+        },
+      });
+      showSuccess('Group created successfully!');
+      const newId = data?.createGroup?.id;
+      void router.push(newId ? `/groups/${newId}` : '/groups');
+    } catch (err: unknown) {
+      showError(err instanceof Error ? err.message : 'Failed to create group.');
+    }
   };
 
   const inputStyle: React.CSSProperties = {
@@ -86,7 +87,7 @@ const CreateGroupPageContent: React.FC = () => {
 
       <AppLayout
         sidebarSections={getDefaultSidebarSections()}
-        user={user}
+        user={user ?? undefined}
         onUserAction={handleUserAction}
         showSearch={false}
         showNotifications={false}
@@ -184,10 +185,10 @@ const CreateGroupPageContent: React.FC = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all"
-                  style={{ backgroundColor: 'var(--color-blue)' }}
+                  disabled={isCreating}
+                  className="ios-btn-primary"
                 >
-                  Create Group
+                  {isCreating ? 'Creating…' : 'Create Group'}
                 </button>
               </div>
             </form>

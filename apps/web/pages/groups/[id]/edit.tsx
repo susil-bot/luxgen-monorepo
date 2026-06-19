@@ -2,125 +2,89 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import Head from 'next/head';
-import {
-  SnackbarProvider,
-  useSnackbar,
-  AppLayout,
-  getDefaultUser,
-  getDefaultLogo,
-  getDefaultSidebarSections,
-  Button,
-} from '@luxgen/ui';
-import { PageLoadingState } from '../../../components/common/PageStates';
-
-interface GroupEditData {
-  id: string;
-  name: string;
-  description: string;
-  maxUsers: number;
-  isPublic: boolean;
-  status: string;
-}
+import { useQuery, useMutation } from '@apollo/client';
+import { SnackbarProvider, useSnackbar, AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { useLayoutUser } from '../../../lib/app-layout-user';
+import { GET_GROUP, UPDATE_GROUP } from '../../../graphql/queries/groups';
+import { PageLoadingState, PageEmptyState } from '../../../components/common/PageStates';
 
 const EditGroupPageContent: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
-  const { showSuccess, showError, showInfo: _showInfo } = useSnackbar();
-  const [user, setUser] = useState<any>(null);
-  const [formData, setFormData] = useState<GroupEditData>({
-    id: '',
-    name: '',
-    description: '',
-    maxUsers: 10,
-    isPublic: false,
-    status: 'Active',
-  });
-  const [isLoading, setIsLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
-
-  // Load user data
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser({
-          name: `${parsedUser.firstName} ${parsedUser.lastName}`,
-          email: parsedUser.email,
-          role: parsedUser.role,
-          tenant: parsedUser.tenant,
-        });
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        setUser(getDefaultUser());
-      }
-    } else {
-      setUser(getDefaultUser());
-    }
-  }, []);
-
-  // Load group data
-  useEffect(() => {
-    if (id) {
-      // Simulate API call
-      setTimeout(() => {
-        setFormData({
-          id: id as string,
-          name: 'Development Team',
-          description: 'A team focused on software development and engineering tasks.',
-          maxUsers: 10,
-          isPublic: false,
-          status: 'Active',
-        });
-        setIsLoading(false);
-      }, 1000);
-    }
-  }, [id]);
-
-  // Handle user actions
+  const groupId = typeof id === 'string' ? id : '';
+  const { showSuccess, showError } = useSnackbar();
+  const user = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
 
-  // Handle form submission
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [maxUsers, setMaxUsers] = useState(10);
+
+  const { data, loading, error } = useQuery(GET_GROUP, {
+    variables: { id: groupId },
+    skip: !groupId,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const [updateGroup, { loading: isSaving }] = useMutation(UPDATE_GROUP);
+
+  useEffect(() => {
+    const group = data?.group;
+    if (!group) return;
+    setName(group.name);
+    setDescription(group.description ?? '');
+    setMaxUsers(group.settings?.maxMembers ?? 10);
+  }, [data]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSaving(true);
-
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-
+      await updateGroup({
+        variables: {
+          input: {
+            id: groupId,
+            name,
+            description,
+            settings: { maxMembers: maxUsers },
+          },
+        },
+      });
       showSuccess('Group updated successfully!');
-      router.push(`/groups/${id}`);
-    } catch {
-      showError('Failed to update group. Please try again.');
-    } finally {
-      setIsSaving(false);
+      void router.push(`/groups/${groupId}`);
+    } catch (err: unknown) {
+      showError(err instanceof Error ? err.message : 'Failed to update group.');
     }
   };
 
-  // Handle form input changes
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
-    }));
-  };
-
-  if (isLoading) {
+  if (!groupId || (loading && !data?.group)) {
     return <PageLoadingState label="Loading group…" />;
+  }
+
+  if (error || !data?.group) {
+    return (
+      <PageEmptyState
+        icon="👥"
+        title="Group not found"
+        subtitle={error?.message}
+        action={
+          <button type="button" className="ios-btn-primary mt-4" onClick={() => router.push('/groups')}>
+            Back to groups
+          </button>
+        }
+      />
+    );
   }
 
   return (
     <>
       <Head>
-        <title>Edit {formData.name} - LuxGen</title>
-        <meta name="description" content={`Edit ${formData.name} group settings`} />
+        <title>Edit {name} - LuxGen</title>
+        <meta name="description" content={`Edit ${name} group settings`} />
       </Head>
 
       <AppLayout
         sidebarSections={getDefaultSidebarSections()}
-        user={user}
+        user={user ?? undefined}
         onUserAction={handleUserAction}
         showSearch={false}
         showNotifications={false}
@@ -130,17 +94,14 @@ const EditGroupPageContent: React.FC = () => {
         responsive={true}
       >
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="ios-large-title">Edit Group</h1>
-                <p className="mt-1 text-secondary text-sm">Update group settings and information</p>
-              </div>
-              <Button variant="outline" size="md" onClick={() => router.push(`/groups/${id}`)} className="px-4 py-2">
-                Cancel
-              </Button>
+          <div className="mb-8 flex items-center justify-between">
+            <div>
+              <h1 className="ios-large-title">Edit Group</h1>
+              <p className="mt-1 text-secondary text-sm">Update group settings and information</p>
             </div>
+            <button type="button" className="ios-btn-secondary" onClick={() => router.push(`/groups/${groupId}`)}>
+              Cancel
+            </button>
           </div>
 
           {/* Form */}
@@ -151,11 +112,10 @@ const EditGroupPageContent: React.FC = () => {
                   Group Name *
                 </label>
                 <input
-                  type="text"
                   id="name"
                   name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                   required
                   className="ios-input"
                   placeholder="Enter group name"
@@ -169,8 +129,8 @@ const EditGroupPageContent: React.FC = () => {
                 <textarea
                   id="description"
                   name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
                   rows={4}
                   className="ios-input min-h-[100px]"
                   placeholder="Describe the purpose of this group"
@@ -187,7 +147,6 @@ const EditGroupPageContent: React.FC = () => {
                   <option value={25}>25 users</option>
                   <option value={50}>50 users</option>
                   <option value={100}>100 users</option>
-                  <option value={-1}>Unlimited</option>
                 </select>
               </div>
 

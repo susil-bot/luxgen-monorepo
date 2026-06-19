@@ -1,135 +1,69 @@
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { createHandleUserAction } from '../../../lib/user-actions';
+import { createHandleUserAction } from '../../lib/user-actions';
 import Head from 'next/head';
-import {
-  SnackbarProvider,
-  useSnackbar,
-  AppLayout,
-  getDefaultUser,
-  getDefaultLogo,
-  getDefaultSidebarSections,
-  Button,
-} from '@luxgen/ui';
-import { PageLoadingState, PageEmptyState } from '../../../components/common/PageStates';
-
-interface GroupDetailsData {
-  id: string;
-  name: string;
-  description: string;
-  totalUsers: number;
-  activeUsers: number;
-  maxUsers: number;
-  role: string;
-  status: string;
-  createdAt: string;
-  members: Array<{
-    id: string;
-    name: string;
-    email: string;
-    role: string;
-    avatar?: string;
-    joinedAt: string;
-  }>;
-  recentActivity: Array<{
-    id: string;
-    action: string;
-    user: string;
-    timestamp: string;
-  }>;
-}
+import { useQuery } from '@apollo/client';
+import { SnackbarProvider, useSnackbar, AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { useLayoutUser } from '../../lib/app-layout-user';
+import { GET_GROUP, GET_GROUP_MEMBERS } from '../../graphql/queries/groups';
+import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
 
 const GroupDetailsPageContent: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
-  const { showSuccess, showError: _showError, showInfo: _showInfo } = useSnackbar();
-  const [user, setUser] = useState<any>(null);
-  const [group, setGroup] = useState<GroupDetailsData | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Load user data
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser({
-          name: `${parsedUser.firstName} ${parsedUser.lastName}`,
-          email: parsedUser.email,
-          role: parsedUser.role,
-          tenant: parsedUser.tenant,
-        });
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        setUser(getDefaultUser());
-      }
-    } else {
-      setUser(getDefaultUser());
-    }
-  }, []);
-
-  // Load group data
-  useEffect(() => {
-    if (id) {
-      // Simulate API call (TODO: connect with real db through graphql)
-      setTimeout(() => {
-        setGroup({
-          id: id as string,
-          name: 'Development Team',
-          description: 'A team focused on software development and engineering tasks.',
-          totalUsers: 8,
-          activeUsers: 6,
-          maxUsers: 10,
-          role: 'Super Admin',
-          status: 'Active',
-          createdAt: '2024-01-15',
-          members: [
-            { id: '1', name: 'John Doe', email: 'john@example.com', role: 'Admin', joinedAt: '2024-01-15' },
-            { id: '2', name: 'Jane Smith', email: 'jane@example.com', role: 'Member', joinedAt: '2024-01-16' },
-            { id: '3', name: 'Bob Johnson', email: 'bob@example.com', role: 'Member', joinedAt: '2024-01-17' },
-            { id: '4', name: 'Alice Brown', email: 'alice@example.com', role: 'Moderator', joinedAt: '2024-01-18' },
-            { id: '5', name: 'Charlie Wilson', email: 'charlie@example.com', role: 'Member', joinedAt: '2024-01-19' },
-          ],
-          recentActivity: [
-            { id: '1', action: 'New member joined', user: 'Alice Brown', timestamp: '2 hours ago' },
-            { id: '2', action: 'Group settings updated', user: 'John Doe', timestamp: '1 day ago' },
-            { id: '3', action: 'Member role changed', user: 'Bob Johnson', timestamp: '2 days ago' },
-          ],
-        });
-        setIsLoading(false);
-      }, 1000);
-    }
-  }, [id]);
-
-  // Handle user actions
+  const groupId = typeof id === 'string' ? id : '';
+  const { showSuccess } = useSnackbar();
+  const user = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
 
-  // Handle actions
+  const { data, loading, error } = useQuery(GET_GROUP, {
+    variables: { id: groupId },
+    skip: !groupId,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const { data: membersData } = useQuery(GET_GROUP_MEMBERS, {
+    variables: { groupId, first: 10 },
+    skip: !groupId,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const group = data?.group;
+  const members =
+    membersData?.groupMembers?.edges?.map(
+      (edge: {
+        node: {
+          id: string;
+          role: string;
+          joinedAt: string;
+          user: { firstName: string; lastName: string; email: string };
+        };
+      }) => edge.node,
+    ) ?? [];
+
   const handleEditGroup = () => {
-    router.push(`/groups/${id}/edit`);
+    void router.push(`/groups/${groupId}/edit`);
   };
 
   const handleManageMembers = () => {
-    router.push(`/groups/${id}/members`);
+    void router.push(`/groups/${groupId}/members`);
   };
 
   const handleDeleteGroup = () => {
     if (confirm('Are you sure you want to delete this group? This action cannot be undone.')) {
-      showSuccess('Group deleted successfully!');
-      router.push('/groups/dashboard');
+      showSuccess('Delete group is not wired yet — coming in a follow-up.');
     }
   };
 
-  if (isLoading) {
+  if (!groupId || (loading && !group)) {
     return <PageLoadingState label="Loading group…" />;
   }
 
-  if (!group) {
+  if (error || !group) {
     return (
       <PageEmptyState
         icon="👥"
         title="Group not found"
-        subtitle="This group may have been removed or you lack access."
+        subtitle={error?.message ?? 'This group may have been removed.'}
         action={
           <button type="button" className="ios-btn-primary mt-4" onClick={() => router.push('/groups')}>
             Back to groups
@@ -138,6 +72,9 @@ const GroupDetailsPageContent: React.FC = () => {
       />
     );
   }
+
+  const maxMembers = group.settings?.maxMembers;
+  const capacityLabel = maxMembers ? String(maxMembers) : '∞';
 
   return (
     <>
@@ -148,7 +85,7 @@ const GroupDetailsPageContent: React.FC = () => {
 
       <AppLayout
         sidebarSections={getDefaultSidebarSections()}
-        user={user}
+        user={user ?? undefined}
         onUserAction={handleUserAction}
         showSearch={false}
         showNotifications={false}
@@ -158,145 +95,82 @@ const GroupDetailsPageContent: React.FC = () => {
         responsive={true}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="ios-large-title">{group.name}</h1>
-                <p className="mt-2 text-secondary">{group.description}</p>
-                <div className="mt-2 flex items-center space-x-4 text-sm text-tertiary">
-                  <span>Created: {new Date(group.createdAt).toLocaleDateString()}</span>
-                  <span>•</span>
-                  <span>Status: {group.status}</span>
-                  <span>•</span>
-                  <span>Your role: {group.role}</span>
-                </div>
+          <div className="mb-8 flex items-start justify-between flex-wrap gap-4">
+            <div>
+              <h1 className="ios-large-title">{group.name}</h1>
+              <p className="mt-2 text-secondary">{group.description || 'No description'}</p>
+              <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-secondary">
+                <span>Created {new Date(group.createdAt).toLocaleDateString()}</span>
+                <span className={`badge ${group.isActive ? 'badge-green' : 'badge-orange'}`}>
+                  {group.isActive ? 'Active' : 'Inactive'}
+                </span>
               </div>
-              <div className="flex space-x-3">
-                <Button variant="outline" size="md" onClick={() => router.back()} className="px-4 py-2">
-                  Back
-                </Button>
-                <Button variant="primary" size="md" onClick={handleEditGroup} className="px-4 py-2">
-                  Edit Group
-                </Button>
-              </div>
+            </div>
+            <div className="flex gap-2">
+              <button type="button" className="ios-btn-secondary" onClick={() => router.back()}>
+                Back
+              </button>
+              <button type="button" className="ios-btn-primary" onClick={handleEditGroup}>
+                Edit Group
+              </button>
             </div>
           </div>
 
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div className="stat-card">
-              <div className="flex items-center">
-                <div className="p-2 bg-blue-100 rounded-lg">
-                  <svg className="h-6 w-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-secondary">Total Members</p>
-                  <p className="text-2xl font-semibold text-primary">{group.totalUsers}</p>
-                </div>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+            <div className="ios-metric-tile">
+              <span className="metric-label">Members</span>
+              <span className="metric-value">{group.memberCount}</span>
             </div>
-
-            <div className="stat-card">
-              <div className="flex items-center">
-                <div className="p-2 bg-green-100 rounded-lg">
-                  <svg className="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-secondary">Active Members</p>
-                  <p className="text-2xl font-semibold text-primary">{group.activeUsers}</p>
-                </div>
-              </div>
+            <div className="ios-metric-tile">
+              <span className="metric-label">Capacity</span>
+              <span className="metric-value">{capacityLabel}</span>
             </div>
-
-            <div className="stat-card">
-              <div className="flex items-center">
-                <div className="p-2 bg-yellow-100 rounded-lg">
-                  <svg className="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                    />
-                  </svg>
-                </div>
-                <div className="ml-4">
-                  <p className="text-sm font-medium text-secondary">Capacity</p>
-                  <p className="text-2xl font-semibold text-primary">{group.maxUsers === -1 ? '∞' : group.maxUsers}</p>
-                </div>
-              </div>
+            <div className="ios-metric-tile">
+              <span className="metric-label">Status</span>
+              <span className="metric-value">{group.isActive ? 'Active' : 'Off'}</span>
             </div>
           </div>
 
-          {/* Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Members List */}
-            <div className="surface p-6" style={{ borderRadius: 'var(--radius-xl)' }}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-base font-semibold text-primary">Members</h3>
-                <Button variant="outline" size="sm" onClick={handleManageMembers} className="px-3 py-1">
-                  Manage
-                </Button>
-              </div>
+          <div className="ios-card p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-base font-semibold text-primary">Members</h3>
+              <button type="button" className="ios-btn-secondary text-sm" onClick={handleManageMembers}>
+                Manage
+              </button>
+            </div>
+            {members.length === 0 ? (
+              <p className="text-sm text-secondary">No members yet.</p>
+            ) : (
               <div className="space-y-3">
-                {group.members.map((member) => (
+                {members.map((member: (typeof members)[number]) => (
                   <div
                     key={member.id}
                     className="flex items-center justify-between p-3 rounded-xl"
                     style={{ backgroundColor: 'var(--color-fill-quaternary)' }}
                   >
-                    <div className="flex items-center">
-                      <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-medium">
-                        {member.name
-                          .split(' ')
-                          .map((n) => n[0])
-                          .join('')}
+                    <div className="flex items-center gap-3">
+                      <div className="ios-avatar ios-avatar-sm">
+                        {member.user.firstName.charAt(0)}
                       </div>
-                      <div className="ml-3">
-                        <p className="font-medium text-primary">{member.name}</p>
-                        <p className="text-sm text-secondary">{member.email}</p>
+                      <div>
+                        <p className="font-medium text-primary">
+                          {member.user.firstName} {member.user.lastName}
+                        </p>
+                        <p className="text-sm text-secondary">{member.user.email}</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-primary">{member.role}</p>
-                      <p className="text-xs text-tertiary">Joined {new Date(member.joinedAt).toLocaleDateString()}</p>
+                    <div className="text-right text-sm">
+                      <p className="font-medium text-primary">{member.role}</p>
+                      <p className="text-xs text-secondary">
+                        Joined {new Date(member.joinedAt).toLocaleDateString()}
+                      </p>
                     </div>
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* Recent Activity */}
-            <div className="surface p-6" style={{ borderRadius: 'var(--radius-xl)' }}>
-              <h3 className="text-base font-semibold text-primary mb-4">Recent Activity</h3>
-              <div className="space-y-3">
-                {group.recentActivity.map((activity) => (
-                  <div key={activity.id} className="flex items-start">
-                    <div className="flex-shrink-0">
-                      <div className="w-2 h-2 bg-blue-500 rounded-full mt-2"></div>
-                    </div>
-                    <div className="ml-3">
-                      <p className="text-sm text-primary">{activity.action}</p>
-                      <p className="text-sm text-secondary">by {activity.user}</p>
-                      <p className="text-xs text-tertiary">{activity.timestamp}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            )}
           </div>
 
-          {/* Danger Zone */}
           <div
             className="mt-8 p-6 rounded-xl"
             style={{ backgroundColor: 'rgba(255,59,48,0.08)', border: '1px solid rgba(255,59,48,0.2)' }}
@@ -307,9 +181,9 @@ const GroupDetailsPageContent: React.FC = () => {
             <p className="text-sm mb-4" style={{ color: 'var(--color-red)', opacity: 0.8 }}>
               Once you delete a group, there is no going back. Please be certain.
             </p>
-            <Button variant="danger" size="md" onClick={handleDeleteGroup} className="px-4 py-2">
+            <button type="button" className="ios-btn-secondary" onClick={handleDeleteGroup}>
               Delete Group
-            </Button>
+            </button>
           </div>
         </div>
       </AppLayout>
