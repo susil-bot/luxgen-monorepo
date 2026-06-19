@@ -259,9 +259,8 @@ out/
 *.sqlite
 *.sqlite3
 
-# Docker
-.dockerignore
-Dockerfile.dev
+# Docker — local-only overrides (committed: apps/*/Dockerfile.dev, .dockerignore)
+Dockerfile.local
 
 # Testing
 coverage/

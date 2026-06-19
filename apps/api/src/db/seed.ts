@@ -1,7 +1,9 @@
 import { getTenantDomain } from '@luxgen/config';
+import { hashPassword } from '@luxgen/auth';
 import { logger } from '../utils/logger';
 import { connectDB } from './connect';
 import { Group, User, Tenant } from '@luxgen/db';
+import type { IUser } from '@luxgen/db';
 import { seedDashboardData } from './dashboardSeed';
 
 export const seedDatabase = async (): Promise<void> => {
@@ -44,9 +46,32 @@ export const seedDatabase = async (): Promise<void> => {
   }
 };
 
+/** Skip seeding when volume already has users (Docker / repeat dev starts). */
+export async function seedDatabaseIfEmpty(): Promise<boolean> {
+  await connectDB();
+  const userCount = await User.countDocuments();
+  if (userCount > 0) {
+    logger.info(`Database already seeded (${userCount} users) — skipping auto-seed`);
+    return false;
+  }
+  logger.info('Empty database detected — running first-time seed');
+  await seedDatabase();
+  return true;
+}
+
 // Run the seed function if this file is executed directly
 if (require.main === module) {
-  seedDatabase()
+  const ifEmpty = process.argv.includes('--if-empty');
+
+  const run = async () => {
+    if (ifEmpty) {
+      await seedDatabaseIfEmpty();
+    } else {
+      await seedDatabase();
+    }
+  };
+
+  run()
     .then(() => {
       console.log('✅ Seed script completed');
       process.exit(0);
@@ -189,7 +214,7 @@ const createSampleUsers = async (tenants: any[]) => {
       lastName: 'Brown',
       email: 'james.brown@demo.com',
       password: 'password123',
-      role: 'STUDENT',
+      role: 'USER',
       tenant: tenants[0]._id,
       isActive: true,
       metadata: {
@@ -203,7 +228,7 @@ const createSampleUsers = async (tenants: any[]) => {
       lastName: 'Garcia',
       email: 'lisa.garcia@demo.com',
       password: 'password123',
-      role: 'STUDENT',
+      role: 'USER',
       tenant: tenants[0]._id,
       isActive: true,
       metadata: {
@@ -217,7 +242,7 @@ const createSampleUsers = async (tenants: any[]) => {
       lastName: 'Martinez',
       email: 'robert.martinez@demo.com',
       password: 'password123',
-      role: 'STUDENT',
+      role: 'USER',
       tenant: tenants[0]._id,
       isActive: true,
       metadata: {
@@ -291,7 +316,7 @@ const createSampleUsers = async (tenants: any[]) => {
       lastName: 'Harris',
       email: 'daniel.harris@ideavibes.com',
       password: 'password123',
-      role: 'STUDENT',
+      role: 'USER',
       tenant: tenants[1]._id,
       isActive: true,
       metadata: {
@@ -305,7 +330,7 @@ const createSampleUsers = async (tenants: any[]) => {
       lastName: 'Clark',
       email: 'michelle.clark@ideavibes.com',
       password: 'password123',
-      role: 'STUDENT',
+      role: 'USER',
       tenant: tenants[1]._id,
       isActive: true,
       metadata: {
@@ -319,7 +344,7 @@ const createSampleUsers = async (tenants: any[]) => {
       lastName: 'Lewis',
       email: 'kevin.lewis@ideavibes.com',
       password: 'password123',
-      role: 'STUDENT',
+      role: 'USER',
       tenant: tenants[1]._id,
       isActive: true,
       metadata: {
@@ -393,7 +418,7 @@ const createSampleUsers = async (tenants: any[]) => {
       lastName: 'Young',
       email: 'donna.young@acme-corp.com',
       password: 'password123',
-      role: 'STUDENT',
+      role: 'USER',
       tenant: tenants[2]._id,
       isActive: true,
       metadata: {
@@ -407,7 +432,7 @@ const createSampleUsers = async (tenants: any[]) => {
       lastName: 'King',
       email: 'paul.king@acme-corp.com',
       password: 'password123',
-      role: 'STUDENT',
+      role: 'USER',
       tenant: tenants[2]._id,
       isActive: true,
       metadata: {
@@ -423,14 +448,26 @@ const createSampleUsers = async (tenants: any[]) => {
 
   for (const userData of allUsers) {
     const existingUser = await User.findOne({ email: userData.email });
+    const hashedPassword = await hashPassword(userData.password);
+
     if (!existingUser) {
-      const user = new User(userData);
+      const user = new User({
+        ...userData,
+        password: hashedPassword,
+        status: 'ACTIVE' as IUser['status'],
+      });
       await user.save();
       users.push(user);
       logger.info(
         `Created user: ${user.firstName} ${user.lastName} (${user.email}) - Role: ${user.role} - Tenant: ${user.tenant}`,
       );
     } else {
+      if (!existingUser.password.startsWith('$2')) {
+        existingUser.password = hashedPassword;
+        existingUser.status = 'ACTIVE' as IUser['status'];
+        await existingUser.save();
+        logger.info(`Updated password hash for: ${existingUser.email}`);
+      }
       users.push(existingUser);
       logger.info(
         `User already exists: ${existingUser.firstName} ${existingUser.lastName} (${existingUser.email}) - Role: ${existingUser.role}`,
@@ -447,8 +484,8 @@ const createSampleGroups = async (tenants: any[], users: any[]) => {
   for (const tenant of tenants) {
     const tenantUsers = users.filter((user) => user.tenant.toString() === tenant._id.toString());
     const admins = tenantUsers.filter((user) => user.role === 'ADMIN');
-    const _instructors = tenantUsers.filter((user) => user.role === 'INSTRUCTOR');
-    const students = tenantUsers.filter((user) => user.role === 'STUDENT');
+    const _learners = tenantUsers.filter((user) => user.role === 'USER');
+    const students = _learners;
 
     const tenantGroups = [
       {

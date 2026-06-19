@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { createHandleUserAction } from '../../lib/user-actions';
+import { createHandleUserAction } from '../lib/user-actions';
 import {
   NotFound,
   AssetManagerProvider,

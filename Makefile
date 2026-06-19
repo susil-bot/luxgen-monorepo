@@ -4,7 +4,7 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 .DEFAULT_GOAL := help
-.PHONY: help setup dev dev-infra dev-full staging prod clean clean-all \
+.PHONY: help setup dev dev-infra dev-full dev-docker staging prod clean clean-all \
         logs logs-api logs-web logs-ollama \
         agent-start agent-stop agent-status \
         agent-pull agent-pull-mistral agent-pull-qwen \
@@ -26,7 +26,7 @@ help: ## Show this help
 	@echo ""
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ { printf "  $(CYAN)%-22s$(RESET) %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 	@echo ""
-	@echo "$(YELLOW)Quick start:$(RESET) make setup && make dev"
+	@echo "$(YELLOW)Quick start:$(RESET) make dev-docker"
 	@echo ""
 
 # ─── Setup (First-Time) ───────────────────────────────────────────────────────
@@ -59,10 +59,22 @@ dev-infra: ## Start MongoDB + Redis + Ollama in Docker (background)
 	@echo "  Redis:    localhost:6379"
 	@echo "  Ollama:   localhost:11434"
 
-dev-full: ## Run entire dev stack in Docker (app + api + infra)
-	@echo "$(GREEN)► Starting full Docker dev stack...$(RESET)"
+dev-full: dev-docker ## Alias for dev-docker
+
+dev-docker: ## Full dev stack in Docker (build + hot reload + auto-seed on first boot)
+	@echo "$(GREEN)► Starting Docker dev stack (persistent volumes)...$(RESET)"
 	@docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d
-	@echo "$(GREEN)✓ Dev stack running at http://localhost:3000$(RESET)"
+	@echo ""
+	@echo "$(GREEN)✓ Stack starting — first boot may take 2–3 min (npm install + seed)$(RESET)"
+	@echo "  Web:      http://demo.localhost:3000"
+	@echo "  Login:    http://demo.localhost:3000/login"
+	@echo "  GraphQL:  http://localhost:4000/graphql"
+	@echo "  Mongo UI: http://localhost:8081  (admin / admin123)"
+	@echo ""
+	@echo "  Demo login: alex.thompson@demo.com / password123"
+	@echo "  Logs:       make logs"
+	@echo "  Stop:       make clean  (keeps DB volume)"
+	@echo "  Reset DB:   make db-reset  (wipes volume data, re-seeds on next start)"
 
 # ─── Agent Studio (Local LLM) ─────────────────────────────────────────────────
 agent-start: ## Start Ollama in Docker
@@ -126,14 +138,26 @@ build-api: ## Build API only
 	@npx turbo run build --filter=@luxgen/api
 
 # ─── Database ─────────────────────────────────────────────────────────────────
-db-seed: ## Seed the database with dev data
+db-seed: ## Seed the database with dev data (force — idempotent upsert)
 	@echo "$(GREEN)► Seeding database...$(RESET)"
-	@cd apps/api && npm run seed
+	@if docker compose ps api 2>/dev/null | grep -q Up; then \
+		docker compose exec api sh -c "cd apps/api && npm run seed"; \
+	else \
+		cd apps/api && npm run seed; \
+	fi
 
-db-reset: ## Drop and re-seed the dev database (DESTRUCTIVE)
-	@echo "$(RED)► Resetting dev database...$(RESET)"
-	@docker exec luxgen-mongodb mongosh luxgen_dev --eval "db.dropDatabase()" 2>/dev/null || true
-	@$(MAKE) db-seed
+db-reset: ## Drop dev database volume data and re-seed on next API start
+	@echo "$(RED)► Resetting dev database (luxgen_dev)...$(RESET)"
+	@if docker compose ps mongodb 2>/dev/null | grep -q Up; then \
+		docker compose exec mongodb mongosh -u admin -p password123 --authenticationDatabase admin luxgen_dev --eval "db.dropDatabase()"; \
+		if docker compose ps api 2>/dev/null | grep -q Up; then \
+			echo "  Restarting API to trigger auto-seed..."; \
+			docker compose restart api; \
+		fi; \
+	else \
+		echo "  MongoDB container not running — start with: make dev-docker"; exit 1; \
+	fi
+	@echo "$(GREEN)✓ Database dropped. API will auto-seed on restart.$(RESET)"
 
 # ─── Logs ─────────────────────────────────────────────────────────────────────
 logs: ## Follow all Docker logs

@@ -10,7 +10,8 @@
     "test:watch": "jest --watch",
     "lint": "eslint src --ext .ts",
     "clean": "rm -rf dist",
-    "seed": "ts-node src/db/seed.ts"
+    "seed": "ts-node src/db/seed.ts",
+    "seed:if-empty": "ts-node src/db/seed.ts --if-empty"
   },
   "dependencies": {
     "@luxgen/agent": "*",

@@ -51,17 +51,29 @@ npm test
 npm run lint
 ```
 
-## 🐳 Docker Development
+## 🐳 Docker Development (recommended)
+
+One command — builds images, starts MongoDB/Redis/API/Web with hot reload, and **auto-seeds on first boot only** (data persists in Docker volumes):
 
 ```bash
-# Start all services with Docker
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+make dev-docker
+# or
+npm run dev:docker:detach
+```
 
-# View logs
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs -f
+| URL | Purpose |
+|-----|---------|
+| http://demo.localhost:3000 | Demo tenant app |
+| http://localhost:4000/graphql | GraphQL playground |
+| http://localhost:8081 | Mongo Express (admin / admin123) |
 
-# Stop services
-docker-compose -f docker-compose.yml -f docker-compose.dev.yml down
+**Demo login:** `alex.thompson@demo.com` / `password123`
+
+```bash
+make logs          # follow all logs
+make clean         # stop stack (keeps DB volume — no re-seed needed)
+make db-reset      # wipe DB; API re-seeds automatically on next start
+make clean-all     # stop + delete all volumes (full reset)
 ```
 
 ## 🔧 Recent Improvements

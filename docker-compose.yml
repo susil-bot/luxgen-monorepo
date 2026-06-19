@@ -12,7 +12,6 @@ services:
       MONGO_INITDB_DATABASE: luxgen
     volumes:
       - mongodb_data:/data/db
-      - ./packages/db/src/seed.ts:/docker-entrypoint-initdb.d/seed.ts:ro
     networks:
       - luxgen-network
     healthcheck:
@@ -50,9 +49,13 @@ services:
     environment:
       NODE_ENV: development
       PORT: 4000
-      MONGODB_URI: mongodb://admin:password123@mongodb:27017/luxgen?authSource=admin
+      MONGODB_URI: mongodb://admin:password123@mongodb:27017/luxgen_dev?authSource=admin
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      JWT_SECRET: dev-jwt-secret-change-in-production-min-32-chars
+      JWT_EXPIRES_IN: 7d
+      SEED_IF_EMPTY: "true"
+      TENANT_DEMO_KEY: demo-tenant-signing-key-dev-32chars-min
+      TENANT_IDEA-VIBES_KEY: idea-vibes-signing-key-dev-32chars-min
       CORS_ORIGIN: http://localhost:3000
     volumes:
       - ./apps/api:/app/apps/api
@@ -67,9 +70,10 @@ services:
       - luxgen-network
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
-      interval: 30s
+      interval: 15s
       timeout: 10s
-      retries: 3
+      retries: 10
+      start_period: 120s
 
   # Web Application
   web:
@@ -84,6 +88,7 @@ services:
       NODE_ENV: development
       PORT: 3000
       NEXT_PUBLIC_API_URL: http://localhost:4000
+      NEXT_PUBLIC_GRAPHQL_URL: http://localhost:4000/graphql
       NEXT_PUBLIC_APP_URL: http://localhost:3000
     volumes:
       - ./apps/web:/app/apps/web
@@ -101,8 +106,10 @@ services:
       timeout: 10s
       retries: 3
 
-  # Development Tools
+  # Legacy turbo dev container — opt-in only (conflicts with api/web services)
   dev-tools:
+    profiles:
+      - tools
     image: node:18-alpine
     container_name: luxgen-dev-tools
     restart: unless-stopped
