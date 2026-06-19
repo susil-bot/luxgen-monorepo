@@ -1,5 +1,6 @@
 import type { CustomerDetail } from '../../fetcher';
-import { CustomerDetailSection } from '../../CustomerDetailSection';
+import type { TimelineActivityProps } from '../../../Timeline';
+import { CustomerBlocksSection } from '../BlocksSection/BlocksSection';
 import { TimelineView, type TimelineEvent } from '../../../Timeline';
 
 function customerEventsToTimeline(customer: CustomerDetail): TimelineEvent[] {
@@ -14,37 +15,20 @@ function customerEventsToTimeline(customer: CustomerDetail): TimelineEvent[] {
   }));
 }
 
-export function CustomerHistorySection({
-  customer,
-  events,
-  allowComments,
-  commentDraft,
-  onCommentDraftChange,
-  onPostComment,
-  posting,
-  staffInitials,
-}: {
+export type CustomerHistorySectionProps = {
   customer: CustomerDetail;
-  events?: TimelineEvent[];
-  allowComments?: boolean;
-  commentDraft?: string;
-  onCommentDraftChange?: (value: string) => void;
-  onPostComment?: () => void;
-  posting?: boolean;
-  staffInitials?: string;
-}) {
+} & Partial<TimelineActivityProps>;
+
+export function CustomerHistorySection({ customer, events, ...timeline }: CustomerHistorySectionProps) {
+  const resolvedEvents = events ?? customerEventsToTimeline(customer);
+
   return (
-    <CustomerDetailSection title="Customer history" hint="Shopify timeline · LuxGen activity log">
+    <CustomerBlocksSection changeCount={resolvedEvents.length}>
       <TimelineView
         embedded
-        events={events ?? customerEventsToTimeline(customer)}
-        allowComments={allowComments}
-        commentDraft={commentDraft}
-        onCommentDraftChange={onCommentDraftChange}
-        onPostComment={onPostComment}
-        posting={posting}
-        staffInitials={staffInitials}
+        events={resolvedEvents}
+        {...timeline}
       />
-    </CustomerDetailSection>
+    </CustomerBlocksSection>
   );
 }

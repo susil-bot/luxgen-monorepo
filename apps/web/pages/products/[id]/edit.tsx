@@ -24,6 +24,7 @@ import { useAppLayoutHeader } from '../../../lib/app-layout-header';
 import { GET_COURSE, UPDATE_COURSE } from '../../../graphql/queries/courses';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useActivityTimeline } from '../../../lib/use-activity-timeline';
+import { getStoredUser } from '../../../lib/session';
 
 interface Props {
   tenant: string;
@@ -53,7 +54,8 @@ function EditProductContent({ tenant }: Props) {
 
   const [updateCourse] = useMutation(UPDATE_COURSE);
 
-  const queryTenantId = tenantId ?? data?.course?.tenant?.id ?? tenant;
+  const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
+  const queryTenantId = tenantId ?? sessionUser?.tenant.id ?? data?.course?.tenant?.id;
   const staffInitials =
     layoutUser?.name
       ?.split(' ')

@@ -21,6 +21,8 @@ import { GET_COURSES } from '../../../graphql/queries/courses';
 import { GET_USERS } from '../../../graphql/queries/users';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
+import { isMongoObjectId } from '../../../lib/mongo-id';
+import { isLearnerRole } from '../../../lib/user-roles';
 
 interface Props {
   tenant: string;
@@ -32,7 +34,7 @@ function AdminCustomersPageContent({ tenant }: Props) {
   const layoutUser = useLayoutUser();
   const tenantId = useAppTenantId();
   const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
-  const queryTenantId = tenantId ?? sessionUser?.tenant.id ?? tenant;
+  const queryTenantId = tenantId ?? sessionUser?.tenant.id;
   const headerProps = useAppLayoutHeader();
 
   const [search, setSearch] = useState('');
@@ -57,9 +59,7 @@ function AdminCustomersPageContent({ tenant }: Props) {
   }, [router.query.search]);
 
   const allCustomers = useMemo(() => {
-    const learners = (usersData?.users ?? []).filter(
-      (u: { role: string }) => u.role === 'STUDENT' || u.role === 'student',
-    );
+    const learners = (usersData?.users ?? []).filter((u: { role: string }) => isLearnerRole(u.role));
     return buildCustomersFromUsers(learners, coursesData?.courses);
   }, [coursesData, usersData]);
 
@@ -107,7 +107,7 @@ function AdminCustomersPageContent({ tenant }: Props) {
         )}
       </AppLayout>
 
-      {queryTenantId && (
+      {isMongoObjectId(queryTenantId) && (
         <CreateCustomerModal
           isOpen={showCreateCustomer}
           onClose={() => setShowCreateCustomer(false)}

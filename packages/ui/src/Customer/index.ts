@@ -9,6 +9,7 @@ export {
   filterCustomersByTab,
   findCustomerDetail,
   buildCustomerDetail,
+  buildCustomerDetailFromUser,
   formatCustomerListDate,
 } from './fetcher';
 export type {

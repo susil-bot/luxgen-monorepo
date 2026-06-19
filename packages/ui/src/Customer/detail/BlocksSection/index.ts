@@ -1,0 +1,1 @@
+export { CustomerBlocksSection } from './BlocksSection';

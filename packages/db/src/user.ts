@@ -3,6 +3,9 @@ import { Schema, model, Document } from 'mongoose';
 export enum UserRole {
   SUPER_ADMIN = 'SUPER_ADMIN',
   ADMIN = 'ADMIN',
+  INSTRUCTOR = 'INSTRUCTOR',
+  STUDENT = 'STUDENT',
+  /** @deprecated Use STUDENT — kept for legacy seed data */
   USER = 'USER',
 }
 

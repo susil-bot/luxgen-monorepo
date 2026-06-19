@@ -7,6 +7,7 @@ import {
   User,
   type IActivityEvent,
 } from '@luxgen/db';
+import mongoose from 'mongoose';
 import { publishActivityEvent, type ActivityEventPayload } from '../lib/activityPubSub';
 
 function buildOrderSubjectId(courseId: string, studentId: string): string {
@@ -139,6 +140,16 @@ export class ActivityEventService {
     first = 50,
     after?: string,
   ): Promise<ActivityEventConnection> {
+    const empty: ActivityEventConnection = {
+      edges: [],
+      pageInfo: { hasNextPage: false, endCursor: null },
+      totalCount: 0,
+    };
+
+    if (!mongoose.Types.ObjectId.isValid(tenantId)) {
+      return empty;
+    }
+
     const limit = Math.min(Math.max(first, 1), 100);
     const decoded = after ? decodeActivityCursor(after) : null;
 
@@ -158,9 +169,12 @@ export class ActivityEventService {
     if (stored.length === 0 && !after) {
       const synthesized = await this.synthesize(tenantId, subjectType, subjectId);
       const nodes = synthesized.slice(0, limit);
-      const edges = nodes.map((node) => ({
+      const edges = nodes.map((node, index) => ({
         node,
-        cursor: encodeActivityCursor(node.createdAt, node._id?.toString?.() ?? node.id ?? 'synth'),
+        cursor: encodeActivityCursor(
+          node.createdAt,
+          node._id?.toString?.() ?? `synth-${subjectType}-${subjectId}-${index}`,
+        ),
       }));
       return {
         edges,

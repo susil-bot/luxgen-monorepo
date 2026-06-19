@@ -185,6 +185,33 @@ export function findCustomerDetail(
   return buildCustomerDetail(customer, orders);
 }
 
+/** Build customer detail from a single user record (detail page direct lookup). */
+export function buildCustomerDetailFromUser(
+  user: EnrollmentUserSource,
+  courses: EnrollmentCourseSource[] | null | undefined,
+  users: EnrollmentUserSource[] | null | undefined,
+  staffNotes?: string,
+): CustomerDetail {
+  const orders = buildOrdersFromEnrollments(courses, users);
+  const orderCount = orders.filter((o) => o.customerId === user.id).length;
+  const row: CustomerRow = {
+    id: user.id,
+    name: displayName(user),
+    email: user.email,
+    location: '—',
+    orderCount,
+    amountSpent: orderCount > 0 ? '—' : '₹0.00',
+    customerSince: formatCustomerSince(user.createdAt ?? new Date().toISOString()),
+    rfmGroup: deriveRfmGroup(orderCount),
+    tags: orderCount > 0 ? ['Active learner'] : [],
+  };
+  const detail = buildCustomerDetail(row, orders);
+  if (staffNotes !== undefined) {
+    detail.notes = staffNotes;
+  }
+  return detail;
+}
+
 export function formatCustomerListDate(iso: string): string {
   try {
     return new Date(iso).toLocaleDateString(undefined, {

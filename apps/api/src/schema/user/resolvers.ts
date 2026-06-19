@@ -10,12 +10,16 @@ export const userResolvers = {
   },
   Mutation: {
     createUser: async (_: unknown, { input }: { input: any }, context: GraphQLContext) => {
-      const user = await userService.createUser(input);
+      const actor = actorFromContext(context.user);
+      const user = await userService.createUser({
+        ...input,
+        invitedBy: actor?.id,
+      });
       if (input.role === 'STUDENT') {
-        const actor = actorFromContext(context.user);
+        const userId = (user as { _id?: { toString(): string }; id?: string })._id?.toString?.() ?? user.id;
         await activityEventService.recordCustomerCreated(
           input.tenantId,
-          user.id,
+          userId,
           user.email,
           actor,
         );
@@ -31,5 +35,27 @@ export const userResolvers = {
       userService.login({ ...input, req: ctx.req }),
 
     register: (_: unknown, { input }: { input: any }) => userService.register(input),
+  },
+  User: {
+    id: (parent: { _id?: { toString(): string }; id?: string }) =>
+      parent._id?.toString?.() ?? parent.id ?? '',
+    role: (parent: { role: string }) => (parent.role === 'USER' ? 'STUDENT' : parent.role),
+    staffNotes: (parent: { staffNotes?: string }) => parent.staffNotes ?? '',
+    tenant: (parent: {
+      tenant?: {
+        _id?: { toString(): string };
+        id?: string;
+        name?: string;
+        subdomain?: string;
+      };
+    }) => {
+      const t = parent.tenant;
+      if (!t || typeof t !== 'object') return t;
+      return {
+        id: t._id?.toString?.() ?? t.id,
+        name: t.name,
+        subdomain: t.subdomain,
+      };
+    },
   },
 };
