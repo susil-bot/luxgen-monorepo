@@ -1,16 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useMutation } from '@apollo/client';
 import { LoginForm, LoginFormData, RegisterVisual, SnackbarProvider, useSnackbar } from '@luxgen/ui';
 import { PageWrapper } from '@luxgen/ui';
+import { AuthNoticeBanner } from '../components/auth/AuthNoticeBanner';
 import { LOGIN_MUTATION } from '../graphql/queries/auth';
+import {
+  AUTH_NOTICE_BY_REASON,
+  formatLoginError,
+  parseAuthRedirectReason,
+} from '../lib/auth-notices';
 import { persistSession } from '../lib/session';
 
 const LoginPageContent: React.FC = () => {
   const router = useRouter();
   const { showSuccess, showError, showInfo } = useSnackbar();
   const [loading, setLoading] = useState(false);
+  const [authNoticeDismissed, setAuthNoticeDismissed] = useState(false);
+
+  const redirectReason = parseAuthRedirectReason(router.query.reason);
+  const authNotice =
+    redirectReason && !authNoticeDismissed ? AUTH_NOTICE_BY_REASON[redirectReason] : null;
+
+  useEffect(() => {
+    setAuthNoticeDismissed(false);
+  }, [redirectReason]);
 
   const [loginMutation] = useMutation(LOGIN_MUTATION);
 
@@ -45,8 +60,8 @@ const LoginPageContent: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Login error:', error);
-      const errorMessage = error.message || 'Login failed. Please check your credentials and try again.';
-      showError(errorMessage);
+      const rawMessage = error.message || 'Login failed. Please check your credentials and try again.';
+      showError(formatLoginError(rawMessage));
     } finally {
       setLoading(false);
     }
@@ -93,6 +108,12 @@ const LoginPageContent: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Left Section - Login Form */}
               <div className="order-2 md:order-1">
+                {authNotice && (
+                  <AuthNoticeBanner
+                    notice={authNotice}
+                    onDismiss={() => setAuthNoticeDismissed(true)}
+                  />
+                )}
                 <LoginForm
                   onSubmit={handleLogin}
                   onSocialLogin={handleSocialLogin}

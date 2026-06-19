@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { buildLoginRedirect, requiresAuth } from '../lib/auth-routes';
-import { clearStoredSession, isStoredSessionExpired } from '../lib/session';
+import { buildLoginRedirect, requiresAuth } from '../../lib/auth-routes';
+import { clearStoredSession, isStoredSessionExpired } from '../../lib/session';
 
 const CHECK_INTERVAL_MS = 60_000;
 
@@ -29,7 +29,7 @@ export function SessionMonitor({ onSessionExpired }: SessionMonitorProps) {
       const onProtected = requiresAuth(router.pathname);
 
       if (onProtected) {
-        void router.replace(buildLoginRedirect(returnPath));
+        void router.replace(buildLoginRedirect(returnPath, 'session_expired'));
       } else {
         handlingRef.current = false;
       }
