@@ -1,25 +1,50 @@
 import type { CustomerDetail } from '../../fetcher';
 import { CustomerDetailSection } from '../../CustomerDetailSection';
-import { formatCustomerListDate } from '../../fetcher';
+import { TimelineView, type TimelineEvent } from '../../../Timeline';
 
-export function CustomerHistorySection({ customer }: { customer: CustomerDetail }) {
+function customerEventsToTimeline(customer: CustomerDetail): TimelineEvent[] {
+  return customer.timeline.map((e) => ({
+    id: e.id,
+    message: e.message,
+    createdAt: e.at,
+    kind: e.field ? ('FIELD_CHANGE' as const) : ('SYSTEM' as const),
+    field: e.field,
+    oldValue: e.oldValue,
+    newValue: e.newValue,
+  }));
+}
+
+export function CustomerHistorySection({
+  customer,
+  events,
+  allowComments,
+  commentDraft,
+  onCommentDraftChange,
+  onPostComment,
+  posting,
+  staffInitials,
+}: {
+  customer: CustomerDetail;
+  events?: TimelineEvent[];
+  allowComments?: boolean;
+  commentDraft?: string;
+  onCommentDraftChange?: (value: string) => void;
+  onPostComment?: () => void;
+  posting?: boolean;
+  staffInitials?: string;
+}) {
   return (
     <CustomerDetailSection title="Customer history" hint="Shopify timeline · LuxGen activity log">
-      <ul className="space-y-4">
-        {customer.timeline.map((event) => (
-          <li key={event.id} className="text-sm">
-            <p className="text-primary">{event.message}</p>
-            {event.field && event.newValue && (
-              <p className="text-xs mt-1">
-                <span className="badge badge-gray mr-1">{event.oldValue ?? '—'}</span>
-                →
-                <span className="badge badge-green ml-1">{event.newValue}</span>
-              </p>
-            )}
-            <p className="text-xs text-tertiary mt-1">{formatCustomerListDate(event.at)}</p>
-          </li>
-        ))}
-      </ul>
+      <TimelineView
+        embedded
+        events={events ?? customerEventsToTimeline(customer)}
+        allowComments={allowComments}
+        commentDraft={commentDraft}
+        onCommentDraftChange={onCommentDraftChange}
+        onPostComment={onPostComment}
+        posting={posting}
+        staffInitials={staffInitials}
+      />
     </CustomerDetailSection>
   );
 }
