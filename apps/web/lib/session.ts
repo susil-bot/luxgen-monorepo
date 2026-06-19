@@ -100,6 +100,17 @@ export function getStoredUser(): SessionUser | null {
   }
 }
 
+/** Merge profile fields into persisted session (after updateUser or local edit) */
+export function updateStoredUser(partial: Partial<SessionUser>): SessionUser | null {
+  if (typeof window === 'undefined') return null;
+  const user = getStoredUser();
+  if (!user) return null;
+  const next = { ...user, ...partial };
+  localStorage.setItem(AUTH_STORAGE_KEYS.user, JSON.stringify(next));
+  localStorage.setItem(AUTH_STORAGE_KEYS.sessionEpoch, String(Date.now()));
+  return next;
+}
+
 export function clearStoredSession(): void {
   if (typeof window === 'undefined') return;
   Object.values(AUTH_STORAGE_KEYS).forEach((key) => {

@@ -4,6 +4,7 @@ import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 import { AppLayout } from '../Layout';
 import { AdminDashboard } from '../AdminDashboard';
+import { useNavigation } from '../context/NavigationContext';
 import {
   getDefaultSidebarSections,
   getDefaultNavItems,
@@ -91,6 +92,8 @@ export interface AdminDashboardLayoutProps extends BaseComponentProps {
   variant?: 'default' | 'compact' | 'detailed';
   loading?: boolean;
   onUserAction?: (action: 'profile' | 'settings' | 'logout') => void;
+  pathname?: string;
+  onNavigate?: (href: string) => void;
   onSearch?: (query: string) => void;
   onNotificationClick?: () => void;
   showSearch?: boolean;
@@ -194,6 +197,8 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
   variant = 'default',
   loading = false,
   onUserAction,
+  pathname,
+  onNavigate,
   onSearch,
   onNotificationClick,
   showSearch = true,
@@ -220,6 +225,7 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
   style,
   ...props
 }) => {
+  const navigation = useNavigation();
   const { styles, adminDashboardLayoutClasses } = getAdminDashboardLayoutStyles(tenantTheme, variant);
 
   const sidebarSections = getDefaultSidebarSections();
@@ -240,6 +246,8 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
           sidebarSections={sidebarSections}
           user={user}
           onUserAction={onUserAction}
+          pathname={pathname ?? navigation.pathname}
+          onNavigate={onNavigate ?? navigation.onNavigate}
           onSearch={onSearch}
           onNotificationClick={onNotificationClick}
           showSearch={showSearch}

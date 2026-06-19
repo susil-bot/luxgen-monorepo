@@ -26,6 +26,9 @@ export const PROTECTED_PREFIXES = [
   '/marketplace',
   '/admin',
   '/banner-demo',
+  '/profile',
+  '/settings',
+  '/products',
 ];
 
 export function isPublicRoute(pathname: string): boolean {
