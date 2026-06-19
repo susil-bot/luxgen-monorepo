@@ -1,6 +1,7 @@
 import { courseService } from '../../services/courseService';
 import { activityEventService, actorFromContext } from '../../services/activityEventService';
 import { enrollmentService } from '../../services/enrollmentService';
+import { emitAutomationEvent } from '@luxgen/agent';
 import type { GraphQLContext } from '../../context';
 
 export const courseResolvers = {
@@ -75,6 +76,18 @@ export const courseResolvers = {
         student?.email ?? 'customer',
         actor,
       );
+      void emitAutomationEvent({
+        tenantId,
+        triggerType: 'USER_ENROLLED',
+        payload: {
+          courseId,
+          studentId,
+          userId: studentId,
+          orderId: `${courseId}:${studentId}`,
+          customerEmail: student?.email,
+        },
+        source: 'lms',
+      }).catch(() => undefined);
       return course;
     },
     unenrollStudent: async (

@@ -1,4 +1,6 @@
+import { withFilter } from 'graphql-subscriptions';
 import { activityEventService, actorFromContext } from '../../services/activityEventService';
+import { ACTIVITY_EVENT_ADDED, activityPubSub, timelineTopic } from '../../lib/activityPubSub';
 import type { GraphQLContext } from '../../context';
 import type { ActivitySubjectType } from '@luxgen/db';
 
@@ -17,6 +19,7 @@ function mapEvent(event: {
   oldValue?: string;
   newValue?: string;
   metadata?: Record<string, unknown>;
+  criticalAlert?: boolean;
 }) {
   return {
     id: event._id?.toString?.() ?? event.id,
@@ -32,6 +35,7 @@ function mapEvent(event: {
     oldValue: event.oldValue,
     newValue: event.newValue,
     metadata: event.metadata ?? {},
+    criticalAlert: event.criticalAlert ?? false,
   };
 }
 
@@ -44,16 +48,47 @@ export const activityEventResolvers = {
         subjectType,
         subjectId,
         first,
-      }: { tenantId: string; subjectType: ActivitySubjectType; subjectId: string; first?: number },
+        after,
+      }: {
+        tenantId: string;
+        subjectType: ActivitySubjectType;
+        subjectId: string;
+        first?: number;
+        after?: string;
+      },
     ) => {
-      const events = await activityEventService.list(tenantId, subjectType, subjectId, first ?? 50);
-      return events.map(mapEvent);
+      const connection = await activityEventService.listConnection(
+        tenantId,
+        subjectType,
+        subjectId,
+        first ?? 50,
+        after,
+      );
+      return {
+        edges: connection.edges.map((edge) => ({
+          cursor: edge.cursor,
+          node: mapEvent(edge.node),
+        })),
+        pageInfo: connection.pageInfo,
+        totalCount: connection.totalCount,
+      };
     },
   },
   Mutation: {
     addActivityComment: async (
       _: unknown,
-      { input }: { input: { tenantId: string; subjectType: ActivitySubjectType; subjectId: string; message: string } },
+      {
+        input,
+      }: {
+        input: {
+          tenantId: string;
+          subjectType: ActivitySubjectType;
+          subjectId: string;
+          message: string;
+          mentions?: string[];
+          attachments?: Array<{ url: string; name: string; mimeType?: string }>;
+        };
+      },
       context: GraphQLContext,
     ) => {
       const actor = actorFromContext(context.user);
@@ -65,8 +100,30 @@ export const activityEventResolvers = {
         message: input.message.trim(),
         actorId: actor.id,
         actorName: actor.name,
+        mentions: input.mentions,
+        attachments: input.attachments,
       });
       return mapEvent(event);
+    },
+  },
+  Subscription: {
+    activityEventAdded: {
+      subscribe: withFilter(
+        () => activityPubSub.asyncIterator(ACTIVITY_EVENT_ADDED),
+        (
+          payload: { activityEventAdded: { tenantId: string; subjectType: string; subjectId: string }; topic: string },
+          variables: { tenantId: string; subjectType: string; subjectId: string },
+        ) => {
+          const expected = timelineTopic(
+            variables.tenantId,
+            variables.subjectType as ActivitySubjectType,
+            variables.subjectId,
+          );
+          return payload.topic === expected;
+        },
+      ),
+      resolve: (payload: { activityEventAdded: ReturnType<typeof mapEvent> }) =>
+        mapEvent(payload.activityEventAdded),
     },
   },
 };

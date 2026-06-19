@@ -7,6 +7,8 @@ export {
   getApiUrl,
   getGraphqlUrl,
   getClientGraphqlUrl,
+  getGraphqlWsUrl,
+  getClientGraphqlWsUrl,
   getOllamaUrl,
   getTenantDomain,
   getTenantWebOrigin,

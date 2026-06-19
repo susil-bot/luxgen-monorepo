@@ -18,6 +18,15 @@ export interface TimelineEvent {
   oldValue?: string;
   newValue?: string;
   metadata?: Record<string, unknown>;
+  criticalAlert?: boolean;
+  mentions?: string[];
+  attachments?: TimelineCommentAttachment[];
+}
+
+export interface TimelineCommentAttachment {
+  url: string;
+  name: string;
+  mimeType?: string;
 }
 
 export interface TimelineDateGroup {

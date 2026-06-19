@@ -1,10 +1,11 @@
 import mongoose from 'mongoose';
 import { connectDB } from '@luxgen/db';
-import { AgentTask, AgentAuditEntry } from '@luxgen/db';
+import { AgentTask, AgentAuditEntry, ActivityEventKind, ActivityActorType, ActivitySubjectType } from '@luxgen/db';
 import type { AgentSession } from '../types/session';
 import type { AuditAction } from '../types/task';
 import type { ValidationResult } from '../types/validation';
 import { getAgentConfig } from '../config/agent-mode';
+import { recordTimelineEvent } from '../timeline/record';
 
 let connected = false;
 
@@ -81,6 +82,59 @@ export async function appendAuditEntry(params: {
     details: params.details || {},
     timestamp: new Date(),
   });
+
+  await recordAgentTimelineFromAudit(params);
+}
+
+async function recordAgentTimelineFromAudit(params: {
+  sessionId: string;
+  tenantId: string;
+  userId: string;
+  action: AuditAction;
+  details?: Record<string, unknown>;
+}): Promise<void> {
+  const tracked = new Set(['staged', 'committed', 'merged', 'failed', 'approved']);
+  if (!tracked.has(params.action)) return;
+
+  const details = params.details ?? {};
+  const courseId = details.courseId as string | undefined;
+  const orderId = details.orderId as string | undefined;
+  const customerId = (details.customerId ?? details.userId ?? params.userId) as string | undefined;
+
+  const subjects: Array<{ subjectType: ActivitySubjectType; subjectId: string }> = [];
+  if (orderId) {
+    subjects.push({ subjectType: ActivitySubjectType.ORDER, subjectId: orderId });
+  }
+  if (courseId) {
+    subjects.push({ subjectType: ActivitySubjectType.PRODUCT, subjectId: courseId });
+  }
+  if (customerId && !orderId) {
+    subjects.push({ subjectType: ActivitySubjectType.CUSTOMER, subjectId: customerId });
+  }
+  if (subjects.length === 0) return;
+
+  const message = `Agent Studio: ${params.action}`;
+  const metadata = {
+    sessionId: params.sessionId,
+    agentAction: params.action,
+    userId: params.userId,
+    ...details,
+  };
+
+  for (const { subjectType, subjectId } of subjects) {
+    await recordTimelineEvent({
+      tenantId: params.tenantId,
+      subjectType,
+      subjectId,
+      kind: ActivityEventKind.APP,
+      eventType: `agent.${params.action}`,
+      message,
+      actorType: ActivityActorType.APP,
+      actorName: 'Agent Studio',
+      metadata,
+      criticalAlert: params.action === 'failed',
+    });
+  }
 }
 
 export async function getTaskFromMongo(sessionId: string): Promise<Record<string, unknown> | null> {

@@ -34,8 +34,8 @@ export type { IAutomationTemplate, TemplateCategory } from './automation-templat
 export { AutomationTemplate } from './automation-template';
 export type { IBusinessListing, ApplicationStatus, PublicationStatus, IStatusHistoryEntry } from './business-listing';
 export { BusinessListing } from './business-listing';
-export type { IActivityEvent, ActivitySubjectType, ActivityEventKind, ActivityActorType } from './activity-event';
-export { ActivityEvent } from './activity-event';
+export type { IActivityEvent } from './activity-event';
+export { ActivityEvent, ActivitySubjectType, ActivityEventKind, ActivityActorType } from './activity-event';
 export type { IEnrollment, EnrollmentPaymentStatus } from './enrollment';
 export { Enrollment, enrollmentSubjectId } from './enrollment';
 export type { IEmailNotificationLog, ListingEmailTemplate } from './email-notification-log';

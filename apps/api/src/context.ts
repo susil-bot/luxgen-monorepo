@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { IUser } from '@luxgen/db';
 import type { AuthErrorCode } from './types/auth';
+import { buildGraphQLContext } from './context/buildContext';
 
 export interface GraphQLContext {
   req: Request;
@@ -21,3 +22,5 @@ export const context = ({ req, res }: { req: Request; res: Response }): GraphQLC
     authError: req.authError,
   };
 };
+
+export { buildGraphQLContext };

@@ -1,10 +1,13 @@
+import { createServer, type Server as HttpServer } from 'http';
+import { execute, subscribe } from 'graphql';
+import { SubscriptionServer } from 'subscriptions-transport-ws';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import cors from 'cors';
 import helmet from 'helmet';
 
-import { typeDefs, resolvers } from './schema';
-import { context } from './context';
+import { schema } from './schema';
+import { context, buildGraphQLContext, type GraphQLContext } from './context';
 import { errorHandler, notFoundHandler } from './utils/errorHandler';
 
 // Middleware
@@ -77,10 +80,10 @@ app.use('/api/billing', billingRoutes);
 app.use('/api/jobs', jobsRoutes);
 app.use('/api/notifications', notificationsRoutes);
 
-// ── GraphQL ───────────────────────────────────────────────────────────────
+const executableSchema = schema;
+
 const apolloServer = new ApolloServer({
-  typeDefs,
-  resolvers,
+  schema: executableSchema,
   context,
   introspection: process.env.APOLLO_INTROSPECTION === 'true',
   formatError: (error) => {
@@ -89,14 +92,58 @@ const apolloServer = new ApolloServer({
   },
 });
 
+let httpServer: HttpServer | null = null;
+let subscriptionServer: SubscriptionServer | null = null;
+
 const startApollo = async () => {
   await apolloServer.start();
   apolloServer.applyMiddleware({ app: app as any, path: '/graphql' });
-  // Error handlers must register AFTER Apollo so /graphql is matched first
   app.use(notFoundHandler);
   app.use(errorHandler);
 };
 
-startApollo().catch(console.error);
+export async function createAppServer(): Promise<HttpServer> {
+  await startApollo();
+
+  httpServer = createServer(app);
+
+  subscriptionServer = SubscriptionServer.create(
+    {
+      schema: executableSchema,
+      execute,
+      subscribe,
+      onConnect: async (connectionParams: Record<string, unknown>) => {
+        const ctx = await buildGraphQLContext({
+          headers: {
+            authorization: (connectionParams.authorization as string) ?? '',
+            'x-tenant': (connectionParams['x-tenant'] as string) ?? '',
+          },
+        });
+        if (!ctx.user) {
+          throw new Error('Authentication required');
+        }
+        return ctx as GraphQLContext;
+      },
+    },
+    {
+      server: httpServer,
+      path: apolloServer.graphqlPath,
+    },
+  );
+
+  return httpServer;
+}
+
+export async function stopAppServer(): Promise<void> {
+  subscriptionServer?.close();
+  subscriptionServer = null;
+  if (httpServer) {
+    await new Promise<void>((resolve, reject) => {
+      httpServer!.close((err) => (err ? reject(err) : resolve()));
+    });
+    httpServer = null;
+  }
+  await apolloServer.stop();
+}
 
 export { app };

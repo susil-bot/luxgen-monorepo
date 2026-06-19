@@ -57,11 +57,12 @@ type ResolverFn = (parent: unknown, args: unknown, context: GraphQLContext, info
 export function secureResolvers<T extends Record<string, unknown>>(resolvers: T): T {
   const secured = { ...resolvers } as T;
 
-  for (const typeName of ['Query', 'Mutation'] as const) {
+  for (const typeName of ['Query', 'Mutation', 'Subscription'] as const) {
     const typeResolvers = resolvers[typeName] as Record<string, ResolverFn> | undefined;
     if (!typeResolvers) continue;
 
-    const publicSet = typeName === 'Query' ? PUBLIC_QUERIES : PUBLIC_MUTATIONS;
+    const publicSet =
+      typeName === 'Query' ? PUBLIC_QUERIES : typeName === 'Mutation' ? PUBLIC_MUTATIONS : new Set<string>();
     const wrapped: Record<string, ResolverFn> = {};
 
     for (const [fieldName, resolver] of Object.entries(typeResolvers)) {

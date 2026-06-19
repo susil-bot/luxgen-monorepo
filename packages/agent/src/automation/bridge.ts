@@ -5,6 +5,8 @@ import {
   TenantSubscription,
   TenantUsageMonthly,
   currentUsagePeriod,
+  ActivityEventKind,
+  ActivityActorType,
   type AutomationTriggerType,
   type IAutomation,
   type IAutomationAction,
@@ -16,6 +18,10 @@ import { ensureMongoConnection } from '../persistence/mongo';
 import { getRedisClient } from '../queue/redis-queue';
 import { getOllamaUrl } from '@luxgen/config';
 import { AUTOMATION_EVENTS_CHANNEL, type AutomationEventPayload } from './events';
+import {
+  recordTimelineEvent,
+  subjectsFromAutomationPayload,
+} from '../timeline/record';
 
 export interface EmitAutomationEventOptions {
   tenantId: string;
@@ -72,17 +78,32 @@ export async function emitAutomationEvent(options: EmitAutomationEventOptions): 
     });
 
     try {
-      await executeAutomationActions(automation, event);
+      await executeAutomationActions(automation, event, String(run._id));
       const durationMs = Date.now() - started;
       await AutomationRun.updateOne({ _id: run._id }, { status: 'success', durationMs });
       await Automation.updateOne({ _id: automation._id }, { $inc: { runCount: 1 }, lastRunAt: new Date() });
       await incrementAutomationRuns(tenantId);
+      await recordAutomationTimeline({
+        tenantId,
+        automation,
+        event,
+        runId: String(run._id),
+        status: 'success',
+      });
       executed += 1;
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
       const durationMs = Date.now() - started;
       await AutomationRun.updateOne({ _id: run._id }, { status: 'error', durationMs, error: message });
       await Automation.updateOne({ _id: automation._id }, { $inc: { runCount: 1 }, lastRunAt: new Date() });
+      await recordAutomationTimeline({
+        tenantId,
+        automation,
+        event,
+        runId: String(run._id),
+        status: 'error',
+        error: message,
+      });
       console.error(`[automation-bridge] Run failed for "${automation.name}":`, message);
     }
   }
@@ -101,9 +122,13 @@ async function publishAutomationEvent(event: AutomationEventPayload): Promise<vo
   }
 }
 
-async function executeAutomationActions(automation: IAutomation, event: AutomationEventPayload): Promise<void> {
+async function executeAutomationActions(
+  automation: IAutomation,
+  event: AutomationEventPayload,
+  runId: string,
+): Promise<void> {
   for (const action of automation.actions) {
-    await executeAction(action, automation, event);
+    await executeAction(action, automation, event, runId);
   }
 }
 
@@ -111,6 +136,7 @@ async function executeAction(
   action: IAutomationAction,
   automation: IAutomation,
   event: AutomationEventPayload,
+  runId: string,
 ): Promise<void> {
   switch (action.type) {
     case 'RUN_AGENT_TASK': {
@@ -146,9 +172,110 @@ async function executeAction(
         `[automation-bridge] ${action.type} for "${automation.name}" (tenant=${event.tenantId})`,
         action.config ?? {},
       );
+      await recordAutomationActionTimeline({
+        tenantId: event.tenantId,
+        automation,
+        action,
+        payload: event.payload,
+        runId,
+      });
       break;
     default:
       console.warn(`[automation-bridge] Unknown action type: ${action.type}`);
+  }
+}
+
+const ACTION_LABELS: Record<string, string> = {
+  SEND_EMAIL: 'sent an email',
+  ADD_TO_GROUP: 'added customer to a group',
+  REMOVE_FROM_GROUP: 'removed customer from a group',
+  ENROLL_IN_COURSE: 'enrolled customer in a course',
+  ISSUE_CERTIFICATE: 'issued a certificate',
+  CALL_WEBHOOK: 'called a webhook',
+  NOTIFY_SLACK: 'sent a Slack notification',
+  TAG_USER: 'tagged the customer',
+  RUN_AGENT_TASK: 'ran an agent task',
+};
+
+async function recordAutomationTimeline(params: {
+  tenantId: string;
+  automation: IAutomation;
+  event: AutomationEventPayload;
+  runId: string;
+  status: 'success' | 'error';
+  error?: string;
+}): Promise<void> {
+  const subjects = subjectsFromAutomationPayload(params.event.payload);
+  if (subjects.length === 0) return;
+
+  const actionSummary = params.automation.actions.map((a) => a.label || a.type).join(', ');
+  const message =
+    params.status === 'success'
+      ? `${params.automation.name} ran (${actionSummary})`
+      : `${params.automation.name} failed: ${params.error ?? 'unknown error'}`;
+
+  const metadata = {
+    automationId: String(params.automation._id),
+    automationName: params.automation.name,
+    triggerType: params.event.triggerType,
+    status: params.status,
+    runId: params.runId,
+    ...params.event.payload,
+  };
+
+  for (const { subjectType, subjectId } of subjects) {
+    await recordTimelineEvent({
+      tenantId: params.tenantId,
+      subjectType,
+      subjectId,
+      kind: ActivityEventKind.APP,
+      eventType: params.status === 'success' ? 'automation.ran' : 'automation.failed',
+      message,
+      actorType: ActivityActorType.APP,
+      actorName: params.automation.name,
+      metadata,
+      criticalAlert: params.status === 'error',
+    });
+  }
+}
+
+async function recordAutomationActionTimeline(params: {
+  tenantId: string;
+  automation: IAutomation;
+  action: IAutomationAction;
+  payload: Record<string, unknown>;
+  runId: string;
+}): Promise<void> {
+  const subjects = subjectsFromAutomationPayload(params.payload);
+  if (subjects.length === 0) return;
+
+  const verb = ACTION_LABELS[params.action.type] ?? `ran ${params.action.label}`;
+  const message = `${params.automation.name} ${verb}`;
+  const metadata = {
+    automationId: String(params.automation._id),
+    automationName: params.automation.name,
+    actionType: params.action.type,
+    actionLabel: params.action.label,
+    actionConfig: params.action.config ?? {},
+    runId: params.runId,
+    ...params.payload,
+  };
+
+  for (const { subjectType, subjectId } of subjects) {
+    await recordTimelineEvent({
+      tenantId: params.tenantId,
+      subjectType,
+      subjectId,
+      kind: ActivityEventKind.APP,
+      eventType:
+        params.action.type === 'SEND_EMAIL'
+          ? 'order.email_sent'
+          : `automation.action.${params.action.type.toLowerCase()}`,
+      message,
+      actorType: ActivityActorType.APP,
+      actorName: params.automation.name,
+      metadata,
+    });
   }
 }
 
