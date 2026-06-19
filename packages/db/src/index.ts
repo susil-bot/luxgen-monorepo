@@ -34,5 +34,5 @@ export type { IAutomationTemplate, TemplateCategory } from './automation-templat
 export { AutomationTemplate } from './automation-template';
 export type { IBusinessListing, ApplicationStatus, PublicationStatus, IStatusHistoryEntry } from './business-listing';
 export { BusinessListing } from './business-listing';
-export type { IEmailNotificationLog, ListingEmailTemplate } from './email-notification-log';
-export { EmailNotificationLog } from './email-notification-log';
+export type { IActivityEvent, ActivitySubjectType, ActivityEventKind, ActivityActorType } from './activity-event';
+export { ActivityEvent } from './activity-event';

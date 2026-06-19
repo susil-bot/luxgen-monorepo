@@ -10,6 +10,8 @@ import { DeliverySection } from './sections/DeliverySection';
 import { VariantsSection } from './sections/VariantsSection';
 import { MetafieldsSection } from './sections/MetafieldsSection';
 import { SearchListingSection } from './sections/SearchListingSection';
+import { ProductTimelineSection } from './sections/TimelineSection';
+import type { TimelineActivityProps } from '../Timeline';
 import { StatusSection } from './sidebar/StatusSection';
 import { PublishingSection } from './sidebar/PublishingSection';
 import { SalesSection } from './sidebar/SalesSection';
@@ -34,6 +36,7 @@ export interface ProductEditFormProps {
   onMetaChange: (patch: Partial<ProductEditMeta>) => void;
   onStatusChange: (s: ProductStatus) => void;
   onSave: () => void;
+  timeline?: TimelineActivityProps;
 }
 
 export function ProductEditForm({
@@ -54,6 +57,7 @@ export function ProductEditForm({
   onMetaChange,
   onStatusChange,
   onSave,
+  timeline,
 }: ProductEditFormProps) {
   return (
     <ProductEditLayout
@@ -89,6 +93,17 @@ export function ProductEditForm({
             tenant={tenant}
             onSeoChange={onSeoChange}
           />
+          {timeline && (
+            <ProductTimelineSection
+              events={timeline.events}
+              allowComments={timeline.allowComments}
+              commentDraft={timeline.commentDraft}
+              onCommentDraftChange={timeline.onCommentDraftChange}
+              onPostComment={timeline.onPostComment}
+              posting={timeline.posting}
+              staffInitials={timeline.staffInitials}
+            />
+          )}
         </>
       }
       sidebar={

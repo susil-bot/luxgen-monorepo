@@ -19,6 +19,7 @@ import { GET_COURSES } from '../../graphql/queries/courses';
 import { GET_USERS } from '../../graphql/queries/users';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
+import { useActivityTimeline } from '../../lib/use-activity-timeline';
 
 interface Props {
   tenant: string;
@@ -55,6 +56,15 @@ function OrderDetailPageContent({ tenant }: Props) {
 
   const loading = !orderId || ((coursesLoading || usersLoading) && !order);
 
+  const staffInitials =
+    layoutUser?.name
+      ?.split(' ')
+      .map((p) => p[0])
+      .join('')
+      .slice(0, 2) ?? 'ST';
+
+  const timeline = useActivityTimeline(queryTenantId, 'ORDER', orderId, staffInitials);
+
   return (
     <>
       <Head>
@@ -79,7 +89,7 @@ function OrderDetailPageContent({ tenant }: Props) {
             </Link>
           </div>
         ) : (
-          <OrderDetailView order={order} />
+          <OrderDetailView order={order} timeline={timeline} />
         )}
       </AppLayout>
     </>

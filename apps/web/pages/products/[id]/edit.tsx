@@ -19,10 +19,11 @@ import {
 } from '@luxgen/ui';
 import { PageLoadingState } from '../../../components/common/PageStates';
 import { createHandleUserAction } from '../../../lib/user-actions';
-import { useLayoutUser } from '../../../lib/app-layout-user';
+import { useLayoutUser, useAppTenantId } from '../../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
 import { GET_COURSE, UPDATE_COURSE } from '../../../graphql/queries/courses';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
+import { useActivityTimeline } from '../../../lib/use-activity-timeline';
 
 interface Props {
   tenant: string;
@@ -33,6 +34,7 @@ function EditProductContent({ tenant }: Props) {
   const { id } = router.query;
   const courseId = typeof id === 'string' ? id : '';
   const layoutUser = useLayoutUser();
+  const tenantId = useAppTenantId();
   const handleUserAction = createHandleUserAction(router);
   const headerProps = useAppLayoutHeader();
   const { showSuccess, showError } = useSnackbar();
@@ -50,6 +52,15 @@ function EditProductContent({ tenant }: Props) {
   });
 
   const [updateCourse] = useMutation(UPDATE_COURSE);
+
+  const queryTenantId = tenantId ?? data?.course?.tenant?.id ?? tenant;
+  const staffInitials =
+    layoutUser?.name
+      ?.split(' ')
+      .map((p) => p[0])
+      .join('')
+      .slice(0, 2) ?? 'ST';
+  const timeline = useActivityTimeline(queryTenantId, 'PRODUCT', courseId || undefined, staffInitials);
 
   useEffect(() => {
     const course = data?.course;
@@ -142,6 +153,7 @@ function EditProductContent({ tenant }: Props) {
           onMetaChange={handleMetaChange}
           onStatusChange={setStatus}
           onSave={() => void handleSave()}
+          timeline={timeline}
         />
       </AppLayout>
     </>

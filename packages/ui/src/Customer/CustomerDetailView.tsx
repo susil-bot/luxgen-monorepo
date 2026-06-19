@@ -1,4 +1,5 @@
 import type { CustomerDetail } from './fetcher';
+import type { TimelineActivityProps } from '../Timeline';
 import { SplitPageLayout } from '../SplitPageLayout';
 import { CustomerDetailHeader } from './CustomerDetailHeader';
 import { CustomerStatsBar } from './CustomerStatsBar';
@@ -14,9 +15,10 @@ import { CustomerNotesSection } from './detail/CustomerNotesSection';
 export interface CustomerDetailViewProps {
   customer: CustomerDetail;
   onCreateOrder?: () => void;
+  timeline?: TimelineActivityProps;
 }
 
-export function CustomerDetailView({ customer, onCreateOrder }: CustomerDetailViewProps) {
+export function CustomerDetailView({ customer, onCreateOrder, timeline }: CustomerDetailViewProps) {
   return (
     <SplitPageLayout
       variant="main-aside"
@@ -30,7 +32,7 @@ export function CustomerDetailView({ customer, onCreateOrder }: CustomerDetailVi
         <>
           <LastOrderSection customer={customer} onCreateOrder={onCreateOrder} />
           <MetafieldsSection customer={customer} />
-          <CustomerHistorySection customer={customer} />
+          <CustomerHistorySection customer={customer} {...timeline} />
         </>
       }
       aside={

@@ -1,31 +1,51 @@
 import type { OrderDetail } from '../../fetcher';
 import { OrderDetailSection } from '../../OrderDetailSection';
-import { formatOrderDate } from '../../fetcher';
+import { TimelineView, type TimelineEvent } from '../../../Timeline';
 
 export interface TimelineSectionProps {
   order: OrderDetail;
+  events?: TimelineEvent[];
+  allowComments?: boolean;
+  commentDraft?: string;
+  onCommentDraftChange?: (value: string) => void;
+  onPostComment?: () => void;
+  posting?: boolean;
+  staffInitials?: string;
 }
 
-export function TimelineSection({ order }: TimelineSectionProps) {
+function orderEventsToTimeline(order: OrderDetail): TimelineEvent[] {
+  return order.timeline.map((e) => ({
+    id: e.id,
+    message: e.message,
+    createdAt: e.at,
+    kind: 'SYSTEM' as const,
+    actorType: 'SYSTEM' as const,
+    actorName: e.actor,
+  }));
+}
+
+export function TimelineSection({
+  order,
+  events,
+  allowComments,
+  commentDraft,
+  onCommentDraftChange,
+  onPostComment,
+  posting,
+  staffInitials,
+}: TimelineSectionProps) {
   return (
     <OrderDetailSection title="Timeline" hint="Shopify: order events · LuxGen: enrollment activity">
-      <ul className="space-y-4">
-        {order.timeline.map((event) => (
-          <li key={event.id} className="flex gap-3">
-            <div
-              className="w-2 h-2 rounded-full mt-2 flex-shrink-0"
-              style={{ background: 'var(--color-blue)' }}
-            />
-            <div>
-              <p className="text-sm text-primary">{event.message}</p>
-              <p className="text-xs text-tertiary">
-                {formatOrderDate(event.at)}
-                {event.actor ? ` · ${event.actor}` : ''}
-              </p>
-            </div>
-          </li>
-        ))}
-      </ul>
+      <TimelineView
+        embedded
+        events={events ?? orderEventsToTimeline(order)}
+        allowComments={allowComments}
+        commentDraft={commentDraft}
+        onCommentDraftChange={onCommentDraftChange}
+        onPostComment={onPostComment}
+        posting={posting}
+        staffInitials={staffInitials}
+      />
     </OrderDetailSection>
   );
 }

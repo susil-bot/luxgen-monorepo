@@ -62,6 +62,7 @@ export * from './ProductCard';
 export * from './ProductEdit';
 export * from './Order';
 export * from './Customer';
+export * from './Timeline';
 export * from './Modal';
 export * from './Table';
 

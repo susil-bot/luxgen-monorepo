@@ -1,4 +1,5 @@
 import { userService } from '../../services/userService';
+import { activityEventService, actorFromContext } from '../../services/activityEventService';
 import type { GraphQLContext } from '../../context';
 
 export const userResolvers = {
@@ -8,7 +9,19 @@ export const userResolvers = {
     currentUser: (_: unknown, __: unknown, context: GraphQLContext) => context.user ?? null,
   },
   Mutation: {
-    createUser: (_: unknown, { input }: { input: any }) => userService.createUser(input),
+    createUser: async (_: unknown, { input }: { input: any }, context: GraphQLContext) => {
+      const user = await userService.createUser(input);
+      if (input.role === 'STUDENT') {
+        const actor = actorFromContext(context.user);
+        await activityEventService.recordCustomerCreated(
+          input.tenantId,
+          user.id,
+          user.email,
+          actor,
+        );
+      }
+      return user;
+    },
 
     updateUser: (_: unknown, { id, input }: { id: string; input: any }) => userService.updateUser(id, input),
 
