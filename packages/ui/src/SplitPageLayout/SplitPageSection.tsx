@@ -1,7 +1,9 @@
+import type { ReactNode } from 'react';
+
 export interface SplitPageSectionProps {
   title?: string;
   hint?: string;
-  children: React.ReactNode;
+  children: ReactNode;
   className?: string;
 }
 

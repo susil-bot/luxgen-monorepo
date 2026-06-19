@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import type { SplitPageVariant } from './fetcher';
 import { splitPageDefaults } from './fetcher';
 import { SplitPageLayoutTranslations } from './translations';
@@ -5,13 +6,13 @@ import { SplitPageLayoutTranslations } from './translations';
 export interface SplitPageLayoutProps {
   /** `main-aside` = Shopify detail (products, orders). `nav-main` = settings. `triple` = dev studio. */
   variant?: SplitPageVariant;
-  header?: React.ReactNode;
+  header?: ReactNode;
   /** Primary column — forms, tables, detail sections */
-  main: React.ReactNode;
+  main: ReactNode;
   /** Right column — metadata sidebar (main-aside) or right inspector (triple) */
-  aside?: React.ReactNode;
+  aside?: ReactNode;
   /** Left column — settings nav (nav-main) or left panel (triple) */
-  leading?: React.ReactNode;
+  leading?: ReactNode;
   maxWidth?: string;
   stickyAside?: boolean;
   stickyLeading?: boolean;
