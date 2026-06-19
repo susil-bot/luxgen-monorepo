@@ -37,7 +37,9 @@ export const GET_COURSES = gql`
         firstName
         lastName
       }
-      studentCount
+      students {
+        id
+      }
       startDate
       endDate
       status
