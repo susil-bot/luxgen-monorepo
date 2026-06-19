@@ -32,7 +32,7 @@
 | Bulk select | Checkbox + action bar | **Partial** | UI only |
 | Table columns | Image, title, status, inventory, type, vendor, SKU, price, updated | **Live** | `product-display.ts` |
 | Create product | Create course | **Live** | `/products/create` · `CREATE_COURSE` |
-| Edit product | Edit course | **Partial** | `/courses/[id]/edit` |
+| Edit product | Edit course | **Live** | `/products/[id]/edit` · see `docs/PRODUCT_EDIT_LAYOUT.md` |
 | Variants | — | Planned | Metafields phase |
 | Pricing | Billing plans | **Partial** | `/billing` |
 | Inventory | Enrollment count | **Live** | `students.length` |
