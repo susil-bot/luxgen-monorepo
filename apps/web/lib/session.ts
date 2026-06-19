@@ -21,6 +21,8 @@ export const AUTH_STORAGE_KEYS = {
   user: 'currentUser',
   tenant: 'currentTenant',
   expiresAt: 'authTokenExpiresAt',
+  /** Bumped on login/logout — cross-tab session sync via storage events */
+  sessionEpoch: 'authSessionEpoch',
 } as const;
 
 interface JwtPayload {
@@ -81,6 +83,7 @@ export function persistSession(token: string, user: SessionUser): void {
   localStorage.setItem(AUTH_STORAGE_KEYS.token, token);
   localStorage.setItem(AUTH_STORAGE_KEYS.user, JSON.stringify(user));
   localStorage.setItem(AUTH_STORAGE_KEYS.tenant, user.tenant.subdomain);
+  localStorage.setItem(AUTH_STORAGE_KEYS.sessionEpoch, String(Date.now()));
   if (expiresAt) {
     localStorage.setItem(AUTH_STORAGE_KEYS.expiresAt, String(expiresAt));
   }
@@ -99,7 +102,12 @@ export function getStoredUser(): SessionUser | null {
 
 export function clearStoredSession(): void {
   if (typeof window === 'undefined') return;
-  Object.values(AUTH_STORAGE_KEYS).forEach((key) => localStorage.removeItem(key));
+  Object.values(AUTH_STORAGE_KEYS).forEach((key) => {
+    if (key !== AUTH_STORAGE_KEYS.sessionEpoch) {
+      localStorage.removeItem(key);
+    }
+  });
+  localStorage.setItem(AUTH_STORAGE_KEYS.sessionEpoch, String(Date.now()));
 }
 
 export function getMsUntilExpiry(): number | null {
