@@ -14,7 +14,7 @@
 | P0 | Dashboard `/dashboard` | GraphQL | ✅ | Loading/empty states use iOS tokens |
 | P0 | Home `/` | redirect | ✅ | iOS landing page |
 | P0 | 404 | — | ✅ | iOS quick-nav buttons |
-| P1 | Users `/users` | mock | ✅ | Full iOS card/table restyle (data still mock — Phase 1.1) |
+| P1 | Users `/users` | GraphQL | ✅ | Phase 1.1c — GET_USERS + role summaries |
 | P1 | Courses `/courses`, `/courses/[id]` | mock | 🟡 | iOS loading + layout shell; mock data — Phase 1.1 |
 | P1 | Groups detail `/groups/[id]/*` | mock | 🟡 | Loading/empty iOS; some pages still need card pass |
 | P2 | Plan gate overlay | `@luxgen/billing` | ✅ | Token names fixed |
