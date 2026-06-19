@@ -1,29 +1,39 @@
-export interface User {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  role: string;
-  tenant: {
-    id: string;
-    name: string;
-    subdomain: string;
-  };
-}
+import {
+  AUTH_STORAGE_KEYS,
+  clearStoredSession,
+  getStoredUser,
+  isStoredSessionExpired,
+  persistSession,
+  type SessionUser,
+} from './session';
+
+export interface User extends SessionUser {}
+
+export {
+  AUTH_STORAGE_KEYS,
+  clearStoredSession,
+  getStoredUser,
+  isStoredSessionExpired,
+  persistSession,
+} from './session';
 
 export const getAuthToken = (): string | null => {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem('authToken');
+  const token = localStorage.getItem(AUTH_STORAGE_KEYS.token);
+  if (token && isStoredSessionExpired()) {
+    clearStoredSession();
+    return null;
+  }
+  return token;
 };
 
 export const setAuthToken = (token: string): void => {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('authToken', token);
+  localStorage.setItem(AUTH_STORAGE_KEYS.token, token);
 };
 
 export const removeAuthToken = (): void => {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem('authToken');
+  clearStoredSession();
 };
 
 export const isAuthenticated = (): boolean => {
@@ -33,6 +43,9 @@ export const isAuthenticated = (): boolean => {
 export const getCurrentUser = async (): Promise<User | null> => {
   const token = getAuthToken();
   if (!token) return null;
+
+  const cached = getStoredUser();
+  if (cached) return cached;
 
   try {
     const response = await fetch('/api/auth/me', {
@@ -52,6 +65,6 @@ export const getCurrentUser = async (): Promise<User | null> => {
 };
 
 export const logout = (): void => {
-  removeAuthToken();
+  clearStoredSession();
   window.location.href = '/login';
 };

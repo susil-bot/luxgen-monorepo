@@ -5,6 +5,7 @@ import { useMutation } from '@apollo/client';
 import { LoginForm, LoginFormData, RegisterVisual, SnackbarProvider, useSnackbar } from '@luxgen/ui';
 import { PageWrapper } from '@luxgen/ui';
 import { LOGIN_MUTATION } from '../graphql/queries/auth';
+import { persistSession } from '../lib/session';
 
 const LoginPageContent: React.FC = () => {
   const router = useRouter();
@@ -32,10 +33,7 @@ const LoginPageContent: React.FC = () => {
       if (result.data?.login) {
         const { token, user } = result.data.login;
 
-        // Store token and user data in localStorage
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        localStorage.setItem('currentTenant', user.tenant.subdomain);
+        persistSession(token, user);
 
         showSuccess(`Login successful! Welcome ${user.firstName} ${user.lastName}`);
 
