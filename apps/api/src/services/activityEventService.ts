@@ -7,9 +7,54 @@ import {
   User,
   type IActivityEvent,
 } from '@luxgen/db';
+import { publishActivityEvent, type ActivityEventPayload } from '../lib/activityPubSub';
 
 function buildOrderSubjectId(courseId: string, studentId: string): string {
   return `${courseId}:${studentId}`;
+}
+
+export interface ActivityEventConnection {
+  edges: Array<{ node: IActivityEvent; cursor: string }>;
+  pageInfo: { hasNextPage: boolean; endCursor: string | null };
+  totalCount: number;
+}
+
+export function encodeActivityCursor(createdAt: Date, id: string): string {
+  return Buffer.from(`${createdAt.toISOString()}:${id}`).toString('base64url');
+}
+
+export function decodeActivityCursor(cursor: string): { createdAt: Date; id: string } | null {
+  try {
+    const raw = Buffer.from(cursor, 'base64url').toString('utf8');
+    const sep = raw.lastIndexOf(':');
+    if (sep <= 0) return null;
+    const createdAt = new Date(raw.slice(0, sep));
+    const id = raw.slice(sep + 1);
+    if (!id || Number.isNaN(createdAt.getTime())) return null;
+    return { createdAt, id };
+  } catch {
+    return null;
+  }
+}
+
+function toPayload(event: IActivityEvent, tenantId: string): ActivityEventPayload {
+  return {
+    id: event._id?.toString?.() ?? (event as { id?: string }).id ?? '',
+    tenantId,
+    subjectType: event.subjectType,
+    subjectId: event.subjectId,
+    kind: event.kind,
+    eventType: event.eventType,
+    message: event.message,
+    createdAt: event.createdAt,
+    actorType: event.actorType,
+    actorName: event.actorName,
+    field: event.field,
+    oldValue: event.oldValue,
+    newValue: event.newValue,
+    metadata: event.metadata,
+    criticalAlert: event.criticalAlert,
+  };
 }
 
 export interface RecordActivityInput {
@@ -26,6 +71,7 @@ export interface RecordActivityInput {
   oldValue?: string;
   newValue?: string;
   metadata?: Record<string, unknown>;
+  criticalAlert?: boolean;
 }
 
 export interface AddCommentInput {
@@ -35,6 +81,8 @@ export interface AddCommentInput {
   message: string;
   actorId: string;
   actorName: string;
+  mentions?: string[];
+  attachments?: Array<{ url: string; name: string; mimeType?: string }>;
 }
 
 function staffName(user: { firstName?: string; lastName?: string; email?: string }): string {
@@ -58,12 +106,18 @@ export class ActivityEventService {
       oldValue: input.oldValue,
       newValue: input.newValue,
       metadata: input.metadata ?? {},
+      criticalAlert: input.criticalAlert ?? false,
     });
     await event.save();
+    void publishActivityEvent(toPayload(event, input.tenantId)).catch(() => undefined);
     return event;
   }
 
   async addComment(input: AddCommentInput): Promise<IActivityEvent> {
+    const metadata: Record<string, unknown> = {};
+    if (input.mentions?.length) metadata.mentions = input.mentions;
+    if (input.attachments?.length) metadata.attachments = input.attachments;
+
     return this.record({
       tenantId: input.tenantId,
       subjectType: input.subjectType,
@@ -74,7 +128,63 @@ export class ActivityEventService {
       actorType: ActivityActorType.STAFF,
       actorId: input.actorId,
       actorName: input.actorName,
+      metadata: Object.keys(metadata).length ? metadata : undefined,
     });
+  }
+
+  async listConnection(
+    tenantId: string,
+    subjectType: ActivitySubjectType,
+    subjectId: string,
+    first = 50,
+    after?: string,
+  ): Promise<ActivityEventConnection> {
+    const limit = Math.min(Math.max(first, 1), 100);
+    const decoded = after ? decodeActivityCursor(after) : null;
+
+    const filter: Record<string, unknown> = { tenant: tenantId, subjectType, subjectId };
+    if (decoded) {
+      filter.$or = [
+        { createdAt: { $lt: decoded.createdAt } },
+        { createdAt: decoded.createdAt, _id: { $lt: decoded.id } },
+      ];
+    }
+
+    const [stored, totalCount] = await Promise.all([
+      ActivityEvent.find(filter).sort({ createdAt: -1, _id: -1 }).limit(limit + 1).lean(),
+      ActivityEvent.countDocuments({ tenant: tenantId, subjectType, subjectId }),
+    ]);
+
+    if (stored.length === 0 && !after) {
+      const synthesized = await this.synthesize(tenantId, subjectType, subjectId);
+      const nodes = synthesized.slice(0, limit);
+      const edges = nodes.map((node) => ({
+        node,
+        cursor: encodeActivityCursor(node.createdAt, node._id?.toString?.() ?? node.id ?? 'synth'),
+      }));
+      return {
+        edges,
+        pageInfo: { hasNextPage: synthesized.length > limit, endCursor: edges.at(-1)?.cursor ?? null },
+        totalCount: synthesized.length,
+      };
+    }
+
+    const hasNextPage = stored.length > limit;
+    const page = hasNextPage ? stored.slice(0, limit) : stored;
+    const nodes = page as IActivityEvent[];
+    const edges = nodes.map((node) => ({
+      node,
+      cursor: encodeActivityCursor(node.createdAt, node._id?.toString?.() ?? ''),
+    }));
+
+    return {
+      edges,
+      pageInfo: {
+        hasNextPage,
+        endCursor: edges.at(-1)?.cursor ?? null,
+      },
+      totalCount,
+    };
   }
 
   async list(

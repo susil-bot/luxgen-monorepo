@@ -119,12 +119,43 @@ export function getClientGraphqlUrl(): string {
   return getGraphqlUrl();
 }
 
+/** WebSocket URL for GraphQL subscriptions (direct to API — Next rewrites do not proxy WS). */
+export function getGraphqlWsUrl(): string {
+  const explicit = firstDefined(process.env.NEXT_PUBLIC_GRAPHQL_WS_URL, process.env.GRAPHQL_WS_URL);
+  if (explicit) return trimUrl(explicit);
+
+  const httpUrl = getGraphqlUrl();
+  if (httpUrl.startsWith('https://')) {
+    return `wss://${httpUrl.slice('https://'.length)}`;
+  }
+  if (httpUrl.startsWith('http://')) {
+    return `ws://${httpUrl.slice('http://'.length)}`;
+  }
+  return `ws://${httpUrl}`;
+}
+
+/** GraphQL WS URL for browser (uses public API host). */
+export function getClientGraphqlWsUrl(): string {
+  if (typeof window !== 'undefined') {
+    const explicit = process.env.NEXT_PUBLIC_GRAPHQL_WS_URL;
+    if (explicit) return trimUrl(explicit);
+    const api = process.env.NEXT_PUBLIC_API_URL;
+    if (api) {
+      const base = trimUrl(api);
+      return base.startsWith('https://') ? `wss://${base.slice(8)}/graphql` : `ws://${base.replace(/^http:\/\//, '')}/graphql`;
+    }
+  }
+  return getGraphqlWsUrl();
+}
+
 /** Shared URL object for convenience */
 export const urls = {
   web: getWebUrl,
   api: getApiUrl,
   graphql: getGraphqlUrl,
   clientGraphql: getClientGraphqlUrl,
+  graphqlWs: getGraphqlWsUrl,
+  clientGraphqlWs: getClientGraphqlWsUrl,
   ollama: getOllamaUrl,
   mongo: getMongoUri,
   redis: getRedisUrl,

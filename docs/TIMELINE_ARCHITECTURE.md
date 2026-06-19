@@ -81,8 +81,26 @@ query {
     subjectType: ORDER
     subjectId: "courseId:studentId"
     first: 50
+    after: "cursor"
   ) {
-    id message createdAt kind eventType actorName field oldValue newValue
+    edges {
+      cursor
+      node {
+        id message createdAt kind eventType actorName criticalAlert metadata
+      }
+    }
+    pageInfo { hasNextPage endCursor }
+    totalCount
+  }
+}
+
+subscription {
+  activityEventAdded(
+    tenantId: "..."
+    subjectType: ORDER
+    subjectId: "courseId:studentId"
+  ) {
+    id message createdAt kind eventType actorName criticalAlert
   }
 }
 
@@ -92,7 +110,9 @@ mutation {
     subjectType: CUSTOMER
     subjectId: "userId"
     message: "VIP — handle with care"
-  }) { id message createdAt }
+    mentions: ["jane"]
+    attachments: [{ url: "https://...", name: "brief.pdf" }]
+  }) { id message createdAt metadata }
 }
 ```
 
@@ -145,16 +165,16 @@ When no MongoDB events exist, `activityEventService.list()` **synthesizes** read
 
 ### Phase 3 — Automation & apps
 
-- [ ] Automation engine → `APP` events (`actorName: automation name`)
-- [ ] Agent Studio actions → structured `metadata` on events
-- [ ] Email notification log cross-link (`order.email_sent`)
+- [x] Automation engine → `APP` events (`actorName: automation name`)
+- [x] Agent Studio actions → structured `metadata` on events
+- [x] Email notification log cross-link (`order.email_sent` via automation `SEND_EMAIL`)
 
 ### Phase 4 — Polish
 
-- [ ] Pagination (`after` cursor) on `activityEvents`
-- [ ] Real-time subscription for new timeline entries
-- [ ] Rich comment editor (@mention, attachments)
-- [ ] Critical alert flag (`criticalAlert` like Shopify)
+- [x] Pagination (`after` cursor) on `activityEvents`
+- [x] Real-time subscription for new timeline entries
+- [x] Rich comment editor (@mention, attachments)
+- [x] Critical alert flag (`criticalAlert` like Shopify)
 - [ ] Remove synthesize once backfill migration runs
 
 ---

@@ -35,6 +35,8 @@ export interface IActivityEvent extends Document {
   oldValue?: string;
   newValue?: string;
   metadata?: Record<string, unknown>;
+  /** Shopify-style critical alert — surfaces prominently in admin timeline */
+  criticalAlert?: boolean;
   createdAt: Date;
 }
 
@@ -66,6 +68,7 @@ const activityEventSchema = new Schema<IActivityEvent>(
     oldValue: { type: String },
     newValue: { type: String },
     metadata: { type: Schema.Types.Mixed, default: {} },
+    criticalAlert: { type: Boolean, default: false },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );

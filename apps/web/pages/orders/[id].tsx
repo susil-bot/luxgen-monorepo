@@ -72,7 +72,17 @@ function OrderDetailPageContent({ tenant }: Props) {
       .join('')
       .slice(0, 2) ?? 'ST';
 
-  const timeline = useActivityTimeline(queryTenantId, 'ORDER', orderId, staffInitials);
+  const mentionOptions = useMemo(
+    () =>
+      (usersData?.users ?? [])
+        .filter((u: { role: string }) => u.role !== 'STUDENT' && u.role !== 'student')
+        .map((u: { email?: string; firstName?: string }) =>
+          (u.email?.split('@')[0] || u.firstName || 'staff').toLowerCase(),
+        ),
+    [usersData],
+  );
+
+  const timeline = useActivityTimeline(queryTenantId, 'ORDER', orderId, staffInitials, mentionOptions);
 
   return (
     <>

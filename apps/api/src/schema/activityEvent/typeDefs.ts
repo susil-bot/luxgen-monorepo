@@ -32,6 +32,29 @@ export const activityEventTypeDefs = `
     oldValue: String
     newValue: String
     metadata: JSON
+    criticalAlert: Boolean!
+  }
+
+  type ActivityEventEdge {
+    node: ActivityEvent!
+    cursor: String!
+  }
+
+  type ActivityEventPageInfo {
+    hasNextPage: Boolean!
+    endCursor: String
+  }
+
+  type ActivityEventConnection {
+    edges: [ActivityEventEdge!]!
+    pageInfo: ActivityEventPageInfo!
+    totalCount: Int!
+  }
+
+  input ActivityCommentAttachmentInput {
+    url: String!
+    name: String!
+    mimeType: String
   }
 
   input AddActivityCommentInput {
@@ -39,6 +62,8 @@ export const activityEventTypeDefs = `
     subjectType: ActivitySubjectType!
     subjectId: String!
     message: String!
+    mentions: [String!]
+    attachments: [ActivityCommentAttachmentInput!]
   }
 
   extend type Query {
@@ -47,10 +72,19 @@ export const activityEventTypeDefs = `
       subjectType: ActivitySubjectType!
       subjectId: String!
       first: Int
-    ): [ActivityEvent!]!
+      after: String
+    ): ActivityEventConnection!
   }
 
   extend type Mutation {
     addActivityComment(input: AddActivityCommentInput!): ActivityEvent!
+  }
+
+  extend type Subscription {
+    activityEventAdded(
+      tenantId: ID!
+      subjectType: ActivitySubjectType!
+      subjectId: String!
+    ): ActivityEvent!
   }
 `;
