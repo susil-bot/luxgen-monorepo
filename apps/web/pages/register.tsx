@@ -5,6 +5,7 @@ import { useMutation } from '@apollo/client';
 import { RegisterForm, RegisterFormData, RegisterVisual, SnackbarProvider, useSnackbar } from '@luxgen/ui';
 import { PageWrapper } from '@luxgen/ui';
 import { REGISTER_MUTATION } from '../graphql/queries/auth';
+import { formatRegisterError } from '../lib/auth-notices';
 import { persistSession } from '../lib/session';
 
 const RegisterPageContent: React.FC = () => {
@@ -70,8 +71,8 @@ const RegisterPageContent: React.FC = () => {
       }
     } catch (error: any) {
       console.error('Registration error:', error);
-      const errorMessage = error.message || 'Registration failed. Please try again.';
-      showError(errorMessage);
+      const rawMessage = error.message || 'Registration failed. Please try again.';
+      showError(formatRegisterError(rawMessage));
     } finally {
       setLoading(false);
     }

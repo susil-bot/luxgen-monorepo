@@ -11,6 +11,7 @@ import {
   getDefaultSidebarSections,
   Button,
 } from '@luxgen/ui';
+import { PageLoadingState, PageEmptyState } from '../../../components/common/PageStates';
 
 interface GroupDetailsData {
   id: string;
@@ -120,26 +121,21 @@ const GroupDetailsPageContent: React.FC = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-base">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading group details...</p>
-        </div>
-      </div>
-    );
+    return <PageLoadingState label="Loading group…" />;
   }
 
   if (!group) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-base">
-        <div className="text-center">
-          <div className="text-gray-600 text-xl mb-4">Group not found</div>
-          <Button variant="primary" size="md" onClick={() => router.push('/groups/dashboard')} className="px-4 py-2">
-            Back to Groups
-          </Button>
-        </div>
-      </div>
+      <PageEmptyState
+        icon="👥"
+        title="Group not found"
+        subtitle="This group may have been removed or you lack access."
+        action={
+          <button type="button" className="ios-btn-primary mt-4" onClick={() => router.push('/groups')}>
+            Back to groups
+          </button>
+        }
+      />
     );
   }
 
@@ -166,7 +162,7 @@ const GroupDetailsPageContent: React.FC = () => {
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
-                <h1 className="text-3xl font-bold text-primary">{group.name}</h1>
+                <h1 className="ios-large-title">{group.name}</h1>
                 <p className="mt-2 text-secondary">{group.description}</p>
                 <div className="mt-2 flex items-center space-x-4 text-sm text-tertiary">
                   <span>Created: {new Date(group.createdAt).toLocaleDateString()}</span>

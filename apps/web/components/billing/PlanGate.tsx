@@ -30,25 +30,20 @@ export function PlanGate({ feature, currentPlan, tenant, children }: PlanGatePro
 
   return (
     <div
-      className="rounded-xl border p-6 text-center"
+      className="rounded-xl border p-6 text-center ios-card"
       style={{
-        background: 'var(--color-bg-secondary)',
-        borderColor: 'var(--color-border)',
+        borderColor: 'var(--color-separator)',
       }}
     >
       <div className="text-3xl mb-3">🔒</div>
-      <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-text-primary)' }}>
+      <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-label-primary)' }}>
         {featureLabels[feature]} requires {requiredDef.name}
       </h3>
-      <p className="text-sm mb-4" style={{ color: 'var(--color-text-secondary)' }}>
+      <p className="text-sm mb-4" style={{ color: 'var(--color-label-secondary)' }}>
         Your workspace is on the <strong>{getPlanDefinition(currentPlan).name}</strong> plan. Upgrade to{' '}
         {requiredDef.name} (${requiredDef.priceMonthly}/mo) to unlock this feature.
       </p>
-      <Link
-        href={`/billing?tenant=${encodeURIComponent(tenant)}`}
-        className="inline-block px-5 py-2.5 rounded-lg font-medium text-white"
-        style={{ background: 'var(--color-accent)' }}
-      >
+      <Link href={`/billing?tenant=${encodeURIComponent(tenant)}`} className="ios-btn-primary inline-block">
         View plans & upgrade
       </Link>
     </div>

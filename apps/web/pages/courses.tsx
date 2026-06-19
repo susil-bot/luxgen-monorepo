@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import { useRouter } from 'next/router';
 import {
   AppLayout,
   getDefaultSidebarSections,
@@ -11,12 +12,16 @@ import {
   CourseAnalytics,
 } from '@luxgen/ui';
 import { TenantBanner } from '../components/tenant/TenantBanner';
+import { PageLoadingState } from '../components/common/PageStates';
+import { createHandleUserAction } from '../lib/user-actions';
 
 interface CoursesPageProps {
   tenant: string;
 }
 
 export default function CoursesPage({ tenant }: CoursesPageProps) {
+  const router = useRouter();
+  const handleUserAction = createHandleUserAction(router);
   const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'learner' | 'user'>('learner');
   const [loading, setLoading] = useState(true);
 
@@ -53,11 +58,7 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <PageLoadingState label="Loading courses…" />;
   }
 
   return (
@@ -70,19 +71,7 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
         sidebarSections={getDefaultSidebarSections()}
         user={getDefaultUser()}
         logo={getDefaultLogo()}
-        onUserAction={(action) => {
-          switch (action) {
-            case 'profile':
-              console.log('Navigate to profile');
-              break;
-            case 'settings':
-              console.log('Navigate to settings');
-              break;
-            case 'logout':
-              console.log('Logout');
-              break;
-          }
-        }}
+        onUserAction={handleUserAction}
         showSearch={true}
         showNotifications={true}
         notificationCount={3}
@@ -91,7 +80,12 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
       >
         <TenantBanner tenant={tenant} />
 
-        <div className="mt-6 space-y-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-2">
+          <div className="mb-8">
+            <h1 className="ios-large-title">Courses</h1>
+            <p className="mt-1 text-secondary text-sm">Browse and manage learning content</p>
+          </div>
+          <div className="space-y-8">
           {/* Course Overview */}
           <CourseOverview course={sampleCourse} userRole={userRole} enrollmentStatus="enrolled" />
 
@@ -102,6 +96,7 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
 
           {/* Course Menu */}
           <CourseMenu userRole={userRole} courseId={sampleCourse.id} onNavigate={handleNavigate} />
+          </div>
         </div>
 
         <TenantDebug />

@@ -758,6 +758,52 @@
     color: var(--color-label-secondary);
     margin: 0;
   }
+
+  /* ── iOS form input (used on listings, groups, courses) ───────────────── */
+  .ios-input {
+    width: 100%;
+    padding: 10px 12px;
+    font-size: 15px;
+    color: var(--color-label-primary);
+    background: var(--color-bg-secondary);
+    border: 1px solid var(--color-separator);
+    border-radius: var(--radius-md);
+    outline: none;
+    transition: border-color var(--transition-fast);
+  }
+  .ios-input:focus {
+    border-color: var(--color-blue);
+  }
+
+  /* ── iOS data table ───────────────────────────────────────────────────── */
+  .ios-table-wrap {
+    overflow-x: auto;
+  }
+  .ios-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .ios-table thead {
+    background: var(--color-bg-tertiary);
+  }
+  .ios-table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-label-secondary);
+  }
+  .ios-table td {
+    padding: 14px 16px;
+    font-size: 14px;
+    color: var(--color-label-primary);
+    border-top: 1px solid var(--color-separator);
+  }
+  .ios-table tbody tr:hover {
+    background: var(--color-fill-quaternary);
+  }
 }
 
 /* ── Utility Overrides ────────────────────────────────────────────────────── */
