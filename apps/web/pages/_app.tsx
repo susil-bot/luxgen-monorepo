@@ -5,6 +5,7 @@ import { GlobalProvider } from '@luxgen/ui';
 import { ThemeProvider } from '../lib/theme';
 import { AuthGuard } from '../components/auth/AuthGuard';
 import { SessionMonitor } from '../components/auth/SessionMonitor';
+import { SessionSync } from '../components/auth/SessionSync';
 import '../styles/globals.css';
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -13,6 +14,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <ThemeProvider>
         <GlobalProvider initialTenant={pageProps.tenant || 'demo'}>
           <SessionMonitor />
+          <SessionSync />
           <AuthGuard>
             <Component {...pageProps} />
           </AuthGuard>

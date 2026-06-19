@@ -1,8 +1,8 @@
 import { AuthLoadingScreen } from './AuthNoticeBanner';
 import { useEffect, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/router';
-import { getAuthToken } from '../../lib/auth';
 import { buildLoginRedirect, requiresAuth } from '../../lib/auth-routes';
+import { validateClientSession } from '../../lib/session-guard';
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -10,7 +10,7 @@ interface AuthGuardProps {
 
 /**
  * Redirects unauthenticated users away from protected app routes.
- * Wrap once in `_app.tsx` — individual pages do not need their own checks.
+ * Distinguishes missing token, expired JWT, and wrong-tenant sessions.
  */
 export function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
@@ -29,8 +29,8 @@ export function AuthGuard({ children }: AuthGuardProps) {
       return;
     }
 
-    const token = getAuthToken();
-    if (token) {
+    const validation = validateClientSession();
+    if (validation.ok) {
       setAllowed(true);
       setRedirecting(false);
       return;
@@ -38,7 +38,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
 
     setRedirecting(true);
     const returnPath = router.asPath || path;
-    void router.replace(buildLoginRedirect(returnPath, 'unauthorized'));
+    void router.replace(buildLoginRedirect(returnPath, validation.reason));
   }, [router.isReady, router.pathname, router.asPath, router]);
 
   if (!router.isReady) {

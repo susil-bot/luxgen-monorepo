@@ -3,9 +3,10 @@ import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 
 import { buildLoginRedirect } from '../lib/auth-routes';
-import type { AuthRedirectReason } from '../lib/auth-notices';
 import { getGraphqlUrl } from '../lib/urls';
-import { AUTH_STORAGE_KEYS, clearStoredSession, isStoredSessionExpired } from '../lib/session';
+import { AUTH_STORAGE_KEYS, clearStoredSession, getStoredUser, isStoredSessionExpired } from '../lib/session';
+import { resolveAuthRedirectReason } from '../lib/session-guard';
+import { getHostTenantSubdomain, isSessionTenantMismatch } from '../lib/tenant-auth';
 
 const httpLink = createHttpLink({
   uri: getGraphqlUrl(),
@@ -24,11 +25,18 @@ const authLink = setContext((_, { headers }) => {
     return { headers };
   }
 
+  if (token && isSessionTenantMismatch(getStoredUser())) {
+    clearStoredSession();
+    return { headers };
+  }
+
+  const hostTenant = getHostTenantSubdomain();
+
   return {
     headers: {
       ...headers,
       authorization: token ? `Bearer ${token}` : '',
-      'x-tenant': tenant || 'demo',
+      'x-tenant': tenant || hostTenant,
     },
   };
 });
@@ -36,25 +44,16 @@ const authLink = setContext((_, { headers }) => {
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (typeof window === 'undefined') return;
 
-  const isAuthGraphqlError = graphQLErrors?.some(
-    (err) =>
-      err.extensions?.code === 'UNAUTHENTICATED' ||
-      err.extensions?.code === 'FORBIDDEN' ||
-      /unauthorized|not authenticated|invalid token/i.test(err.message),
-  );
-
   const statusCode =
     networkError && 'statusCode' in networkError
       ? (networkError as { statusCode?: number }).statusCode
       : undefined;
-  const isAuthNetworkError = statusCode === 401 || statusCode === 403;
 
-  if (!isAuthGraphqlError && !isAuthNetworkError) return;
+  const reason = resolveAuthRedirectReason(graphQLErrors, statusCode);
+  if (!reason) return;
 
   clearStoredSession();
   const returnPath = `${window.location.pathname}${window.location.search}`;
-  const reason: AuthRedirectReason =
-    graphQLErrors?.some((err) => err.extensions?.code === 'FORBIDDEN') ? 'unauthorized' : 'session_expired';
   window.location.href = buildLoginRedirect(returnPath, reason);
 });
 

@@ -1,16 +1,16 @@
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
 import { buildLoginRedirect, requiresAuth } from '../../lib/auth-routes';
-import { clearStoredSession, isStoredSessionExpired } from '../../lib/session';
+import { validateClientSession } from '../../lib/session-guard';
 
-const CHECK_INTERVAL_MS = 60_000;
+const CHECK_INTERVAL_MS = 30_000;
 
 interface SessionMonitorProps {
   onSessionExpired?: () => void;
 }
 
 /**
- * Periodically checks JWT expiry and clears stale sessions.
+ * Periodically validates JWT expiry and tenant match; redirects with the right reason.
  * Pair with Apollo error link in graphql/client.ts for API-side 401 handling.
  */
 export function SessionMonitor({ onSessionExpired }: SessionMonitorProps) {
@@ -18,26 +18,26 @@ export function SessionMonitor({ onSessionExpired }: SessionMonitorProps) {
   const handlingRef = useRef(false);
 
   useEffect(() => {
-    const handleExpired = () => {
+    const handleInvalid = (reason: 'session_expired' | 'tenant_mismatch') => {
       if (handlingRef.current) return;
       handlingRef.current = true;
 
-      clearStoredSession();
       onSessionExpired?.();
 
       const returnPath = router.asPath || router.pathname;
       const onProtected = requiresAuth(router.pathname);
 
       if (onProtected) {
-        void router.replace(buildLoginRedirect(returnPath, 'session_expired'));
+        void router.replace(buildLoginRedirect(returnPath, reason));
       } else {
         handlingRef.current = false;
       }
     };
 
     const check = () => {
-      if (isStoredSessionExpired()) {
-        handleExpired();
+      const validation = validateClientSession();
+      if (!validation.ok && validation.reason !== 'unauthorized') {
+        handleInvalid(validation.reason as 'session_expired' | 'tenant_mismatch');
       }
     };
 

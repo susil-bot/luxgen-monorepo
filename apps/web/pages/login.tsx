@@ -12,6 +12,7 @@ import {
   parseAuthRedirectReason,
 } from '../lib/auth-notices';
 import { persistSession } from '../lib/session';
+import { isSessionTenantMismatch, tenantMismatchMessage } from '../lib/tenant-auth';
 
 const LoginPageContent: React.FC = () => {
   const router = useRouter();
@@ -47,6 +48,11 @@ const LoginPageContent: React.FC = () => {
 
       if (result.data?.login) {
         const { token, user } = result.data.login;
+
+        if (isSessionTenantMismatch(user)) {
+          showError(tenantMismatchMessage(user));
+          return;
+        }
 
         persistSession(token, user);
 

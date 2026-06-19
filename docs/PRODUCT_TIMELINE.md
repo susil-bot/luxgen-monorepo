@@ -19,6 +19,18 @@
 | 0.8 | iOS auth notice banners on login (`?reason=`) | Web | ✅ done | `AuthNoticeBanner` + `auth-notices.ts` |
 | 0.9 | Session / logout redirects with reason codes | Web | ✅ done | SessionMonitor, Apollo link, `performLogout` |
 | 0.10 | Friendly login errors (rate limit, deactivated) | Web | ✅ done | `formatLoginError()` in login page |
+| 0.11 | Auth edge cases — tenant mismatch, mid-session expiry, cross-tab sync | Web | 🟡 in progress | `feat/auth-edge-cases` |
+
+### Phase 0.11 — Auth edge cases
+
+| Edge case | Behavior |
+|-----------|----------|
+| Wrong tenant subdomain at login | Block persist; snackbar + optional `tenant_mismatch` banner |
+| Expired JWT mid-session | `SessionMonitor` + Apollo link → `/login?reason=session_expired` |
+| Concurrent tabs | `SessionSync` listens for token/epoch changes; resets Apollo cache |
+| Unauthenticated admin routes | `AuthGuard` + `validateClientSession()` → `/login?reason=unauthorized` |
+
+Acceptance: login → dashboard on `demo.localhost:3000`; logged-out user cannot reach `/dashboard`.
 
 ### Phase 0 — Server details (0.4–0.6)
 

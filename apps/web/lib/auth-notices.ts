@@ -2,7 +2,12 @@
  * Auth redirect reasons and user-facing copy (iOS notice banners).
  */
 
-export type AuthRedirectReason = 'session_expired' | 'unauthorized' | 'logged_out';
+export type AuthRedirectReason =
+  | 'session_expired'
+  | 'unauthorized'
+  | 'logged_out'
+  | 'tenant_mismatch'
+  | 'session_replaced';
 
 export interface AuthNoticeContent {
   variant: 'info' | 'warning' | 'error';
@@ -30,6 +35,19 @@ export const AUTH_NOTICE_BY_REASON: Record<AuthRedirectReason, AuthNoticeContent
     title: 'Signed out',
     message: 'You have been signed out successfully.',
   },
+  tenant_mismatch: {
+    variant: 'error',
+    icon: '🏢',
+    title: 'Wrong workspace',
+    message:
+      'This account belongs to a different tenant. Open the correct subdomain (e.g. demo.localhost) and sign in again.',
+  },
+  session_replaced: {
+    variant: 'info',
+    icon: '🔄',
+    title: 'Session updated',
+    message: 'You signed in on another tab or this session was replaced. Please sign in again to continue.',
+  },
 };
 
 export function parseAuthRedirectReason(value: string | string[] | undefined): AuthRedirectReason | null {
@@ -44,6 +62,9 @@ export function parseAuthRedirectReason(value: string | string[] | undefined): A
 export function formatLoginError(message: string): string {
   const lower = message.toLowerCase();
 
+  if (lower.includes('not valid for this tenant') || lower.includes('tenant mismatch')) {
+    return 'This account is not valid for this workspace. Use the correct subdomain to sign in.';
+  }
   if (lower.includes('too many login') || lower.includes('rate limit')) {
     return 'Too many sign-in attempts. Please wait a few minutes and try again.';
   }
