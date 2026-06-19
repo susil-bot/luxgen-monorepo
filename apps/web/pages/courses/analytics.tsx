@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { createHandleUserAction } from '../../lib/user-actions';
 import { useQuery } from '@apollo/client';
 import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo } from '@luxgen/ui';
 import { TenantBanner } from '../../components/tenant/TenantBanner';
@@ -66,17 +67,7 @@ export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps
     }
   }, []);
 
-  const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
-    switch (action) {
-      case 'logout':
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        router.push('/login');
-        break;
-      default:
-        router.push(`/${action}`);
-    }
-  };
+  const handleUserAction = createHandleUserAction(router);
 
   return (
     <>

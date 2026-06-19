@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { createHandleUserAction } from '../../lib/user-actions';
 import Head from 'next/head';
 import {
   SnackbarProvider,
@@ -128,21 +129,7 @@ const GroupDashboardPageContent: React.FC = () => {
   }, []);
 
   // Handle user actions
-  const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
-    switch (action) {
-      case 'profile':
-        router.push('/profile');
-        break;
-      case 'settings':
-        router.push('/settings');
-        break;
-      case 'logout':
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        router.push('/login');
-        break;
-    }
-  };
+  const handleUserAction = createHandleUserAction(router);
 
   // Handle search
   const handleSearch = (query: string) => {

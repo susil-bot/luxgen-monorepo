@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo } from '@luxgen/ui';
+import { createHandleUserAction } from '../../../lib/user-actions';
 import { TenantBanner } from '../../../components/tenant/TenantBanner';
 
 interface EditCourseProps {
@@ -97,15 +98,7 @@ export default function EditCourse({ tenant }: EditCourseProps) {
       <AppLayout
         sidebarSections={getDefaultSidebarSections()}
         user={user}
-        onUserAction={(action) => {
-          if (action === 'logout') {
-            localStorage.removeItem('authToken');
-            localStorage.removeItem('user');
-            router.push('/login');
-          } else {
-            router.push(`/${action}`);
-          }
-        }}
+        onUserAction={createHandleUserAction(router)}
         logo={getDefaultLogo()}
         sidebarCollapsible
         responsive

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { createHandleUserAction } from '../../lib/user-actions';
 import { useQuery } from '@apollo/client';
 import { SnackbarProvider, AppLayout, getDefaultUser, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
 import { PlanGate } from '../../components/billing/PlanGate';
@@ -38,21 +39,7 @@ const GroupAnalyticsPageContent: React.FC = () => {
     }
   }, []);
 
-  const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
-    switch (action) {
-      case 'profile':
-        router.push('/profile');
-        break;
-      case 'settings':
-        router.push('/settings');
-        break;
-      case 'logout':
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        router.push('/login');
-        break;
-    }
-  };
+  const handleUserAction = createHandleUserAction(router);
 
   const stats = [
     {

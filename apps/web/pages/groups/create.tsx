@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import { createHandleUserAction } from '../../lib/user-actions';
 import {
   SnackbarProvider,
   useSnackbar,
@@ -40,21 +41,7 @@ const CreateGroupPageContent: React.FC = () => {
     }
   }, []);
 
-  const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
-    switch (action) {
-      case 'profile':
-        router.push('/profile');
-        break;
-      case 'settings':
-        router.push('/settings');
-        break;
-      case 'logout':
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        router.push('/login');
-        break;
-    }
-  };
+  const handleUserAction = createHandleUserAction(router);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;

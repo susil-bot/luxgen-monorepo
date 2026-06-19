@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 import { LOGIN_MUTATION, REGISTER_MUTATION, GET_CURRENT_USER } from '../graphql/queries/auth';
-import { setAuthToken, removeAuthToken, getAuthToken } from './auth';
+import { getAuthToken } from './auth';
 import { persistSession } from './session';
+import { performLogout } from './user-actions';
 
 export interface User {
   id: string;
@@ -144,7 +145,7 @@ export const useAuth = () => {
   };
 
   const logout = () => {
-    removeAuthToken();
+    performLogout();
     setAuthState({
       user: null,
       token: null,

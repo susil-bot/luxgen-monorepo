@@ -12,6 +12,7 @@ import {
 import AgentChat from '../../components/agent/AgentChat';
 import AgentTransparency from '../../components/agent/AgentTransparency';
 import { SYSTEM_PROMPT } from '../../lib/agent';
+import { createHandleUserAction } from '../../lib/user-actions';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -490,12 +491,7 @@ function AIStudioContent() {
     checkHealth();
   }, []);
 
-  const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
-    if (action === 'logout') {
-      localStorage.removeItem('authToken');
-      router.push('/login');
-    } else router.push(`/${action}`);
-  };
+  const handleUserAction = createHandleUserAction(router);
 
   const handleToolToggle = (id: string) => {
     setEnabledTools((prev) => {

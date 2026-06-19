@@ -1,11 +1,14 @@
+import { performLogout } from './user-actions';
 import {
   AUTH_STORAGE_KEYS,
   clearStoredSession,
   getStoredUser,
   isStoredSessionExpired,
-  persistSession,
   type SessionUser,
 } from './session';
+
+export type { LogoutOptions } from './user-actions';
+export { performLogout, createHandleUserAction } from './user-actions';
 
 export interface User extends SessionUser {}
 
@@ -64,7 +67,6 @@ export const getCurrentUser = async (): Promise<User | null> => {
   return null;
 };
 
-export const logout = (): void => {
-  clearStoredSession();
-  window.location.href = '/login';
+export const logout = (router?: Pick<import('next/router').NextRouter, 'push'>): void => {
+  performLogout({ router });
 };
