@@ -85,6 +85,7 @@ export * from './ErrorBoundary';
 export * from './context/GlobalContext';
 export * from './context/ThemeContext';
 export * from './context/UserContext';
+export * from './context/NavigationContext';
 
 // Services
 export * from './services/userService';

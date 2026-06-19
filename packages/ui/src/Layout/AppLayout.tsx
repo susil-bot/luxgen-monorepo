@@ -7,6 +7,7 @@ import type { SidebarSection } from '../Sidebar/Sidebar';
 import { MenuLayer, MenuItem } from '../Menu';
 import { useGlobalContext } from '../context/GlobalContext';
 import { useTheme } from '../context/ThemeContext';
+import { useNavigation } from '../context/NavigationContext';
 // import { ErrorBoundary } from '../ErrorBoundary';
 
 export interface AppLayoutProps {
@@ -17,6 +18,10 @@ export interface AppLayoutProps {
   menuItems?: MenuItem[];
   user?: UserMenu;
   onUserAction?: (action: 'profile' | 'settings' | 'logout') => void;
+  /** Current route pathname — enables URL-based sidebar active state */
+  pathname?: string;
+  /** Client-side navigation (e.g. Next.js router.push). Falls back to location.href */
+  onNavigate?: (href: string) => void;
   onSearch?: (query: string) => void;
   onNotificationClick?: () => void;
   showSearch?: boolean;
@@ -48,6 +53,8 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   menuItems = [],
   user,
   onUserAction,
+  pathname,
+  onNavigate,
   onSearch,
   onNotificationClick,
   showSearch = true,
@@ -77,7 +84,6 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(sidebarDefaultCollapsed);
   const [menuCollapsed, setMenuCollapsed] = useState(menuDefaultCollapsed);
   const [hasError, setHasError] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   // Refs for analytics and performance tracking
   const layoutRef = useRef<HTMLDivElement>(null);
@@ -86,6 +92,9 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   // Get tenant context for analytics
   const { currentTenant, tenantConfig } = useGlobalContext();
   const { theme } = useTheme();
+  const navigation = useNavigation();
+  const resolvedPathname = pathname ?? navigation.pathname;
+  const resolvedNavigate = onNavigate ?? navigation.onNavigate;
 
   // Analytics tracking functions
   const trackLayoutEvent = useCallback(
@@ -215,30 +224,16 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
     trackUserInteraction('menu_toggle', 'menu');
   };
 
-  // Initialize layout
+  // Initialize layout analytics once
   useEffect(() => {
-    const initializeLayout = async () => {
-      try {
-        setIsLoading(true);
-
-        // Track layout initialization
-        trackLayoutEvent('layout_initialized', {
-          tenant: currentTenant,
-          theme: theme.colors.primary,
-          responsive: responsive,
-        });
-
-        // Track performance after a short delay
-        setTimeout(trackPerformance, 1000);
-
-        setIsLoading(false);
-      } catch (error) {
-        handleError(error as Error);
-      }
-    };
-
-    initializeLayout();
-  }, [currentTenant, theme.colors.primary, responsive, trackLayoutEvent, trackPerformance, handleError]);
+    trackLayoutEvent('layout_initialized', {
+      tenant: currentTenant,
+      theme: theme.colors.primary,
+      responsive: responsive,
+    });
+    const timer = window.setTimeout(trackPerformance, 1000);
+    return () => window.clearTimeout(timer);
+  }, [currentTenant, theme.colors.primary, responsive, trackLayoutEvent, trackPerformance]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -249,24 +244,6 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
       trackLayoutEvent('layout_unmounted');
     };
   }, [trackLayoutEvent]);
-
-  // Show loading state
-  if (isLoading) {
-    return (
-      <div
-        className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: theme.colors.background }}
-      >
-        <div className="text-center">
-          <div
-            className="animate-spin rounded-full h-32 w-32 border-b-2 mx-auto mb-4"
-            style={{ borderColor: theme.colors.primary }}
-          ></div>
-          <p className="text-gray-600">Loading layout...</p>
-        </div>
-      </div>
-    );
-  }
 
   // Show error state
   if (hasError) {
@@ -314,11 +291,13 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
           user={user}
           onUserAction={onUserAction}
           logo={logo}
+          pathname={resolvedPathname}
+          onNavigate={resolvedNavigate}
           variant="default"
           position="fixed"
           width="normal"
           collapsible={sidebarCollapsible}
-          defaultCollapsed={sidebarCollapsed}
+          defaultCollapsed={sidebarDefaultCollapsed}
           showUserSection={true}
           showLogo={true}
           className={`${getSidebarStyles()} shadow-sm`}

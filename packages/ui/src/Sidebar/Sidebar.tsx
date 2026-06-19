@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { withSSR } from '../ssr';
 import { defaultTheme, TenantTheme } from '../theme';
 import { useGlobalContext } from '../context/GlobalContext';
 import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/UserContext';
+import { useNavigation } from '../context/NavigationContext';
+import { useSidebarActive } from './useSidebarActive';
+import type { NavSection } from './sidebar.types';
 
 export interface SidebarItem {
   id: string;
@@ -15,6 +18,8 @@ export interface SidebarItem {
   external?: boolean;
   disabled?: boolean;
   active?: boolean;
+  /** Require exact pathname match for active state (e.g. dashboard) */
+  exact?: boolean;
   onClick?: () => void;
 }
 
@@ -52,6 +57,10 @@ export interface SidebarProps {
   defaultCollapsed?: boolean;
   onToggle?: (collapsed: boolean) => void;
   onItemClick?: (item: SidebarItem) => void;
+  /** Current pathname for URL-based active highlighting */
+  pathname?: string;
+  /** Client-side navigation callback (e.g. Next.js router.push) */
+  onNavigate?: (href: string) => void;
 }
 
 const SidebarComponent: React.FC<SidebarProps> = ({
@@ -70,11 +79,20 @@ const SidebarComponent: React.FC<SidebarProps> = ({
   defaultCollapsed = false,
   onToggle,
   onItemClick,
+  pathname,
+  onNavigate,
   ...props
 }) => {
+  const navigation = useNavigation();
+  const effectivePathname = pathname ?? navigation.pathname ?? '';
+  const effectiveNavigate = onNavigate ?? navigation.onNavigate;
+
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-  const [activeItem, setActiveItem] = useState<string>('');
+
+  const navSections = useMemo(() => sections as unknown as NavSection[], [sections]);
+  const { activeItemId, expandedByUrl } = useSidebarActive(navSections, effectivePathname);
+  const urlDrivenActive = Boolean(effectivePathname);
 
   // Get tenant-specific logo from runtime tenant detection
   const { tenantConfig } = useGlobalContext();
@@ -85,7 +103,7 @@ const SidebarComponent: React.FC<SidebarProps> = ({
   // Use dynamic user data if available, fallback to prop
   const currentUser = dynamicUser || user;
 
-  // Initialize expanded sections
+  // Initialize expanded sections + auto-expand parents of active route
   useEffect(() => {
     const initialExpanded = new Set<string>();
     sections.forEach((section) => {
@@ -93,8 +111,9 @@ const SidebarComponent: React.FC<SidebarProps> = ({
         initialExpanded.add(section.id);
       }
     });
+    expandedByUrl.forEach((id) => initialExpanded.add(id));
     setExpandedSections(initialExpanded);
-  }, [sections]);
+  }, [sections, expandedByUrl]);
 
   // Handle sidebar toggle
   const handleToggle = () => {
@@ -114,19 +133,33 @@ const SidebarComponent: React.FC<SidebarProps> = ({
     setExpandedSections(newExpanded);
   };
 
+  const navigateTo = useCallback(
+    (href: string, external?: boolean) => {
+      if (external) {
+        window.open(href, '_blank', 'noopener,noreferrer');
+        return;
+      }
+      if (effectiveNavigate) {
+        effectiveNavigate(href);
+      } else {
+        window.location.href = href;
+      }
+    },
+    [effectiveNavigate],
+  );
+
   // Handle item click
   const handleItemClick = (item: SidebarItem) => {
-    setActiveItem(item.id);
     onItemClick?.(item);
 
     if (item.onClick) {
       item.onClick();
-    } else if (item.href && !item.external) {
-      window.location.href = item.href;
-    } else if (item.href && item.external) {
-      window.open(item.href, '_blank', 'noopener,noreferrer');
+    } else if (item.href) {
+      navigateTo(item.href, item.external);
     }
   };
+
+  const isItemActive = (itemId: string) => (urlDrivenActive ? activeItemId === itemId : false);
 
   // Handle user action
   const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
@@ -203,12 +236,16 @@ const SidebarComponent: React.FC<SidebarProps> = ({
             style={{ borderColor: 'var(--color-separator)' }}
           >
             {!isCollapsed && (
-              <a href={tenantLogo.href || '/'} className="flex items-center space-x-2 text-xl font-bold text-green-600">
+              <button
+                type="button"
+                onClick={() => tenantLogo.href && navigateTo(tenantLogo.href)}
+                className="flex items-center space-x-2 text-xl font-bold text-green-600 bg-transparent border-0 p-0 cursor-pointer"
+              >
                 {tenantLogo.src ? (
                   <img src={tenantLogo.src} alt={tenantLogo.alt || 'Logo'} className="h-8 w-8" />
                 ) : null}
                 <span style={{ color: theme.colors.primary }}>{tenantLogo.text}</span>
-              </a>
+              </button>
             )}
 
             {collapsible && (
@@ -269,9 +306,11 @@ const SidebarComponent: React.FC<SidebarProps> = ({
                     <SidebarItemComponent
                       key={item.id}
                       item={item}
-                      isActive={activeItem === item.id}
+                      isActive={isItemActive(item.id)}
+                      activeItemId={activeItemId}
+                      isItemActive={isItemActive}
                       isCollapsed={isCollapsed}
-                      onClick={() => handleItemClick(item)}
+                      onItemClick={handleItemClick}
                       variant={variant}
                       styles={styles}
                     />
@@ -327,32 +366,46 @@ const SidebarComponent: React.FC<SidebarProps> = ({
 const SidebarItemComponent: React.FC<{
   item: SidebarItem;
   isActive: boolean;
+  activeItemId: string | null;
+  isItemActive: (id: string) => boolean;
   isCollapsed: boolean;
-  onClick: () => void;
+  onItemClick: (item: SidebarItem) => void;
   variant: string;
-  styles: any;
-}> = React.memo(({ item, isActive, isCollapsed, onClick, variant, styles }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
+  styles: Record<string, string>;
+}> = React.memo(({ item, isActive, activeItemId, isItemActive, isCollapsed, onItemClick, variant, styles }) => {
+  const hasActiveChild = Boolean(
+    item.children?.some((child) => isItemActive(child.id)),
+  );
+  const [isExpanded, setIsExpanded] = useState(hasActiveChild);
+
+  useEffect(() => {
+    if (hasActiveChild) {
+      setIsExpanded(true);
+    }
+  }, [hasActiveChild, activeItemId]);
 
   const handleClick = () => {
     if (item.children && item.children.length > 0) {
-      // Only toggle submenu, don't navigate
       setIsExpanded(!isExpanded);
+      if (item.href) {
+        onItemClick(item);
+      }
     } else {
-      // Only navigate if no children
-      onClick();
+      onItemClick(item);
     }
   };
 
   return (
     <div>
       <button
+        type="button"
         onClick={handleClick}
         disabled={item.disabled}
+        aria-current={isActive ? 'page' : undefined}
         className={`
           w-full flex items-center ${styles.item} py-2 text-sm font-medium rounded-md
           transition-colors duration-200
-          ${isActive ? 'nav-item active' : 'nav-item'}
+          nav-item ${isActive ? 'active' : ''}
           ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
         `}
       >
@@ -387,9 +440,11 @@ const SidebarItemComponent: React.FC<{
             <SidebarItemComponent
               key={child.id}
               item={child}
-              isActive={false}
+              isActive={isItemActive(child.id)}
+              activeItemId={activeItemId}
+              isItemActive={isItemActive}
               isCollapsed={isCollapsed}
-              onClick={onClick}
+              onItemClick={onItemClick}
               variant={variant}
               styles={styles}
             />
