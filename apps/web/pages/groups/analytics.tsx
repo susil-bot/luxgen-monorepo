@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { createHandleUserAction } from '../../lib/user-actions';
+import { useAppLayoutHeader } from '../../lib/app-layout-header';
 import { useQuery } from '@apollo/client';
 import { SnackbarProvider, AppLayout, getDefaultUser, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
 import { PlanGate } from '../../components/billing/PlanGate';
@@ -40,6 +41,7 @@ const GroupAnalyticsPageContent: React.FC = () => {
   }, []);
 
   const handleUserAction = createHandleUserAction(router);
+  const headerProps = useAppLayoutHeader();
 
   const stats = [
     {
@@ -89,8 +91,7 @@ const GroupAnalyticsPageContent: React.FC = () => {
         sidebarSections={getDefaultSidebarSections()}
         user={user}
         onUserAction={handleUserAction}
-        showSearch={false}
-        showNotifications={false}
+        {...headerProps}
         logo={getDefaultLogo()}
         sidebarCollapsible={true}
         sidebarDefaultCollapsed={false}

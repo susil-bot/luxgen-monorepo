@@ -1,22 +1,23 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useQuery } from '@apollo/client';
-import { AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
-import { PageLoadingState, PageEmptyState } from '../components/common/PageStates';
-import { createHandleUserAction } from '../lib/user-actions';
-import { useLayoutUser, useAppTenantId } from '../lib/app-layout-user';
-import { getStoredUser } from '../lib/session';
-import { GET_COURSES } from '../graphql/queries/courses';
+import { useMutation, useQuery } from '@apollo/client';
+import { AppLayout, getDefaultLogo, getDefaultSidebarSections, SnackbarProvider, useSnackbar } from '@luxgen/ui';
+import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
+import { createHandleUserAction } from '../../lib/user-actions';
+import { useLayoutUser, useAppTenantId } from '../../lib/app-layout-user';
+import { getStoredUser } from '../../lib/session';
+import { GET_COURSES, UPDATE_COURSE } from '../../graphql/queries/courses';
 import {
   courseToProductRow,
   formatProductDate,
   statusBadgeClass,
   type GraphQLCourseProduct,
   type ProductStatus,
-} from '../lib/product-display';
-import { getTenantPageProps } from '../lib/tenant-page-props';
+} from '../../lib/product-display';
+import { getTenantPageProps } from '../../lib/tenant-page-props';
+import { useAppLayoutHeader } from '../../lib/app-layout-header';
 
 interface ProductsPageProps {
   tenant: string;
@@ -25,13 +26,15 @@ interface ProductsPageProps {
 type SortKey = 'title' | 'updatedAt' | 'inventory' | 'status';
 type StatusFilter = 'ALL' | ProductStatus;
 
-export default function ProductsPage({ tenant }: ProductsPageProps) {
+function ProductsPage({ tenant }: ProductsPageProps) {
   const router = useRouter();
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
   const tenantId = useAppTenantId();
   const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
   const queryTenantId = tenantId ?? sessionUser?.tenant.id ?? tenant;
+  const { showSuccess, showError } = useSnackbar();
+  const headerProps = useAppLayoutHeader();
 
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
@@ -39,12 +42,20 @@ export default function ProductsPage({ tenant }: ProductsPageProps) {
   const [sortBy, setSortBy] = useState<SortKey>('updatedAt');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
   const [selected, setSelected] = useState<string[]>([]);
+  const [bulkLoading, setBulkLoading] = useState(false);
 
-  const { data, loading, error } = useQuery(GET_COURSES, {
+  const { data, loading, error, refetch } = useQuery(GET_COURSES, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
     fetchPolicy: 'cache-and-network',
   });
+
+  const [updateCourse] = useMutation(UPDATE_COURSE);
+
+  useEffect(() => {
+    const q = router.query.search;
+    if (typeof q === 'string') setSearch(q);
+  }, [router.query.search]);
 
   const products = useMemo(() => {
     const raw: GraphQLCourseProduct[] = data?.courses ?? [];
@@ -88,6 +99,23 @@ export default function ProductsPage({ tenant }: ProductsPageProps) {
     setSelected((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
+  const bulkSetStatus = async (status: 'DRAFT' | 'PUBLISHED') => {
+    if (selected.length === 0) return;
+    setBulkLoading(true);
+    try {
+      await Promise.all(
+        selected.map((id) => updateCourse({ variables: { id, input: { status } } })),
+      );
+      await refetch();
+      showSuccess(`${selected.length} product${selected.length === 1 ? '' : 's'} updated`);
+      setSelected([]);
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Bulk update failed');
+    } finally {
+      setBulkLoading(false);
+    }
+  };
+
   if (loading && !data) {
     return <PageLoadingState label="Loading products…" />;
   }
@@ -103,8 +131,7 @@ export default function ProductsPage({ tenant }: ProductsPageProps) {
         user={layoutUser ?? undefined}
         logo={getDefaultLogo()}
         onUserAction={handleUserAction}
-        showSearch={false}
-        showNotifications={false}
+        {...headerProps}
         responsive
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -156,10 +183,20 @@ export default function ProductsPage({ tenant }: ProductsPageProps) {
           {selected.length > 0 && (
             <div className="ios-card p-3 flex flex-wrap items-center gap-3">
               <span className="text-sm text-secondary">{selected.length} selected</span>
-              <button type="button" className="ios-btn-secondary text-sm" disabled>
+              <button
+                type="button"
+                className="ios-btn-secondary text-sm"
+                disabled={bulkLoading}
+                onClick={() => void bulkSetStatus('DRAFT')}
+              >
                 Set draft
               </button>
-              <button type="button" className="ios-btn-secondary text-sm" disabled>
+              <button
+                type="button"
+                className="ios-btn-secondary text-sm"
+                disabled={bulkLoading}
+                onClick={() => void bulkSetStatus('PUBLISHED')}
+              >
                 Publish
               </button>
               <button type="button" className="ios-btn-plain text-sm" onClick={() => setSelected([])}>
@@ -214,7 +251,7 @@ export default function ProductsPage({ tenant }: ProductsPageProps) {
                           <button
                             type="button"
                             className="ios-btn-plain text-left font-medium p-0"
-                            onClick={() => void router.push(`/courses/${p.id}`)}
+                            onClick={() => void router.push(`/products/${p.id}/edit`)}
                           >
                             <div className="flex items-center gap-3">
                               <div
@@ -248,5 +285,15 @@ export default function ProductsPage({ tenant }: ProductsPageProps) {
     </>
   );
 }
+
+function ProductsPageWithSnackbar(props: ProductsPageProps) {
+  return (
+    <SnackbarProvider position="top-right" maxSnackbars={3}>
+      <ProductsPage {...props} />
+    </SnackbarProvider>
+  );
+}
+
+export default ProductsPageWithSnackbar;
 
 export const getServerSideProps = getTenantPageProps;

@@ -28,6 +28,9 @@ export interface AppLayoutProps {
   showNotifications?: boolean;
   notificationCount?: number;
   searchPlaceholder?: string;
+  showThemeToggle?: boolean;
+  isDarkMode?: boolean;
+  onThemeToggle?: () => void;
   logo?: {
     text: string;
     href: string;
@@ -61,6 +64,9 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   showNotifications = true,
   notificationCount = 0,
   searchPlaceholder = 'Search...',
+  showThemeToggle = false,
+  isDarkMode = false,
+  onThemeToggle,
   logo = {
     text: 'LuxGen',
     href: '/',
@@ -250,7 +256,7 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
     return (
       <div
         className="min-h-screen flex items-center justify-center"
-        style={{ backgroundColor: theme.colors.background }}
+        style={{ backgroundColor: 'var(--color-bg-primary)' }}
       >
         <div className="text-center p-8">
           <div className="mb-4">
@@ -281,7 +287,7 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
     <div
       ref={layoutRef}
       className={`flex h-screen ${className}`}
-      style={{ backgroundColor: theme.colors.background }}
+      style={{ backgroundColor: 'var(--color-bg-primary)' }}
       {...props}
     >
       {/* Sidebar - Always rendered */}
@@ -316,6 +322,9 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
           showNotifications={showNotifications}
           notificationCount={notificationCount}
           onNotificationClick={onNotificationClick}
+          showThemeToggle={showThemeToggle}
+          isDarkMode={isDarkMode}
+          onThemeToggle={onThemeToggle}
           logo={logo}
           variant="default"
           position="fixed"

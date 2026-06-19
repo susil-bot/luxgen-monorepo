@@ -252,10 +252,10 @@
 /* ── Component Utilities ──────────────────────────────────────────────────── */
 @layer components {
   .glass {
-    background: var(--color-sidebar-bg);
+    background: color-mix(in srgb, var(--color-bg-elevated) 88%, transparent);
     backdrop-filter: blur(20px) saturate(180%);
     -webkit-backdrop-filter: blur(20px) saturate(180%);
-    border: 1px solid var(--color-sidebar-border);
+    border-bottom: 1px solid var(--color-separator);
   }
 
   .surface {

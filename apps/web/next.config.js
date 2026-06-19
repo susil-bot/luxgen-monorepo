@@ -3,6 +3,8 @@ const { apiUrl } = require('@luxgen/config/urls.cjs');
 
 const nextConfig = {
   output: 'standalone',
+  /** Allow _next assets when browsing via tenant subdomains (demo.localhost:3000) */
+  allowedDevOrigins: ['demo.localhost', 'idea-vibes.localhost', 'localhost', '127.0.0.1'],
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
@@ -22,6 +24,8 @@ const nextConfig = {
       { source: '/api/graphql', destination: `${resolvedApiUrl}/graphql` },
       { source: '/api/auth/:path*', destination: `${resolvedApiUrl}/api/auth/:path*` },
       { source: '/api/admin/:path*', destination: `${resolvedApiUrl}/api/admin/:path*` },
+      { source: '/api/tenant/:path*', destination: `${resolvedApiUrl}/api/tenant/:path*` },
+      { source: '/api/notifications/:path*', destination: `${resolvedApiUrl}/api/notifications/:path*` },
     ];
   },
   async headers() {

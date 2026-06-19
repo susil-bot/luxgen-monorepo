@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { useMutation } from '@apollo/client';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
+import { useAppLayoutHeader } from '../../lib/app-layout-header';
 import { CREATE_GROUP } from '../../graphql/queries/groups';
 import {
   SnackbarProvider,
@@ -26,6 +27,7 @@ const CreateGroupPageContent: React.FC = () => {
   });
 
   const handleUserAction = createHandleUserAction(router);
+  const headerProps = useAppLayoutHeader();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
@@ -89,8 +91,7 @@ const CreateGroupPageContent: React.FC = () => {
         sidebarSections={getDefaultSidebarSections()}
         user={user ?? undefined}
         onUserAction={handleUserAction}
-        showSearch={false}
-        showNotifications={false}
+        {...headerProps}
         logo={getDefaultLogo()}
         sidebarCollapsible={true}
         sidebarDefaultCollapsed={false}

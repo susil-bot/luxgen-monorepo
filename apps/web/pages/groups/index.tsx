@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useQuery } from '@apollo/client';
 import { SnackbarProvider, AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
+import { useAppLayoutHeader } from '../../lib/app-layout-header';
+import { filterGroupsBySearch } from '../../lib/group-display';
 import { GET_GROUPS } from '../../graphql/queries/groups';
 import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
 
@@ -12,13 +14,21 @@ const GroupsPageContent: React.FC = () => {
   const router = useRouter();
   const user = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
+  const headerProps = useAppLayoutHeader();
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    const q = router.query.search;
+    if (typeof q === 'string') setSearch(q);
+  }, [router.query.search]);
 
   const { data, loading, error } = useQuery(GET_GROUPS, {
     variables: { first: 50, isActive: true },
     fetchPolicy: 'cache-and-network',
   });
 
-  const groups = data?.groups?.edges?.map((edge: { node: GroupNode }) => edge.node) ?? [];
+  const allGroups = data?.groups?.edges?.map((edge: { node: GroupNode }) => edge.node) ?? [];
+  const groups = useMemo(() => filterGroupsBySearch(allGroups, search), [allGroups, search]);
 
   return (
     <>
@@ -31,8 +41,7 @@ const GroupsPageContent: React.FC = () => {
         sidebarSections={getDefaultSidebarSections()}
         user={user ?? undefined}
         onUserAction={handleUserAction}
-        showSearch={false}
-        showNotifications={false}
+        {...headerProps}
         logo={getDefaultLogo()}
         sidebarCollapsible={true}
         sidebarDefaultCollapsed={false}
@@ -57,7 +66,7 @@ const GroupsPageContent: React.FC = () => {
             </div>
           </div>
 
-          {loading && groups.length === 0 && <PageLoadingState label="Loading groups…" fullScreen={false} />}
+          {loading && allGroups.length === 0 && <PageLoadingState label="Loading groups…" fullScreen={false} />}
 
           {error && groups.length === 0 && (
             <PageEmptyState
@@ -72,7 +81,15 @@ const GroupsPageContent: React.FC = () => {
             />
           )}
 
-          {!loading && !error && groups.length === 0 && (
+          {!loading && !error && allGroups.length > 0 && groups.length === 0 && (
+            <PageEmptyState
+              icon="🔍"
+              title="No matching groups"
+              subtitle={`No groups match "${search}".`}
+            />
+          )}
+
+          {!loading && !error && allGroups.length === 0 && (
             <PageEmptyState
               icon="👥"
               title="No groups yet"

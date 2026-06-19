@@ -1,9 +1,12 @@
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useQuery } from '@apollo/client';
 import { SnackbarProvider, AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
+import { useAppLayoutHeader } from '../../lib/app-layout-header';
+import { filterGroupsBySearch } from '../../lib/group-display';
 import { GET_GROUPS } from '../../graphql/queries/groups';
 import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
 
@@ -19,16 +22,24 @@ const GroupDashboardPageContent: React.FC = () => {
   const router = useRouter();
   const user = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
+  const headerProps = useAppLayoutHeader();
+  const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    const q = router.query.search;
+    if (typeof q === 'string') setSearch(q);
+  }, [router.query.search]);
 
   const { data, loading, error } = useQuery(GET_GROUPS, {
     variables: { first: 100, isActive: undefined },
     fetchPolicy: 'cache-and-network',
   });
 
-  const groups: GroupNode[] = data?.groups?.edges?.map((edge: { node: GroupNode }) => edge.node) ?? [];
-  const totalGroups = data?.groups?.totalCount ?? groups.length;
-  const totalMembers = groups.reduce((sum, g) => sum + (g.memberCount ?? 0), 0);
-  const activeGroups = groups.filter((g) => g.isActive).length;
+  const allGroups: GroupNode[] = data?.groups?.edges?.map((edge: { node: GroupNode }) => edge.node) ?? [];
+  const groups = useMemo(() => filterGroupsBySearch(allGroups, search), [allGroups, search]);
+  const totalGroups = data?.groups?.totalCount ?? allGroups.length;
+  const totalMembers = allGroups.reduce((sum, g) => sum + (g.memberCount ?? 0), 0);
+  const activeGroups = allGroups.filter((g) => g.isActive).length;
   const avgMembers = totalGroups > 0 ? Math.round(totalMembers / totalGroups) : 0;
 
   return (
@@ -42,10 +53,7 @@ const GroupDashboardPageContent: React.FC = () => {
         sidebarSections={getDefaultSidebarSections()}
         user={user ?? undefined}
         onUserAction={handleUserAction}
-        showSearch={true}
-        showNotifications={true}
-        notificationCount={0}
-        searchPlaceholder="Search groups…"
+        {...headerProps}
         logo={getDefaultLogo()}
         sidebarCollapsible={true}
         sidebarDefaultCollapsed={false}
@@ -67,7 +75,7 @@ const GroupDashboardPageContent: React.FC = () => {
             </div>
           </div>
 
-          {loading && groups.length === 0 && <PageLoadingState label="Loading dashboard…" fullScreen={false} />}
+          {loading && allGroups.length === 0 && <PageLoadingState label="Loading dashboard…" fullScreen={false} />}
 
           {error && groups.length === 0 && (
             <PageEmptyState icon="⚠️" title="Could not load groups" subtitle={error.message} />
@@ -95,7 +103,7 @@ const GroupDashboardPageContent: React.FC = () => {
                 </div>
               </div>
 
-              {groups.length === 0 ? (
+              {allGroups.length === 0 ? (
                 <PageEmptyState
                   icon="👥"
                   title="No groups yet"
@@ -105,6 +113,12 @@ const GroupDashboardPageContent: React.FC = () => {
                       Create group
                     </button>
                   }
+                />
+              ) : groups.length === 0 ? (
+                <PageEmptyState
+                  icon="🔍"
+                  title="No matching groups"
+                  subtitle={`No groups match "${search}".`}
                 />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">

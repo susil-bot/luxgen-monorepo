@@ -100,6 +100,9 @@ export interface AdminDashboardLayoutProps extends BaseComponentProps {
   showNotifications?: boolean;
   notificationCount?: number;
   searchPlaceholder?: string;
+  showThemeToggle?: boolean;
+  isDarkMode?: boolean;
+  onThemeToggle?: () => void;
   sidebarCollapsible?: boolean;
   sidebarDefaultCollapsed?: boolean;
   responsive?: boolean;
@@ -205,6 +208,9 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
   showNotifications = true,
   notificationCount = 0,
   searchPlaceholder = 'Search...',
+  showThemeToggle = false,
+  isDarkMode = false,
+  onThemeToggle,
   sidebarCollapsible = true,
   sidebarDefaultCollapsed = false,
   responsive = true,
@@ -254,6 +260,9 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
           showNotifications={showNotifications}
           notificationCount={notificationCount}
           searchPlaceholder={searchPlaceholder}
+          showThemeToggle={showThemeToggle}
+          isDarkMode={isDarkMode}
+          onThemeToggle={onThemeToggle}
           logo={logo}
           sidebarCollapsible={sidebarCollapsible}
           sidebarDefaultCollapsed={sidebarDefaultCollapsed}

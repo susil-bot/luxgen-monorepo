@@ -5,6 +5,7 @@ import { useQuery } from '@apollo/client';
 import { AdminDashboardLayout, UserMenu } from '@luxgen/ui';
 import { GET_DASHBOARD_DATA } from '../graphql/queries/dashboard';
 import { transformDashboardData, transformUserData, handleDashboardAction, handleUserAction } from '../lib/transformer';
+import { useAppLayoutHeader } from '../lib/app-layout-header';
 import { PageEmptyState, PageLoadingState } from '../components/common/PageStates';
 
 interface DashboardProps {
@@ -13,6 +14,7 @@ interface DashboardProps {
 
 export default function Dashboard({ tenant }: DashboardProps) {
   const router = useRouter();
+  const headerProps = useAppLayoutHeader();
   const [user, setUser] = useState<UserMenu | null>(() => transformUserData(tenant));
 
   // GraphQL query for dashboard data with error handling
@@ -126,6 +128,7 @@ export default function Dashboard({ tenant }: DashboardProps) {
         variant="default"
         loading={dataLoading}
         onUserAction={onUserAction}
+        {...headerProps}
         onDashboardAction={onDashboardAction}
         onDataPointClick={(point: any) => console.log('Data point clicked:', point)}
         onSegmentClick={(segment: any) => console.log('Segment clicked:', segment)}

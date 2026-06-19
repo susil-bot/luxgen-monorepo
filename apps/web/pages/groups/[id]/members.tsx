@@ -9,6 +9,9 @@ import {
   getDefaultLogo,
   getDefaultSidebarSections,
 } from '@luxgen/ui';
+import { useLayoutUser } from '../../../lib/app-layout-user';
+import { useAppLayoutHeader } from '../../../lib/app-layout-header';
+import { GET_GROUP, GET_GROUP_MEMBERS } from '../../../graphql/queries/groups';
 import { PageLoadingState, PageEmptyState } from '../../../components/common/PageStates';
 
 const GroupMembersPageContent: React.FC = () => {
@@ -17,20 +20,47 @@ const GroupMembersPageContent: React.FC = () => {
   const groupId = typeof id === 'string' ? id : '';
   const user = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
+  const headerProps = useAppLayoutHeader();
 
-  // Handle search
-  const handleSearch = (query: string) => {
-    console.log('Search query:', query);
-    // TODO: Implement search functionality
-  };
+  const {
+    data: groupData,
+    loading: groupLoading,
+    error: groupError,
+  } = useQuery(GET_GROUP, {
+    variables: { id: groupId },
+    skip: !groupId,
+    fetchPolicy: 'cache-and-network',
+  });
 
-  // Handle notifications
-  const handleNotificationClick = () => {
-    console.log('Notification clicked');
-    // TODO: Implement notification functionality
-  };
+  const {
+    data: membersData,
+    loading: membersLoading,
+    refetch: refetchMembers,
+  } = useQuery(GET_GROUP_MEMBERS, {
+    variables: { groupId, first: 100 },
+    skip: !groupId,
+    fetchPolicy: 'cache-and-network',
+  });
 
-  if (loading) {
+  const group = groupData?.group;
+  const members =
+    membersData?.groupMembers?.edges?.map(
+      (edge: {
+        node: {
+          id: string;
+          role: string;
+          joinedAt: string;
+          user: { firstName: string; lastName: string; email: string };
+        };
+      }) => ({
+        ...edge.node,
+        permissions: [] as string[],
+      }),
+    ) ?? [];
+
+  const loading = groupLoading || membersLoading;
+
+  if (!groupId || loading) {
     return <PageLoadingState label="Loading members…" />;
   }
 
@@ -39,6 +69,7 @@ const GroupMembersPageContent: React.FC = () => {
       <PageEmptyState
         icon="👥"
         title="Group not found"
+        subtitle={groupError?.message}
         action={
           <button type="button" className="ios-btn-primary mt-4" onClick={() => router.push('/groups')}>
             Back to groups
@@ -59,8 +90,7 @@ const GroupMembersPageContent: React.FC = () => {
         sidebarSections={getDefaultSidebarSections()}
         user={user ?? undefined}
         onUserAction={handleUserAction}
-        showSearch={false}
-        showNotifications={false}
+        {...headerProps}
         logo={getDefaultLogo()}
         sidebarCollapsible={true}
         sidebarDefaultCollapsed={false}
@@ -71,30 +101,32 @@ const GroupMembersPageContent: React.FC = () => {
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center space-x-3 mb-2">
-                  <button type="button" onClick={() => router.push('/groups')} className="ios-btn-plain p-1" aria-label="Back to groups">
+                  <button
+                    type="button"
+                    onClick={() => router.push(`/groups/${groupId}`)}
+                    className="ios-btn-plain p-1"
+                    aria-label="Back to group"
+                  >
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
                   <h1 className="ios-large-title">{group.name}</h1>
                 </div>
-                <p className="text-secondary">{group.description}</p>
+                <p className="text-secondary">{group.description || 'Manage group members'}</p>
               </div>
 
-              <div className="flex items-center space-x-3">
-                <div
-                  className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-semibold"
-                  style={{ backgroundColor: group.color }}
-                >
-                  {group.icon ? (
-                    <span className="text-xl">{group.icon}</span>
-                  ) : (
-                    <span className="text-xl">{group.name.charAt(0).toUpperCase()}</span>
-                  )}
-                </div>
+              <div
+                className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-semibold"
+                style={{ backgroundColor: group.color || 'var(--color-blue)' }}
+              >
+                {group.icon ? (
+                  <span className="text-xl">{group.icon}</span>
+                ) : (
+                  <span className="text-xl">{group.name.charAt(0).toUpperCase()}</span>
+                )}
               </div>
             </div>
-            <p className="text-secondary">{group.description || 'Manage group members'}</p>
           </div>
 
           <GroupMemberList members={members} onRemoveMember={() => void refetchMembers()} />

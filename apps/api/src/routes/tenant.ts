@@ -95,7 +95,7 @@ router.patch('/branding', async (req: Request, res: Response) => {
       });
     }
 
-    const { tenantId } = tenantContext;
+    const { tenantId, tenant } = tenantContext;
     const { branding } = req.body;
 
     // Validate branding data
@@ -136,6 +136,65 @@ router.patch('/branding', async (req: Request, res: Response) => {
       success: false,
       message: 'Internal server error',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  }
+});
+
+/**
+ * Update tenant general / regional settings
+ */
+router.patch('/general', async (req: Request, res: Response) => {
+  try {
+    const tenantContext = getTenantContext(req);
+
+    if (!tenantContext) {
+      return res.status(404).json({
+        success: false,
+        message: 'No tenant context found',
+      });
+    }
+
+    const { tenantId, tenant } = tenantContext;
+    const { name, regional } = req.body as {
+      name?: string;
+      regional?: { contactEmail?: string; timezone?: string; currency?: string };
+    };
+
+    const update: Record<string, unknown> = { updatedAt: new Date() };
+    if (name?.trim()) {
+      update.name = name.trim();
+    }
+    if (regional) {
+      const existingRegional =
+        (tenant.settings?.config as Record<string, unknown> | undefined)?.regional ?? {};
+      update['settings.config.regional'] = { ...existingRegional, ...regional };
+    }
+
+    const updatedTenant = await Tenant.findByIdAndUpdate(tenantId, update, { new: true });
+
+    if (!updatedTenant) {
+      return res.status(404).json({
+        success: false,
+        message: 'Tenant not found',
+      });
+    }
+
+    const config = updatedTenant.settings?.config as Record<string, unknown> | undefined;
+
+    res.json({
+      success: true,
+      message: 'General settings updated successfully',
+      data: {
+        name: updatedTenant.name,
+        regional: config?.regional ?? {},
+      },
+    });
+  } catch (error) {
+    console.error('Update tenant general error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
     });
   }
 });

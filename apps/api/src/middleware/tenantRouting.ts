@@ -67,6 +67,19 @@ export const tenantRoutingMiddleware = async (req: Request, res: Response, next:
     }
 
     if (!tenant) {
+      const headerTenant = req.get('x-tenant')?.trim().toLowerCase();
+      if (headerTenant) {
+        tenant = await Tenant.findOne({ subdomain: headerTenant, status: 'active' }).populate(
+          'metadata.createdBy',
+        );
+        if (tenant) {
+          tenantId = (tenant._id as any).toString();
+          req.subdomain = headerTenant;
+        }
+      }
+    }
+
+    if (!tenant) {
       if (isPublicPath(req.path)) return next();
 
       if (req.path === '/' || !req.path.startsWith('/api/')) {

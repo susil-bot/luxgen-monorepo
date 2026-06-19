@@ -9,6 +9,7 @@ import { useLayoutUser, useAppTenantId } from '../../lib/app-layout-user';
 import { getStoredUser } from '../../lib/session';
 import { CREATE_COURSE } from '../../graphql/queries/courses';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
+import { useAppLayoutHeader } from '../../lib/app-layout-header';
 
 interface Props {
   tenant: string;
@@ -18,6 +19,7 @@ function CreateProductContent({ tenant }: Props) {
   const router = useRouter();
   const layoutUser = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
+  const headerProps = useAppLayoutHeader();
   const { showSuccess, showError } = useSnackbar();
   const tenantId = useAppTenantId();
   const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
@@ -49,7 +51,7 @@ function CreateProductContent({ tenant }: Props) {
       });
       showSuccess('Product created');
       const id = data?.createCourse?.id;
-      void router.push(id ? `/courses/${id}/edit` : '/products');
+      void router.push(id ? `/products/${id}/edit` : '/products');
     } catch (err: unknown) {
       showError(err instanceof Error ? err.message : 'Create failed');
     }
@@ -66,8 +68,7 @@ function CreateProductContent({ tenant }: Props) {
         user={layoutUser ?? undefined}
         logo={getDefaultLogo()}
         onUserAction={handleUserAction}
-        showSearch={false}
-        showNotifications={false}
+        {...headerProps}
         responsive
       >
         <div className="max-w-2xl mx-auto px-4 py-8 space-y-6">
