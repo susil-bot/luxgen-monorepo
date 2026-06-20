@@ -1,8 +1,7 @@
 import Head from 'next/head';
 import { SnackbarProvider } from '@luxgen/ui';
 
-import { TowerShell } from '../../../components/automations/tower/TowerShell';
-import { TowerRunLogsTable } from '../../../components/automations/tower/TowerRunLogsTable';
+import { TowerRunLogsTable, TowerShell } from '../../../components/automations/tower';
 import styles from '../../../components/automations/tower/TowerFlow.module.css';
 import { useTowerRunLogs } from '../../../hooks/useTowerRunLogs';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';

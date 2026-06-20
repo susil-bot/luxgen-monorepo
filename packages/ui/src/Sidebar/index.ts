@@ -22,3 +22,8 @@ export { useSidebarActive } from './useSidebarActive';
 export type { ActiveState } from './useSidebarActive';
 
 export { useSidebarSearch } from './useSidebarSearch';
+export { fetchSidebarData, fetchSidebarSSR } from './fetcher';
+export type { SidebarData } from './fetcher';
+export { sidebarFixtures } from './fixture';
+export { sidebarStyles } from './styles';
+export { SidebarTranslations } from './translations';

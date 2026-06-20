@@ -11,3 +11,4 @@ export type {
 } from './fetcher';
 export { TimelineTranslations } from './translations';
 export { timelineFixtures } from './fixture';
+export { timelineStyles } from './styles';

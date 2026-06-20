@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { SnackbarProvider } from '@luxgen/ui';
 
-import { TowerShell } from '../../../components/automations/tower/TowerShell';
+import { TowerShell } from '../../../components/automations/tower';
 import styles from '../../../components/automations/tower/TowerFlow.module.css';
 import { GET_AUTOMATIONS } from '../../../graphql/queries/automations';
 import {

@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 
+import {
+  FlowConfigFieldInput,
+  TowerGraphCanvas,
+  TowerStepConnections,
+  TowerStepRail,
+} from '../../../components/automations/tower';
 import styles from '../../../components/automations/tower/TowerFlow.module.css';
-import { FlowConfigFieldInput } from '../../../components/automations/tower/FlowConfigFieldInput';
-import { TowerGraphCanvas } from '../../../components/automations/tower/TowerGraphCanvas';
-import { TowerStepConnections } from '../../../components/automations/tower/TowerStepConnections';
-import { TowerStepRail } from '../../../components/automations/tower/TowerStepRail';
 import { useTowerFlowPersist } from '../../../hooks/useTowerFlowPersist';
 import {
   flowToGraphSteps,

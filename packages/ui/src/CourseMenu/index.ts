@@ -4,3 +4,8 @@ export { CourseOverview } from './CourseOverview';
 export { CourseAnalytics } from './CourseAnalytics';
 export * from './types';
 export * from './config';
+export { fetchCourseMenuData, fetchCourseMenuSSR } from './fetcher';
+export type { CourseMenuData } from './fetcher';
+export { courseMenuFixtures } from './fixture';
+export { courseMenuStyles } from './styles';
+export { CourseMenuTranslations } from './translations';
