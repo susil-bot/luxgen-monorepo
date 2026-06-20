@@ -4,6 +4,10 @@ export type McpScope = 'read' | 'write';
 export const MCP_WRITE_TOOLS = new Set([
   'create_automation',
   'update_automation_flow',
+  'tower_insert_step',
+  'tower_move_step',
+  'tower_connect_nodes',
+  'tower_disconnect_nodes',
   'toggle_automation',
   'delete_automation',
   'run_agent_task',
