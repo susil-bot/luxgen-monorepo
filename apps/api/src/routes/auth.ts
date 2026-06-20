@@ -1,4 +1,5 @@
 import { Router, Request, Response } from 'express';
+import crypto from 'crypto';
 import { User } from '@luxgen/db';
 import { UserRole } from '@luxgen/auth';
 import { verifyPassword } from '@luxgen/auth';
@@ -8,6 +9,8 @@ import { loginRateLimitMiddleware } from '../middleware/loginRateLimit';
 import { isAccountActive, ACCOUNT_DEACTIVATED_MESSAGE } from '../utils/accountStatus';
 import { UserRegistrationService } from '../services/userRegistrationService';
 import { requireRole, canInviteUsers, logRoleAccess } from '../middleware/roleManagement';
+import { sendTransactionalEmail } from '../utils/email';
+import { logger } from '../utils/logger';
 
 const router = Router();
 
@@ -244,8 +247,8 @@ router.post('/invite', canInviteUsers, logRoleAccess('user invitation'), async (
       });
     }
 
-    // Generate temporary password
-    const tempPassword = Math.random().toString(36).slice(-8);
+    // Generate cryptographically secure temporary password — delivered via email only
+    const tempPassword = crypto.randomBytes(16).toString('hex');
 
     const registrationResult = await UserRegistrationService.registerUser({
       email,
@@ -265,9 +268,32 @@ router.post('/invite', canInviteUsers, logRoleAccess('user invitation'), async (
       });
     }
 
+    try {
+      await sendTransactionalEmail({
+        to: email,
+        subject: 'You have been invited to LuxGen',
+        body: [
+          `Hello ${firstName},`,
+          '',
+          'An administrator has invited you to LuxGen.',
+          '',
+          `Sign in with your email (${email}) and this temporary password:`,
+          tempPassword,
+          '',
+          'Please change your password after your first login.',
+        ].join('\n'),
+      });
+    } catch (emailError) {
+      logger.error('Failed to send invite email:', emailError);
+      return res.status(500).json({
+        success: false,
+        message: 'User was created but the invitation email could not be sent. Contact an administrator.',
+      });
+    }
+
     res.status(201).json({
       success: true,
-      message: 'User invited successfully',
+      message: 'User invited successfully. Login credentials were sent by email.',
       data: {
         user: {
           id: registrationResult.user!._id,
@@ -277,7 +303,6 @@ router.post('/invite', canInviteUsers, logRoleAccess('user invitation'), async (
           role: registrationResult.user!.role,
           status: registrationResult.user!.status,
         },
-        tempPassword, // In production, this should be sent via email
       },
     });
   } catch (error) {

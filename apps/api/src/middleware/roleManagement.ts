@@ -12,6 +12,19 @@ export interface RoleManagementRequest extends Request {
 
 const errMsg = (e: unknown) => (e instanceof Error ? e.message : undefined);
 
+const ROLE_HIERARCHY: Record<UserRole, number> = {
+  [UserRole.SUPER_ADMIN]: 3,
+  [UserRole.ADMIN]: 2,
+  [UserRole.USER]: 1,
+};
+
+function meetsRoleRequirement(userRole: string, requiredRole: UserRole): boolean {
+  const userRank = ROLE_HIERARCHY[userRole as UserRole];
+  const requiredRank = ROLE_HIERARCHY[requiredRole];
+  if (userRank === undefined || requiredRank === undefined) return false;
+  return userRank >= requiredRank;
+}
+
 export const requireRole = (requiredRole: UserRole) => {
   return async (req: RoleManagementRequest, res: Response, next: NextFunction) => {
     try {
@@ -23,7 +36,7 @@ export const requireRole = (requiredRole: UserRole) => {
         });
       }
 
-      if (req.user.role !== requiredRole) {
+      if (!meetsRoleRequirement(req.user.role, requiredRole)) {
         logger.warn(
           `Access denied: User ${req.user.email} (${req.user.role}) attempted to access ${requiredRole} resource`,
         );

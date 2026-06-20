@@ -3,11 +3,13 @@ import request from 'supertest';
 import express from 'express';
 import authRoutes from '../routes/auth';
 import { UserRegistrationService } from '../services/userRegistrationService';
+import { sendTransactionalEmail } from '../utils/email';
 import { User, UserRole, UserStatus } from '@luxgen/db';
 import { generateToken } from '../utils/jwt';
 
 // Mock dependencies
 jest.mock('../services/userRegistrationService');
+jest.mock('../utils/email');
 jest.mock('@luxgen/db');
 jest.mock('../utils/jwt');
 
@@ -140,6 +142,7 @@ describe('Auth Routes', () => {
         user: mockUser,
         message: 'User invited successfully',
       });
+      (sendTransactionalEmail as jest.Mock).mockResolvedValue(undefined);
 
       const response = await request(app)
         .post('/auth/invite')
@@ -154,9 +157,10 @@ describe('Auth Routes', () => {
 
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
-      expect(response.body.message).toBe('User invited successfully');
+      expect(response.body.message).toBe('User invited successfully. Login credentials were sent by email.');
       expect(response.body.data.user.email).toBe('invited@example.com');
-      expect(response.body.data.tempPassword).toBeDefined();
+      expect(response.body.data.tempPassword).toBeUndefined();
+      expect(sendTransactionalEmail).toHaveBeenCalled();
     });
 
     it('should fail invitation if authentication is missing', async () => {
