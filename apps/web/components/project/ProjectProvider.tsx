@@ -18,6 +18,7 @@ import {
 import type { ProjectIterationScope, ProjectPriority, ProjectStatus } from '../../lib/project-types';
 import { AUTH_SESSION_CHANGE_EVENT } from '../../lib/session';
 import { validateClientSession } from '../../lib/session-guard';
+import { useAppTenantId } from '../../lib/app-layout-user';
 
 interface ProjectContextValue {
   tenant: string;
@@ -65,6 +66,8 @@ const ProjectContext = createContext<ProjectContextValue | null>(null);
 export function ProjectProvider({ tenant, children }: { tenant: string; children: ReactNode }) {
   const [filterQuery, setFilterQuery] = useState('');
   const [sessionReady, setSessionReady] = useState(false);
+  const sessionTenantId = useAppTenantId();
+  const queryTenantId = sessionTenantId ?? tenant;
 
   useEffect(() => {
     const refresh = () => setSessionReady(validateClientSession().ok);
@@ -75,11 +78,11 @@ export function ProjectProvider({ tenant, children }: { tenant: string; children
 
   const { data, loading, error, refetch } = useQuery(GET_PROJECT_ITEMS, {
     variables: {
-      tenantId: tenant,
+      tenantId: queryTenantId,
       search: filterQuery.trim() || undefined,
     },
     fetchPolicy: 'cache-and-network',
-    skip: !tenant || !sessionReady,
+    skip: !queryTenantId || !sessionReady,
   });
 
   const [createItem] = useMutation(CREATE_PROJECT_ITEM);
@@ -115,7 +118,7 @@ export function ProjectProvider({ tenant, children }: { tenant: string; children
       await createItem({
         variables: {
           input: {
-            tenantId: tenant,
+            tenantId: queryTenantId,
             title: partial.title,
             description: partial.description,
             status: partial.status,
@@ -131,7 +134,7 @@ export function ProjectProvider({ tenant, children }: { tenant: string; children
       });
       await refetch();
     },
-    [createItem, tenant, refetch],
+    [createItem, queryTenantId, refetch],
   );
 
   const updateItem = useCallback(
@@ -153,7 +156,7 @@ export function ProjectProvider({ tenant, children }: { tenant: string; children
       await updateItemMutation({
         variables: {
           id,
-          tenantId: tenant,
+          tenantId: queryTenantId,
           input: {
             title: patch.title,
             description: patch.description,
@@ -170,27 +173,27 @@ export function ProjectProvider({ tenant, children }: { tenant: string; children
       });
       await refetch();
     },
-    [updateItemMutation, tenant, refetch],
+    [updateItemMutation, queryTenantId, refetch],
   );
 
   const moveItem = useCallback(
     async (id: string, status: ProjectStatus) => {
       await moveItemMutation({
-        variables: { id, tenantId: tenant, status },
+        variables: { id, tenantId: queryTenantId, status },
       });
       await refetch();
     },
-    [moveItemMutation, tenant, refetch],
+    [moveItemMutation, queryTenantId, refetch],
   );
 
   const deleteItem = useCallback(
     async (id: string) => {
       await deleteItemMutation({
-        variables: { id, tenantId: tenant },
+        variables: { id, tenantId: queryTenantId },
       });
       await refetch();
     },
-    [deleteItemMutation, tenant, refetch],
+    [deleteItemMutation, queryTenantId, refetch],
   );
 
   const value = useMemo(

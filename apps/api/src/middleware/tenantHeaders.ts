@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { isDevLocalOrigin } from '@luxgen/config';
 import { getRedisClient } from '../lib/redis';
 
 // Strip CR/LF to prevent HTTP header injection
@@ -68,7 +69,7 @@ export const tenantHeadersMiddleware = (req: Request, res: Response, next: NextF
 
     if (security.corsOrigins.length > 0) {
       const origin = req.get('Origin');
-      if (origin && security.corsOrigins.includes(origin)) {
+      if (origin && (security.corsOrigins.includes(origin) || isDevLocalOrigin(origin))) {
         res.set('Access-Control-Allow-Origin', origin);
       }
     }

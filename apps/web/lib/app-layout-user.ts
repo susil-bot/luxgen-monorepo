@@ -51,8 +51,17 @@ export function useAppTenantId(): string | null {
   const [tenantId, setTenantId] = useState<string | null>(null);
 
   useEffect(() => {
-    const stored = getStoredUser();
-    setTenantId(stored?.tenant.id ?? null);
+    const refresh = () => {
+      const stored = getStoredUser();
+      setTenantId(stored?.tenant.id ?? null);
+    };
+    refresh();
+    window.addEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+      window.removeEventListener('storage', refresh);
+    };
   }, []);
 
   return tenantId;

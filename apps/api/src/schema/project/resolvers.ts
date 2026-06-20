@@ -1,16 +1,9 @@
 import type { ProjectItemIteration, ProjectItemPriority, ProjectItemStatus } from '@luxgen/db';
 import { GraphQLError } from 'graphql';
 import type { GraphQLContext } from '../../context';
+import { resolveTenantIdForScope } from '../../graphql/tenantScope';
 import { requireFeature } from '../../middleware/planGate';
 import { projectItemService } from '../../services/projectItemService';
-
-function assertTenantScope(ctx: GraphQLContext, tenantId: string): void {
-  if (ctx.tenantId && ctx.tenantId !== tenantId) {
-    throw new GraphQLError('Token is not valid for this tenant', {
-      extensions: { code: 'FORBIDDEN' },
-    });
-  }
-}
 
 export const projectResolvers = {
   Query: {
@@ -34,8 +27,8 @@ export const projectResolvers = {
       ctx: GraphQLContext,
     ) => {
       await requireFeature(ctx, 'project');
-      assertTenantScope(ctx, tenantId);
-      const items = await projectItemService.listByTenant(tenantId, {
+      const scopedTenantId = resolveTenantIdForScope(ctx, tenantId);
+      const items = await projectItemService.listByTenant(scopedTenantId, {
         iteration: iteration as ProjectItemIteration | undefined,
         status: status as ProjectItemStatus | undefined,
         priority: priority as ProjectItemPriority | undefined,
@@ -46,8 +39,8 @@ export const projectResolvers = {
     },
     projectItem: async (_: unknown, { id, tenantId }: { id: string; tenantId: string }, ctx: GraphQLContext) => {
       await requireFeature(ctx, 'project');
-      assertTenantScope(ctx, tenantId);
-      const item = await projectItemService.getById(id, tenantId);
+      const scopedTenantId = resolveTenantIdForScope(ctx, tenantId);
+      const item = await projectItemService.getById(id, scopedTenantId);
       return item ? projectItemService.toGraphQL(item) : null;
     },
   },
@@ -58,9 +51,10 @@ export const projectResolvers = {
       ctx: GraphQLContext,
     ) => {
       await requireFeature(ctx, 'project');
-      assertTenantScope(ctx, input.tenantId);
+      const scopedTenantId = resolveTenantIdForScope(ctx, input.tenantId);
       const created = await projectItemService.create({
         ...input,
+        tenantId: scopedTenantId,
         createdById: ctx.user?._id?.toString() ?? ctx.user?.id,
       });
       return projectItemService.toGraphQL(created);
@@ -71,8 +65,8 @@ export const projectResolvers = {
       ctx: GraphQLContext,
     ) => {
       await requireFeature(ctx, 'project');
-      assertTenantScope(ctx, tenantId);
-      const updated = await projectItemService.update(id, tenantId, input);
+      const scopedTenantId = resolveTenantIdForScope(ctx, tenantId);
+      const updated = await projectItemService.update(id, scopedTenantId, input);
       return updated ? projectItemService.toGraphQL(updated) : null;
     },
     moveProjectItem: async (
@@ -81,8 +75,8 @@ export const projectResolvers = {
       ctx: GraphQLContext,
     ) => {
       await requireFeature(ctx, 'project');
-      assertTenantScope(ctx, tenantId);
-      const moved = await projectItemService.moveStatus(id, tenantId, status);
+      const scopedTenantId = resolveTenantIdForScope(ctx, tenantId);
+      const moved = await projectItemService.moveStatus(id, scopedTenantId, status);
       if (!moved) {
         throw new GraphQLError('Project item not found', { extensions: { code: 'NOT_FOUND' } });
       }
@@ -90,8 +84,8 @@ export const projectResolvers = {
     },
     deleteProjectItem: async (_: unknown, { id, tenantId }: { id: string; tenantId: string }, ctx: GraphQLContext) => {
       await requireFeature(ctx, 'project');
-      assertTenantScope(ctx, tenantId);
-      return projectItemService.delete(id, tenantId);
+      const scopedTenantId = resolveTenantIdForScope(ctx, tenantId);
+      return projectItemService.delete(id, scopedTenantId);
     },
   },
 };

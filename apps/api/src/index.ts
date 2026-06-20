@@ -1,4 +1,4 @@
-import { config } from 'dotenv';
+import './load-env';
 import { getApiUrl, getGraphqlUrl } from '@luxgen/config';
 import { createAppServer } from './app';
 import { connectDB } from './db/connect';
@@ -6,8 +6,6 @@ import { seedDatabaseIfEmpty } from './db/seed';
 import { ensureDemoStorefrontCourses } from './db/storefrontSeed';
 import { ensureDemoStorefrontBundles } from './services/storefrontService';
 import { startTimelineRedisBridge } from './lib/timelineRedisBridge';
-
-config();
 
 const REQUIRED_ENV = ['JWT_SECRET', 'MONGODB_URI'] as const;
 for (const key of REQUIRED_ENV) {
