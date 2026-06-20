@@ -45,6 +45,16 @@ const nextConfig = {
     }
     return config;
   },
+  async redirects() {
+    return [
+      { source: '/learn/products', destination: '/store/product', permanent: false },
+      { source: '/learn/products/:id', destination: '/store/product/:id', permanent: false },
+      { source: '/learn/collections', destination: '/store/collections', permanent: false },
+      { source: '/learn/collections/:id', destination: '/store/collections/:id', permanent: false },
+      { source: '/learn/bundles', destination: '/store/bundles', permanent: false },
+      { source: '/learn/bundles/:id', destination: '/store/bundles/:id', permanent: false },
+    ];
+  },
   async rewrites() {
     const resolvedApiUrl = apiUrl();
     return [

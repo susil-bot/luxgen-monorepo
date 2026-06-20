@@ -18,6 +18,9 @@ export function learnStoreServerProps(context: GetServerSidePropsContext) {
   };
 }
 
+/** Alias for GPT commerce store pages */
+export const storeServerProps = learnStoreServerProps;
+
 export interface LearnCourse {
   id: string;
   title: string;

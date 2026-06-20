@@ -51,6 +51,17 @@ export default function LearnCatalogPage({ tenantSubdomain }: Props) {
         <header className="mb-8">
           <h1 className="ios-large-title">Training catalog</h1>
           <p className="mt-1 text-secondary text-sm">Expert-led courses — sign in to enroll and start learning</p>
+          <div className="flex flex-wrap gap-3 mt-4 text-sm">
+            <Link href="/store/product" style={{ color: 'var(--color-blue)' }}>
+              GPT Store →
+            </Link>
+            <Link href="/store/collections" style={{ color: 'var(--color-blue)' }}>
+              Collections →
+            </Link>
+            <Link href="/store/bundles" style={{ color: 'var(--color-blue)' }}>
+              Bundles →
+            </Link>
+          </div>
         </header>
 
         {catalogLoading && <PageLoadingState label="Loading courses…" />}

@@ -31,8 +31,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    const stored = (localStorage.getItem('luxgen-theme') as Theme) || 'system';
-    setThemeState(stored);
+    const readStored = (): Theme => (localStorage.getItem('luxgen-theme') as Theme) || 'system';
 
     const resolve = (t: Theme): 'light' | 'dark' => {
       if (t === 'system') {
@@ -41,11 +40,13 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       return t;
     };
 
+    const stored = readStored();
+    setThemeState(stored);
     applyTheme(resolve(stored));
 
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
     const handler = () => {
-      if (stored === 'system') applyTheme(mq.matches ? 'dark' : 'light');
+      if (readStored() === 'system') applyTheme(mq.matches ? 'dark' : 'light');
     };
     mq.addEventListener('change', handler);
     return () => mq.removeEventListener('change', handler);

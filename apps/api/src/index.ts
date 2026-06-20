@@ -4,6 +4,7 @@ import { createAppServer } from './app';
 import { connectDB } from './db/connect';
 import { seedDatabaseIfEmpty } from './db/seed';
 import { ensureDemoStorefrontCourses } from './db/storefrontSeed';
+import { ensureDemoStorefrontBundles } from './services/storefrontService';
 import { startTimelineRedisBridge } from './lib/timelineRedisBridge';
 
 config();
@@ -27,6 +28,7 @@ async function startServer() {
     if (autoSeed) {
       await seedDatabaseIfEmpty();
       await ensureDemoStorefrontCourses();
+      await ensureDemoStorefrontBundles();
     }
 
     const httpServer = await createAppServer();

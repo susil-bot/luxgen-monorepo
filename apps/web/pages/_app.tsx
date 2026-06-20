@@ -4,6 +4,7 @@ import { ApolloProvider } from '@apollo/client';
 import { client } from '../graphql/client';
 import { GlobalProvider, NavigationProvider, AIStudioProvider, AIStudioPanelSlot } from '@luxgen/ui';
 import { ThemeProvider } from '../lib/theme';
+import { TenantThemeBridge } from '../components/theme/TenantThemeBridge';
 import { AuthGuard } from '../components/auth/AuthGuard';
 import { SessionMonitor } from '../components/auth/SessionMonitor';
 import { SessionSync } from '../components/auth/SessionSync';
@@ -33,6 +34,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <ApolloProvider client={client}>
       <ThemeProvider>
         <GlobalProvider initialTenant={pageProps.tenant || 'demo'}>
+          <TenantThemeBridge />
           <AIStudioProvider>
             <WebNavigationProvider>
               <SuperAdminTenantSwitchProvider>

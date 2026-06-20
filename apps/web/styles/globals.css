@@ -282,6 +282,9 @@ html.dark {
 }
 
 [data-tenant='idea-vibes'] {
+  --color-blue: #af52de;
+  --color-blue-hover: #8944ab;
+  --color-sidebar-item-active: rgba(175, 82, 222, 0.12);
   --lux-color-accent: #af52de;
   --lux-color-accent-tint: rgba(175, 82, 222, 0.14);
   --lux-color-accent-hover: rgba(175, 82, 222, 0.2);
@@ -292,6 +295,9 @@ html.dark {
 }
 
 html.dark [data-tenant='idea-vibes'] {
+  --color-blue: #bf5af2;
+  --color-blue-hover: #d080f5;
+  --color-sidebar-item-active: rgba(191, 90, 242, 0.2);
   --lux-color-accent: #bf5af2;
   --lux-color-accent-tint: rgba(191, 90, 242, 0.18);
   --lux-color-accent-hover: rgba(191, 90, 242, 0.26);
@@ -299,6 +305,16 @@ html.dark [data-tenant='idea-vibes'] {
   --lux-item-active-hover-bg: rgba(191, 90, 242, 0.26);
   --lux-subnav-border: rgba(191, 90, 242, 0.4);
   --lux-search-focus-border: rgba(191, 90, 242, 0.6);
+}
+
+[data-tenant='demo'] {
+  --color-blue: #007aff;
+  --color-blue-hover: #0066dd;
+}
+
+html.dark [data-tenant='demo'] {
+  --color-blue: #0a84ff;
+  --color-blue-hover: #409cff;
 }
 
 /* ── Component Utilities ──────────────────────────────────────────────────── */
@@ -871,6 +887,18 @@ html.dark [data-tenant='idea-vibes'] {
   }
   .text-accent {
     color: var(--color-blue) !important;
+  }
+
+  .text-red {
+    color: var(--color-red) !important;
+  }
+
+  .bg-primary {
+    background-color: var(--color-bg-primary) !important;
+  }
+
+  .border-separator {
+    border-color: var(--color-separator);
   }
 
   .bg-surface {
