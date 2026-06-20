@@ -18,8 +18,9 @@ import {
   type ProductStatus,
 } from '@luxgen/ui';
 import { createHandleUserAction } from '../../lib/user-actions';
-import { useLayoutUser, useAppTenantId } from '../../lib/app-layout-user';
+import { useLayoutUser } from '../../lib/app-layout-user';
 import { getStoredUser } from '../../lib/session';
+import { useTenantScope } from '../../lib/use-tenant-scope';
 import { CREATE_COURSE, UPDATE_COURSE } from '../../graphql/queries/courses';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
@@ -34,7 +35,7 @@ function CreateProductContent({ tenant }: Props) {
   const handleUserAction = createHandleUserAction(router);
   const headerProps = useAppLayoutHeader();
   const { showSuccess, showError } = useSnackbar();
-  const tenantId = useAppTenantId();
+  const { queryTenantId } = useTenantScope(tenant);
   const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
 
   const [title, setTitle] = useState('');
@@ -62,7 +63,7 @@ function CreateProductContent({ tenant }: Props) {
     }
 
     const instructorId = sessionUser?.id;
-    const tid = tenantId ?? sessionUser?.tenant.id ?? tenant;
+    const tid = queryTenantId;
     if (!instructorId || !tid) {
       showError('Sign in required');
       return;

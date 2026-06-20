@@ -8,8 +8,7 @@ import { GET_USERS } from '../../graphql/queries/users';
 import { GET_ENROLLMENT } from '../../graphql/queries/enrollment';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useCommercePageShell } from '../../lib/commerce-page-shell';
-import { useAppTenantId } from '../../lib/app-layout-user';
-import { getStoredUser } from '../../lib/session';
+import { useTenantScope } from '../../lib/use-tenant-scope';
 import { isLearnerRole } from '../../lib/user-roles';
 
 interface Props {
@@ -21,9 +20,7 @@ function CreateOrderContent({ tenant }: Props) {
   const client = useApolloClient();
   const { appLayoutProps } = useCommercePageShell();
   const { showSuccess, showError } = useSnackbar();
-  const tenantId = useAppTenantId();
-  const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
-  const queryTenantId = tenantId ?? sessionUser?.tenant.id ?? tenant;
+  const { queryTenantId } = useTenantScope(tenant);
 
   const lockStudentId = typeof router.query.customerId === 'string' ? router.query.customerId : undefined;
 

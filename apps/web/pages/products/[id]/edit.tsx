@@ -19,12 +19,12 @@ import {
 } from '@luxgen/ui';
 import { PageLoadingState } from '../../../components/common/PageStates';
 import { createHandleUserAction } from '../../../lib/user-actions';
-import { useLayoutUser, useAppTenantId } from '../../../lib/app-layout-user';
+import { useLayoutUser } from '../../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
 import { GET_COURSE, UPDATE_COURSE } from '../../../graphql/queries/courses';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useActivityTimeline } from '../../../lib/use-activity-timeline';
-import { getStoredUser } from '../../../lib/session';
+import { useTenantScope } from '../../../lib/use-tenant-scope';
 
 interface Props {
   tenant: string;
@@ -35,7 +35,7 @@ function EditProductContent({ tenant }: Props) {
   const { id } = router.query;
   const courseId = typeof id === 'string' ? id : '';
   const layoutUser = useLayoutUser();
-  const tenantId = useAppTenantId();
+  const { queryTenantId } = useTenantScope(tenant);
   const handleUserAction = createHandleUserAction(router);
   const headerProps = useAppLayoutHeader();
   const { showSuccess, showError } = useSnackbar();
@@ -54,8 +54,6 @@ function EditProductContent({ tenant }: Props) {
 
   const [updateCourse] = useMutation(UPDATE_COURSE);
 
-  const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
-  const queryTenantId = tenantId ?? sessionUser?.tenant.id ?? data?.course?.tenant?.id;
   const staffInitials =
     layoutUser?.name
       ?.split(' ')
@@ -129,7 +127,9 @@ function EditProductContent({ tenant }: Props) {
   return (
     <>
       <Head>
-        <title>{title || 'Edit product'} — {tenant}</title>
+        <title>
+          {title || 'Edit product'} — {tenant}
+        </title>
       </Head>
 
       <AppLayout

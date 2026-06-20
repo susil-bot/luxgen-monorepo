@@ -211,9 +211,9 @@ flowchart LR
 
 1. **Phase A — Consistency (in progress)**
    - `scopedTenantId()` + resolver coverage (automation, billing, course, user, enrollment, listing, marketplace, activity, project)
-   - Web: `useTenantScope()` hook — `apps/web/lib/use-tenant-scope.ts`
+   - Web: `useTenantScope()` hook — commerce (products, orders, automations), dashboard (`useDashboardTenant`)
    - [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md) — host-based `x-tenant` documented
-   - Remaining: migrate commerce pages to `useTenantScope`, dashboard subdomain helper
+   - Remaining: other admin/commerce pages (customers, organization)
 
 2. **Phase B — Superadmin impersonation (feature PR)**
    - `POST /api/admin/impersonate { subdomain }` → 15m token, `act` claim, audit event

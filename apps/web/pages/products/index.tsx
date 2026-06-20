@@ -14,8 +14,8 @@ import {
 import type { DataListTab, FilterChipData, SortOption } from '@luxgen/ui';
 import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
-import { useLayoutUser, useAppTenantId } from '../../lib/app-layout-user';
-import { getStoredUser } from '../../lib/session';
+import { useLayoutUser } from '../../lib/app-layout-user';
+import { useTenantScope } from '../../lib/use-tenant-scope';
 import { GET_COURSES, UPDATE_COURSE } from '../../graphql/queries/courses';
 import {
   courseToProductRow,
@@ -63,9 +63,7 @@ function ProductsPage({ tenant }: ProductsPageProps) {
   const router = useRouter();
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
-  const tenantId = useAppTenantId();
-  const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
-  const queryTenantId = tenantId ?? sessionUser?.tenant.id ?? tenant;
+  const { queryTenantId } = useTenantScope(tenant);
   const { showSuccess, showError } = useSnackbar();
   const headerProps = useAppLayoutHeader();
 
