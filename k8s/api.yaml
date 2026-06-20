@@ -29,11 +29,6 @@ spec:
             - secretRef:
                 name: luxgen-secrets
           env:
-            - name: MONGODB_URI
-              valueFrom:
-                secretKeyRef:
-                  name: luxgen-secrets
-                  key: MONGODB_URI
             - name: PORT
               value: '4000'
           resources:

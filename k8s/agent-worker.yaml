@@ -20,17 +20,17 @@ spec:
       containers:
         - name: agent-worker
           image: luxgen/agent-worker:latest
+          ports:
+            - containerPort: 9090
+              name: health
           envFrom:
             - configMapRef:
                 name: luxgen-config
             - secretRef:
                 name: luxgen-secrets
           env:
-            - name: MONGODB_URI
-              valueFrom:
-                secretKeyRef:
-                  name: luxgen-secrets
-                  key: MONGODB_URI
+            - name: HEALTH_PORT
+              value: '9090'
             - name: OLLAMA_HOST
               valueFrom:
                 configMapKeyRef:
@@ -44,40 +44,26 @@ spec:
               memory: '2Gi'
               cpu: '1000m'
           livenessProbe:
-            exec:
-              command:
-                - node
-                - -e
-                - "require('http').get('http://localhost:4000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"
+            httpGet:
+              path: /
+              port: 9090
             initialDelaySeconds: 30
-            periodSeconds: 15
-            timeoutSeconds: 10
+            periodSeconds: 30
+            timeoutSeconds: 5
             failureThreshold: 3
           readinessProbe:
-            exec:
-              command:
-                - node
-                - -e
-                - "require('http').get('http://localhost:4000/health', (r) => { process.exit(r.statusCode === 200 ? 0 : 1); })"
+            httpGet:
+              path: /
+              port: 9090
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /
+              port: 9090
             initialDelaySeconds: 10
             periodSeconds: 10
             timeoutSeconds: 5
-            failureThreshold: 3
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: agent-worker-service
-  namespace: luxgen
-  labels:
-    app: agent-worker
-    component: worker
-spec:
-  type: ClusterIP
-  ports:
-    - port: 4000
-      targetPort: 4000
-      protocol: TCP
-      name: http
-  selector:
-    app: agent-worker
+            failureThreshold: 12
