@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
 import { applyLearnTenantTheme } from '../../lib/learn-theme';
+import { useTheme } from '../../lib/theme';
 import { getStoredUser, isStoredSessionExpired } from '../../lib/session';
 import { buildLogoutRedirect } from '../../lib/auth-routes';
 import { StoreNav } from './StoreNav';
@@ -16,6 +17,7 @@ interface StoreLayoutProps {
 
 export function StoreLayout({ tenantSubdomain, tenantName, tenantSettings, children }: StoreLayoutProps) {
   const router = useRouter();
+  const { resolvedTheme } = useTheme();
   const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
@@ -23,8 +25,8 @@ export function StoreLayout({ tenantSubdomain, tenantName, tenantSettings, child
   }, []);
 
   useEffect(() => {
-    applyLearnTenantTheme(tenantSettings);
-  }, [tenantSettings]);
+    applyLearnTenantTheme(tenantSettings, tenantSubdomain);
+  }, [tenantSettings, tenantSubdomain, resolvedTheme]);
 
   const displayName = tenantName ?? tenantSubdomain;
 
