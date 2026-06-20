@@ -1,7 +1,7 @@
 # Developer Guide — LuxGen
 
 > **Audience:** Engineers onboarding to the monorepo.  
-> **Next steps:** [CODEBASE.md](../CODEBASE.md), [CODING_STANDARDS.md](../CODING_STANDARDS.md), [docs/INDEX.md](./INDEX.md)
+> **Next steps:** [technical/development/CODEBASE.md](./technical/development/CODEBASE.md), [technical/development/CODING_STANDARDS.md](./technical/development/CODING_STANDARDS.md), [docs/INDEX.md](./INDEX.md)
 
 ---
 
@@ -93,7 +93,7 @@ docs/           Architecture, API, business, phases
 skills/         Agent + developer task guides
 ```
 
-Full map: [CODEBASE.md](../CODEBASE.md)
+Full map: [technical/development/CODEBASE.md](./technical/development/CODEBASE.md)
 
 ---
 
@@ -192,11 +192,11 @@ make test             # If configured
 
 **Known issues:** Pre-existing TS errors in `@luxgen/ui`; web build may ignore them. Fix only when touching those files.
 
-Checklist before deploy: [CHECKLIST.md](../CHECKLIST.md)
+Checklist before deploy: [technical/operations/CHECKLIST.md](./technical/operations/CHECKLIST.md)
 
 Deploy to cloud (free tier): [deployment/FREE_TIER_CLOUD.md](./deployment/FREE_TIER_CLOUD.md)
 
-Repo layout: [REPO_STRUCTURE.md](../REPO_STRUCTURE.md)
+Repo layout: [technical/development/REPO_STRUCTURE.md](./technical/development/REPO_STRUCTURE.md)
 
 ---
 
@@ -211,7 +211,7 @@ Repo layout: [REPO_STRUCTURE.md](../REPO_STRUCTURE.md)
 | Billing                | [PHASE_9_BILLING.md](./PHASE_9_BILLING.md)                               |
 | Marketplace            | [PHASE_10_MARKETPLACE.md](./PHASE_10_MARKETPLACE.md)                     |
 | Listings               | [LISTING_SUBSCRIPTION_LIFECYCLE.md](./LISTING_SUBSCRIPTION_LIFECYCLE.md) |
-| Agent platform         | [AGENT_STUDIO.md](../AGENT_STUDIO.md)                                    |
+| Agent platform         | [technical/agent/AGENT_STUDIO.md](./technical/agent/AGENT_STUDIO.md)     |
 | AI agents working here | [AI_AGENT_GUIDE.md](./AI_AGENT_GUIDE.md)                                 |
 
 ---
@@ -219,5 +219,5 @@ Repo layout: [REPO_STRUCTURE.md](../REPO_STRUCTURE.md)
 ## 9. Getting help
 
 - **Troubleshooting:** [DEVELOPER_KNOWLEDGE_BASE.md](./DEVELOPER_KNOWLEDGE_BASE.md)
-- **Multi-tenant:** [MULTI_TENANT_ARCHITECTURE.md](../MULTI_TENANT_ARCHITECTURE.md)
+- **Multi-tenant:** [technical/architecture/MULTI_TENANT.md](./technical/architecture/MULTI_TENANT.md)
 - **Personas & pages:** [PERSONA_PAGES.md](./PERSONA_PAGES.md)

@@ -21,13 +21,13 @@ See [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md) for client setup (web + mobile)
 
 ### Web-only (Next.js `apps/web/pages/api/`)
 
-| Method | Path                | Purpose                                   |
-| ------ | ------------------- | ----------------------------------------- |
-| POST   | `/api/agent/chat`   | Agent SSE stream (Enterprise gate)        |
-| POST   | `/api/agent/commit` | Git commit staged session                 |
-| POST   | `/api/agent/merge`  | Merge agent branch                        |
-| GET    | `/api/agent/health` | Ollama status                             |
-| …      | `/api/agent/*`      | See [AGENT_STUDIO.md](../AGENT_STUDIO.md) |
+| Method | Path                | Purpose                                                                  |
+| ------ | ------------------- | ------------------------------------------------------------------------ |
+| POST   | `/api/agent/chat`   | Agent SSE stream (Enterprise gate)                                       |
+| POST   | `/api/agent/commit` | Git commit staged session                                                |
+| POST   | `/api/agent/merge`  | Merge agent branch                                                       |
+| GET    | `/api/agent/health` | Ollama status                                                            |
+| …      | `/api/agent/*`      | See [technical/agent/AGENT_STUDIO.md](./technical/agent/AGENT_STUDIO.md) |
 
 ---
 

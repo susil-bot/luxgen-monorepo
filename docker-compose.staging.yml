@@ -1,11 +1,8 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# LuxGen Staging Environment
+# LuxGen — Staging Docker stack
+# Docs: docs/deployment/INDEX.md · docs/deployment/ENV_PRODUCTION.md
 # Usage: docker compose -f docker-compose.staging.yml up -d
-#        docker compose -f docker-compose.staging.yml --env-file .env.staging up -d
-# ─────────────────────────────────────────────────────────────────────────────
 
 services:
-
   # ── MongoDB ─────────────────────────────────────────────────────────────────
   mongodb:
     image: mongo:7.0
@@ -20,7 +17,7 @@ services:
     networks:
       - luxgen-staging-network
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -35,7 +32,7 @@ services:
     networks:
       - luxgen-staging-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -49,7 +46,7 @@ services:
     container_name: luxgen-api-staging
     restart: unless-stopped
     ports:
-      - "4000:4000"
+      - '4000:4000'
     environment:
       NODE_ENV: staging
       PORT: 4000
@@ -58,7 +55,7 @@ services:
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:3000}
-      APOLLO_INTROSPECTION: "true"
+      APOLLO_INTROSPECTION: 'true'
     depends_on:
       mongodb:
         condition: service_healthy
@@ -67,7 +64,7 @@ services:
     networks:
       - luxgen-staging-network
     healthcheck:
-      test: ["CMD", "curl", "-fs", "http://localhost:4000/health"]
+      test: ['CMD', 'curl', '-fs', 'http://localhost:4000/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -86,7 +83,7 @@ services:
     container_name: luxgen-web-staging
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       NODE_ENV: staging
       API_URL: http://api:4000
@@ -98,7 +95,7 @@ services:
     networks:
       - luxgen-staging-network
     healthcheck:
-      test: ["CMD", "curl", "-fs", "http://localhost:3000/api/health"]
+      test: ['CMD', 'curl', '-fs', 'http://localhost:3000/api/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -110,13 +107,13 @@ services:
     container_name: luxgen-ollama-staging
     restart: unless-stopped
     ports:
-      - "11434:11434"
+      - '11434:11434'
     volumes:
       - ollama_staging_data:/root/.ollama
     networks:
       - luxgen-staging-network
     healthcheck:
-      test: ["CMD", "ollama", "list"]
+      test: ['CMD', 'ollama', 'list']
       interval: 10s
       timeout: 5s
       retries: 10
@@ -130,10 +127,10 @@ services:
         condition: service_healthy
     environment:
       - OLLAMA_HOST=http://ollama:11434
-    command: ["pull", "${OLLAMA_MODEL:-qwen2.5-coder:7b}"]
+    command: ['pull', '${OLLAMA_MODEL:-qwen2.5-coder:7b}']
     networks:
       - luxgen-staging-network
-    restart: "no"
+    restart: 'no'
 
 volumes:
   mongodb_staging_data:

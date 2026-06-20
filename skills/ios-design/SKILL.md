@@ -2,7 +2,7 @@
 
 **Domain:** Any UI work — new pages, components, colours, typography, spacing, dark mode.  
 **Primary reference:** `apps/web/styles/globals.css`  
-**Full spec:** `CODEBASE.md` § iOS Design System
+**Full spec:** [CODEBASE.md](../../docs/technical/development/CODEBASE.md) § iOS Design System
 
 ---
 
@@ -54,21 +54,21 @@ var(--transition-spring) /* 400ms cubic spring */
 
 ## Utility Classes (all in globals.css)
 
-| Class | Use |
-|---|---|
-| `.ios-large-title` | 34px/700 section heading |
-| `.ios-card` | card surface with `--radius-xl` and shadow |
-| `.ios-btn-primary` | filled blue pill button |
-| `.ios-btn-secondary` | blue-tint outline button |
-| `.ios-btn-plain` | text-only blue link-button |
-| `.ios-avatar` + `.ios-avatar-{sm/md/lg/xl}` | circular avatar |
-| `.ios-metric-tile` | KPI value+label tile |
-| `.ios-empty-state` | centered empty placeholder |
-| `.ios-spinner` | loading spinner |
-| `.ios-form-group` | label+input pair |
-| `.badge` | neutral pill label |
-| `.badge-blue/green/red/orange` | coloured pill |
-| `.surface` | frosted glass card |
+| Class                                       | Use                                        |
+| ------------------------------------------- | ------------------------------------------ |
+| `.ios-large-title`                          | 34px/700 section heading                   |
+| `.ios-card`                                 | card surface with `--radius-xl` and shadow |
+| `.ios-btn-primary`                          | filled blue pill button                    |
+| `.ios-btn-secondary`                        | blue-tint outline button                   |
+| `.ios-btn-plain`                            | text-only blue link-button                 |
+| `.ios-avatar` + `.ios-avatar-{sm/md/lg/xl}` | circular avatar                            |
+| `.ios-metric-tile`                          | KPI value+label tile                       |
+| `.ios-empty-state`                          | centered empty placeholder                 |
+| `.ios-spinner`                              | loading spinner                            |
+| `.ios-form-group`                           | label+input pair                           |
+| `.badge`                                    | neutral pill label                         |
+| `.badge-blue/green/red/orange`              | coloured pill                              |
+| `.surface`                                  | frosted glass card                         |
 
 ---
 
@@ -92,13 +92,17 @@ import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo } 
 export default function MyPage({ tenant }: { tenant: string }) {
   return (
     <>
-      <Head><title>Page Title — {tenant}</title></Head>
+      <Head>
+        <title>Page Title — {tenant}</title>
+      </Head>
       <AppLayout
         sidebarSections={getDefaultSidebarSections()}
         user={getDefaultUser()}
         logo={getDefaultLogo()}
         onUserAction={() => {}}
-        showSearch showNotifications notificationCount={0}
+        showSearch
+        showNotifications
+        notificationCount={0}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
           <h1 className="ios-large-title">Page Title</h1>
@@ -110,7 +114,7 @@ export default function MyPage({ tenant }: { tenant: string }) {
 }
 
 export const getServerSideProps = async (ctx: any) => ({
-  props: { tenant: ctx.query.tenant || 'demo' }
+  props: { tenant: ctx.query.tenant || 'demo' },
 });
 ```
 

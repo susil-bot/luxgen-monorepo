@@ -1,6 +1,6 @@
-# Render Blueprint — LuxGen monorepo
-# Docs: docs/deployment/FREE_TIER_CLOUD.md
-# Deploy: Render Dashboard → New Blueprint → connect repo
+# LuxGen — Render Blueprint (API + agent worker)
+# Docs: docs/deployment/FREE_TIER_CLOUD.md · deploy/README.md
+# Usage: Render Dashboard → New Blueprint → connect repo
 
 services:
   - type: web
@@ -15,11 +15,11 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: "4000"
+        value: '4000'
       - key: APOLLO_INTROSPECTION
-        value: "false"
+        value: 'false'
       - key: BILLING_DEV_MODE
-        value: "false"
+        value: 'false'
       - key: LOG_LEVEL
         value: info
       - key: EMAIL_PROVIDER

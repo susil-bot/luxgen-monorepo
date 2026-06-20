@@ -1,5 +1,7 @@
 # LuxGen Kubernetes Infrastructure
 
+> **Parent:** [Technical docs](../docs/technical/README.md) · **Related:** [deployment/DOCKER.md](../docs/deployment/DOCKER.md)
+
 This directory contains Kubernetes manifests for deploying the LuxGen monorepo to a Kubernetes cluster.
 
 ## Architecture Overview

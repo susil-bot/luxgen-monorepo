@@ -2,7 +2,7 @@
 
 > **Status:** Architecture specification (v1)  
 > **Audience:** Engineers implementing Agent Studio phases 3–6  
-> **Related:** `AGENT_STUDIO.md` (current implementation), `docs/AI_STUDIO_TIMELINE.md` (task backlog)
+> **Related:** [technical/agent/AGENT_STUDIO.md](./technical/agent/AGENT_STUDIO.md) (current implementation), [AI_STUDIO_TIMELINE.md](./AI_STUDIO_TIMELINE.md) (task backlog)
 
 ---
 
@@ -23,18 +23,18 @@ Agent Studio today is a **local, interactive coding assistant** with a JSON stag
 
 ## 2. Gap Analysis — Current vs Target
 
-| Capability | Current (Phase 1–2) | Target |
-|---|---|---|
-| Change isolation | JSON snapshot in `.agent-staging/` | Git worktree + feature branch per task |
-| Apply mechanism | `fs.writeFileSync` to working tree | Commit to branch → PR → merge |
-| Approval | Single "Apply All" button | Per-file + bulk approve → commit → optional PR merge |
-| Validation | None before apply | Lint, typecheck, tests on changed packages |
-| Audit trail | Session JSON only | Immutable task log in DB + Git commits |
-| Headless execution | UI-only (`/agent`) | API + worker for automations & CI |
-| Multi-user | File-level last-write-wins | Branch-per-task, merge conflicts at PR |
-| Automation | Not connected | First-class trigger + action in Automations |
-| Model provider | Ollama only | Pluggable `ModelProvider` interface |
-| Service boundary | Logic in `apps/web/lib/agent.ts` | `@luxgen/agent` package + thin API routes |
+| Capability         | Current (Phase 1–2)                | Target                                               |
+| ------------------ | ---------------------------------- | ---------------------------------------------------- |
+| Change isolation   | JSON snapshot in `.agent-staging/` | Git worktree + feature branch per task               |
+| Apply mechanism    | `fs.writeFileSync` to working tree | Commit to branch → PR → merge                        |
+| Approval           | Single "Apply All" button          | Per-file + bulk approve → commit → optional PR merge |
+| Validation         | None before apply                  | Lint, typecheck, tests on changed packages           |
+| Audit trail        | Session JSON only                  | Immutable task log in DB + Git commits               |
+| Headless execution | UI-only (`/agent`)                 | API + worker for automations & CI                    |
+| Multi-user         | File-level last-write-wins         | Branch-per-task, merge conflicts at PR               |
+| Automation         | Not connected                      | First-class trigger + action in Automations          |
+| Model provider     | Ollama only                        | Pluggable `ModelProvider` interface                  |
+| Service boundary   | Logic in `apps/web/lib/agent.ts`   | `@luxgen/agent` package + thin API routes            |
 
 ---
 
@@ -186,15 +186,15 @@ Agent Studio today is a **local, interactive coding assistant** with a JSON stag
 
 Direct filesystem apply (`applySession`) is acceptable for **local dev mode only**. Production path:
 
-| Step | Mechanism |
-|---|---|
-| Isolation | `git worktree add .agent-worktrees/{taskId} -b agent/task-{id}` |
-| Agent writes | Tools operate inside worktree directory |
-| Staging | In-memory + optional JSON mirror for UI speed |
-| Approve | `git add -A && git commit -m "..."` inside worktree |
-| Review | Push branch; open PR with auto-generated description |
-| Merge | Squash merge (single clean commit on target) |
-| Cleanup | `git worktree remove` + branch delete after merge |
+| Step         | Mechanism                                                       |
+| ------------ | --------------------------------------------------------------- |
+| Isolation    | `git worktree add .agent-worktrees/{taskId} -b agent/task-{id}` |
+| Agent writes | Tools operate inside worktree directory                         |
+| Staging      | In-memory + optional JSON mirror for UI speed                   |
+| Approve      | `git add -A && git commit -m "..."` inside worktree             |
+| Review       | Push branch; open PR with auto-generated description            |
+| Merge        | Squash merge (single clean commit on target)                    |
+| Cleanup      | `git worktree remove` + branch delete after merge               |
 
 **Why worktrees over clones:** Shared object database, fast creation, industry-standard for parallel agent sessions.
 
@@ -211,9 +211,9 @@ interface ValidationResult {
   passed: boolean;
   checks: Array<{
     name: 'lint' | 'typecheck' | 'test' | 'security';
-    scope: string;       // e.g. "apps/web", "packages/ui"
+    scope: string; // e.g. "apps/web", "packages/ui"
     passed: boolean;
-    output: string;      // truncated log
+    output: string; // truncated log
     durationMs: number;
   }>;
 }
@@ -221,19 +221,19 @@ interface ValidationResult {
 
 **Scoped execution** — only run checks for packages touched by the changeset:
 
-| Changed path prefix | Checks |
-|---|---|
-| `apps/web/` | `next lint`, `tsc --noEmit` |
-| `packages/ui/` | `tsc --noEmit` (ui package) |
-| `apps/api/` | `tsc --noEmit`, `jest` (api tests) |
+| Changed path prefix | Checks                             |
+| ------------------- | ---------------------------------- |
+| `apps/web/`         | `next lint`, `tsc --noEmit`        |
+| `packages/ui/`      | `tsc --noEmit` (ui package)        |
+| `apps/api/`         | `tsc --noEmit`, `jest` (api tests) |
 
 **Gate policy:**
 
-| Environment | Required to commit | Required to auto-merge |
-|---|---|---|
-| Local dev | None (warn only) | N/A |
-| Staging | lint + typecheck | + tests |
-| Production | All checks + human PR approval | All checks + 1 human reviewer |
+| Environment | Required to commit             | Required to auto-merge        |
+| ----------- | ------------------------------ | ----------------------------- |
+| Local dev   | None (warn only)               | N/A                           |
+| Staging     | lint + typecheck               | + tests                       |
+| Production  | All checks + human PR approval | All checks + 1 human reviewer |
 
 Add tool: `run_validation({ scope })` so the agent can self-correct before finishing.
 
@@ -288,6 +288,7 @@ packages/agent/
 ```
 
 **apps/web** retains only:
+
 - React components (`AgentChat`, `AgentTransparency`, new `AgentTaskPanel`, `ValidationReport`)
 - Thin API routes that call `@luxgen/agent`
 - SSE transport wiring
@@ -298,20 +299,21 @@ packages/agent/
 
 Replace session-centric endpoints with task-centric ones. Keep backward compat aliases during migration.
 
-| Method | Path | Purpose |
-|---|---|---|
-| `POST` | `/api/agent/tasks` | Create task `{ prompt, mode: 'interactive' \| 'headless', tenantId, userId }` |
-| `GET` | `/api/agent/tasks/:id` | Task status, changeset summary, validation result |
-| `POST` | `/api/agent/tasks/:id/run` | Start/resume agent loop (returns SSE stream) |
-| `POST` | `/api/agent/tasks/:id/cancel` | Cancel in-flight run |
-| `GET` | `/api/agent/tasks/:id/changes` | Full changeset with diffs |
-| `POST` | `/api/agent/tasks/:id/validate` | Re-run validation pipeline |
-| `POST` | `/api/agent/tasks/:id/approve` | `{ filePaths?: string[] }` — commit approved files |
-| `POST` | `/api/agent/tasks/:id/merge` | Merge branch to target |
-| `DELETE` | `/api/agent/tasks/:id` | Discard task, remove worktree |
-| `GET` | `/api/agent/health` | Model provider status (unchanged) |
+| Method   | Path                            | Purpose                                                                       |
+| -------- | ------------------------------- | ----------------------------------------------------------------------------- |
+| `POST`   | `/api/agent/tasks`              | Create task `{ prompt, mode: 'interactive' \| 'headless', tenantId, userId }` |
+| `GET`    | `/api/agent/tasks/:id`          | Task status, changeset summary, validation result                             |
+| `POST`   | `/api/agent/tasks/:id/run`      | Start/resume agent loop (returns SSE stream)                                  |
+| `POST`   | `/api/agent/tasks/:id/cancel`   | Cancel in-flight run                                                          |
+| `GET`    | `/api/agent/tasks/:id/changes`  | Full changeset with diffs                                                     |
+| `POST`   | `/api/agent/tasks/:id/validate` | Re-run validation pipeline                                                    |
+| `POST`   | `/api/agent/tasks/:id/approve`  | `{ filePaths?: string[] }` — commit approved files                            |
+| `POST`   | `/api/agent/tasks/:id/merge`    | Merge branch to target                                                        |
+| `DELETE` | `/api/agent/tasks/:id`          | Discard task, remove worktree                                                 |
+| `GET`    | `/api/agent/health`             | Model provider status (unchanged)                                             |
 
 **Legacy mapping:**
+
 - `sessionId` → `taskId`
 - `POST /api/agent/chat` → `POST /api/agent/tasks/:id/run`
 - `POST /api/agent/apply` → `POST /api/agent/tasks/:id/approve`
@@ -331,8 +333,8 @@ interface AgentTask {
   status: TaskStatus;
   mode: 'interactive' | 'headless' | 'automation';
   prompt: string;
-  skill?: string;                    // e.g. "ios-design", "sidebar"
-  automationId?: string;             // if triggered by automation
+  skill?: string; // e.g. "ios-design", "sidebar"
+  automationId?: string; // if triggered by automation
   git: {
     worktreePath: string;
     branch: string;
@@ -378,20 +380,20 @@ LuxGen Automations (`/automations`) is currently UI mock data. Agent Studio inte
 
 ### 11.1 New Automation Triggers
 
-| Trigger | Fires when |
-|---|---|
-| `code_change_staged` | Agent task reaches STAGED with ≥1 file |
-| `code_change_committed` | Agent branch committed |
-| `code_change_merged` | Agent branch merged to target |
-| `code_change_failed` | Task FAILED or validation failed |
+| Trigger                 | Fires when                             |
+| ----------------------- | -------------------------------------- |
+| `code_change_staged`    | Agent task reaches STAGED with ≥1 file |
+| `code_change_committed` | Agent branch committed                 |
+| `code_change_merged`    | Agent branch merged to target          |
+| `code_change_failed`    | Task FAILED or validation failed       |
 
 ### 11.2 New Automation Actions
 
-| Action | Config | Behavior |
-|---|---|---|
-| `run_agent_task` | `{ prompt, skill?, autoApprove?: boolean, autoMerge?: boolean }` | Enqueue headless agent task |
-| `notify_review_required` | `{ channel: 'email' \| 'slack', recipients }` | Alert when task awaits review |
-| `create_automation` | `{ name, trigger, actions }` | Agent tool to scaffold automation JSON (future) |
+| Action                   | Config                                                           | Behavior                                        |
+| ------------------------ | ---------------------------------------------------------------- | ----------------------------------------------- |
+| `run_agent_task`         | `{ prompt, skill?, autoApprove?: boolean, autoMerge?: boolean }` | Enqueue headless agent task                     |
+| `notify_review_required` | `{ channel: 'email' \| 'slack', recipients }`                    | Alert when task awaits review                   |
+| `create_automation`      | `{ name, trigger, actions }`                                     | Agent tool to scaffold automation JSON (future) |
 
 ### 11.3 Agent → Automation Authoring
 
@@ -428,27 +430,27 @@ Add tool `read_automation_schema` + extend system prompt with `docs/PERSONA_PAGE
 
 ### 12.2 New Components
 
-| Component | Responsibility |
-|---|---|
-| `AgentTaskHeader` | Task id, branch, status badge, git link |
-| `ValidationReport` | Check results, expandable logs |
-| `ChangeSetPanel` | Per-file checkbox, diff, individual approve |
-| `MergeControls` | Commit, PR, merge with confirmation |
-| `AutomationLink` | Show if task was automation-triggered |
+| Component          | Responsibility                              |
+| ------------------ | ------------------------------------------- |
+| `AgentTaskHeader`  | Task id, branch, status badge, git link     |
+| `ValidationReport` | Check results, expandable logs              |
+| `ChangeSetPanel`   | Per-file checkbox, diff, individual approve |
+| `MergeControls`    | Commit, PR, merge with confirmation         |
+| `AutomationLink`   | Show if task was automation-triggered       |
 
 ---
 
 ## 13. Security & Multi-Tenancy
 
-| Control | Implementation |
-|---|---|
-| Path allowlist | Keep `ALLOWED_PATHS` — extend with tenant-scoped roots if needed |
-| Sensitive files | Keep `SENSITIVE_FILE_PATTERNS` |
-| Auth | Require JWT on all `/api/agent/tasks/*`; bind task to `userId` + `tenantId` |
-| Rate limits | Per-user: 10 tasks/hour, 30 tool calls/message (existing limits) |
-| Auto-merge | Disabled by default; tenant policy flag `agent.autoMergeAllowed` |
-| Git credentials | Server-side only; never exposed to browser |
-| Audit | All approve/merge actions logged with user attribution |
+| Control         | Implementation                                                              |
+| --------------- | --------------------------------------------------------------------------- |
+| Path allowlist  | Keep `ALLOWED_PATHS` — extend with tenant-scoped roots if needed            |
+| Sensitive files | Keep `SENSITIVE_FILE_PATTERNS`                                              |
+| Auth            | Require JWT on all `/api/agent/tasks/*`; bind task to `userId` + `tenantId` |
+| Rate limits     | Per-user: 10 tasks/hour, 30 tool calls/message (existing limits)            |
+| Auto-merge      | Disabled by default; tenant policy flag `agent.autoMergeAllowed`            |
+| Git credentials | Server-side only; never exposed to browser                                  |
+| Audit           | All approve/merge actions logged with user attribution                      |
 
 ---
 
@@ -467,11 +469,11 @@ interface ModelProvider {
 }
 ```
 
-| Provider | Use case |
-|---|---|
-| `OllamaProvider` | Local dev, air-gapped, no API cost |
-| `OpenAIProvider` | Production quality, cloud |
-| `AnthropicProvider` | Long-context planning tasks |
+| Provider            | Use case                           |
+| ------------------- | ---------------------------------- |
+| `OllamaProvider`    | Local dev, air-gapped, no API cost |
+| `OpenAIProvider`    | Production quality, cloud          |
+| `AnthropicProvider` | Long-context planning tasks        |
 
 Configuration via env: `AGENT_MODEL_PROVIDER=ollama|openai|anthropic`.
 
@@ -479,12 +481,12 @@ Configuration via env: `AGENT_MODEL_PROVIDER=ollama|openai|anthropic`.
 
 ## 15. Deployment Modes
 
-| Mode | Staging | Git | Validation | Storage |
-|---|---|---|---|---|
-| `local` | JSON files | Optional | Warn only | Filesystem |
-| `dev` | Worktree | Branch, no push | lint + typecheck | MongoDB |
-| `staging` | Worktree | Branch + PR | Full pipeline | MongoDB + Redis |
-| `production` | Worktree | PR required, no direct merge | Full + security scan | MongoDB + Redis |
+| Mode         | Staging    | Git                          | Validation           | Storage         |
+| ------------ | ---------- | ---------------------------- | -------------------- | --------------- |
+| `local`      | JSON files | Optional                     | Warn only            | Filesystem      |
+| `dev`        | Worktree   | Branch, no push              | lint + typecheck     | MongoDB         |
+| `staging`    | Worktree   | Branch + PR                  | Full pipeline        | MongoDB + Redis |
+| `production` | Worktree   | PR required, no direct merge | Full + security scan | MongoDB + Redis |
 
 Env: `AGENT_DEPLOYMENT_MODE=local|dev|staging|production`
 
@@ -493,7 +495,8 @@ Env: `AGENT_DEPLOYMENT_MODE=local|dev|staging|production`
 ## 16. Implementation Roadmap
 
 ### Phase 3 — UX & Transparency (4–6 weeks)
-*Aligns with `docs/AI_STUDIO_TIMELINE.md` Phase 3*
+
+_Aligns with `docs/AI_STUDIO_TIMELINE.md` Phase 3_
 
 - [ ] Per-file approve/discard
 - [ ] Undo last apply (with backup)
@@ -502,12 +505,14 @@ Env: `AGENT_DEPLOYMENT_MODE=local|dev|staging|production`
 - [ ] Validation report UI (manual trigger first)
 
 ### Phase 4 — Extract `@luxgen/agent` (3–4 weeks)
+
 - [ ] Create `packages/agent` with orchestrator, changeset, tools
 - [ ] Migrate `apps/web/lib/agent.ts` → package
 - [ ] Thin API routes
 - [ ] Unit tests for state machine, diff, conflict detection
 
 ### Phase 5 — Git Worktree Pipeline (4–6 weeks)
+
 - [ ] `GitService` with worktree lifecycle
 - [ ] Approve → commit flow (replace direct apply in non-local modes)
 - [ ] PR creation via `gh` CLI
@@ -515,6 +520,7 @@ Env: `AGENT_DEPLOYMENT_MODE=local|dev|staging|production`
 - [ ] Conflict detection against base branch
 
 ### Phase 6 — Validation & Production (4–6 weeks)
+
 - [ ] `ValidationPipeline` with scoped checks
 - [ ] MongoDB task persistence + audit log
 - [ ] Auth on agent endpoints
@@ -522,6 +528,7 @@ Env: `AGENT_DEPLOYMENT_MODE=local|dev|staging|production`
 - [ ] `apps/agent-worker` (optional separate process)
 
 ### Phase 7 — Automations Bridge ✅ (shipped)
+
 - [x] GraphQL automation schema + MongoDB models (`packages/db`, `apps/api`)
 - [x] `AutomationBridge` + `run_agent_task` action (`packages/agent/src/automation/`)
 - [x] Agent lifecycle events → automations (staged, commit/merge/failed)
@@ -536,14 +543,14 @@ Env: `AGENT_DEPLOYMENT_MODE=local|dev|staging|production`
 
 ## 17. Comparison with Industry Patterns
 
-| Pattern | Source | LuxGen adoption |
-|---|---|---|
-| Git worktree isolation | Augment Code, Cursor, 2026 agent guides | Phase 5 — one worktree per `AgentTask` |
-| Maker–Checker loop | DEV Community git-native orchestration | Phase 6 — optional verifier pass before human review |
-| Squash merge to main | Standard PR hygiene | Default merge strategy |
-| CI gates before merge | GitHub branch protection | `ValidationPipeline` + tenant policy |
-| Staging before apply | Current Agent Studio | Retained — core invariant |
-| Headless agent workers | Augment, Devin-style workspaces | Phase 6 — Redis queue + worker |
+| Pattern                | Source                                  | LuxGen adoption                                      |
+| ---------------------- | --------------------------------------- | ---------------------------------------------------- |
+| Git worktree isolation | Augment Code, Cursor, 2026 agent guides | Phase 5 — one worktree per `AgentTask`               |
+| Maker–Checker loop     | DEV Community git-native orchestration  | Phase 6 — optional verifier pass before human review |
+| Squash merge to main   | Standard PR hygiene                     | Default merge strategy                               |
+| CI gates before merge  | GitHub branch protection                | `ValidationPipeline` + tenant policy                 |
+| Staging before apply   | Current Agent Studio                    | Retained — core invariant                            |
+| Headless agent workers | Augment, Devin-style workspaces         | Phase 6 — Redis queue + worker                       |
 
 ---
 
@@ -560,51 +567,51 @@ Existing `/agent` page, sidebar link, and Ollama setup continue working througho
 
 ## 19. Open Decisions
 
-| Decision | Options | Recommendation |
-|---|---|---|
-| PR host | GitHub CLI vs GitLab API vs manual | GitHub CLI first (`gh pr create`) |
-| Verifier agent | Single model vs dedicated checker model | Phase 6 optional; same model with checker prompt |
-| Auto-merge policy | Tenant flag vs role-based | Tenant flag + `admin` role only |
-| Worker deployment | In Next.js process vs separate container | Separate container at staging+ scale |
-| Diff engine | Custom LCS vs `diff` npm package | Keep custom for zero deps; swap if refactor cost is low |
+| Decision          | Options                                  | Recommendation                                          |
+| ----------------- | ---------------------------------------- | ------------------------------------------------------- |
+| PR host           | GitHub CLI vs GitLab API vs manual       | GitHub CLI first (`gh pr create`)                       |
+| Verifier agent    | Single model vs dedicated checker model  | Phase 6 optional; same model with checker prompt        |
+| Auto-merge policy | Tenant flag vs role-based                | Tenant flag + `admin` role only                         |
+| Worker deployment | In Next.js process vs separate container | Separate container at staging+ scale                    |
+| Diff engine       | Custom LCS vs `diff` npm package         | Keep custom for zero deps; swap if refactor cost is low |
 
 ---
 
 ## 20. Success Metrics
 
-| Metric | Target |
-|---|---|
-| Time from prompt to staged changes | < 2 min (7B local), < 30s (cloud) |
-| Validation pass rate before human review | > 70% |
-| Rollback success (undo/branch abandon) | 100% |
-| Automation-triggered tasks completing without human | > 50% (simple tasks only) |
-| Zero unapproved writes to main branch | 100% (in git modes) |
+| Metric                                              | Target                            |
+| --------------------------------------------------- | --------------------------------- |
+| Time from prompt to staged changes                  | < 2 min (7B local), < 30s (cloud) |
+| Validation pass rate before human review            | > 70%                             |
+| Rollback success (undo/branch abandon)              | 100%                              |
+| Automation-triggered tasks completing without human | > 50% (simple tasks only)         |
+| Zero unapproved writes to main branch               | 100% (in git modes)               |
 
 ---
 
 ## Appendix A — Current File Map → Target
 
-| Current | Target |
-|---|---|
-| `apps/web/lib/agent.ts` | `packages/agent/src/changeset/` + `prompts/` + `tools/` |
-| `apps/web/pages/api/agent/chat.ts` | `packages/agent/src/core/orchestrator.ts` + thin route |
-| `apps/web/pages/api/agent/apply.ts` | `packages/agent/src/git/commit.ts` + route |
-| `apps/web/pages/api/agent/stage.ts` | `packages/agent/src/changeset/stage.ts` + route |
-| `apps/web/components/agent/AgentTransparency.tsx` | UI only; diff → `packages/agent/src/changeset/diff.ts` |
-| `.agent-staging/` | Dev fallback; prod uses worktree + MongoDB |
+| Current                                           | Target                                                  |
+| ------------------------------------------------- | ------------------------------------------------------- |
+| `apps/web/lib/agent.ts`                           | `packages/agent/src/changeset/` + `prompts/` + `tools/` |
+| `apps/web/pages/api/agent/chat.ts`                | `packages/agent/src/core/orchestrator.ts` + thin route  |
+| `apps/web/pages/api/agent/apply.ts`               | `packages/agent/src/git/commit.ts` + route              |
+| `apps/web/pages/api/agent/stage.ts`               | `packages/agent/src/changeset/stage.ts` + route         |
+| `apps/web/components/agent/AgentTransparency.tsx` | UI only; diff → `packages/agent/src/changeset/diff.ts`  |
+| `.agent-staging/`                                 | Dev fallback; prod uses worktree + MongoDB              |
 
 ---
 
 ## Appendix B — Environment Variables (Target)
 
-| Variable | Default | Purpose |
-|---|---|---|
-| `AGENT_DEPLOYMENT_MODE` | `local` | local \| dev \| staging \| production |
-| `AGENT_MODEL_PROVIDER` | `ollama` | ollama \| openai \| anthropic |
-| `OLLAMA_HOST` | `http://localhost:11434` | Ollama URL |
-| `OLLAMA_MODEL` | `qwen2.5-coder:7b` | Model name |
-| `AGENT_GIT_ENABLED` | `false` | Enable worktree pipeline |
-| `AGENT_GIT_BASE_BRANCH` | `main` | Branch to merge into |
-| `AGENT_AUTO_MERGE` | `false` | Allow automation auto-merge |
-| `AGENT_MONGODB_URI` | — | Task persistence (staging+) |
-| `AGENT_REDIS_URL` | — | Job queue (staging+) |
+| Variable                | Default                  | Purpose                               |
+| ----------------------- | ------------------------ | ------------------------------------- |
+| `AGENT_DEPLOYMENT_MODE` | `local`                  | local \| dev \| staging \| production |
+| `AGENT_MODEL_PROVIDER`  | `ollama`                 | ollama \| openai \| anthropic         |
+| `OLLAMA_HOST`           | `http://localhost:11434` | Ollama URL                            |
+| `OLLAMA_MODEL`          | `qwen2.5-coder:7b`       | Model name                            |
+| `AGENT_GIT_ENABLED`     | `false`                  | Enable worktree pipeline              |
+| `AGENT_GIT_BASE_BRANCH` | `main`                   | Branch to merge into                  |
+| `AGENT_AUTO_MERGE`      | `false`                  | Allow automation auto-merge           |
+| `AGENT_MONGODB_URI`     | —                        | Task persistence (staging+)           |
+| `AGENT_REDIS_URL`       | —                        | Job queue (staging+)                  |

@@ -1,19 +1,25 @@
 # LuxGen Documentation Index
 
-> **Start here.** This index routes developers, product stakeholders, and AI agents to the right document.
+> **Start here.** Routes developers, product stakeholders, and AI agents to the right document.
+
+| Hub                                                                   | Purpose                                                         |
+| --------------------------------------------------------------------- | --------------------------------------------------------------- |
+| [README.md](./README.md)                                              | Docs landing page                                               |
+| [technical/README.md](./technical/README.md)                          | **Hierarchical technical index** (architecture, dev, ops, YAML) |
+| [\_meta/DOCUMENTATION_STANDARD.md](./_meta/DOCUMENTATION_STANDARD.md) | Markdown & YAML conventions                                     |
 
 ---
 
 ## By audience
 
-| I am…                         | Start with                                                       | Then read                                                                                                        |
-| ----------------------------- | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **New developer**             | [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md)                       | [CODEBASE.md](../CODEBASE.md), [CODING_STANDARDS.md](../CODING_STANDARDS.md)                                     |
-| **Product / business**        | [BUSINESS_STRATEGY_2026.md](./BUSINESS_STRATEGY_2026.md)         | [BUSINESS_TECH_TRANSLATION.md](./BUSINESS_TECH_TRANSLATION.md), [FEATURE_CATALOG.md](./FEATURE_CATALOG.md)       |
-| **AI coding agent**           | [../AGENTS.md](../AGENTS.md)                                     | [AI_AGENT_GUIDE.md](./AI_AGENT_GUIDE.md), [CODEBASE.md](../CODEBASE.md), relevant `skills/*/SKILL.md`            |
-| **Architect / tech lead**     | [ARCHITECTURE.md](./ARCHITECTURE.md)                             | [SECURITY_HARDENING.md](./SECURITY_HARDENING.md), [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md), phase docs below |
-| **Deploying to cloud**        | [deployment/FREE_TIER_CLOUD.md](./deployment/FREE_TIER_CLOUD.md) | [deployment/INDEX.md](./deployment/INDEX.md), [../deploy/README.md](../deploy/README.md)                         |
-| **API consumer (web/mobile)** | [API_REFERENCE.md](./API_REFERENCE.md)                           | [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md), [auth-api.md](./auth-api.md)                                       |
+| I am…                         | Start with                                                                     | Then read                                                                                                                                                                                                      |
+| ----------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **New developer**             | [technical/development/QUICK_START.md](./technical/development/QUICK_START.md) | [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md), [technical/development/CODEBASE.md](./technical/development/CODEBASE.md), [technical/development/CODING_STANDARDS.md](./technical/development/CODING_STANDARDS.md) |
+| **Product / business**        | [BUSINESS_STRATEGY_2026.md](./BUSINESS_STRATEGY_2026.md)                       | [BUSINESS_TECH_TRANSLATION.md](./BUSINESS_TECH_TRANSLATION.md), [FEATURE_CATALOG.md](./FEATURE_CATALOG.md)                                                                                                     |
+| **AI coding agent**           | [../AGENTS.md](../AGENTS.md)                                                   | [AI_AGENT_GUIDE.md](./AI_AGENT_GUIDE.md), [technical/development/CODEBASE.md](./technical/development/CODEBASE.md), relevant `skills/*/SKILL.md`                                                               |
+| **Architect / tech lead**     | [technical/README.md](./technical/README.md)                                   | [ARCHITECTURE.md](./ARCHITECTURE.md), [SECURITY_HARDENING.md](./SECURITY_HARDENING.md), [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md)                                                                           |
+| **Deploying to cloud**        | [deployment/FREE_TIER_CLOUD.md](./deployment/FREE_TIER_CLOUD.md)               | [deployment/INDEX.md](./deployment/INDEX.md), [../deploy/README.md](../deploy/README.md)                                                                                                                       |
+| **API consumer (web/mobile)** | [API_REFERENCE.md](./API_REFERENCE.md)                                         | [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md), [auth-api.md](./auth-api.md)                                                                                                                                     |
 
 ---
 
@@ -21,14 +27,14 @@
 
 ### Platform & architecture
 
-| Document                                                        | Description                                                                            |
-| --------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| [ARCHITECTURE.md](./ARCHITECTURE.md)                            | System layers, apps, packages, data flow, deployment                                   |
-| [SECURITY_HARDENING.md](./SECURITY_HARDENING.md)                | Security invariants, tenant isolation rules, rate limiting, CSP, JWT, Stripe integrity |
-| [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md)                    | GraphQL-first contract for web + mobile                                                |
-| [MULTI_TENANT_ARCHITECTURE.md](../MULTI_TENANT_ARCHITECTURE.md) | Subdomain tenancy, tenant config                                                       |
-| [TENANT_LAYER_SUPERADMIN.md](./TENANT_LAYER_SUPERADMIN.md)      | **Superadmin runbook:** tenant flow, debugging, gaps, impersonation roadmap            |
-| [API_REFERENCE.md](./API_REFERENCE.md)                          | GraphQL domains, REST routes, webhooks                                                 |
+| Document                                                                           | Description                                                                            |
+| ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| [ARCHITECTURE.md](./ARCHITECTURE.md)                                               | System layers, apps, packages, data flow, deployment                                   |
+| [SECURITY_HARDENING.md](./SECURITY_HARDENING.md)                                   | Security invariants, tenant isolation rules, rate limiting, CSP, JWT, Stripe integrity |
+| [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md)                                       | GraphQL-first contract for web + mobile                                                |
+| [technical/architecture/MULTI_TENANT.md](./technical/architecture/MULTI_TENANT.md) | Subdomain tenancy, tenant config                                                       |
+| [TENANT_LAYER_SUPERADMIN.md](./TENANT_LAYER_SUPERADMIN.md)                         | **Superadmin runbook:** tenant flow, debugging, gaps, impersonation roadmap            |
+| [API_REFERENCE.md](./API_REFERENCE.md)                                             | GraphQL domains, REST routes, webhooks                                                 |
 
 ### Business & features
 
@@ -49,36 +55,36 @@
 
 ### Agent Studio & automations (Phases 4–7)
 
-| Document                                                       | Description                          |
-| -------------------------------------------------------------- | ------------------------------------ |
-| [../AGENT_STUDIO.md](../AGENT_STUDIO.md)                       | SSE, tools, staging (implementation) |
-| [AGENT_STUDIO_ARCHITECTURE.md](./AGENT_STUDIO_ARCHITECTURE.md) | Phases 3–7 target architecture       |
-| [AI_STUDIO_TIMELINE.md](./AI_STUDIO_TIMELINE.md)               | Task backlog & edge cases            |
+| Document                                                             | Description                          |
+| -------------------------------------------------------------------- | ------------------------------------ |
+| [technical/agent/AGENT_STUDIO.md](./technical/agent/AGENT_STUDIO.md) | SSE, tools, staging (implementation) |
+| [AGENT_STUDIO_ARCHITECTURE.md](./AGENT_STUDIO_ARCHITECTURE.md)       | Phases 3–7 target architecture       |
+| [AI_STUDIO_TIMELINE.md](./AI_STUDIO_TIMELINE.md)                     | Task backlog & edge cases            |
 
 ### UI & design
 
-| Document                                             | Description                                                  |
-| ---------------------------------------------------- | ------------------------------------------------------------ |
-| [AUTH_UI.md](./AUTH_UI.md)                           | **Auth UX** — AuthGuard, session notices, iOS banners        |
-| [IOS_UI_AUDIT.md](./IOS_UI_AUDIT.md)                 | **UI coverage audit** — feature vs iOS compliance tracker    |
-| [../CODING_STANDARDS.md](../CODING_STANDARDS.md)     | TypeScript, React, CSS rules                                 |
-| [SIDEBAR_REDESIGN.md](./SIDEBAR_REDESIGN.md)         | Sidebar spec                                                 |
-| `skills/ios-design/SKILL.md`                         | Design tokens & page template                                |
-| [MOBILE_STORE_ROADMAP.md](./MOBILE_STORE_ROADMAP.md) | **Mobile + storefront roadmap** — phases, PR log, checklists |
+| Document                                                                                 | Description                                                  |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [AUTH_UI.md](./AUTH_UI.md)                                                               | **Auth UX** — AuthGuard, session notices, iOS banners        |
+| [IOS_UI_AUDIT.md](./IOS_UI_AUDIT.md)                                                     | **UI coverage audit** — feature vs iOS compliance tracker    |
+| [technical/development/CODING_STANDARDS.md](./technical/development/CODING_STANDARDS.md) | TypeScript, React, CSS rules                                 |
+| [SIDEBAR_REDESIGN.md](./SIDEBAR_REDESIGN.md)                                             | Sidebar spec                                                 |
+| `skills/ios-design/SKILL.md`                                                             | Design tokens & page template                                |
+| [MOBILE_STORE_ROADMAP.md](./MOBILE_STORE_ROADMAP.md)                                     | **Mobile + storefront roadmap** — phases, PR log, checklists |
 
 ### Operations
 
-| Document                                                         | Description                        |
-| ---------------------------------------------------------------- | ---------------------------------- |
-| [../CHECKLIST.md](../CHECKLIST.md)                               | Dev/staging/prod validation        |
-| [deployment/INDEX.md](./deployment/INDEX.md)                     | **Cloud deployment hub**           |
-| [deployment/FREE_TIER_CLOUD.md](./deployment/FREE_TIER_CLOUD.md) | $0 deploy: Vercel + Render + Atlas |
-| [deployment/MONOREPO_BUILD.md](./deployment/MONOREPO_BUILD.md)   | Turbo build for CI/cloud           |
-| [deployment/ENV_PRODUCTION.md](./deployment/ENV_PRODUCTION.md)   | Production env vars                |
-| [deployment/DOCKER.md](./deployment/DOCKER.md)                   | Docker & Oracle Cloud VM           |
-| [../REPO_STRUCTURE.md](../REPO_STRUCTURE.md)                     | Repository layout guide            |
-| [DEVELOPER_KNOWLEDGE_BASE.md](./DEVELOPER_KNOWLEDGE_BASE.md)     | Troubleshooting, Docker, env       |
-| [tenant-keys.md](./tenant-keys.md)                               | Per-tenant JWT keys                |
+| Document                                                                             | Description                        |
+| ------------------------------------------------------------------------------------ | ---------------------------------- |
+| [technical/operations/CHECKLIST.md](./technical/operations/CHECKLIST.md)             | Dev/staging/prod validation        |
+| [deployment/INDEX.md](./deployment/INDEX.md)                                         | **Cloud deployment hub**           |
+| [deployment/FREE_TIER_CLOUD.md](./deployment/FREE_TIER_CLOUD.md)                     | $0 deploy: Vercel + Render + Atlas |
+| [deployment/MONOREPO_BUILD.md](./deployment/MONOREPO_BUILD.md)                       | Turbo build for CI/cloud           |
+| [deployment/ENV_PRODUCTION.md](./deployment/ENV_PRODUCTION.md)                       | Production env vars                |
+| [deployment/DOCKER.md](./deployment/DOCKER.md)                                       | Docker & Oracle Cloud VM           |
+| [technical/development/REPO_STRUCTURE.md](./technical/development/REPO_STRUCTURE.md) | Repository layout guide            |
+| [DEVELOPER_KNOWLEDGE_BASE.md](./DEVELOPER_KNOWLEDGE_BASE.md)                         | Troubleshooting, Docker, env       |
+| [tenant-keys.md](./tenant-keys.md)                                                   | Per-tenant JWT keys                |
 
 ---
 
@@ -103,7 +109,7 @@
 
 | Phase    | Status  | Doc                                                                                    |
 | -------- | ------- | -------------------------------------------------------------------------------------- |
-| 1–3      | Shipped | [AGENT_STUDIO.md](../AGENT_STUDIO.md)                                                  |
+| 1–3      | Shipped | [technical/agent/AGENT_STUDIO.md](./technical/agent/AGENT_STUDIO.md)                   |
 | 4        | Shipped | `@luxgen/agent` extraction — [ARCHITECTURE.md](./ARCHITECTURE.md)                      |
 | 5        | Shipped | Git worktree pipeline — [AGENT_STUDIO_ARCHITECTURE.md](./AGENT_STUDIO_ARCHITECTURE.md) |
 | 6        | Shipped | Validation, Mongo, Redis worker                                                        |
@@ -117,10 +123,12 @@
 
 ## Repository entrypoints (always canonical)
 
-| File                                          | Role                                       |
-| --------------------------------------------- | ------------------------------------------ |
-| [CODEBASE.md](../CODEBASE.md)                 | Repo map — **read first for code changes** |
-| [AGENTS.md](../AGENTS.md)                     | AI agent entrypoint                        |
-| [CODING_STANDARDS.md](../CODING_STANDARDS.md) | Non-negotiable coding rules                |
+| File                                                                                     | Role                                       |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------ |
+| [README.md](../README.md)                                                                | Company overview (non-technical)           |
+| [technical/development/CODEBASE.md](./technical/development/CODEBASE.md)                 | Repo map — **read first for code changes** |
+| [AGENTS.md](../AGENTS.md)                                                                | AI agent entrypoint                        |
+| [technical/development/CODING_STANDARDS.md](./technical/development/CODING_STANDARDS.md) | Non-negotiable coding rules                |
+| [technical/README.md](./technical/README.md)                                             | Hierarchical technical documentation       |
 
-_Last updated: 2026-06-20 — security hardening pass: tenant isolation, Redis rate limiting, graphql-ws migration, billing integrity, CSP hardening, pagination spec._
+_Last updated: 2026-06-20 — docs hierarchy restructure; README company standard; technical hub under `docs/technical/`._

@@ -1,5 +1,7 @@
 # Notes for Dave
 
+> **Parent:** [docs/INDEX.md](../INDEX.md) · Internal contributor notes (not product documentation)
+
 ## Git Account Setup — luxgen-monorepo
 
 **Issue found (2026-06-20):** Commits in this repo were being authored from two different accounts because the global git config points to the Condé Nast work account.
