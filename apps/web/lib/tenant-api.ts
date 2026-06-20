@@ -15,6 +15,17 @@ export interface TenantRegionalSettings {
   currency?: string;
 }
 
+export interface TenantStorefrontSettingsPayload {
+  landingEnabled: boolean;
+  routes: {
+    landing: string;
+    courses: string;
+    programs: string;
+    login: string;
+    register: string;
+  };
+}
+
 export interface TenantCurrentData {
   id: string;
   name: string;
@@ -70,7 +81,7 @@ export async function fetchTenantCurrent(): Promise<TenantCurrentData> {
 
 export async function fetchTenantConfig(): Promise<{
   branding: TenantBrandingPayload;
-  config: { regional?: TenantRegionalSettings };
+  config: { regional?: TenantRegionalSettings; storefront?: TenantStorefrontSettingsPayload };
 }> {
   const response = await fetch(apiPath('/api/tenant/config'), {
     headers: tenantRequestHeaders(),
@@ -105,4 +116,16 @@ export async function fetchNotificationTemplates(): Promise<NotificationTemplate
     headers: tenantRequestHeaders(),
   });
   return parseJson(response);
+}
+
+export async function patchTenantStorefront(
+  storefront: TenantStorefrontSettingsPayload,
+): Promise<TenantStorefrontSettingsPayload> {
+  const response = await fetch(apiPath('/api/tenant/storefront'), {
+    method: 'PATCH',
+    headers: tenantRequestHeaders(),
+    body: JSON.stringify(storefront),
+  });
+  const data = await parseJson<{ storefront: TenantStorefrontSettingsPayload }>(response);
+  return data.storefront;
 }

@@ -47,6 +47,21 @@ export interface TenantConfig {
     paymentProvider?: string;
     analyticsProvider?: string;
   };
+  regional?: {
+    contactEmail?: string;
+    timezone?: string;
+    currency?: string;
+  };
+  storefront?: {
+    landingEnabled: boolean;
+    routes: {
+      landing: string;
+      courses: string;
+      programs: string;
+      login: string;
+      register: string;
+    };
+  };
 }
 
 export interface ITenant extends Document {
@@ -208,6 +223,24 @@ const tenantSchema = new Schema<ITenant>(
           emailProvider: String,
           paymentProvider: String,
           analyticsProvider: String,
+        },
+        regional: {
+          contactEmail: String,
+          timezone: String,
+          currency: String,
+        },
+        storefront: {
+          landingEnabled: {
+            type: Boolean,
+            default: false,
+          },
+          routes: {
+            landing: { type: String, default: '/mentors' },
+            courses: { type: String, default: '/learn' },
+            programs: { type: String, default: '/store/product' },
+            login: { type: String, default: '/login' },
+            register: { type: String, default: '/register' },
+          },
         },
       },
     },

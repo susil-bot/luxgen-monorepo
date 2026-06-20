@@ -374,4 +374,77 @@ router.post('/init', async (req: Request, res: Response) => {
   }
 });
 
+/**
+ * Update public storefront landing (trainer/mentor marketplace home)
+ */
+router.patch('/storefront', async (req: Request, res: Response) => {
+  try {
+    const tenantContext = getTenantContext(req);
+
+    if (!tenantContext) {
+      return res.status(404).json({
+        success: false,
+        message: 'No tenant context found',
+      });
+    }
+
+    const { tenantId, tenant } = tenantContext;
+    const { landingEnabled, routes } = req.body as {
+      landingEnabled?: boolean;
+      routes?: {
+        landing?: string;
+        courses?: string;
+        programs?: string;
+        login?: string;
+        register?: string;
+      };
+    };
+
+    const existing = (tenant.settings?.config as unknown as Record<string, unknown> | undefined)?.storefront ?? {};
+    const existingRoutes = (existing as Record<string, unknown>).routes ?? {};
+
+    const nextStorefront = {
+      ...existing,
+      ...(typeof landingEnabled === 'boolean' ? { landingEnabled } : {}),
+      routes: {
+        ...(existingRoutes as Record<string, unknown>),
+        ...routes,
+      },
+    };
+
+    const updatedTenant = await Tenant.findByIdAndUpdate(
+      tenantId,
+      {
+        'settings.config.storefront': nextStorefront,
+        updatedAt: new Date(),
+      },
+      { new: true },
+    );
+
+    if (!updatedTenant) {
+      return res.status(404).json({
+        success: false,
+        message: 'Tenant not found',
+      });
+    }
+
+    const config = updatedTenant.settings?.config as unknown as Record<string, unknown> | undefined;
+
+    res.json({
+      success: true,
+      message: 'Storefront settings updated successfully',
+      data: {
+        storefront: config?.storefront ?? nextStorefront,
+      },
+    });
+  } catch (error) {
+    console.error('Update tenant storefront error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
+    });
+  }
+});
+
 export default router;
