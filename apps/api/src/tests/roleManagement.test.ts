@@ -57,6 +57,21 @@ describe('Role Management Middleware', () => {
       expect(mockRes.status).not.toHaveBeenCalled();
     });
 
+    it('should allow SUPER_ADMIN to access ADMIN-gated resources', async () => {
+      mockReq.user = {
+        _id: 'user123',
+        email: 'superadmin@example.com',
+        role: UserRole.SUPER_ADMIN,
+        status: UserStatus.ACTIVE,
+      };
+
+      const middleware = requireRole(UserRole.ADMIN);
+      await middleware(mockReq, mockRes, mockNext);
+
+      expect(mockNext).toHaveBeenCalled();
+      expect(mockRes.status).not.toHaveBeenCalled();
+    });
+
     it('should deny access for user without required role', async () => {
       mockReq.user = {
         _id: 'user123',

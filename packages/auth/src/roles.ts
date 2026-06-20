@@ -11,6 +11,20 @@ export enum UserStatus {
   SUSPENDED = 'SUSPENDED',
 }
 
+const ROLE_RANK: Record<UserRole, number> = {
+  [UserRole.SUPER_ADMIN]: 3,
+  [UserRole.ADMIN]: 2,
+  [UserRole.USER]: 1,
+};
+
+/** Returns true when userRole meets or exceeds minimumRole (SUPER_ADMIN ≥ ADMIN ≥ USER). */
+export const hasRoleAtLeast = (userRole: UserRole, minimumRole: UserRole): boolean => {
+  const userRank = ROLE_RANK[userRole];
+  const minimumRank = ROLE_RANK[minimumRole];
+  if (userRank === undefined || minimumRank === undefined) return false;
+  return userRank >= minimumRank;
+};
+
 export const ROLE_PERMISSIONS = {
   [UserRole.SUPER_ADMIN]: [
     'tenant:read',

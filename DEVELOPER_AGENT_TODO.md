@@ -13,31 +13,32 @@
 
 ## CRITICAL — Fix Before Any Deployment
 
-- [ ] **C-01** `[security]` `[bug]`
+- [x] **C-01** `[security]` `[bug]`
       **File:** `apps/web/pages/api/agent/apply.ts` lines 4–30
       `/api/agent/apply` endpoint has **zero authentication**. Any unauthenticated caller with a known `sessionId` can apply staged files to the host filesystem. Compare with `commit.ts:19` and `merge.ts:11` which correctly call `requireAgentAuth`. Add `requireAgentAuth` guard immediately.
 
-- [ ] **C-02** `[security]` `[bug]`
+- [x] **C-02** `[security]` `[bug]`
       **File:** `apps/web/pages/api/agent/pr.ts` lines 4–28
       `/api/agent/pr` (GitHub PR creation) has **zero authentication**. Any caller with a `sessionId` can create PRs in the repository. Add `requireAgentAuth` guard.
 
-- [ ] **C-03** `[security]`
+- [x] **C-03** `[security]`
       **File:** `packages/auth/src/jwt.ts` lines 11, 19 · `packages/config/src/env.ts` line 23
       `JWT_SECRET` falls back to the literal `'your-secret-key'` in both `generateToken` and `verifyToken`. Any deployment without `JWT_SECRET` set issues trivially forgeable tokens. Remove the fallback entirely; throw at startup if the secret is absent.
 
-- [ ] **C-04** `[security]` `[infra]`
+- [x] **C-04** `[security]` `[infra]`
       **File:** `k8s/secret.yaml` lines 9–16
       `secret.yaml` is **committed to the repository** with plaintext `stringData` placeholders including `JWT_SECRET` and `MONGODB_URI` with credentials. Even placeholder secrets in source control train developers to commit real values. Replace with an ExternalSecret, Sealed Secret, or SOPS-encrypted file; delete `secret.yaml` from the repo and add it to `.gitignore`.
+      _Already resolved: `k8s/secret.yaml` is gitignored; only `k8s/secret.yaml.example` is tracked._
 
-- [ ] **C-05** `[security]` `[bug]`
+- [x] **C-05** `[security]` `[bug]`
       **File:** `apps/api/src/middleware/roleManagement.ts` line 26
       `requireRole(UserRole.ADMIN)` uses strict equality (`!==`), so `SUPER_ADMIN` is rejected from any `ADMIN`-gated endpoint (e.g., `auth.ts:297` role assignment, `auth.ts:350` activation). Implement a role hierarchy check: `SUPER_ADMIN ≥ ADMIN ≥ USER`.
 
-- [ ] **C-06** `[security]`
+- [x] **C-06** `[security]`
       **File:** `apps/api/src/routes/auth.ts` lines 248–281
       Invite endpoint generates a temporary password via `Math.random().toString(36)` (non-cryptographic) and **returns it in the JSON response body**. The comment at line 280 acknowledges it should be emailed but it was never implemented. Use `crypto.randomBytes(16).toString('hex')` and deliver via email; never expose in HTTP response.
 
-- [ ] **C-07** `[security]`
+- [x] **C-07** `[security]`
       **File:** `apps/api/src/routes/billing.ts` lines 8–18
       `GET /api/billing/plan` returns full billing info (including `stripeCustomerId`) for any `?tenant=<id>` with **no authentication or authorization check**. Add auth middleware and validate the requesting user belongs to the queried tenant.
 
@@ -362,10 +363,10 @@
 
 | Tier      | Total  | Done  |
 | --------- | ------ | ----- |
-| CRITICAL  | 7      | 0     |
+| CRITICAL  | 7      | 7 ✅  |
 | HIGH      | 27     | 0     |
 | MEDIUM    | 24     | 0     |
 | LOW       | 25     | 0     |
-| **Total** | **83** | **0** |
+| **Total** | **83** | **7** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
