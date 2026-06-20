@@ -70,7 +70,9 @@ make mcp-smoke
 
 ---
 
-## 5. Available tools (Phase 1)
+## 5. Available tools
+
+### Automations (Phase 1)
 
 | Tool                    | Example prompt in Cursor                         |
 | ----------------------- | ------------------------------------------------ |
@@ -78,6 +80,19 @@ make mcp-smoke
 | `get_automation`        | "Get automation id abc123"                       |
 | `automation_runs`       | "Show last 10 automation runs for demo"          |
 | `get_automation_schema` | "What triggers and actions does LuxGen support?" |
+
+### Commerce & usage (Phase 2)
+
+| Tool               | Example prompt in Cursor                    |
+| ------------------ | ------------------------------------------- |
+| `get_tenant_usage` | "Show automation run usage for demo tenant" |
+| `list_enrollments` | "List recent enrollments for demo"          |
+| `get_enrollment`   | "Get enrollment id xyz"                     |
+
+### Resources & prompts (Phase 2)
+
+- **Resource:** `luxgen://automation-flow/catalog` — full compound catalog
+- **Prompt:** `tower-authoring` — use when drafting `flowDefinition` JSON
 
 ---
 

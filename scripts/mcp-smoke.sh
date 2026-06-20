@@ -16,11 +16,10 @@ node - <<'NODE'
 const {
   LuxgenGraphqlClient,
   loadLuxgenMcpConfig,
-} = require('./packages/mcp-core/dist/index.js');
-const {
   LIST_AUTOMATIONS,
   AUTOMATION_SCHEMA,
-} = require('./packages/mcp-core/dist/graphql/automation-queries.js');
+  TENANT_USAGE,
+} = require('./packages/mcp-core/dist/index.js');
 
 (async () => {
   const config = loadLuxgenMcpConfig();
@@ -31,6 +30,9 @@ const {
 
   const schema = await client.query(AUTOMATION_SCHEMA);
   console.log('✓ get_automation_schema: keys', Object.keys(schema.automationSchema || {}).join(', ') || '(object)');
+
+  const usage = await client.query(TENANT_USAGE, { tenantId: config.tenant });
+  console.log('✓ get_tenant_usage: plan', usage.tenantUsage.plan, 'runs', usage.tenantUsage.automationRuns);
 
   console.log('MCP smoke test passed.');
 })().catch((err) => {

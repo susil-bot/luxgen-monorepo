@@ -2,6 +2,8 @@ export type { LuxgenMcpConfig } from './config';
 export { loadLuxgenMcpConfig } from './config';
 export { LuxgenGraphqlClient, LuxgenGraphqlError } from './graphql/client';
 export * from './graphql/automation-queries';
+export * from './graphql/commerce-queries';
 export { formatToolError, formatToolSuccess, type McpTextContent } from './errors';
 export { createLuxgenMcpServer } from './server';
 export { runStdioServer } from './transport/stdio';
+export { AUTOMATION_FLOW_CATALOG_URI } from './resources/register';
