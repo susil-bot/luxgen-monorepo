@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BaseComponentProps, TenantTheme } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
+import { Input } from '../Input';
 import { Card } from '../Card';
 import { Form } from '../Form';
 import { Text } from '../Text';
@@ -73,22 +74,12 @@ const LoginFormComponent: React.FC<LoginFormProps> = ({
   ...props
 }) => {
   const [formData, setFormData] = useState<LoginFormData>({
-    email: '',
-    password: '',
+    email: defaultEmail,
+    password: defaultPassword,
     rememberMe: false,
   });
   const [errors, setErrors] = useState<Partial<LoginFormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  // Apply dev prefill after mount — avoids SSR/client text mismatch
-  useEffect(() => {
-    if (!defaultEmail && !defaultPassword) return;
-    setFormData((prev) => ({
-      ...prev,
-      email: defaultEmail || prev.email,
-      password: defaultPassword || prev.password,
-    }));
-  }, [defaultEmail, defaultPassword]);
 
   // Clear errors when form data changes
   useEffect(() => {

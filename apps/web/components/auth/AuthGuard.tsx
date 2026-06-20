@@ -45,13 +45,12 @@ export function AuthGuard({ children }: AuthGuardProps) {
   // Re-render when sessionVersion bumps after login/logout
   void sessionVersion;
 
-  // Public routes must match SSR HTML — do not gate on router.isReady
-  if (!requiresAuth(router.pathname)) {
-    return <>{children}</>;
-  }
-
   if (!router.isReady) {
     return <AuthLoadingScreen label="Loading…" />;
+  }
+
+  if (!requiresAuth(router.pathname)) {
+    return <>{children}</>;
   }
 
   const validation = validateClientSession();

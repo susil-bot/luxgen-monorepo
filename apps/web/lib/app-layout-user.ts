@@ -60,7 +60,7 @@ export function useAppTenantId(): string | null {
 
 /** Hydrate AppLayout user from localStorage session. Returns null when guest. */
 export function useLayoutUser(): LayoutUser | null {
-  const [user, setUser] = useState<LayoutUser | null>(null);
+  const [user, setUser] = useState<LayoutUser | null>(() => resolveLayoutUser());
 
   useEffect(() => {
     const refresh = () => setUser(resolveLayoutUser());
