@@ -204,3 +204,21 @@ export interface ToggleAutomationResult {
 export interface DeleteAutomationResult {
   deleteAutomation: boolean;
 }
+
+export const RUN_AGENT_TASK = `
+  mutation RunAgentTask($input: RunAgentTaskInput!) {
+    runAgentTask(input: $input) {
+      sessionId
+      status
+      jobId
+    }
+  }
+`;
+
+export interface RunAgentTaskResult {
+  runAgentTask: {
+    sessionId: string;
+    status: string;
+    jobId: string | null;
+  };
+}

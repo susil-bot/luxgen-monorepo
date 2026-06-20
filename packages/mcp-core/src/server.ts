@@ -11,7 +11,7 @@ export function createLuxgenMcpServer(
 ): McpServer {
   const server = new McpServer({
     name: 'luxgen',
-    version: '1.4.0',
+    version: '1.5.0',
   });
 
   registerTools(server, client, config);
