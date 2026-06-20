@@ -4,7 +4,12 @@ import Head from 'next/head';
 import { useQuery } from '@apollo/client';
 import { AdminDashboardLayout, UserMenu } from '@luxgen/ui';
 import { GET_DASHBOARD_DATA } from '../graphql/queries/dashboard';
-import { transformDashboardData, transformUserData, handleDashboardAction, handleUserAction } from '../lib/transformer';
+import {
+  transformDashboardData,
+  transformUserDataFromSession,
+  handleDashboardAction,
+  handleUserAction,
+} from '../lib/transformer';
 import { useAppLayoutHeader } from '../lib/app-layout-header';
 import { PageEmptyState, PageLoadingState } from '../components/common/PageStates';
 
@@ -15,7 +20,7 @@ interface DashboardProps {
 export default function Dashboard({ tenant }: DashboardProps) {
   const router = useRouter();
   const headerProps = useAppLayoutHeader();
-  const [user, setUser] = useState<UserMenu | null>(() => transformUserData(tenant));
+  const [user, setUser] = useState<UserMenu | null>(() => transformUserDataFromSession());
 
   // GraphQL query for dashboard data with error handling
   const {
@@ -28,18 +33,7 @@ export default function Dashboard({ tenant }: DashboardProps) {
   });
 
   useEffect(() => {
-    if (!dataError) return;
-    const isAuthError =
-      dataError.graphQLErrors?.some((e) => e.extensions?.code === 'UNAUTHENTICATED') ||
-      /unauthorized|unauthenticated|not authenticated/i.test(dataError.message);
-    if (isAuthError) {
-      void router.push('/login?reason=session_expired');
-    }
-  }, [dataError, router]);
-
-  useEffect(() => {
-    const userData = transformUserData(tenant);
-    setUser(userData);
+    setUser(transformUserDataFromSession());
   }, [tenant]);
 
   // Use transformer functions for action handling

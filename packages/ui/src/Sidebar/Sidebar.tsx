@@ -63,9 +63,7 @@ export interface SidebarProps {
 
 function hasActiveDescendant(item: SidebarItem, isItemActive: (id: string) => boolean): boolean {
   if (!item.children?.length) return false;
-  return item.children.some(
-    (child) => isItemActive(child.id) || hasActiveDescendant(child, isItemActive),
-  );
+  return item.children.some((child) => isItemActive(child.id) || hasActiveDescendant(child, isItemActive));
 }
 
 const SidebarComponent: React.FC<SidebarProps> = ({
@@ -99,14 +97,9 @@ const SidebarComponent: React.FC<SidebarProps> = ({
   const { tenantConfig } = useGlobalContext();
   const { user: dynamicUser } = useUser();
   const tenantLogoRaw = logo ?? tenantConfig.branding.logo;
-  const logoText =
-    'text' in tenantLogoRaw && tenantLogoRaw.text
-      ? tenantLogoRaw.text
-      : 'LuxGen';
+  const logoText = 'text' in tenantLogoRaw && tenantLogoRaw.text ? tenantLogoRaw.text : 'LuxGen';
   const logoSrc =
-    ('src' in tenantLogoRaw && tenantLogoRaw.src) ||
-    ('image' in tenantLogoRaw && tenantLogoRaw.image) ||
-    undefined;
+    ('src' in tenantLogoRaw && tenantLogoRaw.src) || ('image' in tenantLogoRaw && tenantLogoRaw.image) || undefined;
   const logoHref = 'href' in tenantLogoRaw ? tenantLogoRaw.href : '/';
   const currentUser = dynamicUser || user;
 
@@ -201,11 +194,7 @@ const SidebarComponent: React.FC<SidebarProps> = ({
         : undefined;
 
   return (
-    <aside
-      className={`lux-sidebar ${className}`.trim()}
-      data-collapsed={isCollapsed ? 'true' : 'false'}
-      {...props}
-    >
+    <aside className={`lux-sidebar ${className}`.trim()} data-collapsed={isCollapsed ? 'true' : 'false'} {...props}>
       <div className="lux-sidebar__body">
         {showLogo && (
           <div className="lux-sidebar-header">
@@ -289,31 +278,28 @@ const SidebarComponent: React.FC<SidebarProps> = ({
           ))}
         </nav>
 
-        {showUserSection && currentUser && !isCollapsed ? (
-          <div className="lux-sidebar-footer">
-            <button
-              type="button"
-              className="lux-sidebar-footer__user"
-              onClick={() => handleUserAction('profile')}
-            >
-              {userAvatar ? (
-                <img
-                  src={userAvatar}
-                  alt=""
-                  className="lux-sidebar-footer__avatar"
-                  style={{ objectFit: 'cover' }}
-                />
-              ) : (
-                <div className="lux-sidebar-footer__avatar">{userInitials}</div>
-              )}
-              <div className="lux-sidebar-footer__name">
-                <span>{currentUser.name}</span>
-                {currentUser.role ? (
-                  <span className="lux-sidebar-header__sub">{currentUser.role}</span>
-                ) : null}
-              </div>
-            </button>
-          </div>
+        {showUserSection && !isCollapsed ? (
+          currentUser ? (
+            <div className="lux-sidebar-footer">
+              <button type="button" className="lux-sidebar-footer__user" onClick={() => handleUserAction('profile')}>
+                {userAvatar ? (
+                  <img src={userAvatar} alt="" className="lux-sidebar-footer__avatar" style={{ objectFit: 'cover' }} />
+                ) : (
+                  <div className="lux-sidebar-footer__avatar">{userInitials}</div>
+                )}
+                <div className="lux-sidebar-footer__name">
+                  <span>{currentUser.name}</span>
+                  {currentUser.role ? <span className="lux-sidebar-header__sub">{currentUser.role}</span> : null}
+                </div>
+              </button>
+            </div>
+          ) : (
+            <div className="lux-sidebar-footer lux-sidebar-footer--guest">
+              <button type="button" className="lux-sidebar-footer__sign-in" onClick={() => navigateTo('/login')}>
+                Sign in
+              </button>
+            </div>
+          )
         ) : null}
       </div>
     </aside>
@@ -330,13 +316,7 @@ function NavChevronSmall({ open }: { open: boolean }) {
       height={14}
       aria-hidden
     >
-      <path
-        d="M6 4l4 4-4 4"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }

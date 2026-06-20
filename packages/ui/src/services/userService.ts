@@ -38,10 +38,8 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
     });
 
     if (!response.ok) {
-      // If no auth token or authentication failed, fall back to tenant-based user generation
       if (response.status === 401 || response.status === 403) {
-        console.log('👤 Authentication required or failed, using tenant-based user generation');
-        throw new Error('API_ENDPOINT_NOT_FOUND');
+        throw new Error('UNAUTHENTICATED');
       }
       throw new Error(`Failed to fetch user data: ${response.status} ${response.statusText}`);
     }
@@ -73,59 +71,13 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
 
     return userMenu;
   } catch (error) {
+    if (error instanceof Error && error.message === 'UNAUTHENTICATED') {
+      clearUserFromStorage();
+      throw error;
+    }
+
     console.error('Failed to fetch real user data:', error);
-
-    // Check if it's an API endpoint not found error
-    if (error instanceof Error && error.message === 'API_ENDPOINT_NOT_FOUND') {
-      console.log('👤 API endpoints not implemented yet, using tenant-based user generation');
-
-      // First check if we have a stored user for this tenant
-      const storedUser = getUserFromStorage();
-      if (storedUser && storedUser.tenant?.subdomain === tenantId) {
-        console.log('👤 Using stored user data:', storedUser);
-        return storedUser;
-      }
-
-      // Generate user based on tenant configuration
-      const tenantConfig = await getTenantConfig(tenantId);
-      const tenantBasedUser: UserMenu = {
-        name: `User from ${tenantConfig.name}`,
-        email: `user@${tenantConfig.subdomain}.com`,
-        role: 'User',
-        avatar: undefined, // Use initials instead of non-existent avatar
-        tenant: {
-          name: tenantConfig.name,
-          subdomain: tenantConfig.subdomain,
-        },
-      };
-
-      // Save to localStorage for persistence
-      saveUserToStorage(tenantBasedUser);
-      console.log('👤 Generated tenant-based user:', tenantBasedUser);
-      return tenantBasedUser;
-    }
-
-    // Fallback to localStorage if available
-    const storedUser = getUserFromStorage();
-    if (storedUser && storedUser.tenant?.subdomain === tenantId) {
-      console.log('👤 Using stored user data as fallback');
-      return storedUser;
-    }
-
-    // Final fallback - create user based on tenant configuration
-    const tenantConfig = await getTenantConfig(tenantId);
-    const fallbackUser: UserMenu = {
-      name: `User from ${tenantConfig.name}`,
-      email: `user@${tenantConfig.subdomain}.com`,
-      role: 'User',
-      tenant: {
-        name: tenantConfig.name,
-        subdomain: tenantConfig.subdomain,
-      },
-    };
-
-    console.log('👤 Using final fallback user data:', fallbackUser);
-    return fallbackUser;
+    throw error;
   }
 };
 
