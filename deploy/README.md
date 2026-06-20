@@ -24,12 +24,12 @@ deploy/
 
 ## Quick deploy
 
-| Platform | Config | App |
-|----------|--------|-----|
-| Vercel | `platforms/vercel.json` | `apps/web` |
-| Render | `platforms/render.yaml` | `apps/api` |
-| Fly.io | `platforms/fly.api.toml` | `apps/api` |
-| Docker | `apps/*/Dockerfile` | API + web separately |
+| Platform | Config                   | App                           |
+| -------- | ------------------------ | ----------------------------- |
+| Vercel   | `platforms/vercel.json`  | `apps/web`                    |
+| Render   | `platforms/render.yaml`  | `apps/api`, `apps/mcp-server` |
+| Fly.io   | `platforms/fly.api.toml` | `apps/api`                    |
+| Docker   | `apps/*/Dockerfile`      | API + web separately          |
 
 Always build from **monorepo root** — see [MONOREPO_BUILD.md](../docs/deployment/MONOREPO_BUILD.md).
 
@@ -39,11 +39,11 @@ Always build from **monorepo root** — see [MONOREPO_BUILD.md](../docs/deployme
 
 Local hooks mirror CI:
 
-| Hook / Job | Command |
-|------------|---------|
+| Hook / Job | Command                                          |
+| ---------- | ------------------------------------------------ |
 | pre-commit | `lint-staged` → `oxlint --fix` + `oxfmt --write` |
-| pre-push | `sh scripts/validate-build.sh` |
-| CI lint | `npm run lint` (oxlint) |
-| CI format | `npm run format` (oxfmt --check) |
+| pre-push   | `sh scripts/validate-build.sh`                   |
+| CI lint    | `npm run lint` (oxlint)                          |
+| CI format  | `npm run format` (oxfmt --check)                 |
 
 Root scripts: `npm run validate`, `npm run validate:build`

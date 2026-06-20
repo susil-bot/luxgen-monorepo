@@ -133,6 +133,32 @@ Read-only keys (`scopes: [READ]`) cannot call write tools.
 
 ---
 
+## 7. HTTP transport (Phase 5)
+
+Run locally:
+
+```bash
+make dev-stack-api   # terminal 1
+MCP_TRANSPORT=http npm run dev:mcp   # terminal 2 — listens on :3100/mcp
+curl http://127.0.0.1:3100/health
+```
+
+Remote clients (Streamable HTTP) authenticate on the **initialize** request:
+
+| Header          | Value                                                   |
+| --------------- | ------------------------------------------------------- |
+| `x-tenant`      | Tenant subdomain (`demo`)                               |
+| `x-mcp-api-key` | `luxgen_mcp_…` secret                                   |
+| `Accept`        | Must include `application/json` and `text/event-stream` |
+
+Subsequent requests include `mcp-session-id` from the initialize response.
+
+Rate limit: 120 requests/minute per key + IP (override with `MCP_RATE_LIMIT_MAX`).
+
+Render deploy: see `deploy/platforms/render.yaml` service `luxgen-mcp`.
+
+---
+
 ## Troubleshooting
 
 | Symptom                              | Fix                                                      |
@@ -140,10 +166,12 @@ Read-only keys (`scopes: [READ]`) cannot call write tools.
 | `Authentication required`            | Set `LUXGEN_JWT` or `LUXGEN_MCP_API_KEY`                 |
 | `Token is not valid for this tenant` | Align `LUXGEN_TENANT` with JWT tenant                    |
 | `ECONNREFUSED`                       | Start API on port 4000                                   |
+| HTTP `401` on `/mcp`                 | Send `x-tenant` + `x-mcp-api-key` on initialize          |
+| HTTP `429`                           | Rate limit — wait or raise `MCP_RATE_LIMIT_MAX`          |
 | MCP server not listed                | Check `apps/mcp-server/dist/index.js` exists after build |
 
 ---
 
 ## Next phases
 
-HTTP production deploy: [MCP_PLATFORM.md](./MCP_PLATFORM.md) § Roadmap PRs 25–27.
+Phase 6 enterprise tools: [MCP_PLATFORM.md](./MCP_PLATFORM.md) § Roadmap PRs 28–30.

@@ -14,6 +14,22 @@ export interface LuxgenMcpConfig {
   scopes: McpScope[];
 }
 
+export interface HttpMcpRuntimeConfig {
+  graphqlUrl: string;
+  transport: 'http';
+  production: boolean;
+  host: string;
+  port: number;
+  path: string;
+  allowedHosts?: string[];
+  rateLimitMax: number;
+  rateLimitWindowMs: number;
+}
+
+export type LoadedMcpConfig =
+  | (Omit<LuxgenMcpConfig, 'scopes'> & { scopes?: McpScope[]; transport: 'stdio' })
+  | HttpMcpRuntimeConfig;
+
 function parseScopesFromEnv(raw: string | undefined): McpScope[] | null {
   if (!raw?.trim()) return null;
   const parts = raw.split(',').map((s) => s.trim().toLowerCase());
@@ -24,17 +40,48 @@ function parseScopesFromEnv(raw: string | undefined): McpScope[] | null {
   return scopes.length ? scopes : null;
 }
 
-export function loadLuxgenMcpConfig(env: NodeJS.ProcessEnv = process.env): Omit<LuxgenMcpConfig, 'scopes'> & {
-  scopes?: McpScope[];
-} {
+function parseAllowedHosts(raw: string | undefined): string[] | undefined {
+  if (!raw?.trim()) return undefined;
+  const hosts = raw
+    .split(',')
+    .map((h) => h.trim())
+    .filter(Boolean);
+  return hosts.length ? hosts : undefined;
+}
+
+export function loadLuxgenMcpConfig(env: NodeJS.ProcessEnv = process.env): LoadedMcpConfig {
   const graphqlUrl = env.LUXGEN_GRAPHQL_URL?.trim();
+  if (!graphqlUrl) {
+    throw new Error('LUXGEN_GRAPHQL_URL is required (e.g. http://localhost:4000/graphql)');
+  }
+
+  const transport = env.MCP_TRANSPORT === 'http' ? 'http' : 'stdio';
+  const production = env.NODE_ENV === 'production';
+
+  if (transport === 'http') {
+    const host = env.MCP_HTTP_HOST?.trim() || (production ? '0.0.0.0' : '127.0.0.1');
+    const port = Number(env.MCP_HTTP_PORT || env.PORT || 3100);
+    const path = env.MCP_HTTP_PATH?.trim() || '/mcp';
+    const rateLimitMax = Number(env.MCP_RATE_LIMIT_MAX || 120);
+    const rateLimitWindowMs = Number(env.MCP_RATE_LIMIT_WINDOW_MS || 60_000);
+
+    return {
+      graphqlUrl,
+      transport: 'http',
+      production,
+      host,
+      port,
+      path,
+      allowedHosts: parseAllowedHosts(env.MCP_ALLOWED_HOSTS),
+      rateLimitMax,
+      rateLimitWindowMs,
+    };
+  }
+
   const jwt = env.LUXGEN_JWT?.trim();
   const mcpApiKey = env.LUXGEN_MCP_API_KEY?.trim();
   const tenant = env.LUXGEN_TENANT?.trim();
 
-  if (!graphqlUrl) {
-    throw new Error('LUXGEN_GRAPHQL_URL is required (e.g. http://localhost:4000/graphql)');
-  }
   if (!jwt && !mcpApiKey) {
     throw new Error('Set LUXGEN_JWT or LUXGEN_MCP_API_KEY for authentication');
   }
@@ -45,11 +92,9 @@ export function loadLuxgenMcpConfig(env: NodeJS.ProcessEnv = process.env): Omit<
     throw new Error('LUXGEN_TENANT is required (tenant subdomain, e.g. demo)');
   }
 
-  const transport = env.MCP_TRANSPORT === 'http' ? 'http' : 'stdio';
-  const production = env.NODE_ENV === 'production';
   const scopes = parseScopesFromEnv(env.LUXGEN_MCP_SCOPES) ?? undefined;
 
-  return { graphqlUrl, jwt, mcpApiKey, tenant, transport, production, scopes };
+  return { graphqlUrl, jwt, mcpApiKey, tenant, transport: 'stdio', production, scopes };
 }
 
 export async function resolveMcpScopes(
