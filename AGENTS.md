@@ -26,19 +26,20 @@ This file is the repository-level entrypoint for AI coding agents (Claude Code, 
 
 Read `skills/<skill-name>/SKILL.md` **first** when a task matches that skill's domain.
 
-| Task domain                           | Skill to load                                |
-| ------------------------------------- | -------------------------------------------- |
-| Sidebar navigation                    | `skills/sidebar/SKILL.md`                    |
-| Learner / customer / analytics pages  | `skills/persona-pages/SKILL.md`              |
-| AI Studio / agent config              | `skills/ai-studio/SKILL.md`                  |
-| Automations / workflows / marketplace | `skills/automation/SKILL.md`                 |
-| Billing / Stripe / plan gates         | `skills/billing/SKILL.md`                    |
-| Business listings / directory         | `skills/listings/SKILL.md`                   |
-| New GraphQL domain / mobile API       | `skills/graphql/SKILL.md`                    |
-| Commerce CRUD / form → API wiring     | `skills/fullstack-developer/SKILL.md`        |
-| Cloud deploy / Docker / CI            | `skills/deployment/SKILL.md`                 |
-| CSS, colours, typography, layout      | `skills/ios-design/SKILL.md`                 |
-| Any new page                          | `skills/ios-design/SKILL.md` + `CODEBASE.md` |
+| Task domain                              | Skill to load                                |
+| ---------------------------------------- | -------------------------------------------- |
+| Sidebar navigation                       | `skills/sidebar/SKILL.md`                    |
+| Learner / customer / analytics pages     | `skills/persona-pages/SKILL.md`              |
+| AI Studio / agent config                 | `skills/ai-studio/SKILL.md`                  |
+| Automations / workflows / marketplace    | `skills/automation/SKILL.md`                 |
+| Billing / Stripe / plan gates            | `skills/billing/SKILL.md`                    |
+| Business listings / directory            | `skills/listings/SKILL.md`                   |
+| New GraphQL domain / mobile API          | `skills/graphql/SKILL.md`                    |
+| Commerce CRUD / form → API wiring        | `skills/fullstack-developer/SKILL.md`        |
+| Cloud deploy / Docker / CI               | `skills/deployment/SKILL.md`                 |
+| **Local dev by role (web/admin/mobile)** | `skills/dev-workflows/SKILL.md`              |
+| CSS, colours, typography, layout         | `skills/ios-design/SKILL.md`                 |
+| Any new page                             | `skills/ios-design/SKILL.md` + `CODEBASE.md` |
 
 **PR policy:** Feature work (`feat/`) and bug fixes (`fix/`) must be separate PRs — see `.cursor/rules/pr-workflow.mdc`. **Every PR/issue needs labels** — see `.cursor/rules/pr-labels.mdc` (`help wanted` is mandatory). **Auth / login UI** — see `.cursor/rules/auth-session.mdc`.
 
