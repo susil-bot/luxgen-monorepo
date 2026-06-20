@@ -45,6 +45,15 @@ export const userResolvers = {
 
     register: (_: unknown, { input }: { input: any }, ctx: GraphQLContext) =>
       userService.register(input, { selfService: true, tenantId: ctx.tenantId }),
+
+    registerPushToken: async (_: unknown, { token }: { token: string }, context: GraphQLContext) => {
+      if (!context.user || !context.tenantId) {
+        throw new Error('Authentication required');
+      }
+      const userId = context.user._id?.toString?.() ?? '';
+      if (!userId) throw new Error('Authentication required');
+      return userService.registerPushToken(userId, context.tenantId, token);
+    },
   },
   User: {
     id: (parent: { _id?: { toString(): string }; id?: string }) => parent._id?.toString?.() ?? parent.id ?? '',

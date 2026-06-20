@@ -88,14 +88,16 @@ packages/ui             → React DOM only (existing)
 
 ## Phase 3 — Polish & launch
 
-**Branch:** per feature  
-**PR:** _pending_
+**Branch:** `feat/mobile-phase3`  
+**PR:** https://github.com/susil-bot/luxgen-monorepo/pull/43 ✅
 
-- [ ] Push notifications (`expo-server-sdk` on API)
-- [ ] OTA updates (EAS Update)
-- [ ] App Store / Play internal testing
-- [ ] Offline cache (`apollo3-cache-persist`)
-- [ ] Per-tenant white-label app builds (optional)
+- [x] Push notifications (`expo-server-sdk` on API + `expo-notifications` on mobile)
+- [x] OTA updates (EAS Update channels + `useOtaUpdates` hook)
+- [x] App Store / Play internal testing (`eas.json` preview submit + internal track)
+- [x] Offline cache (`apollo3-cache-persist` + AsyncStorage)
+- [x] Per-tenant white-label app builds (`tenant-demo` EAS profile + env vars)
+
+**Done when:** Push token registers after login, enroll sends push, cache persists queries, OTA hook runs on production builds.
 
 ---
 
@@ -107,7 +109,7 @@ packages/ui             → React DOM only (existing)
 | 1     | `feat/mobile-foundation`      | [#39](https://github.com/susil-bot/luxgen-monorepo/pull/39) | Done — awaiting merge |
 | 2a    | `feat/learner-storefront`     | —                                                           | Not started           |
 | 2b    | `feat/mobile-learner-screens` | [#42](https://github.com/susil-bot/luxgen-monorepo/pull/42) | Done — awaiting merge |
-| 3     | —                             | —                                                           | Not started           |
+| 3     | `feat/mobile-phase3`          | [#43](https://github.com/susil-bot/luxgen-monorepo/pull/43) | Done — awaiting merge |
 
 ---
 

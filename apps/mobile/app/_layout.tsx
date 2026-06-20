@@ -1,25 +1,27 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import { ApolloProvider } from '@apollo/client';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
+import { ApolloPersistProvider } from '../components/ApolloPersistProvider';
+import { MobileBootstrap } from '../components/MobileBootstrap';
 import { AuthProvider } from '../hooks/useAuth';
-import { apolloClient } from '../lib/apollo';
 
 export default function RootLayout() {
   return (
     <SafeAreaProvider>
-      <ApolloProvider client={apolloClient}>
+      <ApolloPersistProvider>
         <AuthProvider>
-          <StatusBar style="auto" />
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="(auth)" />
-            <Stack.Screen name="(tabs)" />
-            <Stack.Screen name="courses/[id]" options={{ presentation: 'card' }} />
-          </Stack>
+          <MobileBootstrap>
+            <StatusBar style="auto" />
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="index" />
+              <Stack.Screen name="(auth)" />
+              <Stack.Screen name="(tabs)" />
+              <Stack.Screen name="courses/[id]" options={{ presentation: 'card' }} />
+            </Stack>
+          </MobileBootstrap>
         </AuthProvider>
-      </ApolloProvider>
+      </ApolloPersistProvider>
     </SafeAreaProvider>
   );
 }

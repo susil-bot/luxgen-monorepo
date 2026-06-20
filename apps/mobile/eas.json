@@ -7,18 +7,48 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
+      "channel": "development",
       "ios": {
         "simulator": true
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "channel": "preview"
     },
     "production": {
-      "autoIncrement": true
+      "autoIncrement": true,
+      "channel": "production"
+    },
+    "tenant-demo": {
+      "extends": "preview",
+      "channel": "preview-demo",
+      "env": {
+        "EXPO_PUBLIC_TENANT_SLUG": "demo",
+        "EXPO_PUBLIC_APP_NAME": "Demo Academy"
+      }
     }
   },
   "submit": {
+    "preview": {
+      "ios": {
+        "appleTeamId": "REPLACE_WITH_APPLE_TEAM_ID"
+      },
+      "android": {
+        "track": "internal"
+      }
+    },
     "production": {}
+  },
+  "update": {
+    "development": {
+      "channel": "development"
+    },
+    "preview": {
+      "channel": "preview"
+    },
+    "production": {
+      "channel": "production"
+    }
   }
 }
