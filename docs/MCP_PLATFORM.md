@@ -1,6 +1,6 @@
 # LuxGen MCP Platform
 
-> **Status:** Phase 3 (PRs 16–20) — tower write tools with flow validation  
+> **Status:** Phase 4 (PRs 21–24) — API keys, scopes, audit log  
 > **Audience:** Developers integrating AI clients with LuxGen GraphQL and Tower automations
 
 ---
@@ -64,6 +64,15 @@
 | `toggle_automation`      | `toggleAutomation` | Enable or pause without editing flow       |
 | `delete_automation`      | `deleteAutomation` | Delete (requires `confirm: true`)          |
 
+### Phase 4 auth & audit (PRs 21–24)
+
+| Capability | GraphQL / header                                   | Description                                      |
+| ---------- | -------------------------------------------------- | ------------------------------------------------ |
+| API keys   | `createMcpApiKey`, `revokeMcpApiKey`, `mcpApiKeys` | Business+ (`webhooks` gate); secret shown once   |
+| Key auth   | Header `x-mcp-api-key`                             | Alternative to JWT for MCP server                |
+| Scopes     | `read` / `write` on key                            | Write tools hidden/blocked without `write` scope |
+| Audit      | `recordMcpToolAudit`, `mcpToolAuditLog`            | Append-only tool invocation log                  |
+
 ---
 
 ## 4. Environment variables
@@ -71,8 +80,10 @@
 | Variable             | Required | Example                                  |
 | -------------------- | -------- | ---------------------------------------- |
 | `LUXGEN_GRAPHQL_URL` | Yes      | `http://localhost:4000/graphql`          |
-| `LUXGEN_JWT`         | Yes      | Bearer token from login                  |
+| `LUXGEN_JWT`         | One of   | Bearer token from login (dev)            |
+| `LUXGEN_MCP_API_KEY` | One of   | `luxgen_mcp_…` from `createMcpApiKey`    |
 | `LUXGEN_TENANT`      | Yes      | `demo` (subdomain for `x-tenant` header) |
+| `LUXGEN_MCP_SCOPES`  | No       | Override scopes (`read`, `write`)        |
 | `MCP_TRANSPORT`      | No       | `stdio` (default)                        |
 
 ---
@@ -95,7 +106,7 @@ Cursor: copy `.cursor/mcp.json.example` → `.cursor/mcp.json`, set JWT from bro
 ## 6. Security invariants
 
 1. GraphQL remains source of truth — MCP never writes to Mongo directly.
-2. JWT + `x-tenant` on every request (same as web Apollo client).
+2. JWT or `x-mcp-api-key` + `x-tenant` on every GraphQL request.
 3. No filesystem or repo tools on remote MCP (Agent Studio only, local dev).
 4. Write tools (Phase 4+) require MCP API keys and plan gates.
 5. Tool errors never leak stack traces when `NODE_ENV=production`.
@@ -109,6 +120,7 @@ Cursor: copy `.cursor/mcp.json.example` → `.cursor/mcp.json`, set JWT from bro
 | **1** | 1–10  | Docs, scaffold, stdio, read automation tools   |
 | **2** | 11–15 | Usage, enrollments, MCP resources/prompts ✅   |
 | **3** | 16–20 | Write tools (tower flow persist) ✅            |
+| **4** | 21–24 | API keys, scopes, audit log ✅                 |
 | **4** | 21–24 | API keys, scopes, audit log                    |
 | **5** | 25–27 | HTTP transport, rate limits, Render deploy     |
 | **6** | 28–30 | Enterprise `run_agent_task`, docs, smoke tests |

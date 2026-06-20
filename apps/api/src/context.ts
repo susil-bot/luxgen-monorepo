@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { IUser, ITenant } from '@luxgen/db';
 import type { AuthErrorCode } from './types/auth';
+import type { VerifiedMcpApiKey } from './services/mcpApiKeyService';
 import { buildGraphQLContext } from './context/buildContext';
 
 export interface GraphQLContext {
@@ -14,6 +15,7 @@ export interface GraphQLContext {
   /** MongoDB ObjectId string for the resolved tenant */
   tenantId?: string;
   authError?: AuthErrorCode;
+  mcpApiKey?: VerifiedMcpApiKey;
 }
 
 export const context = ({ req, res }: { req: Request; res: Response }): GraphQLContext => {
@@ -27,6 +29,7 @@ export const context = ({ req, res }: { req: Request; res: Response }): GraphQLC
     tenantDoc: req.tenant,
     tenantId: req.tenantId,
     authError: req.authError,
+    mcpApiKey: req.mcpApiKey,
   };
 };
 

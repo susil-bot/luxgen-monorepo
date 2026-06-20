@@ -1,6 +1,8 @@
-import type { LuxgenMcpConfig } from '../config';
+import type { LuxgenMcpConfig, McpScope } from '../config';
 
-export type ToolConfig = Pick<LuxgenMcpConfig, 'tenant' | 'production'>;
+export type ToolConfig = Pick<LuxgenMcpConfig, 'tenant' | 'production' | 'keyId'> & {
+  scopes: McpScope[];
+};
 
 export type JsonSchema = {
   type: 'object';

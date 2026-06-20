@@ -22,6 +22,12 @@ export const PUBLIC_QUERIES = new Set([
   'storefrontBundle',
 ]);
 
+/** MCP key context — auth via x-mcp-api-key middleware */
+export const MCP_PUBLIC_QUERIES = new Set(['mcpKeyContext']);
+
+/** MCP audit from server — auth via JWT or x-mcp-api-key */
+export const MCP_PUBLIC_MUTATIONS = new Set(['recordMcpToolAudit']);
+
 export const PUBLIC_MUTATIONS = new Set([
   '_empty',
   'login',
@@ -70,7 +76,11 @@ export function secureResolvers<T extends Record<string, unknown>>(resolvers: T)
     if (!typeResolvers) continue;
 
     const publicSet =
-      typeName === 'Query' ? PUBLIC_QUERIES : typeName === 'Mutation' ? PUBLIC_MUTATIONS : new Set<string>();
+      typeName === 'Query'
+        ? new Set([...PUBLIC_QUERIES, ...MCP_PUBLIC_QUERIES])
+        : typeName === 'Mutation'
+          ? new Set([...PUBLIC_MUTATIONS, ...MCP_PUBLIC_MUTATIONS])
+          : new Set<string>();
     const wrapped: Record<string, ResolverFn> = {};
 
     for (const [fieldName, resolver] of Object.entries(typeResolvers)) {

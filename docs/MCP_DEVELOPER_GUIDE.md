@@ -106,11 +106,38 @@ make mcp-smoke
 
 ---
 
+## 6. API keys (Phase 4)
+
+Create a key via GraphQL (Business+ tenant, `webhooks` feature):
+
+```graphql
+mutation {
+  createMcpApiKey(tenantId: "demo", name: "Cursor dev", scopes: [READ, WRITE]) {
+    key {
+      id
+      keyPrefix
+      scopes
+    }
+    secret
+  }
+}
+```
+
+Use in `.cursor/mcp.json`:
+
+```json
+"LUXGEN_MCP_API_KEY": "luxgen_mcp_…paste secret…"
+```
+
+Read-only keys (`scopes: [READ]`) cannot call write tools.
+
+---
+
 ## Troubleshooting
 
 | Symptom                              | Fix                                                      |
 | ------------------------------------ | -------------------------------------------------------- |
-| `Authentication required`            | Set `LUXGEN_JWT`                                         |
+| `Authentication required`            | Set `LUXGEN_JWT` or `LUXGEN_MCP_API_KEY`                 |
 | `Token is not valid for this tenant` | Align `LUXGEN_TENANT` with JWT tenant                    |
 | `ECONNREFUSED`                       | Start API on port 4000                                   |
 | MCP server not listed                | Check `apps/mcp-server/dist/index.js` exists after build |
@@ -119,4 +146,4 @@ make mcp-smoke
 
 ## Next phases
 
-HTTP production deploy and API keys: [MCP_PLATFORM.md](./MCP_PLATFORM.md) § Roadmap PRs 21–27.
+HTTP production deploy: [MCP_PLATFORM.md](./MCP_PLATFORM.md) § Roadmap PRs 25–27.

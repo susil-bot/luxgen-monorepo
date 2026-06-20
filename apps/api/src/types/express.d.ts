@@ -1,6 +1,7 @@
 import { IUser, ITenant } from '@luxgen/db';
 import { UserRole } from '@luxgen/auth';
 import type { AuthErrorCode } from './auth';
+import type { VerifiedMcpApiKey } from '../services/mcpApiKeyService';
 
 declare global {
   namespace Express {
@@ -12,6 +13,7 @@ declare global {
       isCustomDomain?: boolean;
       tenantContext?: string;
       authError?: AuthErrorCode;
+      mcpApiKey?: VerifiedMcpApiKey;
     }
   }
 }

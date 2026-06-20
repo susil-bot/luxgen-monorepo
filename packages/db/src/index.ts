@@ -46,3 +46,7 @@ export type { IProjectItem, ProjectItemStatus, ProjectItemIteration, ProjectItem
 export { ProjectItem } from './project-item';
 export type { IEmailNotificationLog, ListingEmailTemplate } from './email-notification-log';
 export { EmailNotificationLog } from './email-notification-log';
+export type { IMcpToolAuditEntry } from './mcp-audit';
+export { McpToolAuditEntry } from './mcp-audit';
+export type { IMcpApiKey, McpApiKeyScope } from './mcp-api-key';
+export { McpApiKey } from './mcp-api-key';
