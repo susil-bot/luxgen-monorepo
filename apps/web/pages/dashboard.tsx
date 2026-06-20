@@ -21,7 +21,7 @@ interface DashboardProps {
 export default function Dashboard({ tenant }: DashboardProps) {
   const router = useRouter();
   const headerProps = useAppLayoutHeader();
-  const [user, setUser] = useState<UserMenu | null>(() => transformUserDataFromSession());
+  const [user, setUser] = useState<UserMenu | null>(null);
 
   // GraphQL query for dashboard data with error handling
   const {
