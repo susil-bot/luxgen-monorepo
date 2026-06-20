@@ -1,8 +1,6 @@
-export enum EnrollmentStatus {
+export enum EnrollmentLearningStatus {
   ACTIVE = 'ACTIVE',
   COMPLETED = 'COMPLETED',
-  CANCELLED = 'CANCELLED',
-  REFUNDED = 'REFUNDED',
 }
 
 export interface Enrollment {
@@ -12,7 +10,10 @@ export interface Enrollment {
   studentId?: string;
   /** Alias used in some clients */
   userId?: string;
-  status?: EnrollmentStatus;
+  learningStatus?: EnrollmentLearningStatus;
+  progressPercent?: number;
+  lastAccessedAt?: string;
+  completedAt?: string;
   paymentStatus?: string;
   enrolledAt?: string;
 }

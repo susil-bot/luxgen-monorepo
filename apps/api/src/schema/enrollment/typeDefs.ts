@@ -6,12 +6,21 @@ export const enrollmentTypeDefs = `
     VOIDED
   }
 
+  enum EnrollmentLearningStatus {
+    ACTIVE
+    COMPLETED
+  }
+
   type Enrollment {
     id: ID!
     courseId: ID!
     studentId: ID!
     notes: String!
     paymentStatus: EnrollmentPaymentStatus!
+    progressPercent: Int!
+    learningStatus: EnrollmentLearningStatus!
+    lastAccessedAt: Date
+    completedAt: Date
     paidAt: Date
     cancelledAt: Date
     enrolledAt: Date!
@@ -55,10 +64,17 @@ export const enrollmentTypeDefs = `
     sessionId: String!
   }
 
+  input UpdateEnrollmentProgressInput {
+    courseId: ID!
+    studentId: ID!
+    progressPercent: Int!
+  }
+
   extend type Query {
     enrollment(courseId: ID!, studentId: ID!): Enrollment
     enrollmentById(id: ID!): Enrollment
     enrollments(tenantId: ID!): [Enrollment!]!
+    studentEnrollments(tenantId: ID!, studentId: ID!): [Enrollment!]!
   }
 
   extend type Mutation {
@@ -69,5 +85,7 @@ export const enrollmentTypeDefs = `
     updateCustomerNotes(input: UpdateCustomerNotesInput!): User!
     createOrderCheckoutSession(input: CreateOrderCheckoutInput!): OrderCheckoutSession!
     confirmOrderPaymentDev(courseId: ID!, studentId: ID!, tenantId: ID!): Enrollment!
+    updateEnrollmentProgress(input: UpdateEnrollmentProgressInput!): Enrollment!
+    markCourseComplete(courseId: ID!): Enrollment!
   }
 `;

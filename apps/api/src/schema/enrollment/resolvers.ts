@@ -1,10 +1,19 @@
-import { EnrollmentPaymentStatus } from '@luxgen/db';
+import { EnrollmentPaymentStatus, EnrollmentLearningStatus, UserRole } from '@luxgen/db';
 import { enrollmentService } from '../../services/enrollmentService';
 import { courseService } from '../../services/courseService';
 import { actorFromContext } from '../../services/activityEventService';
 import { isBillingDevMode } from '../../services/billingService';
 import { User } from '@luxgen/db';
 import type { GraphQLContext } from '../../context';
+
+const STAFF_ROLES = new Set<UserRole>([UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.INSTRUCTOR]);
+
+function assertCanManageProgress(context: GraphQLContext, studentId: string): void {
+  if (!context.user) throw new Error('Authentication required');
+  if (context.user.id === studentId || context.user._id?.toString?.() === studentId) return;
+  if (STAFF_ROLES.has(context.user.role)) return;
+  throw new Error('Not authorized to update this enrollment');
+}
 
 function mapEnrollment(doc: {
   _id?: { toString(): string };
@@ -13,8 +22,12 @@ function mapEnrollment(doc: {
   student: { toString(): string } | string;
   notes: string;
   paymentStatus: string;
+  progressPercent?: number;
+  learningStatus?: string;
+  lastAccessedAt?: Date;
   paidAt?: Date;
   cancelledAt?: Date;
+  completedAt?: Date;
   enrolledAt: Date;
 }) {
   return {
@@ -23,8 +36,12 @@ function mapEnrollment(doc: {
     studentId: typeof doc.student === 'string' ? doc.student : doc.student.toString(),
     notes: doc.notes ?? '',
     paymentStatus: doc.paymentStatus,
+    progressPercent: doc.progressPercent ?? 0,
+    learningStatus: doc.learningStatus ?? EnrollmentLearningStatus.ACTIVE,
+    lastAccessedAt: doc.lastAccessedAt,
     paidAt: doc.paidAt,
     cancelledAt: doc.cancelledAt,
+    completedAt: doc.completedAt,
     enrolledAt: doc.enrolledAt,
   };
 }
@@ -44,6 +61,15 @@ export const enrollmentResolvers = {
     },
     enrollments: async (_: unknown, { tenantId }: { tenantId: string }) => {
       const docs = await enrollmentService.listByTenant(tenantId);
+      return docs.map(mapEnrollment);
+    },
+    studentEnrollments: async (
+      _: unknown,
+      { tenantId, studentId }: { tenantId: string; studentId: string },
+      context: GraphQLContext,
+    ) => {
+      assertCanManageProgress(context, studentId);
+      const docs = await enrollmentService.listByStudent(tenantId, studentId);
       return docs.map(mapEnrollment);
     },
   },
@@ -153,6 +179,22 @@ export const enrollmentResolvers = {
         studentId,
         `dev_manual_${Date.now()}`,
       );
+      return mapEnrollment(doc);
+    },
+    updateEnrollmentProgress: async (
+      _: unknown,
+      { input }: { input: { courseId: string; studentId: string; progressPercent: number } },
+      context: GraphQLContext,
+    ) => {
+      assertCanManageProgress(context, input.studentId);
+      const doc = await enrollmentService.updateProgress(input.courseId, input.studentId, input.progressPercent);
+      return mapEnrollment(doc);
+    },
+    markCourseComplete: async (_: unknown, { courseId }: { courseId: string }, context: GraphQLContext) => {
+      if (!context.user) throw new Error('Authentication required');
+      const studentId = context.user.id ?? context.user._id?.toString?.();
+      if (!studentId) throw new Error('User id required');
+      const doc = await enrollmentService.markCourseComplete(courseId, studentId);
       return mapEnrollment(doc);
     },
   },
