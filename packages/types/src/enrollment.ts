@@ -8,7 +8,11 @@ export enum EnrollmentStatus {
 export interface Enrollment {
   id: string;
   courseId: string;
-  userId: string;
-  status: EnrollmentStatus;
+  /** GraphQL field name */
+  studentId?: string;
+  /** Alias used in some clients */
+  userId?: string;
+  status?: EnrollmentStatus;
+  paymentStatus?: string;
   enrolledAt?: string;
 }

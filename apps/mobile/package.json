@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@apollo/client": "^3.8.0",
+    "@luxgen/billing": "*",
     "@luxgen/design-tokens": "*",
     "@luxgen/native-ui": "*",
     "@luxgen/types": "*",
