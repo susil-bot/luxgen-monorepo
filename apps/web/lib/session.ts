@@ -16,6 +16,13 @@ export interface SessionUser {
   };
 }
 
+export const AUTH_SESSION_CHANGE_EVENT = 'luxgen-auth-change';
+
+function notifyAuthSessionChange(): void {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new Event(AUTH_SESSION_CHANGE_EVENT));
+}
+
 export const AUTH_STORAGE_KEYS = {
   token: 'authToken',
   user: 'currentUser',
@@ -87,6 +94,7 @@ export function persistSession(token: string, user: SessionUser): void {
   if (expiresAt) {
     localStorage.setItem(AUTH_STORAGE_KEYS.expiresAt, String(expiresAt));
   }
+  notifyAuthSessionChange();
 }
 
 export function getStoredUser(): SessionUser | null {
@@ -119,6 +127,7 @@ export function clearStoredSession(): void {
     }
   });
   localStorage.setItem(AUTH_STORAGE_KEYS.sessionEpoch, String(Date.now()));
+  notifyAuthSessionChange();
 }
 
 export function getMsUntilExpiry(): number | null {

@@ -1,5 +1,6 @@
 import { UserMenu } from '@luxgen/ui';
 import { createHandleUserAction } from './user-actions';
+import { getStoredUser, isStoredSessionExpired } from './session';
 
 export interface DashboardData {
   stats: {
@@ -345,8 +346,28 @@ export const transformDashboardData = (graphqlData: any, tenant: string): Transf
 };
 
 /**
- * Transform user data for dashboard display
+ * Transform user data for dashboard display from the active auth session.
+ * Returns null when the user is not signed in.
  */
+export const transformUserDataFromSession = (): UserMenu | null => {
+  if (typeof window === 'undefined') return null;
+  if (isStoredSessionExpired()) return null;
+
+  const sessionUser = getStoredUser();
+  if (!sessionUser) return null;
+
+  return {
+    name: `${sessionUser.firstName} ${sessionUser.lastName}`.trim() || sessionUser.email,
+    email: sessionUser.email,
+    role: sessionUser.role,
+    tenant: {
+      name: sessionUser.tenant.name,
+      subdomain: sessionUser.tenant.subdomain,
+    },
+  };
+};
+
+/** @deprecated Use transformUserDataFromSession — do not fabricate users for unauthenticated sessions */
 export const transformUserData = (tenant: string): UserMenu => ({
   name: `${tenant.charAt(0).toUpperCase() + tenant.slice(1)} User`,
   email: `user@${tenant}.com`,

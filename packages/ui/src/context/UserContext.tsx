@@ -30,29 +30,41 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children, currentTen
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load user data for current tenant
+  const hasAuthToken = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    return Boolean(localStorage.getItem('authToken'));
+  };
+
+  // Load user data for current tenant (only when a session token exists)
   const loadUser = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      // First try to get user from storage
-      const storedUser = getUserFromStorage();
-
-      // Check if stored user belongs to current tenant
-      if (storedUser && storedUser.tenant?.subdomain === currentTenant) {
-        console.log('👤 Using stored user for tenant:', currentTenant);
-        setUser(storedUser);
-      } else {
-        // Fetch new user data for tenant
-        console.log('👤 Fetching new user for tenant:', currentTenant);
-        const userData = await fetchUserForTenant(currentTenant);
-        setUser(userData);
-        saveUserToStorage(userData);
+      if (!hasAuthToken()) {
+        clearUserFromStorage();
+        setUser(null);
+        return;
       }
+
+      const storedUser = getUserFromStorage();
+      if (storedUser && storedUser.tenant?.subdomain === currentTenant) {
+        setUser(storedUser);
+        return;
+      }
+
+      const userData = await fetchUserForTenant(currentTenant);
+      setUser(userData);
+      saveUserToStorage(userData);
     } catch (err) {
+      if (err instanceof Error && err.message === 'UNAUTHENTICATED') {
+        clearUserFromStorage();
+        setUser(null);
+        return;
+      }
       console.error('Error loading user:', err);
       setError(err instanceof Error ? err.message : 'Failed to load user');
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -103,11 +115,23 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children, currentTen
     await loadUser();
   };
 
-  // Load user when tenant changes (with stability check)
+  // Load user when tenant changes or auth session updates
   useEffect(() => {
-    if (currentTenant) {
-      loadUser();
-    }
+    if (!currentTenant) return;
+
+    void loadUser();
+
+    const onAuthChange = () => {
+      void loadUser();
+    };
+
+    window.addEventListener('storage', onAuthChange);
+    window.addEventListener('luxgen-auth-change', onAuthChange);
+
+    return () => {
+      window.removeEventListener('storage', onAuthChange);
+      window.removeEventListener('luxgen-auth-change', onAuthChange);
+    };
   }, [currentTenant]);
 
   const contextValue: UserContextType = {
