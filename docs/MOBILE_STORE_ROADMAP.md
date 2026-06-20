@@ -89,7 +89,7 @@ packages/ui             → React DOM only (existing)
 ## Phase 3 — Polish & launch
 
 **Branch:** `feat/mobile-phase3`  
-**PR:** _pending_
+**PR:** https://github.com/susil-bot/luxgen-monorepo/pull/43 ✅
 
 - [x] Push notifications (`expo-server-sdk` on API + `expo-notifications` on mobile)
 - [x] OTA updates (EAS Update channels + `useOtaUpdates` hook)
@@ -109,7 +109,7 @@ packages/ui             → React DOM only (existing)
 | 1     | `feat/mobile-foundation`      | [#39](https://github.com/susil-bot/luxgen-monorepo/pull/39) | Done — awaiting merge |
 | 2a    | `feat/learner-storefront`     | —                                                           | Not started           |
 | 2b    | `feat/mobile-learner-screens` | [#42](https://github.com/susil-bot/luxgen-monorepo/pull/42) | Done — awaiting merge |
-| 3     | `feat/mobile-phase3`          | —                                                           | Done — awaiting PR    |
+| 3     | `feat/mobile-phase3`          | [#43](https://github.com/susil-bot/luxgen-monorepo/pull/43) | Done — awaiting merge |
 
 ---
 
