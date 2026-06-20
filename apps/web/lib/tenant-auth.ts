@@ -28,3 +28,8 @@ export function tenantMismatchMessage(user: SessionUser): string {
   const hostTenant = getHostTenantSubdomain();
   return `This account belongs to "${user.tenant.name}" (${accountTenant}.localhost). You are on ${hostTenant}.localhost — use the correct subdomain to sign in.`;
 }
+
+/** x-tenant header for GraphQL — always follow the browser host, never stale localStorage. */
+export function resolveRequestTenant(): string {
+  return getHostTenantSubdomain();
+}

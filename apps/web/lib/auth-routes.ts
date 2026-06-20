@@ -34,6 +34,11 @@ export const PROTECTED_PREFIXES = [
   '/project',
 ];
 
+export function isAuthPage(pathname: string): boolean {
+  const path = normalizePath(pathname);
+  return path === '/login' || path === '/register';
+}
+
 export function isPublicRoute(pathname: string): boolean {
   const path = normalizePath(pathname);
 
