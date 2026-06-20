@@ -93,6 +93,8 @@ export function persistSession(token: string, user: SessionUser): void {
   localStorage.setItem(AUTH_STORAGE_KEYS.sessionEpoch, String(Date.now()));
   if (expiresAt) {
     localStorage.setItem(AUTH_STORAGE_KEYS.expiresAt, String(expiresAt));
+  } else {
+    localStorage.removeItem(AUTH_STORAGE_KEYS.expiresAt);
   }
   notifyAuthSessionChange();
 }

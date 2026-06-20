@@ -43,6 +43,8 @@ alwaysApply: true
 | Wrong tenant token | Redirect `tenant_mismatch`; session cleared |
 | `UserContext` after login | Prefer `currentUser` from storage; **do not** call `clearAuthSessionStorage()` on `/api/users/me` 403 from id vs subdomain mismatch |
 | JWT `tenant` claim | Mongo tenant **id** — never compare directly to subdomain query param |
+| JWT `kid` header | Tenant Mongo id in dev — verify with `getTenantKey(kid)` fallback to `JWT_SECRET`, not `hasTenantKey` reject |
+| Web `JWT_SECRET` | Must match `apps/api` — required for `pages/api/users/me` |
 
 ## Files to touch when changing auth UI
 
