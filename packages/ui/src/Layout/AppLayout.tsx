@@ -4,10 +4,11 @@ import { defaultTheme, TenantTheme } from '../theme';
 import { NavBar, NavItem, UserMenu } from '../NavBar';
 import { Sidebar } from '../Sidebar/Sidebar';
 import type { SidebarSection } from '../Sidebar/Sidebar';
-import { MenuLayer, MenuItem } from '../Menu';
+import { MenuItem } from '../Menu';
 import { useGlobalContext } from '../context/GlobalContext';
 import { useTheme } from '../context/ThemeContext';
 import { useNavigation } from '../context/NavigationContext';
+import { useNavTenantSwitch } from '../context/NavTenantSwitchContext';
 import { AIStudioSidekick } from '../AIStudio';
 import { useAIStudioOptional } from '../AIStudio/AIStudioContext';
 // import { ErrorBoundary } from '../ErrorBoundary';
@@ -108,6 +109,7 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   const resolvedPathname = pathname ?? navigation.pathname;
   const resolvedNavigate = onNavigate ?? navigation.onNavigate;
   const aiStudio = useAIStudioOptional();
+  const navTenantSwitch = useNavTenantSwitch();
 
   // Analytics tracking functions
   const trackLayoutEvent = useCallback(
@@ -209,9 +211,7 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
       return 'w-full';
     }
 
-    return sidebarCollapsed
-      ? 'ml-[var(--lux-sidebar-collapsed-w)]'
-      : 'ml-[var(--lux-sidebar-expanded-w)]';
+    return sidebarCollapsed ? 'ml-[var(--lux-sidebar-collapsed-w)]' : 'ml-[var(--lux-sidebar-expanded-w)]';
   };
 
   const getMenuStyles = () => {
@@ -322,6 +322,15 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
           {/* NavBar - Always rendered */}
           <NavBar
             user={user}
+            tenantSwitch={
+              navTenantSwitch
+                ? {
+                    currentSubdomain: navTenantSwitch.currentSubdomain,
+                    tenants: navTenantSwitch.tenants,
+                    onTenantSelect: navTenantSwitch.onTenantSelect,
+                  }
+                : undefined
+            }
             onUserAction={onUserAction}
             showSearch={showSearch}
             onSearch={onSearch}

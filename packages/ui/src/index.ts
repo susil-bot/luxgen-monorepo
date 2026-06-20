@@ -108,6 +108,7 @@ export * from './context/GlobalContext';
 export * from './context/ThemeContext';
 export * from './context/UserContext';
 export * from './context/NavigationContext';
+export * from './context/NavTenantSwitchContext';
 
 // Services
 export * from './services/userService';

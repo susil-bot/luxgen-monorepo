@@ -12,8 +12,16 @@ export interface UserMenu {
   initials?: string;
 }
 
+export interface NavTenantSwitchProps {
+  currentSubdomain: string;
+  tenants: Array<{ id: string; name: string; subdomain: string }>;
+  onTenantSelect: (tenant: { id: string; name: string; subdomain: string }) => void;
+}
+
 export interface NavBarProps {
   user?: UserMenu;
+  /** Super-admin tenant switcher — rendered only when user.role is SUPER_ADMIN */
+  tenantSwitch?: NavTenantSwitchProps;
   onUserAction?: (action: 'profile' | 'settings' | 'logout') => void;
   showSearch?: boolean;
   onSearch?: (query: string) => void;
@@ -36,8 +44,11 @@ export interface NavBarProps {
   className?: string;
 }
 
+const isSuperAdminRole = (role?: string) => (role ?? '').toUpperCase() === 'SUPER_ADMIN';
+
 const NavBarComponent: React.FC<NavBarProps> = ({
   user,
+  tenantSwitch,
   onUserAction,
   showSearch = true,
   onSearch,
@@ -57,8 +68,11 @@ const NavBarComponent: React.FC<NavBarProps> = ({
   ...props
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isTenantMenuOpen, setIsTenantMenuOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const tenantMenuRef = useRef<HTMLDivElement>(null);
   const aiStudio = useAIStudioOptional();
+  const showTenantSwitch = isSuperAdminRole(user?.role) && tenantSwitch && tenantSwitch.tenants.length > 0;
 
   const handleAIStudioClick = () => {
     if (onAIStudioClick) {
@@ -72,6 +86,9 @@ const NavBarComponent: React.FC<NavBarProps> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
         setIsMobileMenuOpen(false);
+      }
+      if (tenantMenuRef.current && !tenantMenuRef.current.contains(event.target as Node)) {
+        setIsTenantMenuOpen(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -112,6 +129,65 @@ const NavBarComponent: React.FC<NavBarProps> = ({
             </div>
             <span className="text-base font-semibold hidden sm:inline">{logo.text}</span>
           </a>
+
+          {showTenantSwitch && tenantSwitch && (
+            <div className="relative hidden sm:block" ref={tenantMenuRef}>
+              <button
+                type="button"
+                onClick={() => setIsTenantMenuOpen(!isTenantMenuOpen)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium transition-colors"
+                style={{
+                  color: 'var(--color-label-primary)',
+                  backgroundColor: isTenantMenuOpen ? 'var(--color-fill-tertiary)' : 'transparent',
+                  border: '1px solid var(--color-separator)',
+                }}
+                aria-label="Switch tenant"
+                aria-expanded={isTenantMenuOpen}
+                onMouseEnter={(e) => {
+                  if (!isTenantMenuOpen) e.currentTarget.style.backgroundColor = 'var(--color-fill-quaternary)';
+                }}
+                onMouseLeave={(e) => {
+                  if (!isTenantMenuOpen) e.currentTarget.style.backgroundColor = 'transparent';
+                }}
+              >
+                <span className="max-w-[140px] truncate">
+                  {tenantSwitch.tenants.find((t) => t.subdomain === tenantSwitch.currentSubdomain)?.name ??
+                    tenantSwitch.currentSubdomain}
+                </span>
+                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {isTenantMenuOpen && (
+                <div
+                  className="absolute left-0 mt-2 w-64 surface-elevated rounded-xl py-1 max-h-72 overflow-y-auto"
+                  style={{ boxShadow: 'var(--shadow-lg)', zIndex: 60 }}
+                >
+                  {tenantSwitch.tenants.map((tenant) => {
+                    const isActive = tenant.subdomain === tenantSwitch.currentSubdomain;
+                    return (
+                      <button
+                        key={tenant.id}
+                        type="button"
+                        onClick={() => {
+                          setIsTenantMenuOpen(false);
+                          if (!isActive) tenantSwitch.onTenantSelect(tenant);
+                        }}
+                        className="w-full px-4 py-2.5 text-left transition-colors hover:bg-[var(--color-fill-quaternary)]"
+                        style={{
+                          backgroundColor: isActive ? 'var(--color-fill-tertiary)' : 'transparent',
+                        }}
+                      >
+                        <p className="text-sm font-medium text-primary truncate">{tenant.name}</p>
+                        <p className="text-xs text-secondary truncate">{tenant.subdomain}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Search Bar — visible at all breakpoints */}
