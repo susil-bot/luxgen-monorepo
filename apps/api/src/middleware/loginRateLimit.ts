@@ -17,7 +17,7 @@ function evictExpiredEntries(): void {
   }
 }
 
-const DEFAULT_MAX = Number(process.env.LOGIN_RATE_LIMIT_MAX || 10);
+const DEFAULT_MAX = Number(process.env.LOGIN_RATE_LIMIT_MAX || (process.env.NODE_ENV === 'development' ? 1000 : 10));
 const DEFAULT_WINDOW_MS = Number(process.env.LOGIN_RATE_LIMIT_WINDOW_MS || 15 * 60 * 1000);
 
 function clientKey(req: Request, email?: string): string {
