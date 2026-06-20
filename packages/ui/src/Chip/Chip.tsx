@@ -47,7 +47,7 @@ export const Chip: React.FC<ChipProps> = ({
 
   const sizeClasses = {
     small: 'px-2 py-1 text-xs',
-    medium: 'px-3 py-1.5 text-sm',
+    medium: 'px-[10px] py-1.5 text-sm',
     large: 'px-4 py-2 text-base',
   };
 

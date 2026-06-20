@@ -353,7 +353,7 @@ html.dark [data-tenant='idea-vibes'] {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 2px 8px;
+    padding: 4px 10px;
     border-radius: var(--radius-full);
     font-size: 11px;
     font-weight: 600;
@@ -521,7 +521,7 @@ html.dark [data-tenant='idea-vibes'] {
     align-items: center;
     justify-content: center;
     gap: 6px;
-    padding: 12px 22px;
+    padding: 10px 20px;
     background-color: var(--color-blue);
     color: #fff;
     font-size: 15px;
@@ -585,7 +585,7 @@ html.dark [data-tenant='idea-vibes'] {
     display: inline-flex;
     align-items: center;
     gap: 4px;
-    padding: 8px 12px;
+    padding: 10px 12px;
     color: var(--color-blue);
     font-size: 15px;
     font-weight: 500;

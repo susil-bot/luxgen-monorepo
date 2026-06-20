@@ -1,9 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
-import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMutation, useQuery } from '@apollo/client';
-import { AppLayout, getDefaultLogo, getDefaultSidebarSections, SnackbarProvider, useSnackbar } from '@luxgen/ui';
+import {
+  AppLayout,
+  getDefaultLogo,
+  getDefaultSidebarSections,
+  SnackbarProvider,
+  useSnackbar,
+  DataListPage,
+  EmptyState,
+} from '@luxgen/ui';
+import type { DataListTab, FilterChipData, SortOption } from '@luxgen/ui';
 import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../lib/app-layout-user';
@@ -24,7 +32,32 @@ interface ProductsPageProps {
 }
 
 type SortKey = 'title' | 'updatedAt' | 'inventory' | 'status';
-type StatusFilter = 'ALL' | ProductStatus;
+
+const PRODUCT_TABS: DataListTab[] = [
+  { id: 'ALL', label: 'All' },
+  { id: 'PUBLISHED', label: 'Active' },
+  { id: 'DRAFT', label: 'Draft' },
+  { id: 'COMPLETED', label: 'Completed' },
+  { id: 'CANCELLED', label: 'Archived' },
+];
+
+const SORT_OPTIONS: SortOption[] = [
+  { id: 'updatedAt-desc', label: 'Updated (newest)' },
+  { id: 'updatedAt-asc', label: 'Updated (oldest)' },
+  { id: 'title-asc', label: 'Title A–Z' },
+  { id: 'inventory-desc', label: 'Inventory (high)' },
+];
+
+const ProductsIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.8}
+      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+    />
+  </svg>
+);
 
 function ProductsPage({ tenant }: ProductsPageProps) {
   const router = useRouter();
@@ -37,10 +70,9 @@ function ProductsPage({ tenant }: ProductsPageProps) {
   const headerProps = useAppLayoutHeader();
 
   const [search, setSearch] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>('ALL');
-  const [typeFilter, setTypeFilter] = useState('ALL');
-  const [sortBy, setSortBy] = useState<SortKey>('updatedAt');
-  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+  const [activeTab, setActiveTab] = useState('ALL');
+  const [activeFilters, setActiveFilters] = useState<FilterChipData[]>([]);
+  const [sortId, setSortId] = useState('updatedAt-desc');
   const [selected, setSelected] = useState<string[]>([]);
   const [bulkLoading, setBulkLoading] = useState(false);
 
@@ -57,6 +89,24 @@ function ProductsPage({ tenant }: ProductsPageProps) {
     if (typeof q === 'string') setSearch(q);
   }, [router.query.search]);
 
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    if (tabId !== 'ALL') {
+      const tab = PRODUCT_TABS.find((t) => t.id === tabId);
+      if (tab) setActiveFilters([{ id: `status_${tabId}`, label: 'Status', value: tab.label }]);
+    } else {
+      setActiveFilters([]);
+    }
+  };
+
+  const handleSortChange = (optionId: string) => setSortId(optionId);
+
+  const handleClearAll = () => {
+    setActiveFilters([]);
+    setSearch('');
+    setActiveTab('ALL');
+  };
+
   const products = useMemo(() => {
     const raw: GraphQLCourseProduct[] = data?.courses ?? [];
     let rows = raw.map(courseToProductRow);
@@ -65,22 +115,17 @@ function ProductsPage({ tenant }: ProductsPageProps) {
       const q = search.toLowerCase();
       rows = rows.filter(
         (p) =>
-          p.title.toLowerCase().includes(q) ||
-          p.vendor.toLowerCase().includes(q) ||
-          p.sku.toLowerCase().includes(q),
+          p.title.toLowerCase().includes(q) || p.vendor.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q),
       );
     }
 
-    if (statusFilter !== 'ALL') {
-      rows = rows.filter((p) => p.status === statusFilter);
+    if (activeTab !== 'ALL') {
+      rows = rows.filter((p) => p.status === (activeTab as ProductStatus));
     }
 
-    if (typeFilter !== 'ALL') {
-      rows = rows.filter((p) => p.productType === typeFilter);
-    }
-
+    const [sortBy, sortDir] = sortId.split('-') as [SortKey, 'asc' | 'desc'];
+    const dir = sortDir === 'asc' ? 1 : -1;
     rows.sort((a, b) => {
-      const dir = sortDir === 'asc' ? 1 : -1;
       if (sortBy === 'title') return a.title.localeCompare(b.title) * dir;
       if (sortBy === 'status') return a.status.localeCompare(b.status) * dir;
       if (sortBy === 'inventory') return (a.inventory - b.inventory) * dir;
@@ -88,7 +133,16 @@ function ProductsPage({ tenant }: ProductsPageProps) {
     });
 
     return rows;
-  }, [data, search, statusFilter, typeFilter, sortBy, sortDir]);
+  }, [data, search, activeTab, sortId]);
+
+  const tabsWithCounts: DataListTab[] = useMemo(() => {
+    const raw: GraphQLCourseProduct[] = data?.courses ?? [];
+    const all = raw.map(courseToProductRow);
+    return PRODUCT_TABS.map((tab) => ({
+      ...tab,
+      count: tab.id === 'ALL' ? all.length : all.filter((p) => p.status === tab.id).length,
+    }));
+  }, [data]);
 
   const toggleAll = () => {
     if (selected.length === products.length) setSelected([]);
@@ -103,9 +157,7 @@ function ProductsPage({ tenant }: ProductsPageProps) {
     if (selected.length === 0) return;
     setBulkLoading(true);
     try {
-      await Promise.all(
-        selected.map((id) => updateCourse({ variables: { id, input: { status } } })),
-      );
+      await Promise.all(selected.map((id) => updateCourse({ variables: { id, input: { status } } })));
       await refetch();
       showSuccess(`${selected.length} product${selected.length === 1 ? '' : 's'} updated`);
       setSelected([]);
@@ -134,102 +186,86 @@ function ProductsPage({ tenant }: ProductsPageProps) {
         {...headerProps}
         responsive
       >
-        <div className="split-page admin-list-page max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-            <div>
-              <h1 className="ios-large-title">Products</h1>
-              <p className="mt-1 text-secondary text-sm">Courses as catalog products — search, filter, bulk actions</p>
-            </div>
-            <Link href="/products/create" className="ios-btn-primary">
-              + Add product
-            </Link>
-          </div>
-
-          <div className="ios-card p-4 flex flex-col lg:flex-row gap-3">
-            <input
-              type="search"
-              placeholder="Search title, vendor, SKU…"
-              className="ios-input flex-1"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-            />
-            <select className="ios-input lg:w-40" value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as StatusFilter)}>
-              <option value="ALL">All statuses</option>
-              <option value="PUBLISHED">Active</option>
-              <option value="DRAFT">Draft</option>
-              <option value="COMPLETED">Completed</option>
-              <option value="CANCELLED">Archived</option>
-            </select>
-            <select className="ios-input lg:w-36" value={typeFilter} onChange={(e) => setTypeFilter(e.target.value)}>
-              <option value="ALL">All types</option>
-              <option value="Course">Course</option>
-            </select>
-            <select
-              className="ios-input lg:w-44"
-              value={`${sortBy}-${sortDir}`}
-              onChange={(e) => {
-                const [k, d] = e.target.value.split('-') as [SortKey, 'asc' | 'desc'];
-                setSortBy(k);
-                setSortDir(d);
-              }}
-            >
-              <option value="updatedAt-desc">Updated (newest)</option>
-              <option value="updatedAt-asc">Updated (oldest)</option>
-              <option value="title-asc">Title A–Z</option>
-              <option value="inventory-desc">Inventory (high)</option>
-            </select>
-          </div>
-
-          {selected.length > 0 && (
-            <div className="ios-card p-3 flex flex-wrap items-center gap-3">
-              <span className="text-sm text-secondary">{selected.length} selected</span>
-              <button
-                type="button"
-                className="ios-btn-secondary text-sm"
-                disabled={bulkLoading}
-                onClick={() => void bulkSetStatus('DRAFT')}
+        <div className="admin-list-page max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <DataListPage
+            icon={<ProductsIcon />}
+            breadcrumb="Products"
+            title="Products"
+            primaryAction={{ label: '+ Add product', onClick: () => void router.push('/products/create') }}
+            tabs={tabsWithCounts}
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            searchQuery={search}
+            onSearchChange={setSearch}
+            activeFilters={activeFilters}
+            onRemoveFilter={(id) => setActiveFilters((prev) => prev.filter((f) => f.id !== id))}
+            onAddFilter={() => {}}
+            onClearAll={handleClearAll}
+            searchPlaceholder="Search title, vendor, SKU…"
+            sortOptions={SORT_OPTIONS}
+            selectedSortOption={sortId}
+            sortDirection={sortId.endsWith('-asc') ? 'asc' : 'desc'}
+            onSortOptionChange={handleSortChange}
+            onSortDirectionChange={() => {}}
+          >
+            {/* Bulk action bar */}
+            {selected.length > 0 && (
+              <div
+                className="flex flex-wrap items-center gap-3 px-4 py-2.5 border-b"
+                style={{ borderColor: 'var(--color-separator)', background: 'var(--color-bg-tertiary)' }}
               >
-                Set draft
-              </button>
-              <button
-                type="button"
-                className="ios-btn-secondary text-sm"
-                disabled={bulkLoading}
-                onClick={() => void bulkSetStatus('PUBLISHED')}
-              >
-                Publish
-              </button>
-              <button type="button" className="ios-btn-plain text-sm" onClick={() => setSelected([])}>
-                Clear
-              </button>
-            </div>
-          )}
+                <span className="text-sm text-secondary">{selected.length} selected</span>
+                <button
+                  type="button"
+                  className="ios-btn-secondary text-sm"
+                  disabled={bulkLoading}
+                  onClick={() => void bulkSetStatus('DRAFT')}
+                >
+                  Set draft
+                </button>
+                <button
+                  type="button"
+                  className="ios-btn-secondary text-sm"
+                  disabled={bulkLoading}
+                  onClick={() => void bulkSetStatus('PUBLISHED')}
+                >
+                  Publish
+                </button>
+                <button type="button" className="ios-btn-plain text-sm" onClick={() => setSelected([])}>
+                  Clear
+                </button>
+              </div>
+            )}
 
-          {error && !data && (
-            <PageEmptyState icon="⚠️" title="Could not load products" subtitle={error.message} />
-          )}
-
-          {!error && products.length === 0 && (
-            <PageEmptyState
-              icon="📦"
-              title="No products yet"
-              subtitle="Create a course to list it here."
-              action={
-                <Link href="/products/create" className="ios-btn-primary mt-4 inline-block">
-                  Add product
-                </Link>
-              }
-            />
-          )}
-
-          {products.length > 0 && (
-            <div className="ios-card overflow-hidden">
+            {error && !data ? (
+              <PageEmptyState icon="⚠️" title="Could not load products" subtitle={error.message} />
+            ) : products.length === 0 ? (
+              <EmptyState
+                title="No products found"
+                description={
+                  search || activeTab !== 'ALL'
+                    ? 'Try changing the filters or search term'
+                    : 'Create a course to list it here.'
+                }
+                action={
+                  !search && activeTab === 'ALL'
+                    ? { label: 'Add product', onClick: () => void router.push('/products/create') }
+                    : undefined
+                }
+              />
+            ) : (
               <div className="ios-table-wrap">
                 <table className="ios-table">
                   <thead>
                     <tr>
-                      <th>
-                        <input type="checkbox" checked={selected.length === products.length} onChange={toggleAll} />
+                      <th style={{ width: 40 }}>
+                        <input
+                          type="checkbox"
+                          checked={selected.length === products.length && products.length > 0}
+                          onChange={toggleAll}
+                          aria-label="Select all products"
+                          style={{ accentColor: 'var(--color-blue)' }}
+                        />
                       </th>
                       <th>Product</th>
                       <th>Status</th>
@@ -245,7 +281,12 @@ function ProductsPage({ tenant }: ProductsPageProps) {
                     {products.map((p) => (
                       <tr key={p.id}>
                         <td>
-                          <input type="checkbox" checked={selected.includes(p.id)} onChange={() => toggleOne(p.id)} />
+                          <input
+                            type="checkbox"
+                            checked={selected.includes(p.id)}
+                            onChange={() => toggleOne(p.id)}
+                            style={{ accentColor: 'var(--color-blue)' }}
+                          />
                         </td>
                         <td>
                           <button
@@ -278,8 +319,8 @@ function ProductsPage({ tenant }: ProductsPageProps) {
                   </tbody>
                 </table>
               </div>
-            </div>
-          )}
+            )}
+          </DataListPage>
         </div>
       </AppLayout>
     </>

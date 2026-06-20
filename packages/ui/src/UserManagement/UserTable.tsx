@@ -1,7 +1,35 @@
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { UserTableProps } from './types';
 import { UserRow } from './UserRow';
-import { Chip } from '../Chip';
+import { DataListPage, EmptyState } from '../DataList';
+import type { DataListTab, FilterChipData, SortOption } from '../DataList';
+
+const USER_TABS: DataListTab[] = [
+  { id: 'all', label: 'All' },
+  { id: 'active', label: 'Active' },
+  { id: 'pending', label: 'Pending' },
+  { id: 'current_store', label: 'Current store' },
+  { id: 'pos_only', label: 'POS app-only' },
+  { id: 'requests', label: 'Requests' },
+];
+
+const SORT_OPTIONS: SortOption[] = [
+  { id: 'last_name', label: 'Last name' },
+  { id: 'first_name', label: 'First name' },
+  { id: 'email', label: 'Email' },
+  { id: 'status', label: 'Status' },
+];
+
+const UsersIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={1.8}
+      d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"
+    />
+  </svg>
+);
 
 export const UserTable: React.FC<UserTableProps> = ({
   users,
@@ -19,167 +47,188 @@ export const UserTable: React.FC<UserTableProps> = ({
   onAddUser,
   onUserAction,
 }) => {
-  const totalPages = Math.ceil(users.length / rowsPerPage);
-  const startIndex = (currentPage - 1) * rowsPerPage;
-  const endIndex = Math.min(startIndex + rowsPerPage, users.length);
-  const paginatedUsers = users.slice(startIndex, endIndex);
+  const [activeTab, setActiveTab] = useState('all');
+  const [activeFilters, setActiveFilters] = useState<FilterChipData[]>([]);
+  const [sortOption, setSortOption] = useState('last_name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-  const handleSelectAll = () => {
-    if (onSelectAll) {
-      onSelectAll();
+  const handleRemoveFilter = (id: string) => {
+    setActiveFilters((prev) => prev.filter((f) => f.id !== id));
+  };
+
+  const handleClearAll = () => {
+    setActiveFilters([]);
+    onSearchChange?.('');
+  };
+
+  const handleTabChange = (tabId: string) => {
+    setActiveTab(tabId);
+    if (tabId !== 'all') {
+      const tab = USER_TABS.find((t) => t.id === tabId);
+      if (tab) {
+        setActiveFilters([{ id: `tab_${tabId}`, label: 'User type', value: tab.label }]);
+      }
+    } else {
+      setActiveFilters([]);
     }
   };
 
+  const filteredUsers = useMemo(() => {
+    let result = users;
+    if (activeTab === 'active') result = result.filter((u) => u.status === 'active');
+    else if (activeTab === 'pending') result = result.filter((u) => u.status === 'pending');
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(
+        (u) =>
+          u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q) || u.username.toLowerCase().includes(q),
+      );
+    }
+    return result;
+  }, [users, activeTab, searchQuery]);
+
+  const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
+  const startIndex = (currentPage - 1) * rowsPerPage;
+  const endIndex = Math.min(startIndex + rowsPerPage, filteredUsers.length);
+  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
   const isAllSelected = selectedUsers.length === paginatedUsers.length && paginatedUsers.length > 0;
 
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2" style={{ borderColor: 'var(--color-blue)' }} />
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-      {/* Header */}
-      <div className="p-6 border-b border-gray-200">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-bold text-gray-900">Total users with their roles</h2>
-            <p className="text-gray-600 mt-1">
-              Find all of your company's administrator accounts and their associate roles.
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={onExport}
-              className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                />
-              </svg>
-              EXPORT
-            </button>
-
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search users..."
-                value={searchQuery}
-                onChange={(e) => onSearchChange?.(e.target.value)}
-                className="w-full sm:w-64 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              />
-              <svg
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
+    <div className="admin-list-page max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <DataListPage
+        icon={<UsersIcon />}
+        breadcrumb="Users"
+        title="Users"
+        secondaryAction={onExport ? { label: 'Export', onClick: onExport } : undefined}
+        primaryAction={onAddUser ? { label: 'Add users', onClick: onAddUser } : undefined}
+        tabs={USER_TABS}
+        activeTab={activeTab}
+        onTabChange={handleTabChange}
+        searchQuery={searchQuery}
+        onSearchChange={(q) => onSearchChange?.(q)}
+        activeFilters={activeFilters}
+        onRemoveFilter={handleRemoveFilter}
+        onAddFilter={() => {}}
+        onClearAll={handleClearAll}
+        searchPlaceholder="Search users"
+        sortOptions={SORT_OPTIONS}
+        selectedSortOption={sortOption}
+        sortDirection={sortDirection}
+        onSortOptionChange={setSortOption}
+        onSortDirectionChange={setSortDirection}
+      >
+        {paginatedUsers.length === 0 ? (
+          <EmptyState title="No users found" description="Try changing the filters or search term" />
+        ) : (
+          <>
+            <div className="ios-table-wrap">
+              <table className="ios-table">
+                <thead>
+                  <tr>
+                    <th style={{ width: 40 }}>
+                      <input
+                        type="checkbox"
+                        checked={isAllSelected}
+                        onChange={() => onSelectAll?.()}
+                        className="rounded"
+                        style={{ accentColor: 'var(--color-blue)' }}
+                        aria-label="Select all users"
+                      />
+                    </th>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Plan</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedUsers.map((user) => (
+                    <UserRow
+                      key={user.id}
+                      user={user}
+                      selected={selectedUsers.includes(user.id)}
+                      onSelect={onUserSelect}
+                      onAction={onUserAction}
+                      showCheckbox
+                    />
+                  ))}
+                </tbody>
+              </table>
             </div>
 
-            <button
-              onClick={onAddUser}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center gap-2"
+            {/* Pagination */}
+            <div
+              className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 px-4 py-3 border-t text-sm"
+              style={{ borderColor: 'var(--color-separator)', color: 'var(--color-label-secondary)' }}
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-              </svg>
-              ADD USER
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="overflow-x-auto">
-        <table className="w-full">
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-6 py-3 text-left">
-                <input
-                  type="checkbox"
-                  checked={isAllSelected}
-                  onChange={handleSelectAll}
-                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-                />
-              </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">USER</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">EMAIL</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ROLE</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PLAN</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">STATUS</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ACTION</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {paginatedUsers.map((user) => (
-              <UserRow
-                key={user.id}
-                user={user}
-                selected={selectedUsers.includes(user.id)}
-                onSelect={onUserSelect}
-                onAction={onUserAction}
-                showCheckbox={true}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Pagination */}
-      <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-        <div className="flex items-center">
-          <span className="text-sm text-gray-700">Rows per page:</span>
-          <select
-            value={rowsPerPage}
-            onChange={(e) => onRowsPerPageChange?.(Number(e.target.value))}
-            className="ml-2 border border-gray-300 rounded px-2 py-1 text-sm"
-          >
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-            <option value={25}>25</option>
-            <option value={50}>50</option>
-          </select>
-        </div>
-
-        <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-700">
-            {startIndex + 1}-{endIndex} of {users.length}
-          </span>
-          <button
-            onClick={() => onPageChange?.(Math.max(currentPage - 1, 1))}
-            disabled={currentPage === 1}
-            className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <button
-            onClick={() => onPageChange?.(Math.min(currentPage + 1, totalPages))}
-            disabled={currentPage === totalPages}
-            className="p-2 rounded-lg border border-gray-300 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
-      </div>
+              <div className="flex items-center gap-2">
+                <span>Rows per page:</span>
+                <select
+                  value={rowsPerPage}
+                  onChange={(e) => onRowsPerPageChange?.(Number(e.target.value))}
+                  className="border rounded px-2 py-1 text-sm"
+                  style={{
+                    borderColor: 'var(--color-separator-opaque)',
+                    background: 'var(--color-bg-secondary)',
+                    color: 'var(--color-label-primary)',
+                  }}
+                >
+                  {[5, 10, 25, 50].map((n) => (
+                    <option key={n} value={n}>
+                      {n}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex items-center gap-2">
+                <span>
+                  {startIndex + 1}–{endIndex} of {filteredUsers.length}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => onPageChange?.(Math.max(currentPage - 1, 1))}
+                  disabled={currentPage === 1}
+                  className="p-1.5 rounded-lg border disabled:opacity-40"
+                  style={{
+                    borderColor: 'var(--color-separator-opaque)',
+                    background: 'var(--color-bg-secondary)',
+                  }}
+                  aria-label="Previous page"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onPageChange?.(Math.min(currentPage + 1, totalPages))}
+                  disabled={currentPage === totalPages || totalPages === 0}
+                  className="p-1.5 rounded-lg border disabled:opacity-40"
+                  style={{
+                    borderColor: 'var(--color-separator-opaque)',
+                    background: 'var(--color-bg-secondary)',
+                  }}
+                  aria-label="Next page"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </>
+        )}
+      </DataListPage>
     </div>
   );
 };
