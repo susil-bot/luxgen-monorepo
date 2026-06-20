@@ -113,29 +113,34 @@ function TowerListContent({ tenant }: TowerPageProps) {
   });
 
   useEffect(() => {
-    if (!gqlData?.automations?.length) return;
+    if (!gqlData?.automations) return;
     setAutomations(
       gqlData.automations.map(
         (a: {
           id: string;
           name: string;
           enabled: boolean;
+          flowDefinition?: unknown;
           triggerType: string;
           triggerLabel: string;
           actions: { type: string; label: string }[];
           runCount: number;
           lastRunAt?: string;
           createdAt?: string;
-        }): Automation => ({
-          id: a.id,
-          name: a.name,
-          status: a.enabled ? 'active' : 'paused',
-          trigger: { type: triggerFromGql(a.triggerType), label: a.triggerLabel },
-          actions: a.actions.map((x) => ({ type: actionFromGql(x.type), label: x.label })),
-          runCount: a.runCount,
-          lastRunAt: formatRelativeTime(a.lastRunAt),
-          createdAt: formatRelativeTime(a.createdAt) ?? 'Recently',
-        }),
+        }): Automation => {
+          const hasFlow = a.flowDefinition != null && typeof a.flowDefinition === 'object';
+          const status: Automation['status'] = !hasFlow ? 'draft' : a.enabled ? 'active' : 'paused';
+          return {
+            id: a.id,
+            name: a.name,
+            status,
+            trigger: { type: triggerFromGql(a.triggerType), label: a.triggerLabel },
+            actions: a.actions.map((x) => ({ type: actionFromGql(x.type), label: x.label })),
+            runCount: a.runCount,
+            lastRunAt: formatRelativeTime(a.lastRunAt),
+            createdAt: formatRelativeTime(a.createdAt) ?? 'Recently',
+          };
+        },
       ),
     );
   }, [gqlData]);
