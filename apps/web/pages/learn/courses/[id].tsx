@@ -1,6 +1,6 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useQuery } from '@apollo/client';
 import { useRouter } from 'next/router';
 
@@ -10,8 +10,9 @@ import { GET_COURSE } from '../../../graphql/queries/courses';
 import { GET_ENROLLMENT } from '../../../graphql/queries/enrollment';
 import { GET_TENANT } from '../../../graphql/queries/tenants';
 import { formatInstructorName, learnStoreServerProps, type LearnCourse } from '../../../lib/learn-store';
-import { getStoredUser } from '../../../lib/session';
+import { AUTH_SESSION_CHANGE_EVENT, getStoredUser } from '../../../lib/session';
 import { useLearnEnroll } from '../../../lib/use-learn-enroll';
+import { useLearnProgress } from '../../../lib/use-learn-progress';
 
 interface Props {
   tenantSubdomain: string;
@@ -20,6 +21,18 @@ interface Props {
 export default function LearnCourseDetailPage({ tenantSubdomain }: Props) {
   const router = useRouter();
   const courseId = router.query.id as string;
+  const [sessionUser, setSessionUser] = useState(() => getStoredUser());
+
+  useEffect(() => {
+    const refresh = () => setSessionUser(getStoredUser());
+    refresh();
+    window.addEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
 
   const { data: tenantData } = useQuery(GET_TENANT, {
     variables: { subdomain: tenantSubdomain },
@@ -33,34 +46,53 @@ export default function LearnCourseDetailPage({ tenantSubdomain }: Props) {
   });
 
   const course = data?.course as LearnCourse | undefined;
-  const user = typeof window !== 'undefined' ? getStoredUser() : null;
+  const returnPath = `/learn/courses/${courseId}`;
 
-  const { data: enrollmentData, refetch: refetchEnrollment } = useQuery(GET_ENROLLMENT, {
-    skip: !courseId || !user?.id,
-    variables: { courseId, studentId: user?.id ?? '' },
+  const {
+    data: enrollmentData,
+    loading: enrollmentLoading,
+    refetch: refetchEnrollment,
+  } = useQuery(GET_ENROLLMENT, {
+    skip: !courseId || !sessionUser?.id,
+    variables: { courseId, studentId: sessionUser?.id ?? '' },
   });
 
-  const isEnrolled = Boolean(enrollmentData?.enrollment?.id);
-  const returnPath = `/learn/courses/${courseId}`;
+  const enrollment = enrollmentData?.enrollment;
+  const isEnrolled = Boolean(enrollment?.id);
+  const progressPercent = enrollment?.progressPercent ?? 0;
+  const isCompleted = enrollment?.learningStatus === 'COMPLETED' || progressPercent >= 100;
 
   const {
     enroll,
     loading: enrolling,
     error: enrollError,
-    success,
+    success: enrollSuccess,
   } = useLearnEnroll({
     courseId,
     returnPath,
   });
 
+  const {
+    markComplete,
+    bumpProgress,
+    completing,
+    updating,
+    error: progressError,
+  } = useLearnProgress({
+    courseId,
+    returnPath,
+    onUpdated: () => void refetchEnrollment(),
+  });
+
   useEffect(() => {
-    if (success) {
+    if (enrollSuccess) {
       void refetchEnrollment();
     }
-  }, [success, refetchEnrollment]);
+  }, [enrollSuccess, refetchEnrollment]);
 
   const instructor = course ? formatInstructorName(course) : null;
   const isPublished = course?.status === 'PUBLISHED';
+  const showEnrolled = isEnrolled || enrollSuccess;
 
   return (
     <>
@@ -98,34 +130,82 @@ export default function LearnCourseDetailPage({ tenantSubdomain }: Props) {
               </section>
             )}
 
+            {showEnrolled && !enrollmentLoading && (
+              <section className="ios-card p-5 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div>
+                    <h2 className="font-semibold text-primary">Your progress</h2>
+                    <p className="text-sm text-secondary mt-1">
+                      {isCompleted ? 'Course completed — certificate ready.' : `${progressPercent}% complete`}
+                    </p>
+                  </div>
+                  <Link href="/customers" className="ios-btn-secondary text-sm">
+                    My learning
+                  </Link>
+                </div>
+
+                <div className="lux-progress-bar-track">
+                  <div className="lux-progress-bar" style={{ width: `${progressPercent}%` }} />
+                </div>
+
+                {isCompleted ? (
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Link href="/customers" className="ios-btn-primary">
+                      View certificate
+                    </Link>
+                    <Link href="/learn" className="ios-btn-secondary">
+                      Browse more courses
+                    </Link>
+                  </div>
+                ) : (
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <button
+                      type="button"
+                      className="ios-btn-primary"
+                      disabled={completing || updating}
+                      onClick={() => void markComplete()}
+                    >
+                      {completing ? 'Completing…' : 'Mark course complete'}
+                    </button>
+                    {progressPercent < 75 && (
+                      <button
+                        type="button"
+                        className="ios-btn-secondary"
+                        disabled={completing || updating}
+                        onClick={() => void bumpProgress(progressPercent)}
+                      >
+                        {updating ? 'Saving…' : `Record progress (+25%)`}
+                      </button>
+                    )}
+                  </div>
+                )}
+              </section>
+            )}
+
             <section className="ios-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <p className="font-semibold text-primary">
-                  {isEnrolled || success ? 'You are enrolled' : 'Ready to start?'}
-                </p>
+                <p className="font-semibold text-primary">{showEnrolled ? 'You are enrolled' : 'Ready to start?'}</p>
                 <p className="text-sm text-secondary mt-1">
-                  {isEnrolled || success
-                    ? 'Continue from your dashboard.'
+                  {showEnrolled
+                    ? isCompleted
+                      ? 'Nice work — your progress is saved.'
+                      : 'Track progress here or from My learning.'
                     : 'Sign in and enroll to access this course.'}
                 </p>
               </div>
 
-              {isEnrolled || success ? (
-                <Link href="/dashboard" className="ios-btn-primary">
-                  Go to dashboard
-                </Link>
-              ) : isPublished ? (
+              {!showEnrolled && isPublished ? (
                 <button type="button" className="ios-btn-primary" disabled={enrolling} onClick={() => void enroll()}>
                   {enrolling ? 'Enrolling…' : 'Enroll now'}
                 </button>
-              ) : (
+              ) : !showEnrolled ? (
                 <span className="text-sm text-secondary">Not open for enrollment</span>
-              )}
+              ) : null}
             </section>
 
-            {enrollError && (
+            {(enrollError || progressError) && (
               <p className="text-sm" style={{ color: 'var(--color-red)' }}>
-                {enrollError}
+                {enrollError || progressError}
               </p>
             )}
           </article>
