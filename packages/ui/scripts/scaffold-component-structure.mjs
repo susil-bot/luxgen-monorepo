@@ -204,7 +204,6 @@ function appendExports(indexPath, name) {
 
   if (!content.includes('./fetcher')) {
     additions.push(`export { fetch${name}Data, fetch${name}SSR } from './fetcher';`);
-    additions.push(`export type { ${name}Data } from './fetcher';`);
   }
   if (!content.includes('./fixture') && !content.includes('Fixtures')) {
     additions.push(`export { ${camel}Fixtures } from './fixture';`);
