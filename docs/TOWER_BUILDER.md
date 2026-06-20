@@ -17,7 +17,7 @@ Shopify Flow–style automation editor: triggers, conditions, actions, and waits
 | **2** | Clickable `+` on connectors → compound picker                                                | Shipped — this PR                                                     |
 | **3** | Drag reorder on canvas / step rail                                                           | Shipped — this PR                                                     |
 | **4** | Link / unlink UI in config panel                                                             | Shipped — this PR                                                     |
-| **5** | MCP granular tools (`tower_insert_step`, etc.)                                               | Planned                                                               |
+| **5** | MCP granular tools (`tower_insert_step`, etc.)                                               | Shipped — this PR                                                     |
 | **6** | Graph execution in automation bridge                                                         | Planned                                                               |
 
 ---

@@ -117,6 +117,17 @@ make mcp-http-smoke
 | `toggle_automation`      | "Pause automation {id}" / "Enable automation {id}"     |
 | `delete_automation`      | "Delete automation {id}" (tool requires confirm: true) |
 
+### Tower graph edits (incremental — prefer over full flow replace)
+
+| Tool                     | Example prompt in Cursor                                       |
+| ------------------------ | -------------------------------------------------------------- |
+| `tower_insert_step`      | "After node t_abc, insert action commerce.order.update_fields" |
+| `tower_move_step`        | "Move node a_xyz to follow node t_abc"                         |
+| `tower_connect_nodes`    | "Connect condition c_1 true branch to action a_email"          |
+| `tower_disconnect_nodes` | "Disconnect outgoing true edge from condition c_1"             |
+
+All require **write** scope. Use `get_automation` first to read node ids from `flowDefinition`.
+
 ### Enterprise agent (Phase 6)
 
 | Tool             | Example prompt in Cursor                            |
@@ -180,11 +191,11 @@ Render deploy: see `deploy/platforms/render.yaml` service `luxgen-mcp`.
 
 ---
 
-## 8. Tool summary (14 tools)
+## 8. Tool summary (18 tools)
 
 **Read:** `list_automations`, `get_automation`, `automation_runs`, `get_automation_schema`, `get_tenant_usage`, `list_enrollments`, `get_enrollment`, `validate_tower_flow`
 
-**Write:** `create_automation`, `update_automation_flow`, `toggle_automation`, `delete_automation`, `run_agent_task`
+**Write:** `create_automation`, `update_automation_flow`, `tower_insert_step`, `tower_move_step`, `tower_connect_nodes`, `tower_disconnect_nodes`, `toggle_automation`, `delete_automation`, `run_agent_task`
 
 **Resource:** `luxgen://automation-flow/catalog` · **Prompt:** `tower-authoring`
 

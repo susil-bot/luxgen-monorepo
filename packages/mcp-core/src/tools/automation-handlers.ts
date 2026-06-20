@@ -20,7 +20,21 @@ import {
   type UpdateAutomationResult,
   type RunAgentTaskResult,
 } from '../graphql/automation-queries';
-import { parseFlowDefinitionArg, towerFlowToMutationInput, validateFlowDefinitionOnly } from '../flow/prepare-mutation';
+import {
+  parseFlowDefinitionArg,
+  parseTowerFlowFromAutomation,
+  towerFlowToMutationInput,
+  validateFlowDefinitionOnly,
+} from '../flow/prepare-mutation';
+import {
+  applyTowerConnectNodes,
+  applyTowerDisconnectNodes,
+  applyTowerInsertStep,
+  applyTowerMoveStep,
+  parseBranchLabelArg,
+  parseInsertKindArg,
+  persistTowerFlowMutation,
+} from '../flow/apply-mutation';
 import type { ToolConfig, ToolContent } from './types';
 import { formatToolError, formatToolSuccess } from '../errors';
 
@@ -135,6 +149,107 @@ export async function handleAutomationTool(
         });
         if (!data.updateAutomation) throw new Error(`Automation not found: ${id}`);
         return data.updateAutomation;
+      });
+    }
+
+    case 'tower_insert_step': {
+      const id = String(args.id ?? '');
+      const afterNodeId = String(args.afterNodeId ?? '');
+      const compoundId = String(args.compoundId ?? '').trim();
+      if (!id) throw new Error('id is required');
+      if (!afterNodeId) throw new Error('afterNodeId is required');
+      if (!compoundId) throw new Error('compoundId is required');
+      const kind = parseInsertKindArg(args.kind);
+      const branchLabel = parseBranchLabelArg(args.branchLabel);
+
+      return runTool(config, async () => {
+        const before = await client.query<GetAutomationResult>(GET_AUTOMATION, { id });
+        if (!before.automation) throw new Error(`Automation not found: ${id}`);
+        const beforeFlow = parseTowerFlowFromAutomation(before.automation.flowDefinition, before.automation.name);
+        const beforeIds = new Set(beforeFlow.nodes.map((node) => node.id));
+
+        const result = await persistTowerFlowMutation(client, id, (flow) =>
+          applyTowerInsertStep(flow, afterNodeId, kind, compoundId, branchLabel),
+        );
+
+        const newNode = result.flowDefinition.nodes.find((node) => !beforeIds.has(node.id));
+
+        return {
+          automation: result.automation,
+          nodeCount: result.nodeCount,
+          edgeCount: result.edgeCount,
+          insertedNodeId: newNode?.id ?? null,
+          compoundId: newNode?.compoundId ?? compoundId,
+        };
+      });
+    }
+
+    case 'tower_move_step': {
+      const id = String(args.id ?? '');
+      const nodeId = String(args.nodeId ?? '');
+      const afterNodeId = String(args.afterNodeId ?? '');
+      if (!id) throw new Error('id is required');
+      if (!nodeId) throw new Error('nodeId is required');
+      if (!afterNodeId) throw new Error('afterNodeId is required');
+      const branchLabel = parseBranchLabelArg(args.branchLabel);
+
+      return runTool(config, async () => {
+        const result = await persistTowerFlowMutation(client, id, (flow) =>
+          applyTowerMoveStep(flow, nodeId, afterNodeId, branchLabel),
+        );
+        return {
+          automation: result.automation,
+          nodeCount: result.nodeCount,
+          edgeCount: result.edgeCount,
+          movedNodeId: nodeId,
+        };
+      });
+    }
+
+    case 'tower_connect_nodes': {
+      const id = String(args.id ?? '');
+      const from = String(args.from ?? '');
+      const to = String(args.to ?? '');
+      if (!id) throw new Error('id is required');
+      if (!from) throw new Error('from is required');
+      if (!to) throw new Error('to is required');
+      const branchLabel = parseBranchLabelArg(args.branchLabel);
+
+      return runTool(config, async () => {
+        const result = await persistTowerFlowMutation(client, id, (flow) =>
+          applyTowerConnectNodes(flow, from, to, branchLabel),
+        );
+        return {
+          automation: result.automation,
+          nodeCount: result.nodeCount,
+          edgeCount: result.edgeCount,
+          from,
+          to,
+          branchLabel: branchLabel ?? 'default',
+        };
+      });
+    }
+
+    case 'tower_disconnect_nodes': {
+      const id = String(args.id ?? '');
+      const from = String(args.from ?? '');
+      if (!id) throw new Error('id is required');
+      if (!from) throw new Error('from is required');
+      const to = typeof args.to === 'string' && args.to.trim() ? args.to.trim() : undefined;
+      const branchLabel = parseBranchLabelArg(args.branchLabel);
+
+      return runTool(config, async () => {
+        const result = await persistTowerFlowMutation(client, id, (flow) =>
+          applyTowerDisconnectNodes(flow, from, to, branchLabel),
+        );
+        return {
+          automation: result.automation,
+          nodeCount: result.nodeCount,
+          edgeCount: result.edgeCount,
+          from,
+          to: to ?? null,
+          branchLabel: branchLabel ?? null,
+        };
       });
     }
 

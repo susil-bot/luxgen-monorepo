@@ -64,6 +64,17 @@
 | `toggle_automation`      | `toggleAutomation` | Enable or pause without editing flow       |
 | `delete_automation`      | `deleteAutomation` | Delete (requires `confirm: true`)          |
 
+### Tower graph edits (Tower builder Phase 5)
+
+| Tool                     | GraphQL            | Description                               |
+| ------------------------ | ------------------ | ----------------------------------------- |
+| `tower_insert_step`      | `updateAutomation` | Insert action/condition/wait after a node |
+| `tower_move_step`        | `updateAutomation` | Move step via `moveFlowNode`              |
+| `tower_connect_nodes`    | `updateAutomation` | Link nodes on a port (`connectFlowEdge`)  |
+| `tower_disconnect_nodes` | `updateAutomation` | Unlink outgoing edge(s)                   |
+
+Loads `flowDefinition`, applies `@luxgen/automation-flow` mutation, validates, then persists — same as the tower UI.
+
 ### Phase 4 auth & audit (PRs 21–24)
 
 | Capability | GraphQL / header                                   | Description                                      |

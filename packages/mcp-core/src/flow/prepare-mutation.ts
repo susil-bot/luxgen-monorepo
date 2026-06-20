@@ -1,4 +1,9 @@
-import { flowToLegacyAutomation, validateTowerFlowDocument, type TowerFlowDocument } from '@luxgen/automation-flow';
+import {
+  createEmptyFlow,
+  flowToLegacyAutomation,
+  validateTowerFlowDocument,
+  type TowerFlowDocument,
+} from '@luxgen/automation-flow';
 
 export interface TowerFlowMutationInput {
   name: string;
@@ -68,4 +73,18 @@ export function validateFlowDefinitionOnly(
     return { ok: false, errors: validated.errors.map((e) => `${e.path}: ${e.message}`) };
   }
   return { ok: true, flow: validated.data };
+}
+
+/** Parse stored automation.flowDefinition; falls back to empty trigger flow when missing. */
+export function parseTowerFlowFromAutomation(flowRaw: unknown, name = 'Tower'): TowerFlowDocument {
+  if (flowRaw === undefined || flowRaw === null) {
+    return createEmptyFlow(name);
+  }
+  const validated = validateTowerFlowDocument(flowRaw);
+  if (!validated.ok) {
+    throw new Error(
+      `stored flowDefinition is invalid:\n${validated.errors.map((e) => `${e.path}: ${e.message}`).join('\n')}`,
+    );
+  }
+  return validated.data;
 }

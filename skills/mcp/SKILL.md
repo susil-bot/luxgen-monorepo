@@ -47,7 +47,7 @@ make mcp-http-smoke  # HTTP /health check
 
 **Automations (read):** `list_automations`, `get_automation`, `automation_runs`, `get_automation_schema`
 
-**Automations (write):** `validate_tower_flow`, `create_automation`, `update_automation_flow`, `toggle_automation`, `delete_automation`
+**Automations (write):** `validate_tower_flow`, `create_automation`, `update_automation_flow`, `tower_insert_step`, `tower_move_step`, `tower_connect_nodes`, `tower_disconnect_nodes`, `toggle_automation`, `delete_automation`
 
 **Enterprise (write):** `run_agent_task` — GraphQL `runAgentTask`, Agent Studio plan gate
 

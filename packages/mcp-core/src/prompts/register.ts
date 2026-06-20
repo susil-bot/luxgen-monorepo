@@ -18,7 +18,13 @@ When proposing a flow:
 3. Chain actions in order
 4. Return valid JSON matching TowerFlowDocument shape
 
-Reference: docs/AUTOMATION_FLOW_SCHEMA.md in the LuxGen monorepo.`;
+Incremental edits (preferred over full flowDefinition rewrites):
+- tower_insert_step — add action/condition/wait after a node
+- tower_move_step — reorder a step in the default chain
+- tower_connect_nodes / tower_disconnect_nodes — manual graph links
+- update_automation_flow — bulk replace only when restructuring entire tower
+
+Reference: docs/TOWER_BUILDER.md and docs/AUTOMATION_FLOW_SCHEMA.md in the LuxGen monorepo.`;
 
 export function registerPrompts(server: McpServer): void {
   server.server.setRequestHandler(ListPromptsRequestSchema, async () => ({

@@ -4,6 +4,14 @@ const FLOW_DEF_SCHEMA = {
   description: 'TowerFlowDocument JSON object or string (see docs/AUTOMATION_FLOW_SCHEMA.md)',
 };
 
+const BRANCH_LABEL_SCHEMA = {
+  type: 'string',
+  description: 'Edge port on source node: default (next), true (yes), or false (no)',
+  enum: ['default', 'true', 'false'],
+};
+
+const AUTOMATION_ID_SCHEMA = { type: 'string', description: 'Automation id' };
+
 export function allToolDefinitions(config: ToolConfig): ToolDefinition[] {
   return [
     {
@@ -69,6 +77,67 @@ export function allToolDefinitions(config: ToolConfig): ToolDefinition[] {
           enabled: { type: 'boolean', description: 'Override meta.enabled' },
         },
         required: ['id', 'flowDefinition'],
+        additionalProperties: false,
+      },
+    },
+    {
+      name: 'tower_insert_step',
+      description: 'Insert an action, condition, or wait after a node (same as tower UI + button).',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: AUTOMATION_ID_SCHEMA,
+          afterNodeId: { type: 'string', description: 'Insert after this node id' },
+          kind: { type: 'string', enum: ['action', 'condition', 'wait'], description: 'Step kind' },
+          compoundId: { type: 'string', description: 'Catalog compound id (get_automation_schema)' },
+          branchLabel: BRANCH_LABEL_SCHEMA,
+        },
+        required: ['id', 'afterNodeId', 'kind', 'compoundId'],
+        additionalProperties: false,
+      },
+    },
+    {
+      name: 'tower_move_step',
+      description: 'Move a non-trigger node to follow afterNodeId on the given port.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: AUTOMATION_ID_SCHEMA,
+          nodeId: { type: 'string', description: 'Node to move' },
+          afterNodeId: { type: 'string', description: 'Place immediately after this node' },
+          branchLabel: BRANCH_LABEL_SCHEMA,
+        },
+        required: ['id', 'nodeId', 'afterNodeId'],
+        additionalProperties: false,
+      },
+    },
+    {
+      name: 'tower_connect_nodes',
+      description: 'Link from → to on a port (replaces existing edge on that port).',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: AUTOMATION_ID_SCHEMA,
+          from: { type: 'string', description: 'Source node id' },
+          to: { type: 'string', description: 'Target node id' },
+          branchLabel: BRANCH_LABEL_SCHEMA,
+        },
+        required: ['id', 'from', 'to'],
+        additionalProperties: false,
+      },
+    },
+    {
+      name: 'tower_disconnect_nodes',
+      description: 'Remove outgoing edge(s) from a node; narrow with to and/or branchLabel.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: AUTOMATION_ID_SCHEMA,
+          from: { type: 'string', description: 'Source node id' },
+          to: { type: 'string', description: 'Optional target node id' },
+          branchLabel: BRANCH_LABEL_SCHEMA,
+        },
+        required: ['id', 'from'],
         additionalProperties: false,
       },
     },

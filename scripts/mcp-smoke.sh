@@ -53,10 +53,10 @@ const { allToolDefinitions } = require('./packages/mcp-core/dist/tools/definitio
   const usage = await client.query(TENANT_USAGE, { tenantId: loaded.tenant });
   console.log('✓ get_tenant_usage: plan', usage.tenantUsage.plan, 'runs', usage.tenantUsage.automationRuns);
 
-  if (!MCP_WRITE_TOOLS.has('run_agent_task')) {
-    throw new Error('run_agent_task must be a write tool');
+  if (!MCP_WRITE_TOOLS.has('run_agent_task') || !MCP_WRITE_TOOLS.has('tower_insert_step')) {
+    throw new Error('run_agent_task and tower_insert_step must be write tools');
   }
-  console.log('✓ scopes: run_agent_task requires write');
+  console.log('✓ scopes: write tools registered');
 
   const readTools = filterToolsByScope(allToolDefinitions({ tenant: loaded.tenant }), ['read']);
   const readNames = new Set(readTools.map((t) => t.name));
