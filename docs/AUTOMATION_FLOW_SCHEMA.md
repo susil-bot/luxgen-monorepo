@@ -39,7 +39,7 @@ Tower automations use a **versioned flow document** instead of ad-hoc UI state. 
 | `nodes`       | Trigger, condition, action, wait steps                            |
 | `edges`       | Directed graph; `label: "true" \| "false"` for condition branches |
 
-Persisted on Mongo `Automation.flowDefinition`. Legacy flat fields (`triggerType`, `actions[]`) are derived via `flowToLegacyAutomation()` for the existing bridge.
+Persisted on Mongo `Automation.flowDefinition`. Legacy flat fields (`triggerType`, `actions[]`) are derived via `flowToLegacyAutomation()` for GraphQL and backward compatibility. At runtime the bridge prefers graph execution via `planFlowExecution()` when `flowDefinition` is valid.
 
 ---
 

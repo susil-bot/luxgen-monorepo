@@ -18,7 +18,7 @@ Shopify Flow–style automation editor: triggers, conditions, actions, and waits
 | **3** | Drag reorder on canvas / step rail                                                           | Shipped — this PR                                                     |
 | **4** | Link / unlink UI in config panel                                                             | Shipped — this PR                                                     |
 | **5** | MCP granular tools (`tower_insert_step`, etc.)                                               | Shipped — this PR                                                     |
-| **6** | Graph execution in automation bridge                                                         | Planned                                                               |
+| **6** | Graph execution in automation bridge                                                         | Shipped — this PR                                                     |
 
 ---
 
@@ -99,9 +99,30 @@ Implemented by `insertFlowNodeAfter(flow, A, kind, compoundId, P)`.
 
 ---
 
-## Runtime note
+## Phase 6 — Graph execution
 
-The automation bridge still executes flat `automation.actions[]` derived from the flow. Branching is safe to **author** now; **graph execution** is Phase 6.
+| Function                                        | Purpose                                            |
+| ----------------------------------------------- | -------------------------------------------------- |
+| `planFlowExecution(flow, payload)`              | Walk graph; return ordered wait + action steps     |
+| `planFlowExecutionFromDefinition(raw, payload)` | Parse `flowDefinition` then plan                   |
+| `evaluateFlowCondition(node, payload)`          | Boolean for condition branch selection             |
+| `flowActionNodeToLegacyAction(node)`            | Map action node → legacy `IAutomationAction` shape |
+| `getPayloadValue(payload, path)`                | Dot-path field lookup for conditions               |
+
+Wired in `packages/agent/src/automation/bridge.ts` — valid `flowDefinition` replaces flat `actions[]` iteration.
+
+---
+
+## Runtime
+
+When `Automation.flowDefinition` is present and valid, the bridge walks the graph from `entryNodeId` via `planFlowExecution()` in `packages/automation-flow/src/runtime.ts`:
+
+- **Trigger** — follow the default outgoing edge
+- **Wait** — `sleep(seconds)` then continue
+- **Condition** — evaluate against trigger payload; follow `true` or `false` branch
+- **Action** — map compound → legacy action type and execute (same handlers as flat `actions[]`)
+
+Invalid or missing `flowDefinition` falls back to flat `automation.actions[]`.
 
 ---
 
@@ -137,6 +158,7 @@ Pattern: `get_automation` → apply mutation → `validateTowerFlowDocument` →
 | ------------- | --------------------------------------------------- |
 | Types         | `packages/automation-flow/src/types.ts`             |
 | Graph ops     | `packages/automation-flow/src/graph.ts`             |
+| Runtime       | `packages/automation-flow/src/runtime.ts`           |
 | Mutations     | `packages/automation-flow/src/mutations.ts`         |
 | Validation    | `packages/automation-flow/src/validate.ts`          |
 | Catalog       | `packages/automation-flow/src/catalog/compounds.ts` |
