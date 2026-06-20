@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 
 import {
@@ -16,6 +16,7 @@ import {
   type UiProjectPriority,
 } from '../../lib/project-map';
 import type { ProjectIterationScope, ProjectPriority, ProjectStatus } from '../../lib/project-types';
+import { validateClientSession } from '../../lib/session-guard';
 
 interface ProjectContextValue {
   tenant: string;
@@ -62,6 +63,11 @@ const ProjectContext = createContext<ProjectContextValue | null>(null);
 
 export function ProjectProvider({ tenant, children }: { tenant: string; children: ReactNode }) {
   const [filterQuery, setFilterQuery] = useState('');
+  const [sessionReady, setSessionReady] = useState(false);
+
+  useEffect(() => {
+    setSessionReady(validateClientSession().ok);
+  }, []);
 
   const { data, loading, error, refetch } = useQuery(GET_PROJECT_ITEMS, {
     variables: {
@@ -69,7 +75,7 @@ export function ProjectProvider({ tenant, children }: { tenant: string; children
       search: filterQuery.trim() || undefined,
     },
     fetchPolicy: 'cache-and-network',
-    skip: !tenant,
+    skip: !tenant || !sessionReady,
   });
 
   const [createItem] = useMutation(CREATE_PROJECT_ITEM);
@@ -187,8 +193,11 @@ export function ProjectProvider({ tenant, children }: { tenant: string; children
     () => ({
       tenant,
       items,
-      loading,
-      error: error?.message,
+      loading: loading || !sessionReady,
+      error:
+        error?.graphQLErrors?.[0]?.extensions?.code === 'PLAN_UPGRADE_REQUIRED'
+          ? 'Project boards require a Pro plan or higher.'
+          : error?.message,
       filterQuery,
       setFilterQuery,
       addItem,
@@ -205,6 +214,7 @@ export function ProjectProvider({ tenant, children }: { tenant: string; children
       tenant,
       items,
       loading,
+      sessionReady,
       error,
       filterQuery,
       addItem,

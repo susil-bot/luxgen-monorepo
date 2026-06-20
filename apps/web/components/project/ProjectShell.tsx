@@ -32,9 +32,7 @@ function ProjectShellInner({ tenant, title, subtitle, activeTab, children }: Pro
   return (
     <>
       <Head>
-        <title>
-          {title} — {tenant}
-        </title>
+        <title>{`${title} — ${tenant}`}</title>
       </Head>
       <AppLayout {...appLayoutProps}>
         <div className="lux-project-page">
