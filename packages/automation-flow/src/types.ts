@@ -95,6 +95,24 @@ export interface FlowStepView {
   config: Record<string, unknown>;
 }
 
+/** Condition branch for graph-aware tower canvas. */
+export interface FlowGraphBranchView {
+  label: 'true' | 'false';
+  steps: FlowGraphStepView[];
+}
+
+/** Tree node for tower canvas — linear `next` chain plus condition `branches`. */
+export interface FlowGraphStepView extends FlowStepView {
+  next?: FlowGraphStepView;
+  branches?: FlowGraphBranchView[];
+}
+
+/** Non-fatal graph issues (unreachable nodes, open condition ports, etc.). */
+export interface FlowGraphWarning {
+  path: string;
+  message: string;
+}
+
 export interface AutomationSchemaExport {
   version: number;
   compounds: FlowCompoundDefinition[];
