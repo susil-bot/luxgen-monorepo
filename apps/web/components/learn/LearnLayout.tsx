@@ -2,22 +2,28 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 
+import { applyLearnTenantTheme } from '../../lib/learn-theme';
 import { getStoredUser, isStoredSessionExpired } from '../../lib/session';
 import { buildLogoutRedirect } from '../../lib/auth-routes';
 
 interface LearnLayoutProps {
   tenantSubdomain: string;
   tenantName?: string;
+  tenantSettings?: unknown;
   children: React.ReactNode;
 }
 
-export function LearnLayout({ tenantSubdomain, tenantName, children }: LearnLayoutProps) {
+export function LearnLayout({ tenantSubdomain, tenantName, tenantSettings, children }: LearnLayoutProps) {
   const router = useRouter();
   const [signedIn, setSignedIn] = useState(false);
 
   useEffect(() => {
     setSignedIn(!isStoredSessionExpired() && Boolean(getStoredUser()));
   }, []);
+
+  useEffect(() => {
+    applyLearnTenantTheme(tenantSettings);
+  }, [tenantSettings]);
 
   const displayName = tenantName ?? tenantSubdomain;
 

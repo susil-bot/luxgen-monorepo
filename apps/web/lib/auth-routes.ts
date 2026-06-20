@@ -42,7 +42,10 @@ export function isPublicRoute(pathname: string): boolean {
   // Public directory index only — /listings/my and /listings/apply require auth
   if (path === '/listings') return true;
 
-  return PUBLIC_PREFIXES.some((prefix) => path === prefix);
+  return PUBLIC_PREFIXES.some((prefix) => {
+    if (prefix === '/listings') return path === prefix;
+    return path === prefix || path.startsWith(`${prefix}/`);
+  });
 }
 
 export function requiresAuth(pathname: string): boolean {

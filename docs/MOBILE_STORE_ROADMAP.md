@@ -62,10 +62,10 @@ packages/ui             → React DOM only (existing)
 **Branch:** `feat/learner-storefront`  
 **PR:** _pending_
 
-- [ ] Catalog page (courses/products)
-- [ ] Course detail + enroll/checkout (reuse enrollment mutations)
-- [ ] Tenant branding from design tokens + tenant config
-- [ ] Route group: `/learn/*` in `apps/web` or new `apps/store`
+- [x] Catalog page (courses/products)
+- [x] Course detail + enroll/checkout (reuse enrollment mutations)
+- [x] Tenant branding from design tokens + tenant config
+- [x] Route group: `/learn/*` in `apps/web` or new `apps/store`
 
 **Done when:** Unauthenticated browse + authenticated enroll happy path works.
 

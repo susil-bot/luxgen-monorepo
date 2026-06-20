@@ -2,7 +2,7 @@ import { gql } from '@apollo/client';
 
 export const GET_TENANT = gql`
   query GetTenant($subdomain: String!) {
-    tenant(subdomain: $subdomain) {
+    tenantBySubdomain(subdomain: $subdomain) {
       id
       name
       subdomain
