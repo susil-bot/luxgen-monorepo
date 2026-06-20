@@ -58,6 +58,11 @@ export class UserService {
     return !!result;
   }
 
+  async registerPushToken(userId: string, tenantId: string, token: string): Promise<boolean> {
+    const { pushNotificationService } = await import('./pushNotificationService');
+    return pushNotificationService.registerToken(userId, tenantId, token);
+  }
+
   async login({ email, password, tenantId: inputTenantId, req }: LoginInput): Promise<AuthResult> {
     if (req) {
       await checkLoginRateLimit(req, email);

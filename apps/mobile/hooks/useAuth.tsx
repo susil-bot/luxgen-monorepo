@@ -6,7 +6,7 @@ import type { User } from '@luxgen/types';
 
 import { API } from '../constants/api';
 import { GET_CURRENT_USER, LOGIN_MUTATION } from '../graphql/queries';
-import { apolloClient } from '../lib/apollo';
+import { getApolloClient } from '../lib/apollo';
 import { clearSession, getTenantId, getToken, saveSession } from '../lib/auth';
 
 interface AuthContextValue {
@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = useCallback(
     async (email: string, password: string, tenantSubdomain = API.defaultTenant) => {
-      await apolloClient.resetStore();
+      await getApolloClient().resetStore();
 
       const { data: loginData } = await loginMutation({
         variables: { input: { email, password } },
@@ -94,7 +94,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = useCallback(async () => {
     await clearSession();
-    await apolloClient.clearStore();
+    await getApolloClient().clearStore();
     router.replace('/(auth)/login');
   }, [router]);
 

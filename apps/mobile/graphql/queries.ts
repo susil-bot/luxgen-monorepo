@@ -120,3 +120,9 @@ export const GET_TENANT_BILLING = gql`
     }
   }
 `;
+
+export const REGISTER_PUSH_TOKEN = gql`
+  mutation RegisterPushToken($token: String!) {
+    registerPushToken(token: $token)
+  }
+`;

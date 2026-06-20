@@ -91,6 +91,9 @@ export const courseResolvers = {
         },
         source: 'lms',
       }).catch(() => undefined);
+      void import('../../services/pushNotificationService').then(({ pushNotificationService }) =>
+        pushNotificationService.sendEnrollmentConfirmation(studentId, course.title),
+      );
       return course;
     },
     unenrollStudent: async (
