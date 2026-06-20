@@ -21,7 +21,7 @@ export async function requireAgentStudio(req: NextApiRequest, res: NextApiRespon
   const auth = requireAgentAuth(req, res);
   if (!auth) return null;
 
-  const plan = await requirePlanFeature(auth.tenantId, 'agentStudio', res);
+  const plan = await requirePlanFeature(auth.tenantId, 'agentStudio', res, req);
   if (!plan) return null;
 
   return auth;

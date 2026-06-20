@@ -19,8 +19,8 @@ export const env = {
   MONGODB_URI: getMongoUri(),
   DB_NAME: process.env.DB_NAME || 'luxgen',
 
-  // JWT
-  JWT_SECRET: process.env.JWT_SECRET || 'your-super-secret-jwt-key-change-this-in-production',
+  // JWT — no fallback; apps/api hard-fails at startup if JWT_SECRET is unset
+  JWT_SECRET: process.env.JWT_SECRET ?? '',
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN || '7d',
 
   // CORS (primary origin — full list in CORS_ORIGINS)

@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { applySession } from '@luxgen/agent';
+import { applySession, bindSessionAuth } from '@luxgen/agent';
+import { requireAgentAuth } from '../../../lib/agent-auth';
 
 export default function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -7,11 +8,16 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return;
   }
 
+  const auth = requireAgentAuth(req, res);
+  if (!auth) return;
+
   const { sessionId } = req.body as { sessionId: string };
   if (!sessionId) {
     res.status(400).json({ error: 'Missing sessionId' });
     return;
   }
+
+  bindSessionAuth(sessionId, auth);
 
   try {
     const result = applySession(sessionId);
