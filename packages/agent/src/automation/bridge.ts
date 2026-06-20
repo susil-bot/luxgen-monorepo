@@ -21,6 +21,7 @@ import { getRedisClient } from '../queue/redis-queue';
 import { getOllamaUrl } from '@luxgen/config';
 import { AUTOMATION_EVENTS_CHANNEL, type AutomationEventPayload } from './events';
 import { recordTimelineEvent, subjectsFromAutomationPayload } from '../timeline/record';
+import { planFlowExecutionFromDefinition } from '@luxgen/automation-flow';
 
 export interface EmitAutomationEventOptions {
   tenantId: string;
@@ -121,11 +122,31 @@ async function publishAutomationEvent(event: AutomationEventPayload): Promise<vo
   }
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function executeAutomationActions(
   automation: IAutomation,
   event: AutomationEventPayload,
   runId: string,
 ): Promise<void> {
+  const flowSteps = planFlowExecutionFromDefinition(automation.flowDefinition, event.payload);
+
+  if (flowSteps) {
+    for (const step of flowSteps) {
+      if (step.kind === 'wait') {
+        if (step.seconds > 0) {
+          console.log(`[automation-bridge] Wait ${step.seconds}s (${step.title}) for "${automation.name}"`);
+          await sleep(step.seconds * 1000);
+        }
+        continue;
+      }
+      await executeAction(step.action as IAutomationAction, automation, event, runId);
+    }
+    return;
+  }
+
   for (const action of automation.actions) {
     await executeAction(action, automation, event, runId);
   }
@@ -211,7 +232,13 @@ async function recordAutomationTimeline(params: {
   const subjects = subjectsFromAutomationPayload(params.event.payload);
   if (subjects.length === 0) return;
 
-  const actionSummary = params.automation.actions.map((a) => a.label || a.type).join(', ');
+  const flowSteps = planFlowExecutionFromDefinition(params.automation.flowDefinition, params.event.payload);
+  const actionSummary = flowSteps
+    ? flowSteps
+        .filter((step) => step.kind === 'action')
+        .map((step) => step.action.label || step.action.type)
+        .join(', ')
+    : params.automation.actions.map((a) => a.label || a.type).join(', ');
   const message =
     params.status === 'success'
       ? `${params.automation.name} ran (${actionSummary})`
