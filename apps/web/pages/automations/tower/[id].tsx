@@ -8,7 +8,10 @@ import { useTowerFlowPersist } from '../../../hooks/useTowerFlowPersist';
 import {
   flowToOrderedSteps,
   getFlowCompound,
+  insertFlowStepAfter,
   listFlowCompounds,
+  moveFlowStep,
+  removeFlowStep,
   type FlowNodeKind,
   type FlowStepView,
 } from '../../../lib/automation-flow';
@@ -67,6 +70,14 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
   const selectedStep: FlowStepView | undefined = steps.find((s) => s.id === selectedStepId) ?? steps[0];
   const selectedCompound = selectedStep ? getFlowCompound(selectedStep.compoundId) : undefined;
   const triggerOptions = listFlowCompounds('trigger');
+  const addStepOptions = useMemo(
+    () => [
+      ...listFlowCompounds('action').slice(0, 4),
+      ...listFlowCompounds('wait').slice(0, 1),
+      ...listFlowCompounds('condition').slice(0, 1),
+    ],
+    [],
+  );
 
   useEffect(() => {
     setNameInput(flow.meta.name);
@@ -112,6 +123,22 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
 
   const handleSave = async () => {
     await save(flow);
+  };
+
+  const addStepAfterSelected = (compoundId: string) => {
+    const compound = getFlowCompound(compoundId);
+    if (!compound || !selectedStep) return;
+    setFlow((prev) => insertFlowStepAfter(prev, selectedStep.id, compound.kind, compoundId));
+  };
+
+  const removeSelectedStep = () => {
+    if (!selectedStep || selectedStep.id === flow.entryNodeId) return;
+    setFlow((prev) => removeFlowStep(prev, selectedStep.id));
+  };
+
+  const moveSelectedStep = (direction: 'up' | 'down') => {
+    if (!selectedStep) return;
+    setFlow((prev) => moveFlowStep(prev, selectedStep.id, direction));
   };
 
   if (loading) {
@@ -211,26 +238,63 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
           <aside className={styles.stepRail}>
             <div className={styles.stepRailHead}>Workflow steps</div>
             {steps.map((step, index) => (
-              <button
-                key={step.id}
-                type="button"
-                className={`${styles.stepItem} ${selectedStepId === step.id ? styles.stepItemActive : ''}`}
-                onClick={() => setSelectedStepId(step.id)}
-              >
-                <span className={`${styles.stepIcon} ${stepIconClass(step.kind)}`}>
-                  {stepIcon(step.kind, step.emoji)}
-                </span>
-                <span>
-                  <p className={styles.stepLabel}>
-                    {index + 1}. {stepTypeLabel(step.kind)}
-                  </p>
-                  <p className={styles.stepMeta}>{step.title}</p>
-                  <p className={styles.stepMeta} style={{ fontSize: 11, opacity: 0.75 }}>
-                    {step.compoundId}
-                  </p>
-                </span>
-              </button>
+              <div key={step.id} className={styles.stepItemWrap}>
+                <button
+                  type="button"
+                  className={`${styles.stepItem} ${selectedStepId === step.id ? styles.stepItemActive : ''}`}
+                  onClick={() => setSelectedStepId(step.id)}
+                >
+                  <span className={`${styles.stepIcon} ${stepIconClass(step.kind)}`}>
+                    {stepIcon(step.kind, step.emoji)}
+                  </span>
+                  <span>
+                    <p className={styles.stepLabel}>
+                      {index + 1}. {stepTypeLabel(step.kind)}
+                    </p>
+                    <p className={styles.stepMeta}>{step.title}</p>
+                    <p className={styles.stepMeta} style={{ fontSize: 11, opacity: 0.75 }}>
+                      {step.compoundId}
+                    </p>
+                  </span>
+                </button>
+                {selectedStepId === step.id && step.kind !== 'trigger' ? (
+                  <div className={styles.stepItemActions}>
+                    <button type="button" className={styles.stepActionBtn} onClick={() => moveSelectedStep('up')}>
+                      ↑
+                    </button>
+                    <button type="button" className={styles.stepActionBtn} onClick={() => moveSelectedStep('down')}>
+                      ↓
+                    </button>
+                    <button type="button" className={styles.stepActionBtnDanger} onClick={removeSelectedStep}>
+                      Remove
+                    </button>
+                  </div>
+                ) : null}
+              </div>
             ))}
+            <div className={styles.stepRailFoot}>
+              <label className={styles.configLabel} htmlFor="add-step-compound">
+                Add step after selected
+              </label>
+              <select
+                id="add-step-compound"
+                className={styles.configInput}
+                defaultValue=""
+                onChange={(e) => {
+                  if (e.target.value) {
+                    addStepAfterSelected(e.target.value);
+                    e.target.value = '';
+                  }
+                }}
+              >
+                <option value="">Choose step type…</option>
+                {addStepOptions.map((compound) => (
+                  <option key={compound.id} value={compound.id}>
+                    {compound.label} ({compound.kind})
+                  </option>
+                ))}
+              </select>
+            </div>
           </aside>
 
           <main className={styles.canvas}>
