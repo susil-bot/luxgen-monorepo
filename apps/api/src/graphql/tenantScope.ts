@@ -23,3 +23,17 @@ export function resolveTenantIdForScope(ctx: GraphQLContext, tenantId: string): 
   }
   return tenantId;
 }
+
+/**
+ * Normalize tenantId for service calls.
+ * Authenticated requests enforce scope; public requests best-effort map subdomain → Mongo id.
+ */
+export function scopedTenantId(ctx: GraphQLContext, tenantId: string): string {
+  if (ctx.user) {
+    return resolveTenantIdForScope(ctx, tenantId);
+  }
+  if (ctx.tenantId && (tenantId === ctx.tenant || tenantId === ctx.tenantDoc?.subdomain)) {
+    return ctx.tenantId;
+  }
+  return tenantId;
+}

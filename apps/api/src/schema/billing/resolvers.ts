@@ -1,6 +1,7 @@
 import { billingService } from '../../services/billingService';
 import type { GraphQLContext } from '../../context';
 import type { PlanTier } from '@luxgen/billing';
+import { scopedTenantId } from '../../graphql/tenantScope';
 
 function toGqlPlan(plan: string): string {
   return plan.toUpperCase();
@@ -12,8 +13,9 @@ function fromGqlPlan(plan: string): PlanTier {
 
 export const billingResolvers = {
   Query: {
-    tenantBilling: async (_: unknown, { tenantId }: { tenantId: string }) => {
-      const billing = await billingService.getTenantBilling(tenantId);
+    tenantBilling: async (_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) => {
+      const scoped = scopedTenantId(ctx, tenantId);
+      const billing = await billingService.getTenantBilling(scoped);
       return {
         ...billing,
         plan: toGqlPlan(billing.plan),
@@ -38,8 +40,9 @@ export const billingResolvers = {
       }: { tenantId: string; plan: string; successUrl: string; cancelUrl: string },
       ctx: GraphQLContext,
     ) => {
+      const scoped = scopedTenantId(ctx, tenantId);
       return billingService.createCheckoutSession({
-        tenantId,
+        tenantId: scoped,
         plan: fromGqlPlan(plan),
         customerEmail: ctx.user?.email,
         successUrl,
@@ -49,12 +52,19 @@ export const billingResolvers = {
     createBillingPortalSession: async (
       _: unknown,
       { tenantId, returnUrl }: { tenantId: string; returnUrl: string },
+      ctx: GraphQLContext,
     ) => {
-      return billingService.createBillingPortalSession(tenantId, returnUrl);
+      const scoped = scopedTenantId(ctx, tenantId);
+      return billingService.createBillingPortalSession(scoped, returnUrl);
     },
-    setTenantPlanDev: async (_: unknown, { tenantId, plan }: { tenantId: string; plan: string }) => {
-      await billingService.setPlanDev(tenantId, fromGqlPlan(plan));
-      const billing = await billingService.getTenantBilling(tenantId);
+    setTenantPlanDev: async (
+      _: unknown,
+      { tenantId, plan }: { tenantId: string; plan: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scoped = scopedTenantId(ctx, tenantId);
+      await billingService.setPlanDev(scoped, fromGqlPlan(plan));
+      const billing = await billingService.getTenantBilling(scoped);
       return { ...billing, plan: toGqlPlan(billing.plan) };
     },
   },

@@ -209,10 +209,11 @@ flowchart LR
 
 ### Priority roadmap (supports business scale)
 
-1. **Phase A — Consistency (1–2 PRs)**
-   - Apply `tenantScope.ts` to all resolvers accepting `tenantId`
-   - Web hook `useTenantScope()` returning `{ subdomain, mongoId }` for all pages
-   - Update [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md) — stop documenting `localStorage currentTenant` for `x-tenant`
+1. **Phase A — Consistency (in progress)**
+   - `scopedTenantId()` + resolver coverage (automation, billing, course, user, enrollment, listing, marketplace, activity, project)
+   - Web: `useTenantScope()` hook — `apps/web/lib/use-tenant-scope.ts`
+   - [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md) — host-based `x-tenant` documented
+   - Remaining: migrate commerce pages to `useTenantScope`, dashboard subdomain helper
 
 2. **Phase B — Superadmin impersonation (feature PR)**
    - `POST /api/admin/impersonate { subdomain }` → 15m token, `act` claim, audit event

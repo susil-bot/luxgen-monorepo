@@ -1,11 +1,13 @@
 import { userService } from '../../services/userService';
 import { activityEventService, actorFromContext } from '../../services/activityEventService';
 import type { GraphQLContext } from '../../context';
+import { scopedTenantId } from '../../graphql/tenantScope';
 
 export const userResolvers = {
   Query: {
     user: (_: unknown, { id }: { id: string }) => userService.getUserById(id),
-    users: (_: unknown, { tenantId }: { tenantId: string }) => userService.getUsersByTenant(tenantId),
+    users: (_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) =>
+      userService.getUsersByTenant(scopedTenantId(ctx, tenantId)),
     currentUser: (_: unknown, __: unknown, context: GraphQLContext) => context.user ?? null,
   },
   Mutation: {

@@ -4,6 +4,7 @@ import { requireFeature } from '../../middleware/planGate';
 import { usageService, UsageLimitError } from '../../services/usageService';
 import type { GraphQLContext } from '../../context';
 import { GraphQLError } from 'graphql';
+import { scopedTenantId } from '../../graphql/tenantScope';
 
 const AUTOMATION_SCHEMA = {
   triggers: [
@@ -64,8 +65,9 @@ async function runAgentTaskViaQueue(
 
 export const automationResolvers = {
   Query: {
-    automations: async (_: unknown, { tenantId }: { tenantId: string }) => {
-      const items = await automationService.getAutomations(tenantId);
+    automations: async (_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) => {
+      const scoped = scopedTenantId(ctx, tenantId);
+      const items = await automationService.getAutomations(scoped);
       return items.map((a) => automationService.toGraphQL(a));
     },
     automation: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
@@ -73,8 +75,13 @@ export const automationResolvers = {
       const item = await automationService.getAutomationById(id, ctx.tenantId);
       return item ? automationService.toGraphQL(item) : null;
     },
-    automationRuns: async (_: unknown, { tenantId, limit }: { tenantId: string; limit?: number }) => {
-      const runs = await automationService.getAutomationRuns(tenantId, limit ?? 20);
+    automationRuns: async (
+      _: unknown,
+      { tenantId, limit }: { tenantId: string; limit?: number },
+      ctx: GraphQLContext,
+    ) => {
+      const scoped = scopedTenantId(ctx, tenantId);
+      const runs = await automationService.getAutomationRuns(scoped, limit ?? 20);
       return runs.map((r) => automationService.runToGraphQL(r));
     },
     automationSchema: () => AUTOMATION_SCHEMA,
@@ -86,8 +93,9 @@ export const automationResolvers = {
       ctx: GraphQLContext,
     ) => {
       await requireFeature(ctx, 'automations');
+      const scoped = scopedTenantId(ctx, input.tenantId);
       try {
-        await usageService.assertAutomationCreateAllowed(input.tenantId);
+        await usageService.assertAutomationCreateAllowed(scoped);
       } catch (e) {
         if (e instanceof UsageLimitError) {
           const { code: _code, ...rest } = e.toJSON();
@@ -95,7 +103,7 @@ export const automationResolvers = {
         }
         throw e;
       }
-      const created = await automationService.createAutomation(input);
+      const created = await automationService.createAutomation({ ...input, tenantId: scoped });
       return automationService.toGraphQL(created);
     },
     updateAutomation: async (
@@ -126,7 +134,8 @@ export const automationResolvers = {
     ) => {
       await requireFeature(ctx, 'agentStudio');
       const userId = ctx.user?._id?.toString() || ctx.user?.id || 'system';
-      return runAgentTaskViaQueue(input.tenantId, userId, input.prompt, input.model);
+      const scoped = scopedTenantId(ctx, input.tenantId);
+      return runAgentTaskViaQueue(scoped, userId, input.prompt, input.model);
     },
   },
 };

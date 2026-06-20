@@ -5,6 +5,7 @@ import { actorFromContext } from '../../services/activityEventService';
 import { isBillingDevMode } from '../../services/billingService';
 import { User } from '@luxgen/db';
 import type { GraphQLContext } from '../../context';
+import { scopedTenantId } from '../../graphql/tenantScope';
 
 const STAFF_ROLES = new Set<UserRole>([UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.INSTRUCTOR]);
 
@@ -59,8 +60,9 @@ export const enrollmentResolvers = {
       const doc = await enrollmentService.getById(id);
       return doc ? mapEnrollment(doc) : null;
     },
-    enrollments: async (_: unknown, { tenantId }: { tenantId: string }) => {
-      const docs = await enrollmentService.listByTenant(tenantId);
+    enrollments: async (_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) => {
+      const scoped = scopedTenantId(ctx, tenantId);
+      const docs = await enrollmentService.listByTenant(scoped);
       return docs.map(mapEnrollment);
     },
     studentEnrollments: async (
@@ -69,7 +71,8 @@ export const enrollmentResolvers = {
       context: GraphQLContext,
     ) => {
       assertCanManageProgress(context, studentId);
-      const docs = await enrollmentService.listByStudent(tenantId, studentId);
+      const scoped = scopedTenantId(context, tenantId);
+      const docs = await enrollmentService.listByStudent(scoped, studentId);
       return docs.map(mapEnrollment);
     },
   },

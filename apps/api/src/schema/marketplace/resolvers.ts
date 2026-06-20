@@ -4,6 +4,7 @@ import { marketplaceService } from '../../services/marketplaceService';
 import { usageService, UsageLimitError } from '../../services/usageService';
 import { requireFeature } from '../../middleware/planGate';
 import type { GraphQLContext } from '../../context';
+import { scopedTenantId } from '../../graphql/tenantScope';
 
 function fromGqlCategory(category?: string): string | undefined {
   if (!category) return undefined;
@@ -35,8 +36,9 @@ export const marketplaceResolvers = {
       const item = await marketplaceService.getTemplateBySlug(slug);
       return item ? marketplaceService.toGraphQL(item) : null;
     },
-    tenantUsage: async (_: unknown, { tenantId }: { tenantId: string }) => {
-      const summary = await usageService.getUsageSummary(tenantId);
+    tenantUsage: async (_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) => {
+      const scoped = scopedTenantId(ctx, tenantId);
+      const summary = await usageService.getUsageSummary(scoped);
       return { ...summary, plan: toGqlPlan(summary.plan) };
     },
   },
@@ -48,7 +50,8 @@ export const marketplaceResolvers = {
     ) => {
       await requireFeature(ctx, 'automations');
       try {
-        return await marketplaceService.installTemplate(tenantId, slug, nameOverride);
+        const scoped = scopedTenantId(ctx, tenantId);
+        return await marketplaceService.installTemplate(scoped, slug, nameOverride);
       } catch (e) {
         handleUsageError(e);
       }
