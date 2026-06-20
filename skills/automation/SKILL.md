@@ -1,22 +1,24 @@
 # Skill: Automations & Workflows
 
 **Domain:** Automation rules, triggers, actions, marketplace install, usage limits.  
-**Docs:** [FEATURE_CATALOG.md](../../docs/FEATURE_CATALOG.md) §4–5, [AGENT_STUDIO_ARCHITECTURE.md](../../docs/AGENT_STUDIO_ARCHITECTURE.md)
+**Docs:** [FEATURE_CATALOG.md](../../docs/FEATURE_CATALOG.md) §4–5, [AGENT_STUDIO_ARCHITECTURE.md](../../docs/AGENT_STUDIO_ARCHITECTURE.md), [TOWER_BUILDER.md](../../docs/TOWER_BUILDER.md)
 
 ---
 
 ## Key paths
 
-| Layer | Path |
-|-------|------|
-| GraphQL | `apps/api/src/schema/automation/` |
-| Service | `apps/api/src/services/automationService.ts` |
-| Models | `packages/db/src/automation.ts` |
-| Bridge | `packages/agent/src/automation/bridge.ts` |
-| Events | `packages/agent/src/automation/events.ts` |
-| Web UI | `apps/web/pages/automations/` |
-| Queries | `apps/web/graphql/queries/automations.ts` |
-| Marketplace | `schema/marketplace/`, `marketplaceService.ts` |
+| Layer          | Path                                           |
+| -------------- | ---------------------------------------------- |
+| Flow graph API | `packages/automation-flow/src/graph.ts`        |
+| Tower UI       | `apps/web/pages/automations/tower/`            |
+| GraphQL        | `apps/api/src/schema/automation/`              |
+| Service        | `apps/api/src/services/automationService.ts`   |
+| Models         | `packages/db/src/automation.ts`                |
+| Bridge         | `packages/agent/src/automation/bridge.ts`      |
+| Events         | `packages/agent/src/automation/events.ts`      |
+| Web UI         | `apps/web/pages/automations/`                  |
+| Queries        | `apps/web/graphql/queries/automations.ts`      |
+| Marketplace    | `schema/marketplace/`, `marketplaceService.ts` |
 
 ---
 

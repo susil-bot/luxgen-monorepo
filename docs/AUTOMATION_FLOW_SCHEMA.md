@@ -43,6 +43,39 @@ Persisted on Mongo `Automation.flowDefinition`. Legacy flat fields (`triggerType
 
 ---
 
+## Graph editing (Phase 1+)
+
+Tower flows are edited as a **directed graph**, not only a linear list.
+
+| Edge label          | Used when `from` node is |
+| ------------------- | ------------------------ |
+| omitted / `default` | trigger, action, wait    |
+| `true` / `false`    | condition                |
+
+Graph helpers: `@luxgen/automation-flow` (`graph.ts`). Full builder guide: [TOWER_BUILDER.md](./TOWER_BUILDER.md).
+
+### Example — condition branch
+
+```json
+"edges": [
+  { "from": "t_1", "to": "c_1" },
+  { "from": "c_1", "to": "a_yes", "label": "true" },
+  { "from": "c_1", "to": "a_no", "label": "false" }
+]
+```
+
+### Phase 1 API (summary)
+
+| Function                                 | Purpose                       |
+| ---------------------------------------- | ----------------------------- |
+| `connectFlowEdge` / `disconnectFlowEdge` | Manual link / unlink          |
+| `insertFlowNodeAfter`                    | Splice new step on a port     |
+| `moveFlowNode` / `removeFlowNode`        | Reposition or delete steps    |
+| `flowToGraphSteps`                       | Tree with condition branches  |
+| `collectTowerFlowGraphWarnings`          | Unreachable nodes, open ports |
+
+---
+
 ## Compound IDs
 
 Namespaced dot notation: `{domain}.{entity}.{event}`.
