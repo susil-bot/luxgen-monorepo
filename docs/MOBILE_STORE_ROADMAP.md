@@ -42,16 +42,16 @@ packages/ui             → React DOM only (existing)
 ## Phase 1 — Expo shell
 
 **Branch:** `feat/mobile-foundation`  
-**PR:** _pending_
+**PR:** _opening (stacked on #38)_
 
-- [ ] Scaffold `apps/mobile` (Expo Router, TypeScript)
-- [ ] Metro monorepo config (`metro.config.js`, watch folders)
-- [ ] Add `packages/types` (User, Course, Enrollment interfaces)
-- [ ] Apollo client + SecureStore auth + `x-tenant` header
-- [ ] Screens: login → dashboard → courses list (read-only)
-- [ ] `@luxgen/native-ui` minimal: Screen, Card, Button, ListRow
-- [ ] Turbo scripts: `dev:mobile`, root workspace entry
-- [ ] EAS config stub (`eas.json`, `app.config.ts`)
+- [x] Scaffold `apps/mobile` (Expo Router, TypeScript)
+- [x] Metro monorepo config (`metro.config.js`, watch folders)
+- [x] Add `packages/types` (User, Course, Enrollment interfaces)
+- [x] Apollo client + SecureStore auth + `x-tenant` header
+- [x] Screens: login → dashboard → courses list (read-only)
+- [x] `@luxgen/native-ui` minimal: Screen, Card, Button, ListRow
+- [x] Turbo scripts: `dev:mobile`, root workspace entry
+- [x] EAS config stub (`eas.json`, `app.config.ts`)
 
 **Done when:** App runs on iOS simulator, login + course list against local API.
 

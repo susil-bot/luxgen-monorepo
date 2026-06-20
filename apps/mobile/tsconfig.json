@@ -1,0 +1,13 @@
+{
+  "extends": "expo/tsconfig.base",
+  "compilerOptions": {
+    "strict": true,
+    "paths": {
+      "@/*": ["./*"],
+      "@luxgen/design-tokens": ["../../packages/design-tokens/src"],
+      "@luxgen/types": ["../../packages/types/src"],
+      "@luxgen/native-ui": ["../../packages/native-ui/src"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]
+}
