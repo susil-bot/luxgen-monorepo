@@ -74,7 +74,7 @@ packages/ui             → React DOM only (existing)
 ## Phase 2b — Mobile core screens
 
 **Branch:** `feat/mobile-learner-screens`  
-**PR:** _opening (stacked on #39)_
+**PR:** https://github.com/susil-bot/luxgen-monorepo/pull/42 ✅ (stacked on #39)
 
 - [x] Course detail screen (`/courses/[id]`)
 - [x] Profile / account screen
@@ -106,7 +106,7 @@ packages/ui             → React DOM only (existing)
 | 0     | `feat/design-tokens`          | [#38](https://github.com/susil-bot/luxgen-monorepo/pull/38) | Done — awaiting merge |
 | 1     | `feat/mobile-foundation`      | [#39](https://github.com/susil-bot/luxgen-monorepo/pull/39) | Done — awaiting merge |
 | 2a    | `feat/learner-storefront`     | —                                                           | Not started           |
-| 2b    | `feat/mobile-learner-screens` | —                                                           | In progress           |
+| 2b    | `feat/mobile-learner-screens` | [#42](https://github.com/susil-bot/luxgen-monorepo/pull/42) | Done — awaiting merge |
 | 3     | —                             | —                                                           | Not started           |
 
 ---
