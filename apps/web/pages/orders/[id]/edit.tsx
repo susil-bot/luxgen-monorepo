@@ -12,17 +12,17 @@ import {
   findOrderDetail,
   type OrderPaymentStatus,
 } from '@luxgen/ui';
-import { PageLoadingState } from '../../components/common/PageStates';
-import { GET_COURSES } from '../../graphql/queries/courses';
-import { GET_USERS } from '../../graphql/queries/users';
-import { GET_ENROLLMENTS } from '../../graphql/queries/enrollment';
-import { getTenantPageProps } from '../../lib/tenant-page-props';
-import { useCommercePageShell } from '../../lib/commerce-page-shell';
-import { useAppTenantId } from '../../lib/app-layout-user';
-import { getStoredUser } from '../../lib/session';
-import { useOrderEnrollment } from '../../lib/use-order-enrollment';
-import { useOrderActions } from '../../lib/use-order-actions';
-import { isMongoObjectId } from '../../lib/mongo-id';
+import { PageLoadingState } from '../../../components/common/PageStates';
+import { GET_COURSES } from '../../../graphql/queries/courses';
+import { GET_USERS } from '../../../graphql/queries/users';
+import { GET_ENROLLMENTS } from '../../../graphql/queries/enrollment';
+import { getTenantPageProps } from '../../../lib/tenant-page-props';
+import { useCommercePageShell } from '../../../lib/commerce-page-shell';
+import { useAppTenantId } from '../../../lib/app-layout-user';
+import { getStoredUser } from '../../../lib/session';
+import { useOrderEnrollment } from '../../../lib/use-order-enrollment';
+import { useOrderActions } from '../../../lib/use-order-actions';
+import { isMongoObjectId } from '../../../lib/mongo-id';
 
 interface Props {
   tenant: string;
