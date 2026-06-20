@@ -70,6 +70,7 @@ export * from './Order';
 export * from './Customer';
 export * from './Timeline';
 export * from './Modal';
+export * from './ActionMenu';
 export * from './Table';
 
 // Dashboard Components

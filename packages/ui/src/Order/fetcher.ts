@@ -71,10 +71,21 @@ export interface EnrollmentUserSource {
   lastName?: string | null;
   createdAt?: string;
   phone?: string | null;
+  language?: string | null;
   marketingEmail?: boolean | null;
   marketingSms?: boolean | null;
   marketingWhatsapp?: boolean | null;
   staffNotes?: string | null;
+  isArchived?: boolean | null;
+  collectTax?: boolean | null;
+  defaultAddress?: {
+    line1?: string | null;
+    line2?: string | null;
+    city?: string | null;
+    state?: string | null;
+    zip?: string | null;
+    country?: string | null;
+  } | null;
 }
 
 function userDisplayName(user: EnrollmentUserSource): string {
@@ -107,7 +118,26 @@ function derivePaymentStatus(courseStatus?: string): OrderPaymentStatus {
   return 'paid';
 }
 
-function deriveFulfillmentStatus(courseStatus?: string): OrderFulfillmentStatus {
+export function mapEnrollmentPaymentStatus(status?: string | null): OrderPaymentStatus {
+  switch (status) {
+    case 'PAID':
+      return 'paid';
+    case 'REFUNDED':
+      return 'refunded';
+    case 'VOIDED':
+      return 'voided';
+    default:
+      return 'pending';
+  }
+}
+
+function deriveFulfillmentStatus(
+  courseStatus?: string,
+  enrollment?: OrderEnrollmentSource | null,
+): OrderFulfillmentStatus {
+  if (enrollment?.paymentStatus === 'VOIDED' || enrollment?.paymentStatus === 'REFUNDED') {
+    return 'restocked';
+  }
   if (courseStatus === 'COMPLETED') return 'fulfilled';
   if (courseStatus === 'CANCELLED') return 'restocked';
   if (courseStatus === 'PUBLISHED') return 'partial';
@@ -174,11 +204,7 @@ export {
 } from './orderId';
 export type { OrderEnrollmentSource } from './orderId';
 
-import {
-  buildOrderSubjectId,
-  enrollmentPairKey,
-  isLegacyOrderId,
-} from './orderId';
+import { buildOrderSubjectId, enrollmentPairKey, isLegacyOrderId } from './orderId';
 import type { OrderEnrollmentSource } from './orderId';
 
 export function buildOrdersFromEnrollments(
@@ -187,9 +213,7 @@ export function buildOrdersFromEnrollments(
   enrollments?: OrderEnrollmentSource[] | null,
 ): OrderRow[] {
   const userMap = new Map((users ?? []).map((u) => [u.id, u]));
-  const enrollmentByPair = new Map(
-    (enrollments ?? []).map((e) => [enrollmentPairKey(e.courseId, e.studentId), e]),
-  );
+  const enrollmentByPair = new Map((enrollments ?? []).map((e) => [enrollmentPairKey(e.courseId, e.studentId), e]));
   const orders: OrderRow[] = [];
 
   for (const course of courses ?? []) {
@@ -202,8 +226,7 @@ export function buildOrdersFromEnrollments(
       const subjectId = buildOrderSubjectId(course.id, student.id);
       const orderId = enrollment?.id ?? subjectId;
 
-      const date =
-        enrollment?.enrolledAt ?? course.updatedAt ?? course.createdAt ?? new Date().toISOString();
+      const date = enrollment?.enrolledAt ?? course.updatedAt ?? course.createdAt ?? new Date().toISOString();
       const archived = course.status === 'ARCHIVED' || course.status === 'CANCELLED';
 
       orders.push({
@@ -216,8 +239,10 @@ export function buildOrdersFromEnrollments(
         customerId: user.id,
         customerName: userDisplayName(user),
         customerEmail: user.email,
-        paymentStatus: derivePaymentStatus(course.status),
-        fulfillmentStatus: deriveFulfillmentStatus(course.status),
+        paymentStatus: enrollment?.paymentStatus
+          ? mapEnrollmentPaymentStatus(enrollment.paymentStatus)
+          : derivePaymentStatus(course.status),
+        fulfillmentStatus: deriveFulfillmentStatus(course.status, enrollment),
         total: '—',
         itemCount: 1,
         courseTitle: course.title,
@@ -244,10 +269,7 @@ export function filterOrdersByTab(orders: OrderRow[], tab: OrderFilterTab): Orde
   }
 }
 
-export function buildOrderDetail(
-  order: OrderRow,
-  course?: EnrollmentCourseSource | null,
-): OrderDetail {
+export function buildOrderDetail(order: OrderRow, course?: EnrollmentCourseSource | null): OrderDetail {
   const sku = `CRS-${course?.id.slice(-6).toUpperCase() ?? 'UNKNOWN'}`;
   const lineItem: OrderLineItem = {
     id: `${order.id}:line-1`,
@@ -295,10 +317,7 @@ export function findOrderDetail(
 ): OrderDetail | null {
   const order =
     orders.find(
-      (o) =>
-        o.id === orderId ||
-        o.subjectId === orderId ||
-        (isLegacyOrderId(orderId) && o.subjectId === orderId),
+      (o) => o.id === orderId || o.subjectId === orderId || (isLegacyOrderId(orderId) && o.subjectId === orderId),
     ) ?? null;
   if (!order) return null;
   const course = courses?.find((c) => c.id === order.courseId);

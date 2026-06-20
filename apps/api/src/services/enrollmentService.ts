@@ -95,6 +95,82 @@ export class EnrollmentService {
     };
   }
 
+  async refundEnrollment(
+    courseId: string,
+    studentId: string,
+    actor?: { id: string; name: string },
+  ): Promise<IEnrollment> {
+    const enrollment = await Enrollment.findOne({ course: courseId, student: studentId });
+    if (!enrollment) throw new Error('Order not found');
+
+    if (enrollment.paymentStatus !== EnrollmentPaymentStatus.PAID) {
+      throw new Error('Only paid orders can be refunded');
+    }
+
+    enrollment.paymentStatus = EnrollmentPaymentStatus.REFUNDED;
+    await enrollment.save();
+
+    const course = await Course.findById(courseId);
+    const tenantId = enrollment.tenant.toString();
+    const subjectId = enrollmentSubjectId(courseId, studentId);
+    await activityEventService.recordOrderRefunded(tenantId, subjectId, course?.title ?? 'course', actor);
+
+    return enrollment;
+  }
+
+  async updateOrder(
+    courseId: string,
+    studentId: string,
+    updates: { notes?: string; paymentStatus?: EnrollmentPaymentStatus },
+    actor?: { id: string; name: string },
+  ): Promise<IEnrollment> {
+    let enrollment = (await Enrollment.findOne({ course: courseId, student: studentId })) as IEnrollment | null;
+    if (!enrollment) {
+      const course = await Course.findById(courseId);
+      if (!course) throw new Error('Course not found');
+      enrollment = await this.ensureEnrollment(course.tenant.toString(), courseId, studentId);
+    }
+
+    const tenantId = enrollment.tenant.toString();
+    const subjectId = enrollmentSubjectId(courseId, studentId);
+    const changes: string[] = [];
+
+    if (updates.notes !== undefined && updates.notes !== enrollment.notes) {
+      const previous = enrollment.notes;
+      enrollment.notes = updates.notes;
+      if (updates.notes.trim() && updates.notes !== previous) {
+        await activityEventService.recordOrderNoteAdded(tenantId, subjectId, updates.notes, actor);
+      }
+      changes.push('notes');
+    }
+
+    if (updates.paymentStatus !== undefined && updates.paymentStatus !== enrollment.paymentStatus) {
+      const oldStatus = enrollment.paymentStatus;
+      enrollment.paymentStatus = updates.paymentStatus;
+      if (updates.paymentStatus === EnrollmentPaymentStatus.PAID && !enrollment.paidAt) {
+        enrollment.paidAt = new Date();
+      }
+      if (updates.paymentStatus === EnrollmentPaymentStatus.VOIDED && !enrollment.cancelledAt) {
+        enrollment.cancelledAt = new Date();
+      }
+      await activityEventService.recordOrderUpdated(
+        tenantId,
+        subjectId,
+        `Payment status changed to ${updates.paymentStatus.toLowerCase()}`,
+        actor,
+        'paymentStatus',
+        oldStatus,
+        updates.paymentStatus,
+      );
+      changes.push('paymentStatus');
+    }
+
+    if (changes.length === 0) return enrollment;
+
+    await enrollment.save();
+    return enrollment;
+  }
+
   async cancelEnrollment(
     courseId: string,
     studentId: string,

@@ -1,4 +1,4 @@
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -13,6 +13,8 @@ import {
   isLegacyOrderId,
   isStandardOrderId,
   parseLegacyOrderId,
+  SnackbarProvider,
+  useSnackbar,
 } from '@luxgen/ui';
 import { PageLoadingState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
@@ -25,6 +27,7 @@ import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
 import { useActivityTimeline } from '../../lib/use-activity-timeline';
 import { useOrderEnrollment } from '../../lib/use-order-enrollment';
+import { useOrderActions } from '../../lib/use-order-actions';
 import { isMongoObjectId } from '../../lib/mongo-id';
 
 interface Props {
@@ -36,6 +39,7 @@ function OrderDetailPageContent({ tenant }: Props) {
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
   const tenantId = useAppTenantId();
+  const { showSuccess, showError } = useSnackbar();
   const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
   const queryTenantId = tenantId ?? sessionUser?.tenant.id ?? tenant;
   const headerProps = useAppLayoutHeader();
@@ -78,11 +82,7 @@ function OrderDetailPageContent({ tenant }: Props) {
   });
 
   const baseOrder = useMemo(() => {
-    const orders = buildOrdersFromEnrollments(
-      coursesData?.courses,
-      usersData?.users,
-      enrollmentsData?.enrollments,
-    );
+    const orders = buildOrdersFromEnrollments(coursesData?.courses, usersData?.users, enrollmentsData?.enrollments);
     return findOrderDetail(orders, orderId, coursesData?.courses);
   }, [coursesData, usersData, enrollmentsData, orderId]);
 
@@ -101,10 +101,7 @@ function OrderDetailPageContent({ tenant }: Props) {
 
   useEffect(() => {
     if (!isLegacyOrderId(orderId)) return;
-    const canonicalId =
-      order?.id && isStandardOrderId(order.id)
-        ? order.id
-        : legacyEnrollmentData?.enrollment?.id;
+    const canonicalId = order?.id && isStandardOrderId(order.id) ? order.id : legacyEnrollmentData?.enrollment?.id;
     if (canonicalId && canonicalId !== orderId) {
       void router.replace(`/orders/${canonicalId}`, undefined, { shallow: false });
     }
@@ -146,15 +143,40 @@ function OrderDetailPageContent({ tenant }: Props) {
   const timeline = useActivityTimeline(
     isMongoObjectId(queryTenantId) ? queryTenantId : undefined,
     'ORDER',
-    isLegacyOrderId(timelineId) ? timelineId : displayOrder?.subjectId ?? timelineId,
+    isLegacyOrderId(timelineId) ? timelineId : (displayOrder?.subjectId ?? timelineId),
     staffInitials,
     mentionOptions,
   );
 
+  const { refund, cancel, refunding, cancelling } = useOrderActions(displayOrder, queryTenantId);
+
+  const handleRefund = useCallback(async () => {
+    if (!window.confirm('Refund this order? Payment will be marked as refunded.')) return;
+    try {
+      await refund();
+      showSuccess('Order refunded');
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to refund order');
+    }
+  }, [refund, showError, showSuccess]);
+
+  const handleCancel = useCallback(async () => {
+    if (!window.confirm('Cancel this order? The customer will be unenrolled from the course.')) return;
+    try {
+      await cancel();
+      showSuccess('Order cancelled');
+      void router.push('/orders');
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to cancel order');
+    }
+  }, [cancel, router, showError, showSuccess]);
+
   return (
     <>
       <Head>
-        <title>{displayOrder ? `${displayOrder.orderNumber} — Orders` : 'Order'} — {tenant}</title>
+        <title>
+          {displayOrder ? `${displayOrder.orderNumber} — Orders` : 'Order'} — {tenant}
+        </title>
       </Head>
 
       <AppLayout
@@ -177,6 +199,11 @@ function OrderDetailPageContent({ tenant }: Props) {
         ) : (
           <OrderDetailView
             order={displayOrder}
+            editHref={`/orders/${orderId}/edit`}
+            onRefund={handleRefund}
+            onCancel={handleCancel}
+            refunding={refunding}
+            cancelling={cancelling}
             timeline={timeline}
             notes={notes}
             onNotesChange={onNotesChange}
@@ -189,7 +216,11 @@ function OrderDetailPageContent({ tenant }: Props) {
 }
 
 export default function OrderDetailPage(props: Props) {
-  return <OrderDetailPageContent {...props} />;
+  return (
+    <SnackbarProvider position="top-right" maxSnackbars={3}>
+      <OrderDetailPageContent {...props} />
+    </SnackbarProvider>
+  );
 }
 
 export const getServerSideProps = getTenantPageProps;

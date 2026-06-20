@@ -53,6 +53,38 @@ export const UPDATE_ORDER_NOTES = gql`
   }
 `;
 
+export const UPDATE_ORDER = gql`
+  mutation UpdateOrder($input: UpdateOrderInput!) {
+    updateOrder(input: $input) {
+      id
+      notes
+      paymentStatus
+      paidAt
+      cancelledAt
+      enrolledAt
+    }
+  }
+`;
+
+export const REFUND_ORDER = gql`
+  mutation RefundOrder($courseId: ID!, $studentId: ID!) {
+    refundOrder(courseId: $courseId, studentId: $studentId) {
+      id
+      paymentStatus
+    }
+  }
+`;
+
+export const CANCEL_ORDER = gql`
+  mutation CancelOrder($courseId: ID!, $studentId: ID!) {
+    cancelOrder(courseId: $courseId, studentId: $studentId) {
+      id
+      paymentStatus
+      cancelledAt
+    }
+  }
+`;
+
 export const UPDATE_CUSTOMER_NOTES = gql`
   mutation UpdateCustomerNotes($input: UpdateCustomerNotesInput!) {
     updateCustomerNotes(input: $input) {
