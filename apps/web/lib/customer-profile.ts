@@ -24,10 +24,7 @@ export function customerToProfileInput(customer: CustomerDetail): CustomerProfil
   };
 }
 
-export function applyProfilePatch(
-  customer: CustomerDetail,
-  patch: CustomerProfileInput,
-): CustomerDetail {
+export function applyProfilePatch(customer: CustomerDetail, patch: CustomerProfileInput): CustomerDetail {
   const firstName = patch.firstName ?? customer.name.split(' ')[0] ?? '';
   const lastName = patch.lastName ?? customer.name.split(' ').slice(1).join(' ');
   return {

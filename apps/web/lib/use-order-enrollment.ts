@@ -4,10 +4,7 @@ import type { OrderDetail, OrderPaymentStatus } from '@luxgen/ui';
 import { parseLegacyOrderId } from '@luxgen/ui';
 import { GET_ACTIVITY_EVENTS } from '../graphql/queries/activity-events';
 import { isMongoObjectId } from './mongo-id';
-import {
-  GET_ENROLLMENT,
-  UPDATE_ORDER_NOTES,
-} from '../graphql/queries/enrollment';
+import { GET_ENROLLMENT, UPDATE_ORDER_NOTES } from '../graphql/queries/enrollment';
 
 export function mapEnrollmentPaymentStatus(status: string): OrderPaymentStatus {
   switch (status) {

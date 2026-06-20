@@ -14,11 +14,7 @@ function customerInitials(name: string): string {
   return `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase();
 }
 
-export function CustomerDetailHeader({
-  customer,
-  backHref = '/admin/customers',
-  editHref,
-}: CustomerDetailHeaderProps) {
+export function CustomerDetailHeader({ customer, backHref = '/admin/customers', editHref }: CustomerDetailHeaderProps) {
   const t = CustomerTranslations.en;
   const initials = customerInitials(customer.name);
 

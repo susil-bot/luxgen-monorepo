@@ -73,9 +73,7 @@ function AdminCustomersPageContent({ tenant }: Props) {
       const q = search.toLowerCase();
       rows = rows.filter(
         (c) =>
-          c.name.toLowerCase().includes(q) ||
-          c.email.toLowerCase().includes(q) ||
-          c.rfmGroup.toLowerCase().includes(q),
+          c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.rfmGroup.toLowerCase().includes(q),
       );
     }
     return rows;

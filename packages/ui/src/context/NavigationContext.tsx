@@ -12,9 +12,7 @@ export function NavigationProvider({
   pathname,
   onNavigate,
 }: NavigationContextValue & { children: ReactNode }) {
-  return (
-    <NavigationContext.Provider value={{ pathname, onNavigate }}>{children}</NavigationContext.Provider>
-  );
+  return <NavigationContext.Provider value={{ pathname, onNavigate }}>{children}</NavigationContext.Provider>;
 }
 
 /** Optional client router bridge (e.g. Next.js) for sidebar SPA navigation */

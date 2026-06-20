@@ -6,13 +6,7 @@ import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
 import { CREATE_GROUP } from '../../graphql/queries/groups';
-import {
-  SnackbarProvider,
-  useSnackbar,
-  AppLayout,
-  getDefaultLogo,
-  getDefaultSidebarSections,
-} from '@luxgen/ui';
+import { SnackbarProvider, useSnackbar, AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
 
 const CreateGroupPageContent: React.FC = () => {
   const router = useRouter();
@@ -184,11 +178,7 @@ const CreateGroupPageContent: React.FC = () => {
                 >
                   Cancel
                 </button>
-                <button
-                  type="submit"
-                  disabled={isCreating}
-                  className="ios-btn-primary"
-                >
+                <button type="submit" disabled={isCreating} className="ios-btn-primary">
                   {isCreating ? 'Creating…' : 'Create Group'}
                 </button>
               </div>

@@ -3,12 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMutation, useQuery } from '@apollo/client';
-import {
-  AppLayout,
-  CustomerEditForm,
-  SnackbarProvider,
-  useSnackbar,
-} from '@luxgen/ui';
+import { AppLayout, CustomerEditForm, SnackbarProvider, useSnackbar } from '@luxgen/ui';
 import { PageLoadingState } from '../../../../components/common/PageStates';
 import { GET_USER, UPDATE_USER, UPDATE_CUSTOMER_NOTES } from '../../../../graphql/queries/users';
 import { getTenantPageProps } from '../../../../lib/tenant-page-props';

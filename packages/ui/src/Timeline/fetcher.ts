@@ -62,9 +62,7 @@ export function formatTimelineDateHeader(iso: string): string {
 }
 
 export function groupTimelineByDate(events: TimelineEvent[]): TimelineDateGroup[] {
-  const sorted = [...events].sort(
-    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-  );
+  const sorted = [...events].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
   const groups = new Map<string, TimelineEvent[]>();
   for (const event of sorted) {

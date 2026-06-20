@@ -44,16 +44,8 @@ export const GET_ACTIVITY_EVENTS = gql`
 `;
 
 export const ACTIVITY_EVENT_ADDED = gql`
-  subscription ActivityEventAdded(
-    $tenantId: ID!
-    $subjectType: ActivitySubjectType!
-    $subjectId: String!
-  ) {
-    activityEventAdded(
-      tenantId: $tenantId
-      subjectType: $subjectType
-      subjectId: $subjectId
-    ) {
+  subscription ActivityEventAdded($tenantId: ID!, $subjectType: ActivitySubjectType!, $subjectId: String!) {
+    activityEventAdded(tenantId: $tenantId, subjectType: $subjectType, subjectId: $subjectId) {
       id
       subjectType
       subjectId

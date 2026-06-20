@@ -61,11 +61,7 @@ export function CustomerDetailView({
       aside={
         <>
           <CustomerContactSection customer={customer} />
-          <MarketingSection
-            customer={customer}
-            onMarketingChange={onMarketingChange}
-            saving={savingMarketing}
-          />
+          <MarketingSection customer={customer} onMarketingChange={onMarketingChange} saving={savingMarketing} />
           <TaxDetailsSection />
           <StoreCreditSection customer={customer} />
           <CustomerTagsSection customer={customer} />

@@ -2,13 +2,7 @@ import { useRouter } from 'next/router';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import Head from 'next/head';
 import { useQuery } from '@apollo/client';
-import {
-  GroupMemberList,
-  SnackbarProvider,
-  AppLayout,
-  getDefaultLogo,
-  getDefaultSidebarSections,
-} from '@luxgen/ui';
+import { GroupMemberList, SnackbarProvider, AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
 import { useLayoutUser } from '../../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
 import { GET_GROUP, GET_GROUP_MEMBERS } from '../../../graphql/queries/groups';

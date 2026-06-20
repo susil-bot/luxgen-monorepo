@@ -4,10 +4,7 @@ import { categoryMetafieldTags, productMetafields, variantMetafieldLabels } from
 export function MetafieldsSection() {
   return (
     <>
-      <ProductEditSection
-        title="Category metafields"
-        hint="Shopify taxonomy extras · LuxGen: subject-specific fields"
-      >
+      <ProductEditSection title="Category metafields" hint="Shopify taxonomy extras · LuxGen: subject-specific fields">
         <div
           className="rounded-xl p-4 space-y-3"
           style={{ background: 'var(--color-fill-quaternary)', border: '1px solid var(--color-separator)' }}

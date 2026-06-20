@@ -109,17 +109,17 @@ const GroupDashboardPageContent: React.FC = () => {
                   title="No groups yet"
                   subtitle="Create a group to see it on this dashboard."
                   action={
-                    <button type="button" className="ios-btn-primary mt-4" onClick={() => router.push('/groups/create')}>
+                    <button
+                      type="button"
+                      className="ios-btn-primary mt-4"
+                      onClick={() => router.push('/groups/create')}
+                    >
                       Create group
                     </button>
                   }
                 />
               ) : groups.length === 0 ? (
-                <PageEmptyState
-                  icon="🔍"
-                  title="No matching groups"
-                  subtitle={`No groups match "${search}".`}
-                />
+                <PageEmptyState icon="🔍" title="No matching groups" subtitle={`No groups match "${search}".`} />
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
                   {groups.map((group) => (

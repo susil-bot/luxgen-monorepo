@@ -9,9 +9,4 @@ export const productMetafields = [
 
 export const categoryMetafieldTags = ['Fashion', "Men's interests"];
 
-export const variantMetafieldLabels = [
-  'Google: MPN',
-  'Google: Gender',
-  'Google: Condition',
-  'Google: Age group',
-];
+export const variantMetafieldLabels = ['Google: MPN', 'Google: Gender', 'Google: Condition', 'Google: Age group'];

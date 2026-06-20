@@ -144,7 +144,9 @@ function AdminCustomerDetailContent({ tenant }: Props) {
   return (
     <>
       <Head>
-        <title>{customer ? `${customer.name} — Customers` : 'Customer'} — {tenant}</title>
+        <title>
+          {customer ? `${customer.name} — Customers` : 'Customer'} — {tenant}
+        </title>
       </Head>
 
       <AppLayout
@@ -168,9 +170,7 @@ function AdminCustomerDetailContent({ tenant }: Props) {
           <CustomerDetailView
             customer={displayCustomer}
             editHref={`/admin/customers/${customerId}/edit`}
-            onCreateOrder={() =>
-              void router.push(`/orders/create?customerId=${encodeURIComponent(customerId)}`)
-            }
+            onCreateOrder={() => void router.push(`/orders/create?customerId=${encodeURIComponent(customerId)}`)}
             onMarketingChange={onMarketingChange}
             savingMarketing={savingMarketing}
             timeline={timeline}

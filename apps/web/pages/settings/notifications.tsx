@@ -42,7 +42,11 @@ export default function SettingsNotificationsPage({ tenant }: Props) {
     <SettingsShell tenant={tenant} activeSection="notifications" title="Notifications" subtitle="Email templates">
       <div className="ios-card overflow-hidden">
         {loading && <p className="p-4 text-secondary text-sm">Loading templates…</p>}
-        {error && <p className="p-4 text-sm" style={{ color: 'var(--color-red)' }}>{error}</p>}
+        {error && (
+          <p className="p-4 text-sm" style={{ color: 'var(--color-red)' }}>
+            {error}
+          </p>
+        )}
         {!loading && !error && (
           <ul className="divide-y" style={{ borderColor: 'var(--color-separator)' }}>
             {templates.map((t) => {
@@ -56,9 +60,7 @@ export default function SettingsNotificationsPage({ tenant }: Props) {
                   >
                     <div>
                       <span className="text-primary font-medium">{t.label}</span>
-                      <p className="text-xs text-tertiary mt-0.5">
-                        {CATEGORY_LABELS[t.category] ?? t.category}
-                      </p>
+                      <p className="text-xs text-tertiary mt-0.5">{CATEGORY_LABELS[t.category] ?? t.category}</p>
                     </div>
                     <span className={`badge ${t.status === 'live' ? 'badge-green' : 'badge-orange'} capitalize`}>
                       {t.status}

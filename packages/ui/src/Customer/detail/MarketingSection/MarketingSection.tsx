@@ -41,11 +41,7 @@ export function MarketingSection({ customer, onMarketingChange, saving }: Market
                   checked={on}
                   readOnly={!editable}
                   disabled={!editable || saving}
-                  onChange={
-                    editable
-                      ? (e) => onMarketingChange?.(channel.key, e.target.checked)
-                      : undefined
-                  }
+                  onChange={editable ? (e) => onMarketingChange?.(channel.key, e.target.checked) : undefined}
                   aria-label={`${channel.label} marketing`}
                 />
                 {channel.label}

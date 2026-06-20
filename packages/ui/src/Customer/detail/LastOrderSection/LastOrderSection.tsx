@@ -34,7 +34,10 @@ export function LastOrderSection({
           </div>
           <p className="text-xs text-tertiary mb-3">{formatCustomerListDate(order.date)}</p>
           <div className="flex items-start gap-3 pb-3" style={{ borderBottom: '1px solid var(--color-separator)' }}>
-            <div className="w-12 h-12 rounded-lg flex items-center justify-center text-xl flex-shrink-0" style={{ background: 'var(--color-fill-quaternary)' }}>
+            <div
+              className="w-12 h-12 rounded-lg flex items-center justify-center text-xl flex-shrink-0"
+              style={{ background: 'var(--color-fill-quaternary)' }}
+            >
               📘
             </div>
             <div className="flex-1 min-w-0">

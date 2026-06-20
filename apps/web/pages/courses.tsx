@@ -86,16 +86,16 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
             <p className="mt-1 text-secondary text-sm">Browse and manage learning content</p>
           </div>
           <div className="space-y-8">
-          {/* Course Overview */}
-          <CourseOverview course={sampleCourse} userRole={userRole} enrollmentStatus="enrolled" />
+            {/* Course Overview */}
+            <CourseOverview course={sampleCourse} userRole={userRole} enrollmentStatus="enrolled" />
 
-          {/* Course Analytics (Admin/Instructor only) */}
-          {(userRole === 'admin' || userRole === 'instructor') && (
-            <CourseAnalytics courseId={sampleCourse.id} userRole={userRole} metrics={analyticsMetrics} />
-          )}
+            {/* Course Analytics (Admin/Instructor only) */}
+            {(userRole === 'admin' || userRole === 'instructor') && (
+              <CourseAnalytics courseId={sampleCourse.id} userRole={userRole} metrics={analyticsMetrics} />
+            )}
 
-          {/* Course Menu */}
-          <CourseMenu userRole={userRole} courseId={sampleCourse.id} onNavigate={handleNavigate} />
+            {/* Course Menu */}
+            <CourseMenu userRole={userRole} courseId={sampleCourse.id} onNavigate={handleNavigate} />
           </div>
         </div>
 

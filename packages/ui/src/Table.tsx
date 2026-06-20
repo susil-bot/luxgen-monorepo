@@ -30,9 +30,7 @@ export const Table = <T extends Record<string, unknown>>({
   }
 
   if (data.length === 0) {
-    return (
-      <div className="text-center py-8 text-secondary text-sm">{emptyMessage}</div>
-    );
+    return <div className="text-center py-8 text-secondary text-sm">{emptyMessage}</div>;
   }
 
   return (
@@ -50,9 +48,7 @@ export const Table = <T extends Record<string, unknown>>({
             <tr key={rowIndex}>
               {columns.map((column) => (
                 <td key={String(column.key)}>
-                  {column.render
-                    ? column.render(item[column.key], item)
-                    : String(item[column.key] ?? '')}
+                  {column.render ? column.render(item[column.key], item) : String(item[column.key] ?? '')}
                 </td>
               ))}
             </tr>

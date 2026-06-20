@@ -8,10 +8,7 @@ export interface CategorySectionProps {
 
 export function CategorySection({ category, onCategoryChange }: CategorySectionProps) {
   return (
-    <ProductEditSection
-      title="Category"
-      hint="Shopify Standard Product Taxonomy · LuxGen: course subject category"
-    >
+    <ProductEditSection title="Category" hint="Shopify Standard Product Taxonomy · LuxGen: course subject category">
       <div className="ios-form-group">
         <label htmlFor="product-category">Category</label>
         <input

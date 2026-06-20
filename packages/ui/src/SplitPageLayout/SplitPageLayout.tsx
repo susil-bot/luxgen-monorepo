@@ -56,9 +56,7 @@ export function SplitPageLayout({
         )}
 
         {variant === 'triple' && leading && (
-          <div className={`split-page-leading space-y-4 ${stickyLeading ? 'split-page-sticky' : ''}`}>
-            {leading}
-          </div>
+          <div className={`split-page-leading space-y-4 ${stickyLeading ? 'split-page-sticky' : ''}`}>{leading}</div>
         )}
 
         <div className="split-page-main space-y-4" role="region" aria-label={t.mainRegion}>

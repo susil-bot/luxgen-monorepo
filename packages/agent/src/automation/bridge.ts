@@ -18,10 +18,7 @@ import { ensureMongoConnection } from '../persistence/mongo';
 import { getRedisClient } from '../queue/redis-queue';
 import { getOllamaUrl } from '@luxgen/config';
 import { AUTOMATION_EVENTS_CHANNEL, type AutomationEventPayload } from './events';
-import {
-  recordTimelineEvent,
-  subjectsFromAutomationPayload,
-} from '../timeline/record';
+import { recordTimelineEvent, subjectsFromAutomationPayload } from '../timeline/record';
 
 export interface EmitAutomationEventOptions {
   tenantId: string;

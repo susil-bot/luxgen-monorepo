@@ -9,9 +9,7 @@ export function DeliverySection() {
         <input type="checkbox" checked disabled />
         Digital product
       </label>
-      <p className="text-sm text-secondary mb-4">
-        This course is delivered online. Physical shipping does not apply.
-      </p>
+      <p className="text-sm text-secondary mb-4">This course is delivered online. Physical shipping does not apply.</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-60">
         <div className="ios-form-group">
           <label>Access package</label>

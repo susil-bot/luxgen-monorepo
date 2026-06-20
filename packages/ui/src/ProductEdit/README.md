@@ -5,18 +5,9 @@ Shopify Admin–style product edit layout for LuxGen courses. Each sub-section f
 ## Usage
 
 ```tsx
-import {
-  ProductEditForm,
-  mapCourseToProductEditState,
-  buildCourseUpdateInput,
-  productEditFixtures,
-} from '@luxgen/ui';
+import { ProductEditForm, mapCourseToProductEditState, buildCourseUpdateInput, productEditFixtures } from '@luxgen/ui';
 
-<ProductEditForm
-  tenant="demo"
-  {...productEditFixtures.default}
-  onSave={handleSave}
-/>
+<ProductEditForm tenant="demo" {...productEditFixtures.default} onSave={handleSave} />;
 ```
 
 ## Structure

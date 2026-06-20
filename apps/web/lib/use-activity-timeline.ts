@@ -1,16 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useMutation, useQuery, useSubscription } from '@apollo/client';
-import type {
-  TimelineActivityProps,
-  TimelineCommentAttachment,
-  TimelineEvent,
-  TimelineSubjectType,
-} from '@luxgen/ui';
-import {
-  ACTIVITY_EVENT_ADDED,
-  ADD_ACTIVITY_COMMENT,
-  GET_ACTIVITY_EVENTS,
-} from '../graphql/queries/activity-events';
+import type { TimelineActivityProps, TimelineCommentAttachment, TimelineEvent, TimelineSubjectType } from '@luxgen/ui';
+import { ACTIVITY_EVENT_ADDED, ADD_ACTIVITY_COMMENT, GET_ACTIVITY_EVENTS } from '../graphql/queries/activity-events';
 import { isMongoObjectId } from './mongo-id';
 
 interface GraphQLActivityEvent {
