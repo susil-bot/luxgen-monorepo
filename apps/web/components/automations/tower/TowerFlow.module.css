@@ -861,6 +861,151 @@
   padding: 16px;
 }
 
+.connectionsPanel {
+  margin: 8px 0 20px;
+  padding-top: 16px;
+  border-top: 1px solid #e1e3e5;
+}
+
+.connectionsTitle {
+  margin: 0 0 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #202223;
+}
+
+.connectionsLead {
+  margin: 0 0 12px;
+  font-size: 12px;
+  color: #616161;
+  line-height: 1.45;
+}
+
+.connectionsSection {
+  margin-bottom: 14px;
+}
+
+.connectionsSectionLabel {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #616161;
+}
+
+.connectionsEmpty {
+  margin: 0;
+  font-size: 12px;
+  color: #8c9196;
+}
+
+.connectionsList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.connectionsItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #f6f6f7;
+  border-radius: 8px;
+}
+
+.connectionsItemBody {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 12px;
+}
+
+.connectionsPort {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #008060;
+  background: #f1f8f5;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+.connectionsArrow {
+  color: #8c9196;
+}
+
+.connectionsLinkBtn {
+  border: none;
+  background: none;
+  padding: 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: #202223;
+  cursor: pointer;
+  text-align: left;
+  font-family: inherit;
+  text-decoration: underline;
+  text-decoration-color: #c9cccf;
+}
+
+.connectionsLinkBtn:hover {
+  color: #008060;
+}
+
+.connectionsMissing {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 11px;
+  color: #8c9196;
+}
+
+.connectionsDisconnectBtn {
+  flex-shrink: 0;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #d72c0d;
+  background: #fff;
+  border: 1px solid #f5c2b8;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.connectionsDisconnectBtn:hover {
+  background: #fff4f2;
+}
+
+.connectionsConnectBtn {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: #008060;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.connectionsConnectBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.connectionsConnectBtn:not(:disabled):hover {
+  background: #006e52;
+}
+
 .configField {
   margin-bottom: 16px;
 }

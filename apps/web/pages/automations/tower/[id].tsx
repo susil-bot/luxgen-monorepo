@@ -5,6 +5,7 @@ import Head from 'next/head';
 import styles from '../../../components/automations/tower/TowerFlow.module.css';
 import { FlowConfigFieldInput } from '../../../components/automations/tower/FlowConfigFieldInput';
 import { TowerGraphCanvas } from '../../../components/automations/tower/TowerGraphCanvas';
+import { TowerStepConnections } from '../../../components/automations/tower/TowerStepConnections';
 import { TowerStepRail } from '../../../components/automations/tower/TowerStepRail';
 import { useTowerFlowPersist } from '../../../hooks/useTowerFlowPersist';
 import {
@@ -288,6 +289,13 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
                     />
                   </div>
                 ))}
+
+                <TowerStepConnections
+                  flow={flow}
+                  selectedStep={selectedStep}
+                  onFlowChange={updateFlow}
+                  onSelectStep={setSelectedStepId}
+                />
 
                 <p style={{ fontSize: 12, color: '#616161', lineHeight: 1.5, margin: 0 }}>
                   Persisted as <code>TowerFlowDocument</code> v1 on <code>Automation.flowDefinition</code>.
