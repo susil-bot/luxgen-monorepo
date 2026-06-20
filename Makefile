@@ -47,7 +47,7 @@ setup: ## First-time setup: copy env examples, start infra
 # ─── Development ──────────────────────────────────────────────────────────────
 dev: ## Run web + api locally via turbo (fastest — infra must be running)
 	@echo "$(GREEN)► Starting local dev servers...$(RESET)"
-	@npx turbo run dev
+	@npx turbo run dev --concurrency=15
 
 dev-web: ## Run only the web app locally
 	@npx turbo run dev --filter=@luxgen/web

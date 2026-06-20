@@ -3,6 +3,7 @@ import { getApiUrl, getGraphqlUrl } from '@luxgen/config';
 import { createAppServer } from './app';
 import { connectDB } from './db/connect';
 import { seedDatabaseIfEmpty } from './db/seed';
+import { ensureDemoStorefrontCourses } from './db/storefrontSeed';
 import { startTimelineRedisBridge } from './lib/timelineRedisBridge';
 
 config();
@@ -25,6 +26,7 @@ async function startServer() {
     const autoSeed = process.env.SEED_IF_EMPTY !== 'false' && process.env.NODE_ENV !== 'production';
     if (autoSeed) {
       await seedDatabaseIfEmpty();
+      await ensureDemoStorefrontCourses();
     }
 
     const httpServer = await createAppServer();

@@ -24,7 +24,8 @@ export default function LearnCourseDetailPage({ tenantSubdomain }: Props) {
   const { data: tenantData } = useQuery(GET_TENANT, {
     variables: { subdomain: tenantSubdomain },
   });
-  const tenantName = tenantData?.tenant?.name as string | undefined;
+  const tenantName = tenantData?.tenantBySubdomain?.name as string | undefined;
+  const tenantSettings = tenantData?.tenantBySubdomain?.settings;
 
   const { data, loading, error } = useQuery(GET_COURSE, {
     skip: !courseId,
@@ -67,7 +68,7 @@ export default function LearnCourseDetailPage({ tenantSubdomain }: Props) {
         <title>{course?.title ? `${course.title} — Learn` : 'Course — Learn'}</title>
       </Head>
 
-      <LearnLayout tenantSubdomain={tenantSubdomain} tenantName={tenantName}>
+      <LearnLayout tenantSubdomain={tenantSubdomain} tenantName={tenantName} tenantSettings={tenantSettings}>
         <Link href="/learn" className="ios-btn-plain text-sm mb-4 inline-flex">
           ← Catalog
         </Link>

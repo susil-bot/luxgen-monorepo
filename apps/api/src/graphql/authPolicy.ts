@@ -11,6 +11,7 @@ export const PUBLIC_QUERIES = new Set([
   'pricingPlans',
   'currentUser',
   'tenant',
+  'tenantBySubdomain',
   'courses',
   'course',
 ]);

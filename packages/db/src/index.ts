@@ -10,7 +10,7 @@ export { Tenant } from './tenant';
 export type { IUser, IUserPermissions } from './user';
 export { User, UserRole, UserStatus } from './user';
 export type { ICourse } from './course';
-export { Course } from './course';
+export { Course, CourseStatus } from './course';
 export type { IGroup, IGroupMember } from './group';
 export { Group, GroupMember } from './group';
 export type { IAgentTask, AgentTaskStatus, AgentTaskMode } from './agent-task';
