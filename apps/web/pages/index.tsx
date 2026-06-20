@@ -4,20 +4,26 @@ import { useEffect } from 'react';
 import Head from 'next/head';
 import { useGlobalContext } from '@luxgen/ui';
 import { PageLoadingState } from '../components/common/PageStates';
+import { isStoredSessionExpired } from '../lib/session';
 
 interface HomeProps {
   tenant: string | null;
 }
 
+function hasActiveSession(): boolean {
+  if (typeof window === 'undefined') return false;
+  return Boolean(localStorage.getItem('authToken')) && !isStoredSessionExpired();
+}
+
 export default function Home({ tenant: _tenant }: HomeProps) {
   const router = useRouter();
-  const { isInitialized, currentTenant } = useGlobalContext();
+  const { isInitialized } = useGlobalContext();
 
   useEffect(() => {
-    if (isInitialized && currentTenant && currentTenant !== 'demo') {
+    if (isInitialized && hasActiveSession()) {
       router.push('/dashboard');
     }
-  }, [isInitialized, currentTenant, router]);
+  }, [isInitialized, router]);
 
   if (!isInitialized) {
     return <PageLoadingState label="Loading…" />;

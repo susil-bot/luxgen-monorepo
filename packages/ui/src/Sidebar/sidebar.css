@@ -742,9 +742,30 @@ html.dark [data-tenant='demo'] * {
 .lux-sidebar-footer__role {
   font-size: 11px;
   color: var(--lux-text-tertiary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+}
+
+.lux-sidebar-footer--guest {
+  padding: 8px 10px 10px;
+}
+
+.lux-sidebar-footer__sign-in {
+  display: block;
+  width: calc(100% - 8px);
+  margin: 0 4px;
+  padding: 8px 12px;
+  border: none;
+  border-radius: var(--lux-item-radius);
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  color: #fff;
+  background: var(--lux-color-accent);
+  transition: opacity 120ms ease;
+}
+
+.lux-sidebar-footer__sign-in:hover {
+  opacity: 0.9;
 }
 
 /* ── Collapse toggle button ───────────────────────────────────────────────── */

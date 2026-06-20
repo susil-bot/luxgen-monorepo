@@ -208,8 +208,8 @@ const NavBarComponent: React.FC<NavBarProps> = ({
             </button>
           )}
 
-          {/* User Menu */}
-          {user && (
+          {/* User Menu or auth actions */}
+          {user ? (
             <div className="relative" ref={mobileMenuRef}>
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -271,6 +271,18 @@ const NavBarComponent: React.FC<NavBarProps> = ({
                   </div>
                 </div>
               )}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <a href="/login" className="ios-btn-secondary text-sm px-3 py-1.5 hidden sm:inline-flex">
+                Login
+              </a>
+              <a href="/register" className="ios-btn-primary text-sm px-3 py-1.5 hidden sm:inline-flex">
+                Sign Up
+              </a>
+              <a href="/login" className="ios-btn-primary text-sm px-3 py-1.5 sm:hidden" aria-label="Login">
+                Login
+              </a>
             </div>
           )}
         </div>
