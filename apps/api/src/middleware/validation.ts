@@ -1,15 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
 
+export {
+  validateStorefrontPatchBody,
+  validationErrorsToRecord,
+  landingPathFromSlug,
+  mergeStorefrontPatch,
+} from '@luxgen/storefront';
+
+export type { StorefrontPatchBody, StorefrontRouteKey, ValidationError } from '@luxgen/storefront';
+
+import type { ValidationError } from '@luxgen/storefront';
+
 // Email validation regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Password validation
 const PASSWORD_MIN_LENGTH = 6;
-
-export interface ValidationError {
-  field: string;
-  message: string;
-}
 
 export const validateEmail = (email: string): string | null => {
   if (!email) return 'Email is required';

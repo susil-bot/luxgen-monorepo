@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { Tenant } from '@luxgen/db';
 import { getTenantConfig, validateTenantConfig } from '../config/tenants';
 import { getTenantContext } from '../middleware/tenantRouting';
+import { validateStorefrontPatchBody, validationErrorsToRecord, mergeStorefrontPatch } from '../middleware/validation';
 
 const router = Router();
 
@@ -370,6 +371,78 @@ router.post('/init', async (req: Request, res: Response) => {
       message: 'Internal server error',
       error:
         process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
+    });
+  }
+});
+
+/**
+ * Update public storefront landing (trainer/mentor marketplace home)
+ */
+router.patch('/storefront', async (req: Request, res: Response) => {
+  try {
+    const tenantContext = getTenantContext(req);
+
+    if (!tenantContext) {
+      return res.status(404).json({
+        success: false,
+        message: 'No tenant context found',
+      });
+    }
+
+    const { tenantId, tenant } = tenantContext;
+    const validation = validateStorefrontPatchBody(req.body);
+
+    if (!validation.ok) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: validationErrorsToRecord(validation.errors),
+      });
+    }
+
+    const { landingEnabled, slug, routes, content, theme } = validation.data;
+
+    const existing = (tenant.settings?.config as unknown as Record<string, unknown> | undefined)?.storefront ?? {};
+    const existingRecord = existing as Record<string, unknown>;
+    const nextStorefront = mergeStorefrontPatch(existingRecord, {
+      ...(typeof landingEnabled === 'boolean' ? { landingEnabled } : {}),
+      ...(slug ? { slug } : {}),
+      ...(routes ? { routes } : {}),
+      ...(content ? { content } : {}),
+      ...(theme ? { theme } : {}),
+    });
+
+    const updatedTenant = await Tenant.findByIdAndUpdate(
+      tenantId,
+      {
+        'settings.config.storefront': nextStorefront,
+        updatedAt: new Date(),
+      },
+      { new: true },
+    );
+
+    if (!updatedTenant) {
+      return res.status(404).json({
+        success: false,
+        message: 'Tenant not found',
+      });
+    }
+
+    const config = updatedTenant.settings?.config as unknown as Record<string, unknown> | undefined;
+
+    res.json({
+      success: true,
+      message: 'Storefront settings updated successfully',
+      data: {
+        storefront: config?.storefront ?? nextStorefront,
+      },
+    });
+  } catch (error) {
+    console.error('Update tenant storefront error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
     });
   }
 });

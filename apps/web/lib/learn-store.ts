@@ -33,6 +33,7 @@ export interface LearnCourse {
     firstName: string;
     lastName: string;
   };
+  students?: { id: string }[];
 }
 
 export function filterPublishedCourses(courses: LearnCourse[]): LearnCourse[] {

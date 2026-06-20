@@ -71,6 +71,7 @@
 | [SIDEBAR_REDESIGN.md](./SIDEBAR_REDESIGN.md)                                             | Sidebar spec                                                 |
 | `skills/ios-design/SKILL.md`                                                             | Design tokens & page template                                |
 | [MOBILE_STORE_ROADMAP.md](./MOBILE_STORE_ROADMAP.md)                                     | **Mobile + storefront roadmap** — phases, PR log, checklists |
+| [STOREFRONT_TENANT_CUSTOMIZATION.md](./STOREFRONT_TENANT_CUSTOMIZATION.md)               | **Per-tenant landing** — content, style, slug layering       |
 
 ### Operations
 

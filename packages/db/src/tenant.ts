@@ -47,6 +47,29 @@ export interface TenantConfig {
     paymentProvider?: string;
     analyticsProvider?: string;
   };
+  regional?: {
+    contactEmail?: string;
+    timezone?: string;
+    currency?: string;
+  };
+  storefront?: {
+    landingEnabled: boolean;
+    slug?: string;
+    routes: {
+      landing: string;
+      courses: string;
+      programs: string;
+      login: string;
+      register: string;
+    };
+    content?: Record<string, unknown>;
+    theme?: {
+      accentColor?: string;
+      warmAccentColor?: string;
+      heroImage?: string;
+      layout?: 'classic' | 'split';
+    };
+  };
 }
 
 export interface ITenant extends Document {
@@ -208,6 +231,31 @@ const tenantSchema = new Schema<ITenant>(
           emailProvider: String,
           paymentProvider: String,
           analyticsProvider: String,
+        },
+        regional: {
+          contactEmail: String,
+          timezone: String,
+          currency: String,
+        },
+        storefront: {
+          landingEnabled: {
+            type: Boolean,
+            default: false,
+          },
+          slug: {
+            type: String,
+            default: 'mentors',
+            match: [/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens'],
+          },
+          routes: {
+            landing: { type: String, default: '/store/mentors' },
+            courses: { type: String, default: '/learn' },
+            programs: { type: String, default: '/store/product' },
+            login: { type: String, default: '/login' },
+            register: { type: String, default: '/register' },
+          },
+          content: { type: Schema.Types.Mixed },
+          theme: { type: Schema.Types.Mixed },
         },
       },
     },

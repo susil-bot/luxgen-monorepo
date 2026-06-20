@@ -35,18 +35,15 @@ upsertTenant({
       fontFamily: 'Inter, system-ui, sans-serif',
       logo: null,
       favicon: null,
-      customCSS: ''
+      customCSS: '',
     },
     security: {
       allowedDomains: ['demo.localhost', 'localhost'],
-      corsOrigins: [
-        'http://demo.localhost:3000',
-        'http://localhost:3000'
-      ],
+      corsOrigins: ['http://demo.localhost:3000', 'http://localhost:3000'],
       rateLimiting: {
         enabled: true,
         maxRequests: 2000,
-        windowMs: 900000
+        windowMs: 900000,
       },
       sessionTimeout: 480,
       requireMFA: false,
@@ -55,8 +52,8 @@ upsertTenant({
         requireUppercase: true,
         requireLowercase: true,
         requireNumbers: true,
-        requireSymbols: false
-      }
+        requireSymbols: false,
+      },
     },
     config: {
       features: {
@@ -64,27 +61,38 @@ upsertTenant({
         notifications: true,
         fileUpload: true,
         apiAccess: true,
-        customDomain: false
+        customDomain: false,
       },
       limits: {
         maxUsers: 500,
         maxStorage: 5120,
-        maxApiCalls: 20000
+        maxApiCalls: 20000,
       },
       integrations: {
         emailProvider: 'sendgrid',
-        analyticsProvider: 'google-analytics'
-      }
-    }
+        analyticsProvider: 'google-analytics',
+      },
+      storefront: {
+        landingEnabled: true,
+        slug: 'mentors',
+        routes: {
+          landing: '/store/mentors',
+          courses: '/learn',
+          programs: '/store/product',
+          login: '/login',
+          register: '/register',
+        },
+      },
+    },
   },
   metadata: {
     plan: 'pro',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null
+    createdBy: null,
   },
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
 });
 
 // ── Tenant: Idea Vibes ─────────────────────────────────────────────────────
@@ -102,18 +110,15 @@ upsertTenant({
       fontFamily: 'Poppins, system-ui, sans-serif',
       logo: null,
       favicon: null,
-      customCSS: ''
+      customCSS: '',
     },
     security: {
       allowedDomains: ['idea-vibes.localhost', 'localhost'],
-      corsOrigins: [
-        'http://idea-vibes.localhost:3000',
-        'http://localhost:3000'
-      ],
+      corsOrigins: ['http://idea-vibes.localhost:3000', 'http://localhost:3000'],
       rateLimiting: {
         enabled: true,
         maxRequests: 5000,
-        windowMs: 900000
+        windowMs: 900000,
       },
       sessionTimeout: 720,
       requireMFA: false,
@@ -122,8 +127,8 @@ upsertTenant({
         requireUppercase: true,
         requireLowercase: true,
         requireNumbers: true,
-        requireSymbols: false
-      }
+        requireSymbols: false,
+      },
     },
     config: {
       features: {
@@ -131,28 +136,28 @@ upsertTenant({
         notifications: true,
         fileUpload: true,
         apiAccess: true,
-        customDomain: true
+        customDomain: true,
       },
       limits: {
         maxUsers: 200,
         maxStorage: 10240,
-        maxApiCalls: 50000
+        maxApiCalls: 50000,
       },
       integrations: {
         emailProvider: 'mailgun',
         paymentProvider: 'stripe',
-        analyticsProvider: 'mixpanel'
-      }
-    }
+        analyticsProvider: 'mixpanel',
+      },
+    },
   },
   metadata: {
     plan: 'enterprise',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null
+    createdBy: null,
   },
   createdAt: new Date(),
-  updatedAt: new Date()
+  updatedAt: new Date(),
 });
 
 // ── Indexes ────────────────────────────────────────────────────────────────
