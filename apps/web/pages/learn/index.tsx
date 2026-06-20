@@ -18,7 +18,7 @@ interface Props {
 }
 
 export default function LearnCatalogPage({ tenantSubdomain }: Props) {
-  const { data: tenantData } = useQuery(GET_TENANT, {
+  const { data: tenantData, loading: tenantLoading } = useQuery(GET_TENANT, {
     variables: { subdomain: tenantSubdomain },
   });
 
@@ -26,17 +26,24 @@ export default function LearnCatalogPage({ tenantSubdomain }: Props) {
   const tenantName = tenantData?.tenantBySubdomain?.name as string | undefined;
   const tenantSettings = tenantData?.tenantBySubdomain?.settings;
 
-  const { data, loading, error } = useQuery(GET_COURSES, {
+  const {
+    data,
+    loading: coursesLoading,
+    error,
+  } = useQuery(GET_COURSES, {
     skip: !tenantId,
     variables: { tenantId: tenantId ?? '' },
   });
+
+  const catalogLoading = tenantLoading || (Boolean(tenantId) && coursesLoading);
+  const pageTitle = tenantName ? `Learn — ${tenantName}` : `Learn — ${tenantSubdomain}`;
 
   const courses = filterPublishedCourses((data?.courses as LearnCourse[] | undefined) ?? []);
 
   return (
     <>
       <Head>
-        <title>Learn — {tenantName ?? tenantSubdomain}</title>
+        <title>{pageTitle}</title>
         <meta name="description" content={`Browse training courses from ${tenantName ?? tenantSubdomain}`} />
       </Head>
 
@@ -46,7 +53,7 @@ export default function LearnCatalogPage({ tenantSubdomain }: Props) {
           <p className="mt-1 text-secondary text-sm">Expert-led courses — sign in to enroll and start learning</p>
         </header>
 
-        {loading && <PageLoadingState label="Loading courses…" />}
+        {catalogLoading && <PageLoadingState label="Loading courses…" />}
 
         {error && (
           <p className="text-sm" style={{ color: 'var(--color-red)' }}>
@@ -54,7 +61,7 @@ export default function LearnCatalogPage({ tenantSubdomain }: Props) {
           </p>
         )}
 
-        {!loading && !error && courses.length === 0 && (
+        {!catalogLoading && !error && courses.length === 0 && (
           <div className="ios-empty-state ios-card py-12">
             <p className="empty-title">No courses yet</p>
             <p className="empty-subtitle">Check back soon for new training.</p>
