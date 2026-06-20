@@ -22,6 +22,7 @@ export interface CreateAutomationInput {
   triggerLabel: string;
   actions: AutomationActionInput[];
   enabled?: boolean;
+  flowDefinition?: Record<string, unknown>;
 }
 
 export interface UpdateAutomationInput {
@@ -30,6 +31,7 @@ export interface UpdateAutomationInput {
   triggerLabel?: string;
   actions?: AutomationActionInput[];
   enabled?: boolean;
+  flowDefinition?: Record<string, unknown>;
 }
 
 const DEMO_SEED: Omit<CreateAutomationInput, 'tenantId'>[] = [
@@ -151,6 +153,7 @@ export class AutomationService {
         label: a.label,
         config: a.config ?? null,
       })),
+      flowDefinition: automation.flowDefinition ?? null,
       runCount: automation.runCount,
       lastRunAt: automation.lastRunAt ?? null,
       createdAt: automation.createdAt,

@@ -3,61 +3,31 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 
 import styles from '../../../components/automations/tower/TowerFlow.module.css';
+import {
+  createOrderCreatedFlow,
+  flowToOrderedSteps,
+  getFlowCompound,
+  listFlowCompounds,
+  type FlowNodeKind,
+  type FlowStepView,
+  type TowerFlowDocument,
+} from '../../../lib/automation-flow';
 
-type NodeType = 'trigger' | 'wait' | 'action' | 'condition';
-
-interface FlowStep {
-  id: string;
-  type: NodeType;
-  title: string;
-  description: string;
+function stepIcon(kind: FlowNodeKind, emoji?: string) {
+  return emoji ?? (kind === 'trigger' ? '⚡' : kind === 'wait' ? '🕐' : kind === 'condition' ? '◆' : '{/}');
 }
 
-const DEFAULT_STEPS: FlowStep[] = [
-  {
-    id: 't1',
-    type: 'trigger',
-    title: 'Order created',
-    description: 'This tower starts when a new order is created',
-  },
-  {
-    id: 'w1',
-    type: 'wait',
-    title: 'Wait 10 seconds',
-    description: 'Delay before the next step runs',
-  },
-  {
-    id: 'a1',
-    type: 'action',
-    title: 'Run code',
-    description: 'Execute a custom script on the order payload',
-  },
-  {
-    id: 'c1',
-    type: 'condition',
-    title: 'Check subscription',
-    description: 'Run code has subscriptions is equal to true',
-  },
-];
-
-function stepIcon(type: NodeType) {
-  if (type === 'trigger') return '⚡';
-  if (type === 'wait') return '🕐';
-  if (type === 'condition') return '◆';
-  return '{/}';
-}
-
-function stepIconClass(type: NodeType) {
-  if (type === 'trigger') return styles.stepIconTrigger;
-  if (type === 'wait') return styles.stepIconWait;
-  if (type === 'condition') return styles.stepIconCondition;
+function stepIconClass(kind: FlowNodeKind) {
+  if (kind === 'trigger') return styles.stepIconTrigger;
+  if (kind === 'wait') return styles.stepIconWait;
+  if (kind === 'condition') return styles.stepIconCondition;
   return styles.stepIconAction;
 }
 
-function stepTypeLabel(type: NodeType) {
-  if (type === 'trigger') return 'Trigger';
-  if (type === 'wait') return 'Wait';
-  if (type === 'condition') return 'Condition';
+function stepTypeLabel(kind: FlowNodeKind) {
+  if (kind === 'trigger') return 'Trigger';
+  if (kind === 'wait') return 'Wait';
+  if (kind === 'condition') return 'Condition';
   return 'Action';
 }
 
@@ -66,14 +36,23 @@ export default function TowerEditRoom() {
   const { id } = router.query;
   const towerId = typeof id === 'string' ? id : 'new';
 
-  const [steps] = useState<FlowStep[]>(DEFAULT_STEPS);
-  const [selectedStepId, setSelectedStepId] = useState<string>('t1');
-  const [towerName, setTowerName] = useState('Order created');
-  const [isEnabled, setIsEnabled] = useState(false);
+  const [flow, setFlow] = useState<TowerFlowDocument>(() =>
+    towerId === 'new' ? createOrderCreatedFlow() : createOrderCreatedFlow('Order created'),
+  );
+  const steps = useMemo(() => flowToOrderedSteps(flow), [flow]);
+  const [selectedStepId, setSelectedStepId] = useState<string>(flow.entryNodeId);
   const [editingName, setEditingName] = useState(false);
-  const [nameInput, setNameInput] = useState(towerName);
+  const [nameInput, setNameInput] = useState(flow.meta.name);
 
-  const selectedStep = useMemo(() => steps.find((s) => s.id === selectedStepId) ?? steps[0], [steps, selectedStepId]);
+  const selectedStep: FlowStepView | undefined = steps.find((s) => s.id === selectedStepId) ?? steps[0];
+  const selectedCompound = selectedStep ? getFlowCompound(selectedStep.compoundId) : undefined;
+  const triggerOptions = listFlowCompounds('trigger');
+
+  useEffect(() => {
+    if (steps.length && !steps.some((s) => s.id === selectedStepId)) {
+      setSelectedStepId(steps[0]?.id ?? flow.entryNodeId);
+    }
+  }, [steps, selectedStepId, flow.entryNodeId]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -84,14 +63,26 @@ export default function TowerEditRoom() {
   }, [router]);
 
   const commitName = () => {
-    setTowerName(nameInput.trim() || towerName);
+    const name = nameInput.trim() || flow.meta.name;
+    setFlow((prev) => ({ ...prev, meta: { ...prev.meta, name } }));
     setEditingName(false);
+  };
+
+  const replaceTriggerCompound = (compoundId: string) => {
+    const compound = getFlowCompound(compoundId);
+    if (!compound || compound.kind !== 'trigger') return;
+    setFlow((prev) => ({
+      ...prev,
+      nodes: prev.nodes.map((n) =>
+        n.id === prev.entryNodeId ? { ...n, compoundId, title: compound.label, config: {} } : n,
+      ),
+    }));
   };
 
   return (
     <>
       <Head>
-        <title>{towerName} — Tower</title>
+        <title>{flow.meta.name} — Tower</title>
       </Head>
 
       <div className={styles.editorRoot}>
@@ -116,7 +107,7 @@ export default function TowerEditRoom() {
               onKeyDown={(e) => {
                 if (e.key === 'Enter') commitName();
                 if (e.key === 'Escape') {
-                  setNameInput(towerName);
+                  setNameInput(flow.meta.name);
                   setEditingName(false);
                 }
               }}
@@ -126,15 +117,18 @@ export default function TowerEditRoom() {
               type="button"
               className={styles.editorTitle}
               onClick={() => {
-                setNameInput(towerName);
+                setNameInput(flow.meta.name);
                 setEditingName(true);
               }}
             >
-              {towerName}
+              {flow.meta.name}
             </button>
           )}
 
           <span className={styles.statusPill}>{towerId === 'new' ? 'Draft' : 'Saved'}</span>
+          <span className={styles.statusPill} style={{ fontFamily: 'monospace', fontSize: 10 }}>
+            v{flow.version}
+          </span>
 
           <div style={{ flex: 1 }} />
 
@@ -148,15 +142,14 @@ export default function TowerEditRoom() {
 
           <button
             type="button"
-            className={isEnabled ? styles.toggleOff : styles.toggleOn}
-            onClick={() => setIsEnabled((v) => !v)}
+            className={flow.meta.enabled ? styles.toggleOff : styles.toggleOn}
+            onClick={() => setFlow((prev) => ({ ...prev, meta: { ...prev.meta, enabled: !prev.meta.enabled } }))}
           >
-            {isEnabled ? 'Turn off' : 'Turn on'}
+            {flow.meta.enabled ? 'Turn off' : 'Turn on'}
           </button>
         </header>
 
         <div className={styles.editorBody}>
-          {/* Left step rail — Shopify Flow sidebar */}
           <aside className={styles.stepRail}>
             <div className={styles.stepRailHead}>Workflow steps</div>
             {steps.map((step, index) => (
@@ -166,18 +159,22 @@ export default function TowerEditRoom() {
                 className={`${styles.stepItem} ${selectedStepId === step.id ? styles.stepItemActive : ''}`}
                 onClick={() => setSelectedStepId(step.id)}
               >
-                <span className={`${styles.stepIcon} ${stepIconClass(step.type)}`}>{stepIcon(step.type)}</span>
+                <span className={`${styles.stepIcon} ${stepIconClass(step.kind)}`}>
+                  {stepIcon(step.kind, step.emoji)}
+                </span>
                 <span>
                   <p className={styles.stepLabel}>
-                    {index + 1}. {stepTypeLabel(step.type)}
+                    {index + 1}. {stepTypeLabel(step.kind)}
                   </p>
                   <p className={styles.stepMeta}>{step.title}</p>
+                  <p className={styles.stepMeta} style={{ fontSize: 11, opacity: 0.75 }}>
+                    {step.compoundId}
+                  </p>
                 </span>
               </button>
             ))}
           </aside>
 
-          {/* Center canvas — vertical flow */}
           <main className={styles.canvas}>
             <div className={styles.testBar}>
               <span style={{ fontSize: 13, fontWeight: 600, color: '#202223' }}>Test tower</span>
@@ -204,11 +201,11 @@ export default function TowerEditRoom() {
                       if (e.key === 'Enter' || e.key === ' ') setSelectedStepId(step.id);
                     }}
                   >
-                    {step.type === 'trigger' ? (
+                    {step.kind === 'trigger' ? (
                       <>
                         <div className={styles.flowNodeTriggerHead}>
-                          <span>{stepIcon(step.type)}</span>
-                          {stepTypeLabel(step.type)}
+                          <span>{stepIcon(step.kind, step.emoji)}</span>
+                          {stepTypeLabel(step.kind)}
                         </div>
                         <div className={styles.flowNodeBody}>
                           <h3 className={styles.flowNodeTitle}>{step.title}</h3>
@@ -226,7 +223,7 @@ export default function TowerEditRoom() {
                             textTransform: 'uppercase',
                           }}
                         >
-                          {stepTypeLabel(step.type)}
+                          {stepTypeLabel(step.kind)}
                         </p>
                         <h3 className={styles.flowNodeTitle}>{step.title}</h3>
                         <p className={styles.flowNodeDesc}>{step.description}</p>
@@ -239,63 +236,64 @@ export default function TowerEditRoom() {
             </div>
           </main>
 
-          {/* Right config panel */}
-          <aside className={styles.configPanel}>
-            <div className={styles.configPanelHead}>{stepTypeLabel(selectedStep.type)} settings</div>
-            <div className={styles.configPanelBody}>
-              <div className={styles.configField}>
-                <label className={styles.configLabel} htmlFor="step-title">
-                  Title
-                </label>
-                <input id="step-title" className={styles.configInput} defaultValue={selectedStep.title} />
+          {selectedStep && selectedCompound ? (
+            <aside className={styles.configPanel}>
+              <div className={styles.configPanelHead}>{stepTypeLabel(selectedStep.kind)} settings</div>
+              <div className={styles.configPanelBody}>
+                <div className={styles.configField}>
+                  <label className={styles.configLabel}>Compound</label>
+                  {selectedStep.kind === 'trigger' ? (
+                    <select
+                      className={styles.configInput}
+                      value={selectedStep.compoundId}
+                      onChange={(e) => replaceTriggerCompound(e.target.value)}
+                    >
+                      {triggerOptions.map((t) => (
+                        <option key={t.id} value={t.id}>
+                          {t.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input className={styles.configInput} readOnly value={selectedStep.compoundId} />
+                  )}
+                </div>
+
+                {selectedCompound.configFields.map((field) => (
+                  <div key={field.key} className={styles.configField}>
+                    <label className={styles.configLabel} htmlFor={`cfg-${field.key}`}>
+                      {field.label}
+                    </label>
+                    {field.type === 'select' && field.options ? (
+                      <select
+                        id={`cfg-${field.key}`}
+                        className={styles.configInput}
+                        defaultValue={String(field.defaultValue ?? '')}
+                      >
+                        {field.options.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        id={`cfg-${field.key}`}
+                        className={styles.configInput}
+                        type={field.type === 'number' || field.type === 'duration' ? 'number' : 'text'}
+                        placeholder={field.placeholder}
+                        defaultValue={String(selectedStep.config[field.key] ?? field.defaultValue ?? '')}
+                      />
+                    )}
+                  </div>
+                ))}
+
+                <p style={{ fontSize: 12, color: '#616161', lineHeight: 1.5, margin: 0 }}>
+                  Saved as <code>TowerFlowDocument</code> v1 on <code>Automation.flowDefinition</code>.
+                </p>
               </div>
-              <div className={styles.configField}>
-                <label className={styles.configLabel} htmlFor="step-desc">
-                  Description
-                </label>
-                <input id="step-desc" className={styles.configInput} defaultValue={selectedStep.description} />
-              </div>
-              {selectedStep.type === 'trigger' && (
-                <div className={styles.configField}>
-                  <label className={styles.configLabel}>Event</label>
-                  <select className={styles.configInput} defaultValue="order_created">
-                    <option value="order_created">Order created</option>
-                    <option value="user_enrolled">User enrolled</option>
-                    <option value="course_completed">Course completed</option>
-                  </select>
-                </div>
-              )}
-              {selectedStep.type === 'wait' && (
-                <div className={styles.configField}>
-                  <label className={styles.configLabel} htmlFor="wait-seconds">
-                    Wait duration (seconds)
-                  </label>
-                  <input id="wait-seconds" type="number" className={styles.configInput} defaultValue={10} min={1} />
-                </div>
-              )}
-              {selectedStep.type === 'action' && (
-                <div className={styles.configField}>
-                  <label className={styles.configLabel}>Action type</label>
-                  <select className={styles.configInput} defaultValue="run_code">
-                    <option value="run_code">Run code</option>
-                    <option value="send_email">Send email</option>
-                    <option value="notify_slack">Notify Slack</option>
-                  </select>
-                </div>
-              )}
-              {selectedStep.type === 'condition' && (
-                <div className={styles.configField}>
-                  <label className={styles.configLabel} htmlFor="condition-expr">
-                    Condition
-                  </label>
-                  <input id="condition-expr" className={styles.configInput} defaultValue={selectedStep.description} />
-                </div>
-              )}
-              <p style={{ fontSize: 12, color: '#616161', lineHeight: 1.5, margin: 0 }}>
-                Configure this step like Shopify Flow — changes save to the tower definition when wired to GraphQL.
-              </p>
-            </div>
-          </aside>
+            </aside>
+          ) : null}
         </div>
       </div>
     </>

@@ -1,3 +1,4 @@
+import { exportAutomationSchema } from '@luxgen/automation-flow';
 import { randomUUID } from 'crypto';
 import { automationService } from '../../services/automationService';
 import { requireFeature } from '../../middleware/planGate';
@@ -6,31 +7,7 @@ import type { GraphQLContext } from '../../context';
 import { GraphQLError } from 'graphql';
 import { scopedTenantId } from '../../graphql/tenantScope';
 
-const AUTOMATION_SCHEMA = {
-  triggers: [
-    'COURSE_COMPLETED',
-    'USER_ENROLLED',
-    'GROUP_JOINED',
-    'CERTIFICATE_ISSUED',
-    'SCHEDULE',
-    'WEBHOOK',
-    'CODE_CHANGE_STAGED',
-    'CODE_CHANGE_COMMITTED',
-    'CODE_CHANGE_MERGED',
-    'CODE_CHANGE_FAILED',
-  ],
-  actions: [
-    'SEND_EMAIL',
-    'ADD_TO_GROUP',
-    'REMOVE_FROM_GROUP',
-    'ENROLL_IN_COURSE',
-    'ISSUE_CERTIFICATE',
-    'CALL_WEBHOOK',
-    'NOTIFY_SLACK',
-    'TAG_USER',
-    'RUN_AGENT_TASK',
-  ],
-};
+const AUTOMATION_SCHEMA = exportAutomationSchema();
 
 async function runAgentTaskViaQueue(
   tenantId: string,
