@@ -2331,3 +2331,486 @@ html.dark [data-tenant='demo'] {
 .lux-run-detail-btn:hover {
   text-decoration: underline;
 }
+/* ── Project iteration boards ── */
+.lux-project-page {
+  padding: 24px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+.lux-project-header {
+  margin-bottom: 24px;
+}
+.lux-project-header__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+.lux-project-header__title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 0;
+}
+.lux-project-header__subtitle {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+.lux-project-workflows-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-secondary);
+  box-shadow: var(--shadow-sm);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: box-shadow var(--transition-base);
+}
+.lux-project-workflows-btn:hover {
+  box-shadow: var(--shadow-md);
+}
+.lux-project-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--color-separator);
+  padding-bottom: 12px;
+}
+.lux-project-tab {
+  padding: 8px 14px;
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition:
+    background var(--transition-base),
+    color var(--transition-base);
+}
+.lux-project-tab:hover {
+  background: var(--color-fill-tertiary);
+  color: var(--color-text-primary);
+}
+.lux-project-tab--active {
+  background: var(--color-blue);
+  color: #fff;
+}
+.lux-project-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.lux-project-search {
+  flex: 1;
+  min-width: 220px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-family: inherit;
+}
+.lux-project-add-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--color-blue);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+.lux-project-add-btn:hover {
+  opacity: 0.9;
+}
+.lux-project-kanban {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  overflow-x: auto;
+  padding-bottom: 16px;
+  min-height: 480px;
+}
+.lux-project-column {
+  flex: 0 0 280px;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+  min-height: 200px;
+  transition:
+    box-shadow var(--transition-base),
+    outline var(--transition-base);
+}
+.lux-project-column--drop {
+  outline: 2px dashed var(--color-blue);
+  box-shadow: var(--shadow-md);
+}
+.lux-project-column__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.lux-project-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.lux-project-dot--green {
+  background: var(--color-green);
+}
+.lux-project-dot--blue {
+  background: var(--color-blue);
+}
+.lux-project-dot--orange {
+  background: var(--color-orange);
+}
+.lux-project-dot--purple {
+  background: #af52de;
+}
+.lux-project-dot--red {
+  background: var(--color-red);
+}
+.lux-project-column__title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0;
+  flex: 1;
+}
+.lux-project-column__count {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-tertiary);
+  background: var(--color-fill-tertiary);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+.lux-project-column__hint {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  margin: 0 0 12px 18px;
+}
+.lux-project-column__cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.lux-project-card {
+  background: var(--color-bg-primary);
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-lg);
+  padding: 12px;
+  cursor: grab;
+  transition:
+    box-shadow var(--transition-base),
+    transform var(--transition-base);
+}
+.lux-project-card:hover {
+  box-shadow: var(--shadow-sm);
+}
+.lux-project-card:active {
+  cursor: grabbing;
+}
+.lux-project-card__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.lux-project-priority {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+}
+.lux-project-priority--p0 {
+  background: rgba(255, 59, 48, 0.15);
+  color: var(--color-red);
+}
+.lux-project-priority--p1 {
+  background: rgba(255, 149, 0, 0.15);
+  color: var(--color-orange);
+}
+.lux-project-priority--p2 {
+  background: rgba(0, 122, 255, 0.12);
+  color: var(--color-blue);
+}
+.lux-project-priority--p3 {
+  background: var(--color-fill-tertiary);
+  color: var(--color-text-secondary);
+}
+.lux-project-card__estimate {
+  font-size: 11px;
+  color: var(--color-text-tertiary);
+}
+.lux-project-card__title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  margin: 0 0 6px;
+  line-height: 1.35;
+}
+.lux-project-card__dates {
+  font-size: 12px;
+  color: var(--color-text-secondary);
+  margin: 0 0 8px;
+}
+.lux-project-card__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+.lux-project-card__assignee {
+  color: var(--color-text-secondary);
+  font-weight: 500;
+}
+.lux-project-card__priority-label {
+  color: var(--color-text-tertiary);
+}
+.lux-project-card__labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+.lux-project-label {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--color-fill-tertiary);
+  color: var(--color-text-secondary);
+}
+.lux-project-priority__filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.lux-project-priority-chip {
+  padding: 8px 14px;
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-secondary);
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+}
+.lux-project-priority-chip--active {
+  background: var(--color-blue);
+  border-color: var(--color-blue);
+  color: #fff;
+}
+.lux-project-priority__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.lux-project-empty {
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+  grid-column: 1 / -1;
+}
+.lux-project-workflows__intro {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0 0 24px;
+  max-width: 640px;
+}
+.lux-project-workflows__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.lux-project-workflow-card {
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+}
+.lux-project-workflow-card__persona {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-tertiary);
+}
+.lux-project-workflow-card__title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+  margin: 8px 0;
+}
+.lux-project-workflow-card__desc {
+  font-size: 14px;
+  color: var(--color-text-secondary);
+  margin: 0 0 16px;
+  line-height: 1.45;
+}
+.lux-project-workflow-card__btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--color-fill-tertiary);
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: not-allowed;
+}
+.lux-project-workflow-card__btn--active {
+  background: var(--color-blue);
+  color: #fff;
+  cursor: pointer;
+}
+.lux-project-workflow-card__btn--active:disabled {
+  opacity: 0.7;
+  cursor: wait;
+}
+.lux-project-workflow-card__meta {
+  font-size: 12px;
+  color: var(--color-text-tertiary);
+  margin: 0 0 12px;
+}
+.lux-project-workflows__target {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+.lux-project-workflows__target-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+}
+.lux-project-workflows__error {
+  color: var(--color-red);
+  font-size: 14px;
+  margin: 0 0 16px;
+}
+
+.lux-project-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+.lux-project-modal {
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  background: var(--color-bg-secondary);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+}
+.lux-project-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 20px 0;
+}
+.lux-project-modal__header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+.lux-project-modal__close {
+  background: none;
+  border: none;
+  font-size: 24px;
+  line-height: 1;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+  padding: 4px 8px;
+}
+.lux-project-modal__form {
+  padding: 16px 20px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.lux-project-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-text-secondary);
+}
+.lux-project-field input,
+.lux-project-field select,
+.lux-project-field textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-primary);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-family: inherit;
+}
+.lux-project-field-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+.lux-project-modal__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+.lux-project-modal__delete {
+  background: none;
+  border: none;
+  color: var(--color-red);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.lux-project-modal__actions {
+  display: flex;
+  gap: 10px;
+  margin-left: auto;
+}
+.lux-project-modal__cancel {
+  padding: 10px 16px;
+  border: 1px solid var(--color-separator);
+  border-radius: var(--radius-lg);
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-family: inherit;
+  cursor: pointer;
+}
+.lux-project-modal__save {
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-lg);
+  background: var(--color-blue);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
