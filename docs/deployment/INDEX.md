@@ -7,13 +7,14 @@
 
 ## Documents
 
-| Document                                         | Audience        | Description                                               |
-| ------------------------------------------------ | --------------- | --------------------------------------------------------- |
-| [FREE_TIER_CLOUD.md](./FREE_TIER_CLOUD.md)       | Everyone        | Recommended $0 stack: Vercel + Render + Atlas + Upstash   |
-| [MONOREPO_BUILD.md](./MONOREPO_BUILD.md)         | Developers / CI | How Turborepo builds `apps/*` and `packages/*` for deploy |
-| [ENV_PRODUCTION.md](./ENV_PRODUCTION.md)         | DevOps          | Production environment variables (web + API)              |
-| [DOCKER.md](./DOCKER.md)                         | Self-hosters    | Docker Compose prod + Oracle Cloud Always Free VM         |
-| [../../deploy/README.md](../../deploy/README.md) | CI / platforms  | Platform configs (`render.yaml`, `vercel.json`)           |
+| Document                                           | Audience        | Description                                               |
+| -------------------------------------------------- | --------------- | --------------------------------------------------------- |
+| [FREE_TIER_CLOUD.md](./FREE_TIER_CLOUD.md)         | Everyone        | Recommended $0 stack: Vercel + Render + Atlas + Upstash   |
+| [MONOREPO_BUILD.md](./MONOREPO_BUILD.md)           | Developers / CI | How Turborepo builds `apps/*` and `packages/*` for deploy |
+| [PRESUBMIT_AI_REVIEW.md](./PRESUBMIT_AI_REVIEW.md) | Maintainers     | AI PR reviews — Gemini `LLM_API_KEY` setup                |
+| [ENV_PRODUCTION.md](./ENV_PRODUCTION.md)           | DevOps          | Production environment variables (web + API)              |
+| [DOCKER.md](./DOCKER.md)                           | Self-hosters    | Docker Compose prod + Oracle Cloud Always Free VM         |
+| [../../deploy/README.md](../../deploy/README.md)   | CI / platforms  | Platform configs (`render.yaml`, `vercel.json`)           |
 
 ---
 

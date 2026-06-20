@@ -78,16 +78,17 @@
 
 ## 8. Infrastructure configs (YAML)
 
-| File                              | Purpose                             | Docs                                                   |
-| --------------------------------- | ----------------------------------- | ------------------------------------------------------ |
-| `docker-compose.yml`              | Base stack (Mongo, Redis, API, Web) | [DOCKER.md](../deployment/DOCKER.md)                   |
-| `docker-compose.dev.yml`          | Dev overrides (hot reload)          | [QUICK_START.md](./development/QUICK_START.md)         |
-| `docker-compose.staging.yml`      | Staging stack                       | [deployment/INDEX.md](../deployment/INDEX.md)          |
-| `docker-compose.prod.yml`         | Production stack                    | [ENV_PRODUCTION.md](../deployment/ENV_PRODUCTION.md)   |
-| `.github/workflows/ci.yml`        | Lint, format, test                  | [MONOREPO_BUILD.md](../deployment/MONOREPO_BUILD.md)   |
-| `.github/workflows/web-build.yml` | Web production build                | [MONOREPO_BUILD.md](../deployment/MONOREPO_BUILD.md)   |
-| `deploy/platforms/render.yaml`    | Render Blueprint                    | [FREE_TIER_CLOUD.md](../deployment/FREE_TIER_CLOUD.md) |
-| `k8s/*.yaml`                      | Kubernetes services                 | [k8s/README.md](../../k8s/README.md)                   |
+| File                              | Purpose                             | Docs                                                           |
+| --------------------------------- | ----------------------------------- | -------------------------------------------------------------- |
+| `docker-compose.yml`              | Base stack (Mongo, Redis, API, Web) | [DOCKER.md](../deployment/DOCKER.md)                           |
+| `docker-compose.dev.yml`          | Dev overrides (hot reload)          | [QUICK_START.md](./development/QUICK_START.md)                 |
+| `docker-compose.staging.yml`      | Staging stack                       | [deployment/INDEX.md](../deployment/INDEX.md)                  |
+| `docker-compose.prod.yml`         | Production stack                    | [ENV_PRODUCTION.md](../deployment/ENV_PRODUCTION.md)           |
+| `.github/workflows/ci.yml`        | Lint, format, test                  | [MONOREPO_BUILD.md](../deployment/MONOREPO_BUILD.md)           |
+| `.github/workflows/web-build.yml` | Web production build                | [MONOREPO_BUILD.md](../deployment/MONOREPO_BUILD.md)           |
+| `.github/workflows/presubmit.yml` | AI PR code review (Gemini)          | [PRESUBMIT_AI_REVIEW.md](../deployment/PRESUBMIT_AI_REVIEW.md) |
+| `deploy/platforms/render.yaml`    | Render Blueprint                    | [FREE_TIER_CLOUD.md](../deployment/FREE_TIER_CLOUD.md)         |
+| `k8s/*.yaml`                      | Kubernetes services                 | [k8s/README.md](../../k8s/README.md)                           |
 
 ## 9. Planning & internal
 
