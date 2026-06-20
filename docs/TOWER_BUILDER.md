@@ -14,7 +14,7 @@ Shopify Flow–style automation editor: triggers, conditions, actions, and waits
 | Phase | Capability                                                                                   | Status                                                                |
 | ----- | -------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
 | **1** | Graph mutation API (`connect`, `disconnect`, `insert`, `move`, `flowToGraphSteps`, warnings) | Shipped — [#80](https://github.com/susil-bot/luxgen-monorepo/pull/80) |
-| **2** | Clickable `+` on connectors → compound picker                                                | Planned                                                               |
+| **2** | Clickable `+` on connectors → compound picker                                                | Shipped — this PR                                                     |
 | **3** | Drag reorder on canvas / step rail                                                           | Planned                                                               |
 | **4** | Link / unlink UI in config panel                                                             | Planned                                                               |
 | **5** | MCP granular tools (`tower_insert_step`, etc.)                                               | Planned                                                               |

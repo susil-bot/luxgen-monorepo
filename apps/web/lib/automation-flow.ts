@@ -41,5 +41,6 @@ export type {
   FlowCompoundDefinition,
   FlowConfigField,
   FlowNodeKind,
+  FlowEdgeLabel,
   AutomationSchemaExport,
 } from '@luxgen/automation-flow';
