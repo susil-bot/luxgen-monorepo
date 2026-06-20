@@ -1,7 +1,7 @@
 # LuxGen — AI PR code review (Presubmit)
 # Docs: docs/deployment/PRESUBMIT_AI_REVIEW.md
 # Setup: add LLM_API_KEY repo secret (Google AI Studio Gemini key)
-# Triggers: PR open/update and review comments
+# Triggers: PR open/update/reopen and review-thread replies
 
 name: Presubmit.ai
 
@@ -24,15 +24,21 @@ jobs:
   review:
     name: AI code review
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
-      - name: Check LLM_API_KEY secret
+      - name: Check required secrets
         run: |
           if [ -z "${{ secrets.LLM_API_KEY }}" ]; then
             echo "::error::LLM_API_KEY is not configured. Add a Gemini API key — see docs/deployment/PRESUBMIT_AI_REVIEW.md"
             exit 1
           fi
 
+      # v0.2.5 — latest release: https://github.com/presubmit/ai-reviewer/releases
       - uses: presubmit/ai-reviewer@v0.2.5
+        with:
+          style_guide_rules: |
+            Follow docs/technical/development/CODING_STANDARDS.md.
+            Separate feat/ and fix/ PRs; wire UI → GraphQL → resolver → DB before marking features done.
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LLM_API_KEY: ${{ secrets.LLM_API_KEY }}
