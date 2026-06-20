@@ -64,7 +64,7 @@ const ProjectContext = createContext<ProjectContextValue | null>(null);
 
 export function ProjectProvider({ tenant, children }: { tenant: string; children: ReactNode }) {
   const [filterQuery, setFilterQuery] = useState('');
-  const [sessionReady, setSessionReady] = useState(() => typeof window !== 'undefined' && validateClientSession().ok);
+  const [sessionReady, setSessionReady] = useState(false);
 
   useEffect(() => {
     const refresh = () => setSessionReady(validateClientSession().ok);
