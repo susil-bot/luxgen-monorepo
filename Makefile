@@ -4,7 +4,8 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 .DEFAULT_GOAL := help
-.PHONY: help setup dev dev-infra dev-full dev-docker staging prod clean clean-all \
+.PHONY: help setup dev dev-infra dev-full dev-docker dev-stack-web dev-stack-admin dev-stack-mobile dev-stack-api \
+        dev-web dev-api staging prod clean clean-all \
         logs logs-api logs-web logs-ollama \
         agent-start agent-stop agent-status \
         agent-pull agent-pull-mistral agent-pull-qwen \
@@ -26,7 +27,7 @@ help: ## Show this help
 	@echo ""
 	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ { printf "  $(CYAN)%-22s$(RESET) %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 	@echo ""
-	@echo "$(YELLOW)Quick start:$(RESET) make dev-docker"
+	@echo "$(YELLOW)Quick start:$(RESET) make dev-stack-web   (or dev-stack-admin / dev-stack-mobile)"
 	@echo ""
 
 # ─── Setup (First-Time) ───────────────────────────────────────────────────────
@@ -34,6 +35,9 @@ setup: ## First-time setup: copy env examples, start infra
 	@echo "$(GREEN)► Setting up LuxGen...$(RESET)"
 	@[ -f apps/web/.env.local ]  || (cp apps/web/.env.example apps/web/.env.local  && echo "  Created apps/web/.env.local")
 	@[ -f apps/api/.env ]        || (cp apps/api/.env.example apps/api/.env        && echo "  Created apps/api/.env")
+	@if [ -d apps/mobile ] && [ ! -f apps/mobile/.env.local ]; then \
+		cp apps/mobile/.env.example apps/mobile/.env.local && echo "  Created apps/mobile/.env.local"; \
+	fi
 	@[ -f .env.local ]           || (cp .env.example .env.local                    && echo "  Created .env.local")
 	@npm install
 	@npm run prepare
@@ -43,13 +47,26 @@ setup: ## First-time setup: copy env examples, start infra
 # ─── Development ──────────────────────────────────────────────────────────────
 dev: ## Run web + api locally via turbo (fastest — infra must be running)
 	@echo "$(GREEN)► Starting local dev servers...$(RESET)"
-	@npx turbo run dev
+	@npx turbo run dev --concurrency=15
 
 dev-web: ## Run only the web app locally
 	@npx turbo run dev --filter=@luxgen/web
 
 dev-api: ## Run only the API locally
 	@npx turbo run dev --filter=@luxgen/api
+
+# ─── Role-based dev stacks (shared API + Mongo) ───────────────────────────────
+dev-stack-web: ## Web/learner dev: Mongo + API + Next.js (see skills/dev-workflows)
+	@bash scripts/dev-stack.sh web
+
+dev-stack-admin: ## Admin/commerce dev: Mongo + API + Next.js (admin routes)
+	@bash scripts/dev-stack.sh admin
+
+dev-stack-mobile: ## Expo dev: Mongo + API + apps/mobile
+	@bash scripts/dev-stack.sh mobile
+
+dev-stack-api: ## Backend-only: Mongo + GraphQL API
+	@bash scripts/dev-stack.sh api
 
 dev-infra: ## Start MongoDB + Redis + Ollama in Docker (background)
 	@echo "$(GREEN)► Starting infrastructure (MongoDB, Redis, Ollama)...$(RESET)"

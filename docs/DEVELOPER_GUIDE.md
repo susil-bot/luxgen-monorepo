@@ -22,13 +22,13 @@ Architecture overview: [ARCHITECTURE.md](./ARCHITECTURE.md)
 
 ## 2. Prerequisites
 
-| Tool | Version / notes |
-|------|-----------------|
-| Node.js | 18+ |
-| npm | Workspace root install |
-| MongoDB | Local or Docker (`make dev-infra`) |
-| Redis | Agent worker + queue |
-| Ollama | Agent Studio (`http://localhost:11434`) |
+| Tool       | Version / notes                                 |
+| ---------- | ----------------------------------------------- |
+| Node.js    | 18+                                             |
+| npm        | Workspace root install                          |
+| MongoDB    | Local or Docker (`make dev-infra`)              |
+| Redis      | Agent worker + queue                            |
+| Ollama     | Agent Studio (`http://localhost:11434`)         |
 | Stripe CLI | Optional — webhook testing for billing/listings |
 
 ---
@@ -53,14 +53,25 @@ cd apps/api && npm run dev
 cd apps/web && npm run dev
 ```
 
-Or: `make dev` from root (see Makefile).
+Or pick your **role stack** (starts Mongo + API + your client — faster than `make dev`):
+
+```bash
+make dev-stack-web      # learner / marketing pages in apps/web
+make dev-stack-admin    # commerce admin: /orders, /admin/customers, /products
+make dev-stack-mobile   # Expo app (requires apps/mobile merged)
+make dev-stack-api      # GraphQL API only
+```
+
+See `skills/dev-workflows/SKILL.md` and `make help`.
+
+Legacy: `make dev` runs all turbo `dev` workspaces.
 
 **URLs:**
 
-| Service | URL |
-|---------|-----|
-| Web | http://localhost:3000 |
-| GraphQL | http://localhost:4000/graphql |
+| Service | URL                                    |
+| ------- | -------------------------------------- |
+| Web     | http://localhost:3000                  |
+| GraphQL | http://localhost:4000/graphql          |
 | Tenants | `?tenant=demo` or `?tenant=idea-vibes` |
 
 ---
@@ -114,25 +125,25 @@ Full map: [CODEBASE.md](../CODEBASE.md)
 
 ### API (`apps/api/.env`)
 
-| Variable | Purpose |
-|----------|---------|
-| `MONGODB_URI` | Mongo connection |
-| `JWT_SECRET` | Auth tokens |
-| `STRIPE_SECRET_KEY` | Billing + listings |
-| `STRIPE_WEBHOOK_SECRET` | Webhook verification |
-| `BILLING_DEV_MODE` | Dev billing shortcuts |
-| `EMAIL_PROVIDER` | Listing notification emails |
-| `WEB_APP_URL` | Links in emails |
-| `JOBS_API_KEY` | Cron job auth |
+| Variable                | Purpose                     |
+| ----------------------- | --------------------------- |
+| `MONGODB_URI`           | Mongo connection            |
+| `JWT_SECRET`            | Auth tokens                 |
+| `STRIPE_SECRET_KEY`     | Billing + listings          |
+| `STRIPE_WEBHOOK_SECRET` | Webhook verification        |
+| `BILLING_DEV_MODE`      | Dev billing shortcuts       |
+| `EMAIL_PROVIDER`        | Listing notification emails |
+| `WEB_APP_URL`           | Links in emails             |
+| `JOBS_API_KEY`          | Cron job auth               |
 
 See full list: `apps/api/.env.example`
 
 ### Web (`apps/web/.env.local`)
 
-| Variable | Purpose |
-|----------|---------|
-| `NEXT_PUBLIC_GRAPHQL_URL` | Client GraphQL |
-| `OLLAMA_HOST` / `OLLAMA_MODEL` | Agent chat |
+| Variable                       | Purpose        |
+| ------------------------------ | -------------- |
+| `NEXT_PUBLIC_GRAPHQL_URL`      | Client GraphQL |
+| `OLLAMA_HOST` / `OLLAMA_MODEL` | Agent chat     |
 
 ---
 
@@ -156,10 +167,10 @@ Config: `.oxlintrc.json`, `.oxfmtrc.json`, `.oxlintignore`
 
 ### Local git hooks (Husky)
 
-| Hook | Runs | Matches CI |
-|------|------|------------|
-| **pre-commit** | `lint-staged` → ESLint on staged `.ts`/`.tsx` | Lint job |
-| **pre-push** | `scripts/validate-build.sh` | Build job |
+| Hook           | Runs                                          | Matches CI |
+| -------------- | --------------------------------------------- | ---------- |
+| **pre-commit** | `lint-staged` → ESLint on staged `.ts`/`.tsx` | Lint job   |
+| **pre-push**   | `scripts/validate-build.sh`                   | Build job  |
 
 ```bash
 npm run validate        # lint + build (full check)
@@ -191,17 +202,17 @@ Repo layout: [REPO_STRUCTURE.md](../REPO_STRUCTURE.md)
 
 ## 8. Documentation map
 
-| Need | Document |
-|------|----------|
-| All docs index | [INDEX.md](./INDEX.md) |
-| Every feature | [FEATURE_CATALOG.md](./FEATURE_CATALOG.md) |
-| GraphQL + REST | [API_REFERENCE.md](./API_REFERENCE.md) |
-| Business ↔ code | [BUSINESS_TECH_TRANSLATION.md](./BUSINESS_TECH_TRANSLATION.md) |
-| Billing | [PHASE_9_BILLING.md](./PHASE_9_BILLING.md) |
-| Marketplace | [PHASE_10_MARKETPLACE.md](./PHASE_10_MARKETPLACE.md) |
-| Listings | [LISTING_SUBSCRIPTION_LIFECYCLE.md](./LISTING_SUBSCRIPTION_LIFECYCLE.md) |
-| Agent platform | [AGENT_STUDIO.md](../AGENT_STUDIO.md) |
-| AI agents working here | [AI_AGENT_GUIDE.md](./AI_AGENT_GUIDE.md) |
+| Need                   | Document                                                                 |
+| ---------------------- | ------------------------------------------------------------------------ |
+| All docs index         | [INDEX.md](./INDEX.md)                                                   |
+| Every feature          | [FEATURE_CATALOG.md](./FEATURE_CATALOG.md)                               |
+| GraphQL + REST         | [API_REFERENCE.md](./API_REFERENCE.md)                                   |
+| Business ↔ code        | [BUSINESS_TECH_TRANSLATION.md](./BUSINESS_TECH_TRANSLATION.md)           |
+| Billing                | [PHASE_9_BILLING.md](./PHASE_9_BILLING.md)                               |
+| Marketplace            | [PHASE_10_MARKETPLACE.md](./PHASE_10_MARKETPLACE.md)                     |
+| Listings               | [LISTING_SUBSCRIPTION_LIFECYCLE.md](./LISTING_SUBSCRIPTION_LIFECYCLE.md) |
+| Agent platform         | [AGENT_STUDIO.md](../AGENT_STUDIO.md)                                    |
+| AI agents working here | [AI_AGENT_GUIDE.md](./AI_AGENT_GUIDE.md)                                 |
 
 ---
 

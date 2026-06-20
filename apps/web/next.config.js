@@ -8,7 +8,7 @@ const nextConfig = {
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
-  transpilePackages: ['@luxgen/ui', '@luxgen/agent'],
+  transpilePackages: ['@luxgen/ui', '@luxgen/agent', '@luxgen/design-tokens'],
   experimental: {
     externalDir: true,
   },
@@ -17,6 +17,21 @@ const nextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: true,
+  },
+  webpack: (config, { isServer, webpack }) => {
+    // graphql-ws → ws requires the buffer polyfill in the browser bundle
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        buffer: require.resolve('buffer/'),
+      };
+      config.plugins.push(
+        new webpack.ProvidePlugin({
+          Buffer: ['buffer', 'Buffer'],
+        }),
+      );
+    }
+    return config;
   },
   async rewrites() {
     const resolvedApiUrl = apiUrl();

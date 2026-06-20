@@ -8,8 +8,8 @@ import type { AuthRedirectReason } from './auth-notices';
 /** Exact paths that never require authentication */
 export const PUBLIC_ROUTES = new Set(['/login', '/register', '/404']);
 
-/** Path prefixes accessible without login (public directory, static assets) */
-export const PUBLIC_PREFIXES = ['/listings'];
+/** Path prefixes accessible without login (public directory, learner store) */
+export const PUBLIC_PREFIXES = ['/listings', '/learn'];
 
 /** Admin/app areas that always require a valid session */
 export const PROTECTED_PREFIXES = [
@@ -42,7 +42,10 @@ export function isPublicRoute(pathname: string): boolean {
   // Public directory index only — /listings/my and /listings/apply require auth
   if (path === '/listings') return true;
 
-  return PUBLIC_PREFIXES.some((prefix) => path === prefix);
+  return PUBLIC_PREFIXES.some((prefix) => {
+    if (prefix === '/listings') return path === prefix;
+    return path === prefix || path.startsWith(`${prefix}/`);
+  });
 }
 
 export function requiresAuth(pathname: string): boolean {
