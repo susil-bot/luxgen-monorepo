@@ -1,17 +1,31 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Alert, StyleSheet, Text, TextInput, View } from 'react-native';
+import * as Linking from 'expo-linking';
 
 import { Button, Screen } from '@luxgen/native-ui';
 import { luxgenBrand } from '@luxgen/design-tokens';
 
 import { API } from '../../constants/api';
 import { useAuth } from '../../hooks/useAuth';
+import { parseTenantFromUrl } from '../../lib/tenant-link';
 
 export default function LoginScreen() {
   const { login, loading } = useAuth();
   const [email, setEmail] = useState('alex.thompson@demo.com');
   const [password, setPassword] = useState('password123');
   const [tenant, setTenant] = useState(API.defaultTenant);
+
+  useEffect(() => {
+    const applyUrl = (url: string | null) => {
+      if (!url) return;
+      const fromLink = parseTenantFromUrl(url);
+      if (fromLink) setTenant(fromLink);
+    };
+
+    void Linking.getInitialURL().then(applyUrl);
+    const subscription = Linking.addEventListener('url', ({ url }) => applyUrl(url));
+    return () => subscription.remove();
+  }, []);
 
   const onSubmit = async () => {
     try {
@@ -55,6 +69,8 @@ export default function LoginScreen() {
         />
 
         <Button title="Sign in" loading={loading} onPress={onSubmit} />
+
+        <Text style={styles.hint}>Deep link: luxgen://login?tenant=demo — QR can encode this URL for your tenant.</Text>
       </View>
     </Screen>
   );
@@ -77,5 +93,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontSize: 15,
     marginBottom: 4,
+  },
+  hint: {
+    fontSize: 12,
+    color: 'rgba(60, 60, 67, 0.45)',
+    marginTop: 12,
+    lineHeight: 18,
   },
 });

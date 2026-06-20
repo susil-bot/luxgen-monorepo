@@ -14,6 +14,7 @@ config.resolver.nodeModulesPaths = [
 ];
 
 config.resolver.extraNodeModules = {
+  '@luxgen/billing': path.resolve(workspaceRoot, 'packages/billing/src'),
   '@luxgen/design-tokens': path.resolve(workspaceRoot, 'packages/design-tokens/src'),
   '@luxgen/types': path.resolve(workspaceRoot, 'packages/types/src'),
   '@luxgen/native-ui': path.resolve(workspaceRoot, 'packages/native-ui/src'),

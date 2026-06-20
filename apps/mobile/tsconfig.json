@@ -6,7 +6,8 @@
       "@/*": ["./*"],
       "@luxgen/design-tokens": ["../../packages/design-tokens/src"],
       "@luxgen/types": ["../../packages/types/src"],
-      "@luxgen/native-ui": ["../../packages/native-ui/src"]
+      "@luxgen/native-ui": ["../../packages/native-ui/src"],
+      "@luxgen/billing": ["../../packages/billing/src"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"]

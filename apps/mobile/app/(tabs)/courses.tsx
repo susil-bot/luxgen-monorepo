@@ -1,13 +1,16 @@
 import { ActivityIndicator, StyleSheet, Text } from 'react-native';
+import { useRouter } from 'expo-router';
 import { useQuery } from '@apollo/client';
 
 import { Card, ListRow, Screen } from '@luxgen/native-ui';
 import type { Course } from '@luxgen/types';
+import { CourseStatus } from '@luxgen/types';
 
 import { GET_COURSES } from '../../graphql/queries';
 import { useAuth } from '../../hooks/useAuth';
 
 export default function CoursesScreen() {
+  const router = useRouter();
   const { user } = useAuth();
   const tenantId = user?.tenant.id;
 
@@ -16,7 +19,7 @@ export default function CoursesScreen() {
     variables: { tenantId: tenantId ?? '' },
   });
 
-  const courses = (data?.courses as Course[] | undefined) ?? [];
+  const courses = ((data?.courses as Course[] | undefined) ?? []).filter((c) => c.status === CourseStatus.PUBLISHED);
 
   return (
     <Screen title="Courses" subtitle="Browse training available on your tenant">
@@ -32,12 +35,9 @@ export default function CoursesScreen() {
             <ListRow
               key={course.id}
               title={course.title}
-              subtitle={
-                course.instructor
-                  ? `${course.instructor.firstName} ${course.instructor.lastName} · ${course.status}`
-                  : course.status
-              }
+              subtitle={course.instructor ? `${course.instructor.firstName} ${course.instructor.lastName}` : undefined}
               showSeparator={index < courses.length - 1}
+              onPress={() => router.push(`/courses/${course.id}`)}
             />
           ))}
         </Card>
