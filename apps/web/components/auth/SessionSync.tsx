@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/router';
-import { client } from '../../graphql/client';
+import { safeClearApolloStore, safeResetApolloStore } from '../../graphql/safe-apollo-store';
 import { buildLoginRedirect, requiresAuth } from '../../lib/auth-routes';
 import { AUTH_STORAGE_KEYS } from '../../lib/session';
 
@@ -21,7 +21,7 @@ export function SessionSync() {
       if (key === AUTH_STORAGE_KEYS.token) {
         if (!newValue && oldValue) {
           handlingRef.current = true;
-          void client.clearStore();
+          void safeClearApolloStore();
           if (requiresAuth(router.pathname)) {
             void router.replace(buildLoginRedirect(router.asPath, 'session_replaced'));
           } else {
@@ -31,7 +31,7 @@ export function SessionSync() {
         }
 
         if (newValue && newValue !== oldValue) {
-          void client.resetStore();
+          void safeResetApolloStore();
         }
       }
 
@@ -39,10 +39,10 @@ export function SessionSync() {
         const token = localStorage.getItem(AUTH_STORAGE_KEYS.token);
         if (!token && requiresAuth(router.pathname)) {
           handlingRef.current = true;
-          void client.clearStore();
+          void safeClearApolloStore();
           void router.replace(buildLoginRedirect(router.asPath, 'session_replaced'));
         } else if (token) {
-          void client.resetStore();
+          void safeResetApolloStore();
         }
       }
     };

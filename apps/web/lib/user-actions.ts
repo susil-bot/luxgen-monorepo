@@ -1,5 +1,5 @@
 import type { NextRouter } from 'next/router';
-import { client } from '../graphql/client';
+import { safeClearApolloStore } from '../graphql/safe-apollo-store';
 import { buildLogoutRedirect } from './auth-routes';
 import { clearStoredSession } from './session';
 
@@ -25,7 +25,7 @@ export function performLogout(options: LogoutOptions = {}): void {
   clearStoredSession();
 
   if (resetApolloCache) {
-    void client.clearStore();
+    void safeClearApolloStore();
   }
 
   if (router) {

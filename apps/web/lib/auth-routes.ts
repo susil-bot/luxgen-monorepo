@@ -31,6 +31,7 @@ export const PROTECTED_PREFIXES = [
   '/products',
   '/orders',
   '/organization',
+  '/project',
 ];
 
 export function isPublicRoute(pathname: string): boolean {
