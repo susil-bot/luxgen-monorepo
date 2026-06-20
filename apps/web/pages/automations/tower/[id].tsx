@@ -1,17 +1,18 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 
 import styles from '../../../components/automations/tower/TowerFlow.module.css';
+import { useTowerFlowPersist } from '../../../hooks/useTowerFlowPersist';
 import {
-  createOrderCreatedFlow,
   flowToOrderedSteps,
   getFlowCompound,
   listFlowCompounds,
   type FlowNodeKind,
   type FlowStepView,
-  type TowerFlowDocument,
 } from '../../../lib/automation-flow';
+import { getTenantPageProps } from '../../../lib/tenant-page-props';
+import { useTenantScope } from '../../../lib/use-tenant-scope';
 
 function stepIcon(kind: FlowNodeKind, emoji?: string) {
   return emoji ?? (kind === 'trigger' ? '⚡' : kind === 'wait' ? '🕐' : kind === 'condition' ? '◆' : '{/}');
@@ -31,14 +32,32 @@ function stepTypeLabel(kind: FlowNodeKind) {
   return 'Action';
 }
 
-export default function TowerEditRoom() {
+function saveStatusLabel(isNew: boolean, persistedId: string | null, saveState: string) {
+  if (saveState === 'saving') return 'Saving…';
+  if (saveState === 'error') return 'Save failed';
+  if (isNew && !persistedId) return 'Draft';
+  if (saveState === 'saved') return 'Saved';
+  return 'Saved';
+}
+
+interface TowerEditRoomProps {
+  tenant: string;
+}
+
+function TowerEditContent({ tenant }: TowerEditRoomProps) {
   const router = useRouter();
   const { id } = router.query;
   const towerId = typeof id === 'string' ? id : 'new';
+  const { queryTenantId } = useTenantScope(tenant);
 
-  const [flow, setFlow] = useState<TowerFlowDocument>(() =>
-    towerId === 'new' ? createOrderCreatedFlow() : createOrderCreatedFlow('Order created'),
-  );
+  const { flow, setFlow, loading, isNew, persistedId, save, saveState, saveError } = useTowerFlowPersist({
+    towerId,
+    tenantId: queryTenantId,
+    onCreated: (newId) => {
+      void router.replace(`/automations/tower/${newId}`, undefined, { shallow: true });
+    },
+  });
+
   const steps = useMemo(() => flowToOrderedSteps(flow), [flow]);
   const [selectedStepId, setSelectedStepId] = useState<string>(flow.entryNodeId);
   const [editingName, setEditingName] = useState(false);
@@ -47,6 +66,10 @@ export default function TowerEditRoom() {
   const selectedStep: FlowStepView | undefined = steps.find((s) => s.id === selectedStepId) ?? steps[0];
   const selectedCompound = selectedStep ? getFlowCompound(selectedStep.compoundId) : undefined;
   const triggerOptions = listFlowCompounds('trigger');
+
+  useEffect(() => {
+    setNameInput(flow.meta.name);
+  }, [flow.meta.name]);
 
   useEffect(() => {
     if (steps.length && !steps.some((s) => s.id === selectedStepId)) {
@@ -78,6 +101,25 @@ export default function TowerEditRoom() {
       ),
     }));
   };
+
+  const updateNodeConfig = (nodeId: string, key: string, value: unknown) => {
+    setFlow((prev) => ({
+      ...prev,
+      nodes: prev.nodes.map((n) => (n.id === nodeId ? { ...n, config: { ...n.config, [key]: value } } : n)),
+    }));
+  };
+
+  const handleSave = async () => {
+    await save(flow);
+  };
+
+  if (loading) {
+    return (
+      <div className={styles.editorRoot} style={{ alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: '#616161' }}>Loading tower…</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -125,12 +167,27 @@ export default function TowerEditRoom() {
             </button>
           )}
 
-          <span className={styles.statusPill}>{towerId === 'new' ? 'Draft' : 'Saved'}</span>
+          <span className={styles.statusPill}>{saveStatusLabel(isNew, persistedId, saveState)}</span>
           <span className={styles.statusPill} style={{ fontFamily: 'monospace', fontSize: 10 }}>
             v{flow.version}
           </span>
 
+          {saveError ? (
+            <span className={styles.statusPill} style={{ color: '#d72c0d' }} title={saveError}>
+              {saveError}
+            </span>
+          ) : null}
+
           <div style={{ flex: 1 }} />
+
+          <button
+            type="button"
+            className={styles.secondaryBtn}
+            onClick={() => void handleSave()}
+            disabled={saveState === 'saving'}
+          >
+            {saveState === 'saving' ? 'Saving…' : 'Save'}
+          </button>
 
           <button
             type="button"
@@ -268,7 +325,8 @@ export default function TowerEditRoom() {
                       <select
                         id={`cfg-${field.key}`}
                         className={styles.configInput}
-                        defaultValue={String(field.defaultValue ?? '')}
+                        value={String(selectedStep.config[field.key] ?? field.defaultValue ?? '')}
+                        onChange={(e) => updateNodeConfig(selectedStep.id, field.key, e.target.value)}
                       >
                         {field.options.map((opt) => (
                           <option key={opt.value} value={opt.value}>
@@ -282,14 +340,19 @@ export default function TowerEditRoom() {
                         className={styles.configInput}
                         type={field.type === 'number' || field.type === 'duration' ? 'number' : 'text'}
                         placeholder={field.placeholder}
-                        defaultValue={String(selectedStep.config[field.key] ?? field.defaultValue ?? '')}
+                        value={String(selectedStep.config[field.key] ?? field.defaultValue ?? '')}
+                        onChange={(e) => {
+                          const raw = e.target.value;
+                          const value = field.type === 'number' || field.type === 'duration' ? Number(raw) : raw;
+                          updateNodeConfig(selectedStep.id, field.key, value);
+                        }}
                       />
                     )}
                   </div>
                 ))}
 
                 <p style={{ fontSize: 12, color: '#616161', lineHeight: 1.5, margin: 0 }}>
-                  Saved as <code>TowerFlowDocument</code> v1 on <code>Automation.flowDefinition</code>.
+                  Persisted as <code>TowerFlowDocument</code> v1 on <code>Automation.flowDefinition</code>.
                 </p>
               </div>
             </aside>
@@ -300,6 +363,8 @@ export default function TowerEditRoom() {
   );
 }
 
-export async function getServerSideProps() {
-  return { props: {} };
+export default function TowerEditRoom(props: TowerEditRoomProps) {
+  return <TowerEditContent {...props} />;
 }
+
+export const getServerSideProps = getTenantPageProps;
