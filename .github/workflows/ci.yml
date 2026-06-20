@@ -1,3 +1,7 @@
+# LuxGen — CI pipeline (lint, format, test, build)
+# Docs: docs/deployment/MONOREPO_BUILD.md · docs/_meta/DOCUMENTATION_STANDARD.md
+# Triggers: push/PR to main
+
 name: CI
 
 on:
@@ -25,7 +29,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
           cache: npm
 
       - name: Install dependencies
@@ -42,7 +46,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
           cache: npm
 
       - name: Install dependencies
@@ -60,7 +64,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
           cache: npm
 
       - name: Install dependencies
@@ -70,7 +74,7 @@ jobs:
         run: sh scripts/validate-build.sh
         env:
           CI: true
-          REQUIRE_WEB_BUILD: "0"
+          REQUIRE_WEB_BUILD: '0'
 
   test:
     name: Test
@@ -81,7 +85,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
           cache: npm
 
       - name: Install dependencies

@@ -7,21 +7,22 @@
 
 ## Key Design Documents
 
-| Document | Purpose | Read when... |
-|----------|---------|--------------|
-| `CODEBASE.md` (this file) | Repo map, conventions, page template | Before any work |
-| `docs/INDEX.md` | Documentation hub — developer, business, agent, API | Finding the right doc |
-| `docs/DEVELOPER_GUIDE.md` | Onboarding, local dev, workflow | New to the repo |
-| `docs/AI_AGENT_GUIDE.md` | AI agent playbook | Agent sessions |
-| `docs/FEATURE_CATALOG.md` | Every feature: routes, APIs, packages | Product or cross-feature work |
-| `docs/ARCHITECTURE.md` | System layers, apps, packages, flows | Architecture changes |
-| `docs/API_REFERENCE.md` | GraphQL domains + REST routes | API work |
-| `docs/BUSINESS_TECH_TRANSLATION.md` | Business goal ↔ technical feature | Product/engineering alignment |
-| `AGENT_STUDIO.md` | Agent Studio deep-dive (SSE, tools, staging) | Agent / `@luxgen/agent` work |
-| `docs/SIDEBAR_REDESIGN.md` | Sidebar spec | Before touching sidebar |
-| `docs/deployment/FREE_TIER_CLOUD.md` | $0 cloud deploy (Vercel + Render + Atlas) | Before production deploy |
-| `REPO_STRUCTURE.md` | Canonical repo layout | Onboarding, refactors |
-| `CHECKLIST.md` | Dev/staging/prod validation | Before deploying |
+| Document                                                   | Purpose                                             | Read when...                  |
+| ---------------------------------------------------------- | --------------------------------------------------- | ----------------------------- |
+| `CODEBASE.md` (this file)                                  | Repo map, conventions, page template                | Before any work               |
+| `docs/INDEX.md`                                            | Documentation hub — developer, business, agent, API | Finding the right doc         |
+| `docs/DEVELOPER_GUIDE.md`                                  | Onboarding, local dev, workflow                     | New to the repo               |
+| `docs/AI_AGENT_GUIDE.md`                                   | AI agent playbook                                   | Agent sessions                |
+| `docs/FEATURE_CATALOG.md`                                  | Every feature: routes, APIs, packages               | Product or cross-feature work |
+| `docs/ARCHITECTURE.md`                                     | System layers, apps, packages, flows                | Architecture changes          |
+| `docs/API_REFERENCE.md`                                    | GraphQL domains + REST routes                       | API work                      |
+| `docs/BUSINESS_TECH_TRANSLATION.md`                        | Business goal ↔ technical feature                   | Product/engineering alignment |
+| `docs/technical/README.md`                                 | Hierarchical technical index                        | Deep engineering reference    |
+| `AGENT_STUDIO.md` → `docs/technical/agent/AGENT_STUDIO.md` | Agent Studio deep-dive (SSE, tools, staging)        | Agent / `@luxgen/agent` work  |
+| `docs/SIDEBAR_REDESIGN.md`                                 | Sidebar spec                                        | Before touching sidebar       |
+| `docs/deployment/FREE_TIER_CLOUD.md`                       | $0 cloud deploy (Vercel + Render + Atlas)           | Before production deploy      |
+| `docs/technical/development/REPO_STRUCTURE.md`             | Canonical repo layout                               | Onboarding, refactors         |
+| `docs/technical/operations/CHECKLIST.md`                   | Dev/staging/prod validation                         | Before deploying              |
 
 ---
 
@@ -41,16 +42,15 @@ luxgen-monorepo-main/
 │   ├── auth/                    # @luxgen/auth — JWT helpers
 │   ├── config/                  # @luxgen/config — shared env/config utilities
 │   └── utils/                   # @luxgen/utils — shared pure functions
-├── docs/                        # Architecture, API, business, deployment — start at INDEX.md
+├── docs/                        # Documentation — start at INDEX.md; technical hub at docs/technical/
 ├── deploy/                      # Platform configs (Vercel, Render, Fly) + prod env template
 ├── skills/                      # Domain skills for agents (.agents/skills → here)
 ├── .github/workflows/           # CI (build web + api on PR)
 ├── docker-compose.yml           # Base: MongoDB, Redis, Ollama
 ├── Makefile                     # `make help` shows all commands
+├── README.md                    # Company overview (non-technical)
 ├── CODEBASE.md                  # ← this file
-├── AGENTS.md                    # AI agent entrypoint
-├── AGENT_STUDIO.md              # Agent Studio technical deep-dive
-└── CHECKLIST.md                 # Dev/staging/prod validation checklist
+└── AGENTS.md                    # AI agent entrypoint
 ```
 
 ---
@@ -58,6 +58,7 @@ luxgen-monorepo-main/
 ## Frontend — `apps/web/`
 
 ### Router
+
 **Pages Router** (Next.js 14). Every file in `pages/` is a route.
 
 ```
@@ -128,21 +129,22 @@ apps/web/
 
 ### Environment Variables (apps/web)
 
-| Variable | Example | Purpose |
-|----------|---------|---------|
-| `NODE_ENV` | `development` | Required |
-| `API_URL` | `http://localhost:4000` | Server-side GraphQL proxy target |
-| `NEXT_PUBLIC_API_URL` | `http://localhost:4000` | Client-side API URL |
-| `NEXT_PUBLIC_GRAPHQL_URL` | `http://localhost:4000/graphql` | GraphQL endpoint |
-| `NEXT_PUBLIC_APP_URL` | `http://localhost:3000` | App base URL |
-| `OLLAMA_HOST` | `http://localhost:11434` | Ollama server (agent backend) |
-| `OLLAMA_MODEL` | `mistral:latest` | Model to use for agent |
+| Variable                  | Example                         | Purpose                          |
+| ------------------------- | ------------------------------- | -------------------------------- |
+| `NODE_ENV`                | `development`                   | Required                         |
+| `API_URL`                 | `http://localhost:4000`         | Server-side GraphQL proxy target |
+| `NEXT_PUBLIC_API_URL`     | `http://localhost:4000`         | Client-side API URL              |
+| `NEXT_PUBLIC_GRAPHQL_URL` | `http://localhost:4000/graphql` | GraphQL endpoint                 |
+| `NEXT_PUBLIC_APP_URL`     | `http://localhost:3000`         | App base URL                     |
+| `OLLAMA_HOST`             | `http://localhost:11434`        | Ollama server (agent backend)    |
+| `OLLAMA_MODEL`            | `mistral:latest`                | Model to use for agent           |
 
 ### iOS Design System
 
 All pages must use these CSS variables — never hardcode colors.
 
 **Colors** (auto-switch dark/light):
+
 ```css
 var(--color-bg-primary)          /* #F2F2F7 light / #000 dark — page background */
 var(--color-bg-secondary)        /* #FFF / #1C1C1E — card background */
@@ -163,6 +165,7 @@ var(--color-fill-quaternary)     /* very subtle fill — hover backgrounds */
 **Shadows**: `var(--shadow-xs/sm/md/lg/xl/floating)`
 
 **Utility classes** (defined in globals.css):
+
 ```
 .surface            — white card, lg radius, sm shadow, separator border
 .surface-elevated   — elevated card, xl radius, lg shadow
@@ -199,8 +202,12 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import {
-  SnackbarProvider, useSnackbar,
-  AppLayout, getDefaultUser, getDefaultLogo, getDefaultSidebarSections
+  SnackbarProvider,
+  useSnackbar,
+  AppLayout,
+  getDefaultUser,
+  getDefaultLogo,
+  getDefaultSidebarSections,
 } from '@luxgen/ui';
 
 const MyPageContent: React.FC = () => {
@@ -214,18 +221,26 @@ const MyPageContent: React.FC = () => {
       try {
         const p = JSON.parse(data);
         setUser({ name: `${p.firstName} ${p.lastName}`, email: p.email, role: p.role });
-      } catch { setUser(getDefaultUser()); }
-    } else { setUser(getDefaultUser()); }
+      } catch {
+        setUser(getDefaultUser());
+      }
+    } else {
+      setUser(getDefaultUser());
+    }
   }, []);
 
   const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
-    if (action === 'logout') { localStorage.removeItem('authToken'); router.push('/login'); }
-    else router.push(`/${action}`);
+    if (action === 'logout') {
+      localStorage.removeItem('authToken');
+      router.push('/login');
+    } else router.push(`/${action}`);
   };
 
   return (
     <>
-      <Head><title>My Page - LuxGen</title></Head>
+      <Head>
+        <title>My Page - LuxGen</title>
+      </Head>
       <AppLayout
         sidebarSections={getDefaultSidebarSections()}
         user={user}
@@ -262,7 +277,7 @@ export default function MyPage() {
 - `getServerSideProps` passes `tenant` as prop to pages that need it:
   ```ts
   export const getServerSideProps = ({ query }) => ({
-    props: { tenant: (query.tenant as string) || 'demo' }
+    props: { tenant: (query.tenant as string) || 'demo' },
   });
   ```
 
@@ -304,31 +319,31 @@ apps/api/src/
 
 Registered in `apps/api/src/schema/index.ts`. Playground: `http://localhost:4000/graphql`
 
-| Domain | Models / services |
-|--------|-------------------|
-| tenant, user, course, group, dashboard | Core LMS |
-| automation | `Automation`, `AutomationRun`, bridge |
-| billing | `TenantSubscription`, Stripe |
-| marketplace | `AutomationTemplate`, usage |
-| listing | `BusinessListing`, `EmailNotificationLog` |
+| Domain                                 | Models / services                         |
+| -------------------------------------- | ----------------------------------------- |
+| tenant, user, course, group, dashboard | Core LMS                                  |
+| automation                             | `Automation`, `AutomationRun`, bridge     |
+| billing                                | `TenantSubscription`, Stripe              |
+| marketplace                            | `AutomationTemplate`, usage               |
+| listing                                | `BusinessListing`, `EmailNotificationLog` |
 
 Full API catalog: `docs/API_REFERENCE.md`
 
 ### Environment Variables (apps/api)
 
-| Variable | Example | Purpose |
-|----------|---------|---------|
-| `PORT` | `4000` | Server port |
-| `MONGODB_URI` | `mongodb://admin:password123@localhost:27017/luxgen_dev?authSource=admin` | MongoDB connection |
-| `REDIS_URL` | `redis://localhost:6379` | Redis connection |
-| `JWT_SECRET` | `your-secret-here` | JWT signing key |
-| `CORS_ORIGIN` | `http://localhost:3000` | Allowed CORS origin |
-| `STRIPE_SECRET_KEY` | `sk_test_...` | Stripe billing + listings |
-| `STRIPE_WEBHOOK_SECRET` | `whsec_...` | Webhook signature |
-| `BILLING_DEV_MODE` | `true` | Dev billing shortcuts |
-| `EMAIL_PROVIDER` | `console` | Listing notification emails |
-| `WEB_APP_URL` | `http://localhost:3000` | Links in emails |
-| `JOBS_API_KEY` | `dev-jobs-key` | Cron job auth |
+| Variable                | Example                                                                   | Purpose                     |
+| ----------------------- | ------------------------------------------------------------------------- | --------------------------- |
+| `PORT`                  | `4000`                                                                    | Server port                 |
+| `MONGODB_URI`           | `mongodb://admin:password123@localhost:27017/luxgen_dev?authSource=admin` | MongoDB connection          |
+| `REDIS_URL`             | `redis://localhost:6379`                                                  | Redis connection            |
+| `JWT_SECRET`            | `your-secret-here`                                                        | JWT signing key             |
+| `CORS_ORIGIN`           | `http://localhost:3000`                                                   | Allowed CORS origin         |
+| `STRIPE_SECRET_KEY`     | `sk_test_...`                                                             | Stripe billing + listings   |
+| `STRIPE_WEBHOOK_SECRET` | `whsec_...`                                                               | Webhook signature           |
+| `BILLING_DEV_MODE`      | `true`                                                                    | Dev billing shortcuts       |
+| `EMAIL_PROVIDER`        | `console`                                                                 | Listing notification emails |
+| `WEB_APP_URL`           | `http://localhost:3000`                                                   | Links in emails             |
+| `JOBS_API_KEY`          | `dev-jobs-key`                                                            | Cron job auth               |
 
 See `apps/api/.env.example` for full list.
 
@@ -340,20 +355,20 @@ See `apps/api/.env.example` for full list.
 
 Key exports to use in pages:
 
-| Export | Description |
-|--------|-------------|
-| `AppLayout` | Main dashboard layout (sidebar + navbar + content) |
+| Export                        | Description                                             |
+| ----------------------------- | ------------------------------------------------------- |
+| `AppLayout`                   | Main dashboard layout (sidebar + navbar + content)      |
 | `getDefaultSidebarSections()` | Returns nav sections including Developer > Agent Studio |
-| `getDefaultUser()` | Returns a default user object for development |
-| `getDefaultLogo()` | Returns the LuxGen logo config |
-| `SnackbarProvider` | Toast notification context (wrap every page) |
-| `useSnackbar()` | `{ showSuccess, showError, showInfo, showWarning }` |
-| `AdminDashboardLayout` | Full admin dashboard (used by dashboard.tsx) |
-| `LoginForm` | Login form component |
-| `RegisterVisual` | Right-panel illustration for auth pages |
-| `TenantDebug` | Dev-only tenant info overlay |
-| `GroupCard` | Group list/grid card component |
-| `CourseMenu` | Course navigation menu |
+| `getDefaultUser()`            | Returns a default user object for development           |
+| `getDefaultLogo()`            | Returns the LuxGen logo config                          |
+| `SnackbarProvider`            | Toast notification context (wrap every page)            |
+| `useSnackbar()`               | `{ showSuccess, showError, showInfo, showWarning }`     |
+| `AdminDashboardLayout`        | Full admin dashboard (used by dashboard.tsx)            |
+| `LoginForm`                   | Login form component                                    |
+| `RegisterVisual`              | Right-panel illustration for auth pages                 |
+| `TenantDebug`                 | Dev-only tenant info overlay                            |
+| `GroupCard`                   | Group list/grid card component                          |
+| `CourseMenu`                  | Course navigation menu                                  |
 
 ### @luxgen/db (`packages/db/src/`)
 
@@ -382,18 +397,18 @@ Mongoose models: `User`, `Tenant`, `Course`, `Group`, `Automation`, `AutomationR
 
 Agent logic lives in **`@luxgen/agent`** (`packages/agent/`). Web exposes SSE and git endpoints:
 
-| File | Role |
-|------|------|
-| `packages/agent/` | Orchestrator, tools, git pipeline, validation, automation bridge |
-| `apps/web/pages/api/agent/chat.ts` | SSE streaming → Ollama (Enterprise gate) |
-| `apps/web/pages/api/agent/*` | Health, stage, apply, commit, merge |
-| `apps/web/components/agent/` | Chat UI, diff viewer |
-| `apps/web/pages/agent.tsx` | `/agent` page |
-| `apps/agent-worker/` | Redis queue worker for headless jobs |
+| File                               | Role                                                             |
+| ---------------------------------- | ---------------------------------------------------------------- |
+| `packages/agent/`                  | Orchestrator, tools, git pipeline, validation, automation bridge |
+| `apps/web/pages/api/agent/chat.ts` | SSE streaming → Ollama (Enterprise gate)                         |
+| `apps/web/pages/api/agent/*`       | Health, stage, apply, commit, merge                              |
+| `apps/web/components/agent/`       | Chat UI, diff viewer                                             |
+| `apps/web/pages/agent.tsx`         | `/agent` page                                                    |
+| `apps/agent-worker/`               | Redis queue worker for headless jobs                             |
 
 **Plan gate:** Enterprise (`agentStudio` feature).
 
-Full docs: `AGENT_STUDIO.md`, `docs/AGENT_STUDIO_ARCHITECTURE.md`, `skills/ai-studio/SKILL.md`
+Full docs: `docs/technical/agent/AGENT_STUDIO.md`, `docs/AGENT_STUDIO_ARCHITECTURE.md`, `skills/ai-studio/SKILL.md`
 
 ---
 
@@ -412,6 +427,7 @@ npm run build:api    # build API only (Render CI)
 Deploy: see `docs/deployment/FREE_TIER_CLOUD.md` and `deploy/` configs.
 
 **To start dev servers without Docker** (fastest):
+
 ```bash
 # Terminal 1:
 cd apps/web && npx next dev -p 3000
@@ -460,57 +476,57 @@ Prefer the domain folder pattern above over flat `resolvers/`.
 
 ## Known Issues
 
-| Issue | Location | Status |
-|-------|----------|--------|
-| 120 TypeScript errors in `@luxgen/ui` | `packages/ui/src/` | Pre-existing; UI build skipped (`echo 'Skipping...'`) |
-| `typescript.ignoreBuildErrors: true` | `apps/web/next.config.js` | Must disable after fixing TS errors |
-| `groups/[id].tsx` uses mock setTimeout | `apps/web/pages/groups/[id].tsx` | Replace with real GraphQL query |
-| `groups/dashboard.tsx` uses hardcoded data | `apps/web/pages/groups/dashboard.tsx` | Replace with real GraphQL query |
-| `UserRetention` SVG NaN warning | `packages/ui/src/UserRetention/` | NaN passed for SVG circle cx/cy/r |
+| Issue                                      | Location                              | Status                                                |
+| ------------------------------------------ | ------------------------------------- | ----------------------------------------------------- |
+| 120 TypeScript errors in `@luxgen/ui`      | `packages/ui/src/`                    | Pre-existing; UI build skipped (`echo 'Skipping...'`) |
+| `typescript.ignoreBuildErrors: true`       | `apps/web/next.config.js`             | Must disable after fixing TS errors                   |
+| `groups/[id].tsx` uses mock setTimeout     | `apps/web/pages/groups/[id].tsx`      | Replace with real GraphQL query                       |
+| `groups/dashboard.tsx` uses hardcoded data | `apps/web/pages/groups/dashboard.tsx` | Replace with real GraphQL query                       |
+| `UserRetention` SVG NaN warning            | `packages/ui/src/UserRetention/`      | NaN passed for SVG circle cx/cy/r                     |
 
 ---
 
 ## File Naming Conventions
 
-| Type | Convention | Example |
-|------|-----------|---------|
-| Pages | `kebab-case.tsx` | `agent-settings.tsx` |
-| Components | `PascalCase.tsx` | `AgentChat.tsx` |
-| Hooks | `use-kebab-case.ts` | `use-agent-session.ts` |
-| Utilities | `camelCase.ts` | `transformer.ts` |
-| GraphQL queries | `camelCase.ts` in `graphql/queries/` | `dashboard.ts` |
-| API routes | `kebab-case.ts` in `pages/api/` | `agent-health.ts` |
+| Type            | Convention                           | Example                |
+| --------------- | ------------------------------------ | ---------------------- |
+| Pages           | `kebab-case.tsx`                     | `agent-settings.tsx`   |
+| Components      | `PascalCase.tsx`                     | `AgentChat.tsx`        |
+| Hooks           | `use-kebab-case.ts`                  | `use-agent-session.ts` |
+| Utilities       | `camelCase.ts`                       | `transformer.ts`       |
+| GraphQL queries | `camelCase.ts` in `graphql/queries/` | `dashboard.ts`         |
+| API routes      | `kebab-case.ts` in `pages/api/`      | `agent-health.ts`      |
 
 ---
 
 ## Documentation & skills
 
-| Path | Purpose |
-|------|---------|
-| `docs/INDEX.md` | Master documentation index |
-| `docs/FEATURE_CATALOG.md` | Per-feature reference |
-| `docs/BUSINESS_TECH_TRANSLATION.md` | Business ↔ tech mapping |
-| `skills/*/SKILL.md` | Domain task guides for agents |
+| Path                                | Purpose                       |
+| ----------------------------------- | ----------------------------- |
+| `docs/INDEX.md`                     | Master documentation index    |
+| `docs/FEATURE_CATALOG.md`           | Per-feature reference         |
+| `docs/BUSINESS_TECH_TRANSLATION.md` | Business ↔ tech mapping       |
+| `skills/*/SKILL.md`                 | Domain task guides for agents |
 
 ---
 
 ## Ports
 
-| Service | Port | URL |
-|---------|------|-----|
-| Next.js (web) | 3000 | http://localhost:3000 |
-| GraphQL API | 4000 | http://localhost:4000/graphql |
-| MongoDB | 27017 | (internal) |
-| Redis | 6379 | (internal) |
-| Ollama | 11434 | http://localhost:11434 |
-| Mongo Express (dev) | 8081 | http://localhost:8081 |
-| Redis Commander (dev) | 8082 | http://localhost:8082 |
+| Service               | Port  | URL                           |
+| --------------------- | ----- | ----------------------------- |
+| Next.js (web)         | 3000  | http://localhost:3000         |
+| GraphQL API           | 4000  | http://localhost:4000/graphql |
+| MongoDB               | 27017 | (internal)                    |
+| Redis                 | 6379  | (internal)                    |
+| Ollama                | 11434 | http://localhost:11434        |
+| Mongo Express (dev)   | 8081  | http://localhost:8081         |
+| Redis Commander (dev) | 8082  | http://localhost:8082         |
 
 ---
 
 ## Tenant URLs (local dev)
 
-| Tenant | Query param URL | Subdomain URL (needs /etc/hosts) |
-|--------|----------------|----------------------------------|
-| Demo | http://localhost:3000/dashboard?tenant=demo | http://demo.localhost:3000 |
+| Tenant     | Query param URL                                   | Subdomain URL (needs /etc/hosts) |
+| ---------- | ------------------------------------------------- | -------------------------------- |
+| Demo       | http://localhost:3000/dashboard?tenant=demo       | http://demo.localhost:3000       |
 | Idea-Vibes | http://localhost:3000/dashboard?tenant=idea-vibes | http://idea-vibes.localhost:3000 |

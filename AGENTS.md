@@ -9,6 +9,7 @@ This file is the repository-level entrypoint for AI coding agents (Claude Code, 
 - `CODING_STANDARDS.md` — non-negotiable coding rules.
 - `CODEBASE.md` — full repository map: pages, packages, ports, data models, how-to guides.
 - `docs/INDEX.md` — documentation hub (developer, business, architecture, API).
+- `docs/technical/README.md` — hierarchical technical documentation.
 - `docs/AI_AGENT_GUIDE.md` — agent playbook: read order, constraints, feature map.
 - `skills/` — task-specific guidance by domain (`.agents/skills` symlinks here).
 
@@ -52,7 +53,7 @@ Read `skills/<skill-name>/SKILL.md` **first** when a task matches that skill's d
 | **AI agent**           | This file → `docs/AI_AGENT_GUIDE.md` → domain skill                                                |
 | **Developer**          | `docs/DEVELOPER_GUIDE.md` → `CODEBASE.md`                                                          |
 | **Product / business** | `docs/BUSINESS_STRATEGY_2026.md` → `docs/BUSINESS_TECH_TRANSLATION.md` → `docs/FEATURE_CATALOG.md` |
-| **Architecture**       | `docs/ARCHITECTURE.md` → `docs/GRAPHQL_PLATFORM.md`                                                |
+| **Architecture**       | `docs/technical/README.md` → `docs/ARCHITECTURE.md` → `docs/GRAPHQL_PLATFORM.md`                   |
 | **Deployment**         | `docs/deployment/FREE_TIER_CLOUD.md` → `deploy/`                                                   |
 | **API consumer**       | `docs/API_REFERENCE.md`                                                                            |
 

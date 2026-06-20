@@ -1,3 +1,7 @@
+# LuxGen — Web production build validation
+# Docs: docs/deployment/MONOREPO_BUILD.md
+# Triggers: push/PR to main, workflow_dispatch
+
 name: Web Build
 
 on:
@@ -23,7 +27,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: '20'
           cache: npm
 
       - name: Install dependencies

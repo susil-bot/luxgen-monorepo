@@ -2,7 +2,7 @@
 
 > **Audience:** Super admins, platform operators, architects debugging tenancy issues.  
 > **Last updated:** 2026-06-20 (post PR #58)  
-> **Related:** [MULTI_TENANT_ARCHITECTURE.md](../MULTI_TENANT_ARCHITECTURE.md), [SECURITY_HARDENING.md](./SECURITY_HARDENING.md), [tenant-keys.md](./tenant-keys.md), [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md)
+> **Related:** [technical/architecture/MULTI_TENANT.md](./technical/architecture/MULTI_TENANT.md), [SECURITY_HARDENING.md](./SECURITY_HARDENING.md), [tenant-keys.md](./tenant-keys.md), [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md)
 
 This document explains **how tenant context is established, enforced, and debugged** across LuxGen. Use it when something “works on demo but not idea-vibes”, when login redirects with `tenant_mismatch`, or when CORS / GraphQL scope errors appear.
 
@@ -196,16 +196,16 @@ flowchart LR
 
 ### Gaps / scalability risks
 
-| Issue                                                                      | Risk                                       | Recommended direction                                                                                       |
-| -------------------------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| **Two meanings of `tenantId`** (subdomain vs Mongo id) across GraphQL args | Repeat of project-board bug on new domains | Enforce `resolveTenantIdForScope()` in all resolvers; GraphQL schema: `tenantSubdomain` vs `tenantId` types |
-| **Multiple config sources** (Mongo, static files, TenantWorkflow)          | Drift: CORS in DB vs file vs env           | Single **TenantRegistry** read path: Mongo authoritative, files only for seed defaults                      |
-| **Superadmin = URL hop, not impersonation**                                | Operators think switcher grants access     | Add `impersonateTenant` mutation + short-lived scoped token, audit log                                      |
-| **Triple CORS** (Express, tenantSecurity, tenantWorkflow)                  | Confusing failures; duplicate headers      | One CORS policy module; tenant overrides as allowlist merge only                                            |
-| **In-memory tenant cache per process**                                     | Stale tenant status under horizontal scale | Redis-only cache with pub/sub invalidation on tenant update                                                 |
-| **GraphQL `context()` sync vs `buildGraphQLContext()` async**              | WS vs HTTP context drift                   | Unify on async context builder for all transports                                                           |
-| **Build-time tenant** (`TENANT_BUILD_SYSTEM.md`) vs runtime Mongo          | Wrong branding in standalone Docker builds | Document when to use `select-tenant.js`; runtime theming from API for SaaS                                  |
-| **No central tenant audit trail**                                          | Hard to answer “who changed tenant X?”     | Activity events for tenant settings + superadmin actions                                                    |
+| Issue                                                                                                             | Risk                                       | Recommended direction                                                                                       |
+| ----------------------------------------------------------------------------------------------------------------- | ------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| **Two meanings of `tenantId`** (subdomain vs Mongo id) across GraphQL args                                        | Repeat of project-board bug on new domains | Enforce `resolveTenantIdForScope()` in all resolvers; GraphQL schema: `tenantSubdomain` vs `tenantId` types |
+| **Multiple config sources** (Mongo, static files, TenantWorkflow)                                                 | Drift: CORS in DB vs file vs env           | Single **TenantRegistry** read path: Mongo authoritative, files only for seed defaults                      |
+| **Superadmin = URL hop, not impersonation**                                                                       | Operators think switcher grants access     | Add `impersonateTenant` mutation + short-lived scoped token, audit log                                      |
+| **Triple CORS** (Express, tenantSecurity, tenantWorkflow)                                                         | Confusing failures; duplicate headers      | One CORS policy module; tenant overrides as allowlist merge only                                            |
+| **In-memory tenant cache per process**                                                                            | Stale tenant status under horizontal scale | Redis-only cache with pub/sub invalidation on tenant update                                                 |
+| **GraphQL `context()` sync vs `buildGraphQLContext()` async**                                                     | WS vs HTTP context drift                   | Unify on async context builder for all transports                                                           |
+| **Build-time tenant** ([TENANT_BUILD_SYSTEM.md](./technical/development/TENANT_BUILD_SYSTEM.md)) vs runtime Mongo | Wrong branding in standalone Docker builds | Document when to use `select-tenant.js`; runtime theming from API for SaaS                                  |
+| **No central tenant audit trail**                                                                                 | Hard to answer “who changed tenant X?”     | Activity events for tenant settings + superadmin actions                                                    |
 
 ### Priority roadmap (supports business scale)
 
@@ -280,4 +280,4 @@ flowchart LR
 
 ---
 
-_For theme/branding architecture see [MULTI_TENANT_ARCHITECTURE.md](../MULTI_TENANT_ARCHITECTURE.md). For security invariants when adding APIs see [SECURITY_HARDENING.md](./SECURITY_HARDENING.md)._
+_For theme/branding architecture see [technical/architecture/MULTI_TENANT.md](./technical/architecture/MULTI_TENANT.md). For security invariants when adding APIs see [SECURITY_HARDENING.md](./SECURITY_HARDENING.md)._
