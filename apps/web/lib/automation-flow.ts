@@ -12,6 +12,9 @@ export {
   flowNodeToStepView,
   validateTowerFlowDocument,
   parseTowerFlowDocument,
+  insertFlowStepAfter,
+  removeFlowStep,
+  moveFlowStep,
 } from '@luxgen/automation-flow';
 
 export type {
