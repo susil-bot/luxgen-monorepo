@@ -4,14 +4,18 @@ import Head from 'next/head';
 
 import styles from '../../../components/automations/tower/TowerFlow.module.css';
 import { FlowConfigFieldInput } from '../../../components/automations/tower/FlowConfigFieldInput';
+import { TowerGraphCanvas } from '../../../components/automations/tower/TowerGraphCanvas';
 import { useTowerFlowPersist } from '../../../hooks/useTowerFlowPersist';
 import {
+  flowToGraphSteps,
   flowToOrderedSteps,
   getFlowCompound,
+  insertFlowNodeAfter,
   insertFlowStepAfter,
   listFlowCompounds,
   moveFlowStep,
   removeFlowStep,
+  type FlowEdgeLabel,
   type FlowNodeKind,
   type FlowStepView,
 } from '../../../lib/automation-flow';
@@ -63,6 +67,7 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
   });
 
   const steps = useMemo(() => flowToOrderedSteps(flow), [flow]);
+  const graphRoots = useMemo(() => flowToGraphSteps(flow), [flow]);
   const [selectedStepId, setSelectedStepId] = useState<string>(flow.entryNodeId);
   const [editingName, setEditingName] = useState(false);
   const [nameInput, setNameInput] = useState(flow.meta.name);
@@ -71,11 +76,7 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
   const selectedCompound = selectedStep ? getFlowCompound(selectedStep.compoundId) : undefined;
   const triggerOptions = listFlowCompounds('trigger');
   const addStepOptions = useMemo(
-    () => [
-      ...listFlowCompounds('action').slice(0, 4),
-      ...listFlowCompounds('wait').slice(0, 1),
-      ...listFlowCompounds('condition').slice(0, 1),
-    ],
+    () => [...listFlowCompounds('action'), ...listFlowCompounds('wait'), ...listFlowCompounds('condition')],
     [],
   );
 
@@ -129,6 +130,20 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
     const compound = getFlowCompound(compoundId);
     if (!compound || !selectedStep) return;
     setFlow((prev) => insertFlowStepAfter(prev, selectedStep.id, compound.kind, compoundId));
+  };
+
+  const addStepAfterNode = (afterNodeId: string, compoundId: string, branchLabel?: FlowEdgeLabel) => {
+    const compound = getFlowCompound(compoundId);
+    if (!compound) return;
+
+    setFlow((prev) => {
+      const next = insertFlowNodeAfter(prev, afterNodeId, compound.kind, compoundId, branchLabel);
+      const newNode = next.nodes.find((node) => !prev.nodes.some((existing) => existing.id === node.id));
+      if (newNode) {
+        void Promise.resolve().then(() => setSelectedStepId(newNode.id));
+      }
+      return next;
+    });
   };
 
   const removeSelectedStep = () => {
@@ -311,51 +326,12 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
               </button>
             </div>
 
-            <div className={styles.flowColumn}>
-              {steps.map((step, index) => (
-                <div key={step.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <div
-                    role="button"
-                    tabIndex={0}
-                    className={`${styles.flowNode} ${selectedStepId === step.id ? styles.flowNodeSelected : ''}`}
-                    onClick={() => setSelectedStepId(step.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' || e.key === ' ') setSelectedStepId(step.id);
-                    }}
-                  >
-                    {step.kind === 'trigger' ? (
-                      <>
-                        <div className={styles.flowNodeTriggerHead}>
-                          <span>{stepIcon(step.kind, step.emoji)}</span>
-                          {stepTypeLabel(step.kind)}
-                        </div>
-                        <div className={styles.flowNodeBody}>
-                          <h3 className={styles.flowNodeTitle}>{step.title}</h3>
-                          <p className={styles.flowNodeDesc}>{step.description}</p>
-                        </div>
-                      </>
-                    ) : (
-                      <div className={styles.flowNodeBody}>
-                        <p
-                          style={{
-                            margin: '0 0 6px',
-                            fontSize: 11,
-                            fontWeight: 700,
-                            color: '#616161',
-                            textTransform: 'uppercase',
-                          }}
-                        >
-                          {stepTypeLabel(step.kind)}
-                        </p>
-                        <h3 className={styles.flowNodeTitle}>{step.title}</h3>
-                        <p className={styles.flowNodeDesc}>{step.description}</p>
-                      </div>
-                    )}
-                  </div>
-                  {index < steps.length - 1 ? <div className={styles.flowConnector} aria-hidden /> : null}
-                </div>
-              ))}
-            </div>
+            <TowerGraphCanvas
+              roots={graphRoots}
+              selectedStepId={selectedStepId}
+              onSelectStep={setSelectedStepId}
+              onAddStep={addStepAfterNode}
+            />
           </main>
 
           {selectedStep && selectedCompound ? (

@@ -511,6 +511,185 @@
   min-height: 100%;
 }
 
+.flowStepColumn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.flowConnectorWrap {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+}
+
+.flowConnectorLine {
+  width: 2px;
+  flex: 1;
+  min-height: 20px;
+  background: #c9cccf;
+}
+
+.flowConnectorBranchHint {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #616161;
+  margin-bottom: 4px;
+}
+
+.flowConnectorBtn {
+  position: relative;
+  z-index: 2;
+  width: 24px;
+  height: 24px;
+  margin: -12px 0;
+  border-radius: 999px;
+  border: 1px solid #c9cccf;
+  background: #fff;
+  color: #616161;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    border-color 0.15s,
+    color 0.15s,
+    box-shadow 0.15s;
+}
+
+.flowConnectorBtn:hover {
+  border-color: #008060;
+  color: #008060;
+  box-shadow: 0 2px 8px rgba(0, 128, 96, 0.2);
+}
+
+.flowConnectorBtn[aria-expanded='true'] {
+  border-color: #008060;
+  color: #fff;
+  background: #008060;
+}
+
+.branchRow {
+  display: flex;
+  gap: 24px;
+  width: min(520px, 100%);
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.branchColumn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+
+.addStepPicker {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  width: min(320px, 90vw);
+  max-height: 360px;
+  overflow-y: auto;
+  background: #fff;
+  border: 1px solid #e1e3e5;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  padding: 12px;
+}
+
+.addStepPickerTitle {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #202223;
+}
+
+.addStepPickerGroup {
+  margin-bottom: 12px;
+}
+
+.addStepPickerGroup:last-child {
+  margin-bottom: 0;
+}
+
+.addStepPickerGroupLabel {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #616161;
+}
+
+.addStepPickerList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.addStepPickerOption {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  padding: 8px 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.addStepPickerOption:hover {
+  background: #f6f6f7;
+}
+
+.addStepPickerOptionEmoji {
+  width: 24px;
+  flex-shrink: 0;
+  text-align: center;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.addStepPickerOptionLabel {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #202223;
+}
+
+.addStepPickerOptionDesc {
+  display: block;
+  font-size: 12px;
+  color: #616161;
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
+.flowNodeKindLabel {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #616161;
+  text-transform: uppercase;
+}
+
+/* Legacy decorative connector — replaced by FlowConnector */
 .flowConnector {
   width: 2px;
   height: 28px;
