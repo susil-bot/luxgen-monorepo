@@ -44,7 +44,7 @@ Rules:
 ## Moving or renaming docs
 
 1. `git mv` to new path under `docs/technical/` when appropriate
-2. Leave a one-line redirect stub at the old path if it was at repo root
+2. Do **not** leave redirect stubs at the repo root — only `README.md` and `AGENTS.md` belong there. Update in-repo links to the new path, then delete the old file.
 3. Update `docs/INDEX.md`, `docs/technical/README.md`, and `docs/technical/development/CODEBASE.md` links
 4. Search for old path references before opening PR
 

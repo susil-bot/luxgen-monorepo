@@ -9,22 +9,22 @@
 
 ## Key Design Documents
 
-| Document                                                   | Purpose                                             | Read when...                  |
-| ---------------------------------------------------------- | --------------------------------------------------- | ----------------------------- |
-| `docs/technical/development/CODEBASE.md` (this file)       | Repo map, conventions, page template                | Before any work               |
-| `docs/INDEX.md`                                            | Documentation hub — developer, business, agent, API | Finding the right doc         |
-| `docs/DEVELOPER_GUIDE.md`                                  | Onboarding, local dev, workflow                     | New to the repo               |
-| `docs/AI_AGENT_GUIDE.md`                                   | AI agent playbook                                   | Agent sessions                |
-| `docs/FEATURE_CATALOG.md`                                  | Every feature: routes, APIs, packages               | Product or cross-feature work |
-| `docs/ARCHITECTURE.md`                                     | System layers, apps, packages, flows                | Architecture changes          |
-| `docs/API_REFERENCE.md`                                    | GraphQL domains + REST routes                       | API work                      |
-| `docs/BUSINESS_TECH_TRANSLATION.md`                        | Business goal ↔ technical feature                   | Product/engineering alignment |
-| `docs/technical/README.md`                                 | Hierarchical technical index                        | Deep engineering reference    |
-| `AGENT_STUDIO.md` → `docs/technical/agent/AGENT_STUDIO.md` | Agent Studio deep-dive (SSE, tools, staging)        | Agent / `@luxgen/agent` work  |
-| `docs/SIDEBAR_REDESIGN.md`                                 | Sidebar spec                                        | Before touching sidebar       |
-| `docs/deployment/FREE_TIER_CLOUD.md`                       | $0 cloud deploy (Vercel + Render + Atlas)           | Before production deploy      |
-| `docs/technical/development/REPO_STRUCTURE.md`             | Canonical repo layout                               | Onboarding, refactors         |
-| `docs/technical/operations/CHECKLIST.md`                   | Dev/staging/prod validation                         | Before deploying              |
+| Document                                             | Purpose                                             | Read when...                  |
+| ---------------------------------------------------- | --------------------------------------------------- | ----------------------------- |
+| `docs/technical/development/CODEBASE.md` (this file) | Repo map, conventions, page template                | Before any work               |
+| `docs/INDEX.md`                                      | Documentation hub — developer, business, agent, API | Finding the right doc         |
+| `docs/DEVELOPER_GUIDE.md`                            | Onboarding, local dev, workflow                     | New to the repo               |
+| `docs/AI_AGENT_GUIDE.md`                             | AI agent playbook                                   | Agent sessions                |
+| `docs/FEATURE_CATALOG.md`                            | Every feature: routes, APIs, packages               | Product or cross-feature work |
+| `docs/ARCHITECTURE.md`                               | System layers, apps, packages, flows                | Architecture changes          |
+| `docs/API_REFERENCE.md`                              | GraphQL domains + REST routes                       | API work                      |
+| `docs/BUSINESS_TECH_TRANSLATION.md`                  | Business goal ↔ technical feature                   | Product/engineering alignment |
+| `docs/technical/README.md`                           | Hierarchical technical index                        | Deep engineering reference    |
+| `docs/technical/agent/AGENT_STUDIO.md`               | Agent Studio deep-dive (SSE, tools, staging)        | Agent / `@luxgen/agent` work  |
+| `docs/SIDEBAR_REDESIGN.md`                           | Sidebar spec                                        | Before touching sidebar       |
+| `docs/deployment/FREE_TIER_CLOUD.md`                 | $0 cloud deploy (Vercel + Render + Atlas)           | Before production deploy      |
+| `docs/technical/development/REPO_STRUCTURE.md`       | Canonical repo layout                               | Onboarding, refactors         |
+| `docs/technical/operations/CHECKLIST.md`             | Dev/staging/prod validation                         | Before deploying              |
 
 ---
 
@@ -51,7 +51,7 @@ luxgen-monorepo-main/
 ├── docker-compose.yml           # Base: MongoDB, Redis, Ollama
 ├── Makefile                     # `make help` shows all commands
 ├── README.md                    # Company overview (non-technical)
-├── AGENTS.md                    # AI agent entrypoint (root stub → docs)
+├── AGENTS.md                    # AI agent entrypoint
 └── docs/technical/              # CODEBASE.md, CODING_STANDARDS.md, …
 ```
 
