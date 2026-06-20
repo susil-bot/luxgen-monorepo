@@ -7,7 +7,7 @@
 ## Phase 2a — Learner web storefront
 
 **Branch:** `feat/learner-storefront`  
-**PR:** _opening_
+**PR:** https://github.com/susil-bot/luxgen-monorepo/pull/41 ✅
 
 - [x] Catalog page `/learn` (published courses)
 - [x] Course detail `/learn/courses/[id]`
