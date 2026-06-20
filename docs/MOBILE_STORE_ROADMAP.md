@@ -42,16 +42,16 @@ packages/ui             → React DOM only (existing)
 ## Phase 1 — Expo shell
 
 **Branch:** `feat/mobile-foundation`  
-**PR:** _pending_
+**PR:** https://github.com/susil-bot/luxgen-monorepo/pull/39 ✅ (stacked on #38)
 
-- [ ] Scaffold `apps/mobile` (Expo Router, TypeScript)
-- [ ] Metro monorepo config (`metro.config.js`, watch folders)
-- [ ] Add `packages/types` (User, Course, Enrollment interfaces)
-- [ ] Apollo client + SecureStore auth + `x-tenant` header
-- [ ] Screens: login → dashboard → courses list (read-only)
-- [ ] `@luxgen/native-ui` minimal: Screen, Card, Button, ListRow
-- [ ] Turbo scripts: `dev:mobile`, root workspace entry
-- [ ] EAS config stub (`eas.json`, `app.config.ts`)
+- [x] Scaffold `apps/mobile` (Expo Router, TypeScript)
+- [x] Metro monorepo config (`metro.config.js`, watch folders)
+- [x] Add `packages/types` (User, Course, Enrollment interfaces)
+- [x] Apollo client + SecureStore auth + `x-tenant` header
+- [x] Screens: login → dashboard → courses list (read-only)
+- [x] `@luxgen/native-ui` minimal: Screen, Card, Button, ListRow
+- [x] Turbo scripts: `dev:mobile`, root workspace entry
+- [x] EAS config stub (`eas.json`, `app.config.ts`)
 
 **Done when:** App runs on iOS simulator, login + course list against local API.
 
@@ -74,13 +74,13 @@ packages/ui             → React DOM only (existing)
 ## Phase 2b — Mobile core screens
 
 **Branch:** `feat/mobile-learner-screens`  
-**PR:** _pending_
+**PR:** https://github.com/susil-bot/luxgen-monorepo/pull/42 ✅ (stacked on #39)
 
-- [ ] Course detail screen
-- [ ] Profile / account screen
-- [ ] My enrollments (orders)
-- [ ] Plan gate: Pro `mobileApp` from `@luxgen/billing`
-- [ ] Deep link / QR tenant setup
+- [x] Course detail screen (`/courses/[id]`)
+- [x] Profile / account screen
+- [x] My enrollments (Learning tab)
+- [x] Plan gate: Pro `mobileApp` from `@luxgen/billing`
+- [x] Deep link / QR tenant setup (`luxgen://login?tenant=demo`)
 
 **Done when:** Learner can browse, enroll, and view enrollments on device.
 
@@ -88,14 +88,16 @@ packages/ui             → React DOM only (existing)
 
 ## Phase 3 — Polish & launch
 
-**Branch:** per feature  
-**PR:** _pending_
+**Branch:** `feat/mobile-phase3`  
+**PR:** https://github.com/susil-bot/luxgen-monorepo/pull/43 ✅
 
-- [ ] Push notifications (`expo-server-sdk` on API)
-- [ ] OTA updates (EAS Update)
-- [ ] App Store / Play internal testing
-- [ ] Offline cache (`apollo3-cache-persist`)
-- [ ] Per-tenant white-label app builds (optional)
+- [x] Push notifications (`expo-server-sdk` on API + `expo-notifications` on mobile)
+- [x] OTA updates (EAS Update channels + `useOtaUpdates` hook)
+- [x] App Store / Play internal testing (`eas.json` preview submit + internal track)
+- [x] Offline cache (`apollo3-cache-persist` + AsyncStorage)
+- [x] Per-tenant white-label app builds (`tenant-demo` EAS profile + env vars)
+
+**Done when:** Push token registers after login, enroll sends push, cache persists queries, OTA hook runs on production builds.
 
 ---
 
