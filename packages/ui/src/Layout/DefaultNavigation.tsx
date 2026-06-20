@@ -480,8 +480,8 @@ export const getDefaultSidebarSections = (): SidebarSection[] => [
         label: 'Automations',
         href: '/automations',
         children: [
-          { id: 'automations-all', label: 'All Automations', href: '/automations', exact: true },
-          { id: 'automations-tower', label: 'Tower', href: '/automations/tower' },
+          { id: 'automations-tower', label: 'Tower', href: '/automations/tower', exact: true },
+          { id: 'automations-tower-runs', label: 'Recent Run Logs', href: '/automations/tower/runs' },
         ],
         icon: (
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">

@@ -16,6 +16,7 @@
   "dependencies": {
     "@luxgen/agent": "*",
     "@luxgen/auth": "*",
+    "@luxgen/automation-flow": "*",
     "@luxgen/billing": "*",
     "@luxgen/config": "*",
     "@luxgen/core": "*",

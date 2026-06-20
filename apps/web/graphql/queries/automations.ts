@@ -13,9 +13,28 @@ export const GET_AUTOMATIONS = gql`
         label
         config
       }
+      flowDefinition
       runCount
       lastRunAt
       createdAt
+    }
+  }
+`;
+
+export const GET_AUTOMATION = gql`
+  query GetAutomation($id: ID!) {
+    automation(id: $id) {
+      id
+      name
+      enabled
+      triggerType
+      triggerLabel
+      flowDefinition
+      actions {
+        type
+        label
+        config
+      }
     }
   }
 `;
@@ -50,6 +69,7 @@ export const CREATE_AUTOMATION = gql`
       enabled
       triggerType
       triggerLabel
+      flowDefinition
       actions {
         type
         label
@@ -69,6 +89,7 @@ export const UPDATE_AUTOMATION = gql`
       enabled
       triggerType
       triggerLabel
+      flowDefinition
       actions {
         type
         label
