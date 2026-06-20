@@ -1,0 +1,75 @@
+---
+description: Mandatory PR/issue labels — always help wanted plus type, area, and review labels
+alwaysApply: true
+---
+
+# PR and issue labels
+
+## Mandatory on every PR and issue
+
+1. **`help wanted`** — always required; no exceptions.
+2. **One type label** — exactly one of: `bug`, `feat`, `chore`, `infra`.
+3. **One or more area labels** — at least one from the area table below.
+4. **Review label when applicable** — add `need-manual-review` for security, auth, billing, infra, migrations, or changes that cannot be fully verified by CI.
+
+## Type labels
+
+| Label | Use when |
+|-------|----------|
+| `bug` | Broken behavior, 500s, wrong data, regressions, failed saves |
+| `feat` | New UI, routes, GraphQL fields, or capability |
+| `chore` | Docs, cursor rules, CI, deps, refactors with no behavior change |
+| `infra` | K8s, Docker, deploy scripts, Redis/Mongo ops, env/secrets |
+
+## Area labels (pick all that apply)
+
+| Label | Paths / scope |
+|-------|----------------|
+| `web` | `apps/web/` — pages, middleware, client auth, Next.js API routes |
+| `api` | `apps/api/` — Express, REST, middleware, services |
+| `graphql` | GraphQL schema, resolvers, queries/mutations in web or api |
+| `ui` | `packages/ui/` — components, sidebar, design system |
+| `redis` | ioredis, queues, rate limits, cache |
+| `mongo` | Mongoose models, migrations, DB queries |
+| `billing` | Stripe, plans, usage limits |
+| `agent` | `packages/agent/`, AI Studio, automations worker |
+| `deployment` | `deploy/`, `k8s/`, Docker, CI pipelines |
+
+## Review labels
+
+| Label | Use when |
+|-------|----------|
+| `need-manual-review` | Security/auth changes, billing, infra, cross-tenant logic, or no reliable automated test |
+
+## Agent workflow when opening a PR
+
+1. Classify the change → pick type + area label(s).
+2. Add `help wanted` plus `need-manual-review` if the review table applies.
+3. Apply labels with `gh`:
+
+```bash
+gh pr create --title "fix(web): …" --label "help wanted" --label bug --label web \
+  --body "$(cat <<'EOF'
+## Summary
+…
+EOF
+)"
+```
+
+4. If a label does not exist yet, create it once:
+
+```bash
+gh label create feat --description "New feature or capability" --color "a2eeef"
+```
+
+5. PR body must repeat the primary type under **Summary** (e.g. `Label: **bug**`) for scanability.
+
+## Examples
+
+| PR | Labels |
+|----|--------|
+| Login UI missing for guests | `help wanted`, `bug`, `web`, `ui` |
+| JWT kid allowlist | `help wanted`, `bug`, `api`, `need-manual-review` |
+| K8s MongoDB replica set | `help wanted`, `infra`, `mongo`, `deployment`, `need-manual-review` |
+| Redis rate-limit tests | `help wanted`, `chore`, `api`, `redis` |
+| New customer create page | `help wanted`, `feat`, `web`, `graphql` |

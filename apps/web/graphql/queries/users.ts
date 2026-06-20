@@ -31,6 +31,8 @@ export const GET_USERS = gql`
       firstName
       lastName
       role
+      status
+      isActive
       createdAt
     }
   }

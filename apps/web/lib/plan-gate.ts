@@ -47,7 +47,7 @@ export async function requirePlanFeature(
       feature,
       currentPlan: billing.plan,
       requiredPlan: getRequiredPlan(feature),
-      upgradeUrl: `/billing?tenant=${encodeURIComponent(tenantId)}`,
+      upgradeUrl: `/organization/billing?tenant=${encodeURIComponent(tenantId)}`,
     });
     return null;
   }
