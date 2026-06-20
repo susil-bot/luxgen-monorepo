@@ -1,6 +1,6 @@
 # LuxGen Repository Structure
 
-> **Parent:** [Technical docs](../README.md) · **Related:** [QUICK_START.md](./QUICK_START.md), [../../CODEBASE.md](../../CODEBASE.md)
+> **Parent:** [Technical docs](../README.md) · **Related:** [QUICK_START.md](./QUICK_START.md), [CODEBASE.md](./CODEBASE.md)
 
 > Canonical layout for the monorepo. Keeps apps, shared packages, deploy configs, and docs in predictable places.
 
@@ -25,12 +25,11 @@ luxgen-monorepo/
 ├── turbo.json            # Turborepo pipeline
 ├── package.json          # Workspace root
 │
-├── AGENTS.md             # AI agent entrypoint
-├── CODEBASE.md           # Repo map for developers/agents
 ├── README.md             # Company overview (non-technical)
+├── AGENTS.md             # AI agent entrypoint (only root tooling doc besides README)
 │
-├── docs/technical/       # Technical documentation hierarchy
-│   ├── development/      # REPO_STRUCTURE.md, QUICK_START.md, …
+├── docs/technical/       # All technical documentation
+│   ├── development/      # CODEBASE.md, CODING_STANDARDS.md, QUICK_START.md, …
 │   ├── architecture/     # MULTI_TENANT.md, …
 │   ├── operations/       # CHECKLIST.md
 │   └── agent/            # AGENT_STUDIO.md

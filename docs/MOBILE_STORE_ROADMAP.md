@@ -4,7 +4,7 @@
 > **Started:** 2026-06-20  
 > **Goal:** One monorepo — admin web, learner storefront, React Native Expo — sharing GraphQL API and iOS design tokens.
 
-Related docs: [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md) · [feature-discovery/infra-validation-and-expo-feasibility.md](../feature-discovery/infra-validation-and-expo-feasibility.md) · `skills/ios-design/SKILL.md`
+Related docs: [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md) · [technical/planning/infra-validation-and-expo-feasibility.md](./technical/planning/infra-validation-and-expo-feasibility.md) · `skills/ios-design/SKILL.md`
 
 ---
 

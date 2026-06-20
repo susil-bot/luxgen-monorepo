@@ -1,5 +1,7 @@
 # Bulk Upload & Export — Feature Architecture
 
+> **Parent:** [Technical docs](../README.md) · **Related:** [../../FEATURE_CATALOG.md](../../FEATURE_CATALOG.md)
+
 > **Type:** Feature Discovery Document
 > **Status:** Ready for implementation
 > **Author:** Senior Architect Review — 2026-06-20

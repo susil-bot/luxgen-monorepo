@@ -33,13 +33,13 @@
 
 ## Repository entrypoints (outside `docs/`)
 
-| File                                          | Role                                    |
-| --------------------------------------------- | --------------------------------------- |
-| [README.md](../README.md)                     | Company overview                        |
-| [CODEBASE.md](../CODEBASE.md)                 | Repo map — read before code changes     |
-| [AGENTS.md](../AGENTS.md)                     | AI agent entrypoint                     |
-| [CODING_STANDARDS.md](../CODING_STANDARDS.md) | Coding rules                            |
-| [skills/](../skills/)                         | Domain skills for agents and developers |
+| File                                                                                     | Role                                    |
+| ---------------------------------------------------------------------------------------- | --------------------------------------- |
+| [README.md](../README.md)                                                                | Company overview                        |
+| [technical/development/CODEBASE.md](./technical/development/CODEBASE.md)                 | Repo map — read before code changes     |
+| [AGENTS.md](../AGENTS.md)                                                                | AI agent entrypoint                     |
+| [technical/development/CODING_STANDARDS.md](./technical/development/CODING_STANDARDS.md) | Coding rules                            |
+| [skills/](../skills/)                                                                    | Domain skills for agents and developers |
 
 ---
 

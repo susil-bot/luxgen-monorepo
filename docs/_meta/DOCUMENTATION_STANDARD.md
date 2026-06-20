@@ -6,14 +6,16 @@
 
 ## Repository roles
 
-| Location                                          | Role                                                                     |
-| ------------------------------------------------- | ------------------------------------------------------------------------ |
-| `README.md` (root)                                | Company overview — product, links, contributing. **No technical depth.** |
-| `docs/INDEX.md`                                   | Audience router (developer, product, agent, deploy)                      |
-| `docs/technical/README.md`                        | Hierarchical technical index                                             |
-| `AGENTS.md`, `CODEBASE.md`, `CODING_STANDARDS.md` | Tooling entrypoints (stay at root)                                       |
-| `docs/**/*.md`                                    | All detailed documentation                                               |
-| `skills/**/SKILL.md`                              | Domain task guides for agents                                            |
+| Location                                         | Role                                                                     |
+| ------------------------------------------------ | ------------------------------------------------------------------------ |
+| `README.md` (root)                               | Company overview — product, links, contributing. **No technical depth.** |
+| `AGENTS.md` (root)                               | AI agent entrypoint only                                                 |
+| `docs/INDEX.md`                                  | Audience router (developer, product, agent, deploy)                      |
+| `docs/technical/README.md`                       | Hierarchical technical index                                             |
+| `docs/technical/development/CODEBASE.md`         | Repo map for developers/agents                                           |
+| `docs/technical/development/CODING_STANDARDS.md` | Non-negotiable coding rules                                              |
+| `docs/**/*.md`                                   | All detailed documentation                                               |
+| `skills/**/SKILL.md`                             | Domain task guides for agents                                            |
 
 ## Markdown structure
 
@@ -43,7 +45,7 @@ Rules:
 
 1. `git mv` to new path under `docs/technical/` when appropriate
 2. Leave a one-line redirect stub at the old path if it was at repo root
-3. Update `docs/INDEX.md`, `docs/technical/README.md`, and `CODEBASE.md` links
+3. Update `docs/INDEX.md`, `docs/technical/README.md`, and `docs/technical/development/CODEBASE.md` links
 4. Search for old path references before opening PR
 
 ## YAML header block

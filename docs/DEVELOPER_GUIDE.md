@@ -1,7 +1,7 @@
 # Developer Guide — LuxGen
 
 > **Audience:** Engineers onboarding to the monorepo.  
-> **Next steps:** [CODEBASE.md](../CODEBASE.md), [CODING_STANDARDS.md](../CODING_STANDARDS.md), [docs/INDEX.md](./INDEX.md)
+> **Next steps:** [technical/development/CODEBASE.md](./technical/development/CODEBASE.md), [technical/development/CODING_STANDARDS.md](./technical/development/CODING_STANDARDS.md), [docs/INDEX.md](./INDEX.md)
 
 ---
 
@@ -93,7 +93,7 @@ docs/           Architecture, API, business, phases
 skills/         Agent + developer task guides
 ```
 
-Full map: [CODEBASE.md](../CODEBASE.md)
+Full map: [technical/development/CODEBASE.md](./technical/development/CODEBASE.md)
 
 ---
 

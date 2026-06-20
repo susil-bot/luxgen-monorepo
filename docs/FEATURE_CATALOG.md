@@ -138,12 +138,12 @@
 
 ## 11. Design system
 
-|                |                                                               |
-| -------------- | ------------------------------------------------------------- |
-| **User value** | iOS-native feel, dark mode                                    |
-| **Source**     | `apps/web/styles/globals.css`                                 |
-| **Skill**      | [ios-design/SKILL.md](../skills/ios-design/SKILL.md)          |
-| **Rules**      | [CODING_STANDARDS.md](../CODING_STANDARDS.md) § Design System |
+|                |                                                                                                          |
+| -------------- | -------------------------------------------------------------------------------------------------------- |
+| **User value** | iOS-native feel, dark mode                                                                               |
+| **Source**     | `apps/web/styles/globals.css`                                                                            |
+| **Skill**      | [ios-design/SKILL.md](../skills/ios-design/SKILL.md)                                                     |
+| **Rules**      | [technical/development/CODING_STANDARDS.md](./technical/development/CODING_STANDARDS.md) § Design System |
 
 ---
 

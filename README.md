@@ -58,13 +58,13 @@ Technical depth (repo layout, tenancy, checklists, YAML configs) lives under **[
 
 ## Repository
 
-LuxGen is a **Turborepo monorepo**: `apps/` (web, API, agent worker), `packages/` (UI, DB, billing, agent), and `docs/` (all documentation). Agent and coding standards entrypoints remain at the repo root for tooling compatibility.
+LuxGen is a **Turborepo monorepo**: `apps/` (web, API, agent worker), `packages/` (UI, DB, billing, agent), and `docs/` (all documentation). Root keeps only `README.md` and `AGENTS.md`; technical docs live under `docs/technical/`.
 
 ## Contributing
 
 1. Branch from `main` using prefixes: `feat/`, `fix/`, or `chore/`
 2. Open a pull request — **do not push directly to `main`**
-3. Follow [CODING_STANDARDS.md](./CODING_STANDARDS.md) and the PR workflow in `.cursor/rules/`
+3. Follow [CODING_STANDARDS.md](./docs/technical/development/CODING_STANDARDS.md) and the PR workflow in `.cursor/rules/`
 
 ## Support
 

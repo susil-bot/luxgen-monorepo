@@ -1,5 +1,7 @@
 # Infrastructure Validation & React Native Expo Feasibility
 
+> **Parent:** [Technical docs](../README.md) · **Related:** [../../MOBILE_STORE_ROADMAP.md](../../MOBILE_STORE_ROADMAP.md)
+
 > **Type:** Architecture Analysis Document
 > **Date:** 2026-06-20
 > **Scope:** (1) Full K8s + CI/CD infrastructure audit with fixes; (2) React Native Expo monorepo feasibility study

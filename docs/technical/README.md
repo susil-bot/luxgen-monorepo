@@ -6,13 +6,13 @@
 
 ## 1. Onboarding
 
-| Document                                                         | Description                               |
-| ---------------------------------------------------------------- | ----------------------------------------- |
-| [development/QUICK_START.md](./development/QUICK_START.md)       | Install, Docker, demo URLs, credentials   |
-| [../DEVELOPER_GUIDE.md](../DEVELOPER_GUIDE.md)                   | Full developer onboarding                 |
-| [../../CODEBASE.md](../../CODEBASE.md)                           | Repo map — pages, packages, ports, models |
-| [../../CODING_STANDARDS.md](../../CODING_STANDARDS.md)           | Non-negotiable coding rules               |
-| [development/REPO_STRUCTURE.md](./development/REPO_STRUCTURE.md) | Monorepo layout and file placement        |
+| Document                                                             | Description                               |
+| -------------------------------------------------------------------- | ----------------------------------------- |
+| [development/QUICK_START.md](./development/QUICK_START.md)           | Install, Docker, demo URLs, credentials   |
+| [../DEVELOPER_GUIDE.md](../DEVELOPER_GUIDE.md)                       | Full developer onboarding                 |
+| [development/CODEBASE.md](./development/CODEBASE.md)                 | Repo map — pages, packages, ports, models |
+| [development/CODING_STANDARDS.md](./development/CODING_STANDARDS.md) | Non-negotiable coding rules               |
+| [development/REPO_STRUCTURE.md](./development/REPO_STRUCTURE.md)     | Monorepo layout and file placement        |
 
 ## 2. Architecture
 
@@ -64,16 +64,17 @@
 
 ## 7. Operations & deployment
 
-| Document                                                             | Description                            |
-| -------------------------------------------------------------------- | -------------------------------------- |
-| [operations/CHECKLIST.md](./operations/CHECKLIST.md)                 | Dev / staging / prod validation        |
-| [../deployment/INDEX.md](../deployment/INDEX.md)                     | Cloud deployment hub                   |
-| [../deployment/FREE_TIER_CLOUD.md](../deployment/FREE_TIER_CLOUD.md) | $0 tier: Vercel + Render + Atlas       |
-| [../deployment/DOCKER.md](../deployment/DOCKER.md)                   | Docker & VM deploy                     |
-| [../deployment/MONOREPO_BUILD.md](../deployment/MONOREPO_BUILD.md)   | Turbo CI builds                        |
-| [../deployment/ENV_PRODUCTION.md](../deployment/ENV_PRODUCTION.md)   | Production env vars                    |
-| [../../deploy/README.md](../../deploy/README.md)                     | Platform configs (`render.yaml`, etc.) |
-| [../../k8s/README.md](../../k8s/README.md)                           | Kubernetes manifests                   |
+| Document                                                                   | Description                            |
+| -------------------------------------------------------------------------- | -------------------------------------- |
+| [operations/CHECKLIST.md](./operations/CHECKLIST.md)                       | Dev / staging / prod validation        |
+| [operations/DEVELOPER_AGENT_TODO.md](./operations/DEVELOPER_AGENT_TODO.md) | Architect audit backlog                |
+| [../deployment/INDEX.md](../deployment/INDEX.md)                           | Cloud deployment hub                   |
+| [../deployment/FREE_TIER_CLOUD.md](../deployment/FREE_TIER_CLOUD.md)       | $0 tier: Vercel + Render + Atlas       |
+| [../deployment/DOCKER.md](../deployment/DOCKER.md)                         | Docker & VM deploy                     |
+| [../deployment/MONOREPO_BUILD.md](../deployment/MONOREPO_BUILD.md)         | Turbo CI builds                        |
+| [../deployment/ENV_PRODUCTION.md](../deployment/ENV_PRODUCTION.md)         | Production env vars                    |
+| [../../deploy/README.md](../../deploy/README.md)                           | Platform configs (`render.yaml`, etc.) |
+| [../../k8s/README.md](../../k8s/README.md)                                 | Kubernetes manifests                   |
 
 ## 8. Infrastructure configs (YAML)
 
@@ -87,6 +88,14 @@
 | `.github/workflows/web-build.yml` | Web production build                | [MONOREPO_BUILD.md](../deployment/MONOREPO_BUILD.md)   |
 | `deploy/platforms/render.yaml`    | Render Blueprint                    | [FREE_TIER_CLOUD.md](../deployment/FREE_TIER_CLOUD.md) |
 | `k8s/*.yaml`                      | Kubernetes services                 | [k8s/README.md](../../k8s/README.md)                   |
+
+## 9. Planning & internal
+
+| Document                                                                                                 | Description                   |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------- |
+| [planning/infra-validation-and-expo-feasibility.md](./planning/infra-validation-and-expo-feasibility.md) | Mobile/Expo feasibility study |
+| [planning/bulk-upload-export-architecture.md](./planning/bulk-upload-export-architecture.md)             | Bulk upload/export design     |
+| [../internal/NOTES_FOR_DAVE.md](../internal/NOTES_FOR_DAVE.md)                                           | Internal contributor notes    |
 
 ---
 

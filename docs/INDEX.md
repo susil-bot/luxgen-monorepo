@@ -12,14 +12,14 @@
 
 ## By audience
 
-| I am…                         | Start with                                                                     | Then read                                                                                                                            |
-| ----------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
-| **New developer**             | [technical/development/QUICK_START.md](./technical/development/QUICK_START.md) | [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md), [CODEBASE.md](../CODEBASE.md), [CODING_STANDARDS.md](../CODING_STANDARDS.md)             |
-| **Product / business**        | [BUSINESS_STRATEGY_2026.md](./BUSINESS_STRATEGY_2026.md)                       | [BUSINESS_TECH_TRANSLATION.md](./BUSINESS_TECH_TRANSLATION.md), [FEATURE_CATALOG.md](./FEATURE_CATALOG.md)                           |
-| **AI coding agent**           | [../AGENTS.md](../AGENTS.md)                                                   | [AI_AGENT_GUIDE.md](./AI_AGENT_GUIDE.md), [CODEBASE.md](../CODEBASE.md), relevant `skills/*/SKILL.md`                                |
-| **Architect / tech lead**     | [technical/README.md](./technical/README.md)                                   | [ARCHITECTURE.md](./ARCHITECTURE.md), [SECURITY_HARDENING.md](./SECURITY_HARDENING.md), [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md) |
-| **Deploying to cloud**        | [deployment/FREE_TIER_CLOUD.md](./deployment/FREE_TIER_CLOUD.md)               | [deployment/INDEX.md](./deployment/INDEX.md), [../deploy/README.md](../deploy/README.md)                                             |
-| **API consumer (web/mobile)** | [API_REFERENCE.md](./API_REFERENCE.md)                                         | [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md), [auth-api.md](./auth-api.md)                                                           |
+| I am…                         | Start with                                                                     | Then read                                                                                                                                                                                                      |
+| ----------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **New developer**             | [technical/development/QUICK_START.md](./technical/development/QUICK_START.md) | [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md), [technical/development/CODEBASE.md](./technical/development/CODEBASE.md), [technical/development/CODING_STANDARDS.md](./technical/development/CODING_STANDARDS.md) |
+| **Product / business**        | [BUSINESS_STRATEGY_2026.md](./BUSINESS_STRATEGY_2026.md)                       | [BUSINESS_TECH_TRANSLATION.md](./BUSINESS_TECH_TRANSLATION.md), [FEATURE_CATALOG.md](./FEATURE_CATALOG.md)                                                                                                     |
+| **AI coding agent**           | [../AGENTS.md](../AGENTS.md)                                                   | [AI_AGENT_GUIDE.md](./AI_AGENT_GUIDE.md), [technical/development/CODEBASE.md](./technical/development/CODEBASE.md), relevant `skills/*/SKILL.md`                                                               |
+| **Architect / tech lead**     | [technical/README.md](./technical/README.md)                                   | [ARCHITECTURE.md](./ARCHITECTURE.md), [SECURITY_HARDENING.md](./SECURITY_HARDENING.md), [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md)                                                                           |
+| **Deploying to cloud**        | [deployment/FREE_TIER_CLOUD.md](./deployment/FREE_TIER_CLOUD.md)               | [deployment/INDEX.md](./deployment/INDEX.md), [../deploy/README.md](../deploy/README.md)                                                                                                                       |
+| **API consumer (web/mobile)** | [API_REFERENCE.md](./API_REFERENCE.md)                                         | [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md), [auth-api.md](./auth-api.md)                                                                                                                                     |
 
 ---
 
@@ -63,14 +63,14 @@
 
 ### UI & design
 
-| Document                                             | Description                                                  |
-| ---------------------------------------------------- | ------------------------------------------------------------ |
-| [AUTH_UI.md](./AUTH_UI.md)                           | **Auth UX** — AuthGuard, session notices, iOS banners        |
-| [IOS_UI_AUDIT.md](./IOS_UI_AUDIT.md)                 | **UI coverage audit** — feature vs iOS compliance tracker    |
-| [../CODING_STANDARDS.md](../CODING_STANDARDS.md)     | TypeScript, React, CSS rules                                 |
-| [SIDEBAR_REDESIGN.md](./SIDEBAR_REDESIGN.md)         | Sidebar spec                                                 |
-| `skills/ios-design/SKILL.md`                         | Design tokens & page template                                |
-| [MOBILE_STORE_ROADMAP.md](./MOBILE_STORE_ROADMAP.md) | **Mobile + storefront roadmap** — phases, PR log, checklists |
+| Document                                                                                 | Description                                                  |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| [AUTH_UI.md](./AUTH_UI.md)                                                               | **Auth UX** — AuthGuard, session notices, iOS banners        |
+| [IOS_UI_AUDIT.md](./IOS_UI_AUDIT.md)                                                     | **UI coverage audit** — feature vs iOS compliance tracker    |
+| [technical/development/CODING_STANDARDS.md](./technical/development/CODING_STANDARDS.md) | TypeScript, React, CSS rules                                 |
+| [SIDEBAR_REDESIGN.md](./SIDEBAR_REDESIGN.md)                                             | Sidebar spec                                                 |
+| `skills/ios-design/SKILL.md`                                                             | Design tokens & page template                                |
+| [MOBILE_STORE_ROADMAP.md](./MOBILE_STORE_ROADMAP.md)                                     | **Mobile + storefront roadmap** — phases, PR log, checklists |
 
 ### Operations
 
@@ -123,12 +123,12 @@
 
 ## Repository entrypoints (always canonical)
 
-| File                                          | Role                                       |
-| --------------------------------------------- | ------------------------------------------ |
-| [README.md](../README.md)                     | Company overview (non-technical)           |
-| [CODEBASE.md](../CODEBASE.md)                 | Repo map — **read first for code changes** |
-| [AGENTS.md](../AGENTS.md)                     | AI agent entrypoint                        |
-| [CODING_STANDARDS.md](../CODING_STANDARDS.md) | Non-negotiable coding rules                |
-| [technical/README.md](./technical/README.md)  | Hierarchical technical documentation       |
+| File                                                                                     | Role                                       |
+| ---------------------------------------------------------------------------------------- | ------------------------------------------ |
+| [README.md](../README.md)                                                                | Company overview (non-technical)           |
+| [technical/development/CODEBASE.md](./technical/development/CODEBASE.md)                 | Repo map — **read first for code changes** |
+| [AGENTS.md](../AGENTS.md)                                                                | AI agent entrypoint                        |
+| [technical/development/CODING_STANDARDS.md](./technical/development/CODING_STANDARDS.md) | Non-negotiable coding rules                |
+| [technical/README.md](./technical/README.md)                                             | Hierarchical technical documentation       |
 
 _Last updated: 2026-06-20 — docs hierarchy restructure; README company standard; technical hub under `docs/technical/`._
