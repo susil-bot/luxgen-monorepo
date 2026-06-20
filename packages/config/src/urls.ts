@@ -85,6 +85,18 @@ export function getTenantWebOrigin(tenantId: string): string {
   }
 }
 
+/** True for local dev browser origins (*.localhost, localhost, 127.0.0.1 — any port). */
+export function isDevLocalOrigin(origin: string): boolean {
+  if (process.env.NODE_ENV === 'production') return false;
+  try {
+    const { hostname, protocol } = new URL(origin);
+    if (protocol !== 'http:' && protocol !== 'https:') return false;
+    return hostname === 'localhost' || hostname === '127.0.0.1' || hostname.endsWith('.localhost');
+  } catch {
+    return false;
+  }
+}
+
 /** CORS allowlist — set CORS_ORIGINS (comma-separated) or CORS_ORIGIN in .env */
 export function getCorsOrigins(): string[] {
   const list = process.env.CORS_ORIGINS;
@@ -142,7 +154,9 @@ export function getClientGraphqlWsUrl(): string {
     const api = process.env.NEXT_PUBLIC_API_URL;
     if (api) {
       const base = trimUrl(api);
-      return base.startsWith('https://') ? `wss://${base.slice(8)}/graphql` : `ws://${base.replace(/^http:\/\//, '')}/graphql`;
+      return base.startsWith('https://')
+        ? `wss://${base.slice(8)}/graphql`
+        : `ws://${base.replace(/^http:\/\//, '')}/graphql`;
     }
   }
   return getGraphqlWsUrl();

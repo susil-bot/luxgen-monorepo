@@ -30,9 +30,7 @@ import billingRoutes, { stripeWebhookHandler } from './routes/billing';
 import jobsRoutes from './routes/jobs';
 import notificationsRoutes from './routes/notifications';
 
-import { getCorsOrigins } from '@luxgen/config';
-
-const CORS_ORIGINS = getCorsOrigins();
+import { getCorsOrigins, isDevLocalOrigin } from '@luxgen/config';
 
 const app = express();
 
@@ -41,7 +39,9 @@ app.use(helmet());
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || CORS_ORIGINS.includes(origin)) return callback(null, true);
+      if (!origin || isDevLocalOrigin(origin) || getCorsOrigins().includes(origin)) {
+        return callback(null, true);
+      }
       callback(new Error('Not allowed by CORS'));
     },
     credentials: true,

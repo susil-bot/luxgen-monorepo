@@ -2,12 +2,25 @@
 const path = require('path');
 const { apiUrl } = require('@luxgen/config/urls.cjs');
 
+function devAllowedOrigins() {
+  const tenants = (process.env.TENANT_SUBDOMAINS || 'demo,idea-vibes')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((id) => `${id}.localhost`);
+  const extra = (process.env.NEXT_DEV_ALLOWED_ORIGINS || 'luxgen.localhost')
+    .split(',')
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return ['localhost', '127.0.0.1', ...tenants, ...extra];
+}
+
 const nextConfig = {
   output: 'standalone',
   /** Prevent bundling server-only packages into RSC/API server compilation issues */
   serverExternalPackages: ['@luxgen/agent', 'ioredis', 'mongodb'],
   /** Allow _next assets when browsing via tenant subdomains (demo.localhost:3000) */
-  allowedDevOrigins: ['demo.localhost', 'idea-vibes.localhost', 'localhost', '127.0.0.1'],
+  allowedDevOrigins: devAllowedOrigins(),
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },

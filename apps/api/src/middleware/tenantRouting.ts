@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
+import { isDevLocalOrigin } from '@luxgen/config';
 import { Tenant, ITenant } from '@luxgen/db';
 import { verifyToken, getTenantFromToken } from '../utils/jwt';
 import { renderTenantNotFound } from '../utils/tenantNotFound';
@@ -203,7 +204,12 @@ export const tenantSecurityMiddleware = async (req: Request, res: Response, next
     const { security } = req.tenant.settings;
     const origin = req.get('origin');
 
-    if (origin && security.corsOrigins.length > 0 && !security.corsOrigins.includes(origin)) {
+    if (
+      origin &&
+      security.corsOrigins.length > 0 &&
+      !security.corsOrigins.includes(origin) &&
+      !isDevLocalOrigin(origin)
+    ) {
       return res
         .status(403)
         .json({ success: false, message: 'CORS policy violation', error: 'Origin not allowed for this tenant' });

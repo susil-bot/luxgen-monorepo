@@ -5,7 +5,7 @@
 
 .DEFAULT_GOAL := help
 .PHONY: help setup dev dev-infra dev-full dev-docker dev-stack-web dev-stack-admin dev-stack-mobile dev-stack-api \
-        dev-web dev-api staging prod clean clean-all \
+        dev-clean-web dev-web dev-api staging prod clean clean-all \
         logs logs-api logs-web logs-ollama \
         agent-start agent-stop agent-status \
         agent-pull agent-pull-mistral agent-pull-qwen \
@@ -58,6 +58,12 @@ dev-api: ## Run only the API locally
 # ─── Role-based dev stacks (shared API + Mongo) ───────────────────────────────
 dev-stack-web: ## Web/learner dev: Mongo + API + Next.js (see skills/dev-workflows)
 	@bash scripts/dev-stack.sh web
+
+dev-clean-web: ## Kill :3000/:4000, wipe apps/web/.next, restart web stack
+	@echo "$(GREEN)► Cleaning web dev stack (ports + .next)...$(RESET)"
+	@for port in 3000 4000; do lsof -ti :$$port 2>/dev/null | xargs kill -9 2>/dev/null || true; done
+	@rm -rf apps/web/.next
+	@$(MAKE) dev-stack-web
 
 dev-stack-admin: ## Admin/commerce dev: Mongo + API + Next.js (admin routes)
 	@bash scripts/dev-stack.sh admin
