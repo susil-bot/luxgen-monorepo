@@ -4,6 +4,7 @@ import { listingReminderService } from '../../services/listingReminderService';
 import { listingNotificationService } from '../../services/listingNotificationService';
 import type { GraphQLContext } from '../../context';
 import type { ApplicationStatus } from '@luxgen/db';
+import { scopedTenantId } from '../../graphql/tenantScope';
 
 function fromGqlStatus(status: string): ApplicationStatus {
   return status.toLowerCase() as ApplicationStatus;
@@ -17,24 +18,36 @@ function requireReviewer(ctx: GraphQLContext): string {
 
 export const listingResolvers = {
   Query: {
-    publishedListings: async (_: unknown, { tenantId }: { tenantId: string }) => {
-      const items = await listingService.getPublishedListings(tenantId);
+    publishedListings: async (_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) => {
+      const scoped = scopedTenantId(ctx, tenantId);
+      const items = await listingService.getPublishedListings(scoped);
       return items.map((l) => listingService.toGraphQL(l));
     },
-    publishedListing: async (_: unknown, { tenantId, slug }: { tenantId: string; slug: string }) => {
-      const item = await listingService.getListingBySlug(tenantId, slug);
+    publishedListing: async (
+      _: unknown,
+      { tenantId, slug }: { tenantId: string; slug: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scoped = scopedTenantId(ctx, tenantId);
+      const item = await listingService.getListingBySlug(scoped, slug);
       return item ? listingService.toGraphQL(item) : null;
     },
     listing: async (_: unknown, { id }: { id: string }) => {
       const item = await listingService.getListingById(id);
       return item ? listingService.toGraphQL(item) : null;
     },
-    myListings: async (_: unknown, { tenantId, email }: { tenantId: string; email: string }) => {
-      const items = await listingService.getApplicantListings(tenantId, email);
+    myListings: async (_: unknown, { tenantId, email }: { tenantId: string; email: string }, ctx: GraphQLContext) => {
+      const scoped = scopedTenantId(ctx, tenantId);
+      const items = await listingService.getApplicantListings(scoped, email);
       return items.map((l) => listingService.toGraphQL(l));
     },
-    listingsForReview: async (_: unknown, { tenantId, status }: { tenantId: string; status?: string }) => {
-      const items = await listingService.getApplicationsForReview(tenantId, status ? fromGqlStatus(status) : undefined);
+    listingsForReview: async (
+      _: unknown,
+      { tenantId, status }: { tenantId: string; status?: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scoped = scopedTenantId(ctx, tenantId);
+      const items = await listingService.getApplicationsForReview(scoped, status ? fromGqlStatus(status) : undefined);
       return items.map((l) => listingService.toGraphQL(l));
     },
     listingNotifications: async (_: unknown, { listingId, limit }: { listingId: string; limit?: number }) => {

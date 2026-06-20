@@ -3,6 +3,7 @@ import { activityEventService, actorFromContext } from '../../services/activityE
 import { ACTIVITY_EVENT_ADDED, activityPubSub, timelineTopic } from '../../lib/activityPubSub';
 import type { GraphQLContext } from '../../context';
 import type { ActivitySubjectType } from '@luxgen/db';
+import { scopedTenantId } from '../../graphql/tenantScope';
 
 function eventId(event: {
   _id?: { toString(): string };
@@ -69,14 +70,10 @@ export const activityEventResolvers = {
         first?: number;
         after?: string;
       },
+      ctx: GraphQLContext,
     ) => {
-      const connection = await activityEventService.listConnection(
-        tenantId,
-        subjectType,
-        subjectId,
-        first ?? 50,
-        after,
-      );
+      const scoped = scopedTenantId(ctx, tenantId);
+      const connection = await activityEventService.listConnection(scoped, subjectType, subjectId, first ?? 50, after);
       return {
         edges: connection.edges.map((edge) => ({
           cursor: edge.cursor,

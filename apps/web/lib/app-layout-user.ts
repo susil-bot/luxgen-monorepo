@@ -39,8 +39,17 @@ export function useAppTenant(): string {
   const [tenant, setTenant] = useState('demo');
 
   useEffect(() => {
-    const stored = getStoredUser();
-    setTenant(stored?.tenant.subdomain ?? getCurrentTenant() ?? 'demo');
+    const refresh = () => {
+      const stored = getStoredUser();
+      setTenant(stored?.tenant.subdomain ?? getCurrentTenant() ?? 'demo');
+    };
+    refresh();
+    window.addEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+      window.removeEventListener('storage', refresh);
+    };
   }, []);
 
   return tenant;

@@ -18,7 +18,7 @@ import {
 import type { ProjectIterationScope, ProjectPriority, ProjectStatus } from '../../lib/project-types';
 import { AUTH_SESSION_CHANGE_EVENT } from '../../lib/session';
 import { validateClientSession } from '../../lib/session-guard';
-import { useAppTenantId } from '../../lib/app-layout-user';
+import { useTenantScope } from '../../lib/use-tenant-scope';
 
 interface ProjectContextValue {
   tenant: string;
@@ -66,8 +66,7 @@ const ProjectContext = createContext<ProjectContextValue | null>(null);
 export function ProjectProvider({ tenant, children }: { tenant: string; children: ReactNode }) {
   const [filterQuery, setFilterQuery] = useState('');
   const [sessionReady, setSessionReady] = useState(false);
-  const sessionTenantId = useAppTenantId();
-  const queryTenantId = sessionTenantId ?? tenant;
+  const { queryTenantId } = useTenantScope(tenant);
 
   useEffect(() => {
     const refresh = () => setSessionReady(validateClientSession().ok);

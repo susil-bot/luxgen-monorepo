@@ -4,6 +4,7 @@ import { enrollmentService } from '../../services/enrollmentService';
 import { emitAutomationEvent } from '@luxgen/agent';
 import { CourseStatus } from '@luxgen/db';
 import type { GraphQLContext } from '../../context';
+import { scopedTenantId } from '../../graphql/tenantScope';
 
 function publishedCoursesOnly<T extends { status: string }>(courses: T[], context: GraphQLContext): T[] {
   if (context.user) return courses;
@@ -21,7 +22,8 @@ export const courseResolvers = {
       return course;
     },
     courses: async (_: unknown, { tenantId }: { tenantId: string }, context: GraphQLContext) => {
-      const courses = await courseService.getCoursesByTenant(tenantId);
+      const scoped = scopedTenantId(context, tenantId);
+      const courses = await courseService.getCoursesByTenant(scoped);
       return publishedCoursesOnly(courses, context);
     },
     coursesByInstructor: async (_: unknown, { instructorId }: { instructorId: string }) => {
