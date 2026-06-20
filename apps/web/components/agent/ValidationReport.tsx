@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import type { ValidationResult } from '@luxgen/agent';
+import type { ValidationResult } from '../../../../packages/agent/src/types/validation';
 
 interface ValidationReportProps {
   sessionId: string;

@@ -71,5 +71,6 @@ export const userTypeDefs = `
     deleteUser(id: ID!): Boolean!
     login(input: LoginInput!): AuthPayload!
     register(input: CreateUserInput!): AuthPayload!
+    registerPushToken(token: String!): Boolean!
   }
 `;

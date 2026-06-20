@@ -57,6 +57,8 @@ export interface IUser extends Document {
   marketingEmail?: boolean;
   marketingSms?: boolean;
   marketingWhatsapp?: boolean;
+  /** Expo push tokens registered from mobile devices */
+  pushTokens?: string[];
   isActive: boolean;
   metadata: IUserMetadata;
   createdAt: Date;
@@ -123,6 +125,10 @@ const userSchema = new Schema<IUser>(
     marketingWhatsapp: {
       type: Boolean,
       default: false,
+    },
+    pushTokens: {
+      type: [String],
+      default: [],
     },
     isActive: {
       type: Boolean,
