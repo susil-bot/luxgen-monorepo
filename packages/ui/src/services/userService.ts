@@ -20,6 +20,36 @@ interface RealUserData {
 const AUTH_TOKEN_KEY = 'authToken';
 const AUTH_EXPIRES_KEY = 'authTokenExpiresAt';
 const LUXGEN_USER_KEY = 'luxgen_user';
+const CURRENT_USER_KEY = 'currentUser';
+
+/** Map canonical web session (persistSession) to UserMenu — avoids extra /api/users/me round-trip. */
+export const getSessionUserAsUserMenu = (): UserMenu | null => {
+  if (!hasValidAuthSession()) return null;
+
+  try {
+    const raw = localStorage.getItem(CURRENT_USER_KEY);
+    if (!raw) return null;
+
+    const session = JSON.parse(raw) as {
+      firstName?: string;
+      lastName?: string;
+      email: string;
+      role?: string;
+      tenant?: { name: string; subdomain: string };
+    };
+
+    const name = `${session.firstName ?? ''} ${session.lastName ?? ''}`.trim() || session.email;
+
+    return {
+      name,
+      email: session.email,
+      role: session.role,
+      tenant: session.tenant,
+    };
+  } catch {
+    return null;
+  }
+};
 
 /** True when authToken exists and is not past expiry (matches apps/web/lib/session.ts). */
 export const hasValidAuthSession = (): boolean => {
@@ -105,7 +135,6 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
     return userMenu;
   } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHENTICATED') {
-      clearAuthSessionStorage();
       throw error;
     }
 

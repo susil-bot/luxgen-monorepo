@@ -3,6 +3,7 @@ import { UserMenu } from '../NavBar/NavBar';
 import {
   fetchUserForTenant,
   getUserFromStorage,
+  getSessionUserAsUserMenu,
   saveUserToStorage,
   clearUserFromStorage,
   clearAuthSessionStorage,
@@ -43,19 +44,32 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children, currentTen
         return;
       }
 
-      const storedUser = getUserFromStorage();
-      if (storedUser && storedUser.tenant?.subdomain === currentTenant) {
+      const sessionUser = getSessionUserAsUserMenu();
+      const storedUser = getUserFromStorage() ?? sessionUser;
+
+      if (storedUser) {
         setUser(storedUser);
+        if (!getUserFromStorage() && sessionUser) {
+          saveUserToStorage(sessionUser);
+        }
         return;
       }
 
-      const userData = await fetchUserForTenant(currentTenant);
+      const tenantKey = sessionUser?.tenant?.subdomain ?? currentTenant;
+      const userData = await fetchUserForTenant(tenantKey);
       setUser(userData);
       saveUserToStorage(userData);
     } catch (err) {
       if (err instanceof Error && err.message === 'UNAUTHENTICATED') {
         clearAuthSessionStorage();
         setUser(null);
+        return;
+      }
+
+      const fallback = getSessionUserAsUserMenu();
+      if (fallback) {
+        setUser(fallback);
+        saveUserToStorage(fallback);
         return;
       }
       console.error('Error loading user:', err);

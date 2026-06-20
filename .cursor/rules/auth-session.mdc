@@ -38,9 +38,11 @@ alwaysApply: true
 | Expired JWT still in localStorage | Session cleared; guest UI or redirect to `/login?reason=session_expired` |
 | Stale `luxgen_user` without `authToken` | Guest UI (not cached name) |
 | `user={undefined}` passed to layout | Guest UI (not John Doe) |
-| Login success | `persistSession()` → NavBar user menu |
+| Login success | `persistSession()` → NavBar user menu; **stay on dashboard** (no bounce to login) |
 | Logout / cross-tab logout | `luxgen-auth-change` → NavBar back to Login |
 | Wrong tenant token | Redirect `tenant_mismatch`; session cleared |
+| `UserContext` after login | Prefer `currentUser` from storage; **do not** call `clearAuthSessionStorage()` on `/api/users/me` 403 from id vs subdomain mismatch |
+| JWT `tenant` claim | Mongo tenant **id** — never compare directly to subdomain query param |
 
 ## Files to touch when changing auth UI
 
