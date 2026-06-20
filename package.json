@@ -17,6 +17,11 @@
     "dev": "turbo run dev",
     "dev:api": "turbo run dev --filter=@luxgen/api",
     "dev:web": "turbo run dev --filter=@luxgen/web",
+    "dev:mobile": "turbo run dev --filter=@luxgen/mobile",
+    "dev:stack:web": "bash scripts/dev-stack.sh web",
+    "dev:stack:admin": "bash scripts/dev-stack.sh admin",
+    "dev:stack:mobile": "bash scripts/dev-stack.sh mobile",
+    "dev:stack:api": "bash scripts/dev-stack.sh api",
     "dev:agent-worker": "turbo run dev --filter=@luxgen/agent-worker",
     "dev:docker": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
     "dev:docker:detach": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d",
@@ -39,6 +44,10 @@
     "init:tenants": "node scripts/init-tenants.js",
     "select-tenant": "node scripts/select-tenant.js"
   },
+  "dependencies": {
+    "classnames": "^2.5.1",
+    "prop-types": "^15.8.1"
+  },
   "devDependencies": {
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
@@ -56,9 +65,5 @@
   },
   "engines": {
     "node": ">=18.0.0"
-  },
-  "dependencies": {
-    "classnames": "^2.5.1",
-    "prop-types": "^15.8.1"
   }
 }
