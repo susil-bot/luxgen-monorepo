@@ -44,7 +44,12 @@ export const verifyToken = (token: string): JwtPayload | null => {
       return jwt.verify(token, secret) as JwtPayload;
     }
 
-    // Get the tenant-specific key
+    // Reject tokens with an unknown kid before key selection
+    if (!tenantKeyManager.hasTenantKey(header.kid)) {
+      console.error('Token verification rejected: unknown kid', header.kid);
+      return null;
+    }
+
     const secret = tenantKeyManager.getTenantKey(header.kid);
     return jwt.verify(token, secret) as JwtPayload;
   } catch (error) {

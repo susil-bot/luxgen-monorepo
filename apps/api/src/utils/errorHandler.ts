@@ -27,7 +27,10 @@ export const errorHandler = (error: Error, req: Request, res: Response, _next: N
   } else if (error.name === 'CastError') {
     statusCode = 400;
     message = 'Invalid ID format';
-  } else if (error.name === 'MongoError' && (error as any).code === 11000) {
+  } else if (
+    (error.name === 'MongoError' || error.name === 'MongoServerError') &&
+    (error as { code?: number }).code === 11000
+  ) {
     statusCode = 409;
     message = 'Duplicate field value';
   }

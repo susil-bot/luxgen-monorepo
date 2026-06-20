@@ -81,98 +81,6 @@ const ACTIONS: { type: ActionType; label: string; emoji: string }[] = [
   { type: 'run_agent_task', label: 'Run Agent Task', emoji: '🤖' },
 ];
 
-const INITIAL_AUTOMATIONS: Automation[] = [
-  {
-    id: 'a1',
-    name: 'Welcome new learners',
-    enabled: true,
-    trigger: { type: 'user_enrolled', label: 'User Enrolled' },
-    actions: [
-      { type: 'send_email', label: 'Send Email' },
-      { type: 'add_to_group', label: 'Add to Group' },
-    ],
-    runCount: 284,
-    lastRunAt: '2 hours ago',
-    createdAt: 'Jan 12, 2025',
-  },
-  {
-    id: 'a2',
-    name: 'Course completion certificate',
-    enabled: true,
-    trigger: { type: 'course_completed', label: 'Course Completed' },
-    actions: [
-      { type: 'issue_certificate', label: 'Issue Certificate' },
-      { type: 'send_email', label: 'Send Email' },
-      { type: 'notify_slack', label: 'Notify Slack' },
-    ],
-    runCount: 97,
-    lastRunAt: '1 day ago',
-    createdAt: 'Feb 3, 2025',
-  },
-  {
-    id: 'a3',
-    name: 'Weekly progress report',
-    enabled: false,
-    trigger: { type: 'schedule', label: 'Scheduled' },
-    actions: [{ type: 'send_email', label: 'Send Email' }],
-    runCount: 12,
-    lastRunAt: '7 days ago',
-    createdAt: 'Mar 20, 2025',
-  },
-  {
-    id: 'a4',
-    name: 'Tag power learners',
-    enabled: true,
-    trigger: { type: 'certificate_issued', label: 'Certificate Issued' },
-    actions: [
-      { type: 'tag_user', label: 'Tag User' },
-      { type: 'enroll_in_course', label: 'Enroll in Course' },
-    ],
-    runCount: 41,
-    lastRunAt: '3 days ago',
-    createdAt: 'Apr 5, 2025',
-  },
-];
-
-const RUN_HISTORY: AutomationRun[] = [
-  {
-    id: 'r1',
-    automationName: 'Welcome new learners',
-    triggeredAt: '2025-06-18 14:32',
-    status: 'success',
-    durationMs: 342,
-  },
-  {
-    id: 'r2',
-    automationName: 'Course completion certificate',
-    triggeredAt: '2025-06-17 09:15',
-    status: 'success',
-    durationMs: 890,
-  },
-  {
-    id: 'r3',
-    automationName: 'Tag power learners',
-    triggeredAt: '2025-06-15 16:45',
-    status: 'error',
-    durationMs: 120,
-    error: 'Slack webhook timeout',
-  },
-  {
-    id: 'r4',
-    automationName: 'Welcome new learners',
-    triggeredAt: '2025-06-15 11:02',
-    status: 'success',
-    durationMs: 301,
-  },
-  {
-    id: 'r5',
-    automationName: 'Weekly progress report',
-    triggeredAt: '2025-06-11 08:00',
-    status: 'success',
-    durationMs: 1240,
-  },
-];
-
 interface BuilderState {
   name: string;
   trigger: TriggerType | null;
@@ -180,9 +88,8 @@ interface BuilderState {
 }
 
 export default function AutomationsPage({ tenant }: Props) {
-  const [automations, setAutomations] = useState<Automation[]>(INITIAL_AUTOMATIONS);
-  const [runHistory, setRunHistory] = useState<AutomationRun[]>(RUN_HISTORY);
-  const [useGraphql, setUseGraphql] = useState(false);
+  const [automations, setAutomations] = useState<Automation[]>([]);
+  const [runHistory, setRunHistory] = useState<AutomationRun[]>([]);
 
   const { data: billingData } = useQuery(GET_TENANT_BILLING, {
     variables: { tenantId: tenant },
@@ -207,9 +114,10 @@ export default function AutomationsPage({ tenant }: Props) {
   const [updateMutation] = useMutation(UPDATE_AUTOMATION);
   const [deleteMutation] = useMutation(DELETE_AUTOMATION);
 
+  const graphqlReady = gqlData?.automations != null;
+
   useEffect(() => {
-    if (!gqlData?.automations?.length) return;
-    setUseGraphql(true);
+    if (!gqlData?.automations) return;
     setAutomations(
       gqlData.automations.map(
         (a: {
@@ -275,7 +183,7 @@ export default function AutomationsPage({ tenant }: Props) {
     if (!current) return;
     const next = !current.enabled;
     setAutomations((prev) => prev.map((a) => (a.id === id ? { ...a, enabled: next } : a)));
-    if (useGraphql) {
+    if (graphqlReady) {
       try {
         await toggleMutation({ variables: { id, enabled: next } });
         await refetchAutomations();
@@ -301,7 +209,7 @@ export default function AutomationsPage({ tenant }: Props) {
   };
 
   const deleteAutomation = async (id: string) => {
-    if (useGraphql) {
+    if (graphqlReady) {
       try {
         await deleteMutation({ variables: { id } });
         await refetchAutomations();
@@ -332,7 +240,7 @@ export default function AutomationsPage({ tenant }: Props) {
     const triggerMeta = TRIGGERS.find((t) => t.type === builder.trigger)!;
     const actionMetas = builder.actions.map((a) => ({ type: a, label: ACTIONS.find((x) => x.type === a)!.label }));
 
-    if (useGraphql) {
+    if (graphqlReady) {
       const gqlActions = actionMetas.map((a) => ({
         type: actionToGql(a.type),
         label: a.label,

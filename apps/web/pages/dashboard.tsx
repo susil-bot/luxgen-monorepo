@@ -24,17 +24,22 @@ export default function Dashboard({ tenant }: DashboardProps) {
     error: dataError,
   } = useQuery(GET_DASHBOARD_DATA, {
     variables: { tenant },
-    errorPolicy: 'ignore', // Ignore GraphQL errors and continue
     fetchPolicy: 'cache-first',
-    skip: false, // Enable GraphQL queries now that API is working
   });
 
   useEffect(() => {
-    console.log('🔍 Dashboard useEffect running for tenant:', tenant);
+    if (!dataError) return;
+    const isAuthError =
+      dataError.graphQLErrors?.some((e) => e.extensions?.code === 'UNAUTHENTICATED') ||
+      /unauthorized|unauthenticated|not authenticated/i.test(dataError.message);
+    if (isAuthError) {
+      void router.push('/login?reason=session_expired');
+    }
+  }, [dataError, router]);
+
+  useEffect(() => {
     const userData = transformUserData(tenant);
-    console.log('🔍 Setting user data:', userData);
     setUser(userData);
-    console.log('🔍 Loading set to false');
   }, [tenant]);
 
   // Use transformer functions for action handling
@@ -51,22 +56,21 @@ export default function Dashboard({ tenant }: DashboardProps) {
     return <PageLoadingState label="Loading dashboard…" />;
   }
 
-  // Log GraphQL errors but don't block the UI
   if (dataError) {
-    console.warn('GraphQL Error (continuing with default data):', dataError);
+    return (
+      <PageEmptyState
+        icon="🔒"
+        title="Unable to load dashboard"
+        subtitle={dataError.message || 'Check your connection and try again.'}
+      />
+    );
   }
 
   // Transform data using the transformer
   const transformedDashboardData = transformDashboardData(dashboardData, tenant);
 
   if (!transformedDashboardData) {
-    return (
-      <PageEmptyState
-        icon="📊"
-        title="No dashboard data"
-        subtitle="Check your connection and try again."
-      />
-    );
+    return <PageEmptyState icon="📊" title="No dashboard data" subtitle="Check your connection and try again." />;
   }
 
   return (

@@ -103,8 +103,8 @@ export class AutomationService {
     return Automation.find({ tenantId }).sort({ createdAt: -1 });
   }
 
-  async getAutomationById(id: string): Promise<IAutomation | null> {
-    return Automation.findById(id);
+  async getAutomationById(id: string, tenantId: string): Promise<IAutomation | null> {
+    return Automation.findOne({ _id: id, tenantId });
   }
 
   async getAutomationsByTrigger(tenantId: string, triggerType: AutomationTriggerType): Promise<IAutomation[]> {
@@ -125,17 +125,16 @@ export class AutomationService {
     return automation;
   }
 
-  async updateAutomation(id: string, input: UpdateAutomationInput): Promise<IAutomation | null> {
-    const automation = await Automation.findByIdAndUpdate(id, { $set: input }, { new: true });
-    return automation;
+  async updateAutomation(id: string, tenantId: string, input: UpdateAutomationInput): Promise<IAutomation | null> {
+    return Automation.findOneAndUpdate({ _id: id, tenantId }, { $set: input }, { new: true });
   }
 
-  async toggleAutomation(id: string, enabled: boolean): Promise<IAutomation | null> {
-    return Automation.findByIdAndUpdate(id, { $set: { enabled } }, { new: true });
+  async toggleAutomation(id: string, tenantId: string, enabled: boolean): Promise<IAutomation | null> {
+    return Automation.findOneAndUpdate({ _id: id, tenantId }, { $set: { enabled } }, { new: true });
   }
 
-  async deleteAutomation(id: string): Promise<boolean> {
-    const result = await Automation.findByIdAndDelete(id);
+  async deleteAutomation(id: string, tenantId: string): Promise<boolean> {
+    const result = await Automation.findOneAndDelete({ _id: id, tenantId });
     return Boolean(result);
   }
 

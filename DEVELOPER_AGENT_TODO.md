@@ -45,7 +45,7 @@
 
 ## HIGH — Fix Before Staging Release
 
-- [ ] **H-01** `[security]`
+- [x] **H-01** `[security]`
       **File:** `apps/api/src/utils/jwt.ts` lines 37–54
       `verifyToken` decodes the JWT header without verification to extract `kid`, then uses that `kid` to select the signing key. An attacker can craft a token with an arbitrary `kid` pointing to a weak/known key and bypass tenant-key isolation. Validate `kid` against an allowlist before key selection.
 
@@ -53,43 +53,43 @@
       **File:** `apps/api/src/routes/admin.ts` lines 43–62
       Generated tenant keys are stored in the in-process `tenantKeyManager` only — never persisted. On any server restart, all tokens signed with generated keys become invalid. Persist keys to the database and implement proper token invalidation for rotated keys.
 
-- [ ] **H-03** `[security]` `[bug]`
+- [x] **H-03** `[security]` `[bug]`
       **File:** `apps/api/src/services/automationService.ts` lines 96, 128–139
       `updateAutomation`, `toggleAutomation`, `deleteAutomation`, and `getAutomationById` accept only an `id` with no tenant scoping. Any authenticated user can mutate automations belonging to a different tenant by guessing the MongoDB ObjectId. Add `{ _id: id, tenantId: ctx.tenantId }` to all queries.
 
-- [ ] **H-04** `[security]` `[bug]`
+- [x] **H-04** `[security]` `[bug]`
       **File:** `apps/api/src/services/courseService.ts` lines 59–97
       `updateCourse`, `deleteCourse`, `enrollStudent`, and `unenrollStudent` do not validate the course belongs to the caller's tenant. Scope all queries by `tenantId`.
 
-- [ ] **H-05** `[security]`
+- [x] **H-05** `[security]`
       **File:** `apps/api/src/services/userService.ts` lines 50–53
       `updateUser(id, input)` calls `findByIdAndUpdate` with no tenant ownership check. Any caller reaching this method can update any user record. Add a tenant-scoped lookup before the update.
 
-- [ ] **H-06** `[bug]`
+- [x] **H-06** `[bug]`
       **File:** `apps/api/src/utils/errorHandler.ts` line 30
       Duplicate-key error detection uses `error.name === 'MongoError'`, but Mongoose 6+ throws `MongoServerError`. The check never matches in production, turning all duplicate-email registrations into unhandled 500s. Fix to `error.name === 'MongoServerError' || error.code === 11000`.
 
-- [ ] **H-07** `[bug]`
+- [x] **H-07** `[bug]`
       **File:** `apps/api/src/routes/jobs.ts` lines 6–9
       If `JOBS_API_KEY` is unset in production, `authorizeJob` falls through to the `NODE_ENV` check. An unset key in prod silently opens all job endpoints. The safe default should be to reject when the key is unset regardless of environment.
 
-- [ ] **H-08** `[security]`
+- [x] **H-08** `[security]`
       **File:** `apps/web/pages/login.tsx` line 65
       Open redirect: `router.push(redirect)` where `redirect = router.query.redirect`. The guard `startsWith('/')` doesn't block `//evil.com` (protocol-relative) redirects. Validate redirect against a strict pathname-only regex or server-controlled allowlist.
 
-- [ ] **H-09** `[security]`
+- [x] **H-09** `[security]`
       **File:** `apps/web/pages/register.tsx` lines 26–31
       Tenant is resolved from `window.location.hostname` with hard-coded string checks. There is no server-side authoritative resolution; the tenant value flows unchecked into a GraphQL mutation, allowing cross-tenant account creation. Resolve tenant authoritatively server-side.
 
-- [ ] **H-10** `[bug]` `[security]`
+- [x] **H-10** `[bug]` `[security]`
       **File:** `apps/web/pages/register.tsx` lines 37–43
       Role mapping inverts business logic: form value `ADMIN` → backend `INSTRUCTOR`, `SUPER_ADMIN` → `ADMIN`. This allows self-assignment of elevated roles. The GraphQL mutation must reject any role above `STUDENT`/`USER` during self-registration without a server-side admin token.
 
-- [ ] **H-11** `[bug]`
+- [x] **H-11** `[bug]`
       **File:** `apps/web/pages/dashboard.tsx` lines 52–57
       `errorPolicy: 'ignore'` on `GET_DASHBOARD_DATA` swallows all GraphQL errors including auth failures. A user with an expired token sees an empty state instead of being redirected to login. Remove `errorPolicy: 'ignore'` and handle errors explicitly.
 
-- [ ] **H-12** `[arch]` `[bug]`
+- [x] **H-12** `[arch]` `[bug]`
       **File:** `apps/web/pages/automations/index.tsx` lines 84–174
       `INITIAL_AUTOMATIONS` and `RUN_HISTORY` are hard-coded mock arrays displayed when `useGraphql` is false. In production, a tenant with zero automations will see fabricated demo data as real data. Remove the mock data path; show an empty state when there are no automations.
 
@@ -133,7 +133,7 @@
       **File:** `apps/api/src/schema/user/resolvers.ts` line 7
       `user(id)` and `users(tenantId)` resolvers have no tenant-scoping authorization. Any authenticated user can query any user from any tenant. Add a tenant ownership check or a role-based restriction.
 
-- [ ] **H-23** `[security]`
+- [x] **H-23** `[security]`
       **File:** `apps/api/src/schema/listing/resolvers.ts` lines 63–66
       `submitListingApplication` does not verify the listing belongs to the caller's tenant. A user from tenant A can submit applications against listings from tenant B. Add `tenantId` scoping to the listing lookup before accepting the application.
 
@@ -149,7 +149,7 @@
       **File:** `apps/api/src/config/tenants.ts` vs `apps/api/src/config/tenants/index.ts`
       Two files define the same tenant configurations with identical structure and duplicated helper functions. `routes/tenant.ts:3` imports only the legacy flat file; the modular `tenants/index.ts` is entirely dead. Delete one: migrate to `tenants/index.ts` and update the import in `routes/tenant.ts`.
 
-- [ ] **H-27** `[bug]`
+- [x] **H-27** `[bug]`
       **File:** `apps/web/pages/groups/[id].tsx` lines 53–56
       Group deletion shows a confirm dialog then a snackbar saying "not wired yet." The GraphQL `deleteGroup` mutation and resolver are fully implemented (`schema/group/resolvers.ts:68`). Wire the frontend button to the existing mutation.
 
@@ -360,12 +360,12 @@
 
 ## Progress Summary
 
-| Tier      | Total  | Done  |
-| --------- | ------ | ----- |
-| CRITICAL  | 7      | 0     |
-| HIGH      | 27     | 0     |
-| MEDIUM    | 24     | 0     |
-| LOW       | 25     | 0     |
-| **Total** | **83** | **0** |
+| Tier      | Total  | Done   |
+| --------- | ------ | ------ |
+| CRITICAL  | 7      | 0      |
+| HIGH      | 27     | 13     |
+| MEDIUM    | 24     | 0      |
+| LOW       | 25     | 0      |
+| **Total** | **83** | **13** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.

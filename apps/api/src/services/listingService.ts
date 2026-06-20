@@ -100,8 +100,8 @@ export class ListingService {
     return listing;
   }
 
-  async submitApplication(id: string, userId?: string): Promise<IBusinessListing | null> {
-    const listing = await BusinessListing.findById(id);
+  async submitApplication(id: string, tenantId: string, userId?: string): Promise<IBusinessListing | null> {
+    const listing = await BusinessListing.findOne({ _id: id, tenantId });
     if (!listing || !['draft', 'need_more_information'].includes(listing.applicationStatus)) {
       return null;
     }

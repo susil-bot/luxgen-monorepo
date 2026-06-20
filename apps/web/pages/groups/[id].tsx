@@ -1,18 +1,18 @@
 import { useRouter } from 'next/router';
 import { createHandleUserAction } from '../../lib/user-actions';
 import Head from 'next/head';
-import { useQuery } from '@apollo/client';
+import { useQuery, useMutation } from '@apollo/client';
 import { SnackbarProvider, useSnackbar, AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
-import { GET_GROUP, GET_GROUP_MEMBERS } from '../../graphql/queries/groups';
+import { GET_GROUP, GET_GROUP_MEMBERS, DELETE_GROUP } from '../../graphql/queries/groups';
 import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
 
 const GroupDetailsPageContent: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
   const groupId = typeof id === 'string' ? id : '';
-  const { showSuccess } = useSnackbar();
+  const { showSuccess, showError } = useSnackbar();
   const user = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
   const headerProps = useAppLayoutHeader();
@@ -50,9 +50,19 @@ const GroupDetailsPageContent: React.FC = () => {
     void router.push(`/groups/${groupId}/members`);
   };
 
-  const handleDeleteGroup = () => {
-    if (confirm('Are you sure you want to delete this group? This action cannot be undone.')) {
-      showSuccess('Delete group is not wired yet — coming in a follow-up.');
+  const [deleteGroupMutation, { loading: deleting }] = useMutation(DELETE_GROUP);
+
+  const handleDeleteGroup = async () => {
+    if (!groupId || !confirm('Are you sure you want to delete this group? This action cannot be undone.')) {
+      return;
+    }
+    try {
+      await deleteGroupMutation({ variables: { id: groupId } });
+      showSuccess('Group deleted');
+      void router.push('/groups');
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Failed to delete group';
+      showError(message);
     }
   };
 
@@ -150,9 +160,7 @@ const GroupDetailsPageContent: React.FC = () => {
                     style={{ backgroundColor: 'var(--color-fill-quaternary)' }}
                   >
                     <div className="flex items-center gap-3">
-                      <div className="ios-avatar ios-avatar-sm">
-                        {member.user.firstName.charAt(0)}
-                      </div>
+                      <div className="ios-avatar ios-avatar-sm">{member.user.firstName.charAt(0)}</div>
                       <div>
                         <p className="font-medium text-primary">
                           {member.user.firstName} {member.user.lastName}
@@ -162,9 +170,7 @@ const GroupDetailsPageContent: React.FC = () => {
                     </div>
                     <div className="text-right text-sm">
                       <p className="font-medium text-primary">{member.role}</p>
-                      <p className="text-xs text-secondary">
-                        Joined {new Date(member.joinedAt).toLocaleDateString()}
-                      </p>
+                      <p className="text-xs text-secondary">Joined {new Date(member.joinedAt).toLocaleDateString()}</p>
                     </div>
                   </div>
                 ))}
@@ -182,8 +188,8 @@ const GroupDetailsPageContent: React.FC = () => {
             <p className="text-sm mb-4" style={{ color: 'var(--color-red)', opacity: 0.8 }}>
               Once you delete a group, there is no going back. Please be certain.
             </p>
-            <button type="button" className="ios-btn-secondary" onClick={handleDeleteGroup}>
-              Delete Group
+            <button type="button" className="ios-btn-secondary" onClick={handleDeleteGroup} disabled={deleting}>
+              {deleting ? 'Deleting…' : 'Delete Group'}
             </button>
           </div>
         </div>
