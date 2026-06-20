@@ -49,6 +49,8 @@ export const userResolvers = {
   User: {
     id: (parent: { _id?: { toString(): string }; id?: string }) => parent._id?.toString?.() ?? parent.id ?? '',
     role: (parent: { role: string }) => (parent.role === 'USER' ? 'STUDENT' : parent.role),
+    status: (parent: { status?: string }) => parent.status ?? 'ACTIVE',
+    isActive: (parent: { isActive?: boolean }) => parent.isActive ?? true,
     staffNotes: (parent: { staffNotes?: string }) => parent.staffNotes ?? '',
     phone: (parent: { phone?: string }) => parent.phone ?? '',
     marketingEmail: (parent: { marketingEmail?: boolean }) => parent.marketingEmail ?? true,

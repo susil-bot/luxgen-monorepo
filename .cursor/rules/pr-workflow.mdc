@@ -15,10 +15,11 @@ alwaysApply: true
 
 ## Rules
 
-1. **Never mix bugs and features in one PR.** If a feature branch exposes a backend error (500, validation failure, field not persisted), open a **separate `fix/` PR** for the bug. Label it `bug` in the PR description.
-2. **Wire CRUD completely** before calling a feature done: UI field → GraphQL mutation/query → API resolver → DB model. No `readOnly` or `disabled` on fields that should save unless explicitly phased.
-3. **Verify the happy path** after wiring: create → read detail → update → list reflects change.
-4. **Feature PR test plan** must list which fields are persisted. **Bugfix PR** must state what was broken and the exact error fixed.
+1. **Never mix bugs and features in one PR.** If a feature branch exposes a backend error (500, validation failure, field not persisted), open a **separate `fix/` PR** for the bug.
+2. **Label every PR** per `.cursor/rules/pr-labels.mdc`: mandatory `help wanted`, plus type (`bug`/`feat`/`chore`/`infra`), area (`web`/`api`/`graphql`/…), and `need-manual-review` when applicable.
+3. **Wire CRUD completely** before calling a feature done: UI field → GraphQL mutation/query → API resolver → DB model. No `readOnly` or `disabled` on fields that should save unless explicitly phased.
+4. **Verify the happy path** after wiring: create → read detail → update → list reflects change.
+5. **Feature PR test plan** must list which fields are persisted. **Bugfix PR** must state what was broken and the exact error fixed.
 
 ## Examples
 

@@ -29,6 +29,7 @@ export const PROTECTED_PREFIXES = [
   '/profile',
   '/settings',
   '/products',
+  '/organization',
 ];
 
 export function isPublicRoute(pathname: string): boolean {
@@ -51,8 +52,7 @@ export function requiresAuth(pathname: string): boolean {
 }
 
 export function buildLoginRedirect(returnPath: string, reason?: AuthRedirectReason): string {
-  const safe =
-    returnPath && returnPath !== '/login' && returnPath !== '/register' ? returnPath : '/dashboard';
+  const safe = returnPath && returnPath !== '/login' && returnPath !== '/register' ? returnPath : '/dashboard';
   const params = new URLSearchParams({ redirect: safe });
   if (reason) {
     params.set('reason', reason);

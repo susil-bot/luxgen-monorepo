@@ -1,7 +1,6 @@
 import { GetServerSideProps } from 'next';
 
-/** @deprecated Use /organization/users */
-export default function UsersRedirect() {
+export default function OrganizationIndex() {
   return null;
 }
 

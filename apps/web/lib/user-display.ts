@@ -5,6 +5,8 @@ export interface GraphQLUser {
   firstName: string;
   lastName: string;
   role: string;
+  status?: string;
+  isActive?: boolean;
   createdAt: string;
 }
 
@@ -15,6 +17,8 @@ export interface UserTableRow {
   email: string;
   role: string;
   roleLabel: string;
+  status: string;
+  statusLabel: string;
   joinedAt: string;
 }
 
@@ -40,11 +44,27 @@ export function roleIcon(role: string): string {
   return ROLE_META[role]?.icon ?? '👤';
 }
 
+const STATUS_META: Record<string, { label: string; badge: string }> = {
+  ACTIVE: { label: 'Active', badge: 'badge-green' },
+  PENDING: { label: 'Pending', badge: 'badge-orange' },
+  INACTIVE: { label: 'Inactive', badge: 'badge-gray' },
+  SUSPENDED: { label: 'Suspended', badge: 'badge-red' },
+};
+
+export function userStatusLabel(status: string): string {
+  return STATUS_META[status]?.label ?? status;
+}
+
+export function userStatusBadge(status: string): string {
+  return STATUS_META[status]?.badge ?? 'badge-gray';
+}
+
 export function emailUsername(email: string): string {
   return email.split('@')[0] ?? email;
 }
 
 export function toUserTableRow(user: GraphQLUser): UserTableRow {
+  const status = user.status ?? 'ACTIVE';
   return {
     id: user.id,
     name: `${user.firstName} ${user.lastName}`.trim(),
@@ -52,6 +72,8 @@ export function toUserTableRow(user: GraphQLUser): UserTableRow {
     email: user.email,
     role: user.role,
     roleLabel: roleLabel(user.role),
+    status,
+    statusLabel: userStatusLabel(status),
     joinedAt: user.createdAt,
   };
 }

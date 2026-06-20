@@ -5,6 +5,8 @@ export const userTypeDefs = `
     firstName: String!
     lastName: String!
     role: UserRole!
+    status: UserStatus!
+    isActive: Boolean!
     tenant: Tenant!
     phone: String
     marketingEmail: Boolean
@@ -18,6 +20,13 @@ export const userTypeDefs = `
     ADMIN
     INSTRUCTOR
     STUDENT
+  }
+
+  enum UserStatus {
+    ACTIVE
+    INACTIVE
+    PENDING
+    SUSPENDED
   }
 
   input CreateUserInput {
