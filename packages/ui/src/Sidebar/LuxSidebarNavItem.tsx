@@ -41,7 +41,7 @@ export function LuxSidebarNavItem({
   isItemActive,
 }: LuxSidebarNavItemProps) {
   const hasChildren = Boolean(item.children?.length);
-  const isExpanded = isExpandedProp || (isActive && hasChildren);
+  const isExpanded = isExpandedProp;
 
   const handleClick = () => {
     if (item.disabled) return;
