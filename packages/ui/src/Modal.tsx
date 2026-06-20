@@ -45,10 +45,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
         }}
       >
         {title && (
-          <div
-            className="px-5 pt-5 pb-3"
-            style={{ borderBottom: '1px solid var(--color-separator)' }}
-          >
+          <div className="px-5 pt-5 pb-3" style={{ borderBottom: '1px solid var(--color-separator)' }}>
             <h3 className="text-lg font-semibold text-primary">{title}</h3>
           </div>
         )}

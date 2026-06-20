@@ -24,11 +24,7 @@ export function CustomerHistorySection({ customer, events, ...timeline }: Custom
 
   return (
     <CustomerBlocksSection changeCount={resolvedEvents.length}>
-      <TimelineView
-        embedded
-        events={resolvedEvents}
-        {...timeline}
-      />
+      <TimelineView embedded events={resolvedEvents} {...timeline} />
     </CustomerBlocksSection>
   );
 }

@@ -8,12 +8,7 @@ export interface LuxSidebarSubItemsProps {
   onItemClick: (item: SidebarItem) => void;
 }
 
-export function LuxSidebarSubItems({
-  items,
-  isOpen,
-  isItemActive,
-  onItemClick,
-}: LuxSidebarSubItemsProps) {
+export function LuxSidebarSubItems({ items, isOpen, isItemActive, onItemClick }: LuxSidebarSubItemsProps) {
   return (
     <div className={`lux-subnav ${isOpen ? 'lux-subnav--open' : ''}`} aria-hidden={!isOpen}>
       <div className="lux-subnav__inner">

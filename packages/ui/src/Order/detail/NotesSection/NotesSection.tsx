@@ -17,9 +17,7 @@ export function NotesSection({ notes, onNotesChange, saving }: NotesSectionProps
         disabled={!onNotesChange}
       />
       {onNotesChange && saving && <p className="text-xs text-tertiary">Saving…</p>}
-      {!onNotesChange && (
-        <p className="text-xs text-tertiary">Sign in as staff to edit notes.</p>
-      )}
+      {!onNotesChange && <p className="text-xs text-tertiary">Sign in as staff to edit notes.</p>}
     </OrderDetailSection>
   );
 }

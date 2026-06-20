@@ -142,7 +142,13 @@ const EditGroupPageContent: React.FC = () => {
                 <label htmlFor="maxUsers" className="text-sm text-secondary">
                   Maximum Users
                 </label>
-                <select id="maxUsers" name="maxUsers" value={formData.maxUsers} onChange={handleInputChange} className="ios-input">
+                <select
+                  id="maxUsers"
+                  name="maxUsers"
+                  value={formData.maxUsers}
+                  onChange={handleInputChange}
+                  className="ios-input"
+                >
                   <option value={5}>5 users</option>
                   <option value={10}>10 users</option>
                   <option value={25}>25 users</option>
@@ -155,7 +161,13 @@ const EditGroupPageContent: React.FC = () => {
                 <label htmlFor="status" className="text-sm text-secondary">
                   Status
                 </label>
-                <select id="status" name="status" value={formData.status} onChange={handleInputChange} className="ios-input">
+                <select
+                  id="status"
+                  name="status"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                  className="ios-input"
+                >
                   <option value="Active">Active</option>
                   <option value="Inactive">Inactive</option>
                   <option value="Pending">Pending</option>

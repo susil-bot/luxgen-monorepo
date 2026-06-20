@@ -4,11 +4,7 @@ import { GET_ACTIVITY_EVENTS } from '../graphql/queries/activity-events';
 import { GET_USER, UPDATE_CUSTOMER_NOTES } from '../graphql/queries/users';
 import { isMongoObjectId } from './mongo-id';
 
-export function useCustomerNotes(
-  customerId: string | undefined,
-  tenantId: string | undefined,
-  initialNotes = '',
-) {
+export function useCustomerNotes(customerId: string | undefined, tenantId: string | undefined, initialNotes = '') {
   const { data, refetch } = useQuery(GET_USER, {
     variables: { id: customerId },
     skip: !customerId,

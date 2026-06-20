@@ -32,12 +32,8 @@ export function ProductEditHeader({
           {t.backToProducts}
         </a>
         <div className="min-w-0 flex items-center gap-2 flex-wrap">
-          <h1 className="text-lg sm:text-xl font-semibold text-primary truncate">
-            {title || t.untitledProduct}
-          </h1>
-          <span className={`badge ${statusBadgeClass(status)} flex-shrink-0`}>
-            {statusDisplayLabel(status)}
-          </span>
+          <h1 className="text-lg sm:text-xl font-semibold text-primary truncate">{title || t.untitledProduct}</h1>
+          <span className={`badge ${statusBadgeClass(status)} flex-shrink-0`}>{statusDisplayLabel(status)}</span>
         </div>
       </div>
       <div className="flex items-center gap-2 flex-shrink-0">

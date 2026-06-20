@@ -1,10 +1,6 @@
 import { useCallback, useRef, useState, type ReactNode } from 'react';
 import type { TimelineCommentAttachment, TimelineEvent } from './fetcher';
-import {
-  formatTimelineTime,
-  groupTimelineByDate,
-  timelineActorLabel,
-} from './fetcher';
+import { formatTimelineTime, groupTimelineByDate, timelineActorLabel } from './fetcher';
 import { TimelineTranslations } from './translations';
 
 export interface TimelineActivityProps {
@@ -36,8 +32,7 @@ export interface TimelineViewProps extends TimelineActivityProps {
 }
 
 function EventIcon({ kind, critical }: { kind: TimelineEvent['kind']; critical?: boolean }) {
-  const icon =
-    kind === 'STAFF_COMMENT' ? '💬' : kind === 'APP' ? '▦' : kind === 'FIELD_CHANGE' ? '↔' : '●';
+  const icon = kind === 'STAFF_COMMENT' ? '💬' : kind === 'APP' ? '▦' : kind === 'FIELD_CHANGE' ? '↔' : '●';
   return (
     <span
       className="flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs"
@@ -127,13 +122,7 @@ export function TimelineView({
   };
 
   return (
-    <section
-      className={
-        embedded
-          ? `space-y-4 ${className}`
-          : `ios-card p-4 sm:p-5 space-y-4 ${className}`
-      }
-    >
+    <section className={embedded ? `space-y-4 ${className}` : `ios-card p-4 sm:p-5 space-y-4 ${className}`}>
       {(title || hint) && (
         <div className="flex items-start justify-between gap-2">
           {title && <h2 className="text-sm font-semibold text-primary">{title}</h2>}

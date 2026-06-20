@@ -46,11 +46,7 @@ export default function SettingsIndexPage({ tenant }: SettingsIndexProps) {
                   const section = SETTINGS_SECTIONS.find((s) => s.id === id);
                   if (!section) return null;
                   const statusLabel =
-                    section.status === 'implemented'
-                      ? 'Live'
-                      : section.status === 'partial'
-                        ? 'Partial'
-                        : 'Planned';
+                    section.status === 'implemented' ? 'Live' : section.status === 'partial' ? 'Partial' : 'Planned';
 
                   return (
                     <Link

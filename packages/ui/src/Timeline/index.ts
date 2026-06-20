@@ -1,11 +1,6 @@
 export { TimelineView } from './TimelineView';
 export type { TimelineViewProps, TimelineActivityProps } from './TimelineView';
-export {
-  formatTimelineTime,
-  formatTimelineDateHeader,
-  groupTimelineByDate,
-  timelineActorLabel,
-} from './fetcher';
+export { formatTimelineTime, formatTimelineDateHeader, groupTimelineByDate, timelineActorLabel } from './fetcher';
 export type {
   TimelineEvent,
   TimelineCommentAttachment,

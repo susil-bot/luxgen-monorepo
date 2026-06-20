@@ -9,8 +9,7 @@ export interface InventorySectionProps {
 }
 
 export function InventorySection({ meta, enrolled, onMetaChange }: InventorySectionProps) {
-  const available =
-    meta.maxEnrollments != null ? Math.max(0, meta.maxEnrollments - enrolled) : enrolled;
+  const available = meta.maxEnrollments != null ? Math.max(0, meta.maxEnrollments - enrolled) : enrolled;
 
   return (
     <ProductEditSection title="Inventory" hint="Shopify: stock · LuxGen: enrollment seats">

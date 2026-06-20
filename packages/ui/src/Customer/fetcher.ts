@@ -1,7 +1,12 @@
 /** Customer data layer — Shopify customers mapped to LuxGen learners (STUDENT users). */
 
 import type { OrderRow } from '../Order/fetcher';
-import { buildOrdersFromEnrollments, type EnrollmentCourseSource, type EnrollmentUserSource, type OrderEnrollmentSource } from '../Order/fetcher';
+import {
+  buildOrdersFromEnrollments,
+  type EnrollmentCourseSource,
+  type EnrollmentUserSource,
+  type OrderEnrollmentSource,
+} from '../Order/fetcher';
 
 export type CustomerFilterTab = 'all' | 'subscribed' | 'active' | 'archived';
 
@@ -126,10 +131,7 @@ function orderToSummary(order: OrderRow): CustomerOrderSummary {
   };
 }
 
-export function buildCustomerDetail(
-  customer: CustomerRow,
-  orders: OrderRow[],
-): CustomerDetail {
+export function buildCustomerDetail(customer: CustomerRow, orders: OrderRow[]): CustomerDetail {
   const customerOrders = orders
     .filter((o) => o.customerId === customer.id)
     .map(orderToSummary)

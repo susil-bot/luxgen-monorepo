@@ -26,7 +26,11 @@ export default function SettingsStaffPage({ tenant }: Props) {
         </div>
         <ul className="space-y-3">
           {ROLES.map((role) => (
-            <li key={role.id} className="flex items-start gap-3 p-3 rounded-lg" style={{ background: 'var(--color-bg-tertiary)' }}>
+            <li
+              key={role.id}
+              className="flex items-start gap-3 p-3 rounded-lg"
+              style={{ background: 'var(--color-bg-tertiary)' }}
+            >
               <span className="badge badge-blue capitalize">{role.label}</span>
               <p className="text-sm text-secondary">{role.desc}</p>
             </li>

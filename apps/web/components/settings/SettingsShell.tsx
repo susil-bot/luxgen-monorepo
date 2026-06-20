@@ -25,9 +25,7 @@ export function SettingsShell({ tenant, activeSection, title, subtitle, children
     <nav className="ios-card p-3 space-y-4 h-fit">
       {SETTINGS_GROUPS.map((group) => (
         <div key={group.title}>
-          <p className="text-xs font-semibold uppercase tracking-wide text-tertiary px-2 mb-1">
-            {group.title}
-          </p>
+          <p className="text-xs font-semibold uppercase tracking-wide text-tertiary px-2 mb-1">{group.title}</p>
           <ul className="space-y-0.5">
             {group.ids.map((id) => {
               const section = SETTINGS_SECTIONS.find((s) => s.id === id);
@@ -35,10 +33,7 @@ export function SettingsShell({ tenant, activeSection, title, subtitle, children
               const active = activeSection === id;
               return (
                 <li key={id}>
-                  <Link
-                    href={section.href}
-                    className={`nav-item block rounded-lg ${active ? 'active' : ''}`}
-                  >
+                  <Link href={section.href} className={`nav-item block rounded-lg ${active ? 'active' : ''}`}>
                     <span>{section.icon}</span>
                     <span className="truncate">{section.label}</span>
                   </Link>

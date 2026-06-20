@@ -12,7 +12,7 @@ import {
   CourseAnalytics,
 } from '@luxgen/ui';
 import { TenantBanner } from '../../components/tenant/TenantBanner';
-import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
+import { PageLoadingState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
 
 interface CoursePageProps {
@@ -89,24 +89,26 @@ export default function CoursePage({ tenant }: CoursePageProps) {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-2">
           <div className="mb-6">
             <h1 className="ios-large-title">{course.title}</h1>
-            <p className="mt-1 text-secondary text-sm">{course.instructor} · {course.duration}</p>
+            <p className="mt-1 text-secondary text-sm">
+              {course.instructor} · {course.duration}
+            </p>
           </div>
           <div className="space-y-8">
-          {/* Course Overview */}
-          <CourseOverview course={course} userRole={userRole} enrollmentStatus="enrolled" />
+            {/* Course Overview */}
+            <CourseOverview course={course} userRole={userRole} enrollmentStatus="enrolled" />
 
-          {/* Course Analytics (Admin/Instructor only) */}
-          {(userRole === 'admin' || userRole === 'instructor') && (
-            <CourseAnalytics courseId={course.id} userRole={userRole} metrics={analyticsMetrics} />
-          )}
+            {/* Course Analytics (Admin/Instructor only) */}
+            {(userRole === 'admin' || userRole === 'instructor') && (
+              <CourseAnalytics courseId={course.id} userRole={userRole} metrics={analyticsMetrics} />
+            )}
 
-          {/* Course Detail Menu */}
-          <CourseDetailMenu
-            courseId={course.id}
-            userRole={userRole}
-            currentPath={currentPath}
-            onNavigate={handleNavigate}
-          />
+            {/* Course Detail Menu */}
+            <CourseDetailMenu
+              courseId={course.id}
+              userRole={userRole}
+              currentPath={currentPath}
+              onNavigate={handleNavigate}
+            />
           </div>
         </div>
 

@@ -7,7 +7,7 @@ interface Props {
 }
 
 /** Courses are products in LuxGen — redirect to Shopify-style product editor */
-export default function EditCourseRedirect({ tenant }: Props) {
+export default function EditCourseRedirect({ tenant: _tenant }: Props) {
   const router = useRouter();
   const { id } = router.query;
   const courseId = typeof id === 'string' ? id : '';
