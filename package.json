@@ -23,6 +23,8 @@
     "dev:stack:mobile": "bash scripts/dev-stack.sh mobile",
     "dev:stack:api": "bash scripts/dev-stack.sh api",
     "dev:agent-worker": "turbo run dev --filter=@luxgen/agent-worker",
+    "dev:mcp": "npm run build:mcp && node apps/mcp-server/dist/index.js",
+    "build:mcp": "turbo run build --filter=@luxgen/mcp-server^... --filter=@luxgen/mcp-server",
     "dev:docker": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
     "dev:docker:detach": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d",
     "dev:docker:build": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",

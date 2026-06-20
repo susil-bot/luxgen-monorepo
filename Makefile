@@ -9,7 +9,7 @@
         logs logs-api logs-web logs-ollama \
         agent-start agent-stop agent-status \
         agent-pull agent-pull-mistral agent-pull-qwen \
-        build build-api build-web \
+        build build-api build-web build-mcp mcp-smoke \
         db-seed db-reset lint test
 
 # ─── Colors ──────────────────────────────────────────────────────────────────
@@ -159,6 +159,12 @@ build-web: ## Build web app only
 
 build-api: ## Build API only
 	@npx turbo run build --filter=@luxgen/api
+
+build-mcp: ## Build MCP server (packages/mcp-core + apps/mcp-server)
+	@npm run build:mcp
+
+mcp-smoke: ## Smoke test MCP GraphQL tools (requires LUXGEN_* env vars)
+	@bash scripts/mcp-smoke.sh
 
 # ─── Database ─────────────────────────────────────────────────────────────────
 db-seed: ## Seed the database with dev data (force — idempotent upsert)

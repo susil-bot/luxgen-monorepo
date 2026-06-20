@@ -33,6 +33,7 @@ Read `skills/<skill-name>/SKILL.md` **first** when a task matches that skill's d
 | Learner / customer / analytics pages     | `skills/persona-pages/SKILL.md`                                         |
 | AI Studio / agent config                 | `skills/ai-studio/SKILL.md`                                             |
 | Automations / workflows / marketplace    | `skills/automation/SKILL.md`                                            |
+| **MCP / Cursor integration**             | `skills/mcp/SKILL.md`                                                   |
 | Billing / Stripe / plan gates            | `skills/billing/SKILL.md`                                               |
 | Business listings / directory            | `skills/listings/SKILL.md`                                              |
 | New GraphQL domain / mobile API          | `skills/graphql/SKILL.md`                                               |
@@ -61,18 +62,19 @@ Read `skills/<skill-name>/SKILL.md` **first** when a task matches that skill's d
 
 ## Repository Quick Facts
 
-| Item          | Value                                            |
-| ------------- | ------------------------------------------------ |
-| Monorepo tool | Turborepo                                        |
-| Frontend      | Next.js 14 Pages Router — `apps/web/`            |
-| Backend       | GraphQL (Apollo + Express) — `apps/api/`         |
-| Agent package | `@luxgen/agent` — `packages/agent/`              |
-| Billing       | `@luxgen/billing` — plans, gates, usage          |
-| UI package    | `@luxgen/ui` — `packages/ui/src/`                |
-| Design system | iOS/macOS tokens — `apps/web/styles/globals.css` |
-| LLM backend   | Ollama at `http://localhost:11434`               |
-| Multi-tenancy | Subdomain routing — `demo`, `idea-vibes`         |
-| Dev command   | `npm run dev` from repo root or `make dev`       |
+| Item          | Value                                                              |
+| ------------- | ------------------------------------------------------------------ |
+| Monorepo tool | Turborepo                                                          |
+| Frontend      | Next.js 14 Pages Router — `apps/web/`                              |
+| Backend       | GraphQL (Apollo + Express) — `apps/api/`                           |
+| Agent package | `@luxgen/agent` — `packages/agent/`                                |
+| MCP platform  | `@luxgen/mcp-core`, `apps/mcp-server` — see `docs/MCP_PLATFORM.md` |
+| Billing       | `@luxgen/billing` — plans, gates, usage                            |
+| UI package    | `@luxgen/ui` — `packages/ui/src/`                                  |
+| Design system | iOS/macOS tokens — `apps/web/styles/globals.css`                   |
+| LLM backend   | Ollama at `http://localhost:11434`                                 |
+| Multi-tenancy | Subdomain routing — `demo`, `idea-vibes`                           |
+| Dev command   | `npm run dev` from repo root or `make dev`                         |
 
 ---
 
