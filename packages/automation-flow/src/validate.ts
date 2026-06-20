@@ -1,6 +1,7 @@
 import { getFlowCompound } from './catalog';
+import { getNode, listOutgoingEdges, normalizeEdgeLabel } from './graph';
 import { TOWER_FLOW_VERSION } from './types';
-import type { FlowValidationError, TowerFlowDocument, FlowNode, FlowEdge } from './types';
+import type { FlowValidationError, TowerFlowDocument, FlowNode, FlowEdge, FlowGraphWarning } from './types';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === 'object' && !Array.isArray(value);
@@ -140,4 +141,71 @@ export function validateTowerFlowDocument(
 export function parseTowerFlowDocument(raw: unknown): TowerFlowDocument | null {
   const result = validateTowerFlowDocument(raw);
   return result.ok ? result.data : null;
+}
+
+function collectReachableNodeIds(flow: TowerFlowDocument): Set<string> {
+  const reachable = new Set<string>();
+  const queue = [flow.entryNodeId];
+
+  while (queue.length > 0) {
+    const nodeId = queue.shift()!;
+    if (reachable.has(nodeId)) continue;
+    reachable.add(nodeId);
+    for (const edge of listOutgoingEdges(flow, nodeId)) {
+      if (!reachable.has(edge.to)) queue.push(edge.to);
+    }
+  }
+
+  return reachable;
+}
+
+/** Non-fatal graph warnings for tower builder UI and MCP authoring hints. */
+export function collectTowerFlowGraphWarnings(flow: TowerFlowDocument): FlowGraphWarning[] {
+  const warnings: FlowGraphWarning[] = [];
+  const reachable = collectReachableNodeIds(flow);
+  const portKeys = new Set<string>();
+
+  for (const edge of flow.edges) {
+    const key = `${edge.from}:${normalizeEdgeLabel(edge.label)}`;
+    if (portKeys.has(key)) {
+      warnings.push({
+        path: `edges`,
+        message: `node ${edge.from} has multiple outgoing edges on port ${normalizeEdgeLabel(edge.label)}`,
+      });
+    }
+    portKeys.add(key);
+
+    const fromNode = getNode(flow, edge.from);
+    const port = normalizeEdgeLabel(edge.label);
+    if (fromNode && fromNode.kind === 'condition' && port === 'default') {
+      warnings.push({
+        path: `edges`,
+        message: `condition ${edge.from} should use true/false labels, not default`,
+      });
+    }
+    if (fromNode && fromNode.kind !== 'condition' && (port === 'true' || port === 'false')) {
+      warnings.push({
+        path: `edges`,
+        message: `node ${edge.from} (${fromNode.kind}) cannot use ${port} branch label`,
+      });
+    }
+  }
+
+  for (const node of flow.nodes) {
+    if (!reachable.has(node.id)) {
+      warnings.push({ path: `nodes`, message: `node ${node.id} is unreachable from entry` });
+    }
+    if (node.kind === 'condition') {
+      for (const label of ['true', 'false'] as const) {
+        if (!flow.edges.some((edge) => edge.from === node.id && normalizeEdgeLabel(edge.label) === label)) {
+          warnings.push({
+            path: `nodes`,
+            message: `condition ${node.id} is missing outgoing ${label} branch`,
+          });
+        }
+      }
+    }
+  }
+
+  return warnings;
 }
