@@ -35,11 +35,21 @@ Direct link (replace `OWNER/REPO`):
 | Item     | Value                                             |
 | -------- | ------------------------------------------------- |
 | Workflow | `.github/workflows/presubmit.yml`                 |
+| Action   | `presubmit/ai-reviewer@v0.2.5` (latest release)   |
 | Trigger  | PR opened, updated, reopened; new review comments |
 | Model    | `gemini-2.5-flash` (Google AI Studio)             |
-| Provider | `ai-sdk` (default Presubmit provider)             |
+| Provider | `ai-sdk`                                          |
+| Timeout  | 20 minutes per job                                |
 
 `GITHUB_TOKEN` is provided automatically by GitHub Actions — no extra secret needed.
+
+### Verify it works
+
+1. Open or update any PR targeting `main`
+2. GitHub → **Actions** → **Presubmit.ai** — job should finish green (~30s for small PRs)
+3. On the PR: look for a **PR Summary** comment and a review from `github-actions` (posted by presubmit.ai)
+
+Verified on [PR #64](https://github.com/susil-bot/luxgen-monorepo/pull/64) after `LLM_API_KEY` was configured.
 
 ---
 

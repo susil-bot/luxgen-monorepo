@@ -109,8 +109,11 @@ Dockerfile runs `turbo run build --filter=@luxgen/api` which compiles API + depe
 See [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml):
 
 - **Lint** job — `npm run lint`
+- **Format** job — `npm run format`
 - **Build** job — `scripts/validate-build.sh` (same as Husky **pre-push**)
 - **Test** job — `npm run test`
+
+AI PR reviews run separately in [`.github/workflows/presubmit.yml`](../../.github/workflows/presubmit.yml) — see [PRESUBMIT_AI_REVIEW.md](./PRESUBMIT_AI_REVIEW.md).
 
 Local **pre-commit** runs `lint-staged` (ESLint on staged files).
 
