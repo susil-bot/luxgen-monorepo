@@ -7,6 +7,7 @@ import { ThemeProvider } from '../lib/theme';
 import { AuthGuard } from '../components/auth/AuthGuard';
 import { SessionMonitor } from '../components/auth/SessionMonitor';
 import { SessionSync } from '../components/auth/SessionSync';
+import { SuperAdminTenantSwitchProvider } from '../components/layout/SuperAdminTenantSwitchProvider';
 import { AIStudioSidekickPanel } from '../components/agent/AIStudioSidekickPanel';
 import '../styles/globals.css';
 import '../../../packages/ui/src/Sidebar/sidebar.css';
@@ -34,14 +35,16 @@ export default function App({ Component, pageProps }: AppProps) {
         <GlobalProvider initialTenant={pageProps.tenant || 'demo'}>
           <AIStudioProvider>
             <WebNavigationProvider>
-              <SessionMonitor />
-              <SessionSync />
-              <AIStudioPanelSlot>
-                <AIStudioSidekickPanel />
-              </AIStudioPanelSlot>
-              <AuthGuard>
-                <Component {...pageProps} />
-              </AuthGuard>
+              <SuperAdminTenantSwitchProvider>
+                <SessionMonitor />
+                <SessionSync />
+                <AIStudioPanelSlot>
+                  <AIStudioSidekickPanel />
+                </AIStudioPanelSlot>
+                <AuthGuard>
+                  <Component {...pageProps} />
+                </AuthGuard>
+              </SuperAdminTenantSwitchProvider>
             </WebNavigationProvider>
           </AIStudioProvider>
         </GlobalProvider>
