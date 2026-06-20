@@ -1,7 +1,9 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { LuxgenGraphqlClient } from './graphql/client';
 import type { LuxgenMcpConfig } from './config';
-import { registerAutomationTools } from './tools/register';
+import { registerPrompts } from './prompts/register';
+import { registerResources } from './resources/register';
+import { registerTools } from './tools/register';
 
 export function createLuxgenMcpServer(
   client: LuxgenGraphqlClient,
@@ -9,10 +11,12 @@ export function createLuxgenMcpServer(
 ): McpServer {
   const server = new McpServer({
     name: 'luxgen',
-    version: '1.0.0',
+    version: '1.1.0',
   });
 
-  registerAutomationTools(server, client, config);
+  registerTools(server, client, config);
+  registerResources(server);
+  registerPrompts(server);
 
   return server;
 }

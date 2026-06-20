@@ -1,6 +1,6 @@
 # LuxGen MCP Platform
 
-> **Status:** Phase 1 (PRs 1–10) — local stdio MCP for Cursor  
+> **Status:** Phase 2 (PRs 11–15) — usage, enrollments, resources, prompts  
 > **Audience:** Developers integrating AI clients with LuxGen GraphQL and Tower automations
 
 ---
@@ -38,6 +38,21 @@
 | `get_automation`        | `automation(id)`                  | Single automation with flowDefinition    |
 | `automation_runs`       | `automationRuns(tenantId, limit)` | Recent run history                       |
 | `get_automation_schema` | `automationSchema`                | Trigger/action catalog for tower builder |
+
+### Phase 2 tools (PRs 11–13)
+
+| Tool               | GraphQL                 | Description                        |
+| ------------------ | ----------------------- | ---------------------------------- |
+| `get_tenant_usage` | `tenantUsage(tenantId)` | Plan limits, usage %, withinLimits |
+| `list_enrollments` | `enrollments(tenantId)` | Read-only enrollment/order list    |
+| `get_enrollment`   | `enrollmentById(id)`    | Single enrollment by id            |
+
+### Phase 2 resources & prompts (PRs 14–15)
+
+| Kind     | Name                    | URI / id                           |
+| -------- | ----------------------- | ---------------------------------- |
+| Resource | automation-flow-catalog | `luxgen://automation-flow/catalog` |
+| Prompt   | tower-authoring         | Tower flowDefinition guide         |
 
 ---
 
@@ -82,7 +97,7 @@ Cursor: copy `.cursor/mcp.json.example` → `.cursor/mcp.json`, set JWT from bro
 | Phase | PRs   | Scope                                          |
 | ----- | ----- | ---------------------------------------------- |
 | **1** | 1–10  | Docs, scaffold, stdio, read automation tools   |
-| **2** | 11–15 | Usage, enrollments, MCP resources/prompts      |
+| **2** | 11–15 | Usage, enrollments, MCP resources/prompts ✅   |
 | **3** | 16–20 | Write tools (tower flow persist)               |
 | **4** | 21–24 | API keys, scopes, audit log                    |
 | **5** | 25–27 | HTTP transport, rate limits, Render deploy     |
