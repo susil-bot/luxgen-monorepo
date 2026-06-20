@@ -13,6 +13,7 @@ import { errorHandler, notFoundHandler } from './utils/errorHandler';
 
 // Middleware
 import { authMiddleware } from './middleware/auth';
+import { mcpApiKeyMiddleware } from './middleware/mcpApiKey';
 import { tenantRoutingMiddleware, tenantAuthMiddleware, tenantSecurityMiddleware } from './middleware/tenantRouting';
 import {
   tenantHeadersMiddleware,
@@ -66,6 +67,7 @@ app.use(tenantRateLimitMiddleware);
 // ── Authentication ─────────────────────────────────────────────────────────
 app.use(tenantAuthMiddleware);
 app.use(authMiddleware);
+app.use(mcpApiKeyMiddleware);
 
 // ── Health check ──────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => {

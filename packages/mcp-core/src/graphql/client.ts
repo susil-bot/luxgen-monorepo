@@ -1,4 +1,9 @@
-import type { LuxgenMcpConfig } from '../config';
+export interface GraphqlClientAuth {
+  jwt?: string;
+  mcpApiKey?: string;
+  tenant: string;
+  graphqlUrl: string;
+}
 
 export interface GraphqlErrorBody {
   message: string;
@@ -23,19 +28,26 @@ export class LuxgenGraphqlError extends Error {
 }
 
 export class LuxgenGraphqlClient {
-  constructor(private readonly config: Pick<LuxgenMcpConfig, 'graphqlUrl' | 'jwt' | 'tenant'>) {}
+  constructor(private readonly auth: GraphqlClientAuth) {}
 
   async query<TData, TVariables extends Record<string, unknown> = Record<string, unknown>>(
     document: string,
     variables?: TVariables,
   ): Promise<TData> {
-    const response = await fetch(this.config.graphqlUrl, {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'x-tenant': this.auth.tenant,
+    };
+
+    if (this.auth.mcpApiKey) {
+      headers['x-mcp-api-key'] = this.auth.mcpApiKey;
+    } else if (this.auth.jwt) {
+      headers.Authorization = `Bearer ${this.auth.jwt}`;
+    }
+
+    const response = await fetch(this.auth.graphqlUrl, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${this.config.jwt}`,
-        'x-tenant': this.config.tenant,
-      },
+      headers,
       body: JSON.stringify({ query: document, variables: variables ?? {} }),
     });
 

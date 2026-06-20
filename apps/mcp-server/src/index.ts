@@ -1,12 +1,27 @@
 import 'dotenv/config';
-import { createLuxgenMcpServer, loadLuxgenMcpConfig, LuxgenGraphqlClient, runStdioServer } from '@luxgen/mcp-core';
+import {
+  createLuxgenMcpServer,
+  loadLuxgenMcpConfig,
+  LuxgenGraphqlClient,
+  resolveMcpScopes,
+  runStdioServer,
+} from '@luxgen/mcp-core';
 
 async function main(): Promise<void> {
-  const config = loadLuxgenMcpConfig();
-  const client = new LuxgenGraphqlClient(config);
+  const partial = loadLuxgenMcpConfig();
+  const client = new LuxgenGraphqlClient({
+    graphqlUrl: partial.graphqlUrl,
+    tenant: partial.tenant,
+    jwt: partial.jwt,
+    mcpApiKey: partial.mcpApiKey,
+  });
+
+  const config = await resolveMcpScopes(partial, client);
   const server = createLuxgenMcpServer(client, {
     tenant: config.tenant,
     production: config.production,
+    scopes: config.scopes,
+    keyId: config.keyId,
   });
 
   if (config.transport !== 'stdio') {

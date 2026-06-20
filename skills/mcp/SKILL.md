@@ -7,22 +7,23 @@
 
 ## Key paths
 
-| Layer         | Path                                          |
-| ------------- | --------------------------------------------- |
-| MCP app       | `apps/mcp-server/`                            |
-| Core          | `packages/mcp-core/`                          |
-| GraphQL ops   | `packages/mcp-core/src/graphql/`              |
-| Tools         | `packages/mcp-core/src/tools/`                |
-| Resources     | `packages/mcp-core/src/resources/register.ts` |
-| Prompts       | `packages/mcp-core/src/prompts/register.ts`   |
-| Cursor config | `.cursor/mcp.json.example`                    |
+| Layer       | Path                                                         |
+| ----------- | ------------------------------------------------------------ |
+| MCP app     | `apps/mcp-server/`                                           |
+| Core        | `packages/mcp-core/`                                         |
+| GraphQL ops | `packages/mcp-core/src/graphql/`                             |
+| Tools       | `packages/mcp-core/src/tools/`                               |
+| Resources   | `packages/mcp-core/src/resources/register.ts`                |
+| Prompts     | `packages/mcp-core/src/prompts/register.ts`                  |
+| API keys    | `apps/api/src/schema/mcp/`, `packages/db/src/mcp-api-key.ts` |
+| Scopes      | `packages/mcp-core/src/tools/scopes.ts`                      |
 
 ---
 
 ## Rules
 
 1. **GraphQL only** — MCP tools call `apps/api`, never Mongo directly.
-2. **Auth** — `LUXGEN_JWT` + `LUXGEN_TENANT` (`x-tenant` header), same as web client.
+2. **Auth** — `LUXGEN_JWT` or `LUXGEN_MCP_API_KEY` + `LUXGEN_TENANT` (`x-tenant` header).
 3. **No filesystem tools** in MCP — Agent Studio `@luxgen/agent` tools stay separate.
 4. **Errors** — use `formatToolError()` from `packages/mcp-core/src/errors.ts`.
 5. **New tool** — add query in `graphql/`, handler in `tools/*-handlers.ts`, definition in `tools/definitions.ts`.
@@ -49,9 +50,16 @@ make mcp-smoke       # read-tool smoke test
 
 Write tools validate `flowDefinition` via `@luxgen/automation-flow` before GraphQL mutations.
 
+## API keys & scopes (Phase 4)
+
+- Create keys: GraphQL `createMcpApiKey(tenantId, name, scopes)` — Business+ plan
+- MCP env: `LUXGEN_MCP_API_KEY` instead of JWT; scopes from `mcpKeyContext` query
+- `read` scope: list/get tools only; `write` scope: create/update/toggle/delete automations
+- Every tool call logs via `recordMcpToolAudit`; query `mcpToolAuditLog` for history
+
 ## Resources & prompts (Phase 2)
 
 - Resource `luxgen://automation-flow/catalog` — `@luxgen/automation-flow` catalog JSON
 - Prompt `tower-authoring` — guide for flowDefinition JSON
 
-HTTP transport and API keys are Phase 4–6 (not yet shipped).
+HTTP transport is Phase 5–6 (not yet shipped).
