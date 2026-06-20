@@ -27,7 +27,7 @@ packages/ui             → React DOM only (existing)
 ## Phase 0 — Design foundation
 
 **Branch:** `feat/design-tokens`  
-**PR:** _opening_
+**PR:** https://github.com/susil-bot/luxgen-monorepo/pull/38 ✅
 
 - [x] Add `packages/design-tokens` (colors, typography, spacing, radius, shadows, theme)
 - [x] LuxGen brand defaults + tenant accent override helper
@@ -101,13 +101,13 @@ packages/ui             → React DOM only (existing)
 
 ## PR log
 
-| Phase | Branch                        | PR  | Status      |
-| ----- | ----------------------------- | --- | ----------- |
-| 0     | `feat/design-tokens`          | —   | PR open     |
-| 1     | `feat/mobile-foundation`      | —   | Not started |
-| 2a    | `feat/learner-storefront`     | —   | Not started |
-| 2b    | `feat/mobile-learner-screens` | —   | Not started |
-| 3     | —                             | —   | Not started |
+| Phase | Branch                        | PR                                                          | Status                |
+| ----- | ----------------------------- | ----------------------------------------------------------- | --------------------- |
+| 0     | `feat/design-tokens`          | [#38](https://github.com/susil-bot/luxgen-monorepo/pull/38) | Done — awaiting merge |
+| 1     | `feat/mobile-foundation`      | —                                                           | Not started           |
+| 2a    | `feat/learner-storefront`     | —                                                           | Not started           |
+| 2b    | `feat/mobile-learner-screens` | —                                                           | Not started           |
+| 3     | —                             | —                                                           | Not started           |
 
 ---
 
