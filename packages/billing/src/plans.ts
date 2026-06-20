@@ -3,6 +3,7 @@ export type PlanTier = 'free' | 'starter' | 'pro' | 'business' | 'enterprise';
 export type BillingFeature =
   | 'automations'
   | 'analytics'
+  | 'project'
   | 'webhooks'
   | 'customDomain'
   | 'agentStudio'
@@ -46,7 +47,14 @@ export const PLAN_DEFINITIONS: Record<PlanTier, PlanDefinition> = {
     name: 'Pro',
     priceMonthly: 149,
     description: 'Automations and analytics for growing teams',
-    features: ['Everything in Starter', 'Automations', 'Analytics', 'Mobile learner app', 'Up to 500 learners'],
+    features: [
+      'Everything in Starter',
+      'Automations',
+      'Analytics',
+      'Project boards',
+      'Mobile learner app',
+      'Up to 500 learners',
+    ],
     limits: { maxLearners: 500, maxAutomations: 50, maxAutomationRunsPerMonth: 10_000 },
   },
   business: {
@@ -79,6 +87,7 @@ export const FEATURE_MIN_PLAN: Record<BillingFeature, PlanTier> = {
   mobileApp: 'pro',
   automations: 'pro',
   analytics: 'pro',
+  project: 'pro',
   webhooks: 'business',
   customDomain: 'business',
   agentStudio: 'enterprise',

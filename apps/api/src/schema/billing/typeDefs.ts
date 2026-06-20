@@ -27,6 +27,7 @@ export const billingTypeDefs = `
   type PlanFeatureFlags {
     automations: Boolean!
     analytics: Boolean!
+    project: Boolean!
     webhooks: Boolean!
     customDomain: Boolean!
     agentStudio: Boolean!

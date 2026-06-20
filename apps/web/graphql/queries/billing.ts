@@ -20,6 +20,7 @@ export const GET_TENANT_BILLING = gql`
       featureFlags {
         automations
         analytics
+        project
         webhooks
         customDomain
         agentStudio

@@ -106,6 +106,7 @@ export class BillingService {
       featureFlags: {
         automations: hasFeature(plan, 'automations'),
         analytics: hasFeature(plan, 'analytics'),
+        project: hasFeature(plan, 'project'),
         webhooks: hasFeature(plan, 'webhooks'),
         customDomain: hasFeature(plan, 'customDomain'),
         agentStudio: hasFeature(plan, 'agentStudio'),

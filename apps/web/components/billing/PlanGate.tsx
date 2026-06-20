@@ -16,6 +16,7 @@ export function PlanGate({ feature, currentPlan, tenant, children }: PlanGatePro
   const featureLabels: Record<BillingFeature, string> = {
     automations: 'Automations',
     analytics: 'Analytics',
+    project: 'Project',
     webhooks: 'Webhooks',
     customDomain: 'Custom domain',
     agentStudio: 'Agent Studio',
