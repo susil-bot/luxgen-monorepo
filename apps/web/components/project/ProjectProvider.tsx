@@ -16,6 +16,7 @@ import {
   type UiProjectPriority,
 } from '../../lib/project-map';
 import type { ProjectIterationScope, ProjectPriority, ProjectStatus } from '../../lib/project-types';
+import { AUTH_SESSION_CHANGE_EVENT } from '../../lib/session';
 import { validateClientSession } from '../../lib/session-guard';
 
 interface ProjectContextValue {
@@ -63,10 +64,13 @@ const ProjectContext = createContext<ProjectContextValue | null>(null);
 
 export function ProjectProvider({ tenant, children }: { tenant: string; children: ReactNode }) {
   const [filterQuery, setFilterQuery] = useState('');
-  const [sessionReady, setSessionReady] = useState(false);
+  const [sessionReady, setSessionReady] = useState(() => typeof window !== 'undefined' && validateClientSession().ok);
 
   useEffect(() => {
-    setSessionReady(validateClientSession().ok);
+    const refresh = () => setSessionReady(validateClientSession().ok);
+    refresh();
+    window.addEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+    return () => window.removeEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
   }, []);
 
   const { data, loading, error, refetch } = useQuery(GET_PROJECT_ITEMS, {
