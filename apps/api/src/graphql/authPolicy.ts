@@ -14,6 +14,12 @@ export const PUBLIC_QUERIES = new Set([
   'tenantBySubdomain',
   'courses',
   'course',
+  'storefrontProducts',
+  'storefrontProduct',
+  'storefrontCollections',
+  'storefrontCollection',
+  'storefrontBundles',
+  'storefrontBundle',
 ]);
 
 export const PUBLIC_MUTATIONS = new Set([
