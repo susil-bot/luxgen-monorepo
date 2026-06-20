@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { Tenant } from '@luxgen/db';
 import { getTenantConfig, validateTenantConfig } from '../config/tenants';
 import { getTenantContext } from '../middleware/tenantRouting';
+import { validateStorefrontPatchBody, validationErrorsToRecord } from '../middleware/validation';
 
 const router = Router();
 
@@ -389,16 +390,17 @@ router.patch('/storefront', async (req: Request, res: Response) => {
     }
 
     const { tenantId, tenant } = tenantContext;
-    const { landingEnabled, routes } = req.body as {
-      landingEnabled?: boolean;
-      routes?: {
-        landing?: string;
-        courses?: string;
-        programs?: string;
-        login?: string;
-        register?: string;
-      };
-    };
+    const validation = validateStorefrontPatchBody(req.body);
+
+    if (!validation.ok) {
+      return res.status(400).json({
+        success: false,
+        message: 'Validation failed',
+        errors: validationErrorsToRecord(validation.errors),
+      });
+    }
+
+    const { landingEnabled, routes } = validation.data;
 
     const existing = (tenant.settings?.config as unknown as Record<string, unknown> | undefined)?.storefront ?? {};
     const existingRoutes = (existing as Record<string, unknown>).routes ?? {};
