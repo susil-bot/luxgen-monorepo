@@ -1,12 +1,8 @@
-import { useQuery } from '@apollo/client';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { AppLayout } from '@luxgen/ui';
-import { normalizePlan } from '@luxgen/billing';
 
-import { PlanGate } from '../billing/PlanGate';
-import { GET_TENANT_BILLING } from '../../graphql/queries/billing';
 import { useCommercePageShell } from '../../lib/commerce-page-shell';
 import { ProjectProvider, useProject } from './ProjectProvider';
 import { PageLoadingState } from '../common/PageStates';
@@ -33,91 +29,81 @@ function ProjectShellInner({ tenant, title, subtitle, activeTab, children }: Pro
   const { appLayoutProps } = useCommercePageShell();
   const { filterQuery, setFilterQuery, loading, error, items } = useProject();
 
-  const { data: billingData } = useQuery(GET_TENANT_BILLING, {
-    variables: { tenantId: tenant },
-    errorPolicy: 'ignore',
-  });
-  const tenantPlan = normalizePlan(billingData?.tenantBilling?.plan?.toLowerCase?.() ?? 'free');
-
   return (
     <>
       <Head>
-        <title>
-          {title} — {tenant}
-        </title>
+        <title>{`${title} — ${tenant}`}</title>
       </Head>
       <AppLayout {...appLayoutProps}>
-        <PlanGate feature="project" currentPlan={tenantPlan} tenant={tenant}>
-          <div className="lux-project-page">
-            <header className="lux-project-header">
-              <div className="lux-project-header__top">
-                <div>
-                  <h1 className="lux-project-header__title">{title}</h1>
-                  <p className="lux-project-header__subtitle">{subtitle}</p>
-                </div>
-                <Link
-                  href={`/project/workflows?tenant=${encodeURIComponent(tenant)}`}
-                  className="lux-project-workflows-btn"
-                >
-                  <span aria-hidden>⚡</span>
-                  Workflows
-                </Link>
+        <div className="lux-project-page">
+          <header className="lux-project-header">
+            <div className="lux-project-header__top">
+              <div>
+                <h1 className="lux-project-header__title">{title}</h1>
+                <p className="lux-project-header__subtitle">{subtitle}</p>
               </div>
-
-              <nav className="lux-project-tabs" aria-label="Project views">
-                {TABS.map((tab) => (
-                  <Link
-                    key={tab.id}
-                    href={`${tab.href}?tenant=${encodeURIComponent(tenant)}`}
-                    className={`lux-project-tab${activeTab === tab.id ? ' lux-project-tab--active' : ''}`}
-                    aria-current={activeTab === tab.id ? 'page' : undefined}
-                  >
-                    {tab.label}
-                  </Link>
-                ))}
-              </nav>
-
-              {activeTab !== 'workflows' && (
-                <div className="lux-project-toolbar">
-                  <input
-                    type="search"
-                    className="lux-project-search"
-                    placeholder="Filter by title, assignee, or label…"
-                    value={filterQuery}
-                    onChange={(e) => setFilterQuery(e.target.value)}
-                    aria-label="Filter project items"
-                  />
-                  {activeTab === 'current' || activeTab === 'next' ? (
-                    <button
-                      type="button"
-                      className="lux-project-add-btn"
-                      onClick={() =>
-                        router.push({
-                          pathname: `/project/iteration/${activeTab}`,
-                          query: { tenant, new: '1' },
-                        })
-                      }
-                    >
-                      + Add item
-                    </button>
-                  ) : null}
-                </div>
-              )}
-            </header>
-
-            <div className="lux-project-content">
-              {loading && items.length === 0 ? (
-                <PageLoadingState label="Loading project board…" />
-              ) : error ? (
-                <p className="lux-project-empty" role="alert">
-                  {error}
-                </p>
-              ) : (
-                children
-              )}
+              <Link
+                href={`/project/workflows?tenant=${encodeURIComponent(tenant)}`}
+                className="lux-project-workflows-btn"
+              >
+                <span aria-hidden>⚡</span>
+                Workflows
+              </Link>
             </div>
+
+            <nav className="lux-project-tabs" aria-label="Project views">
+              {TABS.map((tab) => (
+                <Link
+                  key={tab.id}
+                  href={`${tab.href}?tenant=${encodeURIComponent(tenant)}`}
+                  className={`lux-project-tab${activeTab === tab.id ? ' lux-project-tab--active' : ''}`}
+                  aria-current={activeTab === tab.id ? 'page' : undefined}
+                >
+                  {tab.label}
+                </Link>
+              ))}
+            </nav>
+
+            {activeTab !== 'workflows' && (
+              <div className="lux-project-toolbar">
+                <input
+                  type="search"
+                  className="lux-project-search"
+                  placeholder="Filter by title, assignee, or label…"
+                  value={filterQuery}
+                  onChange={(e) => setFilterQuery(e.target.value)}
+                  aria-label="Filter project items"
+                />
+                {activeTab === 'current' || activeTab === 'next' ? (
+                  <button
+                    type="button"
+                    className="lux-project-add-btn"
+                    onClick={() =>
+                      router.push({
+                        pathname: `/project/iteration/${activeTab}`,
+                        query: { tenant, new: '1' },
+                      })
+                    }
+                  >
+                    + Add item
+                  </button>
+                ) : null}
+              </div>
+            )}
+          </header>
+
+          <div className="lux-project-content">
+            {loading && items.length === 0 ? (
+              <PageLoadingState label="Loading project board…" />
+            ) : error ? (
+              <p className="lux-project-empty" role="alert">
+                {error}
+              </p>
+            ) : (
+              children
+            )}
           </div>
-        </PlanGate>
+        </div>
       </AppLayout>
     </>
   );

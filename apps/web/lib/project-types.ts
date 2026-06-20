@@ -50,3 +50,24 @@ export const PRIORITY_LABELS: Record<ProjectPriority, string> = {
   P2: 'Medium',
   P3: 'Low',
 };
+
+export const WORKFLOW_TEMPLATES: ProjectWorkflowTemplate[] = [
+  {
+    id: 'content-creator',
+    name: 'Digital content creator',
+    persona: 'content_creator',
+    description: 'Outline → record → edit → publish modules or videos',
+  },
+  {
+    id: 'teacher',
+    name: 'Teacher / instructor',
+    persona: 'teacher',
+    description: 'Lesson plans, assessments, and term delivery',
+  },
+  {
+    id: 'trainer',
+    name: 'Personal development trainer',
+    persona: 'trainer',
+    description: 'Cohort materials, live sessions, and certificates',
+  },
+];

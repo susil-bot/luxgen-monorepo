@@ -1,4 +1,4 @@
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useMutation, useQuery } from '@apollo/client';
 
 import {
@@ -13,11 +13,11 @@ import {
   itemFromGql,
   iterationToGql,
   type UiProjectItem,
-  type UiProjectIteration,
   type UiProjectPriority,
 } from '../../lib/project-map';
-import { getWorkflowTemplate, workflowItemToCreateInput } from '../../lib/project-workflows';
 import type { ProjectIterationScope, ProjectPriority, ProjectStatus } from '../../lib/project-types';
+import { AUTH_SESSION_CHANGE_EVENT } from '../../lib/session';
+import { validateClientSession } from '../../lib/session-guard';
 
 interface ProjectContextValue {
   tenant: string;
@@ -55,8 +55,6 @@ interface ProjectContextValue {
   ) => Promise<void>;
   moveItem: (id: string, status: ProjectStatus) => Promise<void>;
   deleteItem: (id: string) => Promise<void>;
-  applyWorkflow: (templateId: string, iteration: UiProjectIteration) => Promise<number>;
-  applyingWorkflow: boolean;
   itemsForIteration: (iteration: ProjectIterationScope) => UiProjectItem[];
   filteredItems: UiProjectItem[];
   refetch: () => void;
@@ -66,6 +64,14 @@ const ProjectContext = createContext<ProjectContextValue | null>(null);
 
 export function ProjectProvider({ tenant, children }: { tenant: string; children: ReactNode }) {
   const [filterQuery, setFilterQuery] = useState('');
+  const [sessionReady, setSessionReady] = useState(false);
+
+  useEffect(() => {
+    const refresh = () => setSessionReady(validateClientSession().ok);
+    refresh();
+    window.addEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+    return () => window.removeEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+  }, []);
 
   const { data, loading, error, refetch } = useQuery(GET_PROJECT_ITEMS, {
     variables: {
@@ -73,14 +79,13 @@ export function ProjectProvider({ tenant, children }: { tenant: string; children
       search: filterQuery.trim() || undefined,
     },
     fetchPolicy: 'cache-and-network',
-    skip: !tenant,
+    skip: !tenant || !sessionReady,
   });
 
   const [createItem] = useMutation(CREATE_PROJECT_ITEM);
   const [updateItemMutation] = useMutation(UPDATE_PROJECT_ITEM);
   const [moveItemMutation] = useMutation(MOVE_PROJECT_ITEM);
   const [deleteItemMutation] = useMutation(DELETE_PROJECT_ITEM);
-  const [applyingWorkflow, setApplyingWorkflow] = useState(false);
 
   const items = useMemo(
     () => (data?.projectItems ?? []).map((raw: Parameters<typeof itemFromGql>[0]) => itemFromGql(raw)),
@@ -188,45 +193,21 @@ export function ProjectProvider({ tenant, children }: { tenant: string; children
     [deleteItemMutation, tenant, refetch],
   );
 
-  const applyWorkflow = useCallback(
-    async (templateId: string, iteration: UiProjectIteration) => {
-      const template = getWorkflowTemplate(templateId);
-      if (!template) return 0;
-
-      setApplyingWorkflow(true);
-      try {
-        await Promise.all(
-          template.items.map((item) =>
-            createItem({
-              variables: {
-                input: workflowItemToCreateInput(tenant, iteration, item),
-              },
-            }),
-          ),
-        );
-        await refetch();
-        return template.items.length;
-      } finally {
-        setApplyingWorkflow(false);
-      }
-    },
-    [createItem, tenant, refetch],
-  );
-
   const value = useMemo(
     () => ({
       tenant,
       items,
-      loading,
-      error: error?.message,
+      loading: loading || !sessionReady,
+      error:
+        error?.graphQLErrors?.[0]?.extensions?.code === 'PLAN_UPGRADE_REQUIRED'
+          ? 'Project boards require a Pro plan or higher.'
+          : error?.message,
       filterQuery,
       setFilterQuery,
       addItem,
       updateItem,
       moveItem,
       deleteItem,
-      applyWorkflow,
-      applyingWorkflow,
       itemsForIteration,
       filteredItems,
       refetch: () => {
@@ -237,14 +218,13 @@ export function ProjectProvider({ tenant, children }: { tenant: string; children
       tenant,
       items,
       loading,
+      sessionReady,
       error,
       filterQuery,
       addItem,
       updateItem,
       moveItem,
       deleteItem,
-      applyWorkflow,
-      applyingWorkflow,
       itemsForIteration,
       filteredItems,
       refetch,

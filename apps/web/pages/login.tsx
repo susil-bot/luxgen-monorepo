@@ -7,9 +7,12 @@ import { PageWrapper } from '@luxgen/ui';
 import { AuthNoticeBanner } from '../components/auth/AuthNoticeBanner';
 import { LOGIN_MUTATION } from '../graphql/queries/auth';
 import { AUTH_NOTICE_BY_REASON, formatLoginError, parseAuthRedirectReason } from '../lib/auth-notices';
-import { persistSession } from '../lib/session';
+import { clearStoredSession, persistSession } from '../lib/session';
 import { isSessionTenantMismatch, tenantMismatchMessage } from '../lib/tenant-auth';
 import { safeRedirectPath } from '../lib/safe-redirect';
+
+const DEV_DEMO_EMAIL = 'alex.thompson@demo.com';
+const DEV_DEMO_PASSWORD = 'password123';
 
 const LoginPageContent: React.FC = () => {
   const router = useRouter();
@@ -17,11 +20,17 @@ const LoginPageContent: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [authNoticeDismissed, setAuthNoticeDismissed] = useState(false);
 
-  const redirectReason = parseAuthRedirectReason(router.query.reason);
+  const redirectReason = router.isReady ? parseAuthRedirectReason(router.query.reason) : null;
   const authNotice = redirectReason && !authNoticeDismissed ? AUTH_NOTICE_BY_REASON[redirectReason] : null;
 
   useEffect(() => {
     setAuthNoticeDismissed(false);
+  }, [redirectReason]);
+
+  useEffect(() => {
+    if (redirectReason === 'tenant_mismatch') {
+      clearStoredSession();
+    }
   }, [redirectReason]);
 
   const [loginMutation] = useMutation(LOGIN_MUTATION);
@@ -116,6 +125,8 @@ const LoginPageContent: React.FC = () => {
                   title="Welcome Back"
                   subtitle="Sign in to your account to continue"
                   socialProviders={['google', 'linkedin', 'github']}
+                  defaultEmail={process.env.NODE_ENV === 'development' ? DEV_DEMO_EMAIL : undefined}
+                  defaultPassword={process.env.NODE_ENV === 'development' ? DEV_DEMO_PASSWORD : undefined}
                   className=""
                 />
               </div>
