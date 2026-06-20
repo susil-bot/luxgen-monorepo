@@ -75,7 +75,7 @@ upsertTenant({
       storefront: {
         landingEnabled: true,
         routes: {
-          landing: '/mentors',
+          landing: '/store/mentors',
           courses: '/learn',
           programs: '/store/product',
           login: '/login',

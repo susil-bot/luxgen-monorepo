@@ -17,7 +17,7 @@ export interface TenantStorefrontSettings {
 export const LUXGEN_STOREFRONT_TENANT_SUBDOMAINS = new Set(['demo', 'luxgen']);
 
 export const DEFAULT_STOREFRONT_ROUTES: StorefrontRouteSettings = {
-  landing: '/mentors',
+  landing: '/store/mentors',
   courses: '/learn',
   programs: '/store/product',
   login: '/login',

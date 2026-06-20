@@ -235,7 +235,7 @@ const tenantSchema = new Schema<ITenant>(
             default: false,
           },
           routes: {
-            landing: { type: String, default: '/mentors' },
+            landing: { type: String, default: '/store/mentors' },
             courses: { type: String, default: '/learn' },
             programs: { type: String, default: '/store/product' },
             login: { type: String, default: '/login' },

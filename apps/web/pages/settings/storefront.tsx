@@ -81,8 +81,8 @@ function StorefrontSettingsContent({ tenant }: Props) {
           <h2 className="text-lg font-semibold text-primary">Public landing page</h2>
           <p className="text-secondary text-sm mt-1">
             When enabled, signed-out visitors at{' '}
-            <code className="text-xs">{settings.routes.landing || '/mentors'}</code> see the trainer/mentor marketplace
-            landing. The home page (<code className="text-xs">/</code>) stays the simple welcome screen.
+            <code className="text-xs">{settings.routes.landing || '/store/mentors'}</code> see the trainer/mentor
+            marketplace landing. The home page (<code className="text-xs">/</code>) stays the simple welcome screen.
           </p>
           {isLuxgenDefaultTenant && (
             <p className="text-xs text-secondary mt-2">
@@ -103,7 +103,7 @@ function StorefrontSettingsContent({ tenant }: Props) {
                 onChange={(e) => setSettings((prev) => ({ ...prev, landingEnabled: e.target.checked }))}
               />
               <span className="text-sm font-medium text-primary">
-                Enable trainer/mentor landing ({settings.routes.landing || '/mentors'})
+                Enable trainer/mentor landing ({settings.routes.landing || '/store/mentors'})
               </span>
             </label>
 
@@ -119,7 +119,7 @@ function StorefrontSettingsContent({ tenant }: Props) {
                     className="ios-input"
                     value={settings.routes.landing}
                     onChange={(e) => updateRoute('landing', e.target.value)}
-                    placeholder="/mentors"
+                    placeholder="/store/mentors"
                   />
                 </div>
                 <div className="ios-form-group">
@@ -171,7 +171,7 @@ function StorefrontSettingsContent({ tenant }: Props) {
               </button>
               {settings.landingEnabled && (
                 <Link
-                  href={settings.routes.landing || '/mentors'}
+                  href={settings.routes.landing || '/store/mentors'}
                   className="ios-btn-secondary"
                   target="_blank"
                   rel="noopener noreferrer"
