@@ -114,3 +114,93 @@ export interface AutomationRunsResult {
 export interface AutomationSchemaResult {
   automationSchema: unknown;
 }
+
+export const CREATE_AUTOMATION = `
+  mutation CreateAutomation($input: CreateAutomationInput!) {
+    createAutomation(input: $input) {
+      id
+      name
+      enabled
+      triggerType
+      triggerLabel
+      flowDefinition
+      actions {
+        type
+        label
+        config
+      }
+      runCount
+      createdAt
+    }
+  }
+`;
+
+export const UPDATE_AUTOMATION = `
+  mutation UpdateAutomation($id: ID!, $input: UpdateAutomationInput!) {
+    updateAutomation(id: $id, input: $input) {
+      id
+      name
+      enabled
+      triggerType
+      triggerLabel
+      flowDefinition
+      actions {
+        type
+        label
+        config
+      }
+      updatedAt
+    }
+  }
+`;
+
+export const TOGGLE_AUTOMATION = `
+  mutation ToggleAutomation($id: ID!, $enabled: Boolean!) {
+    toggleAutomation(id: $id, enabled: $enabled) {
+      id
+      name
+      enabled
+    }
+  }
+`;
+
+export const DELETE_AUTOMATION = `
+  mutation DeleteAutomation($id: ID!) {
+    deleteAutomation(id: $id)
+  }
+`;
+
+export interface CreateAutomationInput {
+  tenantId: string;
+  name: string;
+  triggerType: string;
+  triggerLabel: string;
+  actions: AutomationAction[];
+  enabled?: boolean;
+  flowDefinition?: unknown;
+}
+
+export interface UpdateAutomationInput {
+  name?: string;
+  triggerType?: string;
+  triggerLabel?: string;
+  actions?: AutomationAction[];
+  enabled?: boolean;
+  flowDefinition?: unknown;
+}
+
+export interface CreateAutomationResult {
+  createAutomation: AutomationRecord;
+}
+
+export interface UpdateAutomationResult {
+  updateAutomation: AutomationRecord | null;
+}
+
+export interface ToggleAutomationResult {
+  toggleAutomation: Pick<AutomationRecord, 'id' | 'name' | 'enabled'> | null;
+}
+
+export interface DeleteAutomationResult {
+  deleteAutomation: boolean;
+}

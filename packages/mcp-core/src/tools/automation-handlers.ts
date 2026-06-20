@@ -3,13 +3,22 @@ import type { LuxgenGraphqlClient } from '../graphql/client';
 import {
   AUTOMATION_RUNS,
   AUTOMATION_SCHEMA,
+  CREATE_AUTOMATION,
+  DELETE_AUTOMATION,
   GET_AUTOMATION,
   LIST_AUTOMATIONS,
+  TOGGLE_AUTOMATION,
+  UPDATE_AUTOMATION,
   type AutomationRunsResult,
   type AutomationSchemaResult,
+  type CreateAutomationResult,
+  type DeleteAutomationResult,
   type GetAutomationResult,
   type ListAutomationsResult,
+  type ToggleAutomationResult,
+  type UpdateAutomationResult,
 } from '../graphql/automation-queries';
+import { parseFlowDefinitionArg, towerFlowToMutationInput, validateFlowDefinitionOnly } from '../flow/prepare-mutation';
 import type { ToolConfig, ToolContent } from './types';
 import { formatToolError, formatToolSuccess } from '../errors';
 
@@ -19,6 +28,10 @@ async function runTool<T>(config: ToolConfig, fn: () => Promise<T>): Promise<Too
   } catch (error) {
     return formatToolError(error, config.production);
   }
+}
+
+function validationErrorResult(config: ToolConfig, errors: string[]): ToolContent {
+  return formatToolError(new Error(`flowDefinition validation failed:\n${errors.join('\n')}`), config.production);
 }
 
 export async function handleAutomationTool(
@@ -61,6 +74,95 @@ export async function handleAutomationTool(
         const data = await client.query<AutomationSchemaResult>(AUTOMATION_SCHEMA);
         return { apiSchema: data.automationSchema, flowCatalog: exportAutomationSchema() };
       });
+
+    case 'validate_tower_flow': {
+      const flowRaw = parseFlowDefinitionArg(args.flowDefinition);
+      const result = validateFlowDefinitionOnly(flowRaw);
+      if (!result.ok) return validationErrorResult(config, result.errors);
+      return runTool(config, async () => ({
+        valid: true,
+        name: result.flow.meta.name,
+        nodeCount: result.flow.nodes.length,
+        edgeCount: result.flow.edges.length,
+      }));
+    }
+
+    case 'create_automation': {
+      const flowRaw = parseFlowDefinitionArg(args.flowDefinition);
+      const enabled = typeof args.enabled === 'boolean' ? args.enabled : undefined;
+      const prepared = towerFlowToMutationInput(flowRaw, { enabled });
+      if (!prepared.ok) return validationErrorResult(config, prepared.errors);
+
+      return runTool(config, async () => {
+        const { input } = prepared;
+        const data = await client.query<CreateAutomationResult>(CREATE_AUTOMATION, {
+          input: {
+            tenantId: config.tenant,
+            name: input.name,
+            triggerType: input.triggerType,
+            triggerLabel: input.triggerLabel,
+            actions: input.actions,
+            enabled: input.enabled,
+            flowDefinition: input.flowDefinition,
+          },
+        });
+        return data.createAutomation;
+      });
+    }
+
+    case 'update_automation_flow': {
+      const id = String(args.id ?? '');
+      if (!id) throw new Error('id is required');
+      const flowRaw = parseFlowDefinitionArg(args.flowDefinition);
+      const enabled = typeof args.enabled === 'boolean' ? args.enabled : undefined;
+      const prepared = towerFlowToMutationInput(flowRaw, { enabled });
+      if (!prepared.ok) return validationErrorResult(config, prepared.errors);
+
+      return runTool(config, async () => {
+        const { input } = prepared;
+        const data = await client.query<UpdateAutomationResult>(UPDATE_AUTOMATION, {
+          id,
+          input: {
+            name: input.name,
+            triggerType: input.triggerType,
+            triggerLabel: input.triggerLabel,
+            actions: input.actions,
+            enabled: input.enabled,
+            flowDefinition: input.flowDefinition,
+          },
+        });
+        if (!data.updateAutomation) throw new Error(`Automation not found: ${id}`);
+        return data.updateAutomation;
+      });
+    }
+
+    case 'toggle_automation': {
+      const id = String(args.id ?? '');
+      if (!id) throw new Error('id is required');
+      if (typeof args.enabled !== 'boolean') throw new Error('enabled (boolean) is required');
+
+      return runTool(config, async () => {
+        const data = await client.query<ToggleAutomationResult>(TOGGLE_AUTOMATION, {
+          id,
+          enabled: args.enabled,
+        });
+        if (!data.toggleAutomation) throw new Error(`Automation not found: ${id}`);
+        return data.toggleAutomation;
+      });
+    }
+
+    case 'delete_automation': {
+      const id = String(args.id ?? '');
+      if (!id) throw new Error('id is required');
+      if (args.confirm !== true) {
+        throw new Error('delete_automation requires confirm: true');
+      }
+
+      return runTool(config, async () => {
+        const data = await client.query<DeleteAutomationResult>(DELETE_AUTOMATION, { id });
+        return { id, deleted: data.deleteAutomation };
+      });
+    }
 
     default:
       return null;

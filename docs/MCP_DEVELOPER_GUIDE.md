@@ -94,6 +94,16 @@ make mcp-smoke
 - **Resource:** `luxgen://automation-flow/catalog` — full compound catalog
 - **Prompt:** `tower-authoring` — use when drafting `flowDefinition` JSON
 
+### Tower writes (Phase 3)
+
+| Tool                     | Example prompt in Cursor                               |
+| ------------------------ | ------------------------------------------------------ |
+| `validate_tower_flow`    | "Validate this flowDefinition JSON before I save it"   |
+| `create_automation`      | "Create a tower from this flowDefinition"              |
+| `update_automation_flow` | "Update automation {id} with this flowDefinition"      |
+| `toggle_automation`      | "Pause automation {id}" / "Enable automation {id}"     |
+| `delete_automation`      | "Delete automation {id}" (tool requires confirm: true) |
+
 ---
 
 ## Troubleshooting

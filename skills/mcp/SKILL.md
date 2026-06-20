@@ -39,15 +39,19 @@ make mcp-smoke       # read-tool smoke test
 
 ---
 
-## Tools (Phase 1–2)
+## Tools (Phase 1–3)
 
-**Automations:** `list_automations`, `get_automation`, `automation_runs`, `get_automation_schema`
+**Automations (read):** `list_automations`, `get_automation`, `automation_runs`, `get_automation_schema`
+
+**Automations (write):** `validate_tower_flow`, `create_automation`, `update_automation_flow`, `toggle_automation`, `delete_automation`
 
 **Commerce (read-only):** `get_tenant_usage`, `list_enrollments`, `get_enrollment`
+
+Write tools validate `flowDefinition` via `@luxgen/automation-flow` before GraphQL mutations.
 
 ## Resources & prompts (Phase 2)
 
 - Resource `luxgen://automation-flow/catalog` — `@luxgen/automation-flow` catalog JSON
 - Prompt `tower-authoring` — guide for flowDefinition JSON
 
-Write tools and HTTP transport are Phase 3–6 (not yet shipped).
+HTTP transport and API keys are Phase 4–6 (not yet shipped).

@@ -1,6 +1,6 @@
 # LuxGen MCP Platform
 
-> **Status:** Phase 2 (PRs 11–15) — usage, enrollments, resources, prompts  
+> **Status:** Phase 3 (PRs 16–20) — tower write tools with flow validation  
 > **Audience:** Developers integrating AI clients with LuxGen GraphQL and Tower automations
 
 ---
@@ -54,6 +54,16 @@
 | Resource | automation-flow-catalog | `luxgen://automation-flow/catalog` |
 | Prompt   | tower-authoring         | Tower flowDefinition guide         |
 
+### Phase 3 write tools (PRs 16–20)
+
+| Tool                     | GraphQL            | Description                                |
+| ------------------------ | ------------------ | ------------------------------------------ |
+| `validate_tower_flow`    | local validation   | Validate flowDefinition before save        |
+| `create_automation`      | `createAutomation` | Create tower from validated flowDefinition |
+| `update_automation_flow` | `updateAutomation` | Replace flowDefinition + derived fields    |
+| `toggle_automation`      | `toggleAutomation` | Enable or pause without editing flow       |
+| `delete_automation`      | `deleteAutomation` | Delete (requires `confirm: true`)          |
+
 ---
 
 ## 4. Environment variables
@@ -98,7 +108,7 @@ Cursor: copy `.cursor/mcp.json.example` → `.cursor/mcp.json`, set JWT from bro
 | ----- | ----- | ---------------------------------------------- |
 | **1** | 1–10  | Docs, scaffold, stdio, read automation tools   |
 | **2** | 11–15 | Usage, enrollments, MCP resources/prompts ✅   |
-| **3** | 16–20 | Write tools (tower flow persist)               |
+| **3** | 16–20 | Write tools (tower flow persist) ✅            |
 | **4** | 21–24 | API keys, scopes, audit log                    |
 | **5** | 25–27 | HTTP transport, rate limits, Render deploy     |
 | **6** | 28–30 | Enterprise `run_agent_task`, docs, smoke tests |
