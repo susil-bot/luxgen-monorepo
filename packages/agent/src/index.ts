@@ -122,6 +122,7 @@ export {
 export { processHeadlessJob, runWorkerLoop, shutdownWorker } from './queue/worker';
 
 // Automation bridge
-export { emitAutomationEvent, emitAgentAutomationEvent } from './automation/bridge';
+export { emitAutomationEvent, emitAgentAutomationEvent, emitCommerceAutomationEvent } from './automation/bridge';
+export type { CommerceAutomationEventKind } from './automation/bridge';
 export { AUTOMATION_EVENTS_CHANNEL, AUTOMATION_SCHEMA_DOC, AGENT_TRIGGER_TYPES } from './automation/events';
 export type { AutomationEventPayload } from './automation/events';

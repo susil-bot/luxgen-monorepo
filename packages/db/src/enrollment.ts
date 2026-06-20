@@ -17,6 +17,8 @@ export interface IEnrollment extends Document {
   course: Types.ObjectId;
   student: Types.ObjectId;
   notes: string;
+  tags: string[];
+  metadata?: Record<string, unknown>;
   paymentStatus: EnrollmentPaymentStatus;
   progressPercent: number;
   learningStatus: EnrollmentLearningStatus;
@@ -36,6 +38,8 @@ const enrollmentSchema = new Schema<IEnrollment>(
     course: { type: Schema.Types.ObjectId, ref: 'Course', required: true, index: true },
     student: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
     notes: { type: String, default: '' },
+    tags: { type: [String], default: [] },
+    metadata: { type: Schema.Types.Mixed, default: {} },
     paymentStatus: {
       type: String,
       enum: Object.values(EnrollmentPaymentStatus),

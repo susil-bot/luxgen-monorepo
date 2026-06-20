@@ -1,12 +1,14 @@
 import {
   Automation,
   AutomationRun,
+  Enrollment,
   Tenant,
   TenantSubscription,
   TenantUsageMonthly,
   currentUsagePeriod,
   ActivityEventKind,
   ActivityActorType,
+  enrollmentSubjectId,
   type AutomationTriggerType,
   type IAutomation,
   type IAutomationAction,
@@ -177,6 +179,9 @@ async function executeAction(
         runId,
       });
       break;
+    case 'UPDATE_ORDER_FIELDS':
+      await executeUpdateOrderFields(action, automation, event, runId);
+      break;
     default:
       console.warn(`[automation-bridge] Unknown action type: ${action.type}`);
   }
@@ -192,6 +197,7 @@ const ACTION_LABELS: Record<string, string> = {
   NOTIFY_SLACK: 'sent a Slack notification',
   TAG_USER: 'tagged the customer',
   RUN_AGENT_TASK: 'ran an agent task',
+  UPDATE_ORDER_FIELDS: 'updated order fields',
 };
 
 async function recordAutomationTimeline(params: {
@@ -274,6 +280,113 @@ async function recordAutomationActionTimeline(params: {
       metadata,
     });
   }
+}
+
+function resolveOrderIds(
+  payload: Record<string, unknown>,
+): { courseId: string; studentId: string; orderId: string } | null {
+  const courseId = payload.courseId as string | undefined;
+  const studentId = (payload.studentId ?? payload.userId) as string | undefined;
+  const orderIdRaw = payload.orderId as string | undefined;
+
+  if (courseId && studentId) {
+    return { courseId, studentId, orderId: enrollmentSubjectId(courseId, studentId) };
+  }
+  if (orderIdRaw?.includes(':')) {
+    const [parsedCourseId, parsedStudentId] = orderIdRaw.split(':');
+    if (parsedCourseId && parsedStudentId) {
+      return { courseId: parsedCourseId, studentId: parsedStudentId, orderId: orderIdRaw };
+    }
+  }
+  return null;
+}
+
+async function executeUpdateOrderFields(
+  action: IAutomationAction,
+  automation: IAutomation,
+  event: AutomationEventPayload,
+  runId: string,
+): Promise<void> {
+  const orderIds = resolveOrderIds(event.payload);
+  if (!orderIds) {
+    throw new Error('UPDATE_ORDER_FIELDS requires orderId or courseId+studentId in trigger payload');
+  }
+
+  const enrollment = await Enrollment.findOne({
+    tenant: event.tenantId,
+    course: orderIds.courseId,
+    student: orderIds.studentId,
+  });
+  if (!enrollment) {
+    throw new Error(`Order not found: ${orderIds.orderId}`);
+  }
+
+  const config = action.config ?? {};
+  const note = typeof config.note === 'string' ? config.note.trim() : '';
+  const tagsRaw = typeof config.tags === 'string' ? config.tags : '';
+  const customFields =
+    config.customFields && typeof config.customFields === 'object' && !Array.isArray(config.customFields)
+      ? (config.customFields as Record<string, unknown>)
+      : undefined;
+
+  if (note) enrollment.notes = note;
+
+  if (tagsRaw.trim()) {
+    const incoming = tagsRaw
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+    const merged = new Set([...(enrollment.tags ?? []), ...incoming]);
+    enrollment.tags = [...merged];
+  }
+
+  if (customFields && Object.keys(customFields).length > 0) {
+    enrollment.metadata = { ...enrollment.metadata, ...customFields };
+  }
+
+  await enrollment.save();
+
+  await recordAutomationActionTimeline({
+    tenantId: event.tenantId,
+    automation,
+    action,
+    payload: {
+      ...event.payload,
+      orderId: orderIds.orderId,
+      courseId: orderIds.courseId,
+      studentId: orderIds.studentId,
+    },
+    runId,
+  });
+}
+
+export type CommerceAutomationEventKind = 'order_created' | 'order_drafted' | 'payment_sent';
+
+/** Map commerce order lifecycle events to automation triggers. */
+export async function emitCommerceAutomationEvent(
+  tenantId: string,
+  kind: CommerceAutomationEventKind,
+  details: Record<string, unknown>,
+): Promise<number> {
+  const map: Record<CommerceAutomationEventKind, AutomationTriggerType> = {
+    order_created: 'ORDER_CREATED',
+    order_drafted: 'ORDER_DRAFTED',
+    payment_sent: 'PAYMENT_SENT',
+  };
+
+  const courseId = details.courseId as string | undefined;
+  const studentId = (details.studentId ?? details.userId) as string | undefined;
+  const payload: Record<string, unknown> = {
+    ...details,
+    ...(courseId && studentId ? { orderId: enrollmentSubjectId(courseId, studentId) } : {}),
+  };
+
+  return emitAutomationEvent({
+    tenantId,
+    triggerType: map[kind],
+    payload,
+    source: 'commerce',
+  });
 }
 
 /** Map agent lifecycle events to automation triggers. */
