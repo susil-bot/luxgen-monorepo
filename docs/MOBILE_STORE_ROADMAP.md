@@ -42,7 +42,7 @@ packages/ui             → React DOM only (existing)
 ## Phase 1 — Expo shell
 
 **Branch:** `feat/mobile-foundation`  
-**PR:** _opening (stacked on #38)_
+**PR:** https://github.com/susil-bot/luxgen-monorepo/pull/39 ✅ (stacked on #38)
 
 - [x] Scaffold `apps/mobile` (Expo Router, TypeScript)
 - [x] Metro monorepo config (`metro.config.js`, watch folders)
@@ -104,7 +104,7 @@ packages/ui             → React DOM only (existing)
 | Phase | Branch                        | PR                                                          | Status                |
 | ----- | ----------------------------- | ----------------------------------------------------------- | --------------------- |
 | 0     | `feat/design-tokens`          | [#38](https://github.com/susil-bot/luxgen-monorepo/pull/38) | Done — awaiting merge |
-| 1     | `feat/mobile-foundation`      | —                                                           | Not started           |
+| 1     | `feat/mobile-foundation`      | [#39](https://github.com/susil-bot/luxgen-monorepo/pull/39) | Done — awaiting merge |
 | 2a    | `feat/learner-storefront`     | —                                                           | Not started           |
 | 2b    | `feat/mobile-learner-screens` | —                                                           | Not started           |
 | 3     | —                             | —                                                           | Not started           |
