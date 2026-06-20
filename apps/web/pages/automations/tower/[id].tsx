@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Head from 'next/head';
 
 import styles from '../../../components/automations/tower/TowerFlow.module.css';
+import { FlowConfigFieldInput } from '../../../components/automations/tower/FlowConfigFieldInput';
 import { useTowerFlowPersist } from '../../../hooks/useTowerFlowPersist';
 import {
   flowToOrderedSteps,
@@ -321,33 +322,12 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
                     <label className={styles.configLabel} htmlFor={`cfg-${field.key}`}>
                       {field.label}
                     </label>
-                    {field.type === 'select' && field.options ? (
-                      <select
-                        id={`cfg-${field.key}`}
-                        className={styles.configInput}
-                        value={String(selectedStep.config[field.key] ?? field.defaultValue ?? '')}
-                        onChange={(e) => updateNodeConfig(selectedStep.id, field.key, e.target.value)}
-                      >
-                        {field.options.map((opt) => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </select>
-                    ) : (
-                      <input
-                        id={`cfg-${field.key}`}
-                        className={styles.configInput}
-                        type={field.type === 'number' || field.type === 'duration' ? 'number' : 'text'}
-                        placeholder={field.placeholder}
-                        value={String(selectedStep.config[field.key] ?? field.defaultValue ?? '')}
-                        onChange={(e) => {
-                          const raw = e.target.value;
-                          const value = field.type === 'number' || field.type === 'duration' ? Number(raw) : raw;
-                          updateNodeConfig(selectedStep.id, field.key, value);
-                        }}
-                      />
-                    )}
+                    <FlowConfigFieldInput
+                      field={field}
+                      inputId={`cfg-${field.key}`}
+                      value={selectedStep.config[field.key]}
+                      onChange={(value) => updateNodeConfig(selectedStep.id, field.key, value)}
+                    />
                   </div>
                 ))}
 

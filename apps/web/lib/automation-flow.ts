@@ -20,6 +20,7 @@ export type {
   FlowEdge,
   FlowStepView,
   FlowCompoundDefinition,
+  FlowConfigField,
   FlowNodeKind,
   AutomationSchemaExport,
 } from '@luxgen/automation-flow';

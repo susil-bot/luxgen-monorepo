@@ -597,6 +597,22 @@
   box-sizing: border-box;
 }
 
+.configInputMultiline {
+  height: auto;
+  min-height: 88px;
+  padding: 8px 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  line-height: 1.4;
+  resize: vertical;
+}
+
+.configFieldError {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  color: #d72c0d;
+}
+
 .toggleOn {
   padding: 8px 14px;
   font-size: 13px;
