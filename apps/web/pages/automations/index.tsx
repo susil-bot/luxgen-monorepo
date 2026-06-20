@@ -23,6 +23,8 @@ import {
   type UiTriggerType,
   type UiActionType,
 } from '../../lib/automation-map';
+import { getTenantPageProps } from '../../lib/tenant-page-props';
+import { useTenantScope } from '../../lib/use-tenant-scope';
 
 interface Props {
   tenant: string;
@@ -88,23 +90,27 @@ interface BuilderState {
 }
 
 export default function AutomationsPage({ tenant }: Props) {
+  const { queryTenantId, subdomain } = useTenantScope(tenant);
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [runHistory, setRunHistory] = useState<AutomationRun[]>([]);
 
   const { data: billingData } = useQuery(GET_TENANT_BILLING, {
-    variables: { tenantId: tenant },
+    variables: { tenantId: queryTenantId },
+    skip: !queryTenantId,
     errorPolicy: 'ignore',
   });
   const tenantPlan = normalizePlan(billingData?.tenantBilling?.plan?.toLowerCase?.() ?? 'free');
 
   const { data: gqlData, refetch: refetchAutomations } = useQuery(GET_AUTOMATIONS, {
-    variables: { tenantId: tenant },
+    variables: { tenantId: queryTenantId },
+    skip: !queryTenantId,
     errorPolicy: 'ignore',
     fetchPolicy: 'cache-and-network',
   });
 
   const { data: runsData, refetch: refetchRuns } = useQuery(GET_AUTOMATION_RUNS, {
-    variables: { tenantId: tenant, limit: 10 },
+    variables: { tenantId: queryTenantId, limit: 10 },
+    skip: !queryTenantId,
     errorPolicy: 'ignore',
     fetchPolicy: 'cache-and-network',
   });
@@ -262,7 +268,7 @@ export default function AutomationsPage({ tenant }: Props) {
           await createMutation({
             variables: {
               input: {
-                tenantId: tenant,
+                tenantId: queryTenantId,
                 name: builder.name,
                 triggerType: triggerToGql(builder.trigger!),
                 triggerLabel: triggerMeta.label,
@@ -326,7 +332,7 @@ export default function AutomationsPage({ tenant }: Props) {
   return (
     <>
       <Head>
-        <title>Automations — {tenant.charAt(0).toUpperCase() + tenant.slice(1)}</title>
+        <title>Automations — {subdomain.charAt(0).toUpperCase() + subdomain.slice(1)}</title>
       </Head>
       <AppLayout
         sidebarSections={getDefaultSidebarSections()}
@@ -337,7 +343,7 @@ export default function AutomationsPage({ tenant }: Props) {
         showNotifications
         notificationCount={0}
       >
-        <PlanGate feature="automations" currentPlan={tenantPlan} tenant={tenant}>
+        <PlanGate feature="automations" currentPlan={tenantPlan} tenant={subdomain}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Header */}
             <div className="lux-automations-header">
@@ -349,7 +355,7 @@ export default function AutomationsPage({ tenant }: Props) {
                   Build trigger-action workflows without writing code.
                 </p>
                 <a
-                  href={`/marketplace?tenant=${encodeURIComponent(tenant)}`}
+                  href={`/marketplace?tenant=${encodeURIComponent(subdomain)}`}
                   style={{ fontSize: 13, color: 'var(--color-blue)', marginTop: 6, display: 'inline-block' }}
                 >
                   Browse marketplace templates →
@@ -769,6 +775,4 @@ export default function AutomationsPage({ tenant }: Props) {
   );
 }
 
-export const getServerSideProps = async (ctx: any) => ({
-  props: { tenant: ctx.query.tenant || 'demo' },
-});
+export const getServerSideProps = getTenantPageProps;

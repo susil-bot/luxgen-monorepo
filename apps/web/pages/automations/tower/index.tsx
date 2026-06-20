@@ -7,7 +7,8 @@ import type { DataListTab, FilterChipData, SortOption, SortDirection } from '@lu
 import { GET_AUTOMATIONS, GET_AUTOMATION_RUNS } from '../../../graphql/queries/automations';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
-import { useLayoutUser, useAppTenantId } from '../../../lib/app-layout-user';
+import { useLayoutUser } from '../../../lib/app-layout-user';
+import { useTenantScope } from '../../../lib/use-tenant-scope';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import {
   triggerFromGql,
@@ -414,7 +415,7 @@ function TowerListContent({ tenant }: TowerPageProps) {
   const router = useRouter();
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
-  const tenantId = useAppTenantId();
+  const { queryTenantId, subdomain } = useTenantScope(tenant);
   const headerProps = useAppLayoutHeader();
 
   const [automations, setAutomations] = useState<Automation[]>(INITIAL_AUTOMATIONS);
@@ -429,16 +430,16 @@ function TowerListContent({ tenant }: TowerPageProps) {
   const [showFilterPopover, setShowFilterPopover] = useState(false);
   const addFilterBtnRef = useRef<HTMLButtonElement>(null);
 
-  const queryTenantId = tenantId ?? tenant;
-
   const { data: gqlData } = useQuery(GET_AUTOMATIONS, {
     variables: { tenantId: queryTenantId },
+    skip: !queryTenantId,
     errorPolicy: 'ignore',
     fetchPolicy: 'cache-and-network',
   });
 
   const { data: runsData } = useQuery(GET_AUTOMATION_RUNS, {
     variables: { tenantId: queryTenantId, limit: 10 },
+    skip: !queryTenantId,
     errorPolicy: 'ignore',
     fetchPolicy: 'cache-and-network',
   });
@@ -541,7 +542,7 @@ function TowerListContent({ tenant }: TowerPageProps) {
       {...headerProps}
     >
       <Head>
-        <title>Tower — {tenant.charAt(0).toUpperCase() + tenant.slice(1)}</title>
+        <title>Tower — {subdomain.charAt(0).toUpperCase() + subdomain.slice(1)}</title>
       </Head>
 
       {/* Canvas controls row */}

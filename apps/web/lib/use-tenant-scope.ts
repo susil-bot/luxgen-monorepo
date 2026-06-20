@@ -53,3 +53,12 @@ export function hostSubdomainFromPageProp(pageSubdomain?: string): string {
   if (typeof window !== 'undefined') return getHostTenantSubdomain();
   return normalizeTenantSubdomain(getCurrentTenant());
 }
+
+/**
+ * Dashboard GraphQL resolvers resolve tenants by subdomain (`Tenant.findOne({ subdomain })`).
+ * Use this for `getDashboardData` — not `queryTenantId` (Mongo id).
+ */
+export function useDashboardTenant(pageSubdomain?: string): string {
+  const { subdomain } = useTenantScope(pageSubdomain);
+  return subdomain;
+}

@@ -18,8 +18,8 @@ import {
 } from '@luxgen/ui';
 import { PageLoadingState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
-import { useLayoutUser, useAppTenantId } from '../../lib/app-layout-user';
-import { getStoredUser } from '../../lib/session';
+import { useLayoutUser } from '../../lib/app-layout-user';
+import { useTenantScope } from '../../lib/use-tenant-scope';
 import { GET_COURSES } from '../../graphql/queries/courses';
 import { GET_USERS } from '../../graphql/queries/users';
 import { GET_ENROLLMENTS, GET_ENROLLMENT_BY_ID, GET_ENROLLMENT } from '../../graphql/queries/enrollment';
@@ -38,10 +38,8 @@ function OrderDetailPageContent({ tenant }: Props) {
   const router = useRouter();
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
-  const tenantId = useAppTenantId();
+  const { queryTenantId } = useTenantScope(tenant);
   const { showSuccess, showError } = useSnackbar();
-  const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
-  const queryTenantId = tenantId ?? sessionUser?.tenant.id ?? tenant;
   const headerProps = useAppLayoutHeader();
 
   const rawId = router.query.id;

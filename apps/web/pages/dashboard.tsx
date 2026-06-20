@@ -12,6 +12,8 @@ import {
 } from '../lib/transformer';
 import { useAppLayoutHeader } from '../lib/app-layout-header';
 import { AUTH_SESSION_CHANGE_EVENT } from '../lib/session';
+import { getTenantPageProps } from '../lib/tenant-page-props';
+import { useDashboardTenant, useTenantScope } from '../lib/use-tenant-scope';
 import { PageEmptyState, PageLoadingState } from '../components/common/PageStates';
 
 interface DashboardProps {
@@ -22,14 +24,17 @@ export default function Dashboard({ tenant }: DashboardProps) {
   const router = useRouter();
   const headerProps = useAppLayoutHeader();
   const [user, setUser] = useState<UserMenu | null>(null);
+  const dashboardTenant = useDashboardTenant(tenant);
+  const { subdomain } = useTenantScope(tenant);
+  const displayName = subdomain.charAt(0).toUpperCase() + subdomain.slice(1);
 
-  // GraphQL query for dashboard data with error handling
   const {
     data: dashboardData,
     loading: dataLoading,
     error: dataError,
   } = useQuery(GET_DASHBOARD_DATA, {
-    variables: { tenant },
+    variables: { tenant: dashboardTenant },
+    skip: !dashboardTenant,
     fetchPolicy: 'cache-first',
   });
 
@@ -42,9 +47,8 @@ export default function Dashboard({ tenant }: DashboardProps) {
       window.removeEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
       window.removeEventListener('storage', refresh);
     };
-  }, [tenant]);
+  }, [subdomain]);
 
-  // Use transformer functions for action handling
   const onUserAction = (action: 'profile' | 'settings' | 'logout') => {
     handleUserAction(action, router);
   };
@@ -53,7 +57,6 @@ export default function Dashboard({ tenant }: DashboardProps) {
     handleDashboardAction(action, data);
   };
 
-  // Show loading state
   if (dataLoading) {
     return <PageLoadingState label="Loading dashboard…" />;
   }
@@ -68,8 +71,7 @@ export default function Dashboard({ tenant }: DashboardProps) {
     );
   }
 
-  // Transform data using the transformer
-  const transformedDashboardData = transformDashboardData(dashboardData, tenant);
+  const transformedDashboardData = transformDashboardData(dashboardData, subdomain);
 
   if (!transformedDashboardData) {
     return <PageEmptyState icon="📊" title="No dashboard data" subtitle="Check your connection and try again." />;
@@ -78,14 +80,14 @@ export default function Dashboard({ tenant }: DashboardProps) {
   return (
     <>
       <Head>
-        <title>Dashboard - {tenant.charAt(0).toUpperCase() + tenant.slice(1)}</title>
+        <title>Dashboard - {displayName}</title>
         <meta name="description" content="Learning management dashboard" />
       </Head>
 
       <AdminDashboardLayout
         currentTenant={{
-          name: tenant.charAt(0).toUpperCase() + tenant.slice(1),
-          subdomain: tenant,
+          name: displayName,
+          subdomain,
         }}
         user={
           user
@@ -152,12 +154,4 @@ export default function Dashboard({ tenant }: DashboardProps) {
   );
 }
 
-export async function getServerSideProps(context: any) {
-  const { tenant } = context.query;
-
-  return {
-    props: {
-      tenant: tenant || 'demo',
-    },
-  };
-}
+export const getServerSideProps = getTenantPageProps;

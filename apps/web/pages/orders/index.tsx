@@ -14,8 +14,8 @@ import {
 } from '@luxgen/ui';
 import { PageLoadingState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
-import { useLayoutUser, useAppTenantId } from '../../lib/app-layout-user';
-import { getStoredUser } from '../../lib/session';
+import { useLayoutUser } from '../../lib/app-layout-user';
+import { useTenantScope } from '../../lib/use-tenant-scope';
 import { GET_COURSES } from '../../graphql/queries/courses';
 import { GET_USERS } from '../../graphql/queries/users';
 import { GET_ENROLLMENTS } from '../../graphql/queries/enrollment';
@@ -31,9 +31,7 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
   const router = useRouter();
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
-  const tenantId = useAppTenantId();
-  const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
-  const queryTenantId = tenantId ?? sessionUser?.tenant.id ?? tenant;
+  const { queryTenantId } = useTenantScope(tenant);
   const headerProps = useAppLayoutHeader();
 
   const [search, setSearch] = useState('');
@@ -63,12 +61,7 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
   }, [router.query.search]);
 
   const allOrders = useMemo(
-    () =>
-      buildOrdersFromEnrollments(
-        coursesData?.courses,
-        usersData?.users,
-        enrollmentsData?.enrollments,
-      ),
+    () => buildOrdersFromEnrollments(coursesData?.courses, usersData?.users, enrollmentsData?.enrollments),
     [coursesData, usersData, enrollmentsData],
   );
 
