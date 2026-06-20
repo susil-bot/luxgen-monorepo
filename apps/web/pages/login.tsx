@@ -20,7 +20,7 @@ const LoginPageContent: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [authNoticeDismissed, setAuthNoticeDismissed] = useState(false);
 
-  const redirectReason = parseAuthRedirectReason(router.query.reason);
+  const redirectReason = router.isReady ? parseAuthRedirectReason(router.query.reason) : null;
   const authNotice = redirectReason && !authNoticeDismissed ? AUTH_NOTICE_BY_REASON[redirectReason] : null;
 
   useEffect(() => {
