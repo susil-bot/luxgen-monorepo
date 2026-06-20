@@ -2,6 +2,7 @@ import { EntityFormPageLayout } from '../SplitPageLayout/EntityFormPageLayout';
 import type { OrderDetail } from './fetcher';
 import type { TimelineActivityProps } from '../Timeline';
 import { SplitPageHeader } from '../SplitPageLayout/SplitPageHeader';
+import { ActionMenu } from '../ActionMenu';
 import {
   formatOrderDate,
   fulfillmentBadgeClass,
@@ -24,14 +25,47 @@ import { ConversionSection } from './detail/ConversionSection';
 export interface OrderDetailViewProps {
   order: OrderDetail;
   backHref?: string;
+  editHref?: string;
+  onRefund?: () => void;
+  onCancel?: () => void;
+  refunding?: boolean;
+  cancelling?: boolean;
   timeline?: TimelineActivityProps;
   notes?: string;
   onNotesChange?: (value: string) => void;
   savingNotes?: boolean;
 }
 
-export function OrderDetailView({ order, backHref, timeline, notes, onNotesChange, savingNotes }: OrderDetailViewProps) {
+export function OrderDetailView({
+  order,
+  backHref,
+  editHref,
+  onRefund,
+  onCancel,
+  refunding,
+  cancelling,
+  timeline,
+  notes,
+  onNotesChange,
+  savingNotes,
+}: OrderDetailViewProps) {
   const t = OrderTranslations.en;
+  const canRefund = order.paymentStatus === 'paid' && Boolean(onRefund);
+  const isTerminal = order.paymentStatus === 'voided' || order.paymentStatus === 'refunded';
+  const resolvedEditHref = editHref ?? `/orders/${order.id}/edit`;
+
+  const menuItems =
+    onCancel && !isTerminal
+      ? [
+          {
+            id: 'cancel',
+            label: t.cancelOrder,
+            onClick: onCancel,
+            disabled: cancelling,
+            destructive: true,
+          },
+        ]
+      : [];
 
   return (
     <EntityFormPageLayout
@@ -53,15 +87,30 @@ export function OrderDetailView({ order, backHref, timeline, notes, onNotesChang
           }
           actions={
             <>
-              <button type="button" className="ios-btn-secondary text-sm" disabled>
-                {t.refund}
+              <button
+                type="button"
+                className="ios-btn-secondary text-sm"
+                disabled={!canRefund || refunding}
+                onClick={onRefund}
+              >
+                {refunding ? 'Refunding…' : t.refund}
               </button>
-              <button type="button" className="ios-btn-secondary text-sm" disabled>
-                {t.edit}
-              </button>
-              <button type="button" className="ios-btn-secondary text-sm" disabled>
-                {t.moreActions}
-              </button>
+              {isTerminal ? (
+                <button type="button" className="ios-btn-secondary text-sm" disabled>
+                  {t.edit}
+                </button>
+              ) : (
+                <a href={resolvedEditHref} className="ios-btn-secondary text-sm">
+                  {t.edit}
+                </a>
+              )}
+              {menuItems.length > 0 ? (
+                <ActionMenu items={menuItems} triggerLabel={t.moreActions} />
+              ) : (
+                <button type="button" className="ios-btn-secondary text-sm" disabled>
+                  {t.moreActions}
+                </button>
+              )}
             </>
           }
         />
@@ -71,11 +120,7 @@ export function OrderDetailView({ order, backHref, timeline, notes, onNotesChang
           <FulfillmentSection order={order} />
           <PaymentSummarySection order={order} />
           <TimelineSection order={order} {...timeline} />
-          <NotesSection
-            notes={notes ?? order.notes}
-            onNotesChange={onNotesChange}
-            saving={savingNotes}
-          />
+          <NotesSection notes={notes ?? order.notes} onNotesChange={onNotesChange} saving={savingNotes} />
         </>
       }
       aside={

@@ -27,6 +27,13 @@ export const enrollmentTypeDefs = `
     notes: String!
   }
 
+  input UpdateOrderInput {
+    courseId: ID!
+    studentId: ID!
+    notes: String
+    paymentStatus: EnrollmentPaymentStatus
+  }
+
   input UpdateCustomerNotesInput {
     customerId: ID!
     notes: String!
@@ -56,6 +63,9 @@ export const enrollmentTypeDefs = `
 
   extend type Mutation {
     updateOrderNotes(input: UpdateOrderNotesInput!): Enrollment!
+    updateOrder(input: UpdateOrderInput!): Enrollment!
+    refundOrder(courseId: ID!, studentId: ID!): Enrollment!
+    cancelOrder(courseId: ID!, studentId: ID!): Enrollment!
     updateCustomerNotes(input: UpdateCustomerNotesInput!): User!
     createOrderCheckoutSession(input: CreateOrderCheckoutInput!): OrderCheckoutSession!
     confirmOrderPaymentDev(courseId: ID!, studentId: ID!, tenantId: ID!): Enrollment!

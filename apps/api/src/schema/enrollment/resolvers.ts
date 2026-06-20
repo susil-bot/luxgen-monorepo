@@ -1,4 +1,6 @@
+import { EnrollmentPaymentStatus } from '@luxgen/db';
 import { enrollmentService } from '../../services/enrollmentService';
+import { courseService } from '../../services/courseService';
 import { actorFromContext } from '../../services/activityEventService';
 import { isBillingDevMode } from '../../services/billingService';
 import { User } from '@luxgen/db';
@@ -59,16 +61,62 @@ export const enrollmentResolvers = {
       );
       return mapEnrollment(doc);
     },
+    updateOrder: async (
+      _: unknown,
+      {
+        input,
+      }: {
+        input: {
+          courseId: string;
+          studentId: string;
+          notes?: string;
+          paymentStatus?: string;
+        };
+      },
+      context: GraphQLContext,
+    ) => {
+      const doc = await enrollmentService.updateOrder(
+        input.courseId,
+        input.studentId,
+        {
+          notes: input.notes,
+          paymentStatus: input.paymentStatus as EnrollmentPaymentStatus | undefined,
+        },
+        actorFromContext(context.user),
+      );
+      return mapEnrollment(doc);
+    },
+    refundOrder: async (
+      _: unknown,
+      { courseId, studentId }: { courseId: string; studentId: string },
+      context: GraphQLContext,
+    ) => {
+      const doc = await enrollmentService.refundEnrollment(courseId, studentId, actorFromContext(context.user));
+      return mapEnrollment(doc);
+    },
+    cancelOrder: async (
+      _: unknown,
+      { courseId, studentId }: { courseId: string; studentId: string },
+      context: GraphQLContext,
+    ) => {
+      const tenantId = context.tenantId;
+      if (!tenantId) throw new Error('Tenant context required');
+      const actor = actorFromContext(context.user);
+      await courseService.unenrollStudent(courseId, tenantId, studentId);
+      let doc = await enrollmentService.cancelEnrollment(courseId, studentId, actor);
+      if (!doc) {
+        await enrollmentService.ensureEnrollment(tenantId, courseId, studentId);
+        doc = await enrollmentService.cancelEnrollment(courseId, studentId, actor);
+      }
+      if (!doc) throw new Error('Order not found');
+      return mapEnrollment(doc);
+    },
     updateCustomerNotes: async (
       _: unknown,
       { input }: { input: { customerId: string; notes: string } },
       context: GraphQLContext,
     ) => {
-      await enrollmentService.updateCustomerNotes(
-        input.customerId,
-        input.notes,
-        actorFromContext(context.user),
-      );
+      await enrollmentService.updateCustomerNotes(input.customerId, input.notes, actorFromContext(context.user));
       const user = await User.findById(input.customerId).populate('tenant');
       if (!user) throw new Error('Customer not found');
       return user;
@@ -99,7 +147,12 @@ export const enrollmentResolvers = {
       if (!isBillingDevMode()) {
         throw new Error('Dev payment confirmation is disabled. Set BILLING_DEV_MODE=true.');
       }
-      const doc = await enrollmentService.markPaymentConfirmed(tenantId, courseId, studentId, `dev_manual_${Date.now()}`);
+      const doc = await enrollmentService.markPaymentConfirmed(
+        tenantId,
+        courseId,
+        studentId,
+        `dev_manual_${Date.now()}`,
+      );
       return mapEnrollment(doc);
     },
   },

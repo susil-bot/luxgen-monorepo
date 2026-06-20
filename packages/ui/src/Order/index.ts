@@ -3,11 +3,9 @@ export type { OrderListViewProps } from './OrderListView';
 export { OrderDetailView } from './OrderDetailView';
 export type { OrderDetailViewProps } from './OrderDetailView';
 export { OrderCreateForm } from './OrderCreateForm';
-export type {
-  OrderCreateFormProps,
-  OrderCreateStudentOption,
-  OrderCreateCourseOption,
-} from './OrderCreateForm';
+export type { OrderCreateFormProps, OrderCreateStudentOption, OrderCreateCourseOption } from './OrderCreateForm';
+export { OrderEditForm } from './OrderEditForm';
+export type { OrderEditFormProps } from './OrderEditForm';
 export { OrderDetailLayout } from './OrderDetailLayout';
 export type { OrderDetailLayoutProps } from './OrderDetailLayout';
 export { OrderDetailHeader } from './OrderDetailHeader';
@@ -32,6 +30,7 @@ export {
   fulfillmentBadgeClass,
   paymentDisplayLabel,
   fulfillmentDisplayLabel,
+  mapEnrollmentPaymentStatus,
 } from './fetcher';
 export type {
   OrderRow,

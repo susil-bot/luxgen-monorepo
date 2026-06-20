@@ -163,7 +163,10 @@ export class ActivityEventService {
     }
 
     const [stored, totalCount] = await Promise.all([
-      ActivityEvent.find(filter).sort({ createdAt: -1, _id: -1 }).limit(limit + 1).lean(),
+      ActivityEvent.find(filter)
+        .sort({ createdAt: -1, _id: -1 })
+        .limit(limit + 1)
+        .lean(),
       ActivityEvent.countDocuments({ tenant: tenantId, subjectType, subjectId }),
     ]);
 
@@ -300,7 +303,6 @@ export class ActivityEventService {
       const course = await Course.findById(courseId);
       const student = await User.findById(studentId);
       if (!course || !student) return [];
-      const orderNumber = subjectId;
       return [
         {
           ...base,
@@ -331,7 +333,10 @@ export class ActivityEventService {
     return [];
   }
 
-  async recordProductCreated(course: { id: string; title: string; tenantId: string }, actor?: { id: string; name: string }) {
+  async recordProductCreated(
+    course: { id: string; title: string; tenantId: string },
+    actor?: { id: string; name: string },
+  ) {
     return this.record({
       tenantId: course.tenantId,
       subjectType: ActivitySubjectType.PRODUCT,
@@ -421,12 +426,7 @@ export class ActivityEventService {
     });
   }
 
-  async recordCustomerCreated(
-    tenantId: string,
-    userId: string,
-    email: string,
-    actor?: { id: string; name: string },
-  ) {
+  async recordCustomerCreated(tenantId: string, userId: string, email: string, actor?: { id: string; name: string }) {
     return this.record({
       tenantId,
       subjectType: ActivitySubjectType.CUSTOMER,
@@ -440,12 +440,7 @@ export class ActivityEventService {
     });
   }
 
-  async recordCustomerUpdated(
-    tenantId: string,
-    userId: string,
-    message: string,
-    actor?: { id: string; name: string },
-  ) {
+  async recordCustomerUpdated(tenantId: string, userId: string, message: string, actor?: { id: string; name: string }) {
     return this.record({
       tenantId,
       subjectType: ActivitySubjectType.CUSTOMER,
@@ -556,11 +551,64 @@ export class ActivityEventService {
       metadata: { stripeSessionId },
     });
   }
+
+  async recordOrderRefunded(
+    tenantId: string,
+    orderSubjectId: string,
+    courseTitle: string,
+    actor?: { id: string; name: string },
+  ) {
+    return this.record({
+      tenantId,
+      subjectType: ActivitySubjectType.ORDER,
+      subjectId: orderSubjectId,
+      kind: ActivityEventKind.FIELD_CHANGE,
+      eventType: 'order.refunded',
+      message: `Order refunded for ${courseTitle}`,
+      actorType: actor ? ActivityActorType.STAFF : ActivityActorType.SYSTEM,
+      actorId: actor?.id,
+      actorName: actor?.name ?? 'LuxGen',
+      field: 'paymentStatus',
+      oldValue: 'paid',
+      newValue: 'refunded',
+    });
+  }
+
+  async recordOrderUpdated(
+    tenantId: string,
+    orderSubjectId: string,
+    message: string,
+    actor?: { id: string; name: string },
+    field?: string,
+    oldValue?: string,
+    newValue?: string,
+  ) {
+    return this.record({
+      tenantId,
+      subjectType: ActivitySubjectType.ORDER,
+      subjectId: orderSubjectId,
+      kind: ActivityEventKind.FIELD_CHANGE,
+      eventType: 'order.updated',
+      message,
+      actorType: actor ? ActivityActorType.STAFF : ActivityActorType.SYSTEM,
+      actorId: actor?.id,
+      actorName: actor?.name ?? 'LuxGen',
+      field,
+      oldValue,
+      newValue,
+    });
+  }
 }
 
 export const activityEventService = new ActivityEventService();
 
-export function actorFromContext(user?: { _id?: { toString(): string }; id?: string; firstName?: string; lastName?: string; email?: string }) {
+export function actorFromContext(user?: {
+  _id?: { toString(): string };
+  id?: string;
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}) {
   if (!user) return undefined;
   const id = user._id?.toString?.() ?? user.id;
   if (!id) return undefined;

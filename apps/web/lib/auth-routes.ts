@@ -29,6 +29,7 @@ export const PROTECTED_PREFIXES = [
   '/profile',
   '/settings',
   '/products',
+  '/orders',
   '/organization',
 ];
 
