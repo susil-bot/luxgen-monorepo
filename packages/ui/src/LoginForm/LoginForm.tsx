@@ -2,13 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { BaseComponentProps, TenantTheme } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
-import { Button } from '../Button';
 import { Input } from '../Input';
 import { Card } from '../Card';
 import { Form } from '../Form';
 import { Text } from '../Text';
 import { Heading } from '../Heading';
-import { Checkbox } from '../Checkbox';
 
 export interface LoginFormData {
   email: string;
@@ -41,6 +39,9 @@ export interface LoginFormProps extends BaseComponentProps {
   signUpText?: string;
   signUpLinkText?: string;
   socialLoginText?: string;
+  /** Dev-only prefill — not for production */
+  defaultEmail?: string;
+  defaultPassword?: string;
 }
 
 const LoginFormComponent: React.FC<LoginFormProps> = ({
@@ -68,11 +69,13 @@ const LoginFormComponent: React.FC<LoginFormProps> = ({
   signUpText = "Don't have an account?",
   signUpLinkText = 'Sign up here',
   socialLoginText = 'Or continue with',
+  defaultEmail = '',
+  defaultPassword = '',
   ...props
 }) => {
   const [formData, setFormData] = useState<LoginFormData>({
-    email: '',
-    password: '',
+    email: defaultEmail,
+    password: defaultPassword,
     rememberMe: false,
   });
   const [errors, setErrors] = useState<Partial<LoginFormData>>({});
