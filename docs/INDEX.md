@@ -55,13 +55,13 @@
 
 ### Agent Studio & automations (Phases 4–7)
 
-| Document                                                             | Description                                   |
-| -------------------------------------------------------------------- | --------------------------------------------- |
-| [MCP_PLATFORM.md](./MCP_PLATFORM.md)                                 | **MCP server** — Cursor stdio, tools, roadmap |
-| [MCP_DEVELOPER_GUIDE.md](./MCP_DEVELOPER_GUIDE.md)                   | Cursor setup and smoke tests                  |
-| [technical/agent/AGENT_STUDIO.md](./technical/agent/AGENT_STUDIO.md) | SSE, tools, staging (implementation)          |
-| [AGENT_STUDIO_ARCHITECTURE.md](./AGENT_STUDIO_ARCHITECTURE.md)       | Phases 3–7 target architecture                |
-| [AI_STUDIO_TIMELINE.md](./AI_STUDIO_TIMELINE.md)                     | Task backlog & edge cases                     |
+| Document                                                             | Description                                               |
+| -------------------------------------------------------------------- | --------------------------------------------------------- |
+| [MCP_PLATFORM.md](./MCP_PLATFORM.md)                                 | **MCP server** — stdio + HTTP, 14 tools, roadmap complete |
+| [MCP_DEVELOPER_GUIDE.md](./MCP_DEVELOPER_GUIDE.md)                   | Cursor setup and smoke tests                              |
+| [technical/agent/AGENT_STUDIO.md](./technical/agent/AGENT_STUDIO.md) | SSE, tools, staging (implementation)                      |
+| [AGENT_STUDIO_ARCHITECTURE.md](./AGENT_STUDIO_ARCHITECTURE.md)       | Phases 3–7 target architecture                            |
+| [AI_STUDIO_TIMELINE.md](./AI_STUDIO_TIMELINE.md)                     | Task backlog & edge cases                                 |
 
 ### UI & design
 

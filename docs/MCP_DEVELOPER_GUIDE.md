@@ -68,6 +68,19 @@ With API + env vars set:
 make mcp-smoke
 ```
 
+Uses `LUXGEN_JWT` or `LUXGEN_MCP_API_KEY`. Validates read tools, scope filtering, and optional agent task:
+
+```bash
+MCP_SMOKE_RUN_AGENT=1 make mcp-smoke   # requires Agent Studio plan
+```
+
+HTTP health (server must be running):
+
+```bash
+make mcp-http-smoke
+# or: MCP_HTTP_URL=https://luxgen-mcp.onrender.com/health make mcp-http-smoke
+```
+
 ---
 
 ## 5. Available tools
@@ -103,6 +116,14 @@ make mcp-smoke
 | `update_automation_flow` | "Update automation {id} with this flowDefinition"      |
 | `toggle_automation`      | "Pause automation {id}" / "Enable automation {id}"     |
 | `delete_automation`      | "Delete automation {id}" (tool requires confirm: true) |
+
+### Enterprise agent (Phase 6)
+
+| Tool             | Example prompt in Cursor                            |
+| ---------------- | --------------------------------------------------- |
+| `run_agent_task` | "Run an agent task: summarize open automation runs" |
+
+Requires **write** MCP scope and tenant **Agent Studio** plan (`agentStudio` feature). Returns `{ sessionId, status, jobId }`.
 
 ---
 
@@ -159,6 +180,16 @@ Render deploy: see `deploy/platforms/render.yaml` service `luxgen-mcp`.
 
 ---
 
+## 8. Tool summary (14 tools)
+
+**Read:** `list_automations`, `get_automation`, `automation_runs`, `get_automation_schema`, `get_tenant_usage`, `list_enrollments`, `get_enrollment`, `validate_tower_flow`
+
+**Write:** `create_automation`, `update_automation_flow`, `toggle_automation`, `delete_automation`, `run_agent_task`
+
+**Resource:** `luxgen://automation-flow/catalog` · **Prompt:** `tower-authoring`
+
+---
+
 ## Troubleshooting
 
 | Symptom                              | Fix                                                      |
@@ -174,4 +205,4 @@ Render deploy: see `deploy/platforms/render.yaml` service `luxgen-mcp`.
 
 ## Next phases
 
-Phase 6 enterprise tools: [MCP_PLATFORM.md](./MCP_PLATFORM.md) § Roadmap PRs 28–30.
+The 30-PR MCP roadmap is complete. See [MCP_PLATFORM.md](./MCP_PLATFORM.md) § Roadmap for follow-ups (MCP Apps, OAuth).

@@ -166,6 +166,9 @@ build-mcp: ## Build MCP server (packages/mcp-core + apps/mcp-server)
 mcp-smoke: ## Smoke test MCP GraphQL tools (requires LUXGEN_* env vars)
 	@bash scripts/mcp-smoke.sh
 
+mcp-http-smoke: ## Smoke test MCP HTTP /health (MCP_HTTP_URL optional)
+	@bash scripts/mcp-http-smoke.sh
+
 dev-mcp-http: ## Run MCP HTTP server on :3100 (requires API)
 	@MCP_TRANSPORT=http MCP_HTTP_PORT=3100 npm run dev:mcp
 

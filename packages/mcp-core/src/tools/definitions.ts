@@ -99,6 +99,19 @@ export function allToolDefinitions(config: ToolConfig): ToolDefinition[] {
       },
     },
     {
+      name: 'run_agent_task',
+      description: `Enqueue a headless agent task for tenant "${config.tenant}" (requires Agent Studio / Business+ plan).`,
+      inputSchema: {
+        type: 'object',
+        properties: {
+          prompt: { type: 'string', description: 'Task prompt for the agent worker' },
+          model: { type: 'string', description: 'Optional Ollama model override' },
+        },
+        required: ['prompt'],
+        additionalProperties: false,
+      },
+    },
+    {
       name: 'get_tenant_usage',
       description: `Plan usage and limits for tenant "${config.tenant}" (automation runs, learners, automations).`,
       inputSchema: { type: 'object', properties: {}, additionalProperties: false },

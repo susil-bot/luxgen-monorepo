@@ -1,6 +1,6 @@
 # LuxGen MCP Platform
 
-> **Status:** Phase 5 (PRs 25–27) — HTTP transport, rate limits, Render deploy  
+> **Status:** Phase 6 complete (30-PR roadmap shipped)  
 > **Audience:** Developers integrating AI clients with LuxGen GraphQL and Tower automations
 
 ---
@@ -83,6 +83,14 @@
 | Health           | `GET /health`                                                | Render / load-balancer probe                  |
 | Deploy           | `apps/mcp-server/Dockerfile`, `deploy/platforms/render.yaml` | `luxgen-mcp` Render service                   |
 
+### Phase 6 enterprise (PRs 28–30)
+
+| Tool / deliverable | GraphQL / script                        | Description                                                       |
+| ------------------ | --------------------------------------- | ----------------------------------------------------------------- |
+| `run_agent_task`   | `runAgentTask`                          | Enqueue headless agent task (Agent Studio plan gate; write scope) |
+| Smoke tests        | `make mcp-smoke`, `make mcp-http-smoke` | GraphQL adapter + scope checks + optional HTTP health             |
+| Docs               | This file + `MCP_DEVELOPER_GUIDE.md`    | Full tool catalog and production setup                            |
+
 ---
 
 ## 4. Environment variables
@@ -140,14 +148,16 @@ Cursor: copy `.cursor/mcp.json.example` → `.cursor/mcp.json`, set JWT from bro
 
 ## 7. Roadmap (30 PR plan)
 
-| Phase | PRs   | Scope                                          |
-| ----- | ----- | ---------------------------------------------- |
-| **1** | 1–10  | Docs, scaffold, stdio, read automation tools   |
-| **2** | 11–15 | Usage, enrollments, MCP resources/prompts ✅   |
-| **3** | 16–20 | Write tools (tower flow persist) ✅            |
-| **4** | 21–24 | API keys, scopes, audit log ✅                 |
-| **5** | 25–27 | HTTP transport, rate limits, Render deploy ✅  |
-| **6** | 28–30 | Enterprise `run_agent_task`, docs, smoke tests |
+| Phase | PRs   | Scope                                             |
+| ----- | ----- | ------------------------------------------------- |
+| **1** | 1–10  | Docs, scaffold, stdio, read automation tools      |
+| **2** | 11–15 | Usage, enrollments, MCP resources/prompts ✅      |
+| **3** | 16–20 | Write tools (tower flow persist) ✅               |
+| **4** | 21–24 | API keys, scopes, audit log ✅                    |
+| **5** | 25–27 | HTTP transport, rate limits, Render deploy ✅     |
+| **6** | 28–30 | Enterprise `run_agent_task`, docs, smoke tests ✅ |
+
+**Roadmap complete.** Future work: MCP Apps (see `feature-discovery/mcp-apps-interactive-chat-ui.md`), Redis-backed rate limits, OAuth on HTTP transport.
 
 See [MCP_DEVELOPER_GUIDE.md](./MCP_DEVELOPER_GUIDE.md) for Cursor setup and troubleshooting.
 

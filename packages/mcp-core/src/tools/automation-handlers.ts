@@ -9,6 +9,7 @@ import {
   LIST_AUTOMATIONS,
   TOGGLE_AUTOMATION,
   UPDATE_AUTOMATION,
+  RUN_AGENT_TASK,
   type AutomationRunsResult,
   type AutomationSchemaResult,
   type CreateAutomationResult,
@@ -17,6 +18,7 @@ import {
   type ListAutomationsResult,
   type ToggleAutomationResult,
   type UpdateAutomationResult,
+  type RunAgentTaskResult,
 } from '../graphql/automation-queries';
 import { parseFlowDefinitionArg, towerFlowToMutationInput, validateFlowDefinitionOnly } from '../flow/prepare-mutation';
 import type { ToolConfig, ToolContent } from './types';
@@ -161,6 +163,19 @@ export async function handleAutomationTool(
       return runTool(config, async () => {
         const data = await client.query<DeleteAutomationResult>(DELETE_AUTOMATION, { id });
         return { id, deleted: data.deleteAutomation };
+      });
+    }
+
+    case 'run_agent_task': {
+      const prompt = String(args.prompt ?? '').trim();
+      if (!prompt) throw new Error('prompt is required');
+      const model = typeof args.model === 'string' && args.model.trim() ? args.model.trim() : undefined;
+
+      return runTool(config, async () => {
+        const data = await client.query<RunAgentTaskResult>(RUN_AGENT_TASK, {
+          input: { tenantId: config.tenant, prompt, model },
+        });
+        return data.runAgentTask;
       });
     }
 

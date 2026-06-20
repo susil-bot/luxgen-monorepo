@@ -6,6 +6,7 @@ export const MCP_WRITE_TOOLS = new Set([
   'update_automation_flow',
   'toggle_automation',
   'delete_automation',
+  'run_agent_task',
 ]);
 
 export function toolRequiresWrite(toolName: string): boolean {

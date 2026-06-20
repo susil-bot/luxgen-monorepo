@@ -37,7 +37,8 @@
 ```bash
 npm run build:mcp    # build mcp-core + mcp-server
 npm run dev:mcp      # stdio server (Cursor)
-make mcp-smoke       # read-tool smoke test
+make mcp-smoke       # GraphQL + scope smoke test
+make mcp-http-smoke  # HTTP /health check
 ```
 
 ---
@@ -47,6 +48,8 @@ make mcp-smoke       # read-tool smoke test
 **Automations (read):** `list_automations`, `get_automation`, `automation_runs`, `get_automation_schema`
 
 **Automations (write):** `validate_tower_flow`, `create_automation`, `update_automation_flow`, `toggle_automation`, `delete_automation`
+
+**Enterprise (write):** `run_agent_task` — GraphQL `runAgentTask`, Agent Studio plan gate
 
 **Commerce (read-only):** `get_tenant_usage`, `list_enrollments`, `get_enrollment`
 
@@ -71,4 +74,4 @@ Write tools validate `flowDefinition` via `@luxgen/automation-flow` before Graph
 - Resource `luxgen://automation-flow/catalog` — `@luxgen/automation-flow` catalog JSON
 - Prompt `tower-authoring` — guide for flowDefinition JSON
 
-HTTP transport is Phase 5 (shipped). Phase 6 adds enterprise tools.
+HTTP transport is Phase 5 (shipped). Phase 6 adds `run_agent_task` and expanded smoke tests. Roadmap complete.
