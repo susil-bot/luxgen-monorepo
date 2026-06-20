@@ -87,12 +87,21 @@ const SidebarComponent: React.FC<SidebarProps> = ({
   const effectiveNavigate = onNavigate ?? navigation.onNavigate;
 
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(() => {
+    const initial = new Set<string>();
+    sections.forEach((section) => {
+      if (!section.defaultCollapsed && section.collapsible !== false) {
+        initial.add(section.id);
+      }
+    });
+    return initial;
+  });
 
   const navSections = useMemo(() => sections as unknown as NavSection[], [sections]);
   const { activeItemId, expandedByUrl } = useSidebarActive(navSections, effectivePathname);
   const urlDrivenActive = Boolean(effectivePathname);
+
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(() => new Set(expandedByUrl));
 
   const { tenantConfig } = useGlobalContext();
   const { user: dynamicUser } = useUser();
@@ -102,16 +111,6 @@ const SidebarComponent: React.FC<SidebarProps> = ({
     ('src' in tenantLogoRaw && tenantLogoRaw.src) || ('image' in tenantLogoRaw && tenantLogoRaw.image) || undefined;
   const logoHref = 'href' in tenantLogoRaw ? tenantLogoRaw.href : '/';
   const currentUser = dynamicUser || user;
-
-  useEffect(() => {
-    const initialExpanded = new Set<string>();
-    sections.forEach((section) => {
-      if (!section.defaultCollapsed && section.collapsible !== false) {
-        initialExpanded.add(section.id);
-      }
-    });
-    setExpandedSections(initialExpanded);
-  }, [sections]);
 
   useEffect(() => {
     setExpandedItems((prev) => {

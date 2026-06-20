@@ -30,9 +30,11 @@ function AuthGuardRedirect({ returnPath, reason }: { returnPath: string; reason:
  */
 export function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
+  const [mounted, setMounted] = useState(false);
   const [sessionVersion, setSessionVersion] = useState(0);
 
   useEffect(() => {
+    setMounted(true);
     const bump = () => setSessionVersion((v) => v + 1);
     window.addEventListener(AUTH_SESSION_CHANGE_EVENT, bump);
     window.addEventListener('storage', bump);
@@ -50,8 +52,10 @@ export function AuthGuard({ children }: AuthGuardProps) {
     return <>{children}</>;
   }
 
-  if (!router.isReady) {
-    return <AuthLoadingScreen label="Loading…" />;
+  // SSR + first client paint: render page shell (AppLayout/sidebar) so HTML matches hydration.
+  // Auth redirect runs only after mount when localStorage is available.
+  if (!mounted) {
+    return <>{children}</>;
   }
 
   const validation = validateClientSession();
