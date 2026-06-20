@@ -7,3 +7,4 @@ export { formatToolError, formatToolSuccess, type McpTextContent } from './error
 export { createLuxgenMcpServer } from './server';
 export { runStdioServer } from './transport/stdio';
 export { AUTOMATION_FLOW_CATALOG_URI } from './resources/register';
+export { parseFlowDefinitionArg, towerFlowToMutationInput, validateFlowDefinitionOnly } from './flow/prepare-mutation';
