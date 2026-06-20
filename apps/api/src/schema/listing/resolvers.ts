@@ -61,8 +61,9 @@ export const listingResolvers = {
       return updated ? listingService.toGraphQL(updated) : null;
     },
     submitListingApplication: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
+      if (!ctx.tenantId) throw new Error('Tenant context required');
       const userId = ctx.user?._id?.toString() || ctx.user?.id;
-      const updated = await listingService.submitApplication(id, userId);
+      const updated = await listingService.submitApplication(id, ctx.tenantId, userId);
       return updated ? listingService.toGraphQL(updated) : null;
     },
     requestListingInformation: async (

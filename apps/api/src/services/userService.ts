@@ -47,8 +47,8 @@ export class UserService {
     return result.user;
   }
 
-  async updateUser(id: string, input: UpdateUserInput): Promise<IUser> {
-    const user = await User.findByIdAndUpdate(id, input, { new: true }).populate('tenant');
+  async updateUser(id: string, tenantId: string, input: UpdateUserInput): Promise<IUser> {
+    const user = await User.findOneAndUpdate({ _id: id, tenant: tenantId }, input, { new: true }).populate('tenant');
     if (!user) throw new Error('User not found');
     return user;
   }
@@ -88,8 +88,20 @@ export class UserService {
     return { token, user };
   }
 
-  async register(input: UserRegistrationData): Promise<AuthResult> {
-    const user = await this.createUser(input);
+  async register(
+    input: UserRegistrationData,
+    options?: { selfService?: boolean; tenantId?: string },
+  ): Promise<AuthResult> {
+    const registration: UserRegistrationData = { ...input };
+
+    if (options?.selfService) {
+      registration.role = 'STUDENT' as UserRegistrationData['role'];
+      if (options.tenantId) {
+        registration.tenantId = options.tenantId;
+      }
+    }
+
+    const user = await this.createUser(registration);
 
     const tenantId = (user.tenant as any)?._id?.toString();
     if (!tenantId) throw new Error('User has no associated tenant');

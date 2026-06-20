@@ -68,8 +68,9 @@ export const automationResolvers = {
       const items = await automationService.getAutomations(tenantId);
       return items.map((a) => automationService.toGraphQL(a));
     },
-    automation: async (_: unknown, { id }: { id: string }) => {
-      const item = await automationService.getAutomationById(id);
+    automation: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
+      if (!ctx.tenantId) return null;
+      const item = await automationService.getAutomationById(id, ctx.tenantId);
       return item ? automationService.toGraphQL(item) : null;
     },
     automationRuns: async (_: unknown, { tenantId, limit }: { tenantId: string; limit?: number }) => {
@@ -103,17 +104,20 @@ export const automationResolvers = {
       ctx: GraphQLContext,
     ) => {
       await requireFeature(ctx, 'automations');
-      const updated = await automationService.updateAutomation(id, input);
+      if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
+      const updated = await automationService.updateAutomation(id, ctx.tenantId, input);
       return updated ? automationService.toGraphQL(updated) : null;
     },
     toggleAutomation: async (_: unknown, { id, enabled }: { id: string; enabled: boolean }, ctx: GraphQLContext) => {
       await requireFeature(ctx, 'automations');
-      const updated = await automationService.toggleAutomation(id, enabled);
+      if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
+      const updated = await automationService.toggleAutomation(id, ctx.tenantId, enabled);
       return updated ? automationService.toGraphQL(updated) : null;
     },
     deleteAutomation: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
       await requireFeature(ctx, 'automations');
-      return automationService.deleteAutomation(id);
+      if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
+      return automationService.deleteAutomation(id, ctx.tenantId);
     },
     runAgentTask: async (
       _: unknown,

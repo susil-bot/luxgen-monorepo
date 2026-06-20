@@ -5,7 +5,7 @@ const router = Router();
 
 function authorizeJob(req: Request): boolean {
   const key = process.env.JOBS_API_KEY;
-  if (!key) return process.env.NODE_ENV === 'development';
+  if (!key) return false;
   return req.get('x-jobs-key') === key;
 }
 

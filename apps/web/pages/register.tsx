@@ -7,8 +7,14 @@ import { PageWrapper } from '@luxgen/ui';
 import { REGISTER_MUTATION } from '../graphql/queries/auth';
 import { formatRegisterError } from '../lib/auth-notices';
 import { persistSession } from '../lib/session';
+import { getTenantPageProps } from '../lib/tenant-page-props';
+import type { GetServerSideProps } from 'next';
 
-const RegisterPageContent: React.FC = () => {
+interface RegisterPageProps {
+  tenant: string;
+}
+
+const RegisterPageContent: React.FC<RegisterPageProps> = ({ tenant }) => {
   const router = useRouter();
   const { showSuccess, showError, showInfo } = useSnackbar();
   const [loading, setLoading] = useState(false);
@@ -19,30 +25,6 @@ const RegisterPageContent: React.FC = () => {
     setLoading(true);
 
     try {
-      // Get current hostname to determine tenant
-      const hostname = window.location.hostname;
-      let tenantId = 'demo'; // default tenant
-
-      if (hostname.includes('ideavibes')) {
-        tenantId = 'ideavibes';
-      } else if (hostname.includes('acme-corp')) {
-        tenantId = 'acme-corp';
-      }
-
-      console.log('📝 Attempting registration for tenant:', tenantId);
-      console.log('👤 Registration data:', data);
-      console.log('🎭 Selected role:', data.role);
-
-      // Map role from form to GraphQL enum
-      const roleMapping: { [key: string]: string } = {
-        USER: 'STUDENT',
-        ADMIN: 'INSTRUCTOR',
-        SUPER_ADMIN: 'ADMIN',
-      };
-
-      const graphqlRole = roleMapping[data.role] || 'STUDENT';
-
-      // Call GraphQL registration mutation
       const result = await registerMutation({
         variables: {
           input: {
@@ -50,8 +32,8 @@ const RegisterPageContent: React.FC = () => {
             password: data.password,
             firstName: data.firstName,
             lastName: data.lastName,
-            role: graphqlRole,
-            tenantId: tenantId,
+            role: 'STUDENT',
+            tenantId: tenant,
           },
         },
       });
@@ -61,7 +43,7 @@ const RegisterPageContent: React.FC = () => {
 
         persistSession(token, user);
 
-        const roleDisplayName = data.role === 'SUPER_ADMIN' ? 'Super Admin' : data.role === 'ADMIN' ? 'Admin' : 'User';
+        const roleDisplayName = 'Student';
         showSuccess(`Registration successful! Welcome ${data.firstName} ${data.lastName} as ${roleDisplayName}`);
 
         // Redirect after a short delay
@@ -143,10 +125,12 @@ const RegisterPageContent: React.FC = () => {
   );
 };
 
-export default function Register() {
+export default function Register(props: RegisterPageProps) {
   return (
     <SnackbarProvider position="top-right" maxSnackbars={3}>
-      <RegisterPageContent />
+      <RegisterPageContent {...props} />
     </SnackbarProvider>
   );
 }
+
+export const getServerSideProps: GetServerSideProps<RegisterPageProps> = getTenantPageProps;

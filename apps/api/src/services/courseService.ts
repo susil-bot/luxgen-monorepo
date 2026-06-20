@@ -56,7 +56,7 @@ export class CourseService {
     return course;
   }
 
-  async updateCourse(id: string, input: UpdateCourseInput): Promise<ICourse> {
+  async updateCourse(id: string, tenantId: string, input: UpdateCourseInput): Promise<ICourse> {
     const update: Record<string, unknown> = {};
     if (input.title !== undefined) update.title = input.title;
     if (input.description !== undefined) update.description = input.description;
@@ -65,20 +65,24 @@ export class CourseService {
     if (input.endDate !== undefined) update.endDate = input.endDate;
     if (input.status !== undefined) update.status = input.status;
 
-    const course = await Course.findByIdAndUpdate(id, { $set: update }, { new: true }).populate(POPULATE);
+    const course = await Course.findOneAndUpdate(
+      { _id: id, tenant: tenantId },
+      { $set: update },
+      { new: true },
+    ).populate(POPULATE);
     if (!course) throw new Error('Course not found');
     return course;
   }
 
-  async deleteCourse(id: string): Promise<boolean> {
-    const result = await Course.findByIdAndDelete(id);
+  async deleteCourse(id: string, tenantId: string): Promise<boolean> {
+    const result = await Course.findOneAndDelete({ _id: id, tenant: tenantId });
     if (result) logger.info(`Course deleted: ${id}`);
     return !!result;
   }
 
-  async enrollStudent(courseId: string, studentId: string): Promise<ICourse> {
-    const course = await Course.findByIdAndUpdate(
-      courseId,
+  async enrollStudent(courseId: string, tenantId: string, studentId: string): Promise<ICourse> {
+    const course = await Course.findOneAndUpdate(
+      { _id: courseId, tenant: tenantId },
       { $addToSet: { students: studentId } },
       { new: true },
     ).populate(POPULATE);
@@ -87,10 +91,12 @@ export class CourseService {
     return course;
   }
 
-  async unenrollStudent(courseId: string, studentId: string): Promise<ICourse> {
-    const course = await Course.findByIdAndUpdate(courseId, { $pull: { students: studentId } }, { new: true }).populate(
-      POPULATE,
-    );
+  async unenrollStudent(courseId: string, tenantId: string, studentId: string): Promise<ICourse> {
+    const course = await Course.findOneAndUpdate(
+      { _id: courseId, tenant: tenantId },
+      { $pull: { students: studentId } },
+      { new: true },
+    ).populate(POPULATE);
     if (!course) throw new Error('Course not found');
     logger.info(`Student ${studentId} unenrolled from course ${courseId}`);
     return course;

@@ -17,30 +17,22 @@ export const userResolvers = {
       });
       if (input.role === 'STUDENT') {
         const userId = (user as { _id?: { toString(): string }; id?: string })._id?.toString?.() ?? user.id;
-        await activityEventService.recordCustomerCreated(
-          input.tenantId,
-          userId,
-          user.email,
-          actor,
-        );
+        await activityEventService.recordCustomerCreated(input.tenantId, userId, user.email, actor);
       }
       return user;
     },
 
     updateUser: async (_: unknown, { id, input }: { id: string; input: any }, context: GraphQLContext) => {
-      const user = await userService.updateUser(id, input);
+      if (!context.tenantId) throw new Error('Tenant context required');
+      const user = await userService.updateUser(id, context.tenantId, input);
       const role = user.role === 'USER' ? 'STUDENT' : user.role;
       if (role === 'STUDENT') {
         const actor = actorFromContext(context.user);
-        const tenantId = (user.tenant as { _id?: { toString(): string }; id?: string })?._id?.toString?.()
-          ?? (user.tenant as { toString(): string })?.toString?.();
+        const tenantId =
+          (user.tenant as { _id?: { toString(): string }; id?: string })?._id?.toString?.() ??
+          (user.tenant as { toString(): string })?.toString?.();
         if (tenantId) {
-          await activityEventService.recordCustomerUpdated(
-            tenantId,
-            id,
-            'Customer profile updated',
-            actor,
-          );
+          await activityEventService.recordCustomerUpdated(tenantId, id, 'Customer profile updated', actor);
         }
       }
       return user;
@@ -51,11 +43,11 @@ export const userResolvers = {
     login: (_: unknown, { input }: { input: { email: string; password: string } }, ctx: GraphQLContext) =>
       userService.login({ ...input, req: ctx.req }),
 
-    register: (_: unknown, { input }: { input: any }) => userService.register(input),
+    register: (_: unknown, { input }: { input: any }, ctx: GraphQLContext) =>
+      userService.register(input, { selfService: true, tenantId: ctx.tenantId }),
   },
   User: {
-    id: (parent: { _id?: { toString(): string }; id?: string }) =>
-      parent._id?.toString?.() ?? parent.id ?? '',
+    id: (parent: { _id?: { toString(): string }; id?: string }) => parent._id?.toString?.() ?? parent.id ?? '',
     role: (parent: { role: string }) => (parent.role === 'USER' ? 'STUDENT' : parent.role),
     staffNotes: (parent: { staffNotes?: string }) => parent.staffNotes ?? '',
     phone: (parent: { phone?: string }) => parent.phone ?? '',

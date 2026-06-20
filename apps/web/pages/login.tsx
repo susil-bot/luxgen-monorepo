@@ -6,13 +6,10 @@ import { LoginForm, LoginFormData, RegisterVisual, SnackbarProvider, useSnackbar
 import { PageWrapper } from '@luxgen/ui';
 import { AuthNoticeBanner } from '../components/auth/AuthNoticeBanner';
 import { LOGIN_MUTATION } from '../graphql/queries/auth';
-import {
-  AUTH_NOTICE_BY_REASON,
-  formatLoginError,
-  parseAuthRedirectReason,
-} from '../lib/auth-notices';
+import { AUTH_NOTICE_BY_REASON, formatLoginError, parseAuthRedirectReason } from '../lib/auth-notices';
 import { persistSession } from '../lib/session';
 import { isSessionTenantMismatch, tenantMismatchMessage } from '../lib/tenant-auth';
+import { safeRedirectPath } from '../lib/safe-redirect';
 
 const LoginPageContent: React.FC = () => {
   const router = useRouter();
@@ -21,8 +18,7 @@ const LoginPageContent: React.FC = () => {
   const [authNoticeDismissed, setAuthNoticeDismissed] = useState(false);
 
   const redirectReason = parseAuthRedirectReason(router.query.reason);
-  const authNotice =
-    redirectReason && !authNoticeDismissed ? AUTH_NOTICE_BY_REASON[redirectReason] : null;
+  const authNotice = redirectReason && !authNoticeDismissed ? AUTH_NOTICE_BY_REASON[redirectReason] : null;
 
   useEffect(() => {
     setAuthNoticeDismissed(false);
@@ -58,11 +54,7 @@ const LoginPageContent: React.FC = () => {
 
         showSuccess(`Login successful! Welcome ${user.firstName} ${user.lastName}`);
 
-        const redirect =
-          typeof router.query.redirect === 'string' && router.query.redirect.startsWith('/')
-            ? router.query.redirect
-            : '/dashboard';
-        router.push(redirect);
+        router.push(safeRedirectPath(router.query.redirect));
       }
     } catch (error: any) {
       console.error('Login error:', error);
@@ -114,12 +106,7 @@ const LoginPageContent: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-center">
               {/* Left Section - Login Form */}
               <div className="order-2 md:order-1">
-                {authNotice && (
-                  <AuthNoticeBanner
-                    notice={authNotice}
-                    onDismiss={() => setAuthNoticeDismissed(true)}
-                  />
-                )}
+                {authNotice && <AuthNoticeBanner notice={authNotice} onDismiss={() => setAuthNoticeDismissed(true)} />}
                 <LoginForm
                   onSubmit={handleLogin}
                   onSocialLogin={handleSocialLogin}

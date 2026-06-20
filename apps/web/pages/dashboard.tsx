@@ -29,9 +29,7 @@ export default function Dashboard({ tenant }: DashboardProps) {
     error: dataError,
   } = useQuery(GET_DASHBOARD_DATA, {
     variables: { tenant },
-    errorPolicy: 'ignore', // Ignore GraphQL errors and continue
     fetchPolicy: 'cache-first',
-    skip: false, // Enable GraphQL queries now that API is working
   });
 
   useEffect(() => {
@@ -52,9 +50,14 @@ export default function Dashboard({ tenant }: DashboardProps) {
     return <PageLoadingState label="Loading dashboard…" />;
   }
 
-  // Log GraphQL errors but don't block the UI
   if (dataError) {
-    console.warn('GraphQL Error (continuing with default data):', dataError);
+    return (
+      <PageEmptyState
+        icon="🔒"
+        title="Unable to load dashboard"
+        subtitle={dataError.message || 'Check your connection and try again.'}
+      />
+    );
   }
 
   // Transform data using the transformer
