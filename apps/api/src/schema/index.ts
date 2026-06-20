@@ -16,6 +16,7 @@ import { listingTypeDefs } from './listing/typeDefs';
 import { activityEventTypeDefs } from './activityEvent/typeDefs';
 import { enrollmentTypeDefs } from './enrollment/typeDefs';
 import { storefrontTypeDefs } from './storefront/typeDefs';
+import { projectTypeDefs } from './project/typeDefs';
 
 // Import resolvers
 import { tenantResolvers } from './tenant/resolvers';
@@ -31,6 +32,7 @@ import { listingResolvers } from './listing/resolvers';
 import { activityEventResolvers } from './activityEvent/resolvers';
 import { enrollmentResolvers } from './enrollment/resolvers';
 import { storefrontResolvers } from './storefront/resolvers';
+import { projectResolvers } from './project/resolvers';
 
 // Base schema
 const baseTypeDefs = `
@@ -66,6 +68,7 @@ export const typeDefs = mergeTypeDefs([
   activityEventTypeDefs,
   enrollmentTypeDefs,
   storefrontTypeDefs,
+  projectTypeDefs,
 ]);
 
 // Scalar resolvers
@@ -116,6 +119,7 @@ const mergedResolvers = mergeResolvers([
   activityEventResolvers,
   enrollmentResolvers,
   storefrontResolvers,
+  projectResolvers,
 ]);
 
 export const resolvers: any = secureResolvers(mergedResolvers);
