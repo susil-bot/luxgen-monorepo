@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import type { AgentSession, StagedFile } from '../../lib/agent';
+import type { AgentSession, StagedFile } from '../../../../packages/agent/src/types/session';
 import ValidationReport from './ValidationReport';
 
 interface AgentTransparencyProps {
