@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "luxgen": {
+      "command": "node",
+      "args": ["apps/mcp-server/dist/index.js"],
+      "env": {
+        "LUXGEN_GRAPHQL_URL": "http://localhost:4000/graphql",
+        "LUXGEN_JWT": "paste-your-jwt-without-Bearer-prefix",
+        "LUXGEN_TENANT": "demo"
+      }
+    }
+  }
+}
