@@ -9,6 +9,7 @@ import {
   type IEnrollment,
 } from '@luxgen/db';
 import { emitAutomationEvent } from '@luxgen/agent';
+import { certificateService } from './certificateService';
 import { activityEventService } from './activityEventService';
 import { isBillingDevMode, isStripeEnabled } from './billingService';
 import { logger } from '../utils/logger';
@@ -278,6 +279,8 @@ export class EnrollmentService {
       },
       source: 'lms',
     }).catch(() => undefined);
+
+    void certificateService.issueForCompletion(enrollment).catch(() => undefined);
   }
 
   async updateProgress(courseId: string, studentId: string, progressPercent: number): Promise<IEnrollment> {
