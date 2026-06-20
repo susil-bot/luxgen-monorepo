@@ -7,7 +7,7 @@ export interface AutomationEventPayload {
   tenantId: string;
   triggerType: AutomationTriggerType;
   payload: Record<string, unknown>;
-  source?: 'agent' | 'lms' | 'webhook' | 'system';
+  source?: 'agent' | 'lms' | 'webhook' | 'system' | 'commerce';
   timestamp: string;
 }
 

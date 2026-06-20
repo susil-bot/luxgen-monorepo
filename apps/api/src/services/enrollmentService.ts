@@ -8,7 +8,7 @@ import {
   enrollmentSubjectId,
   type IEnrollment,
 } from '@luxgen/db';
-import { emitAutomationEvent } from '@luxgen/agent';
+import { emitAutomationEvent, emitCommerceAutomationEvent } from '@luxgen/agent';
 import { activityEventService } from './activityEventService';
 import { isBillingDevMode, isStripeEnabled } from './billingService';
 import { logger } from '../utils/logger';
@@ -63,7 +63,27 @@ export class EnrollmentService {
       learningStatus: EnrollmentLearningStatus.ACTIVE,
       enrolledAt: new Date(),
     });
+    void this.emitCommerceOrderEvent(tenantId, 'order_created', courseId, studentId, { orderSource: 'storefront' });
     return enrollment;
+  }
+
+  private async emitCommerceOrderEvent(
+    tenantId: string,
+    kind: 'order_created' | 'order_drafted' | 'payment_sent',
+    courseId: string,
+    studentId: string,
+    extra: Record<string, unknown> = {},
+  ): Promise<void> {
+    const course = await Course.findById(courseId);
+    const student = await User.findById(studentId);
+    void emitCommerceAutomationEvent(tenantId, kind, {
+      courseId,
+      studentId,
+      userId: studentId,
+      courseTitle: course?.title,
+      customerEmail: student?.email,
+      ...extra,
+    }).catch(() => undefined);
   }
 
   async updateOrderNotes(
@@ -249,6 +269,11 @@ export class EnrollmentService {
       stripeSessionId,
     );
 
+    void this.emitCommerceOrderEvent(tenantId, 'payment_sent', courseId, studentId, {
+      paymentStatus: 'paid',
+      stripeSessionId,
+    });
+
     return enrollment;
   }
 
@@ -324,6 +349,8 @@ export class EnrollmentService {
     const { tenantId, courseId, studentId, amountCents, courseTitle, customerEmail, successUrl, cancelUrl } = options;
 
     await this.ensureEnrollment(tenantId, courseId, studentId);
+
+    void this.emitCommerceOrderEvent(tenantId, 'order_drafted', courseId, studentId, { orderSource: 'storefront' });
 
     const stripe = getStripe();
     if (!stripe) {
