@@ -17,9 +17,42 @@ interface RealUserData {
   isActive: boolean;
 }
 
-/**
- * Fetch real user data for a specific tenant from API
- */
+const AUTH_TOKEN_KEY = 'authToken';
+const AUTH_EXPIRES_KEY = 'authTokenExpiresAt';
+const LUXGEN_USER_KEY = 'luxgen_user';
+
+/** True when authToken exists and is not past expiry (matches apps/web/lib/session.ts). */
+export const hasValidAuthSession = (): boolean => {
+  if (typeof window === 'undefined') return false;
+
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  if (!token) return false;
+
+  const expiresRaw = localStorage.getItem(AUTH_EXPIRES_KEY);
+  if (expiresRaw) {
+    const expiresAt = Number(expiresRaw);
+    if (Number.isFinite(expiresAt) && Date.now() >= expiresAt - 30_000) {
+      return false;
+    }
+  }
+
+  return true;
+};
+
+/** Clear all client auth keys (canonical session + legacy luxgen_user cache). */
+export const clearAuthSessionStorage = (): void => {
+  if (typeof window === 'undefined') return;
+
+  localStorage.removeItem(LUXGEN_USER_KEY);
+  localStorage.removeItem(AUTH_TOKEN_KEY);
+  localStorage.removeItem('currentUser');
+  localStorage.removeItem('currentTenant');
+  localStorage.removeItem(AUTH_EXPIRES_KEY);
+  localStorage.removeItem('authSessionEpoch');
+  window.dispatchEvent(new Event('luxgen-auth-change'));
+  console.log('👤 Auth session cleared from storage');
+};
+
 export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> => {
   console.log('👤 Fetching real user data for tenant:', tenantId);
 
@@ -72,7 +105,7 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
     return userMenu;
   } catch (error) {
     if (error instanceof Error && error.message === 'UNAUTHENTICATED') {
-      clearUserFromStorage();
+      clearAuthSessionStorage();
       throw error;
     }
 
@@ -86,9 +119,10 @@ export const fetchUserForTenant = async (tenantId: string): Promise<UserMenu> =>
  */
 export const getUserFromStorage = (): UserMenu | null => {
   if (typeof window === 'undefined') return null;
+  if (!hasValidAuthSession()) return null;
 
   try {
-    const userData = localStorage.getItem('luxgen_user');
+    const userData = localStorage.getItem(LUXGEN_USER_KEY);
     return userData ? JSON.parse(userData) : null;
   } catch (error) {
     console.error('Error loading user from storage:', error);
@@ -101,9 +135,10 @@ export const getUserFromStorage = (): UserMenu | null => {
  */
 export const saveUserToStorage = (user: UserMenu): void => {
   if (typeof window === 'undefined') return;
+  if (!hasValidAuthSession()) return;
 
   try {
-    localStorage.setItem('luxgen_user', JSON.stringify(user));
+    localStorage.setItem(LUXGEN_USER_KEY, JSON.stringify(user));
     console.log('👤 User data saved to storage');
   } catch (error) {
     console.error('Error saving user to storage:', error);
@@ -117,7 +152,7 @@ export const clearUserFromStorage = (): void => {
   if (typeof window === 'undefined') return;
 
   try {
-    localStorage.removeItem('luxgen_user');
+    localStorage.removeItem(LUXGEN_USER_KEY);
     console.log('👤 User data cleared from storage');
   } catch (error) {
     console.error('Error clearing user from storage:', error);
@@ -245,34 +280,6 @@ export const authenticateUser = async (
     return userMenu;
   } catch (error) {
     console.error('Authentication failed:', error);
-
-    // Check if it's an API endpoint not found error
-    if (error instanceof Error && error.message === 'API_ENDPOINT_NOT_FOUND') {
-      console.log('👤 Auth API not implemented yet, using tenant-based authentication');
-
-      // Generate user based on actual credentials and tenant configuration
-      const tenantConfig = await getTenantConfig(tenantId);
-
-      // Extract name from email (e.g., "susilkhan@gmail.com" -> "Susilkhan")
-      const emailName = credentials.email.split('@')[0];
-      const displayName = emailName.charAt(0).toUpperCase() + emailName.slice(1);
-
-      const demoUser: UserMenu = {
-        name: `${displayName} from ${tenantConfig.name}`, // Use actual user name from email
-        email: credentials.email, // Use the actual email provided
-        role: 'User',
-        avatar: undefined, // Use initials instead of non-existent avatar
-        tenant: {
-          name: tenantConfig.name,
-          subdomain: tenantConfig.subdomain,
-        },
-      };
-
-      saveUserToStorage(demoUser);
-      console.log('👤 Generated user for authentication:', demoUser);
-      return demoUser;
-    }
-
     throw error;
   }
 };
@@ -303,8 +310,7 @@ export const logoutUser = async (tenantId: string): Promise<void> => {
   } catch (error) {
     console.warn('Logout API call failed, but clearing local data:', error);
   } finally {
-    // Always clear local storage
-    clearUserFromStorage();
-    console.log('🚪 User logged out and local data cleared');
+    clearAuthSessionStorage();
+    console.log('🚪 User logged out and session cleared');
   }
 };

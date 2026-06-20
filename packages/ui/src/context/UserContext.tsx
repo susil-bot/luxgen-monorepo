@@ -5,6 +5,8 @@ import {
   getUserFromStorage,
   saveUserToStorage,
   clearUserFromStorage,
+  clearAuthSessionStorage,
+  hasValidAuthSession,
   updateUserForTenant,
   logoutUser,
 } from '../services/userService';
@@ -30,19 +32,13 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children, currentTen
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const hasAuthToken = (): boolean => {
-    if (typeof window === 'undefined') return false;
-    return Boolean(localStorage.getItem('authToken'));
-  };
-
-  // Load user data for current tenant (only when a session token exists)
   const loadUser = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      if (!hasAuthToken()) {
-        clearUserFromStorage();
+      if (!hasValidAuthSession()) {
+        clearAuthSessionStorage();
         setUser(null);
         return;
       }
@@ -58,7 +54,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children, currentTen
       saveUserToStorage(userData);
     } catch (err) {
       if (err instanceof Error && err.message === 'UNAUTHENTICATED') {
-        clearUserFromStorage();
+        clearAuthSessionStorage();
         setUser(null);
         return;
       }

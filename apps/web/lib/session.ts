@@ -126,6 +126,8 @@ export function clearStoredSession(): void {
       localStorage.removeItem(key);
     }
   });
+  // Legacy UI cache — must stay in sync with canonical session keys
+  localStorage.removeItem('luxgen_user');
   localStorage.setItem(AUTH_STORAGE_KEYS.sessionEpoch, String(Date.now()));
   notifyAuthSessionChange();
 }

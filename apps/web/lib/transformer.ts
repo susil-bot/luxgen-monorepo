@@ -351,6 +351,7 @@ export const transformDashboardData = (graphqlData: any, tenant: string): Transf
  */
 export const transformUserDataFromSession = (): UserMenu | null => {
   if (typeof window === 'undefined') return null;
+  if (!localStorage.getItem('authToken')) return null;
   if (isStoredSessionExpired()) return null;
 
   const sessionUser = getStoredUser();

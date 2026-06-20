@@ -11,6 +11,7 @@ import {
   handleUserAction,
 } from '../lib/transformer';
 import { useAppLayoutHeader } from '../lib/app-layout-header';
+import { AUTH_SESSION_CHANGE_EVENT } from '../lib/session';
 import { PageEmptyState, PageLoadingState } from '../components/common/PageStates';
 
 interface DashboardProps {
@@ -33,7 +34,14 @@ export default function Dashboard({ tenant }: DashboardProps) {
   });
 
   useEffect(() => {
-    setUser(transformUserDataFromSession());
+    const refresh = () => setUser(transformUserDataFromSession());
+    refresh();
+    window.addEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+      window.removeEventListener('storage', refresh);
+    };
   }, [tenant]);
 
   // Use transformer functions for action handling
