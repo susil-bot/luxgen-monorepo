@@ -11,7 +11,7 @@ import {
 } from '@luxgen/ui';
 import AgentChat from '../../components/agent/AgentChat';
 import AgentTransparency from '../../components/agent/AgentTransparency';
-import { SYSTEM_PROMPT } from '../../lib/agent';
+import { SYSTEM_PROMPT } from '../../lib/agent-system-prompt';
 import { createHandleUserAction } from '../../lib/user-actions';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
