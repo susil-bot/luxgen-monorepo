@@ -236,6 +236,7 @@ export const getDefaultMenuItems = (): MenuItem[] => [
   },
 ];
 
+/** @deprecated Layout/storybook placeholder only — never pass to AppLayout/NavBar on real pages. Use useLayoutUser() or transformUserDataFromSession(); omit `user` when guest. */
 export const getDefaultUser = (): UserMenu => ({
   name: 'John Doe',
   email: 'john.doe@example.com',

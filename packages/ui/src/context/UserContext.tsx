@@ -3,8 +3,11 @@ import { UserMenu } from '../NavBar/NavBar';
 import {
   fetchUserForTenant,
   getUserFromStorage,
+  getSessionUserAsUserMenu,
   saveUserToStorage,
   clearUserFromStorage,
+  clearAuthSessionStorage,
+  hasValidAuthSession,
   updateUserForTenant,
   logoutUser,
 } from '../services/userService';
@@ -30,36 +33,43 @@ export const UserProvider: React.FC<UserProviderProps> = ({ children, currentTen
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const hasAuthToken = (): boolean => {
-    if (typeof window === 'undefined') return false;
-    return Boolean(localStorage.getItem('authToken'));
-  };
-
-  // Load user data for current tenant (only when a session token exists)
   const loadUser = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      if (!hasAuthToken()) {
-        clearUserFromStorage();
+      if (!hasValidAuthSession()) {
+        clearAuthSessionStorage();
         setUser(null);
         return;
       }
 
-      const storedUser = getUserFromStorage();
-      if (storedUser && storedUser.tenant?.subdomain === currentTenant) {
+      const sessionUser = getSessionUserAsUserMenu();
+      const storedUser = getUserFromStorage() ?? sessionUser;
+
+      if (storedUser) {
         setUser(storedUser);
+        if (!getUserFromStorage() && sessionUser) {
+          saveUserToStorage(sessionUser);
+        }
         return;
       }
 
-      const userData = await fetchUserForTenant(currentTenant);
+      const tenantKey = sessionUser?.tenant?.subdomain ?? currentTenant;
+      const userData = await fetchUserForTenant(tenantKey);
       setUser(userData);
       saveUserToStorage(userData);
     } catch (err) {
       if (err instanceof Error && err.message === 'UNAUTHENTICATED') {
-        clearUserFromStorage();
+        clearAuthSessionStorage();
         setUser(null);
+        return;
+      }
+
+      const fallback = getSessionUserAsUserMenu();
+      if (fallback) {
+        setUser(fallback);
+        saveUserToStorage(fallback);
         return;
       }
       console.error('Error loading user:', err);

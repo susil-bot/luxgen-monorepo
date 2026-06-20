@@ -36,20 +36,16 @@ export const generateToken = (payload: JwtPayload, tenantId?: string): string =>
  */
 export const verifyToken = (token: string): JwtPayload | null => {
   try {
-    // First decode the header to get the key ID
     const header = jwt.decode(token, { complete: true })?.header as JwtHeader;
+
     if (!header?.kid) {
       const secret = process.env.JWT_SECRET;
       if (!secret) throw new Error('JWT_SECRET is not configured');
       return jwt.verify(token, secret) as JwtPayload;
     }
 
-    // Reject tokens with an unknown kid before key selection
-    if (!tenantKeyManager.hasTenantKey(header.kid)) {
-      console.error('Token verification rejected: unknown kid', header.kid);
-      return null;
-    }
-
+    // Match generateToken: getTenantKey(kid) falls back to JWT_SECRET when kid is not
+    // in the env key store (e.g. kid = tenant Mongo id in dev).
     const secret = tenantKeyManager.getTenantKey(header.kid);
     return jwt.verify(token, secret) as JwtPayload;
   } catch (error) {

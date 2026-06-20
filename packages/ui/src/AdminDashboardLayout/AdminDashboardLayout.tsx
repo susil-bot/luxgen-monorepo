@@ -5,13 +5,8 @@ import { defaultTheme } from '../theme';
 import { AppLayout } from '../Layout';
 import { AdminDashboard } from '../AdminDashboard';
 import { useNavigation } from '../context/NavigationContext';
-import {
-  getDefaultSidebarSections,
-  getDefaultNavItems,
-  getDefaultUser,
-  getDefaultLogo,
-} from '../Layout/DefaultNavigation';
-import { getAdminDashboardLayoutStyles, adminDashboardLayoutClasses, adminDashboardLayoutCSS } from './styles';
+import { getDefaultSidebarSections, getDefaultNavItems, getDefaultLogo } from '../Layout/DefaultNavigation';
+import { getAdminDashboardLayoutStyles, adminDashboardLayoutCSS } from './styles';
 
 export interface AdminDashboardLayoutProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
@@ -194,7 +189,7 @@ export interface AdminDashboardLayoutProps extends BaseComponentProps {
 const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
   tenantTheme = defaultTheme,
   currentTenant,
-  user = getDefaultUser(),
+  user,
   bannerCarousel,
   dashboardData = {},
   variant = 'default',

@@ -4,8 +4,8 @@ import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 import { PageLayout } from '../Layout';
 import { UserDashboard } from '../UserDashboard';
-import { getDefaultNavItems, getDefaultUser, getDefaultLogo } from '../Layout/DefaultNavigation';
-import { getUserDashboardLayoutStyles, userDashboardLayoutClasses, userDashboardLayoutCSS } from './styles';
+import { getDefaultNavItems, getDefaultLogo } from '../Layout/DefaultNavigation';
+import { getUserDashboardLayoutStyles, userDashboardLayoutCSS } from './styles';
 
 export interface UserDashboardLayoutProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
@@ -115,7 +115,7 @@ export interface UserDashboardLayoutProps extends BaseComponentProps {
 const UserDashboardLayoutComponent: React.FC<UserDashboardLayoutProps> = ({
   tenantTheme = defaultTheme,
   currentTenant,
-  user = getDefaultUser(),
+  user,
   dashboardData = {},
   variant = 'default',
   loading = false,

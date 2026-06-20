@@ -62,16 +62,6 @@ export default async function getCurrentUser(req: NextApiRequest, res: NextApiRe
       });
     }
 
-    // Verify tenant consistency between token and request
-    const tokenTenantId = extractTenantFromToken(authToken);
-    if (tokenTenantId && tokenTenantId !== tenant) {
-      return res.status(403).json({
-        error: 'Tenant mismatch',
-        message: 'Token tenant does not match requested tenant',
-      });
-    }
-
-    // Fetch user data from database
     const userRecord = await User.findById(tokenPayload.id).populate('tenant');
 
     if (!userRecord) {
@@ -81,13 +71,26 @@ export default async function getCurrentUser(req: NextApiRequest, res: NextApiRe
       });
     }
 
-    // Verify user belongs to the requested tenant
-    if (
-      userRecord.tenant &&
-      typeof userRecord.tenant === 'object' &&
-      'subdomain' in userRecord.tenant &&
-      userRecord.tenant.subdomain !== tenant
-    ) {
+    // JWT `tenant` is Mongo id; query param is subdomain (or id)
+    const tokenTenantId = extractTenantFromToken(authToken);
+    const userTenantId =
+      userRecord.tenant && typeof userRecord.tenant === 'object' && '_id' in userRecord.tenant
+        ? (userRecord.tenant as { _id: { toString(): string } })._id.toString()
+        : null;
+    const userSubdomain =
+      userRecord.tenant && typeof userRecord.tenant === 'object' && 'subdomain' in userRecord.tenant
+        ? String(userRecord.tenant.subdomain)
+        : null;
+
+    if (tokenTenantId && userTenantId && tokenTenantId !== userTenantId) {
+      return res.status(403).json({
+        error: 'Tenant mismatch',
+        message: 'Token tenant does not match user tenant',
+      });
+    }
+
+    const requestedTenant = String(tenant);
+    if (userSubdomain && requestedTenant !== userSubdomain && userTenantId && requestedTenant !== userTenantId) {
       return res.status(403).json({
         error: 'Access denied',
         message: 'User does not belong to requested tenant',

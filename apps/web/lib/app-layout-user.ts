@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
-import { getDefaultUser } from '@luxgen/ui';
-import { getStoredUser, type SessionUser } from './session';
+import {
+  AUTH_SESSION_CHANGE_EVENT,
+  AUTH_STORAGE_KEYS,
+  getStoredUser,
+  isStoredSessionExpired,
+  type SessionUser,
+} from './session';
 import { getCurrentTenant } from './tenant';
 
 export interface LayoutUser {
@@ -18,6 +23,15 @@ export function sessionToLayoutUser(session: SessionUser): LayoutUser {
     role: session.role,
     tenant: session.tenant.subdomain,
   };
+}
+
+function resolveLayoutUser(): LayoutUser | null {
+  if (typeof window === 'undefined') return null;
+  if (isStoredSessionExpired()) return null;
+  if (!localStorage.getItem(AUTH_STORAGE_KEYS.token)) return null;
+
+  const stored = getStoredUser();
+  return stored ? sessionToLayoutUser(stored) : null;
 }
 
 /** Client-side tenant subdomain for GraphQL / headers */
@@ -44,13 +58,19 @@ export function useAppTenantId(): string | null {
   return tenantId;
 }
 
-/** Hydrate AppLayout user from localStorage session */
-export function useLayoutUser() {
-  const [user, setUser] = useState<LayoutUser | ReturnType<typeof getDefaultUser> | null>(null);
+/** Hydrate AppLayout user from localStorage session. Returns null when guest. */
+export function useLayoutUser(): LayoutUser | null {
+  const [user, setUser] = useState<LayoutUser | null>(() => resolveLayoutUser());
 
   useEffect(() => {
-    const stored = getStoredUser();
-    setUser(stored ? sessionToLayoutUser(stored) : getDefaultUser());
+    const refresh = () => setUser(resolveLayoutUser());
+    refresh();
+    window.addEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+      window.removeEventListener('storage', refresh);
+    };
   }, []);
 
   return user;
