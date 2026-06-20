@@ -8,6 +8,10 @@ export const GET_ENROLLMENTS = gql`
       studentId
       notes
       paymentStatus
+      progressPercent
+      learningStatus
+      lastAccessedAt
+      completedAt
       enrolledAt
     }
   }
@@ -36,9 +40,54 @@ export const GET_ENROLLMENT = gql`
       studentId
       notes
       paymentStatus
+      progressPercent
+      learningStatus
+      lastAccessedAt
+      completedAt
       paidAt
       cancelledAt
       enrolledAt
+    }
+  }
+`;
+
+export const GET_STUDENT_ENROLLMENTS = gql`
+  query GetStudentEnrollments($tenantId: ID!, $studentId: ID!) {
+    studentEnrollments(tenantId: $tenantId, studentId: $studentId) {
+      id
+      courseId
+      studentId
+      progressPercent
+      learningStatus
+      lastAccessedAt
+      completedAt
+      enrolledAt
+    }
+  }
+`;
+
+export const UPDATE_ENROLLMENT_PROGRESS = gql`
+  mutation UpdateEnrollmentProgress($input: UpdateEnrollmentProgressInput!) {
+    updateEnrollmentProgress(input: $input) {
+      id
+      courseId
+      studentId
+      progressPercent
+      learningStatus
+      lastAccessedAt
+      completedAt
+    }
+  }
+`;
+
+export const MARK_COURSE_COMPLETE = gql`
+  mutation MarkCourseComplete($courseId: ID!) {
+    markCourseComplete(courseId: $courseId) {
+      id
+      courseId
+      progressPercent
+      learningStatus
+      completedAt
     }
   }
 `;

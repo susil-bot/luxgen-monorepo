@@ -103,6 +103,10 @@ export const GET_ENROLLMENTS = gql`
       courseId
       studentId
       paymentStatus
+      progressPercent
+      learningStatus
+      lastAccessedAt
+      completedAt
       enrolledAt
     }
   }

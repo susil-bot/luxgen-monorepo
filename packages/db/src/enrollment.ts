@@ -7,15 +7,24 @@ export enum EnrollmentPaymentStatus {
   VOIDED = 'VOIDED',
 }
 
+export enum EnrollmentLearningStatus {
+  ACTIVE = 'ACTIVE',
+  COMPLETED = 'COMPLETED',
+}
+
 export interface IEnrollment extends Document {
   tenant: Types.ObjectId;
   course: Types.ObjectId;
   student: Types.ObjectId;
   notes: string;
   paymentStatus: EnrollmentPaymentStatus;
+  progressPercent: number;
+  learningStatus: EnrollmentLearningStatus;
+  lastAccessedAt?: Date;
   stripeCheckoutSessionId?: string;
   paidAt?: Date;
   cancelledAt?: Date;
+  completedAt?: Date;
   enrolledAt: Date;
   createdAt: Date;
   updatedAt: Date;
@@ -32,9 +41,17 @@ const enrollmentSchema = new Schema<IEnrollment>(
       enum: Object.values(EnrollmentPaymentStatus),
       default: EnrollmentPaymentStatus.PENDING,
     },
+    progressPercent: { type: Number, default: 0, min: 0, max: 100 },
+    learningStatus: {
+      type: String,
+      enum: Object.values(EnrollmentLearningStatus),
+      default: EnrollmentLearningStatus.ACTIVE,
+    },
+    lastAccessedAt: { type: Date },
     stripeCheckoutSessionId: { type: String },
     paidAt: { type: Date },
     cancelledAt: { type: Date },
+    completedAt: { type: Date },
     enrolledAt: { type: Date, default: Date.now },
   },
   { timestamps: true },

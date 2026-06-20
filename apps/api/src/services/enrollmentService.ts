@@ -1,5 +1,14 @@
 import Stripe from 'stripe';
-import { Enrollment, EnrollmentPaymentStatus, Course, User, enrollmentSubjectId, type IEnrollment } from '@luxgen/db';
+import {
+  Enrollment,
+  EnrollmentPaymentStatus,
+  EnrollmentLearningStatus,
+  Course,
+  User,
+  enrollmentSubjectId,
+  type IEnrollment,
+} from '@luxgen/db';
+import { emitAutomationEvent } from '@luxgen/agent';
 import { activityEventService } from './activityEventService';
 import { isBillingDevMode, isStripeEnabled } from './billingService';
 import { logger } from '../utils/logger';
@@ -18,6 +27,12 @@ export class EnrollmentService {
     return Enrollment.find({ tenant: tenantId }).sort({ enrolledAt: -1 });
   }
 
+  async listByStudent(tenantId: string, studentId: string): Promise<IEnrollment[]> {
+    return Enrollment.find({ tenant: tenantId, student: studentId, cancelledAt: null }).sort({
+      enrolledAt: -1,
+    });
+  }
+
   async getByCourseAndStudent(courseId: string, studentId: string): Promise<IEnrollment | null> {
     return Enrollment.findOne({ course: courseId, student: studentId });
   }
@@ -29,6 +44,10 @@ export class EnrollmentService {
         enrollment.cancelledAt = undefined;
         enrollment.enrolledAt = new Date();
         enrollment.paymentStatus = EnrollmentPaymentStatus.PENDING;
+        enrollment.progressPercent = 0;
+        enrollment.learningStatus = EnrollmentLearningStatus.ACTIVE;
+        enrollment.completedAt = undefined;
+        enrollment.lastAccessedAt = undefined;
         await enrollment.save();
       }
       return enrollment;
@@ -40,6 +59,8 @@ export class EnrollmentService {
       student: studentId,
       notes: '',
       paymentStatus: EnrollmentPaymentStatus.PENDING,
+      progressPercent: 0,
+      learningStatus: EnrollmentLearningStatus.ACTIVE,
       enrolledAt: new Date(),
     });
     return enrollment;
@@ -229,6 +250,65 @@ export class EnrollmentService {
     );
 
     return enrollment;
+  }
+
+  private clampProgress(progressPercent: number): number {
+    return Math.min(100, Math.max(0, Math.round(progressPercent)));
+  }
+
+  private async emitCourseCompletedIfNeeded(enrollment: IEnrollment, wasCompleted: boolean): Promise<void> {
+    if (wasCompleted || enrollment.learningStatus !== EnrollmentLearningStatus.COMPLETED) return;
+
+    const course = await Course.findById(enrollment.course);
+    const student = await User.findById(enrollment.student);
+    const tenantId = enrollment.tenant.toString();
+    const courseId = enrollment.course.toString();
+    const studentId = enrollment.student.toString();
+
+    void emitAutomationEvent({
+      tenantId,
+      triggerType: 'COURSE_COMPLETED',
+      payload: {
+        courseId,
+        studentId,
+        userId: studentId,
+        courseTitle: course?.title,
+        customerEmail: student?.email,
+        progressPercent: enrollment.progressPercent,
+      },
+      source: 'lms',
+    }).catch(() => undefined);
+  }
+
+  async updateProgress(courseId: string, studentId: string, progressPercent: number): Promise<IEnrollment> {
+    const enrollment = await Enrollment.findOne({ course: courseId, student: studentId });
+    if (!enrollment) throw new Error('Enrollment not found');
+    if (enrollment.cancelledAt) throw new Error('Enrollment is cancelled');
+
+    const wasCompleted = enrollment.learningStatus === EnrollmentLearningStatus.COMPLETED;
+    const nextProgress = this.clampProgress(progressPercent);
+
+    enrollment.progressPercent = nextProgress;
+    enrollment.lastAccessedAt = new Date();
+
+    if (nextProgress >= 100) {
+      enrollment.progressPercent = 100;
+      enrollment.learningStatus = EnrollmentLearningStatus.COMPLETED;
+      if (!enrollment.completedAt) {
+        enrollment.completedAt = new Date();
+      }
+    } else if (enrollment.learningStatus === EnrollmentLearningStatus.COMPLETED) {
+      enrollment.learningStatus = EnrollmentLearningStatus.ACTIVE;
+      enrollment.completedAt = undefined;
+    }
+
+    await enrollment.save();
+    await this.emitCourseCompletedIfNeeded(enrollment, wasCompleted);
+    return enrollment;
+  }
+
+  async markCourseComplete(courseId: string, studentId: string): Promise<IEnrollment> {
+    return this.updateProgress(courseId, studentId, 100);
   }
 
   async createOrderCheckoutSession(options: {
