@@ -166,6 +166,9 @@ build-mcp: ## Build MCP server (packages/mcp-core + apps/mcp-server)
 mcp-smoke: ## Smoke test MCP GraphQL tools (requires LUXGEN_* env vars)
 	@bash scripts/mcp-smoke.sh
 
+dev-mcp-http: ## Run MCP HTTP server on :3100 (requires API)
+	@MCP_TRANSPORT=http MCP_HTTP_PORT=3100 npm run dev:mcp
+
 # ─── Database ─────────────────────────────────────────────────────────────────
 db-seed: ## Seed the database with dev data (force — idempotent upsert)
 	@echo "$(GREEN)► Seeding database...$(RESET)"

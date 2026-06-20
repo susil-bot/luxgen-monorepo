@@ -16,7 +16,9 @@
 | Resources   | `packages/mcp-core/src/resources/register.ts`                |
 | Prompts     | `packages/mcp-core/src/prompts/register.ts`                  |
 | API keys    | `apps/api/src/schema/mcp/`, `packages/db/src/mcp-api-key.ts` |
+| Transport   | `packages/mcp-core/src/transport/`                           |
 | Scopes      | `packages/mcp-core/src/tools/scopes.ts`                      |
+| Rate limits | `packages/mcp-core/src/rate-limit.ts`                        |
 
 ---
 
@@ -57,9 +59,16 @@ Write tools validate `flowDefinition` via `@luxgen/automation-flow` before Graph
 - `read` scope: list/get tools only; `write` scope: create/update/toggle/delete automations
 - Every tool call logs via `recordMcpToolAudit`; query `mcpToolAuditLog` for history
 
+## HTTP transport (Phase 5)
+
+- Set `MCP_TRANSPORT=http`; server listens on `MCP_HTTP_PORT` (default 3100), path `/mcp`
+- Auth via request headers (`x-mcp-api-key`, `x-tenant`) — not env vars
+- Rate limit: `MCP_RATE_LIMIT_MAX` / `MCP_RATE_LIMIT_WINDOW_MS`
+- Deploy: `apps/mcp-server/Dockerfile`, Render service in `deploy/platforms/render.yaml`
+
 ## Resources & prompts (Phase 2)
 
 - Resource `luxgen://automation-flow/catalog` — `@luxgen/automation-flow` catalog JSON
 - Prompt `tower-authoring` — guide for flowDefinition JSON
 
-HTTP transport is Phase 5–6 (not yet shipped).
+HTTP transport is Phase 5 (shipped). Phase 6 adds enterprise tools.

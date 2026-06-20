@@ -50,6 +50,34 @@ services:
       - key: JOBS_API_KEY
         generateValue: true
 
+  - type: web
+    name: luxgen-mcp
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: ./apps/mcp-server/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MCP_TRANSPORT
+        value: http
+      - key: MCP_HTTP_PORT
+        value: '3100'
+      - key: MCP_HTTP_HOST
+        value: 0.0.0.0
+      - key: MCP_RATE_LIMIT_MAX
+        value: '120'
+      - key: MCP_RATE_LIMIT_WINDOW_MS
+        value: '60000'
+      # Set in Render dashboard — e.g. https://luxgen-api.onrender.com/graphql
+      - key: LUXGEN_GRAPHQL_URL
+        sync: false
+      # Comma-separated hostnames for MCP DNS rebinding protection (your Render MCP URL host)
+      - key: MCP_ALLOWED_HOSTS
+        sync: false
+
 # Optional: deploy web on Render instead of Vercel (uses free tier hours)
 #  - type: web
 #    name: luxgen-web
