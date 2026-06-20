@@ -96,6 +96,18 @@ export function persistSession(token: string, user: SessionUser): void {
   } else {
     localStorage.removeItem(AUTH_STORAGE_KEYS.expiresAt);
   }
+
+  // Keep @luxgen/ui UserProvider in sync (reads luxgen_user)
+  localStorage.setItem(
+    'luxgen_user',
+    JSON.stringify({
+      name: `${user.firstName} ${user.lastName}`.trim() || user.email,
+      email: user.email,
+      role: user.role,
+      tenant: user.tenant,
+    }),
+  );
+
   notifyAuthSessionChange();
 }
 

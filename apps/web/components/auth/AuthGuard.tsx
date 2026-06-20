@@ -1,52 +1,61 @@
-import { AuthLoadingScreen } from './AuthNoticeBanner';
-import { useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/router';
+
 import { buildLoginRedirect, requiresAuth } from '../../lib/auth-routes';
+import type { AuthRedirectReason } from '../../lib/auth-notices';
+import { AUTH_SESSION_CHANGE_EVENT } from '../../lib/session';
 import { validateClientSession } from '../../lib/session-guard';
+import { AuthLoadingScreen } from './AuthNoticeBanner';
 
 interface AuthGuardProps {
   children: ReactNode;
 }
 
+function AuthGuardRedirect({ returnPath, reason }: { returnPath: string; reason: AuthRedirectReason }) {
+  const router = useRouter();
+  const didRedirect = useRef(false);
+
+  useEffect(() => {
+    if (didRedirect.current) return;
+    didRedirect.current = true;
+    void router.replace(buildLoginRedirect(returnPath, reason));
+  }, [router, returnPath, reason]);
+
+  return <AuthLoadingScreen label="Redirecting to sign in…" />;
+}
+
 /**
  * Redirects unauthenticated users away from protected app routes.
- * Distinguishes missing token, expired JWT, and wrong-tenant sessions.
+ * Re-validates synchronously on each render and when the session changes (post-login).
  */
 export function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
-  const [allowed, setAllowed] = useState(false);
-  const [redirecting, setRedirecting] = useState(false);
+  const [sessionVersion, setSessionVersion] = useState(0);
 
   useEffect(() => {
-    if (!router.isReady) return;
+    const bump = () => setSessionVersion((v) => v + 1);
+    window.addEventListener(AUTH_SESSION_CHANGE_EVENT, bump);
+    window.addEventListener('storage', bump);
+    return () => {
+      window.removeEventListener(AUTH_SESSION_CHANGE_EVENT, bump);
+      window.removeEventListener('storage', bump);
+    };
+  }, []);
 
-    const path = router.pathname;
-    const needsAuth = requiresAuth(path);
-
-    if (!needsAuth) {
-      setAllowed(true);
-      setRedirecting(false);
-      return;
-    }
-
-    const validation = validateClientSession();
-    if (validation.ok) {
-      setAllowed(true);
-      setRedirecting(false);
-      return;
-    }
-
-    setRedirecting(true);
-    const returnPath = router.asPath || path;
-    void router.replace(buildLoginRedirect(returnPath, validation.reason));
-  }, [router.isReady, router.pathname, router.asPath, router]);
+  // Re-render when sessionVersion bumps after login/logout
+  void sessionVersion;
 
   if (!router.isReady) {
     return <AuthLoadingScreen label="Loading…" />;
   }
 
-  if (redirecting || (requiresAuth(router.pathname) && !allowed)) {
-    return <AuthLoadingScreen label="Redirecting to sign in…" />;
+  if (!requiresAuth(router.pathname)) {
+    return <>{children}</>;
+  }
+
+  const validation = validateClientSession();
+  if (!validation.ok) {
+    return <AuthGuardRedirect returnPath={router.asPath || router.pathname} reason={validation.reason} />;
   }
 
   return <>{children}</>;
