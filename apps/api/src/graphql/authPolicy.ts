@@ -10,6 +10,9 @@ export const PUBLIC_QUERIES = new Set([
   'publishedListing',
   'pricingPlans',
   'currentUser',
+  'tenant',
+  'courses',
+  'course',
 ]);
 
 export const PUBLIC_MUTATIONS = new Set([
@@ -21,9 +24,7 @@ export const PUBLIC_MUTATIONS = new Set([
   'createListingCheckoutSession',
 ]);
 
-export function assertAuthenticated(
-  context: GraphQLContext,
-): asserts context is GraphQLContext & { user: IUser } {
+export function assertAuthenticated(context: GraphQLContext): asserts context is GraphQLContext & { user: IUser } {
   const authError = context.authError;
 
   if (authError === 'ACCOUNT_DEACTIVATED') {

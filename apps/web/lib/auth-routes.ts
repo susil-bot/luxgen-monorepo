@@ -8,8 +8,8 @@ import type { AuthRedirectReason } from './auth-notices';
 /** Exact paths that never require authentication */
 export const PUBLIC_ROUTES = new Set(['/login', '/register', '/404']);
 
-/** Path prefixes accessible without login (public directory, static assets) */
-export const PUBLIC_PREFIXES = ['/listings'];
+/** Path prefixes accessible without login (public directory, learner store) */
+export const PUBLIC_PREFIXES = ['/listings', '/learn'];
 
 /** Admin/app areas that always require a valid session */
 export const PROTECTED_PREFIXES = [

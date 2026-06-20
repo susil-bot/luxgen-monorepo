@@ -2,15 +2,27 @@ import { courseService } from '../../services/courseService';
 import { activityEventService, actorFromContext } from '../../services/activityEventService';
 import { enrollmentService } from '../../services/enrollmentService';
 import { emitAutomationEvent } from '@luxgen/agent';
+import { CourseStatus } from '@luxgen/db';
 import type { GraphQLContext } from '../../context';
+
+function publishedCoursesOnly<T extends { status: string }>(courses: T[], context: GraphQLContext): T[] {
+  if (context.user) return courses;
+  return courses.filter((c) => c.status === CourseStatus.PUBLISHED);
+}
 
 export const courseResolvers = {
   Query: {
-    course: async (_: unknown, { id }: { id: string }) => {
-      return await courseService.getCourseById(id);
+    course: async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
+      const course = await courseService.getCourseById(id);
+      if (!course) return null;
+      if (!context.user && course.status !== CourseStatus.PUBLISHED) {
+        return null;
+      }
+      return course;
     },
-    courses: async (_: unknown, { tenantId }: { tenantId: string }) => {
-      return await courseService.getCoursesByTenant(tenantId);
+    courses: async (_: unknown, { tenantId }: { tenantId: string }, context: GraphQLContext) => {
+      const courses = await courseService.getCoursesByTenant(tenantId);
+      return publishedCoursesOnly(courses, context);
     },
     coursesByInstructor: async (_: unknown, { instructorId }: { instructorId: string }) => {
       return await courseService.getCoursesByInstructor(instructorId);

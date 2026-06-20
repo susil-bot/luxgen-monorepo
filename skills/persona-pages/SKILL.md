@@ -7,27 +7,27 @@
 
 ## Personas → routes
 
-| Persona | Routes | Primary goal |
-|---------|--------|--------------|
-| Operator | `/dashboard`, `/billing` | Run the business |
-| Admin | `/users`, `/courses`, `/groups` | Manage content & users |
-| Learner | `/customers` | Consume training |
-| Analyst | `/analytics`, `/courses/analytics`, `/groups/analytics` | Insights (Pro gate) |
-| Developer | `/developer`, `/agent` | Platform customization |
-| Editorial | `/admin/listings` | Review applications |
+| Persona   | Routes                                                  | Primary goal           |
+| --------- | ------------------------------------------------------- | ---------------------- |
+| Operator  | `/dashboard`, `/billing`                                | Run the business       |
+| Admin     | `/users`, `/courses`, `/groups`                         | Manage content & users |
+| Learner   | `/learn`, `/customers`, `/dashboard`                    | Consume training       |
+| Analyst   | `/analytics`, `/courses/analytics`, `/groups/analytics` | Insights (Pro gate)    |
+| Developer | `/developer`, `/agent`                                  | Platform customization |
+| Editorial | `/admin/listings`                                       | Review applications    |
 
 ---
 
 ## Key paths
 
-| Page | File |
-|------|------|
-| Dashboard | `apps/web/pages/dashboard.tsx` |
-| Customers | `apps/web/pages/customers/index.tsx` |
-| Analytics | `apps/web/pages/analytics/index.tsx` |
+| Page             | File                                   |
+| ---------------- | -------------------------------------- |
+| Dashboard        | `apps/web/pages/dashboard.tsx`         |
+| Customers        | `apps/web/pages/customers/index.tsx`   |
+| Analytics        | `apps/web/pages/analytics/index.tsx`   |
 | Course analytics | `apps/web/pages/courses/analytics.tsx` |
-| Group analytics | `apps/web/pages/groups/analytics.tsx` |
-| Developer hub | `apps/web/pages/developer/index.tsx` |
+| Group analytics  | `apps/web/pages/groups/analytics.tsx`  |
+| Developer hub    | `apps/web/pages/developer/index.tsx`   |
 
 ---
 
