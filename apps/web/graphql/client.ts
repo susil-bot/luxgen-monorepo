@@ -77,8 +77,17 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-const errorLink = onError(({ graphQLErrors, networkError }) => {
+const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
   if (typeof window === 'undefined') return;
+
+  if (graphQLErrors?.some((e) => e.extensions?.code === 'PLAN_UPGRADE_REQUIRED')) {
+    return;
+  }
+
+  const opName = operation.operationName;
+  if (opName === 'Login' || opName === 'Register') {
+    return;
+  }
 
   const statusCode =
     networkError && 'statusCode' in networkError ? (networkError as { statusCode?: number }).statusCode : undefined;
