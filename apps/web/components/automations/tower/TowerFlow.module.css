@@ -386,6 +386,79 @@
   gap: 4px;
 }
 
+.stepItemWrapDropTarget {
+  background: #f1f8f5;
+  box-shadow: inset 0 0 0 2px #008060;
+}
+
+.stepItemRow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+.stepDragHandle {
+  flex-shrink: 0;
+  width: 28px;
+  margin-left: 4px;
+  border: none;
+  border-radius: 6px 0 0 6px;
+  background: #f6f6f7;
+  color: #8c9196;
+  cursor: grab;
+  font-size: 14px;
+  line-height: 1;
+  font-family: inherit;
+}
+
+.stepDragHandle:active {
+  cursor: grabbing;
+}
+
+.stepDragHandle:hover {
+  background: #edeeef;
+  color: #202223;
+}
+
+.stepDragHandleSpacer {
+  flex-shrink: 0;
+  width: 28px;
+  margin-left: 4px;
+}
+
+.stepItemDragging {
+  opacity: 0.45;
+}
+
+.stepRailHint {
+  margin: 0;
+  padding: 8px 16px 0;
+  font-size: 11px;
+  color: #8c9196;
+}
+
+.stepDropZoneEnd {
+  margin: 8px 12px 0;
+  padding: 10px 12px;
+  border: 1px dashed #c9cccf;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #616161;
+  text-align: center;
+  background: #fafbfb;
+}
+
+.stepDropZoneEndActive {
+  border-color: #008060;
+  background: #f1f8f5;
+  color: #008060;
+}
+
+.stepItemRow .stepItem {
+  flex: 1;
+  border-radius: 0;
+}
+
 .stepItemActions {
   display: flex;
   gap: 6px;
