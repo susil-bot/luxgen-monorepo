@@ -1,4 +1,10 @@
-/** Public trainer/mentor storefront landing — per-tenant flag and nav routes */
+import {
+  DEFAULT_STOREFRONT_SLUG,
+  landingPathFromSlug,
+  type StorefrontContentSettings,
+  type StorefrontThemeSettings,
+} from './storefront-profile';
+import { getTenantStorefrontPreset } from './tenant-storefront-presets';
 
 export interface StorefrontRouteSettings {
   landing: string;
@@ -10,7 +16,10 @@ export interface StorefrontRouteSettings {
 
 export interface TenantStorefrontSettings {
   landingEnabled: boolean;
+  slug: string;
   routes: StorefrontRouteSettings;
+  content?: Partial<import('./storefront-profile').StorefrontContentSettings>;
+  theme?: Partial<import('./storefront-profile').StorefrontThemeSettings>;
 }
 
 /** Subdomains that ship with the LuxGen trainer landing enabled by default (dev + product demo). */
@@ -28,9 +37,15 @@ export const DEFAULT_STOREFRONT_ROUTES: StorefrontRouteSettings = {
 export const STOREFRONT_LANDING_PATH = DEFAULT_STOREFRONT_ROUTES.landing;
 
 export function defaultStorefrontSettings(subdomain: string): TenantStorefrontSettings {
+  const preset = getTenantStorefrontPreset(subdomain);
+  const slug = preset?.slug ?? DEFAULT_STOREFRONT_SLUG;
   return {
     landingEnabled: LUXGEN_STOREFRONT_TENANT_SUBDOMAINS.has(subdomain),
-    routes: { ...DEFAULT_STOREFRONT_ROUTES },
+    slug,
+    routes: {
+      ...DEFAULT_STOREFRONT_ROUTES,
+      landing: landingPathFromSlug(slug),
+    },
   };
 }
 
@@ -58,16 +73,24 @@ export function resolveStorefrontSettings(subdomain: string, settings: unknown):
     return defaults;
   }
 
+  const dbSlug = typeof storefront.slug === 'string' ? storefront.slug.trim() : undefined;
+  const slug = dbSlug || defaults.slug;
+  const dbLanding = typeof routes?.landing === 'string' ? routes.landing.trim() : '';
+  const landingPath = dbLanding ? normalizeRoute(dbLanding, defaults.routes.landing) : landingPathFromSlug(slug);
+
   return {
     landingEnabled:
       typeof storefront.landingEnabled === 'boolean' ? storefront.landingEnabled : defaults.landingEnabled,
+    slug,
     routes: {
-      landing: normalizeRoute(routes?.landing, defaults.routes.landing),
+      landing: landingPath,
       courses: normalizeRoute(routes?.courses, defaults.routes.courses),
       programs: normalizeRoute(routes?.programs, defaults.routes.programs),
       login: normalizeRoute(routes?.login, defaults.routes.login),
       register: normalizeRoute(routes?.register, defaults.routes.register),
     },
+    ...(storefront.content ? { content: storefront.content as Partial<StorefrontContentSettings> } : {}),
+    ...(storefront.theme ? { theme: storefront.theme as Partial<StorefrontThemeSettings> } : {}),
   };
 }
 
@@ -78,12 +101,18 @@ export function isTrainerLandingEnabled(subdomain: string, settings: unknown): b
 /** Payload for PATCH /api/tenant/storefront */
 export interface StorefrontSettingsPayload {
   landingEnabled: boolean;
+  slug: string;
   routes: StorefrontRouteSettings;
+  content?: Partial<StorefrontContentSettings>;
+  theme?: Partial<StorefrontThemeSettings>;
 }
 
 export function toStorefrontPayload(settings: TenantStorefrontSettings): StorefrontSettingsPayload {
   return {
     landingEnabled: settings.landingEnabled,
+    slug: settings.slug,
     routes: { ...settings.routes },
+    ...(settings.content ? { content: settings.content } : {}),
+    ...(settings.theme ? { theme: settings.theme } : {}),
   };
 }

@@ -52,6 +52,13 @@
   color: var(--sf-accent);
 }
 
+.logoImage {
+  height: 2rem;
+  width: auto;
+  max-width: 180px;
+  object-fit: contain;
+}
+
 .logoWarm {
   color: var(--sf-warm);
 }

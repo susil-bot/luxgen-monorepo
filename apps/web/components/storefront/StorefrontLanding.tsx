@@ -11,20 +11,18 @@ import { applyLearnTenantTheme } from '../../lib/learn-theme';
 import { filterPublishedCourses, formatInstructorName, type LearnCourse } from '../../lib/learn-store';
 import {
   buildStorefrontStats,
-  STOREFRONT_TESTIMONIALS,
-  TRAINING_CATEGORIES,
   type StorefrontCourseCard,
   type StorefrontInstructor,
 } from '../../lib/storefront-landing-data';
 import { formatStorefrontPrice } from '../../lib/storefront-format';
-import type { StorefrontRouteSettings } from '../../lib/storefront-settings';
+import { resolveNavHref, resolveStorefrontProfile, storefrontThemeCssVars } from '../../lib/storefront-profile';
+import { resolveStorefrontSettings } from '../../lib/storefront-settings';
 import { useClientMounted } from '../../lib/use-client-mounted';
 import { useTheme } from '../../lib/theme';
 import styles from './StorefrontLanding.module.css';
 
 interface StorefrontLandingProps {
   tenantSubdomain: string;
-  routes: StorefrontRouteSettings;
 }
 
 interface StorefrontProduct {
@@ -57,7 +55,7 @@ function pseudoRating(seed: string): { rating: number; reviews: number } {
 function buildCourseCards(
   courses: LearnCourse[],
   products: StorefrontProduct[],
-  routes: StorefrontRouteSettings,
+  routes: { courses: string; programs: string },
 ): StorefrontCourseCard[] {
   const programsBase = routes.programs.replace(/\/$/, '');
 
@@ -114,13 +112,12 @@ function extractInstructors(courses: LearnCourse[], products: StorefrontProduct[
   return Array.from(map.values());
 }
 
-export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLandingProps) {
+export function StorefrontLanding({ tenantSubdomain }: StorefrontLandingProps) {
   const router = useRouter();
   const { resolvedTheme } = useTheme();
   const mounted = useClientMounted();
   const [searchQuery, setSearchQuery] = useState('');
   const [carouselIndex, setCarouselIndex] = useState(0);
-  const [activeCategory, setActiveCategory] = useState(TRAINING_CATEGORIES[0].id);
 
   const { data: tenantData, loading: tenantLoading } = useQuery(GET_TENANT, {
     variables: { subdomain: tenantSubdomain },
@@ -130,6 +127,32 @@ export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLanding
   const tenantId = tenant?.id as string | undefined;
   const tenantName = (tenant?.name as string | undefined) ?? tenantSubdomain;
   const tenantSettings = tenant?.settings;
+
+  const storefrontSettings = useMemo(
+    () => resolveStorefrontSettings(tenantSubdomain, tenantSettings),
+    [tenantSubdomain, tenantSettings],
+  );
+
+  const profile = useMemo(
+    () =>
+      resolveStorefrontProfile({
+        subdomain: tenantSubdomain,
+        tenantName,
+        settings: tenantSettings,
+        routes: storefrontSettings.routes,
+        slug: storefrontSettings.slug,
+      }),
+    [tenantSubdomain, tenantName, tenantSettings, storefrontSettings.routes, storefrontSettings.slug],
+  );
+
+  const { routes, content, theme, branding } = profile;
+  const categories = content.categories;
+
+  const [activeCategory, setActiveCategory] = useState(categories[0]?.id ?? 'leadership');
+
+  useEffect(() => {
+    if (categories[0]?.id) setActiveCategory(categories[0].id);
+  }, [categories]);
 
   const { data: courseData, loading: coursesLoading } = useQuery(GET_COURSES, {
     skip: !tenantId,
@@ -165,11 +188,14 @@ export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLanding
     return fromCourses + fromProducts;
   }, [publishedCourses, products]);
 
-  const stats = buildStorefrontStats({
-    instructorCount: instructors.length,
-    courseCount: courseCards.length,
-    studentCount,
-  });
+  const stats = buildStorefrontStats(
+    {
+      instructorCount: instructors.length,
+      courseCount: courseCards.length,
+      studentCount,
+    },
+    content.stats,
+  );
 
   const visibleCards = courseCards.slice(carouselIndex, carouselIndex + VISIBLE_COURSES);
   const canPrev = carouselIndex > 0;
@@ -180,6 +206,7 @@ export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLanding
 
   const brandFirst = tenantName.charAt(0);
   const brandRest = tenantName.slice(1);
+  const themeStyle = storefrontThemeCssVars(theme, branding);
 
   function handleSearch(event: React.FormEvent) {
     event.preventDefault();
@@ -197,30 +224,30 @@ export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLanding
   }
 
   return (
-    <div className={styles.page}>
+    <div className={styles.page} id="top" style={themeStyle}>
       <header className={styles.header}>
         <div className={`${styles.container} ${styles.headerInner}`}>
           <Link href={routes.landing} className={styles.logo}>
-            <span className={styles.logoAccent}>{brandFirst}</span>
-            <span>{brandRest || 'Learn'}</span>
+            {branding.logoUrl ? (
+              <img src={branding.logoUrl} alt={branding.logoAlt ?? tenantName} className={styles.logoImage} />
+            ) : (
+              <>
+                <span className={styles.logoAccent}>{brandFirst}</span>
+                <span>{brandRest || 'Learn'}</span>
+              </>
+            )}
           </Link>
 
           <nav className={styles.nav} aria-label="Primary">
-            <Link href={routes.landing} className={styles.navLink}>
-              Home
-            </Link>
-            <a href="#about" className={styles.navLink}>
-              About
-            </a>
-            <Link href={routes.courses} className={styles.navLink}>
-              Courses
-            </Link>
-            <a href="#mentors" className={styles.navLink}>
-              Mentors
-            </a>
-            <a href="#contact" className={styles.navLink}>
-              Contact
-            </a>
+            {content.nav.map((item) => (
+              <Link
+                key={`${item.label}-${item.href}`}
+                href={resolveNavHref(item.href, routes)}
+                className={styles.navLink}
+              >
+                {item.label}
+              </Link>
+            ))}
           </nav>
 
           <div className={styles.headerActions}>
@@ -237,18 +264,13 @@ export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLanding
       <section className={styles.hero}>
         <div className={`${styles.container} ${styles.heroGrid}`}>
           <div className={styles.heroCopy}>
-            <h1>
-              Learn from expert trainers &amp; mentors on <span className={styles.heroHighlight}>{tenantName}</span>
-            </h1>
-            <p className={styles.heroLead}>
-              Access cohort programs, 1:1 mentorship, and self-paced courses — sold and delivered by independent
-              trainers who build their business on LuxGen.
-            </p>
+            <h1>{content.hero.headline}</h1>
+            <p className={styles.heroLead}>{content.hero.subheadline}</p>
             <form className={styles.searchBar} onSubmit={handleSearch}>
               <input
                 className={styles.searchInput}
                 type="search"
-                placeholder="What do you want to learn?"
+                placeholder={content.hero.searchPlaceholder}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 aria-label="Search courses and mentors"
@@ -261,7 +283,7 @@ export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLanding
 
           <div className={styles.heroVisual}>
             <div className={styles.ratingBadge}>
-              <span aria-hidden>★</span> 4.8 · Trusted by learners
+              <span aria-hidden>★</span> {content.hero.ratingBadge}
             </div>
             <div className={styles.heroCardStack}>
               {heroCourses[1] && (
@@ -287,8 +309,8 @@ export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLanding
                 <article className={`${styles.heroCard} ${styles.heroCardFront}`}>
                   <div className={styles.heroCardMedia} />
                   <div className={styles.heroCardBody}>
-                    <p className={styles.heroCardTitle}>Mentorship programs launching soon</p>
-                    <p className={styles.heroCardMeta}>Browse the catalog or become a trainer</p>
+                    <p className={styles.heroCardTitle}>{content.hero.emptyCardTitle}</p>
+                    <p className={styles.heroCardMeta}>{content.hero.emptyCardMeta}</p>
                   </div>
                 </article>
               )}
@@ -301,7 +323,7 @@ export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLanding
         <div className={styles.container}>
           <div className={styles.sectionHead}>
             <h2 className={styles.sectionTitle}>
-              <span className={styles.titleUnderline}>Most popular programs</span>
+              <span className={styles.titleUnderline}>{content.sections.programs}</span>
             </h2>
             {courseCards.length > VISIBLE_COURSES && (
               <div className={styles.carouselControls}>
@@ -355,9 +377,9 @@ export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLanding
 
       <section className={`${styles.section} ${styles.sectionAlt}`}>
         <div className={styles.container}>
-          <h2 className={styles.sectionTitleCenter}>Explore by focus area</h2>
+          <h2 className={styles.sectionTitleCenter}>{content.sections.categories}</h2>
           <div className={styles.categoryGrid}>
-            {TRAINING_CATEGORIES.map((category) => (
+            {categories.map((category) => (
               <Link
                 key={category.id}
                 href={routes.courses}
@@ -374,10 +396,10 @@ export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLanding
 
       <section className={styles.section} id="mentors">
         <div className={styles.container}>
-          <h2 className={styles.sectionTitleCenter}>Featured trainers &amp; mentors</h2>
+          <h2 className={styles.sectionTitleCenter}>{content.sections.mentors}</h2>
           {instructors.length === 0 ? (
             <p className={styles.heroLead} style={{ textAlign: 'center' }}>
-              Trainers on {tenantName} will be listed here as they publish programs.
+              {content.sections.mentorsEmpty}
             </p>
           ) : (
             <div className={styles.instructorGrid}>
@@ -397,7 +419,7 @@ export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLanding
         <div className={`${styles.container} ${styles.achievementGrid}`}>
           <div>
             <h2 className={styles.sectionTitle}>
-              <span className={styles.titleUnderline}>Our community</span>
+              <span className={styles.titleUnderline}>{content.sections.community}</span>
             </h2>
             <div className={styles.statsGrid}>
               {stats.map((stat) => (
@@ -414,18 +436,16 @@ export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLanding
             </div>
           </div>
           <div className={styles.achievementVisual}>
-            <p className={styles.achievementQuote}>
-              Trainers and mentors sell directly to learners — you keep your brand, we handle enrollment and delivery.
-            </p>
+            <p className={styles.achievementQuote}>{content.sections.communityQuote}</p>
           </div>
         </div>
       </section>
 
       <section className={styles.section}>
         <div className={styles.container}>
-          <h2 className={styles.sectionTitleCenter}>Learner stories</h2>
+          <h2 className={styles.sectionTitleCenter}>{content.sections.testimonials}</h2>
           <div className={styles.testimonialGrid}>
-            {STOREFRONT_TESTIMONIALS.map((item) => (
+            {content.testimonials.map((item) => (
               <article key={item.id} className={styles.testimonialCard}>
                 <span className={styles.quoteMark} aria-hidden>
                   “
@@ -451,13 +471,10 @@ export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLanding
               🎓
             </div>
             <div className={styles.ctaCopy}>
-              <h2 className={styles.ctaTitle}>Start learning — or start selling</h2>
-              <p className={styles.ctaLead}>
-                Join as a learner to enroll in mentor-led programs, or register to publish your own training on{' '}
-                {tenantName}.
-              </p>
+              <h2 className={styles.ctaTitle}>{content.cta.title}</h2>
+              <p className={styles.ctaLead}>{content.cta.lead}</p>
               <Link href={routes.register} className={styles.primaryBtn}>
-                Sign up now
+                {content.cta.buttonLabel}
               </Link>
             </div>
           </div>
@@ -473,12 +490,12 @@ export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLanding
                 <span className={styles.logoWarm}>{brandRest || 'Learn'}</span>
               </Link>
               <p className={styles.footerText} style={{ marginTop: '0.75rem' }}>
-                Trainer &amp; mentor marketplace powered by LuxGen.
+                {content.footer.tagline}
               </p>
-              <p className={styles.footerText}>hello@{tenantSubdomain}.learn</p>
+              <p className={styles.footerText}>{content.footer.contactEmail}</p>
             </div>
             <div>
-              <p className={styles.footerTitle}>Explore</p>
+              <p className={styles.footerTitle}>{content.footer.exploreTitle}</p>
               <Link href={routes.landing} className={styles.footerLink}>
                 Home
               </Link>
@@ -493,16 +510,16 @@ export function StorefrontLanding({ tenantSubdomain, routes }: StorefrontLanding
               </Link>
             </div>
             <div>
-              <p className={styles.footerTitle}>Categories</p>
-              {TRAINING_CATEGORIES.slice(0, 6).map((cat) => (
+              <p className={styles.footerTitle}>{content.footer.categoriesTitle}</p>
+              {categories.slice(0, 6).map((cat) => (
                 <Link key={cat.id} href={routes.courses} className={styles.footerLink}>
                   {cat.label}
                 </Link>
               ))}
             </div>
             <div>
-              <p className={styles.footerTitle}>Stay updated</p>
-              <p className={styles.footerText}>New mentors and cohorts — no spam.</p>
+              <p className={styles.footerTitle}>{content.footer.newsletterTitle}</p>
+              <p className={styles.footerText}>{content.footer.newsletterHint}</p>
               <div className={styles.subscribeRow}>
                 <input
                   className={styles.subscribeInput}

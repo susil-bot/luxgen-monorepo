@@ -8,9 +8,11 @@ import { getTenantPageProps } from '../../lib/tenant-page-props';
 import {
   defaultStorefrontSettings,
   LUXGEN_STOREFRONT_TENANT_SUBDOMAINS,
+  landingPathFromSlug,
   resolveStorefrontSettings,
   type TenantStorefrontSettings,
 } from '../../lib/storefront-settings';
+import { resolveStorefrontProfile } from '../../lib/storefront-profile';
 import { fetchTenantConfig, patchTenantStorefront } from '../../lib/tenant-api';
 
 interface Props {
@@ -44,13 +46,59 @@ function StorefrontSettingsContent({ tenant }: Props) {
     };
   }, [tenant, showError]);
 
+  const isLuxgenDefaultTenant = LUXGEN_STOREFRONT_TENANT_SUBDOMAINS.has(tenant);
+
+  const profile = resolveStorefrontProfile({
+    subdomain: tenant,
+    tenantName: tenant,
+    settings: { config: { storefront: settings } },
+    routes: settings.routes,
+    slug: settings.slug,
+  });
+
+  const heroHeadline = settings.content?.hero?.headline ?? profile.content.hero.headline;
+  const heroSubheadline = settings.content?.hero?.subheadline ?? profile.content.hero.subheadline;
+  const accentColor = settings.theme?.accentColor ?? profile.theme.accentColor ?? '#28b485';
+
+  const updateHero = (field: 'headline' | 'subheadline', value: string) => {
+    setSettings((prev) => ({
+      ...prev,
+      content: {
+        ...prev.content,
+        hero: {
+          ...prev.content?.hero,
+          [field]: value,
+        },
+      },
+    }));
+  };
+
+  const updateSlug = (slug: string) => {
+    const normalized = slug
+      .trim()
+      .toLowerCase()
+      .replace(/[^a-z0-9-]/g, '');
+    setSettings((prev) => ({
+      ...prev,
+      slug: normalized,
+      routes: {
+        ...prev.routes,
+        landing: landingPathFromSlug(normalized || prev.slug),
+      },
+    }));
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
-      const saved = await patchTenantStorefront({
+      const payload = {
         landingEnabled: settings.landingEnabled,
+        slug: settings.slug,
         routes: { ...settings.routes },
-      });
+        ...(settings.content ? { content: settings.content } : {}),
+        ...(settings.theme ? { theme: settings.theme } : {}),
+      };
+      const saved = await patchTenantStorefront(payload);
       setSettings(resolveStorefrontSettings(tenant, { config: { storefront: saved } }));
       showSuccess('Storefront settings saved');
     } catch (err) {
@@ -66,8 +114,6 @@ function StorefrontSettingsContent({ tenant }: Props) {
       routes: { ...prev.routes, [key]: value },
     }));
   };
-
-  const isLuxgenDefaultTenant = LUXGEN_STOREFRONT_TENANT_SUBDOMAINS.has(tenant);
 
   return (
     <SettingsShell
@@ -106,6 +152,59 @@ function StorefrontSettingsContent({ tenant }: Props) {
                 Enable trainer/mentor landing ({settings.routes.landing || '/store/mentors'})
               </span>
             </label>
+
+            <div className="border-t border-separator pt-4 space-y-3">
+              <h3 className="text-sm font-semibold text-primary">Landing URL &amp; content</h3>
+              <p className="text-xs text-secondary">
+                Slug sets the default path (<code>/store/&#123;slug&#125;</code>). Use <code>{'{{tenantName}}'}</code>{' '}
+                in copy for the workspace name.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div className="ios-form-group">
+                  <label htmlFor="storefront-slug">Landing slug</label>
+                  <input
+                    id="storefront-slug"
+                    className="ios-input"
+                    value={settings.slug}
+                    onChange={(e) => updateSlug(e.target.value)}
+                    placeholder="mentors"
+                  />
+                </div>
+                <div className="ios-form-group">
+                  <label htmlFor="theme-accent">Accent color</label>
+                  <input
+                    id="theme-accent"
+                    className="ios-input"
+                    value={accentColor}
+                    onChange={(e) =>
+                      setSettings((prev) => ({
+                        ...prev,
+                        theme: { ...prev.theme, accentColor: e.target.value },
+                      }))
+                    }
+                    placeholder="#28b485"
+                  />
+                </div>
+                <div className="ios-form-group sm:col-span-2">
+                  <label htmlFor="hero-headline">Hero headline</label>
+                  <input
+                    id="hero-headline"
+                    className="ios-input"
+                    value={heroHeadline}
+                    onChange={(e) => updateHero('headline', e.target.value)}
+                  />
+                </div>
+                <div className="ios-form-group sm:col-span-2">
+                  <label htmlFor="hero-subheadline">Hero subheadline</label>
+                  <textarea
+                    id="hero-subheadline"
+                    className="ios-input min-h-[5rem]"
+                    value={heroSubheadline}
+                    onChange={(e) => updateHero('subheadline', e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
 
             <div className="border-t border-separator pt-4 space-y-3">
               <h3 className="text-sm font-semibold text-primary">Navigation routes</h3>

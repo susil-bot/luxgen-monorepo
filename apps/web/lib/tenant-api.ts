@@ -17,12 +17,20 @@ export interface TenantRegionalSettings {
 
 export interface TenantStorefrontSettingsPayload {
   landingEnabled: boolean;
+  slug?: string;
   routes: {
     landing: string;
     courses: string;
     programs: string;
     login: string;
     register: string;
+  };
+  content?: Record<string, unknown>;
+  theme?: {
+    accentColor?: string;
+    warmAccentColor?: string;
+    heroImage?: string;
+    layout?: 'classic' | 'split';
   };
 }
 

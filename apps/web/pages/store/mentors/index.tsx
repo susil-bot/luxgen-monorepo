@@ -55,7 +55,7 @@ export default function StoreMentorsLandingPage({ tenantSubdomain }: MentorsPage
           content={`Discover courses, cohort programs, and mentorship from trainers on ${tenantName}.`}
         />
       </Head>
-      <StorefrontLanding tenantSubdomain={tenantSubdomain} routes={storefront.routes} />
+      <StorefrontLanding tenantSubdomain={tenantSubdomain} />
     </>
   );
 }

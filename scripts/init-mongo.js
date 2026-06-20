@@ -74,6 +74,7 @@ upsertTenant({
       },
       storefront: {
         landingEnabled: true,
+        slug: 'mentors',
         routes: {
           landing: '/store/mentors',
           courses: '/learn',
