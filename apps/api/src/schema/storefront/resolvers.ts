@@ -3,8 +3,12 @@ import { storefrontService } from '../../services/storefrontService';
 
 export const storefrontResolvers = {
   Query: {
-    storefrontProducts: async (_: unknown, { tenantId }: { tenantId: string }, context: GraphQLContext) => {
-      return storefrontService.listProducts(tenantId, Boolean(context.user));
+    storefrontProducts: async (
+      _: unknown,
+      { tenantId, category }: { tenantId: string; category?: string },
+      context: GraphQLContext,
+    ) => {
+      return storefrontService.listProducts(tenantId, Boolean(context.user), category ?? null);
     },
     storefrontProduct: async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
       return storefrontService.getProduct(id, Boolean(context.user));

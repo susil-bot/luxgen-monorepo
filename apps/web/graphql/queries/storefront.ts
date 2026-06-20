@@ -1,12 +1,13 @@
 import { gql } from '@apollo/client';
 
 export const GET_STOREFRONT_PRODUCTS = gql`
-  query GetStorefrontProducts($tenantId: ID!) {
-    storefrontProducts(tenantId: $tenantId) {
+  query GetStorefrontProducts($tenantId: ID!, $category: String) {
+    storefrontProducts(tenantId: $tenantId, category: $category) {
       id
       title
       description
       status
+      category
       priceCents
       currency
       instructorName
@@ -22,6 +23,7 @@ export const GET_STOREFRONT_PRODUCT = gql`
       title
       description
       status
+      category
       priceCents
       currency
       instructorName

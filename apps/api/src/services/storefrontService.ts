@@ -14,7 +14,30 @@ import { courseService } from './courseService';
 import { enrollmentService } from './enrollmentService';
 import { isBillingDevMode } from './billingService';
 
-function mapProduct(course: Awaited<ReturnType<typeof courseService.getCourseById>>) {
+const PRODUCT_CATEGORIES = ['men', 'women', 'interior', 'dresses', 'digital'] as const;
+
+function parseCategoryFromDescription(description?: string): string | null {
+  if (!description) return null;
+  const match = description.match(/luxgen-product-meta[^]*?"category"\s*:\s*"([^"]+)"/i);
+  if (match?.[1] && PRODUCT_CATEGORIES.includes(match[1] as (typeof PRODUCT_CATEGORIES)[number])) {
+    return match[1];
+  }
+  return null;
+}
+
+function inferProductCategory(title: string, description?: string, index = 0): string {
+  const parsed = parseCategoryFromDescription(description);
+  if (parsed) return parsed;
+  const lower = `${title} ${description ?? ''}`.toLowerCase();
+  if (lower.includes('digital') || lower.includes('training') || lower.includes('course')) return 'digital';
+  if (lower.includes('dress')) return 'dresses';
+  if (lower.includes('interior') || lower.includes('home')) return 'interior';
+  if (lower.includes('women') || lower.includes('leadership')) return 'women';
+  if (lower.includes('men')) return 'men';
+  return PRODUCT_CATEGORIES[index % PRODUCT_CATEGORIES.length];
+}
+
+function mapProduct(course: Awaited<ReturnType<typeof courseService.getCourseById>>, index = 0) {
   if (!course) return null;
   const instructor = course.instructor as {
     _id?: { toString(): string };
@@ -22,12 +45,15 @@ function mapProduct(course: Awaited<ReturnType<typeof courseService.getCourseByI
     firstName?: string;
     lastName?: string;
   };
+  const title = course.title;
+  const description = course.description ?? '';
   return {
     id: course._id?.toString?.() ?? course.id,
-    title: course.title,
-    description: course.description ?? '',
+    title,
+    description,
     status: course.status,
-    priceCents: 0,
+    category: inferProductCategory(title, description, index),
+    priceCents: inferProductCategory(title, description, index) === 'digital' ? 4900 : 12900,
     currency: 'usd',
     instructorName: instructor ? `${instructor.firstName ?? ''} ${instructor.lastName ?? ''}`.trim() : null,
     enrollmentCount: (course.students as unknown[])?.length ?? 0,
@@ -36,10 +62,16 @@ function mapProduct(course: Awaited<ReturnType<typeof courseService.getCourseByI
 }
 
 export class StorefrontService {
-  async listProducts(tenantId: string, includeDrafts = false) {
+  async listProducts(tenantId: string, includeDrafts = false, category?: string | null) {
     const courses = await courseService.getCoursesByTenant(tenantId);
     const filtered = includeDrafts ? courses : courses.filter((c) => c.status === CourseStatus.PUBLISHED);
-    return filtered.map((c) => mapProduct(c)).filter(Boolean);
+    let products = filtered.map((c, i) => mapProduct(c, i)).filter(Boolean) as NonNullable<
+      ReturnType<typeof mapProduct>
+    >[];
+    if (category && category !== 'all') {
+      products = products.filter((p) => p.category === category);
+    }
+    return products;
   }
 
   async getProduct(id: string, includeDrafts = false) {

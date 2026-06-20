@@ -5,7 +5,6 @@ import { useRouter } from 'next/router';
 import { applyLearnTenantTheme } from '../../lib/learn-theme';
 import { getStoredUser, isStoredSessionExpired } from '../../lib/session';
 import { buildLogoutRedirect } from '../../lib/auth-routes';
-import { StorefrontNav } from './StorefrontNav';
 
 interface LearnLayoutProps {
   tenantSubdomain: string;
@@ -66,10 +65,7 @@ export function LearnLayout({ tenantSubdomain, tenantName, tenantSettings, child
           </nav>
         </div>
       </header>
-      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        <StorefrontNav />
-        {children}
-      </main>
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">{children}</main>
     </div>
   );
 }

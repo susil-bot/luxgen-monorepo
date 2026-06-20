@@ -4,6 +4,7 @@ export const storefrontTypeDefs = `
     title: String!
     description: String!
     status: String!
+    category: String!
     priceCents: Int!
     currency: String!
     instructorName: String
@@ -47,7 +48,7 @@ export const storefrontTypeDefs = `
   }
 
   extend type Query {
-    storefrontProducts(tenantId: ID!): [StorefrontProduct!]!
+    storefrontProducts(tenantId: ID!, category: String): [StorefrontProduct!]!
     storefrontProduct(id: ID!): StorefrontProduct
     storefrontCollections(tenantId: ID!): [StorefrontCollection!]!
     storefrontCollection(id: ID!, tenantId: ID!): StorefrontCollection
