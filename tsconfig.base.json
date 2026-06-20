@@ -29,7 +29,8 @@
       "@luxgen/ui": ["./packages/ui/src"],
       "@luxgen/utils": ["./packages/utils/src"],
       "@luxgen/config": ["./packages/config/src"],
-      "@luxgen/shared": ["./packages/shared/src"]
+      "@luxgen/shared": ["./packages/shared/src"],
+      "@luxgen/design-tokens": ["./packages/design-tokens/src"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
