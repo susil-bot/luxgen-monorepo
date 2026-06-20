@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { Tenant } from '@luxgen/db';
 import { getTenantConfig, validateTenantConfig } from '../config/tenants';
 import { getTenantContext } from '../middleware/tenantRouting';
-import { validateStorefrontPatchBody, validationErrorsToRecord, landingPathFromSlug } from '../middleware/validation';
+import { validateStorefrontPatchBody, validationErrorsToRecord, mergeStorefrontPatch } from '../middleware/validation';
 
 const router = Router();
 
@@ -404,43 +404,13 @@ router.patch('/storefront', async (req: Request, res: Response) => {
 
     const existing = (tenant.settings?.config as unknown as Record<string, unknown> | undefined)?.storefront ?? {};
     const existingRecord = existing as Record<string, unknown>;
-    const existingRoutes = (existingRecord.routes as Record<string, unknown> | undefined) ?? {};
-    const existingContent = (existingRecord.content as Record<string, unknown> | undefined) ?? {};
-    const existingTheme = (existingRecord.theme as Record<string, unknown> | undefined) ?? {};
-
-    const mergedRoutes: Record<string, unknown> = { ...existingRoutes };
-    if (routes) Object.assign(mergedRoutes, routes);
-
-    if (slug && !routes?.landing) {
-      mergedRoutes.landing = landingPathFromSlug(slug);
-    }
-
-    const nextStorefront: Record<string, unknown> = {
-      ...existingRecord,
+    const nextStorefront = mergeStorefrontPatch(existingRecord, {
       ...(typeof landingEnabled === 'boolean' ? { landingEnabled } : {}),
       ...(slug ? { slug } : {}),
-      routes: mergedRoutes,
-    };
-
-    if (content) {
-      const mergedContent: Record<string, unknown> = { ...existingContent };
-      for (const key of ['hero', 'sections', 'stats', 'cta', 'footer'] as const) {
-        const patch = content[key];
-        if (patch && typeof patch === 'object' && !Array.isArray(patch)) {
-          mergedContent[key] = {
-            ...(mergedContent[key] as Record<string, unknown>),
-            ...(patch as Record<string, unknown>),
-          };
-        } else if (patch !== undefined) {
-          mergedContent[key] = patch;
-        }
-      }
-      nextStorefront.content = mergedContent;
-    }
-
-    if (theme) {
-      nextStorefront.theme = { ...existingTheme, ...theme };
-    }
+      ...(routes ? { routes } : {}),
+      ...(content ? { content } : {}),
+      ...(theme ? { theme } : {}),
+    });
 
     const updatedTenant = await Tenant.findByIdAndUpdate(
       tenantId,

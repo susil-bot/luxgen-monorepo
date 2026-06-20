@@ -17,6 +17,7 @@
     "@luxgen/config": "*",
     "@luxgen/db": "*",
     "@luxgen/design-tokens": "*",
+    "@luxgen/storefront": "*",
     "@luxgen/ui": "*",
     "@luxgen/utils": "*",
     "buffer": "^6.0.3",

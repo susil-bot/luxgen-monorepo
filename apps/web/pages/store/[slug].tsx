@@ -5,18 +5,19 @@ import Head from 'next/head';
 import { useQuery } from '@apollo/client';
 import { matchesStorefrontSlug } from '@luxgen/storefront';
 
-import { LearnifyStorefront } from '../../../components/storefront/LearnifyStorefront';
-import { PageLoadingState } from '../../../components/common/PageStates';
-import { GET_TENANT } from '../../../graphql/queries/tenants';
-import { learnStoreServerProps } from '../../../lib/learn-store';
-import { resolveStorefrontSettings } from '../../../lib/storefront-settings';
-import { useClientMounted } from '../../../lib/use-client-mounted';
+import { LearnifyStorefront } from '../../components/storefront/LearnifyStorefront';
+import { PageLoadingState } from '../../components/common/PageStates';
+import { GET_TENANT } from '../../graphql/queries/tenants';
+import { learnStoreServerProps } from '../../lib/learn-store';
+import { resolveStorefrontSettings } from '../../lib/storefront-settings';
+import { useClientMounted } from '../../lib/use-client-mounted';
 
-interface MentorsPageProps {
+interface StoreSlugPageProps {
   tenantSubdomain: string;
+  slug: string;
 }
 
-export default function StoreMentorsLandingPage({ tenantSubdomain }: MentorsPageProps) {
+export default function StoreSlugLandingPage({ tenantSubdomain, slug }: StoreSlugPageProps) {
   const router = useRouter();
   const mounted = useClientMounted();
 
@@ -32,7 +33,7 @@ export default function StoreMentorsLandingPage({ tenantSubdomain }: MentorsPage
     [tenantSubdomain, tenant?.settings],
   );
 
-  const slugMatches = matchesStorefrontSlug('mentors', storefront);
+  const slugMatches = matchesStorefrontSlug(slug, storefront);
 
   useEffect(() => {
     if (!mounted || tenantLoading) return;
@@ -56,7 +57,7 @@ export default function StoreMentorsLandingPage({ tenantSubdomain }: MentorsPage
   return (
     <>
       <Head>
-        <title>Trainers &amp; mentors — {tenantName}</title>
+        <title>{tenantName} — trainers &amp; mentors</title>
         <meta
           name="description"
           content={`Discover courses, cohort programs, and mentorship from trainers on ${tenantName}.`}
@@ -68,6 +69,7 @@ export default function StoreMentorsLandingPage({ tenantSubdomain }: MentorsPage
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
+  const slug = typeof context.params?.slug === 'string' ? context.params.slug : 'mentors';
   const { props } = learnStoreServerProps(context);
-  return { props };
+  return { props: { ...props, slug } };
 };

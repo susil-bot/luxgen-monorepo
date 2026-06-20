@@ -1,6 +1,5 @@
-import type { PartialStorefrontPreset } from './types';
+import type { PartialStorefrontPreset } from '../types';
 
-/** Idea Vibes — creative learning & innovation positioning */
 export const ideaVibesStorefrontPreset: PartialStorefrontPreset = {
   slug: 'creators',
   content: {

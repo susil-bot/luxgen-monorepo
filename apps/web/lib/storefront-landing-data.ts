@@ -1,5 +1,5 @@
-import type { StorefrontStatsLabels } from './storefront-profile';
-import { DEFAULT_STOREFRONT_CONTENT } from './storefront-profile';
+import type { StorefrontStatsLabels } from '@luxgen/storefront';
+import { DEFAULT_STOREFRONT_CONTENT } from '@luxgen/storefront';
 
 export interface StorefrontInstructor {
   id: string;

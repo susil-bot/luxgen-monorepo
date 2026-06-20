@@ -24,7 +24,7 @@ const nextConfig = {
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
-  transpilePackages: ['@luxgen/ui', '@luxgen/agent', '@luxgen/design-tokens'],
+  transpilePackages: ['@luxgen/ui', '@luxgen/agent', '@luxgen/design-tokens', '@luxgen/storefront'],
   experimental: {
     externalDir: true,
   },

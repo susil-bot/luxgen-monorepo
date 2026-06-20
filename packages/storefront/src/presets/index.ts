@@ -1,6 +1,6 @@
+import type { PartialStorefrontPreset } from '../types';
 import { demoStorefrontPreset } from './demo';
 import { ideaVibesStorefrontPreset } from './idea-vibes';
-import type { PartialStorefrontPreset } from './types';
 
 const TENANT_STOREFRONT_PRESETS: Record<string, PartialStorefrontPreset> = {
   demo: demoStorefrontPreset,

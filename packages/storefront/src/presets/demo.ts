@@ -1,6 +1,5 @@
-import type { PartialStorefrontPreset } from './types';
+import type { PartialStorefrontPreset } from '../types';
 
-/** Demo tenant — professional trainer marketplace (matches demo brand-identity tone) */
 export const demoStorefrontPreset: PartialStorefrontPreset = {
   slug: 'mentors',
   content: {
@@ -30,4 +29,12 @@ export const demoStorefrontPreset: PartialStorefrontPreset = {
   branding: {
     accentColor: '#1E40AF',
   },
+};
+
+/** Mongo seed / tenant bootstrap payload for demo */
+export const demoStorefrontBootstrap = {
+  slug: demoStorefrontPreset.slug ?? 'mentors',
+  landingEnabled: true,
+  content: demoStorefrontPreset.content,
+  theme: demoStorefrontPreset.theme,
 };
