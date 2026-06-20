@@ -6,16 +6,13 @@ import { useQuery } from '@apollo/client';
 import { AppLayout, getDefaultSidebarSections, getDefaultLogo } from '@luxgen/ui';
 
 import { PageEmptyState, PageLoadingState } from '../../components/common/PageStates';
-import { GET_STUDENT_CERTIFICATES } from '../../graphql/queries/certificate';
 import { GET_COURSES } from '../../graphql/queries/courses';
 import { GET_STUDENT_ENROLLMENTS } from '../../graphql/queries/enrollment';
-import { openCertificateDownload } from '../../lib/certificate-download';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
 import { filterPublishedCourses, type LearnCourse } from '../../lib/learn-store';
 import {
   buildLearnerCourseViews,
   buildRecommendedCourses,
-  courseEmoji,
   formatCompletedDate,
   sortEnrollmentsByRecent,
   type LearnerEnrollment,
@@ -25,14 +22,6 @@ import { handleUserAction, transformUserDataFromSession } from '../../lib/transf
 
 interface Props {
   tenant: string;
-}
-
-interface LearnerCertificate {
-  id: string;
-  courseId: string;
-  courseTitle: string;
-  certificateNumber: string;
-  issuedAt: string;
 }
 
 function ProgressRing({ progress }: { progress: number }) {
@@ -67,8 +56,6 @@ export default function CustomersPage({ tenant }: Props) {
   const headerProps = useAppLayoutHeader();
   const [mounted, setMounted] = useState(false);
   const [sessionUser, setSessionUser] = useState(() => getStoredUser());
-  const [downloadError, setDownloadError] = useState<string | null>(null);
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -104,19 +91,9 @@ export default function CustomersPage({ tenant }: Props) {
     variables: { tenantId: tenantId ?? '' },
   });
 
-  const {
-    data: certificatesData,
-    loading: certificatesLoading,
-    error: certificatesError,
-  } = useQuery(GET_STUDENT_CERTIFICATES, {
-    skip: !tenantId || !studentId,
-    variables: { tenantId: tenantId ?? '', studentId: studentId ?? '' },
-  });
-
   const layoutUser = transformUserDataFromSession();
   const courses = filterPublishedCourses((coursesData?.courses as LearnCourse[] | undefined) ?? []);
   const enrollments = (enrollmentData?.studentEnrollments as LearnerEnrollment[] | undefined) ?? [];
-  const certificates = (certificatesData?.studentCertificates as LearnerCertificate[] | undefined) ?? [];
 
   const enrolledCourses = useMemo(() => {
     const views = buildLearnerCourseViews(enrollments, courses);
@@ -160,20 +137,8 @@ export default function CustomersPage({ tenant }: Props) {
   const goalOffset = goalCircumference - (averageProgress / 100) * goalCircumference;
   const greetingName = sessionUser?.firstName?.trim() || 'Learner';
 
-  const loading = !sessionUser || enrollmentsLoading || coursesLoading || certificatesLoading;
-  const queryError = enrollmentsError ?? coursesError ?? certificatesError;
-
-  const handleDownloadCertificate = async (certificateId: string) => {
-    setDownloadError(null);
-    setDownloadingId(certificateId);
-    try {
-      await openCertificateDownload(certificateId);
-    } catch (error) {
-      setDownloadError(error instanceof Error ? error.message : 'Could not open certificate.');
-    } finally {
-      setDownloadingId(null);
-    }
-  };
+  const loading = !sessionUser || enrollmentsLoading || coursesLoading;
+  const queryError = enrollmentsError ?? coursesError;
 
   if (!sessionUser && mounted) {
     return (
@@ -265,7 +230,7 @@ export default function CustomersPage({ tenant }: Props) {
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                <span className="lux-streak-badge">🏆 {certificates.length} certificates</span>
+                <span className="lux-streak-badge">🏆 {completedCourses.length} completed</span>
                 <span className="lux-streak-badge">📚 {enrolledCourses.length} enrolled</span>
               </div>
             </div>
@@ -400,39 +365,25 @@ export default function CustomersPage({ tenant }: Props) {
               )}
             </section>
 
-            {certificates.length > 0 && (
+            {completedCourses.length > 0 && (
               <section>
                 <div
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}
                 >
                   <h2 className="ios-large-title" style={{ fontSize: 20, margin: 0 }}>
-                    Certificates ({certificates.length})
+                    Completed ({completedCourses.length})
                   </h2>
                 </div>
-                {downloadError && (
-                  <p className="text-sm mb-3" style={{ color: 'var(--color-red)' }}>
-                    {downloadError}
-                  </p>
-                )}
                 <div className="lux-cert-row">
-                  {certificates.map((certificate) => (
-                    <div key={certificate.id} className="lux-cert-card">
-                      <span className="lux-cert-icon">{courseEmoji(certificate.courseId)}</span>
+                  {completedCourses.map((course) => (
+                    <div key={course.id} className="lux-cert-card">
+                      <span className="lux-cert-icon">{course.emoji}</span>
                       <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--color-label-primary)' }}>
-                        {certificate.courseTitle}
+                        {course.title}
                       </div>
                       <div style={{ fontSize: 12, color: 'var(--color-label-secondary)' }}>
-                        Issued {formatCompletedDate(certificate.issuedAt)}
+                        Completed {formatCompletedDate(course.completedAt)}
                       </div>
-                      <button
-                        type="button"
-                        className="ios-btn-plain lux-cert-download"
-                        style={{ fontSize: 13, padding: 0 }}
-                        disabled={downloadingId === certificate.id}
-                        onClick={() => void handleDownloadCertificate(certificate.id)}
-                      >
-                        {downloadingId === certificate.id ? 'Opening…' : 'Download PDF'}
-                      </button>
                     </div>
                   ))}
                 </div>
