@@ -27,6 +27,7 @@
 | [SECURITY_HARDENING.md](./SECURITY_HARDENING.md)                | Security invariants, tenant isolation rules, rate limiting, CSP, JWT, Stripe integrity |
 | [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md)                    | GraphQL-first contract for web + mobile                                                |
 | [MULTI_TENANT_ARCHITECTURE.md](../MULTI_TENANT_ARCHITECTURE.md) | Subdomain tenancy, tenant config                                                       |
+| [TENANT_LAYER_SUPERADMIN.md](./TENANT_LAYER_SUPERADMIN.md)      | **Superadmin runbook:** tenant flow, debugging, gaps, impersonation roadmap            |
 | [API_REFERENCE.md](./API_REFERENCE.md)                          | GraphQL domains, REST routes, webhooks                                                 |
 
 ### Business & features
