@@ -27,3 +27,4 @@ export { customerFixtures } from './fixture';
 export { CustomerTranslations } from './translations';
 export * from './list/CustomerListTabs';
 export * from './list/CustomerListTable';
+export { customerStyles } from './styles';

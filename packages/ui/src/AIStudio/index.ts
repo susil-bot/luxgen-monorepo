@@ -5,3 +5,8 @@ export type { AIStudioSidekickProps } from './AIStudioSidekick';
 export { AIStudioProvider, useAIStudio, useAIStudioOptional } from './AIStudioContext';
 export type { AIStudioContextValue } from './AIStudioContext';
 export { AIStudioPanelSlot } from './AIStudioPanelSlot';
+export { fetchAIStudioData, fetchAIStudioSSR } from './fetcher';
+export type { AIStudioData } from './fetcher';
+export { aiStudioFixtures } from './fixture';
+export { aiStudioStyles } from './styles';
+export { AIStudioTranslations } from './translations';
