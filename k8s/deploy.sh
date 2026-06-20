@@ -1,123 +1,140 @@
 #!/bin/bash
-set -e
+# deploy.sh — Deploy LuxGen to Kubernetes
+#
+# Usage (local):
+#   cp deploy/env/production.env.example .env.production
+#   # fill in real values, then:
+#   ./k8s/deploy.sh
+#
+# Usage (CI / non-interactive — secrets already exist in the cluster):
+#   LUXGEN_SECRETS_ALREADY_EXIST=true ./k8s/deploy.sh
+#
+set -euo pipefail
+
+NAMESPACE=luxgen
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 echo "🚀 Deploying LuxGen to Kubernetes..."
 
-# Check if kubectl is available
-if ! command -v kubectl &> /dev/null; then
-    echo "❌ kubectl is not installed. Please install kubectl first."
-    exit 1
+# ── Pre-flight checks ─────────────────────────────────────────────────────────
+
+if ! command -v kubectl &>/dev/null; then
+  echo "❌ kubectl is not installed. Please install kubectl first."
+  exit 1
 fi
 
-# Check if connected to cluster
-if ! kubectl cluster-info &> /dev/null; then
-    echo "❌ Not connected to a Kubernetes cluster. Please configure kubectl."
-    exit 1
+if ! kubectl cluster-info &>/dev/null; then
+  echo "❌ Not connected to a Kubernetes cluster. Please configure kubectl."
+  exit 1
 fi
 
-echo "✅ kubectl is available and connected to cluster"
+echo "✅ kubectl connected to cluster"
 
-# Create namespace
+# ── Namespace ─────────────────────────────────────────────────────────────────
+
 echo "📦 Creating namespace..."
-kubectl apply -f namespace.yaml
+kubectl apply -f "$SCRIPT_DIR/namespace.yaml"
 
-# Create secrets (prompt for values if not set)
+# ── Secrets ───────────────────────────────────────────────────────────────────
+
 echo "🔐 Setting up secrets..."
-if [ -f .env.production ]; then
-    echo "📝 Using .env.production file for secrets..."
-    # Create secret from .env.production file
-    kubectl create secret generic luxgen-secrets \
-        --namespace=luxgen \
-        --from-env-file=.env.production \
-        --dry-run=client -o yaml | kubectl apply -f -
+
+if [ -f "$SCRIPT_DIR/../.env.production" ]; then
+  echo "📝 Using .env.production for secrets..."
+  kubectl create secret generic luxgen-secrets \
+    --namespace="$NAMESPACE" \
+    --from-env-file="$SCRIPT_DIR/../.env.production" \
+    --dry-run=client -o yaml | kubectl apply -f -
+
+elif [ "${LUXGEN_SECRETS_ALREADY_EXIST:-false}" = "true" ]; then
+  echo "✅ Skipping secret creation — LUXGEN_SECRETS_ALREADY_EXIST=true"
+
 else
-    echo "⚠️  No .env.production file found."
-    echo "Please create .env.production with your production secrets or manually create the secret:"
-    echo ""
-    echo "  kubectl create secret generic luxgen-secrets \\"
-    echo "    --namespace=luxgen \\"
-    echo "    --from-literal=MONGODB_URI='mongodb://admin:YOUR_PASSWORD@mongodb-service:27017/luxgen?authSource=admin' \\"
-    echo "    --from-literal=JWT_SECRET='YOUR_JWT_SECRET_MIN_32_CHARS' \\"
-    echo "    --from-literal=JWT_EXPIRES_IN='7d' \\"
-    echo "    --from-literal=SEED_IF_EMPTY='true' \\"
-    echo "    --from-literal=TENANT_DEMO_KEY='demo-tenant-signing-key-min-32-chars' \\"
-    echo "    --from-literal=TENANT_IDEA-VIBES_KEY='idea-vibes-signing-key-min-32-chars' \\"
-    echo "    --from-literal=MONGO_INITDB_ROOT_USERNAME='admin' \\"
-    echo "    --from-literal=MONGO_INITDB_ROOT_PASSWORD='YOUR_PASSWORD' \\"
-    echo "    --from-literal=MONGO_INITDB_DATABASE='luxgen'"
-    echo ""
-    read -p "Have you already created the secret? (y/n) " -n 1 -r
-    echo
-    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-        echo "❌ Please create the secret first and re-run this script."
-        exit 1
-    fi
+  echo ""
+  echo "❌ No secret source found. Provide one of:"
+  echo ""
+  echo "   Option A — env file (local):"
+  echo "     cp deploy/env/production.env.example .env.production"
+  echo "     # fill in values, then re-run this script"
+  echo ""
+  echo "   Option B — CI / pre-existing secret:"
+  echo "     LUXGEN_SECRETS_ALREADY_EXIST=true ./k8s/deploy.sh"
+  echo ""
+  echo "   Option C — manual kubectl:"
+  echo "     kubectl create secret generic luxgen-secrets \\"
+  echo "       --namespace=$NAMESPACE \\"
+  echo "       --from-literal=MONGODB_URI='...' \\"
+  echo "       --from-literal=JWT_SECRET='...' \\"
+  echo "       # (see k8s/secret.yaml.example for all required keys)"
+  echo ""
+  exit 1
 fi
 
-# Create configmap
-echo "⚙️  Creating configmap..."
-kubectl apply -f configmap.yaml
+# ── ConfigMap ─────────────────────────────────────────────────────────────────
 
-# Create PVCs
-echo "💾 Creating persistent volume claims..."
-kubectl apply -f pvc.yaml
+echo "⚙️  Applying configmap..."
+kubectl apply -f "$SCRIPT_DIR/configmap.yaml"
 
-# Deploy databases
+# ── Databases ─────────────────────────────────────────────────────────────────
+
 echo "🗄️  Deploying MongoDB..."
-kubectl apply -f mongodb.yaml
+kubectl apply -f "$SCRIPT_DIR/mongodb.yaml"
 
 echo "🔄 Deploying Redis..."
-kubectl apply -f redis.yaml
+kubectl apply -f "$SCRIPT_DIR/redis.yaml"
 
-# Wait for databases to be ready
-echo "⏳ Waiting for databases to be ready..."
-kubectl wait --for=condition=ready pod -l app=mongodb -n luxgen --timeout=300s
-kubectl wait --for=condition=ready pod -l app=redis -n luxgen --timeout=300s
+echo "⏳ Waiting for databases (timeout 5m)..."
+kubectl wait --for=condition=ready pod -l app=mongodb -n "$NAMESPACE" --timeout=300s
+kubectl wait --for=condition=ready pod -l app=redis -n "$NAMESPACE" --timeout=300s
+echo "✅ Databases ready"
 
-# Deploy applications
+# ── Applications ──────────────────────────────────────────────────────────────
+
 echo "🔧 Deploying API..."
-kubectl apply -f api.yaml
+kubectl apply -f "$SCRIPT_DIR/api.yaml"
 
 echo "🌐 Deploying Web..."
-kubectl apply -f web.yaml
+kubectl apply -f "$SCRIPT_DIR/web.yaml"
 
 echo "🤖 Deploying Agent Worker..."
-kubectl apply -f agent-worker.yaml
+kubectl apply -f "$SCRIPT_DIR/agent-worker.yaml"
 
-echo "🧠 Deploying Ollama..."
-kubectl apply -f ollama.yaml
+echo "⏳ Waiting for applications (timeout 5m)..."
+kubectl wait --for=condition=ready pod -l app=api -n "$NAMESPACE" --timeout=300s
+kubectl wait --for=condition=ready pod -l app=web -n "$NAMESPACE" --timeout=300s
+kubectl wait --for=condition=ready pod -l app=agent-worker -n "$NAMESPACE" --timeout=300s
+echo "✅ Applications ready"
 
-# Wait for applications to be ready
-echo "⏳ Waiting for applications to be ready..."
-kubectl wait --for=condition=ready pod -l app=api -n luxgen --timeout=300s
-kubectl wait --for=condition=ready pod -l app=web -n luxgen --timeout=300s
-kubectl wait --for=condition=ready pod -l app=agent-worker -n luxgen --timeout=300s
-kubectl wait --for=condition=ready pod -l app=ollama -n luxgen --timeout=300s
+# ── Ingress ───────────────────────────────────────────────────────────────────
 
-# Deploy ingress
 echo "🌍 Deploying Ingress..."
-kubectl apply -f ingress.yaml
+kubectl apply -f "$SCRIPT_DIR/ingress.yaml"
+
+# ── Ollama (async — model download can take 10-30 min on first run) ───────────
+
+echo "🧠 Deploying Ollama (async — will be ready when model download completes)..."
+kubectl apply -f "$SCRIPT_DIR/ollama.yaml"
+echo "⏳ Ollama is downloading the model in the background."
+echo "   Monitor progress: kubectl logs statefulset/ollama -n $NAMESPACE -f"
+
+# ── Done ──────────────────────────────────────────────────────────────────────
 
 echo ""
 echo "✅ Deployment complete!"
 echo ""
 echo "📊 Check status:"
-echo "  kubectl get pods -n luxgen"
-echo "  kubectl get services -n luxgen"
-echo "  kubectl get ingress -n luxgen"
+echo "   kubectl get pods -n $NAMESPACE"
+echo "   kubectl get services -n $NAMESPACE"
+echo "   kubectl get ingress -n $NAMESPACE"
 echo ""
 echo "🔍 View logs:"
-echo "  kubectl logs -f deployment/api -n luxgen"
-echo "  kubectl logs -f deployment/web -n luxgen"
-echo "  kubectl logs -f deployment/agent-worker -n luxgen"
+echo "   kubectl logs -f deployment/api -n $NAMESPACE"
+echo "   kubectl logs -f deployment/web -n $NAMESPACE"
+echo "   kubectl logs -f deployment/agent-worker -n $NAMESPACE"
+echo "   kubectl logs -f statefulset/ollama -n $NAMESPACE"
 echo ""
-echo "🌐 Access the application:"
-echo "  - Web: http://luxgen.yourdomain.com"
-echo "  - API: http://luxgen.yourdomain.com/api"
-echo "  - GraphQL: http://luxgen.yourdomain.com/graphql"
-echo ""
-echo "⚠️  Don't forget to:"
-echo "  1. Update yourdomain.com in ingress.yaml"
-echo "  2. Configure SSL certificates (cert-manager recommended)"
-echo "  3. Build and push Docker images to your registry"
-echo "  4. Update image names in deployment files"
+echo "⚠️  Before going live, verify:"
+echo "   1. yourdomain.com updated in k8s/ingress.yaml and k8s/configmap.yaml"
+echo "   2. cert-manager installed: kubectl get pods -n cert-manager"
+echo "   3. Docker images built and pushed to your registry"
+echo "   4. Image names updated in k8s/api.yaml, k8s/web.yaml, k8s/agent-worker.yaml"
