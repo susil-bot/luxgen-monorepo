@@ -38,5 +38,7 @@ export type { IActivityEvent } from './activity-event';
 export { ActivityEvent, ActivitySubjectType, ActivityEventKind, ActivityActorType } from './activity-event';
 export type { IEnrollment } from './enrollment';
 export { Enrollment, enrollmentSubjectId, EnrollmentPaymentStatus, EnrollmentLearningStatus } from './enrollment';
+export type { ICertificate } from './certificate';
+export { Certificate } from './certificate';
 export type { IEmailNotificationLog, ListingEmailTemplate } from './email-notification-log';
 export { EmailNotificationLog } from './email-notification-log';
