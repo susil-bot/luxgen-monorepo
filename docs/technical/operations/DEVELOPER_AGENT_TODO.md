@@ -176,7 +176,7 @@
       **File:** `apps/api/src/services/groupService.ts` lines 253–268
       `deleteGroup` transaction throws a `GraphQLError` inside `withTransaction`. Mongoose transactions expect standard `Error` instances to trigger rollback. Throw a plain `Error` inside the transaction and convert to `GraphQLError` after the `await`.
 
-- [ ] **M-05** `[security]` `[bug]`
+- [x] **M-05** `[security]` `[bug]`
       **File:** `apps/api/src/app.ts` line 55
       `express.json({ limit: '10mb' })` applies to all routes including `/api/auth/login`. A 10MB body on a login endpoint is never legitimate and allows DoS before the rate limiter fires. Tighten: set `'50kb'` globally and allow larger limits only on specific upload routes.
 
