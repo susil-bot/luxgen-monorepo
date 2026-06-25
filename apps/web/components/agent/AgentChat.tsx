@@ -35,7 +35,9 @@ const TOOL_ICONS: Record<string, string> = {
   read_file: '📄',
   list_files: '📁',
   write_file: '✏️',
+  delete_file: '🗑️',
   search_code: '🔍',
+  read_automation_schema: '⚙️',
 };
 
 function ToolBadge({ event }: { event: ToolEvent }) {
@@ -43,13 +45,17 @@ function ToolBadge({ event }: { event: ToolEvent }) {
   const label =
     event.name === 'write_file'
       ? `Staging ${event.input.path?.split('/').pop()}`
-      : event.name === 'read_file'
-        ? `Reading ${event.input.path?.split('/').pop()}`
-        : event.name === 'list_files'
-          ? `Listing ${event.input.path}`
-          : event.name === 'search_code'
-            ? `Searching "${event.input.query}"`
-            : event.name;
+      : event.name === 'delete_file'
+        ? `Deleting ${event.input.path?.split('/').pop()}`
+        : event.name === 'read_file'
+          ? `Reading ${event.input.path?.split('/').pop()}`
+          : event.name === 'list_files'
+            ? `Listing ${event.input.path}`
+            : event.name === 'search_code'
+              ? `Searching "${event.input.query}"`
+              : event.name === 'read_automation_schema'
+                ? 'Reading automation schema'
+                : event.name;
 
   return (
     <div

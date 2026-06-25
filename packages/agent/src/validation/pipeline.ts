@@ -146,10 +146,7 @@ export async function runValidationPipeline(sessionId: string): Promise<Validati
     return result;
   }
 
-  const checks: ValidationCheckResult[] = [];
-  for (const check of checksToRun) {
-    checks.push(await runCheck(root, check));
-  }
+  const checks: ValidationCheckResult[] = await Promise.all(checksToRun.map((check) => runCheck(root, check)));
 
   const result: ValidationResult = {
     passed: checks.every((c) => c.passed),

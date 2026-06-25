@@ -9,9 +9,10 @@ import {
   MAX_STAGED_FILES_PER_SESSION,
   TOOL_TIMEOUTS,
 } from '../config/limits';
-import { loadSession, stageFile } from '../changeset/session-store';
+import { loadSession, saveSession, stageFile } from '../changeset/session-store';
 import { AUTOMATION_SCHEMA_DOC } from '../automation/events';
 import { isBinary } from './binary';
+import type { StagedFile } from '../types/session';
 
 export function listDirRecursive(dir: string, recursive: boolean, ext?: string): string[] {
   if (!fs.existsSync(dir)) return [];
@@ -136,6 +137,32 @@ async function executeToolInner(name: string, input: Record<string, unknown>, se
     return results.map((r) => `${path.relative(root, r.file)}:${r.line}: ${r.text}`).join('\n');
   }
 
+  if (name === 'delete_file') {
+    const session = loadSession(sessionId);
+    const filePath = String(input.path ?? '');
+    const reason = String(input.reason ?? '');
+    const absPath = path.join(root, filePath);
+
+    if (!fs.existsSync(absPath)) {
+      return JSON.stringify({ error: true, message: `File not found: ${filePath}` });
+    }
+
+    const originalContent = fs.readFileSync(absPath, 'utf-8');
+    session.files[filePath] = {
+      path: filePath,
+      content: '',
+      originalContent,
+      type: 'modified',
+      description: `DELETE: ${reason}`,
+      stagedAt: Date.now(),
+      pendingDelete: true,
+    } as StagedFile & { pendingDelete: boolean };
+    session.updatedAt = Date.now();
+    saveSession(session);
+
+    return JSON.stringify({ staged: true, path: filePath, type: 'deleted' });
+  }
+
   if (name === 'read_automation_schema') {
     return JSON.stringify(AUTOMATION_SCHEMA_DOC, null, 2);
   }
@@ -150,13 +177,20 @@ export async function executeToolWithTimeout(
 ): Promise<string> {
   const timeout = TOOL_TIMEOUTS[name] || 10_000;
 
-  if (['read_file', 'write_file'].includes(name) && input.path) {
+  if (['read_file', 'write_file', 'delete_file', 'list_files'].includes(name) && input.path) {
     const filePath = String(input.path);
     if (!isPathAllowed(filePath)) {
       return `Error: Access denied. Path "${filePath}" is outside allowed directories (apps/web/, apps/api/, packages/, docs/, scripts/).`;
     }
     if (isSensitiveFile(filePath)) {
       return `Error: Access denied. "${filePath}" is a sensitive file and cannot be read or modified.`;
+    }
+  }
+
+  if (name === 'search_code' && input.directory) {
+    const dir = String(input.directory);
+    if (!isPathAllowed(dir) && dir !== '.' && dir !== '') {
+      return `Error: Access denied. Directory "${dir}" is outside allowed directories.`;
     }
   }
 

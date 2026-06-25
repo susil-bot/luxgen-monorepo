@@ -51,6 +51,7 @@ export {
   stageFile,
   applySession,
   discardSession,
+  pruneOldSessions,
   getWorkspaceRoot,
   isGitWorktreeActive,
 } from './changeset/session-store';

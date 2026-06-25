@@ -91,8 +91,12 @@ export function applySession(sessionId: string): ApplyResult {
   for (const [filePath, staged] of Object.entries(session.files)) {
     try {
       const absPath = path.join(root, filePath);
-      fs.mkdirSync(path.dirname(absPath), { recursive: true });
-      fs.writeFileSync(absPath, staged.content, 'utf-8');
+      if (staged.pendingDelete) {
+        if (fs.existsSync(absPath)) fs.unlinkSync(absPath);
+      } else {
+        fs.mkdirSync(path.dirname(absPath), { recursive: true });
+        fs.writeFileSync(absPath, staged.content, 'utf-8');
+      }
       applied.push(filePath);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
@@ -118,4 +122,29 @@ export function discardSession(sessionId: string): void {
   session.files = {};
   session.updatedAt = Date.now();
   saveSession(session);
+}
+
+/** Delete all session JSON files older than `maxAgeMs` (default 7 days). */
+export function pruneOldSessions(maxAgeMs = 7 * 24 * 60 * 60 * 1000): number {
+  const dir = getStagingDir();
+  if (!fs.existsSync(dir)) return 0;
+
+  const now = Date.now();
+  let pruned = 0;
+
+  for (const name of fs.readdirSync(dir)) {
+    if (!name.endsWith('.json')) continue;
+    const filePath = path.join(dir, name);
+    try {
+      const stat = fs.statSync(filePath);
+      if (now - stat.mtimeMs > maxAgeMs) {
+        fs.unlinkSync(filePath);
+        pruned++;
+      }
+    } catch {
+      // skip unreadable files
+    }
+  }
+
+  return pruned;
 }
