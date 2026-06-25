@@ -361,6 +361,7 @@ export const transformUserDataFromSession = (): UserMenu | null => {
     name: `${sessionUser.firstName} ${sessionUser.lastName}`.trim() || sessionUser.email,
     email: sessionUser.email,
     role: sessionUser.role,
+    avatarUrl: sessionUser.avatar,
     tenant: {
       name: sessionUser.tenant.name,
       subdomain: sessionUser.tenant.subdomain,

@@ -9,6 +9,7 @@ export interface SessionUser {
   firstName: string;
   lastName: string;
   role: string;
+  avatar?: string;
   tenant: {
     id: string;
     name: string;
@@ -105,6 +106,7 @@ export function persistSession(token: string, user: SessionUser): void {
       email: user.email,
       role: user.role,
       tenant: user.tenant,
+      avatar: user.avatar,
     }),
   );
 
