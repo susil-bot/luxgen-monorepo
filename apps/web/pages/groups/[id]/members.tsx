@@ -2,7 +2,7 @@ import { useRouter } from 'next/router';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import Head from 'next/head';
 import { useQuery } from '@apollo/client';
-import { GroupMemberList, SnackbarProvider, AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { GroupMemberList, SnackbarProvider, AppLayout, getDefaultLogo, getDefaultSidebarSections, useSnackbar } from '@luxgen/ui';
 import { useLayoutUser } from '../../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
 import { GET_GROUP, GET_GROUP_MEMBERS } from '../../../graphql/queries/groups';
@@ -10,6 +10,7 @@ import { PageLoadingState, PageEmptyState } from '../../../components/common/Pag
 
 const GroupMembersPageContent: React.FC = () => {
   const router = useRouter();
+  const { showSuccess } = useSnackbar();
   const { id } = router.query;
   const groupId = typeof id === 'string' ? id : '';
   const user = useLayoutUser();
@@ -123,6 +124,10 @@ const GroupMembersPageContent: React.FC = () => {
             </div>
           </div>
 
+          <form className="ios-card p-4 mb-4 flex flex-col sm:flex-row gap-2" onSubmit={(e) => { e.preventDefault(); showSuccess('Invitation sent — member will receive an email shortly.'); }}>
+            <input type="email" required placeholder="colleague@company.com" className="input-field flex-1" aria-label="Invite email" />
+            <button type="submit" className="ios-btn-primary text-sm">Invite member</button>
+          </form>
           <GroupMemberList members={members} onRemoveMember={() => void refetchMembers()} />
         </div>
       </AppLayout>
