@@ -101,6 +101,7 @@ const NavBarComponent: React.FC<NavBarProps> = ({
 
   return (
     <nav
+      aria-label="Main navigation"
       className={`glass border-b ${className}`}
       style={{
         borderColor: 'var(--color-separator)',
