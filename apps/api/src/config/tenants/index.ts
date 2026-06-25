@@ -76,7 +76,7 @@ const loadDemoTenantConfig = (): Partial<ITenant> => ({
         maxApiCalls: demoFeaturesConfig.limits.apiCalls.max,
       },
       integrations: {
-        emailProvider: demoFeaturesConfig.platform.analytics.provider,
+        emailProvider: 'sendgrid',
         analyticsProvider: demoFeaturesConfig.platform.analytics.provider,
       },
     },

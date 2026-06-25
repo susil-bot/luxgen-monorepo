@@ -276,7 +276,7 @@
       **File:** `packages/auth/src/roles.ts` lines 59–90
       `isSuperAdmin`, `isAdmin`, `canManageUsers`, `canInviteUsers`, etc. are thin wrappers never imported anywhere outside the package's own `index.ts`. The entire module is superseded by `@luxgen/db` role definitions. Delete or consolidate.
 
-- [ ] **L-05** `[bug]`
+- [x] **L-05** `[bug]`
       **File:** `apps/api/src/config/tenants/index.ts` line 79
       `config.integrations.emailProvider` for the demo tenant is set to `demoFeaturesConfig.platform.analytics.provider` (an analytics provider, not an email provider) — this is a copy-paste error. In `tenants.ts:68` it is correctly set to `'sendgrid'`. Fix the modular config.
 
