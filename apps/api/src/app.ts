@@ -33,6 +33,7 @@ import billingRoutes, { stripeWebhookHandler } from './routes/billing';
 import jobsRoutes from './routes/jobs';
 import notificationsRoutes from './routes/notifications';
 import securityRoutes from './routes/security';
+import commerceWebhookRoutes from './routes/commerceWebhook';
 
 import { getCorsOrigins, isDevLocalOrigin } from '@luxgen/config';
 
@@ -87,6 +88,7 @@ app.use('/api/billing', billingRoutes);
 app.use('/api/jobs', jobsRoutes);
 app.use('/api/notifications', notificationsRoutes);
 app.use('/api/security', securityRoutes);
+app.use('/api/commerce', commerceWebhookRoutes);
 
 const apolloServer = new ApolloServer({
   schema,
