@@ -23,6 +23,7 @@ export interface IAgentTask extends Document {
   files: Record<string, unknown>;
   git?: Record<string, unknown>;
   validation?: Record<string, unknown>;
+  messages?: Array<{ role: string; content: string; timestamp: number }>;
   metadata: {
     model?: string;
     toolCallCount?: number;
@@ -58,6 +59,7 @@ const agentTaskSchema = new Schema<IAgentTask>(
     files: { type: Schema.Types.Mixed, default: {} },
     git: { type: Schema.Types.Mixed },
     validation: { type: Schema.Types.Mixed },
+    messages: { type: Schema.Types.Mixed },
     metadata: {
       model: String,
       toolCallCount: Number,

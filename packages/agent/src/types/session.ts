@@ -27,6 +27,13 @@ export interface StagedFile {
 import type { AgentSessionGit } from './git';
 import type { ValidationResult } from './validation';
 
+/** Persisted chat turn (capped at 50 per session). */
+export interface SessionChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+}
+
 export interface AgentSession {
   id: string;
   files: Record<string, StagedFile>;
@@ -42,6 +49,7 @@ export interface AgentSession {
   metadata?: {
     model?: string;
   };
+  messages?: SessionChatMessage[];
 }
 
 export interface ApplyResult {

@@ -1,5 +1,5 @@
 // Types
-export type { AgentMessage, ToolUse, StagedFile, AgentSession, ApplyResult } from './types/session';
+export type { AgentMessage, ToolUse, StagedFile, AgentSession, ApplyResult, SessionChatMessage } from './types/session';
 
 export type { AgentEventType, AgentEvent, ChatMessage, RunAgentLoopOptions, RunAgentLoopResult } from './types/events';
 
@@ -48,6 +48,7 @@ export {
   getSessionPath,
   loadSession,
   saveSession,
+  saveSessionMessages,
   stageFile,
   applySession,
   discardSession,

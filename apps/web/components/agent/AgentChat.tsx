@@ -168,20 +168,50 @@ export default function AgentChat({
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Welcome message
+  // Load persisted messages or show welcome
   useEffect(() => {
-    setMessages([
-      {
-        id: 'welcome',
-        role: 'assistant',
-        content:
-          layout === 'sidekick'
-            ? "Hi! I'm your LuxGen assistant.\n\nAsk about customers, orders, products, or describe a feature you want to build — I'll read the codebase and stage changes for your review."
-            : "👋 Hi! I'm LuxGen Dev Agent.\n\nDescribe what you want to build — a new page, a feature, a component, or a backend endpoint. I'll read the codebase, write the code, and show you exactly what I'm going to change before anything is applied.",
-        timestamp: Date.now(),
-      },
-    ]);
-  }, [layout]);
+    let cancelled = false;
+
+    const welcome: ChatMessage = {
+      id: 'welcome',
+      role: 'assistant',
+      content:
+        layout === 'sidekick'
+          ? "Hi! I'm your LuxGen assistant.\n\nAsk about customers, orders, products, or describe a feature you want to build — I'll read the codebase and stage changes for your review."
+          : "👋 Hi! I'm LuxGen Dev Agent.\n\nDescribe what you want to build — a new page, a feature, a component, or a backend endpoint. I'll read the codebase, write the code, and show you exactly what I'm going to change before anything is applied.",
+      timestamp: Date.now(),
+    };
+
+    const load = async () => {
+      try {
+        const res = await fetch(`/api/agent/stage?sessionId=${encodeURIComponent(sessionId)}`);
+        if (!res.ok) throw new Error('load failed');
+        const session = await res.json();
+        if (cancelled) return;
+        if (session.messages?.length) {
+          setMessages(
+            session.messages.map(
+              (m: { role: 'user' | 'assistant'; content: string; timestamp: number }, i: number) => ({
+                id: `loaded-${m.timestamp}-${i}`,
+                role: m.role,
+                content: m.content,
+                timestamp: m.timestamp,
+              }),
+            ),
+          );
+        } else {
+          setMessages([welcome]);
+        }
+      } catch {
+        if (!cancelled) setMessages([welcome]);
+      }
+    };
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, layout]);
 
   const sendMessage = useCallback(async () => {
     const text = input.trim();

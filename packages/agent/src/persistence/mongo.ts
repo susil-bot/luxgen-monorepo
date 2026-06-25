@@ -56,6 +56,7 @@ export async function syncSessionToMongo(session: AgentSession): Promise<void> {
       files: session.files,
       git: session.git,
       validation: session.validation,
+      messages: session.messages,
       metadata: {
         model: session.metadata?.model,
         updatedAt: new Date(session.updatedAt),

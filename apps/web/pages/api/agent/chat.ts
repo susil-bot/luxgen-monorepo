@@ -8,6 +8,7 @@ import {
   acquireTenantStreamSlot,
   releaseTenantStreamSlot,
   isAgentMessageRateLimited,
+  saveSessionMessages,
 } from '@luxgen/agent';
 import { requireAgentStudio } from '../../../lib/agent-auth';
 import { getOllamaUrl } from '@luxgen/config';
@@ -130,6 +131,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     try {
       await ensureGitSession(sessionId);
 
+      let assistantText = '';
+
       await runAgentLoop({
         sessionId,
         messages,
@@ -145,10 +148,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         shouldCancel: () => isCancelled,
         onEvent: (event) => {
           if (isCancelled && event.type !== 'done') return;
+          if (event.type === 'text' && typeof event.content === 'string') {
+            assistantText += event.content;
+          }
           const { type, ...rest } = event;
           sendEvent(res, type as EventType, rest);
         },
       });
+
+      if (!isCancelled && assistantText.trim()) {
+        const lastUser = [...messages].reverse().find((m) => m.role === 'user');
+        const turns: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+        if (lastUser) turns.push(lastUser);
+        turns.push({ role: 'assistant', content: assistantText });
+        saveSessionMessages(sessionId, turns);
+      }
     } finally {
       clearInterval(heartbeatInterval);
       clearTimeout(connectionTimer);

@@ -456,11 +456,12 @@
       **Fix approach:** Either wire `AIStudioSidekickPanel` into a page (e.g., as a floating sidekick on other admin pages using `layout="sidekick"` mode of `AgentChat`) or delete the file. If wiring: import from a persistent layout component, pass a stable `sessionId` from `getServerSideProps` or `useId()`.
       _Wired globally via `AIStudioPanelSlot` in `apps/web/pages/_app.tsx` (M-23 session id fix)._
 
-- [ ] **A-14** `[feat]`
+- [x] **A-14** `[feat]`
       **File:** `packages/agent/src/types/session.ts`, `packages/agent/src/changeset/session-store.ts`
       Chat message history is **never persisted**. `AgentSession.files` stores staged file changes but has no `messages` field. On page refresh or session reload, all conversation context is lost — the agent starts cold with no knowledge of prior turns.
       **How to build:** 1. Add `messages?: Array<{ role: 'user' | 'assistant'; content: string; timestamp: number }>` to `AgentSession` in `packages/agent/src/types/session.ts`. 2. After `runAgentLoop` completes in `chat.ts`, save the messages to the session via `saveSession`. 3. On page load in `AgentChat.tsx`, call `GET /api/agent/stage?sessionId=<id>` and populate `messages` state from `session.messages` (filtering out the welcome message). 4. Update `syncSessionToMongo` to include messages in the `AgentTask` document for audit/history.
       **Cap at 50 messages** to avoid unbounded session file growth.
+      **Done (2026-06-25):** Session message persistence with 50-message cap.
 
 - [x] **A-15** `[arch]`
       **File:** `packages/agent/src/persistence/mongo.ts` lines 43–66, `packages/agent/src/types/task.ts` lines 14–27
