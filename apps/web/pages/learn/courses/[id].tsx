@@ -98,7 +98,7 @@ export default function LearnCourseDetailPage({ tenantSubdomain }: Props) {
               </section>
             )}
 
-            <section className="ios-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <section className="ios-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 md:static fixed bottom-0 left-0 right-0 z-30 md:relative rounded-none md:rounded-2xl border-t md:border shadow-lg md:shadow-none px-4 py-4 md:p-5" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
               <div>
                 <p className="font-semibold text-primary">
                   {isEnrolled || success ? 'You are enrolled' : 'Ready to start?'}
