@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
-import { Tenant } from '@luxgen/db';
-import { getTenantConfig, validateTenantConfig } from '../config/tenants';
+import { Tenant, TenantSubscription, resolveEffectivePlan } from '@luxgen/db';
+import { getTenantConfig, validateTenantConfig, getInitialSubscriptionPlan } from '../config/tenants';
 import { getTenantContext } from '../middleware/tenantRouting';
 import { validateStorefrontPatchBody, validationErrorsToRecord, mergeStorefrontPatch } from '../middleware/validation';
 
@@ -30,7 +30,7 @@ router.get('/current', async (req: Request, res: Response) => {
         subdomain: tenant.subdomain,
         domain: tenant.domain,
         status: tenant.status,
-        plan: tenant.metadata?.plan || 'free',
+        plan: await resolveEffectivePlan(tenant.subdomain),
         branding: tenant.settings?.branding || {},
         features: tenant.settings?.config?.features || {},
         limits: tenant.settings?.config?.limits || {},
@@ -292,7 +292,7 @@ router.get('/stats', async (req: Request, res: Response) => {
       data: {
         users: userCount,
         courses: courseCount,
-        plan: tenant.metadata?.plan || 'free',
+        plan: await resolveEffectivePlan(tenant.subdomain),
         limits: tenant.settings?.config?.limits || {},
         usage: {
           users: userCount,
@@ -353,6 +353,13 @@ router.post('/init', async (req: Request, res: Response) => {
     const newTenant = new Tenant(tenantConfig);
     await newTenant.save();
 
+    const initialPlan = getInitialSubscriptionPlan(subdomain);
+    await TenantSubscription.findOneAndUpdate(
+      { tenantId: subdomain },
+      { $set: { plan: initialPlan, status: 'active' } },
+      { upsert: true, new: true },
+    );
+
     res.status(201).json({
       success: true,
       message: 'Tenant initialized successfully',
@@ -361,7 +368,7 @@ router.post('/init', async (req: Request, res: Response) => {
         name: newTenant.name,
         subdomain: newTenant.subdomain,
         status: newTenant.status,
-        plan: newTenant.metadata.plan,
+        plan: getInitialSubscriptionPlan(subdomain),
       },
     });
   } catch (error) {

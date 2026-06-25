@@ -439,12 +439,12 @@ export class TenantConfigUtils {
   /**
    * Generate tenant-specific environment variables
    */
-  public static generateTenantEnvVars(workflow: TenantWorkflow): Record<string, string> {
+  public static generateTenantEnvVars(workflow: TenantWorkflow, billingPlan?: string): Record<string, string> {
     return {
       TENANT_ID: workflow.id,
       TENANT_NAME: workflow.name,
       TENANT_SUBDOMAIN: workflow.subdomain,
-      TENANT_PLAN: workflow.metadata.plan,
+      TENANT_PLAN: billingPlan ?? workflow.metadata.plan,
       TENANT_TIER: workflow.metadata.tier,
       TENANT_REGION: workflow.metadata.region,
       TENANT_TIMEZONE: workflow.metadata.timezone,
