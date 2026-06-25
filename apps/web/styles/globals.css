@@ -145,10 +145,33 @@
   }
 
   body {
+    margin: 0;
     background-color: var(--color-bg-primary);
     color: var(--color-label-primary);
     min-height: 100vh;
     overflow-x: hidden;
+  }
+
+  html.route-loading::after {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 10000;
+    height: 3px;
+    width: 35%;
+    background: var(--color-blue);
+    animation: route-progress-bar 1s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes route-progress-bar {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(300%);
+    }
   }
 
   ::selection {

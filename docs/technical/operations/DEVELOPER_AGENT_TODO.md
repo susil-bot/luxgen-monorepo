@@ -1011,36 +1011,36 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 1 — Global Layout Architecture (UI-01 → UI-20)
 
-- [ ] **UI-01** `[layout]`
+- [x] **UI-01** `[layout]`
       `apps/web/pages/_document.tsx` is missing `<meta name="viewport" content="width=device-width, initial-scale=1" />`. Without this tag, mobile browsers render at desktop width and shrink the page — breaking every layout on iOS/Android.
       **Fix:** Add the viewport meta inside `<Head>` in `_document.tsx`.
 
-- [ ] **UI-02** `[layout]` `[hardcode]`
+- [x] **UI-02** `[layout]` `[hardcode]`
       `_document.tsx` body `style` prop uses literal hex values (`backgroundColor: '#f2f2f7', color: '#000000'`). These bypass the CSS variable system and ignore dark-mode overrides.
       **Fix:** Remove inline style; apply `background-color: var(--color-bg-primary); color: var(--color-label-primary);` via `globals.css body {}`.
 
-- [ ] **UI-03** `[layout]` `[arch]`
+- [x] **UI-03** `[layout]` `[arch]`
       17 pages have no layout wrapper at all (raw JSX with no AppLayout/Shell). The list includes `store/[slug].tsx`, `admin/users.tsx`, `users.tsx`, and all redirect stubs. Redirect stubs are fine; the others need layout shells.
       **Affected non-redirect pages:** `admin/users.tsx`, `users.tsx`, `automations/tower/[id].tsx`, `courses/[id]/edit.tsx`.
       **Fix:** Wrap each in the appropriate shell; add `getTenantPageProps` if server-side tenant is needed.
 
-- [ ] **UI-04** `[layout]` `[arch]`
+- [x] **UI-04** `[layout]` `[arch]`
       `AdminDashboardLayout` is imported and used only on `dashboard.tsx`. All other admin pages use plain `AppLayout`. The distinction between these two layouts is undocumented. If `AdminDashboardLayout` is the correct shell for admin pages, audit which pages should be migrated to it.
       **Fix:** Document the intended usage boundary, or consolidate into `AppLayout` with a `variant="admin"` prop.
 
-- [ ] **UI-05** `[layout]` `[arch]`
+- [x] **UI-05** `[layout]` `[arch]`
       No centralised error boundary is registered in `_app.tsx`. An unhandled React render error on any page white-screens the entire application with no user-visible recovery path.
       **Fix:** Wrap `<Component {...pageProps} />` in `<ErrorBoundary>` (already exported from `@luxgen/ui`) in `_app.tsx`.
 
-- [ ] **UI-06** `[layout]` `[arch]`
+- [x] **UI-06** `[layout]` `[arch]`
       No global page-transition indicator exists. Navigating between pages shows no loading feedback because Next.js Pages Router does not add a progress bar by default.
       **Fix:** Wire `nprogress` or the router `routeChangeStart`/`routeChangeComplete` events to a thin top-bar progress indicator in `_app.tsx`.
 
-- [ ] **UI-07** `[layout]` `[arch]`
+- [x] **UI-07** `[layout]` `[arch]`
       `GlobalContext`, `ThemeContext`, `UserContext`, `NavigationContext`, and `NavTenantSwitchContext` are all exported from `packages/ui/src/index.ts` but none of them appear to be mounted in `_app.tsx`. Components that depend on these contexts will silently receive their default (empty) values.
       **Fix:** Mount all required context providers in `_app.tsx` in the correct nesting order; remove any that are genuinely unused.
 
-- [ ] **UI-08** `[layout]` `[arch]`
+- [x] **UI-08** `[layout]` `[arch]`
       `TenantThemeBridge` (in `apps/web/components/theme/`) exists to apply tenant-specific CSS overrides via `data-tenant` attributes, but it is not present in every page or in `_app.tsx`. Pages that do not include it will not receive tenant colour overrides.
       **Fix:** Move `TenantThemeBridge` into `_app.tsx` so it wraps the entire application.
 
@@ -1056,7 +1056,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
       No CSS methodology is documented or enforced. Pages simultaneously use four styling approaches: Tailwind utility classes, iOS-design-system class names (`ios-btn-primary`, `ios-card`), CSS custom properties (`var(--color-blue)`), and inline `style={{ ... }}` objects. This makes it impossible to apply global changes consistently.
       **Fix:** Adopt a single primary approach (CSS variables + utility classes); document in `CONTRIBUTING.md` and lint via a Stylelint rule.
 
-- [ ] **UI-12** `[layout]` `[arch]`
+- [x] **UI-12** `[layout]` `[arch]`
       No `pages/500.tsx` custom error page exists. Next.js defaults to a plain white page for 500 errors.
       **Fix:** Create `pages/500.tsx` consistent with `pages/404.tsx` using `AppLayout` and the `PageEmptyState` component.
 
@@ -1076,7 +1076,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `getDefaultLogo()` returns a static object. All 28 usages ignore the real tenant's logo URL that may be stored in the database and accessible via `GET_TENANT`.
       **Fix:** Replace with a `useTenantLogo()` hook that fetches from the tenant config query.
 
-- [ ] **UI-17** `[layout]` `[arch]`
+- [x] **UI-17** `[layout]` `[arch]`
       No shared GraphQL error handler exists. Each page duplicates its own error-handling pattern (some use `errorPolicy: 'ignore'`, some check `if (error)`, some do nothing). A GraphQL 401/403 should globally redirect to `/login?reason=session_expired`.
       **Fix:** Add an Apollo `onError` link in the Apollo Client setup that intercepts `UNAUTHENTICATED` errors and redirects.
 
@@ -1845,7 +1845,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 | Section                                         | Items   | Done  |
 | ----------------------------------------------- | ------- | ----- |
-| Global Layout Architecture (UI-01–20)           | 20      | 0     |
+| Global Layout Architecture (UI-01–20)           | 20      | 10    |
 | Responsive Design (UI-21–45)                    | 25      | 0     |
 | Hardcoded Values / Tokens (UI-46–75)            | 30      | 4     |
 | TypeScript & Type Safety (UI-76–95)             | 20      | 0     |
@@ -1857,6 +1857,6 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | Accessibility (UI-166–180)                      | 15      | 0     |
 | Duplicate Components (UI-181–190)               | 10      | 0     |
 | No-Op Wiring / Missing Connections (UI-191–200) | 10      | 0     |
-| **Total**                                       | **200** | **4** |
+| **Total**                                       | **200** | **18** |
 
 > Update Done column as items are completed. Priority order: Layout → Responsive → Hardcoded → TypeScript → Dead Code.

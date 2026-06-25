@@ -4,6 +4,7 @@ export default function Document() {
   return (
     <Html lang="en">
       <Head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
         {/* Inter — free open-source sans-serif, used as SF Pro substitute */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -12,7 +13,7 @@ export default function Document() {
           rel="stylesheet"
         />
       </Head>
-      <body style={{ margin: 0, backgroundColor: '#f2f2f7', color: '#000000' }}>
+      <body>
         <Main />
         <NextScript />
       </body>
