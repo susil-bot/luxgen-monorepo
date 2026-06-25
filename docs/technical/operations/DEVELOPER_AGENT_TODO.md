@@ -172,7 +172,7 @@
       **File:** `apps/web/components/agent/AgentChat.tsx` lines 370, 199, 225
       UI tells the user "Press Escape to stop" but no `keydown` listener exists that calls `abortRef.current?.abort()`. The Escape key does nothing. Wire `window.addEventListener('keydown', handler)` in the message-streaming `useEffect`.
 
-- [ ] **M-04** `[bug]`
+- [x] **M-04** `[bug]`
       **File:** `apps/api/src/services/groupService.ts` lines 253–268
       `deleteGroup` transaction throws a `GraphQLError` inside `withTransaction`. Mongoose transactions expect standard `Error` instances to trigger rollback. Throw a plain `Error` inside the transaction and convert to `GraphQLError` after the `await`.
 
