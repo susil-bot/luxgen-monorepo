@@ -29,7 +29,7 @@ export interface BannerCarouselProps {
 
 export const BannerCarousel: React.FC<BannerCarouselProps> = ({
   slides,
-  autoPlay = true,
+  autoPlay = typeof window === 'undefined' ? true : !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   autoPlayInterval = 5000,
   showArrows = true,
   showDots = true,

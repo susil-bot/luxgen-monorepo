@@ -91,6 +91,17 @@ const CarouselComponent: React.FC<CarouselProps> = ({
 
   useEffect(() => {
     startAutoPlay();
+    const touchStartX = useRef<number | null>(null);
+    const onTouchStart = (e: React.TouchEvent) => {
+      touchStartX.current = e.touches[0].clientX;
+    };
+    const onTouchEnd = (e: React.TouchEvent) => {
+      if (touchStartX.current == null) return;
+      const dx = e.changedTouches[0].clientX - touchStartX.current;
+      if (dx > 50) goToPrevious?.();
+      if (dx < -50) goToNext?.();
+      touchStartX.current = null;
+    };
     return () => stopAutoPlay();
   }, [currentIndex, autoPlay, autoPlayInterval]);
 
