@@ -123,6 +123,27 @@ export default function LearnCourseDetailPage({ tenantSubdomain }: Props) {
               )}
             </section>
 
+            {(isEnrolled || success) && (
+              <section className="ios-card p-5 space-y-4 lux-course-player">
+                <h2 className="font-semibold">Course player</h2>
+                <div
+                  className="aspect-video rounded-lg flex items-center justify-center"
+                  style={{ background: 'var(--color-fill-tertiary)' }}
+                >
+                  <span className="text-secondary text-sm">Video player placeholder</span>
+                </div>
+                <ul className="space-y-2">
+                  {['Introduction', 'Lesson 1', 'Lesson 2', 'Lesson 3'].map((lesson, i) => (
+                    <li key={lesson} className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" disabled readOnly />
+                      <span>{lesson}</span>
+                      {i === 0 ? <span className="badge badge-blue text-xs">Current</span> : null}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
             {enrollError && (
               <p className="text-sm" style={{ color: 'var(--color-red)' }}>
                 {enrollError}
