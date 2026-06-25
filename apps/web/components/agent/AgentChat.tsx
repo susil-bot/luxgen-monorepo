@@ -396,7 +396,7 @@ export default function AgentChat({
               rows={2}
               className="flex-1 resize-none input-field"
               disabled={isStreaming}
-              style={{ minHeight: '56px', maxHeight: '160px' }}
+              style={{ minHeight: '56px', maxHeight: 'min(40vh, 160px)' }}
             />
             <button
               onClick={sendMessage}
