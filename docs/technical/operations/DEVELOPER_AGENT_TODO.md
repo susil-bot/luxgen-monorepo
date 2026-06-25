@@ -340,7 +340,7 @@
       **File:** `apps/web/pages/register.tsx` lines 33–34
       `console.log('Registration data:', data)` logs full form data including password fields to the browser console. Remove immediately.
 
-- [ ] **L-21** `[style]` `[security]`
+- [x] **L-21** `[style]` `[security]`
       **File:** `apps/web/pages/api/users/me.ts` line 122 · `apps/web/pages/api/users/current.ts` line 122
       Server-side `console.log` outputs user name, email, role, and tenant on every authenticated request. PII should not appear in server logs without scrubbing. Remove or redact.
 
