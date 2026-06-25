@@ -91,7 +91,7 @@ const LoginPageContent: React.FC = () => {
   };
 
   const handleForgotPassword = () => {
-    showError('Password reset is coming soon. Contact your administrator if you need access.');
+    router.push('/forgot-password');
   };
 
   const handleSignUp = () => {

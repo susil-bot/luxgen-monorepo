@@ -2,15 +2,31 @@ import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { User } from '@luxgen/db';
 import { UserRole } from '@luxgen/auth';
-import { validateLogin, validateRegister } from '../middleware/validation';
+import { hashPassword } from '@luxgen/auth';
+import {
+  validateLogin,
+  validateRegister,
+  validateForgotPassword,
+  validateResetPassword,
+} from '../middleware/validation';
 import { loginRateLimitMiddleware } from '../middleware/loginRateLimit';
+import { isAccountActive, ACCOUNT_DEACTIVATED_MESSAGE } from '../utils/accountStatus';
 import { AuthServiceError, buildAuthRestPayload, userService } from '../services/userService';
 import { UserRegistrationService } from '../services/userRegistrationService';
 import { requireRole, canInviteUsers, logRoleAccess } from '../middleware/roleManagement';
 import { sendTransactionalEmail } from '../utils/email';
 import { logger } from '../utils/logger';
+import { getWebUrl } from '@luxgen/config';
 
 const router = Router();
+
+const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;
+
+function hashResetToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+const PASSWORD_RESET_SENT_MESSAGE = 'If an account exists with that email, a password reset link has been sent.';
 
 // Login endpoint
 router.post('/login', loginRateLimitMiddleware, validateLogin, async (req: Request, res: Response) => {
@@ -143,6 +159,105 @@ router.post('/logout', (req: Request, res: Response) => {
     success: true,
     message: 'Logout successful',
   });
+});
+
+// Forgot password — issues a crypto reset token (email stub via sendTransactionalEmail)
+router.post('/forgot-password', validateForgotPassword, async (req: Request, res: Response) => {
+  try {
+    const { email, tenant } = req.body;
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+      ...(tenant && { tenant }),
+    }).select('+passwordResetToken +passwordResetExpires');
+
+    if (user && isAccountActive(user)) {
+      const rawToken = crypto.randomBytes(32).toString('hex');
+      user.passwordResetToken = hashResetToken(rawToken);
+      user.passwordResetExpires = new Date(Date.now() + PASSWORD_RESET_TTL_MS);
+      await user.save();
+
+      const resetUrl = `${getWebUrl()}/reset-password?token=${encodeURIComponent(rawToken)}`;
+
+      try {
+        await sendTransactionalEmail({
+          to: user.email,
+          subject: 'Reset your LuxGen password',
+          body: [
+            `Hello ${user.firstName},`,
+            '',
+            'We received a request to reset your LuxGen password.',
+            '',
+            `Reset your password using this link (valid for 1 hour):`,
+            resetUrl,
+            '',
+            'If you did not request this, you can ignore this email.',
+          ].join('\n'),
+        });
+      } catch (emailError) {
+        logger.error('Failed to send password reset email:', emailError);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: PASSWORD_RESET_SENT_MESSAGE,
+    });
+  } catch (error) {
+    logger.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error:
+        process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
+    });
+  }
+});
+
+// Reset password — consumes token and sets a new password
+router.post('/reset-password', validateResetPassword, async (req: Request, res: Response) => {
+  try {
+    const { token, password } = req.body;
+    const hashedToken = hashResetToken(token.trim());
+
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: new Date() },
+    }).select('+passwordResetToken +passwordResetExpires');
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset token',
+        errors: { token: 'Invalid or expired reset token' },
+      });
+    }
+
+    if (!isAccountActive(user)) {
+      return res.status(403).json({
+        success: false,
+        message: ACCOUNT_DEACTIVATED_MESSAGE,
+      });
+    }
+
+    user.password = await hashPassword(password);
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password reset successful. You can now sign in with your new password.',
+    });
+  } catch (error) {
+    logger.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error:
+        process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
+    });
+  }
 });
 
 // Invite user endpoint

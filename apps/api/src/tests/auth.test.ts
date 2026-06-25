@@ -117,4 +117,42 @@ describe('Authentication API', () => {
       expect(response.body.message).toBe('Logout successful');
     });
   });
+
+  describe('POST /api/auth/forgot-password', () => {
+    it('should return validation error for missing email', async () => {
+      const response = await request(app).post('/api/auth/forgot-password').send({});
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.errors.email).toBeDefined();
+    });
+
+    it('should return generic success for valid email', async () => {
+      const response = await request(app).post('/api/auth/forgot-password').send({ email: 'user@example.com' });
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toContain('password reset');
+    });
+  });
+
+  describe('POST /api/auth/reset-password', () => {
+    it('should return validation error for missing token', async () => {
+      const response = await request(app).post('/api/auth/reset-password').send({ password: 'password123' });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.errors.token).toBeDefined();
+    });
+
+    it('should return validation error for short password', async () => {
+      const response = await request(app)
+        .post('/api/auth/reset-password')
+        .send({ token: 'a'.repeat(32), password: '123' });
+
+      expect(response.status).toBe(400);
+      expect(response.body.success).toBe(false);
+      expect(response.body.errors.password).toBeDefined();
+    });
+  });
 });
