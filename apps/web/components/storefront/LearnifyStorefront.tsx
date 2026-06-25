@@ -231,13 +231,17 @@ export function LearnifyStorefront({ tenantSubdomain }: LearnifyStorefrontProps)
           ) : (
             <div className={styles.instructorGrid}>
               {instructors.map((instructor) => (
-                <div key={instructor.id} className={styles.instructorCard}>
+                <Link
+                  key={instructor.id}
+                  href={`/store/mentors/${encodeURIComponent(instructor.id)}`}
+                  className={styles.instructorCard}
+                >
                   <div className={styles.avatar}>{initials(instructor.name)}</div>
                   <p className={styles.instructorName}>{instructor.name}</p>
                   <p className={styles.instructorRole}>
                     {instructor.role} · {instructor.courseCount} courses
                   </p>
-                </div>
+                </Link>
               ))}
             </div>
           )}
