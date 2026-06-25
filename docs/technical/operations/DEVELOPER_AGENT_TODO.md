@@ -227,9 +227,10 @@
       The "Dev plan override" UI is gated on the build-time variable `NEXT_PUBLIC_APP_ENV`. If a dev build artifact is promoted to production, these buttons will be visible and functional in production. Gate this UI server-side using a runtime check, not a baked-in build variable.
       _Resolved: dev override UI removed from billing pages; `setTenantPlanDev` is server-gated via `BILLING_DEV_MODE` only._
 
-- [ ] **M-17** `[infra]`
+- [x] **M-17** `[infra]`
       **File:** `k8s/api.yaml` lines 27–36
       `MONGODB_URI` is mounted both via `envFrom: secretRef` and via an individual `secretKeyRef`. The duplicate mount is redundant and creates precedence confusion. Use only one approach.
+      _Resolved: secrets injected only via `envFrom.secretRef`; redundant `MONGODB_URI` secretKeyRef removed._
 
 - [ ] **M-18** `[infra]`
       **File:** `k8s/mongodb.yaml` lines 57–72
@@ -549,12 +550,12 @@
 | -------------------- | ------- | ------ |
 | CRITICAL             | 7       | 7 ✅   |
 | HIGH                 | 27      | 20     |
-| MEDIUM               | 24      | 20     |
+| MEDIUM               | 24      | 21     |
 | LOW                  | 25      | 22     |
 | **Agent / A-HIGH**   | **7**   | **4**  |
 | **Agent / A-MEDIUM** | **10**  | **2**  |
 | **Agent / A-LOW**    | **10**  | **1**  |
-| **Total**            | **110** | **77** |
+| **Total**            | **110** | **78** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
 
