@@ -140,7 +140,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
           >
             <button
               className="accordion-trigger"
-              onClick={() => handleToggle(item.id)}
+              onClick={() => handleToggle(item.id)} aria-expanded={isOpen}
               disabled={isDisabled}
               style={{
                 width: '100%',
