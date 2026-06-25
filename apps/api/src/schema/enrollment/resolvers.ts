@@ -22,6 +22,7 @@ function mapEnrollment(doc: {
   course: { toString(): string } | string;
   student: { toString(): string } | string;
   notes: string;
+  tags?: string[];
   paymentStatus: string;
   progressPercent?: number;
   learningStatus?: string;
@@ -36,6 +37,7 @@ function mapEnrollment(doc: {
     courseId: typeof doc.course === 'string' ? doc.course : doc.course.toString(),
     studentId: typeof doc.student === 'string' ? doc.student : doc.student.toString(),
     notes: doc.notes ?? '',
+    tags: doc.tags ?? [],
     paymentStatus: doc.paymentStatus,
     progressPercent: doc.progressPercent ?? 0,
     learningStatus: doc.learningStatus ?? EnrollmentLearningStatus.ACTIVE,
@@ -48,9 +50,6 @@ function mapEnrollment(doc: {
 }
 
 export const enrollmentResolvers = {
-  User: {
-    staffNotes: (parent: { staffNotes?: string }) => parent.staffNotes ?? '',
-  },
   Query: {
     enrollment: async (_: unknown, { courseId, studentId }: { courseId: string; studentId: string }) => {
       const doc = await enrollmentService.getByCourseAndStudent(courseId, studentId);
@@ -99,6 +98,7 @@ export const enrollmentResolvers = {
           courseId: string;
           studentId: string;
           notes?: string;
+          tags?: string[];
           paymentStatus?: string;
         };
       },
@@ -109,6 +109,7 @@ export const enrollmentResolvers = {
         input.studentId,
         {
           notes: input.notes,
+          tags: input.tags,
           paymentStatus: input.paymentStatus as EnrollmentPaymentStatus | undefined,
         },
         actorFromContext(context.user),

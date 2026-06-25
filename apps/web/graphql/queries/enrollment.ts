@@ -7,6 +7,7 @@ export const GET_ENROLLMENTS = gql`
       courseId
       studentId
       notes
+      tags
       paymentStatus
       progressPercent
       learningStatus
@@ -24,6 +25,7 @@ export const GET_ENROLLMENT_BY_ID = gql`
       courseId
       studentId
       notes
+      tags
       paymentStatus
       paidAt
       cancelledAt
@@ -39,6 +41,7 @@ export const GET_ENROLLMENT = gql`
       courseId
       studentId
       notes
+      tags
       paymentStatus
       progressPercent
       learningStatus
@@ -97,6 +100,7 @@ export const UPDATE_ORDER_NOTES = gql`
     updateOrderNotes(input: $input) {
       id
       notes
+      tags
       paymentStatus
     }
   }
@@ -107,6 +111,7 @@ export const UPDATE_ORDER = gql`
     updateOrder(input: $input) {
       id
       notes
+      tags
       paymentStatus
       paidAt
       cancelledAt

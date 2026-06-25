@@ -70,6 +70,60 @@ query GetDashboardData($tenant: String) {
 
 ---
 
+## GraphQL — Commerce (tenant → customer → product → order)
+
+Full functional spec: [technical/COMMERCE_API.md](./technical/COMMERCE_API.md)
+
+Entity map: `Tenant` → `User` / `customers` (STUDENT) → `Course` (product) → `Enrollment` (order).
+
+```graphql
+# Customers (learners)
+query Customers($tenantId: ID!, $search: String) {
+  customers(tenantId: $tenantId, search: $search) {
+    id
+    email
+    firstName
+    lastName
+    phone
+    staffNotes
+    marketingEmail
+  }
+}
+
+# Products
+query Courses($tenantId: ID!) {
+  courses(tenantId: $tenantId) {
+    id
+    title
+    status
+    description
+  }
+}
+
+# Orders
+query Enrollments($tenantId: ID!) {
+  enrollments(tenantId: $tenantId) {
+    id
+    courseId
+    studentId
+    notes
+    tags
+    paymentStatus
+    enrolledAt
+  }
+}
+
+mutation EnrollStudent($courseId: ID!, $studentId: ID!) {
+  enrollStudent(courseId: $courseId, studentId: $studentId) {
+    id
+  }
+}
+```
+
+**Web query files:** `graphql/queries/users.ts`, `courses.ts`, `enrollment.ts`, `storefront.ts`
+
+---
+
 ## GraphQL — Courses & groups
 
 ```graphql

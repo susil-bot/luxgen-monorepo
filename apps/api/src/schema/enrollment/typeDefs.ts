@@ -16,6 +16,7 @@ export const enrollmentTypeDefs = `
     courseId: ID!
     studentId: ID!
     notes: String!
+    tags: [String!]!
     paymentStatus: EnrollmentPaymentStatus!
     progressPercent: Int!
     learningStatus: EnrollmentLearningStatus!
@@ -24,10 +25,6 @@ export const enrollmentTypeDefs = `
     paidAt: Date
     cancelledAt: Date
     enrolledAt: Date!
-  }
-
-  extend type User {
-    staffNotes: String
   }
 
   input UpdateOrderNotesInput {
@@ -40,6 +37,7 @@ export const enrollmentTypeDefs = `
     courseId: ID!
     studentId: ID!
     notes: String
+    tags: [String!]
     paymentStatus: EnrollmentPaymentStatus
   }
 

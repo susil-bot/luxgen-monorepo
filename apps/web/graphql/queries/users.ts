@@ -23,6 +23,24 @@ export const GET_USER = gql`
   }
 `;
 
+export const GET_CUSTOMERS = gql`
+  query GetCustomers($tenantId: ID!, $search: String) {
+    customers(tenantId: $tenantId, search: $search) {
+      id
+      email
+      firstName
+      lastName
+      role
+      status
+      isActive
+      phone
+      marketingEmail
+      staffNotes
+      createdAt
+    }
+  }
+`;
+
 export const GET_USERS = gql`
   query GetUsers($tenantId: ID!) {
     users(tenantId: $tenantId) {

@@ -162,7 +162,7 @@ export class EnrollmentService {
   async updateOrder(
     courseId: string,
     studentId: string,
-    updates: { notes?: string; paymentStatus?: EnrollmentPaymentStatus },
+    updates: { notes?: string; tags?: string[]; paymentStatus?: EnrollmentPaymentStatus },
     actor?: { id: string; name: string },
   ): Promise<IEnrollment> {
     let enrollment = (await Enrollment.findOne({ course: courseId, student: studentId })) as IEnrollment | null;
@@ -183,6 +183,11 @@ export class EnrollmentService {
         await activityEventService.recordOrderNoteAdded(tenantId, subjectId, updates.notes, actor);
       }
       changes.push('notes');
+    }
+
+    if (updates.tags !== undefined) {
+      enrollment.tags = updates.tags;
+      changes.push('tags');
     }
 
     if (updates.paymentStatus !== undefined && updates.paymentStatus !== enrollment.paymentStatus) {

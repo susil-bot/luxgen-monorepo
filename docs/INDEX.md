@@ -35,6 +35,7 @@
 | [technical/architecture/MULTI_TENANT.md](./technical/architecture/MULTI_TENANT.md) | Subdomain tenancy, tenant config                                                       |
 | [TENANT_LAYER_SUPERADMIN.md](./TENANT_LAYER_SUPERADMIN.md)                         | **Superadmin runbook:** tenant flow, debugging, gaps, impersonation roadmap            |
 | [API_REFERENCE.md](./API_REFERENCE.md)                                             | GraphQL domains, REST routes, webhooks                                                 |
+| [technical/COMMERCE_API.md](./technical/COMMERCE_API.md)                           | **Commerce hierarchy** — tenant, customer, product, order APIs + checklist             |
 
 ### Business & features
 
