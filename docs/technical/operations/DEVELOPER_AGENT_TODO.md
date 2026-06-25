@@ -292,7 +292,7 @@
       **File:** `apps/api/src/middleware/roleManagement.ts` lines 69, 188, 217
       `req.user!.role as any` passed to `hasPermission` because `IUser.role` is typed as `string`. Type `IUser.role` as `UserRole` (from the canonical definition after H-16 is fixed) to eliminate these casts.
 
-- [ ] **L-08** `[type]`
+- [x] **L-08** `[type]`
       **File:** `apps/api/src/schema/group/resolvers.ts` — throughout
       All resolver arguments typed as `any` (`_: any`, `{ input }: { input: any }`). Add precise input types matching the GraphQL schema for all 12 mutations and queries.
 
@@ -405,11 +405,12 @@
       `mergeAgentBranch()` runs `git checkout <baseBranch>` followed by `git merge --squash <agentBranch>` directly on the **shared monorepo root** working tree. Two concurrent merge calls will race: the second `git checkout` will be on the wrong branch when the first merge commits. The function must instead create a throwaway worktree for the base branch merge, execute the merge there, then `git push` — or use `git merge-tree` to generate the merge result without touching the working tree.
       **Fix approach:** In `mergeAgentBranch`, add a temporary worktree at `.agent-worktrees/merge-<sessionId>`, checkout `baseBranch` there, squash-merge into it, commit, then remove the temp worktree. Never touch `root` working tree.
 
-- [ ] **A-07** `[feat]`
+- [x] **A-07** `[feat]`
       **File:** `apps/web/pages/api/agent/tasks.ts` — no status-stream endpoint exists
       `POST /api/agent/tasks` enqueues a headless job and returns `{ status: 'enqueued' }`, but there is **no mechanism for the UI or API caller to poll or stream job status**. The UI has no panel showing headless task progress. A caller must guess when the job completes.
       **What to build:** 1. Add `GET /api/agent/tasks?sessionId=<id>` — already exists; returns `{ session, task, queueEnabled }`. Ensure `task.status` reflects the live MongoDB status set by the worker. 2. Add `GET /api/agent/tasks/stream?sessionId=<id>` — SSE endpoint that polls MongoDB every 2 seconds for status changes and emits `{ type: 'status', status, validation }` events until the task reaches a terminal state (`pending_review`, `failed`, `merged`, `cancelled`). 3. Add a `HeadlessTaskPanel` UI component in `apps/web/components/agent/` that opens when a headless task is enqueued and streams from the new SSE endpoint.
       **Files to create:** `apps/web/pages/api/agent/tasks/stream.ts`, `apps/web/components/agent/HeadlessTaskPanel.tsx`.
+      **Done (2026-06-25):** SSE stream endpoint + `HeadlessTaskPanel` component.
 
 ### A-MEDIUM — Fix in Next Sprint
 
