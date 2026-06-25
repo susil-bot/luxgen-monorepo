@@ -29,6 +29,11 @@ export interface TenantSecurity {
   };
 }
 
+export interface TenantOnboarding {
+  completedSteps: string[];
+  dismissed: boolean;
+}
+
 export interface TenantConfig {
   features: {
     analytics: boolean;
@@ -81,6 +86,7 @@ export interface ITenant extends Document {
     branding: TenantBranding;
     security: TenantSecurity;
     config: TenantConfig;
+    onboarding?: TenantOnboarding;
   };
   metadata: {
     createdAt: Date;
@@ -188,6 +194,10 @@ const tenantSchema = new Schema<ITenant>(
             default: false,
           },
         },
+      },
+      onboarding: {
+        completedSteps: { type: [String], default: [] },
+        dismissed: { type: Boolean, default: false },
       },
       config: {
         features: {
