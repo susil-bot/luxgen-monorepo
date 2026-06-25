@@ -2,6 +2,13 @@ import { tenantKeyManager } from '../utils/tenantKeys';
 import { generateToken, verifyToken, getTenantFromToken, verifyTokenWithTenant } from '../utils/jwt';
 import { generateNewTenantKey, validateTenantKey, rotateTenantKey } from '../utils/keyRotation';
 
+jest.mock('../services/tenantKeyPersistence', () => ({
+  loadActiveAndGraceKeys: jest.fn().mockResolvedValue([]),
+  upsertActiveKey: jest.fn().mockResolvedValue(undefined),
+  insertGraceKey: jest.fn().mockResolvedValue(undefined),
+  revokeKeysForTenant: jest.fn().mockResolvedValue(0),
+}));
+
 describe('Per-Tenant JWT Keys', () => {
   const testTenantId = 'test-tenant';
   const testKey = 'test-tenant-specific-key-here-32-chars-minimum';
@@ -121,7 +128,24 @@ describe('Per-Tenant JWT Keys', () => {
       const result = await rotateTenantKey(testTenantId, newKey);
 
       expect(result.success).toBe(true);
-      expect(result.newKeyId).toBeDefined();
+      expect(result.newKeyId).toBe(testTenantId);
+    });
+
+    it('should verify tokens signed before rotation during grace period', async () => {
+      const payload = {
+        id: 'user123',
+        email: 'user@test.com',
+        tenant: testTenantId,
+        role: 'STUDENT',
+      };
+      const token = generateToken(payload, testTenantId);
+      const oldKey = tenantKeyManager.getTenantKey(testTenantId);
+      const newKey = generateNewTenantKey(64);
+
+      await tenantKeyManager.addGraceKey(testTenantId, oldKey, new Date(Date.now() + 3_600_000));
+      tenantKeyManager.addTenantKey(testTenantId, newKey);
+
+      expect(verifyToken(token)).toMatchObject({ id: 'user123', tenant: testTenantId });
     });
 
     it('should fail rotation for non-existent tenant', async () => {

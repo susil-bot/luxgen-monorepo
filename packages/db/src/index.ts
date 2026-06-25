@@ -52,3 +52,5 @@ export type { IMcpToolAuditEntry } from './mcp-audit';
 export { McpToolAuditEntry } from './mcp-audit';
 export type { IMcpApiKey, McpApiKeyScope } from './mcp-api-key';
 export { McpApiKey } from './mcp-api-key';
+export type { ITenantSigningKey, TenantSigningKeyStatus } from './tenant-signing-key';
+export { TenantSigningKey } from './tenant-signing-key';
