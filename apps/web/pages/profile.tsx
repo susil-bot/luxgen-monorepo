@@ -53,7 +53,7 @@ function ProfileContent({ tenant }: ProfilePageProps) {
         },
       });
       updateStoredUser({ firstName: firstName.trim(), lastName: lastName.trim() });
-      showSuccess('Profile updated');
+      showSuccess('Your profile changes were saved successfully.');
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : 'Could not save profile';
       showError(message);
