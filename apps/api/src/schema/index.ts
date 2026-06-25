@@ -45,6 +45,14 @@ import { learnerResolvers } from './learner/resolvers';
 import { analyticsResolvers } from './analytics/resolvers';
 import { IssueLearnerCertificateResolvers } from './engagement/issueLearnerCertificate/resolvers';
 import { certificateResolvers } from './certificate/resolvers';
+import { EnrollmentStatusSummaryTypeDefs } from './engagement/enrollmentStatusSummary/typeDefs';
+import { EnrollmentStatusSummaryResolvers } from './engagement/enrollmentStatusSummary/resolvers';
+import { StoreCatalogFacetsTypeDefs } from './engagement/storeCatalogFacets/typeDefs';
+import { StoreCatalogFacetsResolvers } from './engagement/storeCatalogFacets/resolvers';
+import { CartSessionTypeDefs } from './engagement/cartSession/typeDefs';
+import { CartSessionResolvers } from './engagement/cartSession/resolvers';
+import { CheckoutSessionStatusTypeDefs } from './engagement/checkoutSessionStatus/typeDefs';
+import { CheckoutSessionStatusResolvers } from './engagement/checkoutSessionStatus/resolvers';
 
 // Base schema
 const baseTypeDefs = `
@@ -85,6 +93,10 @@ export const typeDefs = mergeTypeDefs([
   learnerTypeDefs,
   analyticsTypeDefs,
   certificateTypeDefs,
+  EnrollmentStatusSummaryTypeDefs,
+  StoreCatalogFacetsTypeDefs,
+  CartSessionTypeDefs,
+  CheckoutSessionStatusTypeDefs,
 ]);
 
 // Scalar resolvers
@@ -118,6 +130,10 @@ const mergedResolvers = mergeResolvers([
   learnerResolvers,
   analyticsResolvers,
   certificateResolvers,
+  EnrollmentStatusSummaryResolvers,
+  StoreCatalogFacetsResolvers,
+  CartSessionResolvers,
+  CheckoutSessionStatusResolvers,
 ]);
 
 export const resolvers: any = secureResolvers(mergedResolvers);
