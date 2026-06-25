@@ -442,15 +442,15 @@
       The agent has no **`run_command` tool**. It can read, search, write, and delete files but cannot execute any shell command (`npm install`, `npx prisma migrate`, `npm run build`, `npm test`). This blocks workflows where a new package must be installed or a migration run after code changes.
       **How to build:** 1. Add tool definition to `packages/agent/src/tools/definitions.ts`:
       `ts
-       { name: 'run_command', description: 'Run a safe shell command (npm/npx only) from the monorepo root. Returns stdout/stderr. Blocked commands: rm, curl, wget, git push, chmod, sudo.', input_schema: { type: 'object', properties: { command: { type: 'string' }, args: { type: 'array', items: { type: 'string' } }, cwd: { type: 'string', description: 'Optional: relative path from monorepo root' } }, required: ['command', 'args'] } }
-       ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
+     { name: 'run_command', description: 'Run a safe shell command (npm/npx only) from the monorepo root. Returns stdout/stderr. Blocked commands: rm, curl, wget, git push, chmod, sudo.', input_schema: { type: 'object', properties: { command: { type: 'string' }, args: { type: 'array', items: { type: 'string' } }, cwd: { type: 'string', description: 'Optional: relative path from monorepo root' } }, required: ['command', 'args'] } }
+     ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
-- [ ] **A-13** `[bug]` `[dead-code]`
+- [x] **A-13** `[bug]` `[dead-code]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx`
       This component exists but is **imported by no page**. `apps/web/pages/agent.tsx` imports `AgentChat` and `AgentTransparency` directly. The panel's `sessionId` initialisation also has the SSR hydration mismatch noted in M-23.
       **Fix approach:** Either wire `AIStudioSidekickPanel` into a page (e.g., as a floating sidekick on other admin pages using `layout="sidekick"` mode of `AgentChat`) or delete the file. If wiring: import from a persistent layout component, pass a stable `sessionId` from `getServerSideProps` or `useId()`.
-      **Decision needed:** Define where the sidekick panel should live (every admin page? dashboard only?) before implementing.
+      _Wired globally via `AIStudioPanelSlot` in `apps/web/pages/_app.tsx` (M-23 session id fix)._
 
 - [ ] **A-14** `[feat]`
       **File:** `packages/agent/src/types/session.ts`, `packages/agent/src/changeset/session-store.ts`
@@ -476,10 +476,10 @@
       **What to build:** `GET /api/agent/tasks/list?tenantId=<id>&status=<status>&limit=20&cursor=<id>` — requires `ADMIN` role, reads from MongoDB `AgentTask` collection. Return `{ tasks: AgentTaskRecord[], nextCursor }`. Wire into a new admin page `apps/web/pages/admin/agent-tasks.tsx`.
       **API contract:**
       `     GET /api/agent/tasks/list
-    Auth: Bearer token, role >= ADMIN
-    Query: tenantId (string), status? (TaskStatus), limit? (number, max 50), cursor? (string)
-    Response: { tasks: AgentTaskRecord[], nextCursor: string | null, total: number }
-    `
+  Auth: Bearer token, role >= ADMIN
+  Query: tenantId (string), status? (TaskStatus), limit? (number, max 50), cursor? (string)
+  Response: { tasks: AgentTaskRecord[], nextCursor: string | null, total: number }
+  `
       **Files to create:** `apps/web/pages/api/agent/tasks/list.ts`, `apps/web/pages/admin/agent-tasks.tsx`.
 
 ### A-LOW — Tech Debt / Polish
@@ -494,7 +494,7 @@
       `search_code` truncates at 50 results with no way for the agent to page through or narrow the search. Add an optional `maxResults` parameter (default 50, max 200) and `offset` parameter so the agent can request the next page of results when the first page is insufficient.
       **Files to change:** `packages/agent/src/tools/definitions.ts`, `packages/agent/src/tools/execute.ts`.
 
-- [ ] **A-20** `[enhancement]`
+- [x] **A-20** `[enhancement]`
       **File:** `apps/web/components/agent/AgentTransparency.tsx` lines 36–88
       The custom diff algorithm is a naive greedy O(n²) approximation with a lookahead of 8 lines. For files with repeated patterns it produces misleading or incorrect diffs. Replace with the `diff` npm package (`npm i diff` in `apps/web`) using `Diff.structuredPatch` for accurate unified diffs.
       **Files to change:** `apps/web/components/agent/AgentTransparency.tsx`. Import: `import { diffLines } from 'diff'`.
@@ -533,12 +533,12 @@
       **File:** `packages/agent/src/prompts/system.ts` line 54
       System prompt template includes `useState<any>(null)` — the agent learns to generate `any`-typed state. Update the embedded page template to use proper types:
       `tsx
-    // Replace:
-    const [user, setUser] = useState<any>(null);
-    // With:
-    import type { UserMenu } from '@luxgen/ui';
-    const [user, setUser] = useState<UserMenu | null>(null);
-    `
+  // Replace:
+  const [user, setUser] = useState<any>(null);
+  // With:
+  import type { UserMenu } from '@luxgen/ui';
+  const [user, setUser] = useState<UserMenu | null>(null);
+  `
       **Files to change:** `packages/agent/src/prompts/system.ts`.
 
 ---
@@ -552,8 +552,413 @@
 | MEDIUM               | 24      | 20     |
 | LOW                  | 25      | 22     |
 | **Agent / A-HIGH**   | **7**   | **4**  |
-| **Agent / A-MEDIUM** | **10**  | **1**  |
-| **Agent / A-LOW**    | **10**  | **0**  |
-| **Total**            | **110** | **75** |
+| **Agent / A-MEDIUM** | **10**  | **2**  |
+| **Agent / A-LOW**    | **10**  | **1**  |
+| **Total**            | **110** | **77** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
+
+---
+
+## BA-Pending Requirements
+
+> **Review date:** 2026-06-25
+> **Reviewer role:** Business Analyst (end-to-end product walk-through)
+> **Scope:** All pages under `apps/web/pages/` were inspected by reading source code + reviewing GraphQL wiring. This section documents functionality gaps between what is **visible in the UI** and what is required for LuxGen to operate as a **complete, commercially viable multi-tenant LMS + commerce platform**.
+>
+> Items are tagged by domain and priority: `[P1]` = blocks core business flow · `[P2]` = degrades key use case · `[P3]` = missing polish / secondary flow.
+
+---
+
+### BA-01 — Course Management: No Real Data Binding `[P1]`
+
+**Pages:** `pages/courses.tsx`, `pages/courses/[id].tsx`
+
+**Gap:** Both pages display hardcoded mock data (`useState` with static objects). No GraphQL query (`useQuery`) fetches real courses from the API. Landing on `/courses` always shows a fake "Advanced React Development" card regardless of what the admin has actually created. The course detail page also uses the same static course regardless of the `[id]` in the URL.
+
+**Business impact:** Admins cannot see their real course catalogue. The courses section is entirely disconnected from the database.
+
+**Required:**
+
+- Replace static `useState` with `useQuery(GET_COURSES, { variables: { tenantId } })` in `pages/courses.tsx`.
+- In `pages/courses/[id].tsx`, query `GET_COURSE` by `id` from `router.query.id`.
+- Render a 404/empty-state when the course is not found.
+- Role detection must read from the auth session, not be inferred from `tenant === 'demo'`.
+
+---
+
+### BA-02 — Course Creation: Simulated Submit, No API Call `[P1]`
+
+**Page:** `pages/courses/create.tsx`
+
+**Gap:** `handleSubmit` runs `setTimeout(resolve, 1500)` then `console.log` and redirects. There is no GraphQL mutation (`CREATE_COURSE`) called. Any course "created" is silently discarded.
+
+**Business impact:** Admins cannot create courses. The entire content creation flow is non-functional.
+
+**Required:**
+
+- Wire `CREATE_COURSE` mutation.
+- Add course thumbnail upload (file input → storage URL).
+- Add fields: price, enrollment capacity, start/end date, prerequisites.
+- Redirect to `/courses/[newId]` on success.
+
+---
+
+### BA-03 — Course Edit Page Does Not Exist `[P1]`
+
+**Gap:** `CourseDetailMenu` links to an edit route that returns 404. The file `pages/courses/[id]/edit.tsx` does not exist.
+
+**Required:** Create the course edit page, pre-populating from `GET_COURSE` query and saving via `UPDATE_COURSE` mutation.
+
+---
+
+### BA-04 — Analytics Pages Use Hardcoded Mock Data `[P1]`
+
+**Pages:** `pages/courses/analytics.tsx`, `pages/groups/analytics.tsx`
+
+**Gap:** Both pages use `useState` with static numbers (e.g., `totalEnrollments: 3456`, `completionRate: 78`). No GraphQL queries are fired. Tenants on paid plans see fabricated metrics.
+
+**Required:**
+
+- Add real GraphQL queries: enrollment counts per course, completion rates, revenue, MAU trend.
+- Remove all static mock objects from analytics pages.
+- Add date-range filter (last 7 / 30 / 90 days).
+
+---
+
+### BA-05 — Learner Course Player Page Missing `[P1]`
+
+**Gap:** `pages/learn/courses/[id].tsx` does not exist (confirmed). The `/learn` catalog page links to `/learn/courses/${course.id}` which 404s for every enrolled learner.
+
+**Business impact:** Learners cannot play course content. The entire learner-facing experience is broken once they click any course.
+
+**Required:**
+
+- Create `pages/learn/courses/[id].tsx` with:
+  - Chapter/lesson list with completion checkboxes.
+  - Video or rich-content player.
+  - Progress tracking: `MARK_LESSON_COMPLETE` mutation on completion.
+  - Certificate trigger when all lessons completed.
+  - Discussion thread per lesson.
+
+---
+
+### BA-06 — No Certificate Generation or Display `[P1]`
+
+**Gap:** The automation system has a `certificate_issued` trigger but:
+
+- No UI shows certificates to learners.
+- No admin UI exists to design or configure certificates.
+- No API mutation for issuing certificates is wired in the frontend.
+- `pages/learn/` has no `/certificates` route.
+
+**Required:**
+
+- Create `pages/learn/certificates/index.tsx` — learner's earned certificates.
+- Create certificate template configuration under `/settings/certificates`.
+- Wire `ISSUE_CERTIFICATE` mutation into course completion flow.
+
+---
+
+### BA-07 — No Learner Progress Tracking UI `[P2]`
+
+**Page:** `pages/customers/index.tsx`
+
+**Gap:** The `ProgressRing` component's `progress` prop is hardcoded to a static value rather than computed from lesson completions. There is no real per-course completion percentage shown to learners.
+
+**Required:**
+
+- Compute progress from `enrollment.completedLessons / enrollment.totalLessons`.
+- Display per-course completion percentage in learner dashboard.
+- Add a "resume" button linking to the last incomplete lesson.
+
+---
+
+### BA-08 — Group Management: Create/Edit Not Wired `[P2]`
+
+**Gap:** `organization/groups/index.tsx` renders `DataListPage` but the create-group action likely opens a modal that was never built with a real mutation. Group edit and member management pages exist in the file tree but their mutation calls were not verified.
+
+**Required:**
+
+- Wire group create form to `CREATE_GROUP` mutation.
+- Wire group edit form to `UPDATE_GROUP` mutation.
+- Group members page must call `ADD_GROUP_MEMBER` / `REMOVE_GROUP_MEMBER` mutations.
+
+---
+
+### BA-09 — Orders: No Real Payment Flow `[P2]`
+
+**Gap:** Orders are inferred from enrollment records via `buildOrdersFromEnrollments` — there is no real Order domain model. `orders/create.tsx` calls `ENROLL_STUDENT` (not a payment). No payment gateway integration is visible in any page.
+
+**Business impact:** Tenants cannot process real payments. "Orders" are enrollment proxies with no revenue data, payment status, or refund handling.
+
+**Required:**
+
+- Design a real `Order` domain model with: `amount`, `currency`, `paymentStatus`, `paymentIntentId`, `refundedAt`.
+- Integrate a payment gateway (Stripe): `/api/checkout/session` → redirect → webhook → create Enrollment.
+- `orders/[id].tsx` edit page must support refund action.
+- `orders/abandoned.tsx` needs the API resolver to actually track incomplete checkout sessions.
+
+---
+
+### BA-10 — Store / Commerce: No Checkout Flow `[P2]`
+
+**Gap:** `store/product/index.tsx` shows a product grid but there is no cart, no checkout, and no order confirmation. The store header copy references "just ask the seller AI" but no GPT chat widget exists on product pages.
+
+**Required:**
+
+- Cart context (add/remove product, quantity, subtotal).
+- Checkout page (`/store/checkout`) → payment gateway.
+- Order confirmation page.
+- GPT Seller AI chat widget on product detail page.
+
+---
+
+### BA-11 — Subscription Cancellation Has No Confirmation `[P2]`
+
+**Page:** `pages/learn/subscriptions/index.tsx`
+
+**Gap:** `handleCancel(subscriptionId)` fires `CANCEL_LEARNER_SUBSCRIPTION` immediately without any confirmation dialog.
+
+**Required:** Add a confirmation modal before cancellation. Show next billing date and access expiry. Support "pause" as an alternative to full cancel.
+
+---
+
+### BA-12 — User Requests Tab Always Empty `[P2]`
+
+**Page:** `pages/organization/users.tsx`
+
+**Gap:** The `requests` tab has `count: 0` hardcoded. No query populates membership requests. Approve/reject actions are missing.
+
+**Required:**
+
+- `GET_PENDING_REQUESTS` query.
+- Approve/reject actions on the requests tab.
+- Email notification to user when approved.
+
+---
+
+### BA-13 — Role Management: System Roles Only, No Custom Roles `[P2]`
+
+**Page:** `pages/organization/roles.tsx`
+
+**Gap:** Uses `ORGANIZATION_SYSTEM_ROLES` — a static local array. There is no UI to create custom roles or edit permissions.
+
+**Required:**
+
+- Custom role builder: name, description, permission set (booleans per resource/action).
+- Role assignment from user detail page.
+- Role-based sidebar visibility.
+
+---
+
+### BA-14 — Security Section: SAML/SCIM Are Stubs `[P2]`
+
+**Pages:** `pages/organization/security/saml.tsx`, `scim.tsx`, `domains.tsx`
+
+**Gap:** Status badges show "partial" or "planned". No actual SSO configuration form is functional.
+
+**Required:**
+
+- SAML page: IdP metadata URL input + SP metadata download + test connection.
+- SCIM page: generate bearer token for directory sync.
+- Domain verification: DNS TXT record flow.
+- All backed by real API mutations.
+
+---
+
+### BA-15 — Notifications: Read-Only, No Template Customization `[P2]`
+
+**Page:** `pages/settings/notifications.tsx`
+
+**Gap:** Fetches and displays templates in expand/collapse list. No edit button, no save action, no subject/body customization.
+
+**Required:**
+
+- Inline template editor (subject + HTML/Markdown body).
+- Variable substitution preview (`{{learner_name}}`, `{{course_title}}`).
+- Test send button.
+
+---
+
+### BA-16 — Profile Page: No Avatar Upload `[P3]`
+
+**Page:** `pages/profile.tsx`
+
+**Gap:** Only `firstName`/`lastName` editing. No avatar/photo upload.
+
+**Required:** File upload → storage URL → display in sidebar user avatar.
+
+---
+
+### BA-17 — Mentor Profile Page Missing `[P3]`
+
+**Gap:** `/store/mentors` lists trainer profiles but there is no `pages/store/mentors/[id].tsx` page. Clicking a mentor card has no destination.
+
+**Required:** Mentor profile page with bio, courses, ratings, and "Contact" CTA.
+
+---
+
+### BA-18 — Listings: No Detail Page or Edit Action `[P3]`
+
+**Page:** `pages/listings/index.tsx`
+
+**Gap:** Listing cards have no link or "view details" action. `pages/listings/my.tsx` shows the user's own listings but likely has no edit action wired.
+
+**Required:** Listing detail page reachable from directory. Edit listing flow from `my.tsx`.
+
+---
+
+### BA-19 — Project Board: Backend Persistence Unverified `[P3]`
+
+**Page:** `pages/project/iteration/current.tsx`
+
+**Gap:** `IterationBoard` renders columns but the API resolver for sprint/task entities was not confirmed to persist to MongoDB. Drag-and-drop column changes may not be saved.
+
+**Required:** Verify `GET_PROJECT_TASKS` / `UPDATE_TASK_STATUS` hit real MongoDB documents. Drag-and-drop status change must persist.
+
+---
+
+### BA-20 — Developer Page: Tool List Out of Date `[P3]`
+
+**Page:** `pages/developer/index.tsx`
+
+**Gap:** `TOOL_DEFS` hardcodes only 4 tools; the agent now has 6 (`delete_file`, `read_automation_schema` are missing from the display).
+
+**Required:** Sync `TOOL_DEFS` with `packages/agent/src/tools/definitions.ts`. Ideally import from the package instead of duplicating.
+
+---
+
+### BA-21 — No Global Search Functionality `[P3]`
+
+**Gap:** `AppLayout` receives `showSearch={true}` across most pages but no search API endpoint or `GET_SEARCH` GraphQL query exists.
+
+**Required:**
+
+- Global search across courses, users, orders, automations, groups.
+- Debounced real-time results (300ms).
+- Keyboard shortcut (Cmd+K).
+
+---
+
+### BA-22 — Notification Bell: Static Count, No Real Notifications `[P3]`
+
+**Gap:** `notificationCount={3}` is hardcoded on multiple pages. No `GET_NOTIFICATIONS` query, no notification feed UI, no "mark as read" action.
+
+**Required:**
+
+- `GET_NOTIFICATIONS` query (unread count + recent items).
+- Notification dropdown with item type, title, timestamp, resource link.
+- "Mark all as read" action.
+- Real-time update via subscription or polling.
+
+---
+
+### BA-23 — No Tenant Onboarding / Setup Wizard `[P1]`
+
+**Page:** `pages/dashboard.tsx`
+
+**Gap:** New tenants land on the dashboard with no guided setup flow. Dashboard banner carousel shows hardcoded Unsplash images not personalized guidance.
+
+**Business impact:** New tenants have no guided path to value. Activation rate will be low.
+
+**Required:**
+
+- Onboarding checklist widget on the dashboard (e.g., "Add your first course · Invite a learner · Set up billing").
+- Each step links to the relevant page.
+- Checklist hides once all steps are complete (persisted in tenant settings).
+
+---
+
+### BA-24 — No Email Verification on Registration `[P2]`
+
+**Page:** `pages/register.tsx`
+
+**Gap:** `REGISTER_MUTATION` succeeds and the user is immediately logged in and active without verifying their email address.
+
+**Required:**
+
+- Send verification email on registration.
+- Redirect to "Verify your email" holding page.
+- Block access to protected pages until verified.
+- Resend verification link action.
+
+---
+
+### BA-25 — Branding Settings: No Logo/Favicon Upload `[P2]`
+
+**Page:** `pages/settings/branding.tsx`
+
+**Gap:** The sidebar renders hardcoded `getDefaultLogo()` across all pages. No logo or favicon upload UI is wired.
+
+**Required:**
+
+- Logo upload (SVG/PNG, max 500 KB) → stored URL → used in `AppLayout`.
+- Favicon upload → served from Next.js `<Head>`.
+- Brand color picker (primary, secondary) → CSS custom properties.
+- Preview before save.
+
+---
+
+### BA-26 — Abandoned Checkout Recovery Has No Action `[P2]`
+
+**Page:** `pages/orders/abandoned.tsx`
+
+**Gap:** Displays abandoned checkout rows but the "Send recovery email" button (if present in `AbandonedCheckoutListView`) has no mutation wired to it.
+
+**Required:**
+
+- "Send recovery email" triggers `SEND_RECOVERY_EMAIL` mutation.
+- Show last-sent timestamp and open rate.
+- Allow editing the recovery email template from `/settings/notifications`.
+
+---
+
+### BA-27 — No Accessibility (a11y) Baseline `[P3]`
+
+**Gap:** Form elements across pages lack consistent `aria-*` labels. Color contrast ratios for `text-secondary` on `bg-secondary` were not verified against WCAG 2.1 AA. No keyboard navigation or screen reader testing was performed.
+
+**Required:**
+
+- Audit all interactive elements for `aria-label`, `role`, `aria-expanded`.
+- Verify color contrast ratios meet WCAG 2.1 AA.
+- Add "skip to main content" link.
+- Test with VoiceOver / NVDA.
+
+---
+
+### BA Summary Table
+
+| ID    | Domain             | Priority | Status  |
+| ----- | ------------------ | -------- | ------- |
+| BA-01 | Courses            | P1       | ⬜ Open |
+| BA-02 | Courses            | P1       | ⬜ Open |
+| BA-03 | Courses            | P1       | ⬜ Open |
+| BA-04 | Analytics          | P1       | ⬜ Open |
+| BA-05 | Learner Experience | P1       | ⬜ Open |
+| BA-06 | Certificates       | P1       | ⬜ Open |
+| BA-23 | Onboarding         | P1       | ⬜ Open |
+| BA-07 | Learner Experience | P2       | ⬜ Open |
+| BA-08 | Groups             | P2       | ⬜ Open |
+| BA-09 | Orders / Payments  | P2       | ⬜ Open |
+| BA-10 | Store / Commerce   | P2       | ⬜ Open |
+| BA-11 | Subscriptions      | P2       | ⬜ Open |
+| BA-12 | User Management    | P2       | ⬜ Open |
+| BA-13 | Role Management    | P2       | ⬜ Open |
+| BA-14 | Security / SSO     | P2       | ⬜ Open |
+| BA-15 | Notifications      | P2       | ⬜ Open |
+| BA-24 | Auth               | P2       | ⬜ Open |
+| BA-25 | Branding           | P2       | ⬜ Open |
+| BA-26 | Abandoned Checkout | P2       | ⬜ Open |
+| BA-16 | Profile            | P3       | ⬜ Open |
+| BA-17 | Mentors            | P3       | ⬜ Open |
+| BA-18 | Listings           | P3       | ⬜ Open |
+| BA-19 | Project Board      | P3       | ⬜ Open |
+| BA-20 | Agent / Developer  | P3       | ⬜ Open |
+| BA-21 | Search             | P3       | ⬜ Open |
+| BA-22 | Notifications Bell | P3       | ⬜ Open |
+| BA-27 | Accessibility      | P3       | ⬜ Open |
+
+**P1 count:** 7 items — blocks commercial launch
+**P2 count:** 12 items — degrades paid-tier value proposition
+**P3 count:** 8 items — polish, missing pages, secondary flows

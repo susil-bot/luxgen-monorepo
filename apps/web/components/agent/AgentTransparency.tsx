@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { diffLines } from 'diff';
 import type { AgentSession, StagedFile } from '../../../../packages/agent/src/types/session';
 import type { ValidationCheckName } from '../../../../packages/agent/src/types/validation';
 import ValidationReport from './ValidationReport';
@@ -38,53 +39,31 @@ function computeDiff(
   original: string,
   modified: string,
 ): Array<{ type: 'same' | 'add' | 'remove'; text: string; lineNum: number }> {
-  const oldLines = (original || '').split('\n');
-  const newLines = (modified || '').split('\n');
   const result: Array<{ type: 'same' | 'add' | 'remove'; text: string; lineNum: number }> = [];
+  const changes = diffLines(original || '', modified || '');
+  let oldLine = 1;
+  let newLine = 1;
 
-  // Simple LCS-based diff (myers algorithm approximation)
-  let oi = 0,
-    ni = 0;
-  while (oi < oldLines.length || ni < newLines.length) {
-    if (oi >= oldLines.length) {
-      result.push({ type: 'add', text: newLines[ni], lineNum: ni + 1 });
-      ni++;
-    } else if (ni >= newLines.length) {
-      result.push({ type: 'remove', text: oldLines[oi], lineNum: oi + 1 });
-      oi++;
-    } else if (oldLines[oi] === newLines[ni]) {
-      result.push({ type: 'same', text: newLines[ni], lineNum: ni + 1 });
-      oi++;
-      ni++;
-    } else {
-      // Look ahead to find next match
-      let found = false;
-      for (let lookahead = 1; lookahead <= 8; lookahead++) {
-        if (ni + lookahead < newLines.length && oldLines[oi] === newLines[ni + lookahead]) {
-          for (let k = 0; k < lookahead; k++) {
-            result.push({ type: 'add', text: newLines[ni + k], lineNum: ni + k + 1 });
-          }
-          ni += lookahead;
-          found = true;
-          break;
-        }
-        if (oi + lookahead < oldLines.length && oldLines[oi + lookahead] === newLines[ni]) {
-          for (let k = 0; k < lookahead; k++) {
-            result.push({ type: 'remove', text: oldLines[oi + k], lineNum: oi + k + 1 });
-          }
-          oi += lookahead;
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        result.push({ type: 'remove', text: oldLines[oi], lineNum: oi + 1 });
-        result.push({ type: 'add', text: newLines[ni], lineNum: ni + 1 });
-        oi++;
-        ni++;
+  for (const part of changes) {
+    const lines = part.value.replace(/\n$/, '').split('\n');
+    const isTrailingNewlineOnly = part.value === '\n';
+    const effectiveLines = isTrailingNewlineOnly ? [''] : lines;
+
+    for (const text of effectiveLines) {
+      if (part.removed) {
+        result.push({ type: 'remove', text, lineNum: oldLine });
+        oldLine++;
+      } else if (part.added) {
+        result.push({ type: 'add', text, lineNum: newLine });
+        newLine++;
+      } else {
+        result.push({ type: 'same', text, lineNum: newLine });
+        oldLine++;
+        newLine++;
       }
     }
   }
+
   return result;
 }
 
