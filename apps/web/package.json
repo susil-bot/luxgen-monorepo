@@ -7,7 +7,8 @@
     "dev:clean": "rm -rf .next && next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:auto": "vitest run"
   },
   "dependencies": {
     "@apollo/client": "^3.8.0",
@@ -19,6 +20,7 @@
     "@luxgen/db": "*",
     "@luxgen/design-tokens": "*",
     "@luxgen/storefront": "*",
+    "@luxgen/test-harness": "*",
     "@luxgen/ui": "*",
     "@luxgen/utils": "*",
     "buffer": "^6.0.3",
@@ -30,6 +32,8 @@
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
     "@types/diff": "^7.0.2",
     "@types/node": "^20.0.0",
     "@types/react": "^18.0.0",
@@ -37,8 +41,10 @@
     "autoprefixer": "^10.4.21",
     "eslint": "^8.0.0",
     "eslint-config-next": "^14.0.0",
+    "jsdom": "^25.0.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^2.1.9"
   }
 }
