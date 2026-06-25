@@ -24,7 +24,6 @@ export function PlanGate({ feature, currentPlan, tenant, children }: PlanGatePro
     apiAccess: 'API access',
   };
 
-  const planRank = (p: PlanTier) => ['free', 'starter', 'pro', 'business', 'enterprise'].indexOf(p);
   const allowed = planRank(currentPlan) >= planRank(required);
 
   if (allowed) return <>{children}</>;
