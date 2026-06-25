@@ -152,10 +152,10 @@ export default function AgentChat({
   useEffect(() => {
     if (!isStreaming) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") abortRef.current?.abort();
+      if (e.key === 'Escape') abortRef.current?.abort();
     };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
   }, [isStreaming]);
 
   useEffect(() => {
