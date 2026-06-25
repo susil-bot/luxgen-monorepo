@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 
-jest.mock('@luxgen/agent', () => ({
-  emitAutomationEvent: jest.fn().mockResolvedValue(undefined),
+jest.mock('../services/automationService', () => ({
+  automationService: {
+    triggerAutomations: jest.fn().mockResolvedValue(0),
+  },
 }));
 
 jest.mock('@luxgen/db', () => ({
@@ -28,7 +30,7 @@ jest.mock('../utils/logger', () => ({
 }));
 
 import { Enrollment, Course, User } from '@luxgen/db';
-import { emitAutomationEvent } from '@luxgen/agent';
+import { automationService } from '../services/automationService';
 import { EnrollmentService } from '../services/enrollmentService';
 
 describe('EnrollmentService progress', () => {
@@ -61,11 +63,14 @@ describe('EnrollmentService progress', () => {
       expect(result.learningStatus).toBe('COMPLETED');
       expect(result.completedAt).toBeInstanceOf(Date);
       expect(enrollment.save).toHaveBeenCalled();
-      expect(emitAutomationEvent).toHaveBeenCalledWith(
+      expect(automationService.triggerAutomations).toHaveBeenCalledWith(
+        'tenant1',
+        'COURSE_COMPLETED',
         expect.objectContaining({
-          triggerType: 'COURSE_COMPLETED',
-          tenantId: 'tenant1',
+          courseId: 'course1',
+          studentId: 'student1',
         }),
+        'lms',
       );
     });
 
@@ -96,7 +101,7 @@ describe('EnrollmentService progress', () => {
       expect(enrollment.progressPercent).toBe(80);
       expect(enrollment.learningStatus).toBe('ACTIVE');
       expect(enrollment.completedAt).toBeUndefined();
-      expect(emitAutomationEvent).not.toHaveBeenCalled();
+      expect(automationService.triggerAutomations).not.toHaveBeenCalled();
     });
   });
 
