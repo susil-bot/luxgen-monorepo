@@ -182,7 +182,7 @@
       **File:** `apps/api/src/app.ts` line 55
       `express.json({ limit: '10mb' })` applies to all routes including `/api/auth/login`. A 10MB body on a login endpoint is never legitimate and allows DoS before the rate limiter fires. Tighten: set `'50kb'` globally and allow larger limits only on specific upload routes.
 
-- [ ] **M-06** `[arch]`
+- [x] **M-06** `[arch]`
       **File:** `apps/api/src/services/userService.ts` vs `apps/api/src/routes/auth.ts`
       `UserService.login()` and `UserService.register()` duplicate logic from the REST route handlers; neither the REST routes nor the GraphQL resolvers use these service methods. Consolidate: migrate routes to use the service methods, or delete the duplicate service logic.
 
