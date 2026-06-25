@@ -110,7 +110,7 @@
       **File:** `k8s/ingress.yaml` lines 13–17, 42–47
       TLS configuration is entirely commented out and there is no `ssl-redirect`. All production traffic would be served over plaintext HTTP. Uncomment TLS, reference the TLS secret, and add the SSL redirect annotation.
 
-- [ ] **H-16** `[arch]`
+- [x] **H-16** `[arch]`
       **File:** `packages/auth/src/roles.ts` lines 1–5 vs `packages/db/src/user.ts` lines 3–10 vs `apps/api/src/schema/user/typeDefs.ts` lines 17–21
       Three separate, divergent `UserRole` enum definitions exist across the monorepo. `@luxgen/auth` has `{SUPER_ADMIN, ADMIN, USER}`; `@luxgen/db` has `{SUPER_ADMIN, ADMIN, INSTRUCTOR, STUDENT, USER}`; the GraphQL schema has `{ADMIN, INSTRUCTOR, STUDENT}`. Consolidate to a single canonical definition in `@luxgen/db` or a dedicated `@luxgen/types` package.
 
