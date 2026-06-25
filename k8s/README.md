@@ -62,7 +62,7 @@ Create a `.env.production` file in the root directory:
 
 ```bash
 # .env.production
-MONGODB_URI=mongodb://admin:YOUR_SECURE_PASSWORD@mongodb-service:27017/luxgen?authSource=admin
+MONGODB_URI=mongodb://admin:YOUR_SECURE_PASSWORD@mongodb-service:27017/luxgen?authSource=admin&replicaSet=rs0
 JWT_SECRET=YOUR_JWT_SECRET_MIN_32_CHARS_CHANGE_IN_PRODUCTION
 JWT_EXPIRES_IN=7d
 SEED_IF_EMPTY=true
@@ -206,6 +206,12 @@ kubectl logs -f deployment/agent-worker -n luxgen
 
 # MongoDB logs
 kubectl logs -f statefulset/mongodb -n luxgen
+
+# MongoDB replica set status
+kubectl exec -it mongodb-0 -n luxgen -- mongosh -u admin -p --eval 'rs.status()'
+
+# MongoDB on-disk backups (daily CronJob at 02:00 UTC, 7-day retention)
+kubectl get cronjob mongodb-backup -n luxgen
 
 # Redis logs
 kubectl logs -f statefulset/redis -n luxgen

@@ -140,6 +140,14 @@ kubectl apply -f "$SCRIPT_DIR/redis.yaml"
 echo "⏳ Waiting for databases (timeout 5m)..."
 kubectl wait --for=condition=ready pod -l app=mongodb -n "$NAMESPACE" --timeout=300s
 kubectl wait --for=condition=ready pod -l app=redis -n "$NAMESPACE" --timeout=300s
+
+echo "🔧 Initialising MongoDB replica set (rs0)..."
+if ! kubectl get job mongodb-rs-init -n "$NAMESPACE" -o jsonpath='{.status.succeeded}' 2>/dev/null | grep -q '^1$'; then
+  kubectl delete job mongodb-rs-init -n "$NAMESPACE" --ignore-not-found
+  kubectl apply -f "$SCRIPT_DIR/mongodb.yaml"
+  kubectl wait --for=condition=complete job/mongodb-rs-init -n "$NAMESPACE" --timeout=300s
+fi
+
 echo "✅ Databases ready"
 
 # ── Applications ──────────────────────────────────────────────────────────────

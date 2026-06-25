@@ -232,9 +232,10 @@
       `MONGODB_URI` is mounted both via `envFrom: secretRef` and via an individual `secretKeyRef`. The duplicate mount is redundant and creates precedence confusion. Use only one approach.
       _Resolved: secrets injected only via `envFrom.secretRef`; redundant `MONGODB_URI` secretKeyRef removed._
 
-- [ ] **M-18** `[infra]`
+- [x] **M-18** `[infra]`
       **File:** `k8s/mongodb.yaml` lines 57–72
       MongoDB runs as a single-replica StatefulSet with no replica set configuration, no backup CronJob, and no `PodDisruptionBudget`. Pod eviction causes data unavailability. Add `--replSet rs0` flag, a backup job, and a PDB with `minAvailable: 1`.
+      _Resolved: `mongod --replSet rs0`, headless `mongodb` service, `mongodb-rs-init` Job, daily `mongodb-backup` CronJob with 7-day retention, and `mongodb-pdb` (`minAvailable: 1`). `MONGODB_URI` docs include `replicaSet=rs0`._
 
 - [x] **M-19** `[infra]`
       **File:** `k8s/deploy.sh` lines 26–53
@@ -558,11 +559,11 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | -------------------- | ------- | ------ |
 | CRITICAL             | 7       | 7 ✅   |
 | HIGH                 | 27      | 20     |
-| MEDIUM               | 24      | 22     |
+| MEDIUM               | 24      | 23     |
 | LOW                  | 25      | 24     |
 | **Agent / A-MEDIUM** | **10**  | **3**  |
 | **Agent / A-LOW**    | **10**  | **2**  |
-| **Total**            | **110** | **82** |
+| **Total**            | **110** | **83** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
 
