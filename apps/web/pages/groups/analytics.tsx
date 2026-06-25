@@ -8,6 +8,9 @@ import { SnackbarProvider, AppLayout, getDefaultUser, getDefaultLogo, getDefault
 import { PlanGate } from '../../components/billing/PlanGate';
 import { GET_TENANT_BILLING } from '../../graphql/queries/billing';
 import { normalizePlan } from '@luxgen/billing';
+import { GET_GROUP_ANALYTICS } from '../../graphql/queries/analytics';
+import { useAppTenantId } from '../../lib/app-layout-user';
+import { isMongoObjectId } from '../../lib/mongo-id';
 
 const GroupAnalyticsPageContent: React.FC = () => {
   const router = useRouter();
@@ -43,17 +46,23 @@ const GroupAnalyticsPageContent: React.FC = () => {
   const handleUserAction = createHandleUserAction(router);
   const headerProps = useAppLayoutHeader();
 
+  const tenantId = useAppTenantId();
+  const { data: groupAnalyticsData } = useQuery(GET_GROUP_ANALYTICS, {
+    variables: { tenantId },
+    skip: !isMongoObjectId(tenantId),
+  });
+  const groupStats = groupAnalyticsData?.groupAnalytics;
   const stats = [
     {
       label: 'Total Groups',
-      value: '12',
+      value: String(groupStats?.totalGroups ?? 0),
       delta: '+2 from last month',
       color: 'var(--color-blue)',
       badge: 'badge-blue',
     },
     {
       label: 'Active Users',
-      value: '156',
+      value: String(groupStats?.totalMembers ?? 0),
       delta: '+12 from last week',
       color: 'var(--color-green)',
       badge: 'badge-green',
