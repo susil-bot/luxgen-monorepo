@@ -75,8 +75,9 @@ describe('GroupForm', () => {
     expect(screen.getByPlaceholderText('Enter group description')).toHaveValue('Creative folks');
   });
 
-  it('disables buttons when loading=true', () => {
+  it('disables submit and cancel buttons when loading=true', () => {
     render(<GroupForm {...baseProps} loading />);
+    expect(screen.getByRole('button', { name: 'Create Group' })).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Cancel' })).toBeDisabled();
   });
 

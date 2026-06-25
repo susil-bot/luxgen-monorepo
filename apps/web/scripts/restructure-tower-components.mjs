@@ -33,9 +33,8 @@ function transformSource(source, name) {
     .replaceAll("'../../../hooks/", "'../../../../hooks/")
     .replaceAll('from "./TowerFlow.module.css"', "from './styles'")
     .replaceAll("from './TowerFlow.module.css'", "from './styles'")
-    .replaceAll(
-      /from '\.\/([A-Z][A-Za-z]+)'/g,
-      (match, imported) => (imported === name ? match : `from '../${imported}'`),
+    .replaceAll(/from '\.\/([A-Z][A-Za-z]+)'/g, (match, imported) =>
+      imported === name ? match : `from '../${imported}'`,
     );
 }
 
@@ -113,9 +112,7 @@ import { ${name} } from '@/components/automations/tower';
 }
 
 function indexTs(name, camel, exportsExtra = '') {
-  const typeExport = exportsExtra.includes('Props')
-    ? `export type { ${exportsExtra} } from './${name}';\n`
-    : '';
+  const typeExport = exportsExtra.includes('Props') ? `export type { ${exportsExtra} } from './${name}';\n` : '';
   return `export { ${name}${exportsExtra && !exportsExtra.includes('Props') ? `, ${exportsExtra}` : ''} } from './${name}';
 ${typeExport}export { fetch${name}Data } from './fetcher';
 export type { ${name}Data } from './fetcher';
@@ -159,7 +156,9 @@ for (const name of COMPONENTS) {
     if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, content);
   }
 
-  const extra = extraExports[name];
+  // Reserved for future index.ts exports beyond the default barrel.
+  const _extra = extraExports[name];
+  void _extra;
   const indexPath = path.join(dir, 'index.ts');
   if (!fs.existsSync(indexPath)) {
     if (name === 'FlowConfigFieldInput') {

@@ -13,7 +13,7 @@ describe('AIStudio (logo)', () => {
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
 
-  it('applies custom size', () => {
+  it('applies custom size (wrapper uses size + 12px padding)', () => {
     const { container } = render(<AIStudio size={32} />);
     const wrapper = container.firstChild as HTMLElement;
     expect(wrapper.style.width).toBe('44px');

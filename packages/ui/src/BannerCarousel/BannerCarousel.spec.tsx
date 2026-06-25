@@ -34,7 +34,7 @@ describe('BannerCarousel', () => {
     const onCtaClick = jest.fn();
     render(<BannerCarousel slides={slides} autoPlay={false} onCtaClick={onCtaClick} />);
     fireEvent.click(screen.getByText('Get started'));
-    expect(onCtaClick).toHaveBeenCalledWith(expect.objectContaining({ id: '1' }));
+    expect(onCtaClick).toHaveBeenCalledWith(slides[0]);
   });
 
   it('renders nothing when slides array is empty', () => {
