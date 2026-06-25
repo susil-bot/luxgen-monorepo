@@ -31,8 +31,10 @@ export interface UpdateUserInput {
 }
 
 export class UserService {
-  async getUserById(id: string): Promise<IUser | null> {
-    return User.findById(id).populate('tenant');
+  async getUserById(id: string, tenantId?: string): Promise<IUser | null> {
+    const filter: { _id: string; tenant?: string } = { _id: id };
+    if (tenantId) filter.tenant = tenantId;
+    return User.findOne(filter).populate('tenant');
   }
 
   async getUsersByTenant(tenantId: string): Promise<IUser[]> {

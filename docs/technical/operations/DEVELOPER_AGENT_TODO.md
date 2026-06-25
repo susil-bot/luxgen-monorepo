@@ -132,7 +132,7 @@
       **File:** `apps/api/src/services/automationService.ts` (entire service)
       `AutomationService` provides CRUD but automations are never executed. `runCount` and `lastRunAt` fields are set only in seed data. Implement `executeAutomation` and hook it to the trigger events defined in `getAutomationsByTrigger`.
 
-- [ ] **H-22** `[security]` `[feat]`
+- [x] **H-22** `[security]` `[feat]`
       **File:** `apps/api/src/schema/user/resolvers.ts` line 7
       `user(id)` and `users(tenantId)` resolvers have no tenant-scoping authorization. Any authenticated user can query any user from any tenant. Add a tenant ownership check or a role-based restriction.
 
@@ -366,9 +366,9 @@
 | Tier      | Total  | Done   |
 | --------- | ------ | ------ |
 | CRITICAL  | 7      | 7 ✅   |
-| HIGH      | 27     | 18     |
+| HIGH      | 27     | 19     |
 | MEDIUM    | 24     | 17     |
 | LOW       | 25     | 22     |
-| **Total** | **83** | **57** |
+| **Total** | **83** | **58** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
