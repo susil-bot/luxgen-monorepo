@@ -122,14 +122,6 @@ export default async function getCurrentUser(req: NextApiRequest, res: NextApiRe
       updatedAt: userRecord.updatedAt.toISOString(),
     };
 
-    console.log('👤 Returning user data:', {
-      tenant: tenant,
-      userId: userResponse.id,
-      name: userResponse.name,
-      email: userResponse.email,
-      role: userResponse.role,
-    });
-
     res.status(200).json(userResponse);
   } catch (error) {
     console.error('Error fetching user data:', error);
