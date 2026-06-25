@@ -160,7 +160,7 @@
 
 ## MEDIUM — Fix in Next Sprint
 
-- [ ] **M-01** `[bug]`
+- [x] **M-01** `[bug]`
       **File:** `apps/api/src/services/groupService.ts` lines 55–56
       Relay-spec `pageInfo` fields are computed incorrectly: `hasPreviousPage` is set to `hasCursor` when paginating forward (should always be `false`), and `hasNextPage` is set to `hasCursor` when paginating backward. This breaks standard Relay infinite-scroll clients.
 
