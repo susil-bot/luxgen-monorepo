@@ -148,7 +148,7 @@
       **File:** `apps/api/src/services/` — all five: `listingService.ts`, `billingService.ts`, `courseService.ts`, `automationService.ts`, `groupService.ts`
       Zero test files exist for any of these services. The entire billing, course, listing, automation, and group domains are untested. Create integration test suites for each service.
 
-- [ ] **H-26** `[arch]`
+- [x] **H-26** `[arch]`
       **File:** `apps/api/src/config/tenants.ts` vs `apps/api/src/config/tenants/index.ts`
       Two files define the same tenant configurations with identical structure and duplicated helper functions. `routes/tenant.ts:3` imports only the legacy flat file; the modular `tenants/index.ts` is entirely dead. Delete one: migrate to `tenants/index.ts` and update the import in `routes/tenant.ts`.
 
