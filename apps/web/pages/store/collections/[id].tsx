@@ -64,7 +64,7 @@ export default function StoreCollectionDetailPage({ tenantSubdomain }: Props) {
 
             <section>
               <h2 className="text-sm font-semibold uppercase tracking-wider text-secondary mb-4">In this collection</h2>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {products.map(
                   (product: {
                     id: string;

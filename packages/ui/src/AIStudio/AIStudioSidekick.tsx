@@ -37,7 +37,11 @@ export function AIStudioSidekick({
   if (!open) return null;
 
   return (
-    <aside className={`lux-sidekick ${className}`} style={{ width, flexShrink: 0 }} aria-label="AI Studio assistant">
+    <aside
+      className={`lux-sidekick lux-sidekick-panel ${className}`}
+      style={{ flexShrink: 0, ['--lux-sidekick-width' as string]: `${width}px` } as React.CSSProperties}
+      aria-label="AI Studio assistant"
+    >
       <header className="lux-sidekick-header">
         <div className="lux-sidekick-header-left">
           <button type="button" className="lux-sidekick-title-btn" aria-haspopup="listbox">

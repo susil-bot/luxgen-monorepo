@@ -1848,6 +1848,37 @@ html.dark [data-tenant='demo'] {
   background: var(--color-bg-primary);
   overflow: hidden;
 }
+
+.lux-sidekick-panel {
+  width: min(calc(100vw - 2rem), 20rem);
+  max-width: 20rem;
+}
+
+@media (min-width: 640px) {
+  .lux-sidekick-panel {
+    width: 24rem;
+    max-width: 24rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .lux-sidekick-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    box-shadow: var(--shadow-xl);
+  }
+}
+
+@media (min-width: 768px) {
+  .lux-sidekick-panel {
+    position: relative;
+    width: var(--lux-sidekick-width, 400px);
+    max-width: var(--lux-sidekick-width, 400px);
+  }
+}
 .lux-sidekick-header {
   display: flex;
   align-items: center;
