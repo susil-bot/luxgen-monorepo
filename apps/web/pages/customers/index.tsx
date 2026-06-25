@@ -272,11 +272,11 @@ function CustomersContent({ tenant }: Props) {
                     </div>
                     <div style={{ padding: '0 14px 14px' }}>
                       <Link
-                        href={`/learn/courses/${course.courseId}`}
+                        href={`/learn/courses/${course.courseId}?lesson=${Math.max(1, Math.round((course.progressPercent / 100) * 4))}`}
                         className="ios-btn-primary"
                         style={{ width: '100%', fontSize: 14, display: 'block', textAlign: 'center' }}
                       >
-                        Resume
+                        Resume lesson
                       </Link>
                     </div>
                   </div>
@@ -335,7 +335,7 @@ function CustomersContent({ tenant }: Props) {
                         </div>
                       </div>
                       <Link
-                        href={`/learn/courses/${course.courseId}`}
+                        href={`/learn/courses/${course.courseId}?lesson=${Math.max(1, Math.round((course.progressPercent / 100) * 4))}`}
                         className="ios-btn-secondary"
                         style={{ fontSize: 13, textAlign: 'center' }}
                       >
