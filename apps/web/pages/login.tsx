@@ -92,7 +92,7 @@ const LoginPageContent: React.FC = () => {
   };
 
   const handleForgotPassword = () => {
-    showSuccess('Password reset email sent! Check your inbox.');
+    showError('Password reset is coming soon. Contact your administrator if you need access.');
   };
 
   const handleSignUp = () => {
