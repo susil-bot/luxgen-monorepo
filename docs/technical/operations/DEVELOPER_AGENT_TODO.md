@@ -227,9 +227,10 @@
       The "Dev plan override" UI is gated on the build-time variable `NEXT_PUBLIC_APP_ENV`. If a dev build artifact is promoted to production, these buttons will be visible and functional in production. Gate this UI server-side using a runtime check, not a baked-in build variable.
       _Resolved: dev override UI removed from billing pages; `setTenantPlanDev` is server-gated via `BILLING_DEV_MODE` only._
 
-- [ ] **M-17** `[infra]`
+- [x] **M-17** `[infra]`
       **File:** `k8s/api.yaml` lines 27–36
       `MONGODB_URI` is mounted both via `envFrom: secretRef` and via an individual `secretKeyRef`. The duplicate mount is redundant and creates precedence confusion. Use only one approach.
+      _Resolved: secrets injected only via `envFrom.secretRef`; redundant `MONGODB_URI` secretKeyRef removed._
 
 - [ ] **M-18** `[infra]`
       **File:** `k8s/mongodb.yaml` lines 57–72
@@ -442,8 +443,8 @@
       The agent has no **`run_command` tool**. It can read, search, write, and delete files but cannot execute any shell command (`npm install`, `npx prisma migrate`, `npm run build`, `npm test`). This blocks workflows where a new package must be installed or a migration run after code changes.
       **How to build:** 1. Add tool definition to `packages/agent/src/tools/definitions.ts`:
       `ts
-     { name: 'run_command', description: 'Run a safe shell command (npm/npx only) from the monorepo root. Returns stdout/stderr. Blocked commands: rm, curl, wget, git push, chmod, sudo.', input_schema: { type: 'object', properties: { command: { type: 'string' }, args: { type: 'array', items: { type: 'string' } }, cwd: { type: 'string', description: 'Optional: relative path from monorepo root' } }, required: ['command', 'args'] } }
-     ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
+   { name: 'run_command', description: 'Run a safe shell command (npm/npx only) from the monorepo root. Returns stdout/stderr. Blocked commands: rm, curl, wget, git push, chmod, sudo.', input_schema: { type: 'object', properties: { command: { type: 'string' }, args: { type: 'array', items: { type: 'string' } }, cwd: { type: 'string', description: 'Optional: relative path from monorepo root' } }, required: ['command', 'args'] } }
+   ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
 - [x] **A-13** `[bug]` `[dead-code]`
@@ -475,11 +476,10 @@
       There is **no endpoint to list all agent tasks for a tenant** (for admin oversight). A tenant admin cannot see what their team's agent sessions are doing, which sessions are running, or audit past changes.
       **What to build:** `GET /api/agent/tasks/list?tenantId=<id>&status=<status>&limit=20&cursor=<id>` — requires `ADMIN` role, reads from MongoDB `AgentTask` collection. Return `{ tasks: AgentTaskRecord[], nextCursor }`. Wire into a new admin page `apps/web/pages/admin/agent-tasks.tsx`.
       **API contract:**
-      `     GET /api/agent/tasks/list
-  Auth: Bearer token, role >= ADMIN
-  Query: tenantId (string), status? (TaskStatus), limit? (number, max 50), cursor? (string)
-  Response: { tasks: AgentTaskRecord[], nextCursor: string | null, total: number }
-  `
+      `    GET /api/agent/tasks/list
+Auth: Bearer token, role >= ADMIN
+Query: tenantId (string), status? (TaskStatus), limit? (number, max 50), cursor? (string)
+Response: { tasks: AgentTaskRecord[], nextCursor: string | null, total: number }`
       **Files to create:** `apps/web/pages/api/agent/tasks/list.ts`, `apps/web/pages/admin/agent-tasks.tsx`.
 
 ### A-LOW — Tech Debt / Polish
@@ -533,12 +533,12 @@
       **File:** `packages/agent/src/prompts/system.ts` line 54
       System prompt template includes `useState<any>(null)` — the agent learns to generate `any`-typed state. Update the embedded page template to use proper types:
       `tsx
-  // Replace:
-  const [user, setUser] = useState<any>(null);
-  // With:
-  import type { UserMenu } from '@luxgen/ui';
-  const [user, setUser] = useState<UserMenu | null>(null);
-  `
+// Replace:
+const [user, setUser] = useState<any>(null);
+// With:
+import type { UserMenu } from '@luxgen/ui';
+const [user, setUser] = useState<UserMenu | null>(null);
+`
       **Files to change:** `packages/agent/src/prompts/system.ts`.
 
 ---
@@ -549,7 +549,7 @@
 | -------------------- | ------- | ------ |
 | CRITICAL             | 7       | 7 ✅   |
 | HIGH                 | 27      | 20     |
-| MEDIUM               | 24      | 20     |
+| MEDIUM               | 24      | 21     |
 | LOW                  | 25      | 22     |
 | **Agent / A-HIGH**   | **7**   | **4**  |
 | **Agent / A-MEDIUM** | **10**  | **2**  |
