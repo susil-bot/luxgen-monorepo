@@ -112,15 +112,17 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
         {loading ? (
           <PageLoadingState label="Loading orders…" />
         ) : (
-          <OrderListView
-            orders={orders}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
-            search={search}
-            onSearchChange={setSearch}
-            tabCounts={tabCounts}
-            onCreateOrder={() => void router.push('/orders/create')}
-          />
+          <div className="overflow-x-auto -mx-4 px-4">
+            <OrderListView
+              orders={orders}
+              activeTab={activeTab}
+              onTabChange={setActiveTab}
+              search={search}
+              onSearchChange={setSearch}
+              tabCounts={tabCounts}
+              onCreateOrder={() => void router.push('/orders/create')}
+            />
+          </div>
         )}
       </AppLayout>
     </>

@@ -1145,19 +1145,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/Modal/Modal.tsx` has no `xs` size for very small screens. All sizes render with `mx-auto` but no `mx-4` fallback means the modal content can overflow on screens narrower than its `max-w`.
       **Fix:** Add `mx-4 sm:mx-auto` to ensure minimum horizontal margin on mobile.
 
-- [ ] **UI-33** `[responsive]`
+- [x] **UI-33** `[responsive]`
       `apps/web/pages/courses/analytics.tsx` and `pages/groups/analytics.tsx` render stat cards in a fixed row. On mobile they overflow rather than wrapping to a single column.
       **Fix:** Wrap in `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4`.
 
-- [ ] **UI-34** `[responsive]`
+- [x] **UI-34** `[responsive]`
       `apps/web/pages/orders/index.tsx` uses `OrderListView` which renders a table. No horizontal scroll container is applied at the page level. Order rows overflow on screens < 768px.
       **Fix:** Wrap the `OrderListView` in `<div className="overflow-x-auto -mx-4 px-4">`.
 
-- [ ] **UI-35** `[responsive]`
+- [x] **UI-35** `[responsive]`
       `packages/ui/src/Carousel/Carousel.tsx` uses JavaScript-calculated `translateX` percentages. The carousel does not support touch swipe gestures on mobile, making it unusable as a primary navigation pattern on touch devices.
       **Fix:** Add `touchstart`/`touchmove`/`touchend` listeners to handle swipe navigation.
 
-- [ ] **UI-36** `[responsive]`
+- [x] **UI-36** `[responsive]`
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` plays automatically by default (`autoPlay: true`). On mobile, autoplay can drain battery and cause motion sickness. The `prefers-reduced-motion` media query is not respected.
       **Fix:** Check `window.matchMedia('(prefers-reduced-motion: reduce)').matches` and disable autoplay/transitions when true.
 
