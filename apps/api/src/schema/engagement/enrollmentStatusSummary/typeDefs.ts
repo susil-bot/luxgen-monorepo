@@ -1,0 +1,1 @@
+export const EnrollmentStatusSummaryTypeDefs=`type EnrollmentStatusSummary{enrolled:Boolean!paymentStatus:String learningStatus:String progressPercent:Int!} extend type Query{enrollmentStatusSummary(courseId:ID!):EnrollmentStatusSummary!}`;

@@ -1,0 +1,2 @@
+import type{GraphQLContext}from'../../../context';import{enrollmentStatusSummaryService}from'../../../services/enrollmentStatusSummaryService';
+export const EnrollmentStatusSummaryResolvers={Query:{enrollmentStatusSummary:async(_:unknown,{courseId}:{courseId:string},ctx:GraphQLContext)=>enrollmentStatusSummaryService.get(courseId,ctx.user?._id?.toString?.()??'')}};
