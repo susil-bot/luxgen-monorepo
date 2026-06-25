@@ -1,4 +1,6 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import { createHandleUserAction } from '../../lib/user-actions';
 import Head from 'next/head';
 import { useQuery, useMutation } from '@apollo/client';
 import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo } from '@luxgen/ui';
@@ -90,6 +92,7 @@ interface BuilderState {
 }
 
 export default function AutomationsPage({ tenant }: Props) {
+  const router = useRouter();
   const { queryTenantId, subdomain } = useTenantScope(tenant);
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [runHistory, setRunHistory] = useState<AutomationRun[]>([]);
@@ -340,7 +343,7 @@ export default function AutomationsPage({ tenant }: Props) {
         sidebarSections={getDefaultSidebarSections()}
         user={getDefaultUser()}
         logo={getDefaultLogo()}
-        onUserAction={() => {}}
+        onUserAction={createHandleUserAction(router)}
         showSearch
         showNotifications
         notificationCount={0}

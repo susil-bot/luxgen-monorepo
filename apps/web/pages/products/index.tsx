@@ -197,14 +197,14 @@ function ProductsPage({ tenant }: ProductsPageProps) {
             onSearchChange={setSearch}
             activeFilters={activeFilters}
             onRemoveFilter={(id) => setActiveFilters((prev) => prev.filter((f) => f.id !== id))}
-            onAddFilter={() => {}}
+            onAddFilter={(chip) => setActiveFilters((prev) => [...prev, chip])}
             onClearAll={handleClearAll}
             searchPlaceholder="Search title, vendor, SKU…"
             sortOptions={SORT_OPTIONS}
             selectedSortOption={sortId}
             sortDirection={sortId.endsWith('-asc') ? 'asc' : 'desc'}
             onSortOptionChange={handleSortChange}
-            onSortDirectionChange={() => {}}
+            onSortDirectionChange={(dir) => setSortId((s) => (dir === 'asc' ? s.replace('-desc', '-asc') : s.replace('-asc', '-desc')))}
           >
             {/* Bulk action bar */}
             {selected.length > 0 && (

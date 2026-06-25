@@ -47,6 +47,7 @@ function OrganizationRolesContent({ tenant }: Props) {
   const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
   const queryTenantId = tenantId ?? sessionUser?.tenant.id ?? tenant;
 
+  const [activeTab, setActiveTab] = useState('all');
   const [search, setSearch] = useState('');
   const [sortOption, setSortOption] = useState('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
@@ -125,8 +126,8 @@ function OrganizationRolesContent({ tenant }: Props) {
             }),
         }}
         tabs={[{ id: 'all', label: 'All roles', count: roles.length }]}
-        activeTab="all"
-        onTabChange={() => {}}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
         searchQuery={search}
         onSearchChange={setSearch}
         searchPlaceholder="Search roles…"
