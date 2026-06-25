@@ -21,7 +21,7 @@ import { storefrontTypeDefs } from './storefront/typeDefs';
 import { projectTypeDefs } from './project/typeDefs';
 import { mcpTypeDefs } from './mcp/typeDefs';
 import { learnerTypeDefs } from './learner/typeDefs';
-import { customRoleTypeDefs } from './customRole/typeDefs';
+import { analyticsTypeDefs } from './analytics/typeDefs';
 
 // Import resolvers
 import { tenantResolvers } from './tenant/resolvers';
@@ -40,7 +40,7 @@ import { storefrontResolvers } from './storefront/resolvers';
 import { projectResolvers } from './project/resolvers';
 import { mcpResolvers } from './mcp/resolvers';
 import { learnerResolvers } from './learner/resolvers';
-import { customRoleResolvers } from './customRole/resolvers';
+import { analyticsResolvers } from './analytics/resolvers';
 
 // Base schema
 const baseTypeDefs = `
@@ -79,7 +79,7 @@ export const typeDefs = mergeTypeDefs([
   projectTypeDefs,
   mcpTypeDefs,
   learnerTypeDefs,
-  customRoleTypeDefs,
+  analyticsTypeDefs,
 ]);
 
 // Scalar resolvers
@@ -111,7 +111,7 @@ const mergedResolvers = mergeResolvers([
   projectResolvers,
   mcpResolvers,
   learnerResolvers,
-  customRoleResolvers,
+  analyticsResolvers,
 ]);
 
 export const resolvers: any = secureResolvers(mergedResolvers);
