@@ -1,6 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { isAuthRequired, resolveAgentAuth } from '@luxgen/agent';
 import type { AgentAuthContext } from '@luxgen/agent';
+import { hasRoleAtLeast, UserRole } from '@luxgen/auth';
 import { requirePlanFeature } from './plan-gate';
 
 export function requireAgentAuth(req: NextApiRequest, res: NextApiResponse): AgentAuthContext | null {
@@ -13,6 +14,28 @@ export function requireAgentAuth(req: NextApiRequest, res: NextApiResponse): Age
     });
     return null;
   }
+  return auth;
+}
+
+/** Agent admin endpoints require ADMIN role or higher. */
+export function requireAgentAdmin(req: NextApiRequest, res: NextApiResponse): AgentAuthContext | null {
+  const auth = requireAgentAuth(req, res);
+  if (!auth) return null;
+
+  const role = auth.role as UserRole | undefined;
+  if (!role || !hasRoleAtLeast(role, UserRole.ADMIN)) {
+    res.status(403).json({ error: 'Admin role required.' });
+    return null;
+  }
+
+  if (auth.tenantId && role !== UserRole.SUPER_ADMIN) {
+    const queryTenant = req.query.tenantId as string | undefined;
+    if (queryTenant && queryTenant !== auth.tenantId) {
+      res.status(403).json({ error: 'Cannot list tasks for another tenant.' });
+      return null;
+    }
+  }
+
   return auth;
 }
 

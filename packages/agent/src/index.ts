@@ -103,6 +103,7 @@ export {
   syncSessionToMongo,
   appendAuditEntry,
   getTaskFromMongo,
+  listTasksFromMongo,
   getAuditLog,
   updateTaskValidation,
 } from './persistence/mongo';
