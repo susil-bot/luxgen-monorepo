@@ -281,10 +281,10 @@ mutation CreateOrder($courseId: ID!, $studentId: ID!) {
 
 ### Phase 3 — Order lifecycle extensions
 
-- [ ] `CheckoutSession` model for abandoned carts
-- [ ] `draftEnrollments` / `abandonedCheckouts` queries
-- [ ] Wire `/orders/drafts`, `/orders/abandoned`
-- [ ] `deleteCustomer` admin UI + cascade policy (block if active enrollments?)
+- [x] `CheckoutSession` model for abandoned carts
+- [x] `draftEnrollments` / `abandonedCheckouts` queries
+- [x] Wire `/orders/drafts`, `/orders/abandoned`
+- [x] `deleteCustomer` admin UI + cascade policy (block if active enrollments?)
 
 ### Phase 4 — Learner & analytics
 

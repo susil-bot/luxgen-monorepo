@@ -1,10 +1,24 @@
+import { useMemo, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { AppLayout, getDefaultLogo, getDefaultSidebarSections, SnackbarProvider } from '@luxgen/ui';
+import { useQuery } from '@apollo/client';
+import {
+  AppLayout,
+  getDefaultLogo,
+  getDefaultSidebarSections,
+  AbandonedCheckoutListView,
+  buildAbandonedCheckoutRows,
+  SnackbarProvider,
+} from '@luxgen/ui';
+import { PageLoadingState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
+import { useTenantScope } from '../../lib/use-tenant-scope';
+import { GET_USERS } from '../../graphql/queries/users';
+import { GET_ABANDONED_CHECKOUTS } from '../../graphql/queries/enrollment';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
+import { isMongoObjectId } from '../../lib/mongo-id';
 
 interface Props {
   tenant: string;
@@ -14,7 +28,28 @@ function OrdersAbandonedContent({ tenant }: Props) {
   const router = useRouter();
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
+  const { queryTenantId } = useTenantScope(tenant);
   const headerProps = useAppLayoutHeader();
+  const [search, setSearch] = useState('');
+
+  const { data: checkoutData, loading: checkoutLoading } = useQuery(GET_ABANDONED_CHECKOUTS, {
+    variables: { tenantId: queryTenantId },
+    skip: !isMongoObjectId(queryTenantId),
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
+    variables: { tenantId: queryTenantId },
+    skip: !queryTenantId,
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const checkouts = useMemo(
+    () => buildAbandonedCheckoutRows(checkoutData?.abandonedCheckouts, usersData?.users),
+    [checkoutData, usersData],
+  );
+
+  const loading = (checkoutLoading || usersLoading) && checkouts.length === 0;
 
   return (
     <>
@@ -29,10 +64,11 @@ function OrdersAbandonedContent({ tenant }: Props) {
         {...headerProps}
         responsive
       >
-        <div className="max-w-4xl mx-auto px-4 py-12">
-          <h1 className="text-2xl font-semibold text-primary">Abandoned checkouts</h1>
-          <p className="text-secondary mt-2">Abandoned checkout recovery will appear here.</p>
-        </div>
+        {loading ? (
+          <PageLoadingState label="Loading abandoned checkouts…" />
+        ) : (
+          <AbandonedCheckoutListView checkouts={checkouts} search={search} onSearchChange={setSearch} />
+        )}
       </AppLayout>
     </>
   );

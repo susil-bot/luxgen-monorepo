@@ -113,6 +113,33 @@ query Enrollments($tenantId: ID!) {
   }
 }
 
+query DraftEnrollments($tenantId: ID!) {
+  draftEnrollments(tenantId: $tenantId) {
+    id
+    courseId
+    studentId
+    tags
+    paymentStatus
+    enrolledAt
+  }
+}
+
+query AbandonedCheckouts($tenantId: ID!) {
+  abandonedCheckouts(tenantId: $tenantId) {
+    id
+    courseId
+    studentId
+    amountCents
+    currency
+    status
+    customerEmail
+    checkoutUrl
+    courseTitle
+    createdAt
+    abandonedAt
+  }
+}
+
 mutation EnrollStudent($courseId: ID!, $studentId: ID!) {
   enrollStudent(courseId: $courseId, studentId: $studentId) {
     id

@@ -1,5 +1,6 @@
 import { EnrollmentPaymentStatus, EnrollmentLearningStatus, UserRole } from '@luxgen/db';
 import { enrollmentService } from '../../services/enrollmentService';
+import { checkoutSessionService } from '../../services/checkoutSessionService';
 import { courseService } from '../../services/courseService';
 import { actorFromContext } from '../../services/activityEventService';
 import { isBillingDevMode } from '../../services/billingService';
@@ -49,6 +50,39 @@ function mapEnrollment(doc: {
   };
 }
 
+function mapAbandonedCheckout(doc: {
+  _id?: { toString(): string };
+  id?: string;
+  course: { toString(): string } | string;
+  student: { toString(): string } | string;
+  stripeSessionId: string;
+  amountCents: number;
+  currency: string;
+  status: string;
+  customerEmail?: string;
+  checkoutUrl?: string;
+  courseTitle?: string;
+  createdAt: Date;
+  abandonedAt?: Date;
+  expiresAt?: Date;
+}) {
+  return {
+    id: doc._id?.toString?.() ?? doc.id,
+    courseId: typeof doc.course === 'string' ? doc.course : doc.course.toString(),
+    studentId: typeof doc.student === 'string' ? doc.student : doc.student.toString(),
+    stripeSessionId: doc.stripeSessionId,
+    amountCents: doc.amountCents,
+    currency: doc.currency,
+    status: doc.status,
+    customerEmail: doc.customerEmail,
+    checkoutUrl: doc.checkoutUrl,
+    courseTitle: doc.courseTitle,
+    createdAt: doc.createdAt,
+    abandonedAt: doc.abandonedAt,
+    expiresAt: doc.expiresAt,
+  };
+}
+
 export const enrollmentResolvers = {
   Query: {
     enrollment: async (_: unknown, { courseId, studentId }: { courseId: string; studentId: string }) => {
@@ -73,6 +107,16 @@ export const enrollmentResolvers = {
       const scoped = scopedTenantId(context, tenantId);
       const docs = await enrollmentService.listByStudent(scoped, studentId);
       return docs.map(mapEnrollment);
+    },
+    draftEnrollments: async (_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) => {
+      const scoped = scopedTenantId(ctx, tenantId);
+      const docs = await enrollmentService.listDraftByTenant(scoped);
+      return docs.map(mapEnrollment);
+    },
+    abandonedCheckouts: async (_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) => {
+      const scoped = scopedTenantId(ctx, tenantId);
+      const docs = await checkoutSessionService.listAbandoned(scoped);
+      return docs.map(mapAbandonedCheckout);
     },
   },
   Mutation: {

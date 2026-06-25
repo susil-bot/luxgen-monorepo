@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import {
   AppLayout,
   getDefaultLogo,
@@ -18,7 +18,7 @@ import { createHandleUserAction } from '../../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../../lib/app-layout-user';
 import { getStoredUser } from '../../../lib/session';
 import { GET_COURSES } from '../../../graphql/queries/courses';
-import { GET_USER, GET_USERS } from '../../../graphql/queries/users';
+import { GET_USER, GET_USERS, DELETE_USER } from '../../../graphql/queries/users';
 import { GET_ENROLLMENTS } from '../../../graphql/queries/enrollment';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
@@ -41,8 +41,9 @@ function AdminCustomerDetailContent({ tenant }: Props) {
   const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
   const queryTenantId = tenantId ?? sessionUser?.tenant.id;
   const headerProps = useAppLayoutHeader();
-  const { showError } = useSnackbar();
+  const { showError, showSuccess } = useSnackbar();
   const [localCustomer, setLocalCustomer] = useState<CustomerDetail | null>(null);
+  const [deletingCustomer, setDeletingCustomer] = useState(false);
 
   const customerId = typeof router.query.id === 'string' ? router.query.id : '';
 
@@ -141,6 +142,27 @@ function AdminCustomerDetailContent({ tenant }: Props) {
     savingNotes: savingCustomerNotes,
   } = useCustomerNotes(customerId, timelineTenantId, customer?.notes ?? '');
 
+  const [deleteUser] = useMutation(DELETE_USER);
+
+  const handleDeleteCustomer = useCallback(async () => {
+    if (!customerId) return;
+    const confirmed = window.confirm(
+      'Delete this customer permanently? This cannot be undone. Customers with active orders cannot be deleted.',
+    );
+    if (!confirmed) return;
+
+    setDeletingCustomer(true);
+    try {
+      await deleteUser({ variables: { id: customerId } });
+      showSuccess('Customer deleted');
+      void router.push('/admin/customers');
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to delete customer');
+    } finally {
+      setDeletingCustomer(false);
+    }
+  }, [customerId, deleteUser, router, showError, showSuccess]);
+
   return (
     <>
       <Head>
@@ -171,6 +193,8 @@ function AdminCustomerDetailContent({ tenant }: Props) {
             customer={displayCustomer}
             editHref={`/admin/customers/${customerId}/edit`}
             onCreateOrder={() => void router.push(`/orders/create?customerId=${encodeURIComponent(customerId)}`)}
+            onDeleteCustomer={() => void handleDeleteCustomer()}
+            deletingCustomer={deletingCustomer}
             onMarketingChange={onMarketingChange}
             savingMarketing={savingMarketing}
             timeline={timeline}
