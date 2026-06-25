@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useQuery, useMutation } from '@apollo/client';
 import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo } from '@luxgen/ui';
@@ -94,6 +95,14 @@ export default function MyListingsPage({ tenant }: Props) {
                       </p>
                       {l.reviewerNotes && <p className="text-sm mt-2 text-secondary">Note: {l.reviewerNotes}</p>}
                     </div>
+                    {(l.applicationStatus === 'DRAFT' || l.applicationStatus === 'NEED_MORE_INFORMATION') && (
+                      <Link
+                        href={`/listings/edit/${l.id}?tenant=${encodeURIComponent(tenant)}`}
+                        className="ios-btn-secondary shrink-0"
+                      >
+                        Edit
+                      </Link>
+                    )}
                     {(l.applicationStatus === 'AWAITING_PAYMENT' || l.applicationStatus === 'EXPIRED') && (
                       <button type="button" className="ios-btn-primary shrink-0" onClick={() => pay(l.id)}>
                         {l.applicationStatus === 'EXPIRED' ? 'Renew' : 'Pay & publish'}

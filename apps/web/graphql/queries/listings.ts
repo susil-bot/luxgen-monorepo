@@ -31,6 +31,22 @@ export const GET_MY_LISTINGS = gql`
   }
 `;
 
+export const GET_LISTING = gql`
+  query GetListing($id: ID!) {
+    listing(id: $id) {
+      id
+      businessName
+      description
+      category
+      website
+      phone
+      address
+      applicationStatus
+      applicantEmail
+    }
+  }
+`;
+
 export const GET_LISTINGS_FOR_REVIEW = gql`
   query GetListingsForReview($tenantId: String!) {
     listingsForReview(tenantId: $tenantId) {
@@ -52,6 +68,20 @@ export const CREATE_LISTING_DRAFT = gql`
       id
       businessName
       applicationStatus
+    }
+  }
+`;
+
+export const UPDATE_LISTING_DRAFT = gql`
+  mutation UpdateListingDraft($id: ID!, $input: UpdateListingInput!) {
+    updateListingDraft(id: $id, input: $input) {
+      id
+      businessName
+      description
+      category
+      website
+      phone
+      address
     }
   }
 `;
