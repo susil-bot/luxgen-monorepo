@@ -192,7 +192,7 @@
       **File:** `apps/api/src/config/tenants/index.ts` line 80 · `apps/api/src/config/tenants.ts` line 78
       `createdBy: null as any` used to satisfy the `ITenant` type, erasing type safety where a valid ObjectId is expected. Define a proper seed-user ObjectId constant or make `createdBy` optional in `ITenant` for system-seeded tenants.
 
-- [ ] **M-09** `[bug]`
+- [x] **M-09** `[bug]`
       **File:** `apps/web/pages/login.tsx` lines 93–96
       `handleForgotPassword` shows `showSuccess('Password reset email sent!')` with no API call behind it. Users receive a fake success notification. Disable the button until H-19 (forgot-password endpoint) is implemented, or display a "coming soon" message instead.
 
