@@ -88,31 +88,6 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
   });
   const [errors, setErrors] = useState<Partial<RegisterFormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const registrationStep = !formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() ? 1 : 2;
-
-  const validateField = (name: keyof RegisterFormData) => {
-    const fieldErrors: Partial<RegisterFormData> = {};
-    if (name === 'firstName' && !formData.firstName.trim()) fieldErrors.firstName = 'First name is required';
-    if (name === 'lastName' && !formData.lastName.trim()) fieldErrors.lastName = 'Last name is required';
-    if (name === 'email') {
-      if (!formData.email.trim()) fieldErrors.email = 'Email is required';
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim()))
-        fieldErrors.email = 'Please enter a valid email address';
-    }
-    if (name === 'password') {
-      if (!formData.password) fieldErrors.password = 'Password is required';
-      else if (formData.password.length < 8) fieldErrors.password = 'Password must be at least 8 characters';
-    }
-    if (name === 'confirmPassword') {
-      if (!formData.confirmPassword) fieldErrors.confirmPassword = 'Please confirm your password';
-      else if (formData.password !== formData.confirmPassword) fieldErrors.confirmPassword = 'Passwords do not match';
-    }
-    setErrors((prev) => {
-      const next = { ...prev, ...fieldErrors };
-      if (!fieldErrors[name]) delete next[name];
-      return next;
-    });
-  };
 
   // Clear errors when form data changes
   useEffect(() => {
@@ -276,22 +251,6 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
         <Text text={subtitle} className="text-lg text-gray-600" />
       </div>
 
-      <div className="mb-6" role="progressbar" aria-valuemin={1} aria-valuemax={2} aria-valuenow={registrationStep}>
-        <div className="flex gap-2 mb-2">
-          <div
-            className="flex-1 h-1 rounded-full"
-            style={{ backgroundColor: registrationStep >= 1 ? 'var(--color-blue)' : 'var(--color-fill-tertiary)' }}
-          />
-          <div
-            className="flex-1 h-1 rounded-full"
-            style={{ backgroundColor: registrationStep >= 2 ? 'var(--color-blue)' : 'var(--color-fill-tertiary)' }}
-          />
-        </div>
-        <p className="text-xs text-secondary text-center">
-          Step {registrationStep} of 2 — {registrationStep === 1 ? 'Your details' : 'Secure your account'}
-        </p>
-      </div>
-
       {/* Error/Success Messages */}
       {error && (
         <div className="mb-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg">
@@ -320,9 +279,7 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
               placeholder="Enter your first name"
               value={formData.firstName}
               onChange={handleInputChange}
-              onBlur={() => validateField('firstName')}
               disabled={loading || isSubmitting}
-              aria-invalid={Boolean(errors.firstName)}
               className={`w-full px-4 py-3 bg-white/90 border rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 ${
                 errors.firstName ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -342,9 +299,7 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
               placeholder="Enter your last name"
               value={formData.lastName}
               onChange={handleInputChange}
-              onBlur={() => validateField('lastName')}
               disabled={loading || isSubmitting}
-              aria-invalid={Boolean(errors.lastName)}
               className={`w-full px-4 py-3 bg-white/90 border rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 ${
                 errors.lastName ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -366,9 +321,7 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
             placeholder="Enter your email"
             value={formData.email}
             onChange={handleInputChange}
-            onBlur={() => validateField('email')}
             disabled={loading || isSubmitting}
-            aria-invalid={Boolean(errors.email)}
             className={`w-full px-4 py-3 bg-white/90 border rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 ${
               errors.email ? 'border-red-500' : 'border-gray-300'
             }`}
@@ -412,9 +365,7 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
               placeholder="Enter your password"
               value={formData.password}
               onChange={handleInputChange}
-              onBlur={() => validateField('password')}
               disabled={loading || isSubmitting}
-              aria-invalid={Boolean(errors.password)}
               className={`w-full px-4 py-3 bg-white/90 border rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 ${
                 errors.password ? 'border-red-500' : 'border-gray-300'
               }`}
@@ -434,9 +385,7 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
               placeholder="Confirm your password"
               value={formData.confirmPassword}
               onChange={handleInputChange}
-              onBlur={() => validateField('confirmPassword')}
               disabled={loading || isSubmitting}
-              aria-invalid={Boolean(errors.confirmPassword)}
               className={`w-full px-4 py-3 bg-white/90 border rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 ${
                 errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
               }`}
