@@ -20,6 +20,7 @@ function BrandingContent({ tenant }: Props) {
   const [primaryColor, setPrimaryColor] = useState('#0A84FF');
   const [logoText, setLogoText] = useState('LuxGen');
   const [fontFamily, setFontFamily] = useState('Inter, system-ui, sans-serif');
+  const [faviconPreview, setFaviconPreview] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -31,6 +32,7 @@ function BrandingContent({ tenant }: Props) {
         setPrimaryColor(branding.primaryColor || branding.accentColor || '#0A84FF');
         setLogoText(branding.logo || current.name || 'LuxGen');
         setFontFamily(branding.fontFamily || 'Inter, system-ui, sans-serif');
+        if (branding.favicon) setFaviconPreview(branding.favicon);
       } catch (err) {
         if (!cancelled) {
           showError(err instanceof Error ? err.message : 'Failed to load branding');
@@ -44,6 +46,14 @@ function BrandingContent({ tenant }: Props) {
     };
   }, [showError]);
 
+  const handleFaviconFile = (file: File | null) => {
+    if (!file) return;
+    if (file.size > 500_000) { showError('Favicon must be 500 KB or less'); return; }
+    const reader = new FileReader();
+    reader.onload = () => setFaviconPreview(String(reader.result ?? ''));
+    reader.readAsDataURL(file);
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
@@ -52,6 +62,7 @@ function BrandingContent({ tenant }: Props) {
         primaryColor,
         accentColor: primaryColor,
         fontFamily,
+        ...(faviconPreview ? { favicon: faviconPreview } : {}),
       });
       showSuccess('Branding saved');
     } catch (err) {
@@ -69,6 +80,11 @@ function BrandingContent({ tenant }: Props) {
           <p className="text-secondary text-sm">Loading…</p>
         ) : (
           <>
+            <div className="ios-form-group">
+              <label htmlFor="faviconUpload">Favicon (PNG/SVG, max 500 KB)</label>
+              <input id="faviconUpload" type="file" accept="image/png,image/svg+xml,image/x-icon" onChange={(e) => handleFaviconFile(e.target.files?.[0] ?? null)} />
+              {faviconPreview && <img src={faviconPreview} alt="" className="mt-2 h-8 w-8" />}
+            </div>
             <div className="ios-form-group">
               <label htmlFor="logoText">Logo text</label>
               <input
