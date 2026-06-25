@@ -296,7 +296,7 @@
       **File:** `apps/web/pages/automations/index.tsx` line 864 · `apps/web/pages/dashboard.tsx` line 149
       `getServerSideProps` typed as `async (ctx: any)`. Replace with `GetServerSideProps<PageProps>` for proper Next.js type safety.
 
-- [ ] **L-10** `[type]`
+- [x] **L-10** `[type]`
       **File:** `apps/api/src/schema/index.ts` lines 73–93
       Custom JSON scalar `parseLiteral` uses `any` throughout; the `ast` parameter should be typed as `graphql.ValueNode`. (Related to M-13 which replaces this implementation entirely.)
 
