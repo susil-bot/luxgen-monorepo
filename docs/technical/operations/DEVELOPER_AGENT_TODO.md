@@ -1169,15 +1169,15 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/components/agent/AgentTransparency.tsx` uses a side-by-side panel layout (file tree + diff viewer). On screens < 1024px the diff viewer is cramped. On mobile it is unusable.
       **Fix:** Stack the panels vertically below `lg:` breakpoint using `flex-col lg:flex-row`.
 
-- [ ] **UI-39** `[responsive]`
+- [x] **UI-39** `[responsive]`
       `OrganizationSecurityNav` (sidebar nav within the security section) renders as a list. On mobile it takes up the full screen width but has no drawer/accordion treatment.
       **Fix:** Collapse to a `<select>` or accordion on `< md` breakpoints.
 
-- [ ] **UI-40** `[responsive]`
+- [x] **UI-40** `[responsive]`
       `SettingsShell` renders a vertical tab list on the left. On narrow screens this pushes the main content off-screen.
       **Fix:** Collapse the settings tab list to a horizontal scrollable `<nav>` or `<select>` below `md:`.
 
-- [ ] **UI-41** `[responsive]`
+- [x] **UI-41** `[responsive]`
       `packages/ui/src/CountryLanguageDropdown/CountryLanguageDropdown.tsx` hardcodes `w-80` (320px). On screens narrower than 360px this causes horizontal overflow.
       **Fix:** Use `w-full max-w-xs` and set `min-w-0` on the parent container.
 
@@ -1189,11 +1189,11 @@ const [user, setUser] = useState<UserMenu | null>(null);
       No CSS Container Queries are used anywhere. Several components (e.g., `Card`, `ProductCard`, `GroupCard`) would benefit from container-based breakpoints rather than viewport breakpoints, since they appear in both narrow sidebars and wide main content areas.
       **Fix:** Evaluate and introduce `@container` queries for the card components.
 
-- [ ] **UI-44** `[responsive]`
+- [x] **UI-44** `[responsive]`
       `packages/ui/src/Select/Select.tsx` custom dropdown does not handle the case where it opens near the bottom of the viewport. The dropdown can be clipped by the viewport edge on mobile.
       **Fix:** Detect available space and flip the dropdown to open upward (`dropup`) when needed.
 
-- [ ] **UI-45** `[responsive]`
+- [x] **UI-45** `[responsive]`
       `apps/web/components/agent/AgentChat.tsx` textarea has `maxHeight: '160px'` hardcoded as an inline style. On small phones this is too tall relative to the available screen height, pushing the send button below the fold.
       **Fix:** Use `max-h-24 sm:max-h-40` or compute max height relative to `window.innerHeight`.
 
