@@ -23,9 +23,15 @@ export default function ApplyListingPage({ tenant }: Props) {
 
   const [createDraft] = useMutation(CREATE_LISTING_DRAFT);
   const [submitListing] = useMutation(SUBMIT_LISTING);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFormError(null);
+    if (!form.applicantEmail.trim() || !form.businessName.trim()) {
+      setFormError('Email and business name are required.');
+      return;
+    }
     const { data } = await createDraft({
       variables: {
         input: { tenantId: tenant, ...form },
@@ -51,6 +57,11 @@ export default function ApplyListingPage({ tenant }: Props) {
             subscription is active.
           </p>
 
+          {formError && (
+            <p role="alert" className="text-red-600 text-sm">
+              {formError}
+            </p>
+          )}
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             {(['applicantEmail', 'applicantName', 'businessName', 'category', 'website', 'phone'] as const).map(
               (field) => (

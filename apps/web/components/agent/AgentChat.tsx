@@ -153,6 +153,7 @@ export default function AgentChat({
   systemPrompt,
   layout = 'default',
 }: AgentChatProps) {
+  const [streamError, setStreamError] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
@@ -264,6 +265,7 @@ export default function AgentChat({
       });
 
       if (!response.ok) {
+        setStreamError('Connection lost — try sending again.');
         const err = await response.json();
         setMessages((prev) =>
           prev.map((m) => (m.id === assistantMsg.id ? { ...m, content: `Error: ${err.error}` } : m)),
@@ -350,6 +352,11 @@ export default function AgentChat({
 
   return (
     <div className={isSidekick ? 'lux-sidekick-chat' : 'flex flex-col h-full'}>
+      {streamError && (
+        <div role="alert" className="mx-4 mt-2 p-2 text-sm rounded bg-red-50 text-red-700">
+          {streamError}
+        </div>
+      )}
       {/* Messages */}
       <div className={isSidekick ? 'lux-sidekick-messages' : 'flex-1 overflow-y-auto px-4 py-4'}>
         {messages.map((msg) => (

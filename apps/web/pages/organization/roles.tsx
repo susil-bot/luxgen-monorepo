@@ -131,7 +131,10 @@ function OrganizationRolesContent({ tenant }: Props) {
         onSortDirectionChange={setSortDirection}
       >
         {roles.length === 0 ? (
-          <EmptyState title="No roles match" description="Try a different search." />
+          <EmptyState
+            title="No roles match"
+            description="No custom roles yet. Create your first role to manage permissions."
+          />
         ) : (
           <div className="ios-table-wrap">
             <table className="ios-table">
