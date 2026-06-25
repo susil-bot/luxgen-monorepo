@@ -16,7 +16,7 @@ export interface SnackbarProps {
   };
   closable?: boolean;
   className?: string;
-  tenantTheme?: any;
+  tenantTheme?: import('../types').TenantTheme;
 }
 
 export interface SnackbarItem {

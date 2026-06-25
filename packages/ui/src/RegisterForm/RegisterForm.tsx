@@ -17,7 +17,7 @@ export interface RegisterFormData {
 }
 
 export interface RegisterFormProps {
-  tenantTheme?: any;
+  tenantTheme?: import('../types').TenantTheme;
   onSubmit?: (data: RegisterFormData) => Promise<void> | void;
   onSocialLogin?: (provider: 'google' | 'linkedin' | 'github') => Promise<void> | void;
   onLogin?: () => void;
@@ -41,7 +41,6 @@ export interface RegisterFormProps {
   loginText?: string;
   loginLinkText?: string;
   socialLoginText?: string;
-  [key: string]: any;
 }
 
 const defaultTheme = {
