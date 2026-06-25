@@ -89,7 +89,7 @@ router.post('/login', loginRateLimitMiddleware, validateLogin, async (req: Reque
       },
     });
   } catch (error) {
-    console.error('Login error:', error);
+    logger.error('Login error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -171,7 +171,7 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
       },
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    logger.error('Registration error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -215,7 +215,7 @@ router.get('/me', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('Get user error:', error);
+    logger.error('Get user error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -306,7 +306,7 @@ router.post('/invite', canInviteUsers, logRoleAccess('user invitation'), async (
       },
     });
   } catch (error) {
-    console.error('User invitation error:', error);
+    logger.error('User invitation error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -358,7 +358,7 @@ router.put(
         },
       });
     } catch (error) {
-      console.error('Role update error:', error);
+      logger.error('Role update error:', error);
       res.status(500).json({
         success: false,
         message: 'Internal server error',
@@ -408,7 +408,7 @@ router.put(
         },
       });
     } catch (error) {
-      console.error('User activation error:', error);
+      logger.error('User activation error:', error);
       res.status(500).json({
         success: false,
         message: 'Internal server error',
