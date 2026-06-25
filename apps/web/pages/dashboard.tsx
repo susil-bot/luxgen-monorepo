@@ -106,7 +106,7 @@ export default function Dashboard({ tenant }: DashboardProps) {
           banners: [
             {
               id: '1',
-              title: 'Welcome to Ideavibes',
+              title: `Welcome to ${displayName}`,
               description: 'Your learning management dashboard',
               image:
                 'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80',
