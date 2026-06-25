@@ -353,8 +353,9 @@ export default function AgentChat({
   return (
     <div className={isSidekick ? 'lux-sidekick-chat' : 'flex flex-col h-full'}>
       {streamError && (
-        <div role="alert" className="mx-4 mt-2 p-2 text-sm rounded bg-red-50 text-red-700">
-          {streamError}
+        <div role="alert" className="mx-4 mt-2 p-3 text-sm rounded-lg flex items-center justify-between gap-3" style={{ background: 'rgba(255,59,48,0.12)', color: 'var(--color-red)' }}>
+          <span>{streamError}</span>
+          <button type="button" className="ios-btn-secondary text-xs py-1 px-2" onClick={() => { setStreamError(null); void sendMessage(); }}>Reconnect</button>
         </div>
       )}
       {/* Messages */}
