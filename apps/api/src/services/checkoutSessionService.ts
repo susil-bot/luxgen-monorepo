@@ -1,4 +1,5 @@
 import { CheckoutSession, CheckoutSessionStatus, type ICheckoutSession } from '@luxgen/db';
+import { sendTransactionalEmail } from '../utils/email';
 
 /** Open Stripe sessions older than this are treated as abandoned. */
 const ABANDONED_AFTER_MS = 60 * 60 * 1000;
@@ -55,6 +56,18 @@ export class CheckoutSessionService {
       },
       { status: CheckoutSessionStatus.ABANDONED, abandonedAt: new Date() },
     );
+  }
+
+  async sendRecoveryEmail(tenantId: string, sessionId: string): Promise<boolean> {
+    const session = await CheckoutSession.findOne({ _id: sessionId, tenant: tenantId });
+    if (!session?.customerEmail) return false;
+    const url = session.checkoutUrl || '';
+    await sendTransactionalEmail({
+      to: session.customerEmail,
+      subject: 'Complete your checkout',
+      body: [`Hello,`, '', 'You left items in your cart. Complete checkout here:', url || '(contact support for a new link)', ''].join('\n'),
+    });
+    return true;
   }
 
   async listAbandoned(tenantId: string): Promise<ICheckoutSession[]> {

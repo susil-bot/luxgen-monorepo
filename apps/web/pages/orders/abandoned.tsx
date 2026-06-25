@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import {
   AppLayout,
   getDefaultLogo,
@@ -15,7 +15,7 @@ import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import { useTenantScope } from '../../lib/use-tenant-scope';
 import { GET_USERS } from '../../graphql/queries/users';
-import { GET_ABANDONED_CHECKOUTS } from '../../graphql/queries/enrollment';
+import { GET_ABANDONED_CHECKOUTS, SEND_CHECKOUT_RECOVERY } from '../../graphql/queries/enrollment';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
 import { isMongoObjectId } from '../../lib/mongo-id';
@@ -31,6 +31,8 @@ function OrdersAbandonedContent({ tenant }: Props) {
   const { queryTenantId } = useTenantScope(tenant);
   const headerProps = useAppLayoutHeader();
   const [search, setSearch] = useState('');
+  const [sendingId, setSendingId] = useState<string | null>(null);
+  const [sendRecovery] = useMutation(SEND_CHECKOUT_RECOVERY);
 
   const { data: checkoutData, loading: checkoutLoading } = useQuery(GET_ABANDONED_CHECKOUTS, {
     variables: { tenantId: queryTenantId },
@@ -67,7 +69,16 @@ function OrdersAbandonedContent({ tenant }: Props) {
         {loading ? (
           <PageLoadingState label="Loading abandoned checkouts…" />
         ) : (
-          <AbandonedCheckoutListView checkouts={checkouts} search={search} onSearchChange={setSearch} />
+          <AbandonedCheckoutListView
+            checkouts={checkouts}
+            search={search}
+            onSearchChange={setSearch}
+            sendingId={sendingId}
+            onSendRecovery={(checkoutSessionId) => {
+              setSendingId(checkoutSessionId);
+              void sendRecovery({ variables: { tenantId: queryTenantId, checkoutSessionId } }).finally(() => setSendingId(null));
+            }}
+          />
         )}
       </AppLayout>
     </>
