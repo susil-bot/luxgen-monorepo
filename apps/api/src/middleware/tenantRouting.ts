@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { isDevLocalOrigin } from '@luxgen/config';
-import { Tenant, ITenant } from '@luxgen/db';
+import { Tenant, ITenant, resolveEffectivePlan } from '@luxgen/db';
 import { verifyToken, getTenantFromToken } from '../utils/jwt';
 import { renderTenantNotFound } from '../utils/tenantNotFound';
 import { getRedisClient } from '../lib/redis';
@@ -163,7 +163,8 @@ export const tenantRoutingMiddleware = async (req: Request, res: Response, next:
     res.set('X-Tenant-ID', tenantId!);
     res.set('X-Tenant-Name', tenant.name);
     res.set('X-Tenant-Subdomain', tenant.subdomain);
-    res.set('X-Tenant-Plan', tenant.metadata.plan);
+    const effectivePlan = await resolveEffectivePlan(tenant.subdomain);
+    res.set('X-Tenant-Plan', effectivePlan);
 
     next();
   } catch {

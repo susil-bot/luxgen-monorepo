@@ -2,9 +2,8 @@ import {
   Automation,
   AutomationRun,
   Enrollment,
-  Tenant,
-  TenantSubscription,
   TenantUsageMonthly,
+  resolveEffectivePlan,
   currentUsagePeriod,
   ActivityEventKind,
   ActivityActorType,
@@ -13,7 +12,7 @@ import {
   type IAutomation,
   type IAutomationAction,
 } from '@luxgen/db';
-import { assertWithinLimit, normalizePlan } from '@luxgen/billing';
+import { assertWithinLimit } from '@luxgen/billing';
 import { randomUUID } from 'crypto';
 import { enqueueHeadlessTask } from '../queue/redis-queue';
 import { ensureMongoConnection } from '../persistence/mongo';
@@ -438,12 +437,7 @@ export async function emitAgentAutomationEvent(
 }
 
 async function resolveTenantPlan(tenantId: string) {
-  const sub = await TenantSubscription.findOne({ tenantId }).lean();
-  if (sub && ['active', 'trialing'].includes(sub.status)) {
-    return normalizePlan(sub.plan);
-  }
-  const tenant = await Tenant.findOne({ subdomain: tenantId }).lean();
-  return normalizePlan(tenant?.metadata?.plan as string | undefined);
+  return resolveEffectivePlan(tenantId);
 }
 
 async function assertMonthlyAutomationRunsAllowed(tenantId: string): Promise<void> {
