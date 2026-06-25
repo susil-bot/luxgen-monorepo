@@ -1807,19 +1807,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `NavBar` `notificationCount` is hardcoded to `3` on most pages. It never reflects real unread notifications.
       **Fix:** Implement `GET /api/notifications/unread-count` polled every 30s; pass the real count to `NavBar`.
 
-- [ ] **UI-193** `[arch]`
+- [x] **UI-193** `[arch]`
       `NavBar` `onNotificationClick` is not wired to a notification list on any page. Clicking the bell icon has no effect on most pages.
       **Fix:** Implement a notifications dropdown panel (see BA-22).
 
-- [ ] **UI-194** `[arch]`
+- [x] **UI-194** `[arch]`
       `NavBar` `showThemeToggle={false}` is set on every page. Dark mode is not implemented.
       **Fix:** Implement dark mode with `localStorage` persistence and `data-theme` attribute toggle; then enable `showThemeToggle` globally.
 
-- [ ] **UI-195** `[arch]`
+- [x] **UI-195** `[arch]`
       `AppLayout`/`OrganizationShell` `onSearch` callback is defined but never connected to a search page. Pressing Enter in the NavBar search does nothing.
       **Fix:** On search submit, navigate to `/search?q={query}&tenant={tenant}` (page to be created).
 
-- [ ] **UI-196** `[arch]`
+- [x] **UI-196** `[arch]`
       `Sidebar` `onUserAction` for `'logout'` fires `handleUserAction` which calls `router.push('/login')` but does NOT clear the Apollo Client cache. Cached data from the previous user's session can leak to the next login.
       **Fix:** Call `apolloClient.clearStore()` before redirecting on logout.
 

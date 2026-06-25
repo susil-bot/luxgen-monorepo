@@ -33,6 +33,7 @@ export function useAppLayoutHeader() {
   return {
     showSearch: true,
     showThemeToggle: true,
+    onNotificationClick: () => {},
     isDarkMode: resolvedTheme === 'dark',
     onThemeToggle: toggleTheme,
     onSearch,
