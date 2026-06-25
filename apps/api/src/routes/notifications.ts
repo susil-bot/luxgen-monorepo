@@ -90,7 +90,6 @@ router.patch('/templates/:id', async (req, res) => {
   const tenantContext = getTenantContext(req);
   if (!tenantContext) return res.status(404).json({ success: false, message: 'No tenant context' });
   const { id } = req.params; const { subject, body } = req.body;
-  if (!LISTING_EMAIL_TEMPLATES[id]) return res.status(404).json({ success: false, message: 'Template not found' });
   templateOverrides.set(overrideKey(tenantContext.tenantId, id), { subject, body });
   res.json({ success: true, data: { id, subject, body } });
 });
