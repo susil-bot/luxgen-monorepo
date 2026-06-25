@@ -212,7 +212,7 @@
       **File:** `apps/web/pages/api/schema/index.ts` lines 73–93
       Custom JSON scalar `parseLiteral` calls `JSON.parse(field.value.value)` on raw AST string values inside `ObjectValue` and `ListValue` cases. This throws on non-JSON strings and corrupts data silently. Replace with the battle-tested `GraphQLJSON` from `graphql-scalars`.
 
-- [ ] **M-14** `[enhancement]`
+- [x] **M-14** `[enhancement]`
       **File:** `apps/api/src/lib/redis.ts` lines 16–27
       Redis client uses `lazyConnect: true` but `connect()` is never explicitly called. The `.on('error', () => {})` handler swallows all errors with no log message, making Redis misconfiguration invisible. Log the error, and add an explicit startup connectivity check.
 
