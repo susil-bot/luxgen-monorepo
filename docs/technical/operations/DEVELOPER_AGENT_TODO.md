@@ -462,7 +462,7 @@
 ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
-      _Resolved: `run_command` tool with npm/npx/node allowlist._
+        _Resolved: `run_command` tool with npm/npx/node allowlist._
 
 - [x] **A-13** `[bug]` `[dead-code]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx`
@@ -581,14 +581,14 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ## Progress Summary
 
-| Tier                 | Total   | Done   |
-| -------------------- | ------- | ------ |
-| CRITICAL             | 7       | 7 ✅   |
-| HIGH                 | 27      | 21     |
-| MEDIUM               | 24      | 23     |
-| LOW                  | 25      | 24     |
-| **Agent / A-MEDIUM** | **10**  | **10** ✅ |
-| **Agent / A-LOW**    | **10**  | **10** ✅ |
+| Tier                 | Total   | Done       |
+| -------------------- | ------- | ---------- |
+| CRITICAL             | 7       | 7 ✅       |
+| HIGH                 | 27      | 21         |
+| MEDIUM               | 24      | 23         |
+| LOW                  | 25      | 24         |
+| **Agent / A-MEDIUM** | **10**  | **10** ✅  |
+| **Agent / A-LOW**    | **10**  | **10** ✅  |
 | **Total**            | **110** | **110** ✅ |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
@@ -1807,19 +1807,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `NavBar` `notificationCount` is hardcoded to `3` on most pages. It never reflects real unread notifications.
       **Fix:** Implement `GET /api/notifications/unread-count` polled every 30s; pass the real count to `NavBar`.
 
-- [ ] **UI-193** `[arch]`
+- [x] **UI-193** `[arch]`
       `NavBar` `onNotificationClick` is not wired to a notification list on any page. Clicking the bell icon has no effect on most pages.
       **Fix:** Implement a notifications dropdown panel (see BA-22).
 
-- [ ] **UI-194** `[arch]`
+- [x] **UI-194** `[arch]`
       `NavBar` `showThemeToggle={false}` is set on every page. Dark mode is not implemented.
       **Fix:** Implement dark mode with `localStorage` persistence and `data-theme` attribute toggle; then enable `showThemeToggle` globally.
 
-- [ ] **UI-195** `[arch]`
+- [x] **UI-195** `[arch]`
       `AppLayout`/`OrganizationShell` `onSearch` callback is defined but never connected to a search page. Pressing Enter in the NavBar search does nothing.
       **Fix:** On search submit, navigate to `/search?q={query}&tenant={tenant}` (page to be created).
 
-- [ ] **UI-196** `[arch]`
+- [x] **UI-196** `[arch]`
       `Sidebar` `onUserAction` for `'logout'` fires `handleUserAction` which calls `router.push('/login')` but does NOT clear the Apollo Client cache. Cached data from the previous user's session can leak to the next login.
       **Fix:** Call `apolloClient.clearStore()` before redirecting on logout.
 
