@@ -1,10 +1,12 @@
 import React from 'react';
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+/** UI-152: use Input label prop */
+export interface InputProps {
   label?: string;
   error?: string;
   helperText?: string;
   className?: string;
+  [key: string]: any;
 }
 
 export const Input: React.FC<InputProps> = ({ label, error, helperText, className = '', ...props }) => {
