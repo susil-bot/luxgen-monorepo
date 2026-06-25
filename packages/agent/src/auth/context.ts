@@ -62,3 +62,13 @@ export function bindSessionAuth(
   session.status = session.status || 'created';
   saveSession(session);
 }
+
+export async function bindSessionAuthAsync(
+  sessionId: string,
+  auth: AgentAuthContext,
+  extras?: { mode?: 'interactive' | 'headless'; prompt?: string },
+): Promise<void> {
+  const { ensureSessionHydrated } = await import('../changeset/session-store');
+  await ensureSessionHydrated(sessionId);
+  bindSessionAuth(sessionId, auth, extras);
+}

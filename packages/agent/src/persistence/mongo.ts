@@ -145,6 +145,32 @@ export async function getTaskFromMongo(sessionId: string): Promise<Record<string
   return doc as Record<string, unknown> | null;
 }
 
+/** Convert Mongo AgentTask document to in-memory AgentSession. */
+export async function sessionFromMongoDoc(sessionId: string): Promise<AgentSession | null> {
+  const doc = await getTaskFromMongo(sessionId);
+  if (!doc) return null;
+
+  const meta = (doc.metadata as Record<string, unknown>) || {};
+  const createdAt = meta.createdAt ? new Date(meta.createdAt as string | Date).getTime() : Date.now();
+  const updatedAt = meta.updatedAt ? new Date(meta.updatedAt as string | Date).getTime() : Date.now();
+
+  return {
+    id: sessionId,
+    tenantId: doc.tenantId as string | undefined,
+    userId: doc.userId as string | undefined,
+    mode: doc.mode as AgentSession['mode'],
+    status: doc.status as AgentSession['status'],
+    prompt: doc.prompt as string | undefined,
+    files: (doc.files as AgentSession['files']) || {},
+    git: doc.git as AgentSession['git'],
+    validation: doc.validation as AgentSession['validation'],
+    messages: doc.messages as AgentSession['messages'],
+    metadata: { model: meta.model as string | undefined },
+    createdAt,
+    updatedAt,
+  };
+}
+
 export async function listTasksFromMongo(params: {
   tenantId: string;
   status?: string;

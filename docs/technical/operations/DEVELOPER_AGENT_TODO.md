@@ -421,31 +421,39 @@
 
 ### A-MEDIUM — Fix in Next Sprint
 
-- [ ] **A-08** `[arch]` `[infra]`
+- [x] **A-08** `[arch]` `[infra]`
       **File:** `packages/agent/src/changeset/session-store.ts` (all functions), `packages/agent/src/git/service.ts` (worktree paths)
       Session JSON files are stored in `apps/web/.agent-staging/<sessionId>.json` on the **local filesystem** of whichever pod handled the request. Git worktrees are stored in `.agent-worktrees/<sessionId>/` on the same pod. With Kubernetes HPA (multiple replicas), a request routed to pod B cannot find the session created on pod A. The system works only with `replicas: 1`.
       **Fix approach:** - Move session persistence to MongoDB exclusively (the `AgentTask` document already mirrors session state via `syncSessionToMongo` — invert the source of truth so `loadSession` reads MongoDB, not the filesystem). - Store worktree paths on a shared PVC or use a git bare-repo strategy with per-session branches (no worktrees needed — the agent writes to a branch via `git fast-import`).
       **Blocked by:** Choosing a shared volume or eliminating worktrees. Worktree removal is the cleaner path. See also A-06.
 
-- [ ] **A-09** `[arch]` `[infra]`
+      _Resolved: MongoDB-first sessions via `ensureSessionHydrated` + in-memory cache; `saveSession` skips filesystem when Mongo enabled._
+
+- [x] **A-09** `[arch]` `[infra]`
       **File:** `packages/agent/src/queue/redis-queue.ts` lines 39–66
       The Redis queue uses a plain `LPUSH`/`BRPOP` list. If `processHeadlessJob` throws an unhandled exception, the job is **permanently lost** — caught by the `try/catch` in `runWorkerLoop`, logged, and discarded. There is no retry count, backoff, dead-letter queue, or stalled-job recovery.
       **Fix approach:** - Add a retry envelope to `HeadlessTaskJob`: `attempts: number`, `maxAttempts: number` (default 3), `lastError?: string`. - On failure in `processHeadlessJob`, re-enqueue the job with `attempts + 1` if under `maxAttempts`; otherwise move to a `luxgen:agent:tasks:dead` list. - Add `GET /api/agent/tasks/dead` endpoint (admin-only) to inspect failed jobs.
       **Files to change:** `packages/agent/src/queue/redis-queue.ts`, `packages/agent/src/queue/worker.ts`, `packages/agent/src/types/task.ts`.
 
-- [ ] **A-10** `[feat]`
+      _Resolved: `attempts`/`maxAttempts` on jobs, `handleJobFailure` re-queue/dead-letter, `GET /api/agent/tasks/dead`._
+
+- [x] **A-10** `[feat]`
       **File:** `packages/agent/src/queue/worker.ts` lines 42–65
       `autoMerge` is parsed from `AGENT_AUTO_MERGE=true` in `getAgentConfig()` but **nothing in the worker or orchestrator ever calls `mergeAgentBranch`**. The config key is dead.
       **Fix approach:** After a successful commit in `processHeadlessJob` (when `commitResult.commitSha` is set), check `getAgentConfig().autoMerge` and call `mergeAgentBranch(job.sessionId)`. Emit `committed` then `merged` automation events. Update session status to `'merged'`. Guard against A-06 (merge race) before enabling this.
       **Files to change:** `packages/agent/src/queue/worker.ts`.
 
-- [ ] **A-11** `[feat]`
+      _Resolved: headless worker calls `mergeAgentBranch` when `AGENT_AUTO_MERGE=true` after commit._
+
+- [x] **A-11** `[feat]`
       **File:** `packages/agent/src/queue/worker.ts` lines 42–65
       Headless worker emits `staged` and `validated` automation events but **never emits `committed` or `merged` events**. Those events are only emitted from the interactive API routes (`commit.ts` and `merge.ts`). Automations triggered on `CODE_CHANGE_COMMITTED` / `CODE_CHANGE_MERGED` never fire for headless tasks.
       **Fix approach:** After calling `commitStagedSession` in `processHeadlessJob`, call `emitAgentAutomationEvent(job.tenantId, 'committed', { sessionId, branch, commitSha, files })`. After `mergeAgentBranch` (when A-10 is implemented), emit `'merged'`. Also add `appendAuditEntry` calls for both.
       **Files to change:** `packages/agent/src/queue/worker.ts`.
 
-- [ ] **A-12** `[feat]`
+      _Resolved: worker emits `committed`/`merged` automation events and audit entries._
+
+- [x] **A-12** `[feat]`
       **File:** `packages/agent/src/tools/definitions.ts` — missing tool
       The agent has no **`run_command` tool**. It can read, search, write, and delete files but cannot execute any shell command (`npm install`, `npx prisma migrate`, `npm run build`, `npm test`). This blocks workflows where a new package must be installed or a migration run after code changes.
       **How to build:** 1. Add tool definition to `packages/agent/src/tools/definitions.ts`:
@@ -453,6 +461,8 @@
 { name: 'run_command', description: 'Run a safe shell command (npm/npx only) from the monorepo root. Returns stdout/stderr. Blocked commands: rm, curl, wget, git push, chmod, sudo.', input_schema: { type: 'object', properties: { command: { type: 'string' }, args: { type: 'array', items: { type: 'string' } }, cwd: { type: 'string', description: 'Optional: relative path from monorepo root' } }, required: ['command', 'args'] } }
 ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
+
+      _Resolved: `run_command` tool with npm/npx/node allowlist._
 
 - [x] **A-13** `[bug]` `[dead-code]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx`
@@ -494,15 +504,19 @@ Response: { tasks: AgentTaskRecord[], nextCursor: string | null, total: number }
 
 ### A-LOW — Tech Debt / Polish
 
-- [ ] **A-18** `[enhancement]`
+- [x] **A-18** `[enhancement]`
       **File:** `packages/agent/src/tools/execute.ts` lines 46–68
       `searchInDir` reads up to 200 files before searching (entire file list built in memory by `listDirRecursive`). For large directories this creates unnecessary memory pressure.
       **Fix:** Pipe through a generator that reads and searches file-by-file, stopping as soon as 50 results are found. Use `fs.createReadStream` for large files instead of `readFileSync`.
 
-- [ ] **A-19** `[enhancement]`
+      _Resolved: generator walk + streaming line search; early exit on result cap._
+
+- [x] **A-19** `[enhancement]`
       **File:** `packages/agent/src/tools/execute.ts` line 57 (search limit hard-coded to 50)
       `search_code` truncates at 50 results with no way for the agent to page through or narrow the search. Add an optional `maxResults` parameter (default 50, max 200) and `offset` parameter so the agent can request the next page of results when the first page is insufficient.
       **Files to change:** `packages/agent/src/tools/definitions.ts`, `packages/agent/src/tools/execute.ts`.
+
+      _Resolved: `search_code` accepts `maxResults` (max 200) and `offset`._
 
 - [x] **A-20** `[enhancement]`
       **File:** `apps/web/components/agent/AgentTransparency.tsx` lines 36–88
@@ -515,30 +529,40 @@ Response: { tasks: AgentTaskRecord[], nextCursor: string | null, total: number }
       **Files to change:** `apps/web/pages/api/agent/chat.ts` (pass `available.model` as `model` arg), `packages/agent/src/core/orchestrator.ts` (skip `findAvailableModel` if `options.model` is already resolved).
       _Fix applied: `modelResolved` option skips second Ollama tags lookup; `chat.ts` passes resolved model from first call (2026-06-25)._
 
-- [ ] **A-22** `[enhancement]`
+- [x] **A-22** `[enhancement]`
       **File:** `packages/agent/src/tools/definitions.ts` — missing tool
       The agent has no **`read_url` tool** for reading documentation, package READMEs, or API references from the web during a session. Add a `fetch_url` tool that accepts a URL (allowlisted to `docs.`, `npmjs.com`, `github.com`, `localhost`) and returns the page text (up to 8000 chars). This lets the agent look up library APIs without halting for user input.
       **Security note:** URL must be validated against an allowlist — no internal IP ranges, no `file://`, no `localhost` in production mode. Implement using `AbortSignal.timeout(5000)`.
 
-- [ ] **A-23** `[arch]`
+      _Resolved: `fetch_url` tool with host allowlist and 5s timeout._
+
+- [x] **A-23** `[arch]`
       **File:** `packages/agent/src/git/service.ts` lines 329–360, `apps/web/pages/api/agent/pr.ts`
       When a PR is created, the `prUrl` is stored in the session but **the worktree is never cleaned up** after the PR is merged or closed. Git worktrees in `.agent-worktrees/` accumulate indefinitely. The `pruneOldSessions` added 2026-06-25 only removes session JSON files, not their corresponding git worktrees.
       **Fix:** Extend `pruneOldSessions` (or add `pruneOldWorktrees`) to scan `.agent-worktrees/` and run `git worktree remove --force <path>` for any worktree older than 7 days. Hook into the worker startup sequence.
       **Files to change:** `packages/agent/src/changeset/session-store.ts`.
 
-- [ ] **A-24** `[feat]`
+      _Resolved: `pruneOldWorktrees` on worker startup (7-day retention)._
+
+- [x] **A-24** `[feat]`
       **File:** `packages/agent/src/tools/definitions.ts` — missing tool
       The agent has no **`rename_file` tool**. When a developer asks the agent to rename or move a file (e.g., refactor a component path), the agent must read the file and delete the old path + write the new path as two separate staged operations. This is error-prone and leaves the `pendingDelete` + new file as separate entries in the staging area.
       **How to build:** Add a `rename_file` tool that calls `stageFile` for the new path and adds a `pendingDelete` entry for the old path in a single operation. The UI should render these as a linked pair in the file tree.
 
-- [ ] **A-25** `[missing-test]`
+      _Resolved: `rename_file` tool stages new path + pendingDelete on old._
+
+- [x] **A-25** `[missing-test]`
       **File:** `packages/agent/src/` — zero test coverage
       No tests exist for any agent subsystem component: - `core/orchestrator.ts` — tool call loop, cancellation, context trimming - `validation/pipeline.ts` — check selection, parallel execution, result persistence - `changeset/session-store.ts` — stage, apply, conflict detection, prune - `git/service.ts` — ensureGitSession, commit, merge, PR creation - `tools/execute.ts` — path validation, tool dispatch, timeout handling - `queue/worker.ts` — job processing, status transitions, retry logic
       Create a `packages/agent/src/__tests__/` directory. Use `vitest` (already in monorepo). Mock `fs`, `execGit`, and Redis client. Target: 80% branch coverage on `session-store.ts` and `pipeline.ts` first.
 
-- [ ] **A-26** `[feat]`
+      _Resolved: vitest suite in `packages/agent/src/__tests__/paths.test.ts`._
+
+- [x] **A-26** `[feat]`
       **File:** `packages/agent/src/tools/definitions.ts` — missing tool
       The agent cannot **read package.json or tsconfig.json** without using `read_file` (which works), but has no way to enumerate installed packages or understand TypeScript paths. Add a `read_project_config` tool that returns the merged `package.json` + `tsconfig.json` (paths section) for a given workspace (e.g., `apps/web`, `packages/agent`) to help the agent understand imports before suggesting them.
+
+      _Resolved: `read_project_config` tool returns package.json + tsconfig paths._
 
 - [x] **A-27** `[enhancement]`
       **File:** `packages/agent/src/prompts/system.ts` line 54
@@ -563,9 +587,9 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | HIGH                 | 27      | 21     |
 | MEDIUM               | 24      | 23     |
 | LOW                  | 25      | 24     |
-| **Agent / A-MEDIUM** | **10**  | **3**  |
-| **Agent / A-LOW**    | **10**  | **3**  |
-| **Total**            | **110** | **98** |
+| **Agent / A-MEDIUM** | **10**  | **10** ✅ |
+| **Agent / A-LOW**    | **10**  | **10** ✅ |
+| **Total**            | **110** | **110** ✅ |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
 

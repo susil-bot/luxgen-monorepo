@@ -22,9 +22,13 @@ export {
   getStagingDir,
   getWorktreesDir,
   getWorktreePath,
+  getMergeWorktreePath,
   getAgentBranchName,
   sanitizeSessionId,
   ALLOWED_PATHS,
+  ALLOWED_COMMANDS,
+  isAllowedCommand,
+  isFetchUrlAllowed,
   isPathAllowed,
   SENSITIVE_FILE_PATTERNS,
   isSensitiveFile,
@@ -53,6 +57,9 @@ export {
   applySession,
   discardSession,
   pruneOldSessions,
+  pruneOldWorktrees,
+  ensureSessionHydrated,
+  clearSessionCache,
   getWorkspaceRoot,
   isGitWorktreeActive,
 } from './changeset/session-store';
@@ -104,13 +111,20 @@ export {
   syncSessionToMongo,
   appendAuditEntry,
   getTaskFromMongo,
+  sessionFromMongoDoc,
   listTasksFromMongo,
   getAuditLog,
   updateTaskValidation,
 } from './persistence/mongo';
 
 // Auth
-export { isAuthRequired, resolveAgentAuth, bindSessionAuth, extractBearerToken } from './auth/context';
+export {
+  isAuthRequired,
+  resolveAgentAuth,
+  bindSessionAuth,
+  bindSessionAuthAsync,
+  extractBearerToken,
+} from './auth/context';
 export type { TaskStatus, TaskMode, AgentAuthContext, HeadlessTaskJob, AuditAction } from './types/task';
 
 // Queue
@@ -125,6 +139,10 @@ export {
   releaseTenantStreamSlot,
   isAgentMessageRateLimited,
   resetAgentRateLimitFallback,
+  listDeadLetterJobs,
+  handleJobFailure,
+  requeueHeadlessTask,
+  moveJobToDeadLetter,
   MAX_CONCURRENT_STREAMS_PER_TENANT,
   MAX_AGENT_MESSAGES_PER_MINUTE,
 } from './queue/redis-queue';

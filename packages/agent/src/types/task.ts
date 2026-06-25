@@ -65,4 +65,10 @@ export interface HeadlessTaskJob {
   enqueuedAt: number;
   /** Times this job was reclaimed after a worker crash (BullMQ maxStalledCount). */
   stallCount?: number;
+  /** Processing attempts after explicit failures (default max 3). */
+  attempts?: number;
+  maxAttempts?: number;
+  lastError?: string;
 }
+
+export const DEFAULT_HEADLESS_MAX_ATTEMPTS = 3;

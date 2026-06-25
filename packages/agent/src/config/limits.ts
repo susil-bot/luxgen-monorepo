@@ -3,7 +3,18 @@ export const TOOL_TIMEOUTS: Record<string, number> = {
   list_files: 10_000,
   search_code: 15_000,
   write_file: 2_000,
+  delete_file: 2_000,
+  run_command: 60_000,
+  fetch_url: 10_000,
+  rename_file: 2_000,
+  read_project_config: 5_000,
 };
+
+export const MAX_SEARCH_RESULTS = 200;
+export const DEFAULT_SEARCH_RESULTS = 50;
+export const MAX_COMMAND_OUTPUT_CHARS = 4_000;
+export const MAX_FETCH_URL_CHARS = 8_000;
+export const STREAM_READ_FILE_THRESHOLD = 100_000;
 
 export const MAX_FILE_SIZE = 1_000_000;
 export const MAX_DIR_ENTRIES = 5_000;

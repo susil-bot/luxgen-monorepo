@@ -5,7 +5,7 @@ import {
   getValidationPolicy,
   validationBlocksCommit,
   appendAuditEntry,
-  bindSessionAuth,
+  bindSessionAuthAsync,
   emitAgentAutomationEvent,
 } from '@luxgen/agent';
 import { requireAgentAuth } from '../../../lib/agent-auth';
@@ -30,7 +30,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
-  bindSessionAuth(sessionId, auth);
+  await bindSessionAuthAsync(sessionId, auth);
 
   try {
     if (!skipValidation) {

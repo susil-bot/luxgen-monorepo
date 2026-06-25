@@ -1,8 +1,43 @@
 import fs from 'fs';
 import path from 'path';
 import type { AgentSession, ApplyResult, StagedFile } from '../types/session';
-import { getMonorepoRoot, getStagingDir } from '../config/paths';
-import { syncSessionToMongo } from '../persistence/mongo';
+import { getMonorepoRoot, getStagingDir, getWorktreesDir } from '../config/paths';
+import { isMongoPersistenceEnabled, sessionFromMongoDoc, syncSessionToMongo } from '../persistence/mongo';
+import { execGit } from '../git/exec';
+
+const sessionCache = new Map<string, AgentSession>();
+
+export function clearSessionCache(sessionId?: string): void {
+  if (sessionId) sessionCache.delete(sessionId);
+  else sessionCache.clear();
+}
+
+function loadSessionFromFilesystem(sessionId: string): AgentSession {
+  const file = getSessionPath(sessionId);
+  if (fs.existsSync(file)) {
+    return JSON.parse(fs.readFileSync(file, 'utf-8')) as AgentSession;
+  }
+  return { id: sessionId, files: {}, createdAt: Date.now(), updatedAt: Date.now() };
+}
+
+/** Load session from MongoDB (when enabled) into the in-process cache. */
+export async function ensureSessionHydrated(sessionId: string): Promise<AgentSession> {
+  if (sessionCache.has(sessionId)) {
+    return sessionCache.get(sessionId)!;
+  }
+
+  if (isMongoPersistenceEnabled()) {
+    const fromMongo = await sessionFromMongoDoc(sessionId);
+    if (fromMongo) {
+      sessionCache.set(sessionId, fromMongo);
+      return fromMongo;
+    }
+  }
+
+  const fromFs = loadSessionFromFilesystem(sessionId);
+  sessionCache.set(sessionId, fromFs);
+  return fromFs;
+}
 
 export function getWorkspaceRoot(sessionId: string): string {
   const session = loadSession(sessionId);
@@ -22,21 +57,27 @@ export function getSessionPath(sessionId: string): string {
 }
 
 export function loadSession(sessionId: string): AgentSession {
-  const file = getSessionPath(sessionId);
-  if (fs.existsSync(file)) {
-    return JSON.parse(fs.readFileSync(file, 'utf-8')) as AgentSession;
+  if (sessionCache.has(sessionId)) {
+    return sessionCache.get(sessionId)!;
   }
-  return { id: sessionId, files: {}, createdAt: Date.now(), updatedAt: Date.now() };
+  const fromFs = loadSessionFromFilesystem(sessionId);
+  sessionCache.set(sessionId, fromFs);
+  return fromFs;
 }
 
 export function saveSession(session: AgentSession): void {
-  const dir = getStagingDir();
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  sessionCache.set(session.id, session);
 
-  const filePath = getSessionPath(session.id);
-  const tmpPath = filePath + '.tmp';
-  fs.writeFileSync(tmpPath, JSON.stringify(session, null, 2), 'utf-8');
-  fs.renameSync(tmpPath, filePath);
+  if (!isMongoPersistenceEnabled()) {
+    const dir = getStagingDir();
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+
+    const filePath = getSessionPath(session.id);
+    const tmpPath = filePath + '.tmp';
+    fs.writeFileSync(tmpPath, JSON.stringify(session, null, 2), 'utf-8');
+    fs.renameSync(tmpPath, filePath);
+  }
+
   void syncSessionToMongo(session).catch(() => {});
 }
 
@@ -168,10 +209,41 @@ export function pruneOldSessions(maxAgeMs = 7 * 24 * 60 * 60 * 1000): number {
       const stat = fs.statSync(filePath);
       if (now - stat.mtimeMs > maxAgeMs) {
         fs.unlinkSync(filePath);
+        const sessionId = name.replace(/\.json$/, '');
+        sessionCache.delete(sessionId);
         pruned++;
       }
     } catch {
       // skip unreadable files
+    }
+  }
+
+  return pruned;
+}
+
+/** Remove git worktrees under `.agent-worktrees/` older than `maxAgeMs` (default 7 days). */
+export async function pruneOldWorktrees(maxAgeMs = 7 * 24 * 60 * 60 * 1000): Promise<number> {
+  const dir = getWorktreesDir();
+  const root = getMonorepoRoot();
+  if (!fs.existsSync(dir)) return 0;
+
+  const now = Date.now();
+  let pruned = 0;
+
+  for (const name of fs.readdirSync(dir)) {
+    const worktreePath = path.join(dir, name);
+    try {
+      const stat = fs.statSync(worktreePath);
+      if (!stat.isDirectory() || now - stat.mtimeMs <= maxAgeMs) continue;
+
+      try {
+        await execGit(['worktree', 'remove', '--force', worktreePath], root);
+      } catch {
+        fs.rmSync(worktreePath, { recursive: true, force: true });
+      }
+      pruned++;
+    } catch {
+      // skip
     }
   }
 
