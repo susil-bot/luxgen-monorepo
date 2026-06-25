@@ -18,7 +18,7 @@ export function ProductCard({ id, title, description, category, priceCents, curr
   return (
     <Link
       href={`/store/product/${id}`}
-      className="group block rounded-2xl overflow-hidden transition-transform hover:scale-[1.02]"
+      className="group block rounded-2xl overflow-hidden transition-all hover:scale-[1.02] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-blue)] focus-visible:ring-offset-2"
       style={{
         background: 'var(--color-bg-secondary)',
         border: '1px solid var(--color-separator)',
