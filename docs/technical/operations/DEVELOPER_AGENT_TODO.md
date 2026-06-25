@@ -260,7 +260,7 @@
 
 ## LOW — Tech Debt / Polish
 
-- [ ] **L-01** `[dead-code]`
+- [x] **L-01** `[dead-code]`
       **File:** `apps/api/src/middleware/tenant.ts`
       File is marked `@deprecated` in its JSDoc, must not be registered in `app.ts`, yet still exists. Delete the file to prevent accidental future registration.
 
