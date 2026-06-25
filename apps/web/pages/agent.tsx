@@ -1,3 +1,4 @@
+import type { SessionUser } from '../lib/session';
 import React, { useState, useCallback, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -16,7 +17,7 @@ import AgentTransparency from '../components/agent/AgentTransparency';
 function AgentStudioContent() {
   const router = useRouter();
   const { showSuccess, showError: _showError, showInfo } = useSnackbar();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<SessionUser | null>(null);
   const [sessionId, setSessionId] = useState<string>('');
   const [transparencyRefresh, setTransparencyRefresh] = useState(0);
   const [appliedCount, setAppliedCount] = useState(0);
