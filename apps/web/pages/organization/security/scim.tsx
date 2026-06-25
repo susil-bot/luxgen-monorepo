@@ -11,6 +11,7 @@ export default function OrganizationSecurityScimPage({ tenant }: Props) {
     <OrganizationShell
       tenant={tenant}
       activeSection="security"
+      securitySectionId="scim"
       title="SCIM integration"
       subtitle="Provision users automatically from your identity provider"
       securityNav={<OrganizationSecurityNav activeId="scim" />}

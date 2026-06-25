@@ -205,7 +205,41 @@ function OrganizationRolesContent({ tenant }: Props) {
           </div>
         </div>
       )}
-      {showCreate && (<div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }}><div className="ios-card p-6 max-w-md w-full space-y-4"><h2 className="text-lg font-semibold">Create custom role</h2><input className="ios-input w-full" value={newRoleName} onChange={(e) => setNewRoleName(e.target.value)} placeholder="Role name" /><div className="flex gap-3 justify-end"><button type="button" className="ios-btn-secondary" onClick={() => setShowCreate(false)}>Cancel</button><button type="button" className="ios-btn-primary" disabled={!newRoleName.trim()} onClick={async () => { await createCustomRole({ variables: { input: { tenantId: queryTenantId, name: newRoleName.trim(), permissions: { canViewReports: true } } } }); setNewRoleName(''); setShowCreate(false); await refetchCustomRoles(); }}>Create</button></div></div></div>)
+      {showCreate && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }}>
+          <div className="ios-card p-6 max-w-md w-full space-y-4">
+            <h2 className="text-lg font-semibold">Create custom role</h2>
+            <input
+              className="ios-input w-full"
+              value={newRoleName}
+              onChange={(e) => setNewRoleName(e.target.value)}
+              placeholder="Role name"
+            />
+            <div className="flex gap-3 justify-end">
+              <button type="button" className="ios-btn-secondary" onClick={() => setShowCreate(false)}>
+                Cancel
+              </button>
+              <button
+                type="button"
+                className="ios-btn-primary"
+                disabled={!newRoleName.trim()}
+                onClick={async () => {
+                  await createCustomRole({
+                    variables: {
+                      input: { tenantId: queryTenantId, name: newRoleName.trim(), permissions: { canViewReports: true } },
+                    },
+                  });
+                  setNewRoleName('');
+                  setShowCreate(false);
+                  await refetchCustomRoles();
+                }}
+              >
+                Create
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </OrganizationShell>
   );
 }

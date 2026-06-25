@@ -11,6 +11,7 @@ export default function OrganizationSecurityStorePage({ tenant }: Props) {
     <OrganizationShell
       tenant={tenant}
       activeSection="security"
+      securitySectionId="store"
       title="Store security"
       subtitle="Collaborators and store-level access"
       securityNav={<OrganizationSecurityNav activeId="store" />}

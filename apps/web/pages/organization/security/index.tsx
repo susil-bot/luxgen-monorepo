@@ -15,6 +15,7 @@ export default function OrganizationSecurityPage({ tenant }: Props) {
       activeSection="security"
       title="Organization security"
       subtitle="Secure sign-in and identity for this tenant"
+      securitySectionId="overview"
       securityNav={<OrganizationSecurityNav activeId="overview" />}
     >
       <div className="auth-notice auth-notice--warning">
