@@ -146,7 +146,7 @@
       **File:** `apps/agent-worker/src/index.ts` lines 5–6
       Agent worker loads `.env` files via hard-coded relative paths from `__dirname`. Inside a Docker container or K8s pod, `__dirname` resolves to the compiled `dist/` directory and the `../../../` traversal won't reach the monorepo root. All env vars silently fail to load. Use explicit `ENV_FILE` env var or inject vars via K8s ConfigMap/Secret.
 
-- [ ] **H-25** `[missing-test]`
+- [x] **H-25** `[missing-test]`
       **File:** `apps/api/src/services/` — all five: `listingService.ts`, `billingService.ts`, `courseService.ts`, `automationService.ts`, `groupService.ts`
       Zero test files exist for any of these services. The entire billing, course, listing, automation, and group domains are untested. Create integration test suites for each service.
 
