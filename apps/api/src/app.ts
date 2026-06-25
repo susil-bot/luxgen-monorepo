@@ -32,6 +32,7 @@ import tenantConfigRoutes from './routes/tenantConfig';
 import billingRoutes, { stripeWebhookHandler } from './routes/billing';
 import jobsRoutes from './routes/jobs';
 import notificationsRoutes from './routes/notifications';
+import securityRoutes from './routes/security';
 
 import { getCorsOrigins, isDevLocalOrigin } from '@luxgen/config';
 
@@ -85,6 +86,7 @@ app.use('/api/tenant-config', tenantConfigRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/jobs', jobsRoutes);
 app.use('/api/notifications', notificationsRoutes);
+app.use('/api/security', securityRoutes);
 
 const apolloServer = new ApolloServer({
   schema,
