@@ -320,7 +320,7 @@
       **File:** `apps/web/components/billing/PlanGate.tsx` line 27
       `planRank` duplicates the plan ordering from `@luxgen/billing`. If a new plan tier is added to the billing package, `PlanGate` will silently compute wrong rankings. Export `planRank` (or an equivalent comparison function) from `@luxgen/billing` and import it here.
 
-- [ ] **L-16** `[style]`
+- [x] **L-16** `[style]`
       **File:** `apps/api/src/routes/auth.ts` lines 89, 171, 215, 284, 336, 386
       All six route error handlers use `console.error(...)` directly, bypassing the project's `logger` utility. Replace with `logger.error(...)` for consistency and structured output.
 
