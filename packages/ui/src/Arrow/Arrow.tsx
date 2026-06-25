@@ -11,7 +11,7 @@ export interface ArrowProps {
   className?: string;
   'aria-label'?: string;
   'data-testid'?: string;
-  tenantTheme?: any;
+  tenantTheme?: import('../types').TenantTheme;
 }
 
 export const Arrow: React.FC<ArrowProps> = ({
