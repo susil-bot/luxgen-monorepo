@@ -62,6 +62,9 @@ export interface IUser extends Document {
   /** SHA-256 hash of password reset token */
   passwordResetToken?: string;
   passwordResetExpires?: Date;
+  emailVerified?: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
   isActive: boolean;
   metadata: IUserMetadata;
   createdAt: Date;
@@ -138,6 +141,18 @@ const userSchema = new Schema<IUser>(
       select: false,
     },
     passwordResetExpires: {
+      type: Date,
+      select: false,
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationToken: {
+      type: String,
+      select: false,
+    },
+    emailVerificationExpires: {
       type: Date,
       select: false,
     },
