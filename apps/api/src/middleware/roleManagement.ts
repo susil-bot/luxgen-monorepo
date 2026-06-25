@@ -13,9 +13,11 @@ export interface RoleManagementRequest extends Request {
 const errMsg = (e: unknown) => (e instanceof Error ? e.message : undefined);
 
 const ROLE_HIERARCHY: Record<UserRole, number> = {
-  [UserRole.SUPER_ADMIN]: 3,
-  [UserRole.ADMIN]: 2,
-  [UserRole.USER]: 1,
+  [UserRole.SUPER_ADMIN]: 5,
+  [UserRole.ADMIN]: 4,
+  [UserRole.INSTRUCTOR]: 3,
+  [UserRole.STUDENT]: 2,
+  [UserRole.USER]: 2,
 };
 
 function meetsRoleRequirement(userRole: string, requiredRole: UserRole): boolean {

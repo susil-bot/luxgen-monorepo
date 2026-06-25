@@ -34,6 +34,9 @@ export async function runAgentLoop(options: RunAgentLoopOptions): Promise<RunAge
     messages,
     ollamaHost,
     model: requestedModel,
+    modelResolved,
+    preferredModel,
+    modelFromFallback,
     temperature: requestedTemp,
     maxTokens: requestedMaxTokens,
     toolFilter,
@@ -50,16 +53,22 @@ export async function runAgentLoop(options: RunAgentLoopOptions): Promise<RunAge
   let activeModel = requestedModelVal;
   let usingFallback = false;
 
-  const availableModel = await findAvailableModel(ollamaHost, requestedModelVal);
-  if (availableModel) {
-    activeModel = availableModel.model;
-    usingFallback = availableModel.fromFallback;
+  if (modelResolved) {
+    activeModel = requestedModelVal;
+    usingFallback = modelFromFallback ?? false;
+  } else {
+    const availableModel = await findAvailableModel(ollamaHost, requestedModelVal);
+    if (availableModel) {
+      activeModel = availableModel.model;
+      usingFallback = availableModel.fromFallback;
+    }
   }
 
   if (usingFallback) {
+    const preferredLabel = preferredModel || requestedModelVal;
     onEvent({
       type: 'text',
-      content: `_[Using model: ${activeModel} (fallback — preferred model "${requestedModelVal}" not available)]_\n\n`,
+      content: `_[Using model: ${activeModel} (fallback — preferred model "${preferredLabel}" not available)]_\n\n`,
     });
   }
 

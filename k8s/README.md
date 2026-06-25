@@ -124,9 +124,19 @@ CMD ["node", "dist/index.js"]
 # Make deploy script executable
 chmod +x k8s/deploy.sh
 
-# Run deployment
+# Run deployment (validates required keys in .env.production)
 ./k8s/deploy.sh
 ```
+
+#### CI / non-interactive deploy
+
+`deploy.sh` uses `set -euo pipefail` and never prompts. For pipelines where secrets are provisioned separately (Sealed Secrets, External Secrets, or a prior `kubectl create secret` step):
+
+```bash
+LUXGEN_SECRETS_ALREADY_EXIST=true ./k8s/deploy.sh
+```
+
+For local deploys, `.env.production` must include every key listed in `k8s/secret.yaml.example` (non-empty). The script exits before `kubectl apply` if any required key is missing.
 
 Or deploy manually:
 

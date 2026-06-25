@@ -182,7 +182,7 @@
       **File:** `apps/api/src/app.ts` line 55
       `express.json({ limit: '10mb' })` applies to all routes including `/api/auth/login`. A 10MB body on a login endpoint is never legitimate and allows DoS before the rate limiter fires. Tighten: set `'50kb'` globally and allow larger limits only on specific upload routes.
 
-- [ ] **M-06** `[arch]`
+- [x] **M-06** `[arch]`
       **File:** `apps/api/src/services/userService.ts` vs `apps/api/src/routes/auth.ts`
       `UserService.login()` and `UserService.register()` duplicate logic from the REST route handlers; neither the REST routes nor the GraphQL resolvers use these service methods. Consolidate: migrate routes to use the service methods, or delete the duplicate service logic.
 
@@ -210,7 +210,7 @@
       **File:** `apps/web/pages/api/users/me.ts` and `apps/web/pages/api/users/current.ts`
       These two files are **byte-for-byte identical** — same handler, same imports, same JWT verification. Two separate routes (`/api/users/me` and `/api/users/current`) serve the exact same response. Delete `current.ts` and update all callers to use `/api/users/me`.
 
-- [ ] **M-13** `[security]`
+- [x] **M-13** `[security]`
       **File:** `apps/web/pages/api/schema/index.ts` lines 73–93
       Custom JSON scalar `parseLiteral` calls `JSON.parse(field.value.value)` on raw AST string values inside `ObjectValue` and `ListValue` cases. This throws on non-JSON strings and corrupts data silently. Replace with the battle-tested `GraphQLJSON` from `graphql-scalars`.
 
@@ -227,17 +227,19 @@
       The "Dev plan override" UI is gated on the build-time variable `NEXT_PUBLIC_APP_ENV`. If a dev build artifact is promoted to production, these buttons will be visible and functional in production. Gate this UI server-side using a runtime check, not a baked-in build variable.
       _Resolved: dev override UI removed from billing pages; `setTenantPlanDev` is server-gated via `BILLING_DEV_MODE` only._
 
-- [ ] **M-17** `[infra]`
+- [x] **M-17** `[infra]`
       **File:** `k8s/api.yaml` lines 27–36
       `MONGODB_URI` is mounted both via `envFrom: secretRef` and via an individual `secretKeyRef`. The duplicate mount is redundant and creates precedence confusion. Use only one approach.
+      _Resolved: secrets injected only via `envFrom.secretRef`; redundant `MONGODB_URI` secretKeyRef removed._
 
 - [ ] **M-18** `[infra]`
       **File:** `k8s/mongodb.yaml` lines 57–72
       MongoDB runs as a single-replica StatefulSet with no replica set configuration, no backup CronJob, and no `PodDisruptionBudget`. Pod eviction causes data unavailability. Add `--replSet rs0` flag, a backup job, and a PDB with `minAvailable: 1`.
 
-- [ ] **M-19** `[infra]`
+- [x] **M-19** `[infra]`
       **File:** `k8s/deploy.sh` lines 26–53
       Deploy script has interactive `read -p` prompts, making it incompatible with CI/CD pipelines. Add `set -euo pipefail`, validate that all required secret keys are present in `.env.production` before applying, and document the non-interactive invocation pattern.
+      _Resolved: `validate_env_production` checks required keys; `LUXGEN_SECRETS_ALREADY_EXIST=true` documented in deploy.sh and k8s/README._
 
 - [x] **M-20** `[missing-test]`
       **File:** `apps/api/src/middleware/loginRateLimit.ts` lines 33–40
@@ -444,8 +446,8 @@
       The agent has no **`run_command` tool**. It can read, search, write, and delete files but cannot execute any shell command (`npm install`, `npx prisma migrate`, `npm run build`, `npm test`). This blocks workflows where a new package must be installed or a migration run after code changes.
       **How to build:** 1. Add tool definition to `packages/agent/src/tools/definitions.ts`:
       `ts
- { name: 'run_command', description: 'Run a safe shell command (npm/npx only) from the monorepo root. Returns stdout/stderr. Blocked commands: rm, curl, wget, git push, chmod, sudo.', input_schema: { type: 'object', properties: { command: { type: 'string' }, args: { type: 'array', items: { type: 'string' } }, cwd: { type: 'string', description: 'Optional: relative path from monorepo root' } }, required: ['command', 'args'] } }
- ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
+{ name: 'run_command', description: 'Run a safe shell command (npm/npx only) from the monorepo root. Returns stdout/stderr. Blocked commands: rm, curl, wget, git push, chmod, sudo.', input_schema: { type: 'object', properties: { command: { type: 'string' }, args: { type: 'array', items: { type: 'string' } }, cwd: { type: 'string', description: 'Optional: relative path from monorepo root' } }, required: ['command', 'args'] } }
+` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
 - [x] **A-13** `[bug]` `[dead-code]`
@@ -460,11 +462,12 @@
       **How to build:** 1. Add `messages?: Array<{ role: 'user' | 'assistant'; content: string; timestamp: number }>` to `AgentSession` in `packages/agent/src/types/session.ts`. 2. After `runAgentLoop` completes in `chat.ts`, save the messages to the session via `saveSession`. 3. On page load in `AgentChat.tsx`, call `GET /api/agent/stage?sessionId=<id>` and populate `messages` state from `session.messages` (filtering out the welcome message). 4. Update `syncSessionToMongo` to include messages in the `AgentTask` document for audit/history.
       **Cap at 50 messages** to avoid unbounded session file growth.
 
-- [ ] **A-15** `[arch]`
+- [x] **A-15** `[arch]`
       **File:** `packages/agent/src/persistence/mongo.ts` lines 43–66, `packages/agent/src/types/task.ts` lines 14–27
       `AgentTaskRecord.metadata.model` is defined in the type but **`syncSessionToMongo` never writes it**. Which model processed each task is unauditable — you cannot correlate quality issues to model selection.
       **Fix:** In `worker.ts:processHeadlessJob`, after loading the session, store `job.model` on `session.metadata` (add `metadata?: { model?: string }` to `AgentSession`). Then include `metadata.model` in the `syncSessionToMongo` upsert body.
       **Files to change:** `packages/agent/src/types/session.ts`, `packages/agent/src/persistence/mongo.ts`, `packages/agent/src/queue/worker.ts`.
+      _Fix applied: `AgentSession.metadata.model`, worker sets from `job.model`, `syncSessionToMongo` persists it (2026-06-25)._
 
 - [x] **A-16** `[enhancement]`
       **File:** `apps/web/components/agent/AgentTransparency.tsx` lines 232–248
@@ -500,10 +503,11 @@ Response: { tasks: AgentTaskRecord[], nextCursor: string | null, total: number }
       The custom diff algorithm is a naive greedy O(n²) approximation with a lookahead of 8 lines. For files with repeated patterns it produces misleading or incorrect diffs. Replace with the `diff` npm package (`npm i diff` in `apps/web`) using `Diff.structuredPatch` for accurate unified diffs.
       **Files to change:** `apps/web/components/agent/AgentTransparency.tsx`. Import: `import { diffLines } from 'diff'`.
 
-- [ ] **A-21** `[enhancement]`
+- [x] **A-21** `[enhancement]`
       **File:** `packages/agent/src/providers/ollama.ts` lines 48–87
       `findAvailableModel` is called twice per chat request (once in `chat.ts` + again inside `runAgentLoop` at `orchestrator.ts:53`), making **two sequential HTTP calls to Ollama** before the first token streams. Memoize the result for the duration of a request or pass the resolved model from `chat.ts` through to `runAgentLoop`.
       **Files to change:** `apps/web/pages/api/agent/chat.ts` (pass `available.model` as `model` arg), `packages/agent/src/core/orchestrator.ts` (skip `findAvailableModel` if `options.model` is already resolved).
+      _Fix applied: `modelResolved` option skips second Ollama tags lookup; `chat.ts` passes resolved model from first call (2026-06-25)._
 
 - [ ] **A-22** `[enhancement]`
       **File:** `packages/agent/src/tools/definitions.ts` — missing tool
@@ -550,12 +554,11 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | -------------------- | ------- | ------ |
 | CRITICAL             | 7       | 7 ✅   |
 | HIGH                 | 27      | 20     |
-| MEDIUM               | 24      | 20     |
+| MEDIUM               | 24      | 22     |
 | LOW                  | 25      | 22     |
-| **Agent / A-HIGH**   | **7**   | **5**  |
-| **Agent / A-MEDIUM** | **10**  | **2**  |
-| **Agent / A-LOW**    | **10**  | **1**  |
-| **Total**            | **110** | **78** |
+| **Agent / A-MEDIUM** | **10**  | **3**  |
+| **Agent / A-LOW**    | **10**  | **2**  |
+| **Total**            | **110** | **80** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
 

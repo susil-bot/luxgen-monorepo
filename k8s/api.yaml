@@ -26,6 +26,7 @@ spec:
           ports:
             - containerPort: 4000
               name: http
+          # Secrets (MONGODB_URI, JWT_SECRET, …) via secretRef only — no per-key secretKeyRef duplicates.
           envFrom:
             - configMapRef:
                 name: luxgen-config

@@ -13,6 +13,9 @@ export async function processHeadlessJob(job: HeadlessTaskJob): Promise<void> {
   session.userId = job.userId;
   session.mode = 'headless';
   session.status = 'running';
+  if (job.model) {
+    session.metadata = { ...session.metadata, model: job.model };
+  }
   saveSession(session);
 
   await syncSessionToMongo(session);

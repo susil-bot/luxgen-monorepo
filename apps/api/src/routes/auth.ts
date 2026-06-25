@@ -2,8 +2,7 @@ import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
 import { User } from '@luxgen/db';
 import { UserRole } from '@luxgen/auth';
-import { verifyPassword, hashPassword } from '@luxgen/auth';
-import { generateToken } from '../utils/jwt';
+import { hashPassword } from '@luxgen/auth';
 import {
   validateLogin,
   validateRegister,
@@ -12,6 +11,7 @@ import {
 } from '../middleware/validation';
 import { loginRateLimitMiddleware } from '../middleware/loginRateLimit';
 import { isAccountActive, ACCOUNT_DEACTIVATED_MESSAGE } from '../utils/accountStatus';
+import { AuthServiceError, buildAuthRestPayload, userService } from '../services/userService';
 import { UserRegistrationService } from '../services/userRegistrationService';
 import { requireRole, canInviteUsers, logRoleAccess } from '../middleware/roleManagement';
 import { sendTransactionalEmail } from '../utils/email';
@@ -32,77 +32,25 @@ const PASSWORD_RESET_SENT_MESSAGE = 'If an account exists with that email, a pas
 router.post('/login', loginRateLimitMiddleware, validateLogin, async (req: Request, res: Response) => {
   try {
     const { email, password, tenant } = req.body;
+    const { token, user } = await userService.login({
+      email,
+      password,
+      tenantId: tenant,
+    });
 
-    // Find user by email
-    const user = await User.findOne({
-      email: email.toLowerCase().trim(),
-      ...(tenant && { tenant }), // Include tenant filter if provided
-    }).populate('tenant');
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password',
-        errors: {
-          email: 'Invalid email or password',
-          password: 'Invalid email or password',
-        },
-      });
-    }
-
-    // Verify password
-    const isPasswordValid = await verifyPassword(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password',
-        errors: {
-          email: 'Invalid email or password',
-          password: 'Invalid email or password',
-        },
-      });
-    }
-
-    if (!isAccountActive(user)) {
-      return res.status(403).json({
-        success: false,
-        message: ACCOUNT_DEACTIVATED_MESSAGE,
-      });
-    }
-
-    // Generate JWT token with tenant-specific key
-    const token = generateToken(
-      {
-        id: user._id.toString(),
-        email: user.email,
-        tenant: (user.tenant as any)._id?.toString(),
-        role: user.role,
-      },
-      (user.tenant as any)._id?.toString(),
-    );
-
-    // Return success response
     res.json({
       success: true,
       message: 'Login successful',
-      data: {
-        token,
-        user: {
-          id: user._id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          tenant: {
-            id: (user.tenant as any)._id,
-            name: (user.tenant as any).name,
-            subdomain: (user.tenant as any).subdomain,
-          },
-        },
-        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-      },
+      data: buildAuthRestPayload(token, user),
     });
   } catch (error) {
+    if (error instanceof AuthServiceError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+        ...(error.errors ? { errors: error.errors } : {}),
+      });
+    }
     logger.error('Login error:', error);
     res.status(500).json({
       success: false,
@@ -118,7 +66,6 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
   try {
     const { email, password, firstName, lastName, role } = req.body;
 
-    // Get tenant from request (set by middleware)
     const tenantId = req.tenantId;
     if (!tenantId) {
       return res.status(400).json({
@@ -130,8 +77,7 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
       });
     }
 
-    // Use the registration service
-    const registrationResult = await UserRegistrationService.registerUser({
+    const { token, user } = await userService.register({
       email,
       password,
       firstName,
@@ -140,51 +86,19 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
       tenantId,
     });
 
-    if (!registrationResult.success) {
-      return res.status(400).json({
-        success: false,
-        message: registrationResult.message,
-        errors: registrationResult.errors,
-      });
-    }
-
-    const newUser = registrationResult.user!;
-    await newUser.populate('tenant');
-
-    // Generate JWT token with tenant-specific key
-    const token = generateToken(
-      {
-        id: newUser._id.toString(),
-        email: newUser.email,
-        tenant: (newUser.tenant as any)._id?.toString(),
-        role: newUser.role,
-      },
-      (newUser.tenant as any)._id?.toString(),
-    );
-
-    // Return success response
     res.status(201).json({
       success: true,
       message: 'Registration successful',
-      data: {
-        token,
-        user: {
-          id: newUser._id,
-          email: newUser.email,
-          firstName: newUser.firstName,
-          lastName: newUser.lastName,
-          role: newUser.role,
-          status: newUser.status,
-          tenant: {
-            id: (newUser.tenant as any)._id,
-            name: (newUser.tenant as any).name,
-            subdomain: (newUser.tenant as any).subdomain,
-          },
-        },
-        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-      },
+      data: buildAuthRestPayload(token, user, true),
     });
   } catch (error) {
+    if (error instanceof AuthServiceError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+        ...(error.errors ? { errors: error.errors } : {}),
+      });
+    }
     logger.error('Registration error:', error);
     res.status(500).json({
       success: false,
