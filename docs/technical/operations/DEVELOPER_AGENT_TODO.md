@@ -252,7 +252,7 @@
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx` line 14–17, 35
       `sessionId` initialises as `''` and is only set via `useEffect` on mount, causing a `null` render flash and SSR hydration mismatch. Initialise `sessionId` with a stable SSR-safe value (e.g., `useId()` or generate on the server side via `getServerSideProps`).
 
-- [ ] **M-24** `[missing-test]`
+- [x] **M-24** `[missing-test]`
       **File:** `packages/billing/src/usage-limits.ts` line 52
       `assertWithinLimit` uses `>=` (block at limit, not over limit) — a non-obvious edge case. No test covers the exact-limit boundary. Add unit tests for at-limit, under-limit, and over-limit for each plan tier.
 
