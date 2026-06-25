@@ -151,6 +151,16 @@ export const demoFeaturesConfig = {
     },
   },
 
+
+  commerce: {
+    phase4: {
+      learnerDashboard: true,
+      customerSegmentation: true,
+      adminCustomerSegmentation: true,
+      mcpCommerceTools: true,
+    },
+  },
+
   // Feature flags
   flags: {
     'new-dashboard': false,
