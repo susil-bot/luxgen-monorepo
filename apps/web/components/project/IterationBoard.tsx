@@ -12,6 +12,7 @@ interface IterationBoardProps {
 
 export function IterationBoard({ iteration }: IterationBoardProps) {
   const { itemsForIteration, moveItem } = useProject();
+  const [moveError, setMoveError] = useState<string | null>(null);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dropTarget, setDropTarget] = useState<ProjectStatus | null>(null);
   const [editingItem, setEditingItem] = useState<ProjectItem | null>(null);
@@ -28,7 +29,10 @@ export function IterationBoard({ iteration }: IterationBoardProps) {
 
   const handleDrop = (status: ProjectStatus) => {
     if (draggingId) {
-      moveItem(draggingId, status);
+      setMoveError(null);
+      void moveItem(draggingId, status).catch((err: unknown) => {
+        setMoveError(err instanceof Error ? err.message : 'Could not save column change');
+      });
     }
     setDraggingId(null);
     setDropTarget(null);
@@ -36,6 +40,11 @@ export function IterationBoard({ iteration }: IterationBoardProps) {
 
   return (
     <>
+      {moveError && (
+        <p className="text-sm text-red-600 mb-3" role="alert">
+          {moveError}
+        </p>
+      )}
       <div className="lux-project-kanban">
         {PROJECT_COLUMNS.map((col) => (
           <section
