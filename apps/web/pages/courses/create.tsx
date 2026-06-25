@@ -11,7 +11,7 @@ interface CreateCourseProps {
 
 export default function CreateCourse({ tenant }: CreateCourseProps) {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<import('@luxgen/ui').UserMenu | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     title: '',

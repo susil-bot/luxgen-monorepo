@@ -12,7 +12,7 @@ import { normalizePlan } from '@luxgen/billing';
 const GroupAnalyticsPageContent: React.FC = () => {
   const router = useRouter();
   const tenant = (router.query.tenant as string) || 'demo';
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<import('@luxgen/ui').UserMenu | null>(null);
 
   const { data: billingData } = useQuery(GET_TENANT_BILLING, {
     variables: { tenantId: tenant },

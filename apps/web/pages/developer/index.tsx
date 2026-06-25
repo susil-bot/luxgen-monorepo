@@ -425,7 +425,7 @@ function AIStudioContent() {
 
   // Session
   const [sessionId, setSessionId] = useState('');
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<import('@luxgen/ui').UserMenu | null>(null);
 
   // Ollama
   const [ollamaStatus, setOllamaStatus] = useState<OllamaStatus>('checking');

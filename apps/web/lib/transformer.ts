@@ -36,7 +36,7 @@ export interface DashboardData {
     userAvatar: string;
     timestamp: string;
     status: string;
-    metadata: any;
+    metadata: Record<string, unknown>;
   }>;
   lastSurvey: {
     id: string;
@@ -58,7 +58,7 @@ export interface DashboardData {
     description: string;
     status: string;
     requestedAt: string;
-    metadata: any;
+    metadata: Record<string, unknown>;
   }>;
 }
 
@@ -98,7 +98,7 @@ export interface TransformedDashboardData {
     userAvatar: string;
     timestamp: string;
     status: string;
-    metadata: any;
+    metadata: Record<string, unknown>;
   }>;
   surveyData: {
     id: string;
@@ -121,7 +121,7 @@ export interface TransformedDashboardData {
     description: string;
     status: string;
     requestedAt: string;
-    metadata: any;
+    metadata: Record<string, unknown>;
   }>;
 }
 
@@ -206,7 +206,7 @@ export const getDefaultDashboardData = (_tenant: string): DashboardData => ({
 /**
  * Transform GraphQL dashboard data to component format
  */
-export const transformDashboardData = (graphqlData: any, tenant: string): TransformedDashboardData => {
+export const transformDashboardData = (graphqlData: Record<string, unknown>, tenant: string): TransformedDashboardData => {
   // Use GraphQL data if available, otherwise use defaults
   const data = graphqlData?.getDashboardData || getDefaultDashboardData(tenant);
 
@@ -235,7 +235,7 @@ export const transformDashboardData = (graphqlData: any, tenant: string): Transf
             label: '30 days',
           },
         ],
-    engagementData: data.engagementBreakdown?.map((item: any) => ({
+    engagementData: data.engagementBreakdown?.map((item: Record<string, unknown>) => ({
       id: item.category.toLowerCase().replace(/\s+/g, '-'),
       label: item.category,
       value: item.value,
@@ -247,7 +247,7 @@ export const transformDashboardData = (graphqlData: any, tenant: string): Transf
       { id: 'discussions', label: 'Discussions', value: 25, color: '#F59E0B', percentage: 25 },
     ],
     trendsData:
-      data.engagementTrends?.map((item: any) => ({
+      data.engagementTrends?.map((item: Record<string, unknown>) => ({
         label: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
         interactions: item.activeUsers,
         completions: item.completedCourses,
