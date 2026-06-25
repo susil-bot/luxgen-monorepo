@@ -13,7 +13,8 @@
     "test": "jest",
     "test:watch": "jest --watch",
     "test:coverage": "jest --coverage",
-    "scaffold:components": "node scripts/scaffold-component-structure.mjs"
+    "scaffold:components": "node scripts/scaffold-component-structure.mjs",
+    "test:auto": "vitest run"
   },
   "dependencies": {
     "@emotion/css": "^11.11.0",
@@ -40,7 +41,8 @@
     "jest": "^29.0.0",
     "jest-environment-jsdom": "^29.0.0",
     "ts-jest": "^29.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^2.1.9"
   },
   "peerDependencies": {
     "react": "^18.0.0",
