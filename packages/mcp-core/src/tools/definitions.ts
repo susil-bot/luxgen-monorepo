@@ -204,5 +204,43 @@ export function allToolDefinitions(config: ToolConfig): ToolDefinition[] {
         additionalProperties: false,
       },
     },
+    {
+      name: 'list_customers',
+      description: `List customers (STUDENT users) for tenant "${config.tenant}" (read-only).`,
+      inputSchema: {
+        type: 'object',
+        properties: { limit: { type: 'number', description: 'Max rows (1–500, default 50)' } },
+        additionalProperties: false,
+      },
+    },
+    {
+      name: 'get_learner_dashboard',
+      description: `Learner progress and subscriptions for tenant "${config.tenant}" (defaults to authenticated user).`,
+      inputSchema: {
+        type: 'object',
+        properties: { studentId: { type: 'string', description: 'Optional learner user id (staff only)' } },
+        additionalProperties: false,
+      },
+    },
+    {
+      name: 'customer_segments',
+      description: `Enrollment-based customer segment summaries for tenant "${config.tenant}" (staff).`,
+      inputSchema: { type: 'object', properties: {}, additionalProperties: false },
+    },
+    {
+      name: 'customers_in_segment',
+      description: `List customers in a segment for tenant "${config.tenant}" (staff).`,
+      inputSchema: {
+        type: 'object',
+        properties: {
+          segment: {
+            type: 'string',
+            description: 'ALL | ACTIVE_LEARNERS | AT_RISK | HIGH_VALUE | INACTIVE',
+          },
+        },
+        required: ['segment'],
+        additionalProperties: false,
+      },
+    },
   ];
 }

@@ -288,9 +288,11 @@ mutation CreateOrder($courseId: ID!, $studentId: ID!) {
 
 ### Phase 4 — Learner & analytics
 
-- [ ] Learner dashboard GraphQL (progress, subscriptions)
-- [ ] Customer segmentation query (aggregates from enrollments)
-- [ ] MCP commerce tools parity with GraphQL
+- [x] Learner dashboard GraphQL (progress, subscriptions)
+- [x] Customer segmentation query (aggregates from enrollments)
+- [x] MCP commerce tools parity with GraphQL
+- [x] Wire `/customers` (learner dashboard)
+- [x] Wire `/admin/customers/segmentation`
 
 ---
 
@@ -308,12 +310,12 @@ Page → @luxgen/ui → apps/web/graphql → resolver → service → @luxgen/db
 
 ## 8. Key file map
 
-| Layer        | Path                                                                         |
-| ------------ | ---------------------------------------------------------------------------- |
-| Models       | `packages/db/src/{tenant,user,course,enrollment}.ts`                         |
-| Services     | `apps/api/src/services/{tenant,user,course,enrollment,storefront}Service.ts` |
-| GraphQL      | `apps/api/src/schema/{tenant,user,course,enrollment,storefront}/`            |
-| Web queries  | `apps/web/graphql/queries/{tenants,users,courses,enrollment,storefront}.ts`  |
-| Admin pages  | `apps/web/pages/admin/customers/`, `products/`, `orders/`                    |
-| Product meta | `packages/ui/src/ProductEdit/fetcher.ts`                                     |
-| Timeline     | `apps/api/src/schema/activityEvent/`, `TIMELINE_ARCHITECTURE.md`             |
+| Layer        | Path                                                                                 |
+| ------------ | ------------------------------------------------------------------------------------ |
+| Models       | `packages/db/src/{tenant,user,course,enrollment}.ts`                                 |
+| Services     | `apps/api/src/services/{tenant,user,course,enrollment,storefront,learner}Service.ts` |
+| GraphQL      | `apps/api/src/schema/{tenant,user,course,enrollment,storefront,learner}/`            |
+| Web queries  | `apps/web/graphql/queries/{tenants,users,courses,enrollment,storefront,learner}.ts`  |
+| Admin pages  | `apps/web/pages/admin/customers/`, `products/`, `orders/`                            |
+| Product meta | `packages/ui/src/ProductEdit/fetcher.ts`                                             |
+| Timeline     | `apps/api/src/schema/activityEvent/`, `TIMELINE_ARCHITECTURE.md`                     |

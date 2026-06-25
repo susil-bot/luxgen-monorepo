@@ -95,7 +95,7 @@ export const apolloClient = new ApolloClient({
 | Users           | `users`                         | `/users`       | —                  |
 | **Automations** | `automations`, `automationRuns` | `/automations` | — (admin web only) |
 | **Agent tasks** | `agentTask`, `runAgentTask`     | `/agent`       | —                  |
-| Learner         | `learnerDashboard` _(future)_   | `/customers`   | Primary mobile UX  |
+| Learner         | `learnerDashboard`              | `/customers`   | Primary mobile UX  |
 
 ---
 

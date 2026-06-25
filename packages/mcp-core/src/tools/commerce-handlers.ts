@@ -3,9 +3,17 @@ import {
   GET_ENROLLMENT_BY_ID,
   LIST_ENROLLMENTS,
   TENANT_USAGE,
+  LIST_CUSTOMERS,
+  GET_LEARNER_DASHBOARD,
+  CUSTOMER_SEGMENTS,
+  CUSTOMERS_IN_SEGMENT,
   type GetEnrollmentByIdResult,
   type ListEnrollmentsResult,
   type TenantUsageResult,
+  type ListCustomersResult,
+  type LearnerDashboardResult,
+  type CustomerSegmentsResult,
+  type CustomersInSegmentResult,
 } from '../graphql/commerce-queries';
 import type { ToolConfig, ToolContent } from './types';
 import { formatToolError, formatToolSuccess } from '../errors';
@@ -53,6 +61,57 @@ export async function handleCommerceTool(
         const data = await client.query<GetEnrollmentByIdResult>(GET_ENROLLMENT_BY_ID, { id });
         if (!data.enrollmentById) throw new Error(`Enrollment not found: ${id}`);
         return data.enrollmentById;
+      });
+    }
+
+    case 'list_customers': {
+      const limitRaw = args.limit;
+      const limit = typeof limitRaw === 'number' ? Math.min(500, Math.max(1, limitRaw)) : 50;
+      return runTool(config, async () => {
+        const data = await client.query<ListCustomersResult>(LIST_CUSTOMERS, { tenantId: config.tenant });
+        const customers = data.customers.slice(0, limit);
+        return {
+          tenantId: config.tenant,
+          total: data.customers.length,
+          count: customers.length,
+          customers,
+        };
+      });
+    }
+
+    case 'get_learner_dashboard': {
+      const studentId = typeof args.studentId === 'string' ? args.studentId : undefined;
+      return runTool(config, async () => {
+        const data = await client.query<LearnerDashboardResult>(GET_LEARNER_DASHBOARD, {
+          tenantId: config.tenant,
+          studentId,
+        });
+        return data.learnerDashboard;
+      });
+    }
+
+    case 'customer_segments':
+      return runTool(config, async () => {
+        const data = await client.query<CustomerSegmentsResult>(CUSTOMER_SEGMENTS, { tenantId: config.tenant });
+        return {
+          tenantId: config.tenant,
+          segments: data.customerSegments,
+        };
+      });
+
+    case 'customers_in_segment': {
+      const segment = String(args.segment ?? 'ALL');
+      return runTool(config, async () => {
+        const data = await client.query<CustomersInSegmentResult>(CUSTOMERS_IN_SEGMENT, {
+          tenantId: config.tenant,
+          segment,
+        });
+        return {
+          tenantId: config.tenant,
+          segment,
+          count: data.customersInSegment.length,
+          customers: data.customersInSegment,
+        };
       });
     }
 

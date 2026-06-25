@@ -18,6 +18,7 @@ import { enrollmentTypeDefs } from './enrollment/typeDefs';
 import { storefrontTypeDefs } from './storefront/typeDefs';
 import { projectTypeDefs } from './project/typeDefs';
 import { mcpTypeDefs } from './mcp/typeDefs';
+import { learnerTypeDefs } from './learner/typeDefs';
 
 // Import resolvers
 import { tenantResolvers } from './tenant/resolvers';
@@ -35,6 +36,7 @@ import { enrollmentResolvers } from './enrollment/resolvers';
 import { storefrontResolvers } from './storefront/resolvers';
 import { projectResolvers } from './project/resolvers';
 import { mcpResolvers } from './mcp/resolvers';
+import { learnerResolvers } from './learner/resolvers';
 
 // Base schema
 const baseTypeDefs = `
@@ -72,6 +74,7 @@ export const typeDefs = mergeTypeDefs([
   storefrontTypeDefs,
   projectTypeDefs,
   mcpTypeDefs,
+  learnerTypeDefs,
 ]);
 
 // Scalar resolvers
@@ -124,6 +127,7 @@ const mergedResolvers = mergeResolvers([
   storefrontResolvers,
   projectResolvers,
   mcpResolvers,
+  learnerResolvers,
 ]);
 
 export const resolvers: any = secureResolvers(mergedResolvers);
