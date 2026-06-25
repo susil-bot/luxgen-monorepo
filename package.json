@@ -42,6 +42,7 @@
     "prepare": "husky",
     "validate": "sh scripts/validate.sh",
     "validate:build": "sh scripts/validate-build.sh",
+    "test:k8s": "node --test scripts/k8s-config-ingress-smoke.mjs",
     "init:tenant-workflow": "node scripts/init-tenant-workflow.js",
     "init:tenants": "node scripts/init-tenants.js",
     "select-tenant": "node scripts/select-tenant.js"
