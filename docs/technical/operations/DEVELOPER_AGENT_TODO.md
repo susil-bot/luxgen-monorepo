@@ -539,7 +539,7 @@ Response: { tasks: AgentTaskRecord[], nextCursor: string | null, total: number }
       **File:** `packages/agent/src/tools/definitions.ts` — missing tool
       The agent cannot **read package.json or tsconfig.json** without using `read_file` (which works), but has no way to enumerate installed packages or understand TypeScript paths. Add a `read_project_config` tool that returns the merged `package.json` + `tsconfig.json` (paths section) for a given workspace (e.g., `apps/web`, `packages/agent`) to help the agent understand imports before suggesting them.
 
-- [ ] **A-27** `[enhancement]`
+- [x] **A-27** `[enhancement]`
       **File:** `packages/agent/src/prompts/system.ts` line 54
       System prompt template includes `useState<any>(null)` — the agent learns to generate `any`-typed state. Update the embedded page template to use proper types:
       `tsx
@@ -550,6 +550,7 @@ import type { UserMenu } from '@luxgen/ui';
 const [user, setUser] = useState<UserMenu | null>(null);
 `
       **Files to change:** `packages/agent/src/prompts/system.ts`.
+      _Resolved: embedded page template uses `UserMenu | null` and `import type { UserMenu }`._
 
 ---
 
@@ -562,8 +563,8 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | MEDIUM               | 24      | 23     |
 | LOW                  | 25      | 24     |
 | **Agent / A-MEDIUM** | **10**  | **3**  |
-| **Agent / A-LOW**    | **10**  | **2**  |
-| **Total**            | **110** | **83** |
+| **Agent / A-LOW**    | **10**  | **3**  |
+| **Total**            | **110** | **97** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
 
