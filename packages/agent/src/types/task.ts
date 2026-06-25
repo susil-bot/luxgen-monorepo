@@ -63,4 +63,6 @@ export interface HeadlessTaskJob {
   ollamaHost: string;
   model?: string;
   enqueuedAt: number;
+  /** Times this job was reclaimed after a worker crash (BullMQ maxStalledCount). */
+  stallCount?: number;
 }
