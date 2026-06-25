@@ -1,6 +1,8 @@
 import React, { type ReactNode } from 'react';
 import { type BaseComponentProps } from '../types';
 import { withSSR } from '../ssr';
+import { getToolkitItemClassName, toolkitClasses, toolkitStyles } from './styles';
+import { ToolkitTranslations } from './translations';
 
 export interface ToolkitItem {
   id: string;
@@ -21,57 +23,50 @@ export interface ToolkitProps extends BaseComponentProps {
 
 const ToolkitComponent: React.FC<ToolkitProps> = ({
   items,
-  ariaLabel = 'Toolkit',
+  ariaLabel = ToolkitTranslations.en.defaultAriaLabel,
   size = 'medium',
   className = '',
   style,
   id,
   dataTestId,
 }) => {
-  const buttonPad = size === 'small' ? 'px-2.5 py-1.5 text-xs' : 'px-3 py-2 text-sm';
-
   return (
-    <div
-      role="toolbar"
-      aria-label={ariaLabel}
-      id={id}
-      data-testid={dataTestId}
-      className={`inline-flex flex-wrap items-center gap-1 rounded-xl p-1 ${className}`}
-      style={{ background: 'var(--color-fill-quaternary)', border: '1px solid var(--color-separator)', ...style }}
-    >
-      {items.map((item) => {
-        const isDisabled = item.disabled;
-        const tone = item.destructive
-          ? 'text-red-600 hover:bg-red-50'
-          : item.active
-            ? 'text-primary bg-white shadow-sm'
-            : 'text-secondary hover:text-primary hover:bg-[var(--color-fill-tertiary)]';
+    <div className={toolkitStyles.root}>
+      <div
+        role="toolbar"
+        aria-label={ariaLabel}
+        id={id}
+        data-testid={dataTestId}
+        className={`${toolkitClasses.root} ${className}`.trim()}
+        style={style}
+      >
+        {items.map((item) => {
+          const isDisabled = Boolean(item.disabled);
 
-        return (
-          <button
-            key={item.id}
-            type="button"
-            disabled={isDisabled}
-            aria-pressed={item.active ?? false}
-            aria-label={item.label}
-            title={item.label}
-            className={`inline-flex items-center gap-1.5 rounded-lg font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-blue)] ${buttonPad} ${
-              isDisabled ? 'cursor-not-allowed opacity-50' : tone
-            }`}
-            onClick={() => {
-              if (isDisabled) return;
-              item.onClick?.();
-            }}
-          >
-            {item.icon ? (
-              <span className="inline-flex shrink-0" aria-hidden="true">
-                {item.icon}
-              </span>
-            ) : null}
-            <span>{item.label}</span>
-          </button>
-        );
-      })}
+          return (
+            <button
+              key={item.id}
+              type="button"
+              disabled={isDisabled}
+              aria-pressed={item.active ?? false}
+              aria-label={item.label}
+              title={item.label}
+              className={getToolkitItemClassName(item, size)}
+              onClick={() => {
+                if (isDisabled) return;
+                item.onClick?.();
+              }}
+            >
+              {item.icon ? (
+                <span className={toolkitClasses.itemIcon} aria-hidden="true">
+                  {item.icon}
+                </span>
+              ) : null}
+              <span>{item.label}</span>
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };

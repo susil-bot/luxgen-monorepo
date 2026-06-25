@@ -19,16 +19,16 @@ import { Toolkit } from '@luxgen/ui';
 
 ## Props
 
-| Prop          | Type                  | Default      | Description                                  |
-| ------------- | --------------------- | ------------ | -------------------------------------------- |
-| `items`       | `ToolkitItem[]`       | required     | Tool buttons                                 |
-| `ariaLabel`   | `string`              | `'Toolkit'`  | `role="toolbar"` label                       |
-| `size`        | `'small' \| 'medium'` | `'medium'`   | Button density                               |
-| `className`   | `string`              | `''`         | Extra classes on root                        |
-| `style`       | `CSSProperties`       | —            | Inline styles merged onto root element       |
-| `id`          | `string`              | —            | HTML `id` on root element                    |
-| `dataTestId`  | `string`              | —            | `data-testid` for testing                    |
-| `tenantTheme` | `TenantTheme`         | defaultTheme | Theme token set; used by SSR style injection |
+| Prop          | Type                  | Default      | Description                                    |
+| ------------- | --------------------- | ------------ | ---------------------------------------------- |
+| `items`       | `ToolkitItem[]`       | required     | Tool buttons                                   |
+| `ariaLabel`   | `string`              | i18n default | `role="toolbar"` label (`ToolkitTranslations`) |
+| `size`        | `'small' \| 'medium'` | `'medium'`   | Button density                                 |
+| `className`   | `string`              | `''`         | Extra classes on root                          |
+| `style`       | `CSSProperties`       | —            | Inline styles merged onto root element         |
+| `id`          | `string`              | —            | HTML `id` on root element                      |
+| `dataTestId`  | `string`              | —            | `data-testid` for testing                      |
+| `tenantTheme` | `TenantTheme`         | defaultTheme | Theme token set; used by SSR style injection   |
 
 ### ToolkitItem
 
@@ -42,6 +42,10 @@ import { Toolkit } from '@luxgen/ui';
 | `active`      | `boolean`    | Sets `aria-pressed` and active tone     |
 | `destructive` | `boolean`    | Applies red/danger tone                 |
 
+## Styling
+
+Semantic classes (`toolkit`, `toolkit-item`, …) are defined once in `styles.ts` (`toolkitCssRules`). The React component injects them via `toolkitStyles.root` (emotion); `fetchToolkitSSR` returns the same rules for server HTML.
+
 ## Structure
 
-Per `.cursor/.rules`: `Toolkit.tsx`, `fetcher.ts`, `fixture.ts`, `fixture.tsx`, `Toolkit.spec.ts`, `Toolkit.spec.tsx`, `styles.ts`, `translations.ts`, `index.ts`, `README.md`.
+Per `.cursor/.rules`: `Toolkit.tsx`, `fetcher.ts`, `fixture.ts`, `fixture.tsx`, `Toolkit.spec.tsx`, `styles.ts`, `translations.ts`, `index.ts`, `README.md`.

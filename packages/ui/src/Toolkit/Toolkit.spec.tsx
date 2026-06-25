@@ -51,16 +51,17 @@ describe('Toolkit', () => {
     expect(addBtn).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('renders compact size with smaller padding class', () => {
+  it('renders compact size with smaller item class', () => {
     render(<Toolkit {...toolkitFixtures.compact} />);
     const btn = screen.getByRole('button', { name: 'Add' });
-    expect(btn.className).toContain('text-xs');
+    expect(btn.className).toContain('toolkit-item-small');
   });
 
-  it('renders medium size by default', () => {
+  it('renders medium size without small item class', () => {
     render(<Toolkit {...toolkitFixtures.default} />);
     const btn = screen.getByRole('button', { name: 'Add' });
-    expect(btn.className).toContain('text-sm');
+    expect(btn.className).toContain('toolkit-item');
+    expect(btn.className).not.toContain('toolkit-item-small');
   });
 
   it('renders icon wrapper when icon is provided', () => {
