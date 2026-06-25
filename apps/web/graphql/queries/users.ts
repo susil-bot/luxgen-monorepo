@@ -116,3 +116,15 @@ export const DELETE_USER = gql`
     deleteUser(id: $id)
   }
 `;
+
+export const GET_PENDING_USERS = gql`
+  query GetPendingUsers($tenantId: ID!) {
+    getPendingUsers(tenantId: $tenantId) { id email firstName lastName status createdAt }
+  }
+`;
+export const ACTIVATE_USER = gql`
+  mutation ActivateUser($userId: ID!) { activateUser(userId: $userId) { success message } }
+`;
+export const SUSPEND_USER = gql`
+  mutation SuspendUser($userId: ID!, $reason: String) { suspendUser(userId: $userId, reason: $reason) { success message } }
+`;
