@@ -1,5 +1,7 @@
 export { OrderListView } from './OrderListView';
 export type { OrderListViewProps } from './OrderListView';
+export { AbandonedCheckoutListView } from './AbandonedCheckoutListView';
+export type { AbandonedCheckoutListViewProps } from './AbandonedCheckoutListView';
 export { OrderDetailView } from './OrderDetailView';
 export type { OrderDetailViewProps } from './OrderDetailView';
 export { OrderCreateForm } from './OrderCreateForm';
@@ -15,6 +17,8 @@ export type { OrderDetailSectionProps } from './OrderDetailSection';
 
 export {
   buildOrdersFromEnrollments,
+  buildOrdersFromEnrollmentList,
+  buildAbandonedCheckoutRows,
   filterOrdersByTab,
   findOrderDetail,
   buildOrderDetail,
@@ -43,6 +47,8 @@ export type {
   EnrollmentCourseSource,
   EnrollmentUserSource,
   OrderEnrollmentSource,
+  AbandonedCheckoutRow,
+  AbandonedCheckoutSource,
 } from './fetcher';
 
 export { orderFixtures } from './fixture';

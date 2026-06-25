@@ -68,11 +68,36 @@ export const enrollmentTypeDefs = `
     progressPercent: Int!
   }
 
+  enum CheckoutSessionStatus {
+    OPEN
+    COMPLETED
+    EXPIRED
+    ABANDONED
+  }
+
+  type AbandonedCheckout {
+    id: ID!
+    courseId: ID!
+    studentId: ID!
+    stripeSessionId: String!
+    amountCents: Int!
+    currency: String!
+    status: CheckoutSessionStatus!
+    customerEmail: String
+    checkoutUrl: String
+    courseTitle: String
+    createdAt: Date!
+    abandonedAt: Date
+    expiresAt: Date
+  }
+
   extend type Query {
     enrollment(courseId: ID!, studentId: ID!): Enrollment
     enrollmentById(id: ID!): Enrollment
     enrollments(tenantId: ID!): [Enrollment!]!
     studentEnrollments(tenantId: ID!, studentId: ID!): [Enrollment!]!
+    draftEnrollments(tenantId: ID!): [Enrollment!]!
+    abandonedCheckouts(tenantId: ID!): [AbandonedCheckout!]!
   }
 
   extend type Mutation {

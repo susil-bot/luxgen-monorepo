@@ -1,4 +1,4 @@
-import { User, IUser } from '@luxgen/db';
+import { User, IUser, Enrollment } from '@luxgen/db';
 import { verifyPassword } from '@luxgen/auth';
 import { generateToken } from '../utils/jwt';
 import { logger } from '../utils/logger';
@@ -66,6 +66,18 @@ export class UserService {
   }
 
   async deleteUser(id: string, tenantId: string): Promise<boolean> {
+    const user = await User.findOne({ _id: id, tenant: tenantId });
+    if (!user) throw new Error('User not found');
+
+    const activeOrders = await Enrollment.countDocuments({
+      tenant: tenantId,
+      student: id,
+      cancelledAt: null,
+    });
+    if (activeOrders > 0) {
+      throw new Error(`Cannot delete customer with ${activeOrders} active order(s). Cancel or complete orders first.`);
+    }
+
     const result = await User.findOneAndDelete({ _id: id, tenant: tenantId });
     return !!result;
   }

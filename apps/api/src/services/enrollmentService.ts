@@ -10,6 +10,7 @@ import {
 } from '@luxgen/db';
 import { emitAutomationEvent, emitCommerceAutomationEvent } from '@luxgen/agent';
 import { activityEventService } from './activityEventService';
+import { checkoutSessionService } from './checkoutSessionService';
 import { isBillingDevMode, isStripeEnabled } from './billingService';
 import { logger } from '../utils/logger';
 
@@ -25,6 +26,15 @@ export class EnrollmentService {
 
   async listByTenant(tenantId: string): Promise<IEnrollment[]> {
     return Enrollment.find({ tenant: tenantId }).sort({ enrolledAt: -1 });
+  }
+
+  async listDraftByTenant(tenantId: string): Promise<IEnrollment[]> {
+    return Enrollment.find({
+      tenant: tenantId,
+      cancelledAt: null,
+      paymentStatus: EnrollmentPaymentStatus.PENDING,
+      tags: 'draft',
+    }).sort({ enrolledAt: -1 });
   }
 
   async listByStudent(tenantId: string, studentId: string): Promise<IEnrollment[]> {
@@ -259,6 +269,7 @@ export class EnrollmentService {
           paidAt: new Date(),
           ...(stripeSessionId ? { stripeCheckoutSessionId: stripeSessionId } : {}),
         },
+        $pull: { tags: 'draft' },
       },
       { new: true, upsert: true, setDefaultsOnInsert: true },
     );
@@ -391,6 +402,21 @@ export class EnrollmentService {
     });
 
     if (!session.url) throw new Error('Stripe did not return a checkout URL');
+
+    const expiresAt = typeof session.expires_at === 'number' ? new Date(session.expires_at * 1000) : undefined;
+
+    await checkoutSessionService.recordOpenSession({
+      tenantId,
+      courseId,
+      studentId,
+      stripeSessionId: session.id,
+      amountCents,
+      customerEmail,
+      checkoutUrl: session.url,
+      courseTitle,
+      expiresAt,
+    });
+
     return { url: session.url, sessionId: session.id };
   }
 
@@ -401,6 +427,7 @@ export class EnrollmentService {
     if (!tenantId || !courseId || !studentId) return false;
 
     await this.markPaymentConfirmed(tenantId, courseId, studentId, session.id);
+    await checkoutSessionService.markCompleted(session.id);
     logger.info(`Enrollment payment confirmed: ${courseId}:${studentId}`);
     return true;
   }

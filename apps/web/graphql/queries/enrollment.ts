@@ -1,5 +1,40 @@
 import { gql } from '@apollo/client';
 
+export const GET_DRAFT_ENROLLMENTS = gql`
+  query GetDraftEnrollments($tenantId: ID!) {
+    draftEnrollments(tenantId: $tenantId) {
+      id
+      courseId
+      studentId
+      notes
+      tags
+      paymentStatus
+      progressPercent
+      learningStatus
+      enrolledAt
+    }
+  }
+`;
+
+export const GET_ABANDONED_CHECKOUTS = gql`
+  query GetAbandonedCheckouts($tenantId: ID!) {
+    abandonedCheckouts(tenantId: $tenantId) {
+      id
+      courseId
+      studentId
+      stripeSessionId
+      amountCents
+      currency
+      status
+      customerEmail
+      checkoutUrl
+      courseTitle
+      createdAt
+      abandonedAt
+    }
+  }
+`;
+
 export const GET_ENROLLMENTS = gql`
   query GetEnrollments($tenantId: ID!) {
     enrollments(tenantId: $tenantId) {

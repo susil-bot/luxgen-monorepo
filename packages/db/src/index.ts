@@ -38,6 +38,8 @@ export type { IActivityEvent } from './activity-event';
 export { ActivityEvent, ActivitySubjectType, ActivityEventKind, ActivityActorType } from './activity-event';
 export type { IEnrollment } from './enrollment';
 export { Enrollment, enrollmentSubjectId, EnrollmentPaymentStatus, EnrollmentLearningStatus } from './enrollment';
+export type { ICheckoutSession } from './checkout-session';
+export { CheckoutSession, CheckoutSessionStatus } from './checkout-session';
 export type { IStorefrontBundle } from './storefront-bundle';
 export { StorefrontBundle, StorefrontBundleStatus, StorefrontBillingInterval } from './storefront-bundle';
 export type { ILearnerSubscription } from './learner-subscription';

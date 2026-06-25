@@ -5,7 +5,7 @@ import { useApolloClient, useMutation, useQuery } from '@apollo/client';
 import { AppLayout, OrderCreateForm, SnackbarProvider, useSnackbar } from '@luxgen/ui';
 import { ENROLL_STUDENT, GET_COURSES } from '../../graphql/queries/courses';
 import { GET_USERS } from '../../graphql/queries/users';
-import { GET_ENROLLMENT } from '../../graphql/queries/enrollment';
+import { GET_ENROLLMENT, UPDATE_ORDER } from '../../graphql/queries/enrollment';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useCommercePageShell } from '../../lib/commerce-page-shell';
 import { useTenantScope } from '../../lib/use-tenant-scope';
@@ -77,6 +77,8 @@ function CreateOrderContent({ tenant }: Props) {
     refetchQueries: [{ query: GET_COURSES, variables: { tenantId: queryTenantId } }],
   });
 
+  const [updateOrder] = useMutation(UPDATE_ORDER);
+
   const handleSave = async () => {
     if (!studentId || !courseId) {
       showError('Select a customer and course.');
@@ -86,6 +88,11 @@ function CreateOrderContent({ tenant }: Props) {
     setSaving(true);
     try {
       await enrollStudent({ variables: { courseId, studentId } });
+      await updateOrder({
+        variables: {
+          input: { courseId, studentId, tags: ['draft'] },
+        },
+      });
       const { data: enrollmentData } = await client.query({
         query: GET_ENROLLMENT,
         variables: { courseId, studentId },

@@ -254,6 +254,111 @@ export function buildOrdersFromEnrollments(
   return orders.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
+/** Build order rows from a pre-filtered enrollment list (e.g. draft orders). */
+export function buildOrdersFromEnrollmentList(
+  enrollments: OrderEnrollmentSource[],
+  courses: EnrollmentCourseSource[] | null | undefined,
+  users: EnrollmentUserSource[] | null | undefined,
+): OrderRow[] {
+  const courseMap = new Map((courses ?? []).map((c) => [c.id, c]));
+  const userMap = new Map((users ?? []).map((u) => [u.id, u]));
+  const orders: OrderRow[] = [];
+
+  for (const enrollment of enrollments) {
+    const course = courseMap.get(enrollment.courseId);
+    const user = userMap.get(enrollment.studentId);
+    if (!course || !user) continue;
+
+    const subjectId = buildOrderSubjectId(enrollment.courseId, enrollment.studentId);
+    const orderId = enrollment.id ?? subjectId;
+    const date = enrollment.enrolledAt ?? course.updatedAt ?? course.createdAt ?? new Date().toISOString();
+    const archived = course.status === 'ARCHIVED' || course.status === 'CANCELLED';
+
+    orders.push({
+      id: orderId,
+      subjectId,
+      courseId: enrollment.courseId,
+      studentId: enrollment.studentId,
+      orderNumber: orderNumberFromId(orderId),
+      date,
+      customerId: user.id,
+      customerName: userDisplayName(user),
+      customerEmail: user.email,
+      paymentStatus: enrollment.paymentStatus
+        ? mapEnrollmentPaymentStatus(enrollment.paymentStatus)
+        : derivePaymentStatus(course.status),
+      fulfillmentStatus: deriveFulfillmentStatus(course.status, enrollment),
+      total: '—',
+      itemCount: 1,
+      courseTitle: course.title,
+      archived,
+    });
+  }
+
+  return orders.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+export interface AbandonedCheckoutSource {
+  id: string;
+  courseId: string;
+  studentId: string;
+  stripeSessionId: string;
+  amountCents: number;
+  currency: string;
+  status: string;
+  customerEmail?: string | null;
+  checkoutUrl?: string | null;
+  courseTitle?: string | null;
+  createdAt: string;
+  abandonedAt?: string | null;
+}
+
+export interface AbandonedCheckoutRow {
+  id: string;
+  date: string;
+  customerEmail: string;
+  customerName: string;
+  courseTitle: string;
+  amount: string;
+  status: string;
+  checkoutUrl?: string;
+}
+
+function formatCents(amountCents: number, currency: string): string {
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: currency.toUpperCase(),
+    }).format(amountCents / 100);
+  } catch {
+    return `$${(amountCents / 100).toFixed(2)}`;
+  }
+}
+
+export function buildAbandonedCheckoutRows(
+  sessions: AbandonedCheckoutSource[] | null | undefined,
+  users?: EnrollmentUserSource[] | null,
+): AbandonedCheckoutRow[] {
+  const userMap = new Map((users ?? []).map((u) => [u.id, u]));
+
+  return (sessions ?? []).map((session) => {
+    const user = userMap.get(session.studentId);
+    const customerName = user ? userDisplayName(user) : (session.customerEmail ?? 'Guest');
+    const customerEmail = session.customerEmail ?? user?.email ?? '—';
+
+    return {
+      id: session.id,
+      date: session.abandonedAt ?? session.createdAt,
+      customerEmail,
+      customerName,
+      courseTitle: session.courseTitle ?? 'Course',
+      amount: formatCents(session.amountCents, session.currency),
+      status: session.status.toLowerCase(),
+      checkoutUrl: session.checkoutUrl ?? undefined,
+    };
+  });
+}
+
 export function filterOrdersByTab(orders: OrderRow[], tab: OrderFilterTab): OrderRow[] {
   switch (tab) {
     case 'unpaid':
