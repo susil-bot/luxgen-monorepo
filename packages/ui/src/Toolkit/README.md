@@ -44,7 +44,7 @@ import { Toolkit } from '@luxgen/ui';
 
 ## Styling
 
-- **Client:** `toolkitStyles` emotion classes are applied directly on the toolbar and buttons (`Toolkit.tsx`).
+- **Client:** `toolkitStyles` emotion classes plus semantic modifier classes (`toolkit-item-active`, etc.) on buttons so hover rules match SSR.
 - **SSR:** `fetchToolkitSSR` returns semantic class names (`.toolkit`, `.toolkit-item`, …) with matching rules from `toolkitCssRules` / `getToolkitSSRStyles()` — plain CSS for server HTML without emotion hashes.
 
 ## Structure

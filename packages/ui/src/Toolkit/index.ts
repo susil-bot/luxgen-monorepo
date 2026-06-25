@@ -4,6 +4,7 @@ export { fetchToolkitData, fetchToolkitSSR, defaultToolkitItems } from './fetche
 export type { ToolkitData } from './fetcher';
 export { toolkitFixtures } from './fixture';
 export {
+  getToolkitButtonClassName,
   getToolkitItemClassName,
   getToolkitItemStyles,
   getToolkitSSRStyles,

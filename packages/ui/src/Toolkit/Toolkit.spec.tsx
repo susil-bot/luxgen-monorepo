@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Toolkit } from './Toolkit';
 import { toolkitFixtures } from './fixture';
-import { toolkitStyles } from './styles';
+import { toolkitClasses, toolkitStyles } from './styles';
 
 describe('Toolkit', () => {
   it('renders all item labels', () => {
@@ -50,6 +50,14 @@ describe('Toolkit', () => {
     expect(editBtn).toHaveAttribute('aria-pressed', 'true');
     const addBtn = screen.getByRole('button', { name: 'Add' });
     expect(addBtn).toHaveAttribute('aria-pressed', 'false');
+  });
+
+  it('applies semantic modifier classes on active and destructive items', () => {
+    const { rerender } = render(<Toolkit {...toolkitFixtures.withActive} />);
+    expect(screen.getByRole('button', { name: 'Edit' }).className).toContain(toolkitClasses.itemActive);
+
+    rerender(<Toolkit items={[{ id: 'del', label: 'Delete', destructive: true }]} ariaLabel="Destructive toolbar" />);
+    expect(screen.getByRole('button', { name: 'Delete' }).className).toContain(toolkitClasses.itemDestructive);
   });
 
   it('applies emotion root styles directly on the toolbar element', () => {

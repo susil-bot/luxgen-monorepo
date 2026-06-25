@@ -1,7 +1,7 @@
 import React, { type ReactNode } from 'react';
 import { type BaseComponentProps } from '../types';
 import { withSSR } from '../ssr';
-import { getToolkitItemStyles, toolkitClasses, toolkitStyles } from './styles';
+import { getToolkitButtonClassName, toolkitClasses, toolkitStyles } from './styles';
 import { ToolkitTranslations } from './translations';
 
 export interface ToolkitItem {
@@ -50,7 +50,7 @@ const ToolkitComponent: React.FC<ToolkitProps> = ({
             aria-pressed={item.active ?? false}
             aria-label={item.label}
             title={item.label}
-            className={getToolkitItemStyles(item, size)}
+            className={getToolkitButtonClassName(item, size)}
             onClick={() => {
               if (isDisabled) return;
               item.onClick?.();

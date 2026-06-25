@@ -39,7 +39,7 @@ export const toolkitStyles = {
       color 0.15s ease,
       background 0.15s ease;
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled):not(.${toolkitClasses.itemActive}):not(.${toolkitClasses.itemDestructive}) {
       color: var(--color-text);
       background: var(--color-fill-tertiary);
     }
@@ -197,3 +197,9 @@ export const getToolkitItemStyles = (
   ]
     .filter(Boolean)
     .join(' ');
+
+/** Emotion + semantic class names for client-rendered toolkit buttons. */
+export const getToolkitButtonClassName = (
+  item: { active?: boolean; destructive?: boolean; disabled?: boolean },
+  size: 'small' | 'medium' = 'medium',
+): string => `${getToolkitItemStyles(item, size)} ${getToolkitItemClassName(item, size)}`.trim();
