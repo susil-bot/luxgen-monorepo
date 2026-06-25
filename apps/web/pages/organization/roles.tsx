@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { DataListPage, SnackbarProvider, EmptyState, type SortOption } from '@luxgen/ui';
 import type { SortDirection } from '@luxgen/ui';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { OrganizationShell } from '../../components/organization/OrganizationShell';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { GET_USERS } from '../../graphql/queries/users';
+import { GET_CUSTOM_ROLES, CREATE_CUSTOM_ROLE } from '../../graphql/queries/custom-roles';
 import { toUserTableRow, type GraphQLUser } from '../../lib/user-display';
 import { useAppTenantId } from '../../lib/app-layout-user';
 import { getStoredUser } from '../../lib/session';
@@ -51,6 +52,10 @@ function OrganizationRolesContent({ tenant }: Props) {
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [detailRole, setDetailRole] = useState<OrganizationRoleDefinition | null>(null);
 
+  const { data: customRoleData, refetch: refetchCustomRoles } = useQuery(GET_CUSTOM_ROLES, { variables: { tenantId: queryTenantId }, skip: !queryTenantId });
+  const [createCustomRole] = useMutation(CREATE_CUSTOM_ROLE);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newRoleName, setNewRoleName] = useState('');
   const { data } = useQuery(GET_USERS, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
@@ -69,7 +74,8 @@ function OrganizationRolesContent({ tenant }: Props) {
   }, [data]);
 
   const roles = useMemo(() => {
-    let list = [...ORGANIZATION_SYSTEM_ROLES];
+    const extras = (customRoleData?.customRoles ?? []).map((r) => ({ id: r.id, name: r.name, description: r.description ?? '', permissions: [] }));
+    let list = [...ORGANIZATION_SYSTEM_ROLES, ...extras];
     if (search.trim()) {
       const q = search.toLowerCase();
       list = list.filter((r) => r.name.toLowerCase().includes(q) || r.description.toLowerCase().includes(q));
@@ -195,6 +201,7 @@ function OrganizationRolesContent({ tenant }: Props) {
           </div>
         </div>
       )}
+      {showCreate && (<div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }}><div className="ios-card p-6 max-w-md w-full space-y-4"><h2 className="text-lg font-semibold">Create custom role</h2><input className="ios-input w-full" value={newRoleName} onChange={(e) => setNewRoleName(e.target.value)} placeholder="Role name" /><div className="flex gap-3 justify-end"><button type="button" className="ios-btn-secondary" onClick={() => setShowCreate(false)}>Cancel</button><button type="button" className="ios-btn-primary" disabled={!newRoleName.trim()} onClick={async () => { await createCustomRole({ variables: { input: { tenantId: queryTenantId, name: newRoleName.trim(), permissions: { canViewReports: true } } } }); setNewRoleName(''); setShowCreate(false); await refetchCustomRoles(); }}>Create</button></div></div></div>)
     </OrganizationShell>
   );
 }
