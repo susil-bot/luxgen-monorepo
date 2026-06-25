@@ -12,6 +12,7 @@ export const userTypeDefs = `
     marketingEmail: Boolean
     marketingSms: Boolean
     marketingWhatsapp: Boolean
+    staffNotes: String
     createdAt: Date!
     updatedAt: Date!
   }
@@ -62,6 +63,7 @@ export const userTypeDefs = `
   extend type Query {
     user(id: ID!): User
     users(tenantId: ID!): [User!]!
+    customers(tenantId: ID!, search: String): [User!]!
     currentUser: User
   }
 

@@ -53,8 +53,20 @@ export class UserService {
     return user;
   }
 
-  async deleteUser(id: string): Promise<boolean> {
-    const result = await User.findByIdAndDelete(id);
+  async getCustomersByTenant(tenantId: string, search?: string): Promise<IUser[]> {
+    const query: Record<string, unknown> = {
+      tenant: tenantId,
+      role: { $in: ['STUDENT', 'USER'] },
+    };
+    if (search?.trim()) {
+      const pattern = new RegExp(search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      query.$or = [{ email: pattern }, { firstName: pattern }, { lastName: pattern }];
+    }
+    return User.find(query).populate('tenant').sort({ createdAt: -1 });
+  }
+
+  async deleteUser(id: string, tenantId: string): Promise<boolean> {
+    const result = await User.findOneAndDelete({ _id: id, tenant: tenantId });
     return !!result;
   }
 

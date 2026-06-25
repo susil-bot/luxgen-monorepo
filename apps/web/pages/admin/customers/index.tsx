@@ -17,11 +17,10 @@ import { createHandleUserAction } from '../../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../../lib/app-layout-user';
 import { getStoredUser } from '../../../lib/session';
 import { GET_COURSES } from '../../../graphql/queries/courses';
-import { GET_USERS } from '../../../graphql/queries/users';
+import { GET_CUSTOMERS } from '../../../graphql/queries/users';
 import { GET_ENROLLMENTS } from '../../../graphql/queries/enrollment';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
-import { isLearnerRole } from '../../../lib/user-roles';
 
 interface Props {
   tenant: string;
@@ -45,8 +44,8 @@ function AdminCustomersPageContent({ tenant }: Props) {
     fetchPolicy: 'cache-and-network',
   });
 
-  const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
-    variables: { tenantId: queryTenantId },
+  const { data: customersData, loading: customersLoading } = useQuery(GET_CUSTOMERS, {
+    variables: { tenantId: queryTenantId, search: search.trim() || undefined },
     skip: !queryTenantId,
     fetchPolicy: 'cache-and-network',
   });
@@ -63,9 +62,8 @@ function AdminCustomersPageContent({ tenant }: Props) {
   }, [router.query.search]);
 
   const allCustomers = useMemo(() => {
-    const learners = (usersData?.users ?? []).filter((u: { role: string }) => isLearnerRole(u.role));
-    return buildCustomersFromUsers(learners, coursesData?.courses, enrollmentsData?.enrollments);
-  }, [coursesData, usersData, enrollmentsData]);
+    return buildCustomersFromUsers(customersData?.customers ?? [], coursesData?.courses, enrollmentsData?.enrollments);
+  }, [coursesData, customersData, enrollmentsData]);
 
   const customers = useMemo(() => {
     let rows = filterCustomersByTab(allCustomers, activeTab);
@@ -79,7 +77,7 @@ function AdminCustomersPageContent({ tenant }: Props) {
     return rows;
   }, [allCustomers, activeTab, search]);
 
-  const loading = (coursesLoading || usersLoading) && allCustomers.length === 0;
+  const loading = (coursesLoading || customersLoading) && allCustomers.length === 0;
 
   return (
     <>

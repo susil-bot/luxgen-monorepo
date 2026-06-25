@@ -8,6 +8,8 @@ export const userResolvers = {
     user: (_: unknown, { id }: { id: string }) => userService.getUserById(id),
     users: (_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) =>
       userService.getUsersByTenant(scopedTenantId(ctx, tenantId)),
+    customers: (_: unknown, { tenantId, search }: { tenantId: string; search?: string }, ctx: GraphQLContext) =>
+      userService.getCustomersByTenant(scopedTenantId(ctx, tenantId), search),
     currentUser: (_: unknown, __: unknown, context: GraphQLContext) => context.user ?? null,
   },
   Mutation: {
@@ -40,7 +42,10 @@ export const userResolvers = {
       return user;
     },
 
-    deleteUser: (_: unknown, { id }: { id: string }) => userService.deleteUser(id),
+    deleteUser: (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
+      if (!context.tenantId) throw new Error('Tenant context required');
+      return userService.deleteUser(id, context.tenantId);
+    },
 
     login: (_: unknown, { input }: { input: { email: string; password: string } }, ctx: GraphQLContext) =>
       userService.login({ ...input, req: ctx.req }),
