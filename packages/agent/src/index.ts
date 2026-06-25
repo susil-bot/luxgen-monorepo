@@ -119,6 +119,12 @@ export {
   connectQueue,
   disconnectQueue,
   isQueueEnabled,
+  acquireTenantStreamSlot,
+  releaseTenantStreamSlot,
+  isAgentMessageRateLimited,
+  resetAgentRateLimitFallback,
+  MAX_CONCURRENT_STREAMS_PER_TENANT,
+  MAX_AGENT_MESSAGES_PER_MINUTE,
 } from './queue/redis-queue';
 export { processHeadlessJob, runWorkerLoop, shutdownWorker } from './queue/worker';
 

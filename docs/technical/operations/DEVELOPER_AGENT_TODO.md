@@ -395,10 +395,11 @@
       **How to fix:** Before the write loop, if `conflicts.length > 0` and mode is `'filesystem'`, return early with `{ applied: [], errors: [], conflicts, mode: 'filesystem' }`. The API route (`apply.ts`) already includes `conflictWarning` in the response — update the UI in `AgentTransparency.tsx:handleApplyAll` to block and display conflicts instead of proceeding.
       **Missing API field:** `apply.ts` needs a `blocked: boolean` field so the UI can distinguish "applied with warning" from "blocked by conflict."
 
-- [ ] **A-05** `[security]`
+- [x] **A-05** `[security]`
       **File:** `apps/web/pages/api/agent/chat.ts` (no rate limiting)
       There is **no per-user or per-tenant rate limit** on `POST /api/agent/chat`. A single tenant can open unlimited concurrent SSE streams, exhausting Ollama connection slots and degrading all other tenants. Add a per-tenant concurrent-stream counter using Redis (`INCR`/`DECR`) with a max of 3 concurrent streams per tenant and a per-user message rate limit (e.g., 20 messages per minute).
       **Files to change:** `apps/web/pages/api/agent/chat.ts`, `packages/agent/src/queue/redis-queue.ts` (add helpers for stream counting).
+      _Fix applied: `acquireTenantStreamSlot` / `releaseTenantStreamSlot` (max 3 per tenant) and `isAgentMessageRateLimited` (20/min per user) in `redis-queue.ts`; wired in `chat.ts` (2026-06-25)._
 
 - [ ] **A-06** `[bug]` `[arch]`
       **File:** `packages/agent/src/git/service.ts` lines 297–304
@@ -551,10 +552,10 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | HIGH                 | 27      | 20     |
 | MEDIUM               | 24      | 20     |
 | LOW                  | 25      | 22     |
-| **Agent / A-HIGH**   | **7**   | **4**  |
+| **Agent / A-HIGH**   | **7**   | **5**  |
 | **Agent / A-MEDIUM** | **10**  | **2**  |
 | **Agent / A-LOW**    | **10**  | **1**  |
-| **Total**            | **110** | **77** |
+| **Total**            | **110** | **78** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
 
