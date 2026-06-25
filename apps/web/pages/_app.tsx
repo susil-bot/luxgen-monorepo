@@ -2,9 +2,10 @@ import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import { ApolloProvider } from '@apollo/client';
 import { client } from '../graphql/client';
-import { GlobalProvider, NavigationProvider, AIStudioProvider, AIStudioPanelSlot } from '@luxgen/ui';
+import { GlobalProvider, NavigationProvider, AIStudioProvider, AIStudioPanelSlot, ErrorBoundary } from '@luxgen/ui';
 import { ThemeProvider } from '../lib/theme';
 import { TenantThemeBridge } from '../components/theme/TenantThemeBridge';
+import { RouteProgressBar } from '../components/layout/RouteProgressBar';
 import { AuthGuard } from '../components/auth/AuthGuard';
 import { SessionMonitor } from '../components/auth/SessionMonitor';
 import { SessionSync } from '../components/auth/SessionSync';
@@ -35,6 +36,7 @@ export default function App({ Component, pageProps }: AppProps) {
       <ThemeProvider>
         <GlobalProvider initialTenant={pageProps.tenant || 'demo'}>
           <TenantThemeBridge />
+          <RouteProgressBar />
           <AIStudioProvider>
             <WebNavigationProvider>
               <SuperAdminTenantSwitchProvider>
@@ -43,9 +45,16 @@ export default function App({ Component, pageProps }: AppProps) {
                 <AIStudioPanelSlot>
                   <AIStudioSidekickPanel />
                 </AIStudioPanelSlot>
-                <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:px-3 focus:py-2">Skip to main content</a>
+                <a
+                  href="#main-content"
+                  className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:px-3 focus:py-2"
+                >
+                  Skip to main content
+                </a>
                 <AuthGuard>
-                  <Component {...pageProps} />
+                  <ErrorBoundary>
+                    <Component {...pageProps} />
+                  </ErrorBoundary>
                 </AuthGuard>
               </SuperAdminTenantSwitchProvider>
             </WebNavigationProvider>

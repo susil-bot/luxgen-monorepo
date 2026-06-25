@@ -157,8 +157,8 @@ sh scripts/check-env.sh staging  # validate staging env vars
 | 7.2 | TypeScript build errors (api)                | ⚠️     | Run: `make build-api`                                                    |
 | 7.3 | Lint passing                                 | ⚠️     | Run: `make lint`                                                         |
 | 7.4 | Tests passing                                | ⚠️     | Run: `make test`                                                         |
-| 7.5 | `groups/[id].tsx` GraphQL TODO resolved      | ⚠️     | Currently uses setTimeout mock                                           |
-| 7.6 | `groups/dashboard.tsx` GraphQL TODO resolved | ⚠️     | Currently uses hardcoded data                                            |
+| 7.5 | `groups/[id].tsx` GraphQL TODO resolved      | ✅     | Uses `GET_GROUP` / `GET_GROUP_MEMBERS` / `DELETE_GROUP`                  |
+| 7.6 | `groups/dashboard.tsx` GraphQL TODO resolved | ✅     | Uses `GET_GROUPS` with live metrics                                        |
 
 ---
 

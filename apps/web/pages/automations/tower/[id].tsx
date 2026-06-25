@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 
-import { Toolkit, type ToolkitItem } from '@luxgen/ui';
+import { Toolkit, type ToolkitItem, AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
 import {
   FlowConfigFieldInput,
   TowerGraphCanvas,
@@ -24,6 +24,9 @@ import {
 } from '../../../lib/automation-flow';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useTenantScope } from '../../../lib/use-tenant-scope';
+import { createHandleUserAction } from '../../../lib/user-actions';
+import { useAppLayoutHeader } from '../../../lib/app-layout-header';
+import { useLayoutUser } from '../../../lib/app-layout-user';
 
 function stepTypeLabel(kind: FlowNodeKind) {
   if (kind === 'trigger') return 'Trigger';
@@ -317,8 +320,25 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
   );
 }
 
-export default function TowerEditRoom(props: TowerEditRoomProps) {
-  return <TowerEditContent {...props} />;
+function TowerEditRoomPage(props: TowerEditRoomProps) {
+  const router = useRouter();
+  const headerProps = useAppLayoutHeader();
+  const user = useLayoutUser();
+
+  return (
+    <AppLayout
+      sidebarSections={getDefaultSidebarSections()}
+      user={user ?? undefined}
+      logo={getDefaultLogo()}
+      onUserAction={createHandleUserAction(router)}
+      responsive
+      {...headerProps}
+    >
+      <TowerEditContent {...props} />
+    </AppLayout>
+  );
 }
+
+export default TowerEditRoomPage;
 
 export const getServerSideProps = getTenantPageProps;
