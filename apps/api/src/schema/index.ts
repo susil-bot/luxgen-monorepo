@@ -53,6 +53,12 @@ import { CartSessionTypeDefs } from './engagement/cartSession/typeDefs';
 import { CartSessionResolvers } from './engagement/cartSession/resolvers';
 import { CheckoutSessionStatusTypeDefs } from './engagement/checkoutSessionStatus/typeDefs';
 import { CheckoutSessionStatusResolvers } from './engagement/checkoutSessionStatus/resolvers';
+import { UserPreferencesTypeDefs } from './engagement/userPreferences/typeDefs';
+import { UserPreferencesResolvers } from './engagement/userPreferences/resolvers';
+import { UserActivityFeedTypeDefs } from './engagement/userActivityFeed/typeDefs';
+import { UserActivityFeedResolvers } from './engagement/userActivityFeed/resolvers';
+import { CourseProgressPercentTypeDefs } from './engagement/courseProgressPercent/typeDefs';
+import { CourseProgressPercentResolvers } from './engagement/courseProgressPercent/resolvers';
 
 // Base schema
 const baseTypeDefs = `
@@ -97,6 +103,9 @@ export const typeDefs = mergeTypeDefs([
   StoreCatalogFacetsTypeDefs,
   CartSessionTypeDefs,
   CheckoutSessionStatusTypeDefs,
+  UserPreferencesTypeDefs,
+  UserActivityFeedTypeDefs,
+  CourseProgressPercentTypeDefs,
 ]);
 
 // Scalar resolvers
@@ -134,6 +143,9 @@ const mergedResolvers = mergeResolvers([
   StoreCatalogFacetsResolvers,
   CartSessionResolvers,
   CheckoutSessionStatusResolvers,
+  UserPreferencesResolvers,
+  UserActivityFeedResolvers,
+  CourseProgressPercentResolvers,
 ]);
 
 export const resolvers: any = secureResolvers(mergedResolvers);

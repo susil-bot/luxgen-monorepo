@@ -1,0 +1,1 @@
+export const UserActivityFeedTypeDefs=`type UserActivityFeedItem{id:ID!eventType:String!message:String!createdAt:Date!} extend type Query{userActivityFeed(tenantId:ID!,limit:Int):[UserActivityFeedItem!]!}`;

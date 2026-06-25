@@ -1,0 +1,1 @@
+export const UserPreferencesTypeDefs=`type EngagementUserPreferences{theme:String!notifications:Boolean!language:String!} extend type Query{engagementUserPreferences:EngagementUserPreferences!} extend type Mutation{updateEngagementUserPreferences(theme:String,notifications:Boolean,language:String):EngagementUserPreferences!}`;

@@ -1,0 +1,2 @@
+import type{GraphQLContext}from'../../../context';import{userPreferencesService}from'../../../services/userPreferencesService';
+export const UserPreferencesResolvers={Query:{engagementUserPreferences:async(_:unknown,__:unknown,ctx:GraphQLContext)=>userPreferencesService.get(ctx.user?._id?.toString?.()??'')},Mutation:{updateEngagementUserPreferences:async(_:unknown,input:Record<string,unknown>,ctx:GraphQLContext)=>userPreferencesService.update(ctx.user?._id?.toString?.()??'',input as {theme?:string;notifications?:boolean;language?:string})}};
