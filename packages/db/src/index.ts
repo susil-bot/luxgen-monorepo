@@ -45,6 +45,8 @@ export type { IStorefrontBundle } from './storefront-bundle';
 export { StorefrontBundle, StorefrontBundleStatus, StorefrontBillingInterval } from './storefront-bundle';
 export type { ILearnerSubscription } from './learner-subscription';
 export { LearnerSubscription, LearnerSubscriptionStatus } from './learner-subscription';
+export type { ICustomRole, ICustomRolePermissions } from './custom-role';
+export { CustomRole } from './custom-role';
 export type { IProjectItem, ProjectItemStatus, ProjectItemIteration, ProjectItemPriority } from './project-item';
 export { ProjectItem } from './project-item';
 export type { IEmailNotificationLog, ListingEmailTemplate } from './email-notification-log';
