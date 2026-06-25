@@ -210,7 +210,7 @@
       **File:** `apps/web/pages/api/users/me.ts` and `apps/web/pages/api/users/current.ts`
       These two files are **byte-for-byte identical** — same handler, same imports, same JWT verification. Two separate routes (`/api/users/me` and `/api/users/current`) serve the exact same response. Delete `current.ts` and update all callers to use `/api/users/me`.
 
-- [ ] **M-13** `[security]`
+- [x] **M-13** `[security]`
       **File:** `apps/web/pages/api/schema/index.ts` lines 73–93
       Custom JSON scalar `parseLiteral` calls `JSON.parse(field.value.value)` on raw AST string values inside `ObjectValue` and `ListValue` cases. This throws on non-JSON strings and corrupts data silently. Replace with the battle-tested `GraphQLJSON` from `graphql-scalars`.
 
@@ -552,12 +552,12 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | -------------------- | ------- | ------ |
 | CRITICAL             | 7       | 7 ✅   |
 | HIGH                 | 27      | 20     |
-| MEDIUM               | 24      | 21     |
+| MEDIUM               | 24      | 22     |
 | LOW                  | 25      | 22     |
 | **Agent / A-HIGH**   | **7**   | **5**  |
 | **Agent / A-MEDIUM** | **10**  | **3**  |
 | **Agent / A-LOW**    | **10**  | **1**  |
-| **Total**            | **110** | **79** |
+| **Total**            | **110** | **80** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
 
