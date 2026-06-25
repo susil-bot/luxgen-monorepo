@@ -363,8 +363,9 @@
       Agent-worker has `replicas: 1` and no job re-enqueue on crash. In-flight jobs are lost on pod restart. Enable BullMQ's stalled-job recovery (`stalledInterval`, `maxStalledCount`) to re-enqueue jobs lost to crashes.
       _Resolved: processing lease + `recoverStalledJobs` with `AGENT_QUEUE_STALLED_INTERVAL_MS` / `AGENT_QUEUE_MAX_STALLED_COUNT` (BullMQ defaults)._
 
-- [ ] **L-25** `[missing-test]` `[infra]`
+- [x] **L-25** `[missing-test]` `[infra]`
       No integration tests for the K8s deploy script or multi-service startup sequence. The Ingress/ConfigMap URL mismatch (H-14) would have been caught by a deployment smoke test. Add a basic smoke test that validates the ConfigMap URLs match Ingress hostnames.
+      _Resolved: `scripts/k8s-config-ingress-smoke.mjs` + `npm run test:k8s`._
 
 ---
 
@@ -558,10 +559,10 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | CRITICAL             | 7       | 7 ✅   |
 | HIGH                 | 27      | 20     |
 | MEDIUM               | 24      | 22     |
-| LOW                  | 25      | 23     |
+| LOW                  | 25      | 24     |
 | **Agent / A-MEDIUM** | **10**  | **3**  |
 | **Agent / A-LOW**    | **10**  | **2**  |
-| **Total**            | **110** | **81** |
+| **Total**            | **110** | **82** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
 

@@ -98,13 +98,18 @@ export const courseResolvers = {
         actor,
       );
       void automationService
-        .triggerAutomations(tenantId, 'USER_ENROLLED', {
-          courseId,
-          studentId,
-          userId: studentId,
-          orderId: `${courseId}:${studentId}`,
-          customerEmail: student?.email,
-        }, 'lms')
+        .triggerAutomations(
+          tenantId,
+          'USER_ENROLLED',
+          {
+            courseId,
+            studentId,
+            userId: studentId,
+            orderId: `${courseId}:${studentId}`,
+            customerEmail: student?.email,
+          },
+          'lms',
+        )
         .catch(() => undefined);
       void import('../../services/pushNotificationService').then(({ pushNotificationService }) =>
         pushNotificationService.sendEnrollmentConfirmation(studentId, course.title),
