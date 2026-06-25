@@ -462,7 +462,7 @@
 ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
-      _Resolved: `run_command` tool with npm/npx/node allowlist._
+        _Resolved: `run_command` tool with npm/npx/node allowlist._
 
 - [x] **A-13** `[bug]` `[dead-code]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx`
@@ -581,14 +581,14 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ## Progress Summary
 
-| Tier                 | Total   | Done   |
-| -------------------- | ------- | ------ |
-| CRITICAL             | 7       | 7 ✅   |
-| HIGH                 | 27      | 21     |
-| MEDIUM               | 24      | 23     |
-| LOW                  | 25      | 24     |
-| **Agent / A-MEDIUM** | **10**  | **10** ✅ |
-| **Agent / A-LOW**    | **10**  | **10** ✅ |
+| Tier                 | Total   | Done       |
+| -------------------- | ------- | ---------- |
+| CRITICAL             | 7       | 7 ✅       |
+| HIGH                 | 27      | 21         |
+| MEDIUM               | 24      | 23         |
+| LOW                  | 25      | 24         |
+| **Agent / A-MEDIUM** | **10**  | **10** ✅  |
+| **Agent / A-LOW**    | **10**  | **10** ✅  |
 | **Total**            | **110** | **110** ✅ |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
@@ -1567,19 +1567,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       Zero pages use `next/image` (`<Image>` component). All images use external URLs passed to `<img>` or background CSS. `next/image` provides lazy loading, size optimisation, and format conversion (WebP/AVIF) for free.
       **Fix:** Migrate all `<img>` in page-level components to `<Image>` from `next/image`. Add `domains` config to `next.config.js` for Unsplash and other external hosts.
 
-- [ ] **UI-137** `[perf]`
+- [x] **UI-137** `[perf]`
       Dashboard banner carousel uses Unsplash URLs directly (e.g., `https://images.unsplash.com/...?w=2071`). These large images load synchronously and block initial render.
       **Fix:** Use `next/image` with `priority={index === 0}` for the first slide and `loading="lazy"` for others.
 
-- [ ] **UI-138** `[perf]`
+- [x] **UI-138** `[perf]`
       Inter font is loaded via Google Fonts in `_document.tsx`. The recommended approach for Next.js 13+ is `next/font/google` which self-hosts fonts and eliminates the extra DNS resolution and request to Google.
       **Fix:** Migrate to `import { Inter } from 'next/font/google'` and apply the font class to `<html>` in `_document.tsx`.
 
-- [ ] **UI-139** `[perf]`
+- [x] **UI-139** `[perf]`
       `getDefaultSidebarSections()` creates a new array on every call with no memoisation. It is called 25+ times across pages/shells on every render.
       **Fix:** Use `useMemo(() => getDefaultSidebarSections(), [])` at each call site, or export a singleton constant.
 
-- [ ] **UI-140** `[perf]`
+- [x] **UI-140** `[perf]`
       `getDefaultUser()` similarly creates a new object on every call — 16 pages affected.
       **Fix:** Export a `DEFAULT_USER` constant instead of a function.
 
