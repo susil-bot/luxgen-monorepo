@@ -35,26 +35,28 @@ export const Table = <T extends Record<string, unknown>>({
 
   return (
     <div className={`ios-table-wrap ${className}`}>
-      <table className="ios-table">
-        <thead>
-          <tr>
-            {columns.map((column) => (
-              <th key={String(column.key)}>{column.title}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((item, rowIndex) => (
-            <tr key={rowIndex}>
+      <div className="overflow-x-auto">
+        <table className="ios-table">
+          <thead>
+            <tr>
               {columns.map((column) => (
-                <td key={String(column.key)}>
-                  {column.render ? column.render(item[column.key], item) : String(item[column.key] ?? '')}
-                </td>
+                <th key={String(column.key)}>{column.title}</th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {data.map((item, rowIndex) => (
+              <tr key={rowIndex}>
+                {columns.map((column) => (
+                  <td key={String(column.key)}>
+                    {column.render ? column.render(item[column.key], item) : String(item[column.key] ?? '')}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 };

@@ -5,7 +5,7 @@ import { defaultTheme } from '../theme';
 
 export interface GridContainerProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
-  columns?: number;
+  columns?: number | { sm?: number; md?: number; lg?: number };
   gap?: string;
 }
 

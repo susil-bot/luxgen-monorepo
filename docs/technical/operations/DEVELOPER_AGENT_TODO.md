@@ -462,7 +462,7 @@
 ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
-      _Resolved: `run_command` tool with npm/npx/node allowlist._
+        _Resolved: `run_command` tool with npm/npx/node allowlist._
 
 - [x] **A-13** `[bug]` `[dead-code]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx`
@@ -581,14 +581,14 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ## Progress Summary
 
-| Tier                 | Total   | Done   |
-| -------------------- | ------- | ------ |
-| CRITICAL             | 7       | 7 ✅   |
-| HIGH                 | 27      | 21     |
-| MEDIUM               | 24      | 23     |
-| LOW                  | 25      | 24     |
-| **Agent / A-MEDIUM** | **10**  | **10** ✅ |
-| **Agent / A-LOW**    | **10**  | **10** ✅ |
+| Tier                 | Total   | Done       |
+| -------------------- | ------- | ---------- |
+| CRITICAL             | 7       | 7 ✅       |
+| HIGH                 | 27      | 21         |
+| MEDIUM               | 24      | 23         |
+| LOW                  | 25      | 24         |
+| **Agent / A-MEDIUM** | **10**  | **10** ✅  |
+| **Agent / A-LOW**    | **10**  | **10** ✅  |
 | **Total**            | **110** | **110** ✅ |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
@@ -1129,19 +1129,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/components/store/ProductCard.tsx` uses `h-32` fixed height for its image area. On mobile this clips long product titles and the layout breaks when 3-column grid collapses.
       **Fix:** Use `aspect-video` or `aspect-square` instead of a fixed height; ensure the grid switches to 1-column at `sm:`.
 
-- [ ] **UI-29** `[responsive]`
+- [x] **UI-29** `[responsive]`
       `packages/ui/src/Table/Table.tsx` has no horizontal scroll wrapper. Wide data tables overflow and clip on mobile screens.
       **Fix:** Wrap the `<table>` in `<div className="overflow-x-auto">`.
 
-- [ ] **UI-30** `[responsive]`
+- [x] **UI-30** `[responsive]`
       `packages/ui/src/GridContainer/GridContainer.tsx` accepts a single `columns` number. On mobile this still renders N columns. The component has no responsive column array (e.g., `[1, 2, 3]` for sm/md/lg).
       **Fix:** Accept `columns: number | { sm?: number; md?: number; lg?: number }` and generate responsive CSS grid accordingly.
 
-- [ ] **UI-31** `[responsive]`
+- [x] **UI-31** `[responsive]`
       `packages/ui/src/ActionMenu/ActionMenu.tsx` renders a `min-w-[220px]` dropdown. On a 320px screen the menu overflows the right edge.
       **Fix:** Add `max-w-[calc(100vw-2rem)]` and flip alignment to `right` when near the edge via a position calculation.
 
-- [ ] **UI-32** `[responsive]`
+- [x] **UI-32** `[responsive]`
       `packages/ui/src/Modal/Modal.tsx` has no `xs` size for very small screens. All sizes render with `mx-auto` but no `mx-4` fallback means the modal content can overflow on screens narrower than its `max-w`.
       **Fix:** Add `mx-4 sm:mx-auto` to ensure minimum horizontal margin on mobile.
 
@@ -1846,7 +1846,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | Section                                         | Items   | Done  |
 | ----------------------------------------------- | ------- | ----- |
 | Global Layout Architecture (UI-01–20)           | 20      | 0     |
-| Responsive Design (UI-21–45)                    | 25      | 0     |
+| Responsive Design (UI-21–45)                    | 25      | 4     |
 | Hardcoded Values / Tokens (UI-46–75)            | 30      | 0     |
 | TypeScript & Type Safety (UI-76–95)             | 20      | 0     |
 | Dead Code & Unused Props (UI-96–110)            | 15      | 0     |
