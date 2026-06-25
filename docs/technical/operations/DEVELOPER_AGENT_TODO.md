@@ -1356,17 +1356,17 @@ const [user, setUser] = useState<UserMenu | null>(null);
 - [ ] **UI-84** `[type]`
       `apps/web/pages/dashboard.tsx`: `onDashboardAction(action: string, data?: any)`. The `action` should be a typed literal union of all supported action strings.
 
-- [ ] **UI-85** `[type]`
+- [x] **UI-85** `[type]`
       Multiple `getServerSideProps` functions are typed as `async (context: any)`. Should use `GetServerSidePropsContext` from `next`.
 
-- [ ] **UI-86** `[type]`
+- [x] **UI-86** `[type]`
       `RegisterForm` in `@luxgen/ui` exposes `ADMIN` and `SUPER_ADMIN` as selectable role options in the UI. These values flow into `REGISTER_MUTATION` with no type guard on the frontend.
       **Fix:** Type the `role` field as `'USER' | 'STUDENT'` only; remove ADMIN/SUPER_ADMIN from the UI form entirely (backend validates but defence-in-depth applies to UI too).
 
-- [ ] **UI-87** `[type]`
+- [x] **UI-87** `[type]`
       `apps/web/components/automations/tower/TowerShell/TowerShell.tsx` and its sub-components likely have implicit `any` from the flow graph data model. Audit and type the node/edge data structures.
 
-- [ ] **UI-88** `[type]`
+- [x] **UI-88** `[type]`
       `AdminDashboardLayout` `onDashboardAction` prop accepts `data?: any`. Given the 11 different action types being wired to no-ops, this should be a discriminated union.
       **Fix:** Define `type DashboardAction = { type: 'view_course'; courseId: string } | { type: 'view_survey'; surveyId: string } | ...`.
 
@@ -1848,7 +1848,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | Global Layout Architecture (UI-01–20)           | 20      | 0     |
 | Responsive Design (UI-21–45)                    | 25      | 0     |
 | Hardcoded Values / Tokens (UI-46–75)            | 30      | 0     |
-| TypeScript & Type Safety (UI-76–95)             | 20      | 0     |
+| TypeScript & Type Safety (UI-76–95)             | 20      | 4     |
 | Dead Code & Unused Props (UI-96–110)            | 15      | 0     |
 | Missing States (UI-111–125)                     | 15      | 0     |
 | SEO & Head Management (UI-126–135)              | 10      | 0     |
@@ -1857,6 +1857,6 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | Accessibility (UI-166–180)                      | 15      | 0     |
 | Duplicate Components (UI-181–190)               | 10      | 0     |
 | No-Op Wiring / Missing Connections (UI-191–200) | 10      | 0     |
-| **Total**                                       | **200** | **0** |
+| **Total**                                       | **200** | **4** |
 
 > Update Done column as items are completed. Priority order: Layout → Responsive → Hardcoded → TypeScript → Dead Code.
