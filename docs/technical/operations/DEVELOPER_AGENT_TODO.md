@@ -96,7 +96,7 @@
       **File:** `apps/web/pages/automations/index.tsx` lines 84–174
       `INITIAL_AUTOMATIONS` and `RUN_HISTORY` are hard-coded mock arrays displayed when `useGraphql` is false. In production, a tenant with zero automations will see fabricated demo data as real data. Remove the mock data path; show an empty state when there are no automations.
 
-- [ ] **H-13** `[infra]`
+- [x] **H-13** `[infra]`
       **File:** `k8s/agent-worker.yaml` lines 48–65
       Agent-worker liveness and readiness probes hit `http://localhost:4000/health` but the worker exposes no HTTP server. Probes will always fail → infinite crash-loop restarts. Either expose a minimal health endpoint in the worker or switch to an `exec` probe checking process state.
 
