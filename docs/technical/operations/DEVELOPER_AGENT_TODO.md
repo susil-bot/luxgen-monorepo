@@ -462,7 +462,7 @@
 ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
-      _Resolved: `run_command` tool with npm/npx/node allowlist._
+        _Resolved: `run_command` tool with npm/npx/node allowlist._
 
 - [x] **A-13** `[bug]` `[dead-code]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx`
@@ -581,14 +581,14 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ## Progress Summary
 
-| Tier                 | Total   | Done   |
-| -------------------- | ------- | ------ |
-| CRITICAL             | 7       | 7 ✅   |
-| HIGH                 | 27      | 21     |
-| MEDIUM               | 24      | 23     |
-| LOW                  | 25      | 24     |
-| **Agent / A-MEDIUM** | **10**  | **10** ✅ |
-| **Agent / A-LOW**    | **10**  | **10** ✅ |
+| Tier                 | Total   | Done       |
+| -------------------- | ------- | ---------- |
+| CRITICAL             | 7       | 7 ✅       |
+| HIGH                 | 27      | 21         |
+| MEDIUM               | 24      | 23         |
+| LOW                  | 25      | 24         |
+| **Agent / A-MEDIUM** | **10**  | **10** ✅  |
+| **Agent / A-LOW**    | **10**  | **10** ✅  |
 | **Total**            | **110** | **110** ✅ |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
@@ -1328,18 +1328,18 @@ const [user, setUser] = useState<UserMenu | null>(null);
 - [ ] **UI-76** `[type]`
       `packages/ui/src/Arrow/Arrow.tsx`: `tenantTheme: any`. Should be typed as `TenantTheme` (the type exists in `packages/ui/src/types`).
 
-- [x] **UI-77** `[type]`
+- [ ] **UI-77** `[type]`
       `packages/ui/src/Snackbar/Snackbar.tsx`: `tenantTheme: any`. Same fix — use `TenantTheme`.
 
-- [x] **UI-78** `[type]`
+- [ ] **UI-78** `[type]`
       `packages/ui/src/RegisterForm/RegisterForm.tsx`: `tenantTheme: any` and a catch-all `[key: string]: any` index signature. The index signature effectively disables prop type-checking for all callers.
       **Fix:** Remove the index signature; use explicit optional props for all supported keys.
 
-- [x] **UI-79** `[type]`
+- [ ] **UI-79** `[type]`
       `packages/ui/src/Input/Input.tsx`: `[key: string]: any` catch-all. Same issue as UI-78.
       **Fix:** Extend `React.InputHTMLAttributes<HTMLInputElement>` explicitly instead of an index signature.
 
-- [x] **UI-80** `[type]`
+- [ ] **UI-80** `[type]`
       `packages/ui/src/Select/Select.tsx`: `onChange: (value: any) => void`. Should be generic: `onChange: (value: T | T[]) => void` where `T = string | number`.
 
 - [ ] **UI-81** `[type]`
@@ -1533,19 +1533,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       No Open Graph (`og:title`, `og:description`, `og:image`) meta tags on any page. Sharing links on Slack/Twitter will show blank previews.
       **Fix:** Add `<meta property="og:*" />` tags to all public-facing pages (`/learn`, `/store`, `/listings`).
 
-- [ ] **UI-129** `[seo]`
+- [x] **UI-129** `[seo]`
       No Twitter Card meta tags on any page.
       **Fix:** Add `<meta name="twitter:card" content="summary_large_image" />` alongside Open Graph tags.
 
-- [ ] **UI-130** `[seo]`
+- [x] **UI-130** `[seo]`
       No canonical URL `<link rel="canonical">` on any page. Duplicate content (e.g., same page accessible via subdomain and query param) is not disambiguated.
       **Fix:** Derive the canonical URL from `req.headers.host` in `getServerSideProps` and inject it per page.
 
-- [ ] **UI-131** `[seo]`
+- [x] **UI-131** `[seo]`
       No `robots` meta tag. Admin-only pages (`/admin/*`, `/agent`, `/developer`) should be `noindex, nofollow`.
       **Fix:** Add `<meta name="robots" content="noindex,nofollow">` to all authenticated admin pages.
 
-- [ ] **UI-132** `[seo]`
+- [x] **UI-132** `[seo]`
       No `sitemap.xml` generation. Public-facing store, learn, and listing pages are not discoverable by crawlers.
       **Fix:** Add a `pages/sitemap.xml.tsx` using `getServerSideProps` that queries all published courses and listings.
 
@@ -1848,7 +1848,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | Global Layout Architecture (UI-01–20)           | 20      | 0     |
 | Responsive Design (UI-21–45)                    | 25      | 0     |
 | Hardcoded Values / Tokens (UI-46–75)            | 30      | 0     |
-| TypeScript & Type Safety (UI-76–95)             | 20      | 4     |
+| TypeScript & Type Safety (UI-76–95)             | 20      | 0     |
 | Dead Code & Unused Props (UI-96–110)            | 15      | 0     |
 | Missing States (UI-111–125)                     | 15      | 0     |
 | SEO & Head Management (UI-126–135)              | 10      | 0     |
@@ -1857,6 +1857,6 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | Accessibility (UI-166–180)                      | 15      | 0     |
 | Duplicate Components (UI-181–190)               | 10      | 0     |
 | No-Op Wiring / Missing Connections (UI-191–200) | 10      | 0     |
-| **Total**                                       | **200** | **4** |
+| **Total**                                       | **200** | **0** |
 
 > Update Done column as items are completed. Priority order: Layout → Responsive → Hardcoded → TypeScript → Dead Code.
