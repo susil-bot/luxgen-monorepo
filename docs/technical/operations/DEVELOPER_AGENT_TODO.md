@@ -100,7 +100,7 @@
       **File:** `k8s/agent-worker.yaml` lines 48–65
       Agent-worker liveness and readiness probes hit `http://localhost:4000/health` but the worker exposes no HTTP server. Probes will always fail → infinite crash-loop restarts. Either expose a minimal health endpoint in the worker or switch to an `exec` probe checking process state.
 
-- [ ] **H-14** `[infra]`
+- [x] **H-14** `[infra]`
       **File:** `k8s/configmap.yaml` lines 10–11 vs `k8s/ingress.yaml`
       `NEXT_PUBLIC_API_URL` points to `api.luxgen.yourdomain.com` but the Ingress defines no rule for that subdomain — it only routes `luxgen.yourdomain.com/api/...`. The frontend will be unable to reach the API in production. Align the ConfigMap URL with the actual Ingress route.
 
