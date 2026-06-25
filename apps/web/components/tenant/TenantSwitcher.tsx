@@ -38,7 +38,7 @@ export function TenantSwitcher({ currentTenant, tenants }: TenantSwitcherProps) 
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-10">
+        <div className="absolute right-0 mt-2 w-full max-w-[14rem] bg-white rounded-md shadow-lg z-10">
           <div className="py-1">
             {tenants.map((tenant) => (
               <button
