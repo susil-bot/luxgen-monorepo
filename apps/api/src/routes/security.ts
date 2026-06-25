@@ -1,18 +1,18 @@
 import { Router, Request, Response } from 'express';
+import { randomBytes } from 'crypto';
 import { Tenant } from '@luxgen/db';
 import { getTenantContext } from '../middleware/tenantRouting';
 const router = Router();
-router.get('/saml', async (req: Request, res: Response) => {
+router.get('/scim', async (req: Request, res: Response) => {
   const ctx = getTenantContext(req); if (!ctx) return res.status(404).json({ success: false, message: 'No tenant context' });
   const tenant = await Tenant.findById(ctx.tenantId);
-  const saml = (tenant?.settings as { sso?: { saml?: Record<string, unknown> } })?.sso?.saml ?? {};
-  res.json({ success: true, data: { idpMetadataUrl: saml.idpMetadataUrl ?? '', entityId: saml.entityId ?? '', enabled: Boolean(saml.enabled) } });
+  const scim = (tenant?.settings as { sso?: { scim?: { tokenHint?: string; enabled?: boolean } } })?.sso?.scim ?? {};
+  res.json({ success: true, data: { enabled: Boolean(scim.enabled), tokenHint: scim.tokenHint ?? null } });
 });
-router.patch('/saml', async (req: Request, res: Response) => {
+router.post('/scim/token', async (req: Request, res: Response) => {
   const ctx = getTenantContext(req); if (!ctx) return res.status(404).json({ success: false, message: 'No tenant context' });
-  const { idpMetadataUrl, entityId, enabled } = req.body;
-  await Tenant.findByIdAndUpdate(ctx.tenantId, { $set: { 'settings.sso.saml.idpMetadataUrl': idpMetadataUrl ?? '', 'settings.sso.saml.entityId': entityId ?? '', 'settings.sso.saml.enabled': enabled ?? false } });
-  res.json({ success: true, data: { idpMetadataUrl, entityId, enabled } });
+  const token = `scim_${randomBytes(24).toString('hex')}`; const tokenHint = `${token.slice(0, 8)}…`;
+  await Tenant.findByIdAndUpdate(ctx.tenantId, { $set: { 'settings.sso.scim.token': token, 'settings.sso.scim.tokenHint': tokenHint, 'settings.sso.scim.enabled': true } });
+  res.json({ success: true, data: { token, tokenHint } });
 });
-router.get('/saml/metadata', (_req: Request, res: Response) => res.type('application/xml').send('<?xml version="1.0"?><EntityDescriptor entityID="luxgen-sp-stub"/>'));
 export default router;
