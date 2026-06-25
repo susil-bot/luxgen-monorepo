@@ -140,7 +140,7 @@
       **File:** `apps/api/src/schema/listing/resolvers.ts` lines 63–66
       `submitListingApplication` does not verify the listing belongs to the caller's tenant. A user from tenant A can submit applications against listings from tenant B. Add `tenantId` scoping to the listing lookup before accepting the application.
 
-- [ ] **H-24** `[bug]`
+- [x] **H-24** `[bug]`
       **File:** `apps/agent-worker/src/index.ts` lines 5–6
       Agent worker loads `.env` files via hard-coded relative paths from `__dirname`. Inside a Docker container or K8s pod, `__dirname` resolves to the compiled `dist/` directory and the `../../../` traversal won't reach the monorepo root. All env vars silently fail to load. Use explicit `ENV_FILE` env var or inject vars via K8s ConfigMap/Secret.
 
