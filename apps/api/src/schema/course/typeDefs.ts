@@ -1,4 +1,12 @@
 export const courseTypeDefs = `
+  type CourseCommerce {
+    priceCents: Int
+    compareAtPriceCents: Int
+    sku: String
+    category: String
+    currency: String
+  }
+
   type Course {
     id: ID!
     title: String!
@@ -9,6 +17,7 @@ export const courseTypeDefs = `
     startDate: Date
     endDate: Date
     status: CourseStatus!
+    commerce: CourseCommerce
     createdAt: Date!
     updatedAt: Date!
   }
@@ -20,6 +29,14 @@ export const courseTypeDefs = `
     CANCELLED
   }
 
+  input CourseCommerceInput {
+    priceCents: Int
+    compareAtPriceCents: Int
+    sku: String
+    category: String
+    currency: String
+  }
+
   input CreateCourseInput {
     title: String!
     description: String
@@ -27,6 +44,7 @@ export const courseTypeDefs = `
     tenantId: ID!
     startDate: Date
     endDate: Date
+    commerce: CourseCommerceInput
   }
 
   input UpdateCourseInput {
@@ -36,6 +54,7 @@ export const courseTypeDefs = `
     startDate: Date
     endDate: Date
     status: CourseStatus
+    commerce: CourseCommerceInput
   }
 
   extend type Query {

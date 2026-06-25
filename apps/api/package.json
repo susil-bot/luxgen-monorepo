@@ -11,7 +11,8 @@
     "lint": "eslint src --ext .ts",
     "clean": "rm -rf dist",
     "seed": "ts-node src/db/seed.ts",
-    "seed:if-empty": "ts-node src/db/seed.ts --if-empty"
+    "seed:if-empty": "ts-node src/db/seed.ts --if-empty",
+    "backfill:course-commerce": "ts-node src/scripts/backfill-course-commerce.ts"
   },
   "dependencies": {
     "@luxgen/agent": "*",

@@ -273,11 +273,11 @@ mutation CreateOrder($courseId: ID!, $studentId: ID!) {
 
 ### Phase 2 — Product commerce fields
 
-- [ ] Add `commerce` subdocument on `Course` (`priceCents`, `compareAtPriceCents`, `sku`, `category`)
-- [ ] Migration script: extract meta from `description` → `commerce`
-- [ ] GraphQL `Course.commerce` + update inputs
-- [ ] `buildCourseUpdateInput` writes to DB fields (dual-write during migration)
-- [ ] Checkout uses `course.commerce.priceCents`
+- [x] Add `commerce` subdocument on `Course` (`priceCents`, `compareAtPriceCents`, `sku`, `category`)
+- [x] Migration script: extract meta from `description` → `commerce` (`node scripts/backfill-course-commerce.js`, `--dry-run`)
+- [x] GraphQL `Course.commerce` + update inputs
+- [x] `updateCourse` / `createCourse` sync commerce from description meta (dual-write)
+- [x] Storefront prefers `course.commerce.priceCents`
 
 ### Phase 3 — Order lifecycle extensions
 
