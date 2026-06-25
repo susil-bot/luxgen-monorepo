@@ -12,7 +12,7 @@ import {
   SnackbarProvider,
   type OrderFilterTab,
 } from '@luxgen/ui';
-import { PageLoadingState } from '../../components/common/PageStates';
+import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import { useTenantScope } from '../../lib/use-tenant-scope';
@@ -111,6 +111,13 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
       >
         {loading ? (
           <PageLoadingState label="Loading orders…" />
+        ) : orders.length === 0 ? (
+          <PageEmptyState
+            icon="📦"
+            title="No orders yet"
+            subtitle="Enrollments and purchases will appear here."
+            action={<button type="button" className="ios-btn-primary mt-4" onClick={() => router.push('/orders/create')}>Create order</button>}
+          />
         ) : (
           <div className="overflow-x-auto -mx-4 px-4">
             <OrderListView
