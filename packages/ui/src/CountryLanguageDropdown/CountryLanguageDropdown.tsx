@@ -168,7 +168,7 @@ const CountryLanguageDropdownComponent: React.FC<CountryLanguageDropdownProps> =
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+        <div className="absolute top-full left-0 mt-1 w-full max-w-xs bg-white border border-gray-200 rounded-lg shadow-lg z-50">
           {/* Header with Tabs */}
           <div className="flex border-b border-gray-200">
             <button

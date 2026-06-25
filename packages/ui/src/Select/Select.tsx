@@ -36,6 +36,7 @@ const SelectComponent: React.FC<SelectProps> = ({
   ...props
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropup, setDropup] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
 
   const filteredOptions = searchable
