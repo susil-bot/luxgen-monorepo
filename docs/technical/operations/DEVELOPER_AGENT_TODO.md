@@ -462,7 +462,7 @@
 ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
-      _Resolved: `run_command` tool with npm/npx/node allowlist._
+        _Resolved: `run_command` tool with npm/npx/node allowlist._
 
 - [x] **A-13** `[bug]` `[dead-code]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx`
@@ -581,14 +581,14 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ## Progress Summary
 
-| Tier                 | Total   | Done   |
-| -------------------- | ------- | ------ |
-| CRITICAL             | 7       | 7 ✅   |
-| HIGH                 | 27      | 21     |
-| MEDIUM               | 24      | 23     |
-| LOW                  | 25      | 24     |
-| **Agent / A-MEDIUM** | **10**  | **10** ✅ |
-| **Agent / A-LOW**    | **10**  | **10** ✅ |
+| Tier                 | Total   | Done       |
+| -------------------- | ------- | ---------- |
+| CRITICAL             | 7       | 7 ✅       |
+| HIGH                 | 27      | 21         |
+| MEDIUM               | 24      | 23         |
+| LOW                  | 25      | 24         |
+| **Agent / A-MEDIUM** | **10**  | **10** ✅  |
+| **Agent / A-LOW**    | **10**  | **10** ✅  |
 | **Total**            | **110** | **110** ✅ |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
@@ -1113,19 +1113,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/components/BannerCarousel.tsx` uses a fixed `h-64` class with no responsive height variants. On mobile, the banner is tall relative to viewport, pushing content below the fold.
       **Fix:** Apply `h-40 sm:h-56 md:h-64` responsive height classes.
 
-- [ ] **UI-25** `[responsive]`
+- [x] **UI-25** `[responsive]`
       `apps/web/components/tenant/TenantSwitcher.tsx` renders a dropdown with a hardcoded `w-56` width. On viewport < 280px this overflows.
       **Fix:** Use `w-full max-w-[14rem]` or `min-w-[12rem]` to allow natural flow.
 
-- [ ] **UI-26** `[responsive]`
+- [x] **UI-26** `[responsive]`
       `apps/web/components/agent/AIStudioSidekickPanel.tsx` has no responsive constraints. It renders as a fixed-size panel that overlaps main content on narrow screens.
       **Fix:** Apply `max-w-xs sm:max-w-sm` and position it as a slide-over drawer on mobile.
 
-- [ ] **UI-27** `[responsive]`
+- [x] **UI-27** `[responsive]`
       `apps/web/components/agent/HeadlessTaskPanel.tsx` uses fixed-width inline styles with no responsive fallbacks.
       **Fix:** Replace fixed-width styles with responsive Tailwind classes; ensure it stacks vertically on mobile.
 
-- [ ] **UI-28** `[responsive]`
+- [x] **UI-28** `[responsive]`
       `apps/web/components/store/ProductCard.tsx` uses `h-32` fixed height for its image area. On mobile this clips long product titles and the layout breaks when 3-column grid collapses.
       **Fix:** Use `aspect-video` or `aspect-square` instead of a fixed height; ensure the grid switches to 1-column at `sm:`.
 
@@ -1846,7 +1846,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | Section                                         | Items   | Done  |
 | ----------------------------------------------- | ------- | ----- |
 | Global Layout Architecture (UI-01–20)           | 20      | 0     |
-| Responsive Design (UI-21–45)                    | 25      | 0     |
+| Responsive Design (UI-21–45)                    | 25      | 4     |
 | Hardcoded Values / Tokens (UI-46–75)            | 30      | 0     |
 | TypeScript & Type Safety (UI-76–95)             | 20      | 0     |
 | Dead Code & Unused Props (UI-96–110)            | 15      | 0     |

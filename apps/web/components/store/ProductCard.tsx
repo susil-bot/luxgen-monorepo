@@ -26,7 +26,7 @@ export function ProductCard({ id, title, description, category, priceCents, curr
       }}
     >
       <div
-        className="h-32 flex items-end p-4 relative overflow-hidden"
+        className="aspect-video min-h-[8rem] flex items-end p-4 relative overflow-hidden"
         style={{
           background: `linear-gradient(135deg, rgba(0,122,255,0.15), rgba(175,82,222,0.1))`,
         }}
