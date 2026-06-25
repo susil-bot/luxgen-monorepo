@@ -1356,17 +1356,17 @@ const [user, setUser] = useState<UserMenu | null>(null);
 - [x] **UI-84** `[type]`
       `apps/web/pages/dashboard.tsx`: `onDashboardAction(action: string, data?: any)`. The `action` should be a typed literal union of all supported action strings.
 
-- [ ] **UI-85** `[type]`
+- [x] **UI-85** `[type]`
       Multiple `getServerSideProps` functions are typed as `async (context: any)`. Should use `GetServerSidePropsContext` from `next`.
 
-- [ ] **UI-86** `[type]`
+- [x] **UI-86** `[type]`
       `RegisterForm` in `@luxgen/ui` exposes `ADMIN` and `SUPER_ADMIN` as selectable role options in the UI. These values flow into `REGISTER_MUTATION` with no type guard on the frontend.
       **Fix:** Type the `role` field as `'USER' | 'STUDENT'` only; remove ADMIN/SUPER_ADMIN from the UI form entirely (backend validates but defence-in-depth applies to UI too).
 
-- [ ] **UI-87** `[type]`
+- [x] **UI-87** `[type]`
       `apps/web/components/automations/tower/TowerShell/TowerShell.tsx` and its sub-components likely have implicit `any` from the flow graph data model. Audit and type the node/edge data structures.
 
-- [ ] **UI-88** `[type]`
+- [x] **UI-88** `[type]`
       `AdminDashboardLayout` `onDashboardAction` prop accepts `data?: any`. Given the 11 different action types being wired to no-ops, this should be a discriminated union.
       **Fix:** Define `type DashboardAction = { type: 'view_course'; courseId: string } | { type: 'view_survey'; surveyId: string } | ...`.
 
