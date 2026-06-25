@@ -5,6 +5,8 @@ import type { HeadlessTaskJob } from '../types/task';
 const QUEUE_KEY = 'luxgen:agent:tasks';
 const TENANT_STREAM_KEY_PREFIX = 'luxgen:agent:streams:tenant:';
 const USER_MESSAGE_KEY_PREFIX = 'luxgen:agent:messages:user:';
+const PROCESSING_KEY = 'luxgen:agent:tasks:processing';
+const DEAD_KEY = 'luxgen:agent:tasks:dead';
 
 export const MAX_CONCURRENT_STREAMS_PER_TENANT = 3;
 export const MAX_AGENT_MESSAGES_PER_MINUTE = 20;
@@ -12,7 +14,19 @@ const MESSAGE_RATE_WINDOW_MS = 60_000;
 /** Safety TTL if releaseTenantStreamSlot is never called (e.g. crash). */
 const STREAM_SLOT_TTL_SECONDS = 7_200;
 
+/** BullMQ default — re-check in-flight jobs after worker crash. */
+const DEFAULT_STALLED_INTERVAL_MS = 30_000;
+/** BullMQ default — max times a job may be reclaimed before dead-letter. */
+const DEFAULT_MAX_STALLED_COUNT = 1;
+
+interface ProcessingEntry {
+  job: HeadlessTaskJob;
+  leasedAt: number;
+  stallCount: number;
+}
+
 let redis: Redis | null = null;
+let stalledRecoveryTimer: ReturnType<typeof setInterval> | null = null;
 
 /** In-memory fallback when Redis is unavailable (single-process only). */
 const fallbackStreamCounts = new Map<string, number>();
@@ -24,6 +38,18 @@ export function getRedisUrl(): string | undefined {
 
 export function isQueueEnabled(): boolean {
   return Boolean(getRedisUrl()) && process.env.AGENT_QUEUE_ENABLED !== 'false';
+}
+
+export function getStalledIntervalMs(): number {
+  const raw = process.env.AGENT_QUEUE_STALLED_INTERVAL_MS;
+  const parsed = raw ? Number(raw) : DEFAULT_STALLED_INTERVAL_MS;
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_STALLED_INTERVAL_MS;
+}
+
+export function getMaxStalledCount(): number {
+  const raw = process.env.AGENT_QUEUE_MAX_STALLED_COUNT;
+  const parsed = raw ? Number(raw) : DEFAULT_MAX_STALLED_COUNT;
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : DEFAULT_MAX_STALLED_COUNT;
 }
 
 export function getRedisClient(): Redis | null {
@@ -160,7 +186,76 @@ export async function dequeueHeadlessTask(timeoutSeconds = 5): Promise<HeadlessT
   if (!result) return null;
 
   const [, payload] = result;
-  return JSON.parse(payload) as HeadlessTaskJob;
+  const job = JSON.parse(payload) as HeadlessTaskJob;
+
+  const entry: ProcessingEntry = {
+    job,
+    leasedAt: Date.now(),
+    stallCount: job.stallCount ?? 0,
+  };
+  await client.hset(PROCESSING_KEY, job.id, JSON.stringify(entry));
+
+  return job;
+}
+
+export async function acknowledgeHeadlessTask(jobId: string): Promise<void> {
+  const client = getRedisClient();
+  if (!client) return;
+  await connectQueue();
+  await client.hdel(PROCESSING_KEY, jobId);
+}
+
+/** Re-enqueue jobs left in processing after a worker crash (BullMQ stalled-job semantics). */
+export async function recoverStalledJobs(): Promise<number> {
+  const client = getRedisClient();
+  if (!client) return 0;
+  await connectQueue();
+
+  const stalledIntervalMs = getStalledIntervalMs();
+  const maxStalledCount = getMaxStalledCount();
+  const now = Date.now();
+  const entries = await client.hgetall(PROCESSING_KEY);
+  let recovered = 0;
+
+  for (const [jobId, raw] of Object.entries(entries)) {
+    const entry = JSON.parse(raw) as ProcessingEntry;
+    if (now - entry.leasedAt < stalledIntervalMs) continue;
+
+    await client.hdel(PROCESSING_KEY, jobId);
+
+    if (entry.stallCount >= maxStalledCount) {
+      await client.lpush(DEAD_KEY, JSON.stringify(entry.job));
+      console.warn(`[agent-queue] Job ${jobId} exceeded maxStalledCount (${maxStalledCount}); moved to dead letter`);
+      continue;
+    }
+
+    const nextStallCount = entry.stallCount + 1;
+    const requeuedJob: HeadlessTaskJob = { ...entry.job, stallCount: nextStallCount };
+    await client.lpush(QUEUE_KEY, JSON.stringify(requeuedJob));
+    recovered += 1;
+    console.warn(`[agent-queue] Re-enqueued stalled job ${jobId} (stall ${nextStallCount}/${maxStalledCount})`);
+  }
+
+  return recovered;
+}
+
+export function startStalledJobRecovery(): void {
+  if (stalledRecoveryTimer) return;
+  const intervalMs = getStalledIntervalMs();
+  stalledRecoveryTimer = setInterval(() => {
+    recoverStalledJobs().catch((err: unknown) => {
+      const message = err instanceof Error ? err.message : String(err);
+      console.error('[agent-queue] Stalled job recovery failed:', message);
+    });
+  }, intervalMs);
+  stalledRecoveryTimer.unref?.();
+}
+
+export function stopStalledJobRecovery(): void {
+  if (stalledRecoveryTimer) {
+    clearInterval(stalledRecoveryTimer);
+    stalledRecoveryTimer = null;
+  }
 }
 
 export async function getQueueDepth(): Promise<number> {
@@ -172,6 +267,7 @@ export async function getQueueDepth(): Promise<number> {
 }
 
 export async function disconnectQueue(): Promise<void> {
+  stopStalledJobRecovery();
   if (redis) {
     await redis.quit();
     redis = null;

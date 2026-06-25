@@ -34,6 +34,10 @@ spec:
           env:
             - name: HEALTH_PORT
               value: '9090'
+            - name: AGENT_QUEUE_STALLED_INTERVAL_MS
+              value: '30000'
+            - name: AGENT_QUEUE_MAX_STALLED_COUNT
+              value: '1'
             - name: OLLAMA_HOST
               valueFrom:
                 configMapKeyRef:

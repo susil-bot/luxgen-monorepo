@@ -4,7 +4,13 @@ import { loadSession, saveSession, pruneOldSessions } from '../changeset/session
 import { appendAuditEntry, syncSessionToMongo } from '../persistence/mongo';
 import { runValidationPipeline } from '../validation/pipeline';
 import { emitAgentAutomationEvent } from '../automation/bridge';
-import { dequeueHeadlessTask, disconnectQueue, connectQueue } from './redis-queue';
+import {
+  dequeueHeadlessTask,
+  disconnectQueue,
+  connectQueue,
+  acknowledgeHeadlessTask,
+  startStalledJobRecovery,
+} from './redis-queue';
 import type { HeadlessTaskJob } from '../types/task';
 
 export async function processHeadlessJob(job: HeadlessTaskJob): Promise<void> {
@@ -88,6 +94,7 @@ export async function runWorkerLoop(options: { pollIntervalMs?: number } = {}): 
   }
 
   console.log('[agent-worker] Listening for headless tasks…');
+  startStalledJobRecovery();
   const pruned = pruneOldSessions();
   if (pruned > 0) console.log(`[agent-worker] Pruned ${pruned} expired session file(s)`);
 
@@ -101,6 +108,7 @@ export async function runWorkerLoop(options: { pollIntervalMs?: number } = {}): 
 
       console.log(`[agent-worker] Processing job ${job.id} session=${job.sessionId}`);
       await processHeadlessJob(job);
+      await acknowledgeHeadlessTask(job.id);
       console.log(`[agent-worker] Completed job ${job.id}`);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
