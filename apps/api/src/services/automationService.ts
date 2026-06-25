@@ -101,9 +101,11 @@ export class AutomationService {
     logger.info(`Seeded ${DEMO_SEED.length} automations for tenant ${tenantId}`);
   }
 
-  async getAutomations(tenantId: string): Promise<IAutomation[]> {
+  async getAutomations(tenantId: string, limit = 50, offset = 0): Promise<IAutomation[]> {
     await this.ensureSeedForTenant(tenantId);
-    return Automation.find({ tenantId }).sort({ createdAt: -1 });
+    const safeLimit = Math.min(Math.max(limit, 1), 100);
+    const safeOffset = Math.max(offset, 0);
+    return Automation.find({ tenantId }).sort({ createdAt: -1 }).skip(safeOffset).limit(safeLimit);
   }
 
   async getAutomationById(id: string, tenantId: string): Promise<IAutomation | null> {

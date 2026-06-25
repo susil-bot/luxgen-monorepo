@@ -106,7 +106,7 @@ export const automationTypeDefs = `
   }
 
   extend type Query {
-    automations(tenantId: String!): [Automation!]!
+    automations(tenantId: String!, limit: Int, offset: Int): [Automation!]!
     automation(id: ID!): Automation
     automationRuns(tenantId: String!, limit: Int): [AutomationRun!]!
     automationSchema: JSON!
