@@ -316,7 +316,7 @@
       **File:** `apps/api/src/services/listingService.ts` lines 242–262
       `getPublishedListings`, `getListingBySlug`, `getApplicationsForReview`, and `getApplicantListings` return full Mongoose documents. Add `.lean()` to all read-only queries for performance.
 
-- [ ] **L-15** `[arch]`
+- [x] **L-15** `[arch]`
       **File:** `apps/web/components/billing/PlanGate.tsx` line 27
       `planRank` duplicates the plan ordering from `@luxgen/billing`. If a new plan tier is added to the billing package, `PlanGate` will silently compute wrong rankings. Export `planRank` (or an equivalent comparison function) from `@luxgen/billing` and import it here.
 
