@@ -324,7 +324,7 @@
       **File:** `apps/api/src/routes/auth.ts` lines 89, 171, 215, 284, 336, 386
       All six route error handlers use `console.error(...)` directly, bypassing the project's `logger` utility. Replace with `logger.error(...)` for consistency and structured output.
 
-- [ ] **L-17** `[style]`
+- [x] **L-17** `[style]`
       **File:** `apps/api/src/app.ts` line 89
       Apollo `formatError` uses `console.error('GraphQL Error:', error)` instead of `logger.error(...)`. Inconsistent with the rest of the codebase.
 
