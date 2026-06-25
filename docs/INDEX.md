@@ -78,6 +78,15 @@
 | [MOBILE_STORE_ROADMAP.md](./MOBILE_STORE_ROADMAP.md)                                     | **Mobile + storefront roadmap** — phases, PR log, checklists |
 | [STOREFRONT_TENANT_CUSTOMIZATION.md](./STOREFRONT_TENANT_CUSTOMIZATION.md)               | **Per-tenant landing** — content, style, slug layering       |
 
+### Feature discovery (`technical/planning/`)
+
+| Document                                                                                                                                    | Description                                                           |
+| ------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| [bulk-upload-export-architecture.md](./technical/planning/bulk-upload-export-architecture.md)                                               | CSV/XLSX import/export architecture                                   |
+| [infra-validation-and-expo-feasibility.md](./technical/planning/infra-validation-and-expo-feasibility.md)                                   | K8s/CI audit + Expo monorepo feasibility                              |
+| [mcp-apps-interactive-chat-ui.md](./technical/planning/mcp-apps-interactive-chat-ui.md)                                                       | **MCP Apps** — interactive chat UI vs web routes; learner progress P0 |
+| [project-ongoing-iteration-creator-workflows.md](./technical/planning/project-ongoing-iteration-creator-workflows.md)                         | **Project** — iteration boards, priority block, creator workflows     |
+
 ### Operations
 
 | Document                                                                             | Description                        |
@@ -137,4 +146,4 @@
 | [technical/development/CODING_STANDARDS.md](./technical/development/CODING_STANDARDS.md) | Non-negotiable coding rules                |
 | [technical/README.md](./technical/README.md)                                             | Hierarchical technical documentation       |
 
-_Last updated: 2026-06-20 — docs hierarchy restructure; README company standard; technical hub under `docs/technical/`._
+_Last updated: 2026-06-25 — MCP Apps and Project iteration planning docs under `docs/technical/planning/`._
