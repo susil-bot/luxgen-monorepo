@@ -21,6 +21,11 @@ export function getWorktreePath(sessionId: string): string {
   return path.join(getWorktreesDir(), sanitizeSessionId(sessionId));
 }
 
+/** Throwaway worktree for squash-merging an agent branch onto base without touching repo root. */
+export function getMergeWorktreePath(sessionId: string): string {
+  return path.join(getWorktreesDir(), `merge-${sanitizeSessionId(sessionId)}`);
+}
+
 export function getAgentBranchName(sessionId: string): string {
   return `agent/${sanitizeSessionId(sessionId)}`;
 }

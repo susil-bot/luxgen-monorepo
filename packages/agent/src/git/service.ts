@@ -3,6 +3,7 @@ import path from 'path';
 import { getAgentConfig } from '../config/agent-mode';
 import {
   getAgentBranchName,
+  getMergeWorktreePath,
   getMonorepoRoot,
   getWorktreePath,
   getWorktreesDir,
@@ -268,6 +269,19 @@ export async function detectMergeConflicts(sessionId: string): Promise<string[]>
   }
 }
 
+async function removeMergeWorktree(sessionId: string, root: string): Promise<void> {
+  const mergePath = getMergeWorktreePath(sessionId);
+  if (!fs.existsSync(mergePath)) return;
+
+  try {
+    await execGit(['worktree', 'remove', '--force', mergePath], root);
+  } catch {
+    if (fs.existsSync(mergePath)) {
+      fs.rmSync(mergePath, { recursive: true, force: true });
+    }
+  }
+}
+
 export async function mergeAgentBranch(sessionId: string): Promise<MergeResult> {
   const session = loadSession(sessionId);
   const git = session.git;
@@ -297,13 +311,34 @@ export async function mergeAgentBranch(sessionId: string): Promise<MergeResult> 
   }
 
   const message = `agent(${sanitizeSessionId(sessionId)}): squash merge ${git.branch}`;
+  const mergeWorktreePath = getMergeWorktreePath(sessionId);
+  const worktreesDir = getWorktreesDir();
 
   try {
-    await execGit(['checkout', git.baseBranch], root);
-    await execGit(['merge', '--squash', git.branch], root);
-    const { stdout } = await execGit(['commit', '-m', message], root);
-    const shaMatch = stdout.match(/\[[\w/-]+\s+([a-f0-9]+)\]/i);
-    const commitSha = shaMatch?.[1];
+    if (!fs.existsSync(worktreesDir)) {
+      fs.mkdirSync(worktreesDir, { recursive: true });
+    }
+
+    await removeMergeWorktree(sessionId, root);
+
+    const { stdout: baseSha } = await execGit(['rev-parse', git.baseBranch], root);
+    // Detached worktree: base branch may already be checked out at repo root.
+    await execGit(['worktree', 'add', '--detach', mergeWorktreePath, baseSha.trim()], root);
+
+    let commitSha: string | undefined;
+    try {
+      await execGit(['merge', '--squash', git.branch], mergeWorktreePath);
+      const { stdout } = await execGit(['commit', '-m', message], mergeWorktreePath);
+      const shaMatch = stdout.match(/\[[\w/-]+\s+([a-f0-9]+)\]/i);
+      commitSha = shaMatch?.[1];
+      if (!commitSha) {
+        const { stdout: headSha } = await execGit(['rev-parse', 'HEAD'], mergeWorktreePath);
+        commitSha = headSha.trim();
+      }
+      await execGit(['branch', '-f', git.baseBranch, commitSha], root);
+    } finally {
+      await removeMergeWorktree(sessionId, root);
+    }
 
     await cleanupGitSession(sessionId, { deleteBranch: true });
 
@@ -319,6 +354,7 @@ export async function mergeAgentBranch(sessionId: string): Promise<MergeResult> 
       errors: [],
     };
   } catch (e: unknown) {
+    await removeMergeWorktree(sessionId, root);
     const errMsg = e instanceof Error ? e.message : String(e);
     return {
       merged: false,
