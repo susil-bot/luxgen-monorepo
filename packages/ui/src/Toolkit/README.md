@@ -44,7 +44,8 @@ import { Toolkit } from '@luxgen/ui';
 
 ## Styling
 
-Semantic classes (`toolkit`, `toolkit-item`, …) are defined once in `styles.ts` (`toolkitCssRules`). The React component injects them via `toolkitStyles.root` (emotion); `fetchToolkitSSR` returns the same rules for server HTML.
+- **Client:** `toolkitStyles` emotion classes are applied directly on the toolbar and buttons (`Toolkit.tsx`).
+- **SSR:** `fetchToolkitSSR` returns semantic class names (`.toolkit`, `.toolkit-item`, …) with matching rules from `toolkitCssRules` / `getToolkitSSRStyles()` — plain CSS for server HTML without emotion hashes.
 
 ## Structure
 

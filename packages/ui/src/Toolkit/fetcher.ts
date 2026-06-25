@@ -15,15 +15,15 @@ export const defaultToolkitItems: ToolkitItem[] = [
   { id: 'delete', label: 'Delete', destructive: true },
 ];
 
-export const fetchToolkitData = async (_tenantId?: string): Promise<ToolkitData> => {
+export const fetchToolkitData = async (): Promise<ToolkitData> => {
   return {
     tenantTheme: defaultTheme,
     items: defaultToolkitItems,
   };
 };
 
-export const fetchToolkitSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
-  const data = await fetchToolkitData(tenantId);
+export const fetchToolkitSSR = async (): Promise<{ html: string; styles: string }> => {
+  const data = await fetchToolkitData();
   const buttons = data.items
     .map((item) => {
       const className = getToolkitItemClassName(item);

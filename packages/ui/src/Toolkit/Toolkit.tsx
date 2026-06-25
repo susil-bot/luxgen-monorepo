@@ -1,7 +1,7 @@
 import React, { type ReactNode } from 'react';
 import { type BaseComponentProps } from '../types';
 import { withSSR } from '../ssr';
-import { getToolkitItemClassName, toolkitClasses, toolkitStyles } from './styles';
+import { getToolkitItemStyles, toolkitClasses, toolkitStyles } from './styles';
 import { ToolkitTranslations } from './translations';
 
 export interface ToolkitItem {
@@ -31,42 +31,40 @@ const ToolkitComponent: React.FC<ToolkitProps> = ({
   dataTestId,
 }) => {
   return (
-    <div className={toolkitStyles.root}>
-      <div
-        role="toolbar"
-        aria-label={ariaLabel}
-        id={id}
-        data-testid={dataTestId}
-        className={`${toolkitClasses.root} ${className}`.trim()}
-        style={style}
-      >
-        {items.map((item) => {
-          const isDisabled = Boolean(item.disabled);
+    <div
+      role="toolbar"
+      aria-label={ariaLabel}
+      id={id}
+      data-testid={dataTestId}
+      className={`${toolkitStyles.root} ${toolkitClasses.root} ${className}`.trim()}
+      style={style}
+    >
+      {items.map((item) => {
+        const isDisabled = Boolean(item.disabled);
 
-          return (
-            <button
-              key={item.id}
-              type="button"
-              disabled={isDisabled}
-              aria-pressed={item.active ?? false}
-              aria-label={item.label}
-              title={item.label}
-              className={getToolkitItemClassName(item, size)}
-              onClick={() => {
-                if (isDisabled) return;
-                item.onClick?.();
-              }}
-            >
-              {item.icon ? (
-                <span className={toolkitClasses.itemIcon} aria-hidden="true">
-                  {item.icon}
-                </span>
-              ) : null}
-              <span>{item.label}</span>
-            </button>
-          );
-        })}
-      </div>
+        return (
+          <button
+            key={item.id}
+            type="button"
+            disabled={isDisabled}
+            aria-pressed={item.active ?? false}
+            aria-label={item.label}
+            title={item.label}
+            className={getToolkitItemStyles(item, size)}
+            onClick={() => {
+              if (isDisabled) return;
+              item.onClick?.();
+            }}
+          >
+            {item.icon ? (
+              <span className={toolkitStyles.itemIcon} aria-hidden="true">
+                {item.icon}
+              </span>
+            ) : null}
+            <span>{item.label}</span>
+          </button>
+        );
+      })}
     </div>
   );
 };

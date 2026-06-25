@@ -2,6 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { Toolkit } from './Toolkit';
 import { toolkitFixtures } from './fixture';
+import { toolkitStyles } from './styles';
 
 describe('Toolkit', () => {
   it('renders all item labels', () => {
@@ -51,17 +52,23 @@ describe('Toolkit', () => {
     expect(addBtn).toHaveAttribute('aria-pressed', 'false');
   });
 
-  it('renders compact size with smaller item class', () => {
-    render(<Toolkit {...toolkitFixtures.compact} />);
-    const btn = screen.getByRole('button', { name: 'Add' });
-    expect(btn.className).toContain('toolkit-item-small');
+  it('applies emotion root styles directly on the toolbar element', () => {
+    render(<Toolkit {...toolkitFixtures.default} />);
+    const toolbar = screen.getByRole('toolbar');
+    expect(toolbar.className).toContain(toolkitStyles.root);
   });
 
-  it('renders medium size without small item class', () => {
+  it('renders compact size with small item style class', () => {
+    render(<Toolkit {...toolkitFixtures.compact} />);
+    const btn = screen.getByRole('button', { name: 'Add' });
+    expect(btn.className).toContain(toolkitStyles.itemSmall);
+  });
+
+  it('renders medium size without small item style class', () => {
     render(<Toolkit {...toolkitFixtures.default} />);
     const btn = screen.getByRole('button', { name: 'Add' });
-    expect(btn.className).toContain('toolkit-item');
-    expect(btn.className).not.toContain('toolkit-item-small');
+    expect(btn.className).toContain(toolkitStyles.item);
+    expect(btn.className).not.toContain(toolkitStyles.itemSmall);
   });
 
   it('renders icon wrapper when icon is provided', () => {
