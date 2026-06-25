@@ -264,7 +264,7 @@
       **File:** `apps/api/src/middleware/tenant.ts`
       File is marked `@deprecated` in its JSDoc, must not be registered in `app.ts`, yet still exists. Delete the file to prevent accidental future registration.
 
-- [ ] **L-02** `[dead-code]`
+- [x] **L-02** `[dead-code]`
       **File:** `apps/web/components/layout/Sidebar.tsx`
       Legacy sidebar component never imported by any page (pages use the `@luxgen/ui` sidebar). It has its own static nav array with emoji icons and hardcoded routes. Delete the file.
 
