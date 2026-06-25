@@ -1161,19 +1161,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` plays automatically by default (`autoPlay: true`). On mobile, autoplay can drain battery and cause motion sickness. The `prefers-reduced-motion` media query is not respected.
       **Fix:** Check `window.matchMedia('(prefers-reduced-motion: reduce)').matches` and disable autoplay/transitions when true.
 
-- [ ] **UI-37** `[responsive]`
+- [x] **UI-37** `[responsive]`
       `pages/automations/tower/[id].tsx` (TowerShell page) renders a graph canvas with hardcoded pixel dimensions. The canvas does not reflow on window resize.
       **Fix:** Make the canvas dimensions reactive using a `ResizeObserver` on the container element.
 
-- [ ] **UI-38** `[responsive]`
+- [x] **UI-38** `[responsive]`
       `apps/web/components/agent/AgentTransparency.tsx` uses a side-by-side panel layout (file tree + diff viewer). On screens < 1024px the diff viewer is cramped. On mobile it is unusable.
       **Fix:** Stack the panels vertically below `lg:` breakpoint using `flex-col lg:flex-row`.
 
-- [ ] **UI-39** `[responsive]`
+- [x] **UI-39** `[responsive]`
       `OrganizationSecurityNav` (sidebar nav within the security section) renders as a list. On mobile it takes up the full screen width but has no drawer/accordion treatment.
       **Fix:** Collapse to a `<select>` or accordion on `< md` breakpoints.
 
-- [ ] **UI-40** `[responsive]`
+- [x] **UI-40** `[responsive]`
       `SettingsShell` renders a vertical tab list on the left. On narrow screens this pushes the main content off-screen.
       **Fix:** Collapse the settings tab list to a horizontal scrollable `<nav>` or `<select>` below `md:`.
 
