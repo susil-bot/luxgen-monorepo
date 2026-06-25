@@ -462,7 +462,7 @@
 ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
-      _Resolved: `run_command` tool with npm/npx/node allowlist._
+        _Resolved: `run_command` tool with npm/npx/node allowlist._
 
 - [x] **A-13** `[bug]` `[dead-code]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx`
@@ -581,14 +581,14 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ## Progress Summary
 
-| Tier                 | Total   | Done   |
-| -------------------- | ------- | ------ |
-| CRITICAL             | 7       | 7 ✅   |
-| HIGH                 | 27      | 21     |
-| MEDIUM               | 24      | 23     |
-| LOW                  | 25      | 24     |
-| **Agent / A-MEDIUM** | **10**  | **10** ✅ |
-| **Agent / A-LOW**    | **10**  | **10** ✅ |
+| Tier                 | Total   | Done       |
+| -------------------- | ------- | ---------- |
+| CRITICAL             | 7       | 7 ✅       |
+| HIGH                 | 27      | 21         |
+| MEDIUM               | 24      | 23         |
+| LOW                  | 25      | 24         |
+| **Agent / A-MEDIUM** | **10**  | **10** ✅  |
+| **Agent / A-LOW**    | **10**  | **10** ✅  |
 | **Total**            | **110** | **110** ✅ |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
@@ -1583,19 +1583,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `getDefaultUser()` similarly creates a new object on every call — 16 pages affected.
       **Fix:** Export a `DEFAULT_USER` constant instead of a function.
 
-- [ ] **UI-141** `[perf]`
+- [x] **UI-141** `[perf]`
       `apps/web/components/agent/AgentTransparency.tsx` and `apps/web/pages/automations/tower/[id].tsx` (TowerGraphCanvas) are heavy components that are included in the main bundle. They are only used in specific routes.
       **Fix:** Use `next/dynamic` with `{ ssr: false }` for both components to split them into separate chunks.
 
-- [ ] **UI-142** `[perf]`
+- [x] **UI-142** `[perf]`
       `packages/ui/src/Arrow/Arrow.tsx` and `packages/ui/src/ProductCard/ProductCard.tsx` inject `<style>` tags at render time. Each mount creates a new `<style>` element, causing style duplication and Cumulative Layout Shift (CLS).
       **Fix:** Move CSS to module files or `globals.css`. Remove `<style>` injection from components.
 
-- [ ] **UI-143** `[perf]`
+- [x] **UI-143** `[perf]`
       No `prefetch` strategy is used on any navigation link. `next/link` prefetches on hover by default, but `router.push` (used in most action handlers) does not prefetch.
       **Fix:** Use `router.prefetch('/courses')` in `useEffect` for commonly accessed next routes.
 
-- [ ] **UI-144** `[perf]`
+- [x] **UI-144** `[perf]`
       `globals.css` loads 135+ CSS custom properties on every page including properties only relevant to specific contexts (e.g., `--lux-sidebar-*` properties loaded even on pages with no sidebar).
       **Fix:** Split `globals.css` into: `base.css` (tokens + resets), `sidebar.css`, `agent.css`, etc. Import only what each layout needs.
 
