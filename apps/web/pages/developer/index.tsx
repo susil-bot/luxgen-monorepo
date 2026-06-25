@@ -11,6 +11,7 @@ import {
 } from '@luxgen/ui';
 import AgentChat from '../../components/agent/AgentChat';
 import AgentTransparency from '../../components/agent/AgentTransparency';
+import { AGENT_TOOLS } from '@luxgen/agent';
 import { SYSTEM_PROMPT } from '../../lib/agent-system-prompt';
 import { createHandleUserAction } from '../../lib/user-actions';
 
@@ -24,12 +25,25 @@ interface OllamaModel {
 
 type OllamaStatus = 'checking' | 'ready' | 'no-model' | 'offline';
 
-const TOOL_DEFS = [
-  { id: 'read_file', label: 'read_file', desc: 'Read any file in the codebase', emoji: '📄' },
-  { id: 'list_files', label: 'list_files', desc: 'List files in a directory', emoji: '📁' },
-  { id: 'write_file', label: 'write_file', desc: 'Stage file changes for review', emoji: '✏️' },
-  { id: 'search_code', label: 'search_code', desc: 'Grep / regex search across all files', emoji: '🔍' },
-];
+const TOOL_EMOJI: Record<string, string> = {
+  read_file: '📄',
+  list_files: '📁',
+  write_file: '✏️',
+  search_code: '🔍',
+  delete_file: '🗑️',
+  read_automation_schema: '⚡',
+  rename_file: '📝',
+  run_command: '▶️',
+  fetch_url: '🌐',
+  read_project_config: '📦',
+};
+
+const TOOL_DEFS = AGENT_TOOLS.map((tool) => ({
+  id: tool.name,
+  label: tool.name,
+  desc: tool.description.split('.')[0] ?? tool.description,
+  emoji: TOOL_EMOJI[tool.name] ?? '🔧',
+}));
 
 function formatBytes(bytes: number): string {
   if (!bytes) return '';
