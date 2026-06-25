@@ -503,10 +503,11 @@ Response: { tasks: AgentTaskRecord[], nextCursor: string | null, total: number }
       The custom diff algorithm is a naive greedy O(n²) approximation with a lookahead of 8 lines. For files with repeated patterns it produces misleading or incorrect diffs. Replace with the `diff` npm package (`npm i diff` in `apps/web`) using `Diff.structuredPatch` for accurate unified diffs.
       **Files to change:** `apps/web/components/agent/AgentTransparency.tsx`. Import: `import { diffLines } from 'diff'`.
 
-- [ ] **A-21** `[enhancement]`
+- [x] **A-21** `[enhancement]`
       **File:** `packages/agent/src/providers/ollama.ts` lines 48–87
       `findAvailableModel` is called twice per chat request (once in `chat.ts` + again inside `runAgentLoop` at `orchestrator.ts:53`), making **two sequential HTTP calls to Ollama** before the first token streams. Memoize the result for the duration of a request or pass the resolved model from `chat.ts` through to `runAgentLoop`.
       **Files to change:** `apps/web/pages/api/agent/chat.ts` (pass `available.model` as `model` arg), `packages/agent/src/core/orchestrator.ts` (skip `findAvailableModel` if `options.model` is already resolved).
+      _Fix applied: `modelResolved` option skips second Ollama tags lookup; `chat.ts` passes resolved model from first call (2026-06-25)._
 
 - [ ] **A-22** `[enhancement]`
       **File:** `packages/agent/src/tools/definitions.ts` — missing tool
@@ -555,10 +556,9 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | HIGH                 | 27      | 20     |
 | MEDIUM               | 24      | 22     |
 | LOW                  | 25      | 22     |
-| **Agent / A-HIGH**   | **7**   | **5**  |
 | **Agent / A-MEDIUM** | **10**  | **3**  |
-| **Agent / A-LOW**    | **10**  | **1**  |
-| **Total**            | **110** | **79** |
+| **Agent / A-LOW**    | **10**  | **2**  |
+| **Total**            | **110** | **80** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
 
