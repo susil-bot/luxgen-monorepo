@@ -125,7 +125,7 @@ export class GroupService {
     },
   ) {
     const tenantId = requireTenantId(context);
-    const baseQuery: FilterQuery<IGroup> = { tenant: tenantId, isActive: true };
+    const baseQuery: FilterQuery<IGroup> = { tenant: tenantId };
 
     if (args.search) {
       baseQuery.$or = [
@@ -133,7 +133,11 @@ export class GroupService {
         { description: { $regex: args.search, $options: 'i' } },
       ];
     }
-    if (args.isActive !== undefined) baseQuery.isActive = args.isActive;
+    if (args.isActive !== undefined) {
+      baseQuery.isActive = args.isActive;
+    } else {
+      baseQuery.isActive = true;
+    }
     if (args.createdBy) baseQuery.createdBy = args.createdBy;
 
     return paginate(Group, baseQuery, args, mapGroup as any);
