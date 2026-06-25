@@ -45,7 +45,7 @@ export function ProductCard({ id, title, description, category, priceCents, curr
         </div>
       </div>
       <div className="p-4">
-        <h2 className="font-semibold text-primary line-clamp-1">{title}</h2>
+        <h2 className="font-semibold text-primary line-clamp-2 sm:line-clamp-1">{title}</h2>
         <p className="text-xs text-secondary mt-1 line-clamp-2">{cleanDesc || 'GPT-curated pick'}</p>
         <p className="mt-3 font-semibold" style={{ color: 'var(--color-blue)' }}>
           {formatStorefrontPrice(priceCents, currency)}

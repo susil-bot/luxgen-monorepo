@@ -89,13 +89,13 @@ export default function HeadlessTaskPanel({ sessionId, prompt, onComplete, onClo
 
   return (
     <div
-      className="rounded-xl border p-4 animate-slide-up"
+      className="w-full max-w-full min-w-0 rounded-xl border p-4 animate-slide-up"
       style={{
         backgroundColor: 'var(--color-bg-secondary)',
         borderColor: 'var(--color-separator)',
       }}
     >
-      <div className="flex items-start justify-between gap-3 mb-3">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-3 min-w-0">
         <div>
           <h3 className="text-sm font-semibold" style={{ color: 'var(--color-label-primary)' }}>
             Background task

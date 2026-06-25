@@ -1113,19 +1113,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/components/BannerCarousel.tsx` uses a fixed `h-64` class with no responsive height variants. On mobile, the banner is tall relative to viewport, pushing content below the fold.
       **Fix:** Apply `h-40 sm:h-56 md:h-64` responsive height classes.
 
-- [ ] **UI-25** `[responsive]`
+- [x] **UI-25** `[responsive]`
       `apps/web/components/tenant/TenantSwitcher.tsx` renders a dropdown with a hardcoded `w-56` width. On viewport < 280px this overflows.
       **Fix:** Use `w-full max-w-[14rem]` or `min-w-[12rem]` to allow natural flow.
 
-- [ ] **UI-26** `[responsive]`
+- [x] **UI-26** `[responsive]`
       `apps/web/components/agent/AIStudioSidekickPanel.tsx` has no responsive constraints. It renders as a fixed-size panel that overlaps main content on narrow screens.
       **Fix:** Apply `max-w-xs sm:max-w-sm` and position it as a slide-over drawer on mobile.
 
-- [ ] **UI-27** `[responsive]`
+- [x] **UI-27** `[responsive]`
       `apps/web/components/agent/HeadlessTaskPanel.tsx` uses fixed-width inline styles with no responsive fallbacks.
       **Fix:** Replace fixed-width styles with responsive Tailwind classes; ensure it stacks vertically on mobile.
 
-- [ ] **UI-28** `[responsive]`
+- [x] **UI-28** `[responsive]`
       `apps/web/components/store/ProductCard.tsx` uses `h-32` fixed height for its image area. On mobile this clips long product titles and the layout breaks when 3-column grid collapses.
       **Fix:** Use `aspect-video` or `aspect-square` instead of a fixed height; ensure the grid switches to 1-column at `sm:`.
 
@@ -1133,7 +1133,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/Table/Table.tsx` has no horizontal scroll wrapper. Wide data tables overflow and clip on mobile screens.
       **Fix:** Wrap the `<table>` in `<div className="overflow-x-auto">`.
 
-- [ ] **UI-30** `[responsive]`
+- [x] **UI-30** `[responsive]`
       `packages/ui/src/GridContainer/GridContainer.tsx` accepts a single `columns` number. On mobile this still renders N columns. The component has no responsive column array (e.g., `[1, 2, 3]` for sm/md/lg).
       **Fix:** Accept `columns: number | { sm?: number; md?: number; lg?: number }` and generate responsive CSS grid accordingly.
 
