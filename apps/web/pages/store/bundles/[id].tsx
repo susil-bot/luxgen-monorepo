@@ -10,6 +10,7 @@ import { useLearnTenant } from '../../../hooks/useLearnTenant';
 import { storeServerProps } from '../../../lib/learn-store';
 import { formatBillingInterval, formatStorefrontPrice } from '../../../lib/storefront-format';
 import { useStorefrontSubscribe } from '../../../lib/use-storefront-subscribe';
+import { CheckoutSteps } from '../../../components/store/CheckoutSteps';
 
 interface Props {
   tenantSubdomain: string;
@@ -51,6 +52,7 @@ export default function StoreBundleDetailPage({ tenantSubdomain }: Props) {
 
         {bundle && (
           <article className="space-y-6">
+            <CheckoutSteps current={success ? 3 : subscribing ? 2 : 1} />
             <header
               className="rounded-2xl p-8"
               style={{
