@@ -308,7 +308,7 @@
       **File:** `apps/api/src/db/connect.ts` lines 5–18
       `connectDB` calls `process.exit(1)` on connection error and does not monitor `disconnected`/`reconnected` events. Silent reconnection failures cause all DB calls to hang. Add `mongoose.connection.on('disconnected', ...)` handler and set `serverSelectionTimeoutMS` / `socketTimeoutMS` in options.
 
-- [ ] **L-13** `[enhancement]`
+- [x] **L-13** `[enhancement]`
       **File:** `packages/db/src/connection.ts` lines 1–21
       No Mongoose connection options set: no `serverSelectionTimeoutMS`, `socketTimeoutMS`, or pool size. Production defaults (30s selection timeout, unbounded pool) are inappropriate. Configure sensible production options.
 
@@ -348,7 +348,7 @@
       **File:** `apps/web/pages/dashboard.tsx` line 100
       Hard-coded `'Welcome to Ideavibes'` in the banner carousel. Banner content must come from tenant configuration. Reference `tenantConfig.brand.name` or equivalent.
 
-- [ ] **L-23** `[enhancement]`
+- [x] **L-23** `[enhancement]`
       **File:** `apps/api/src/services/groupService.ts` line 128 vs line 136
       `baseQuery` initialises with `isActive: true` hardcoded, but the total count is calculated from `baseQuery` before the `isActive` override is applied to `cursorFilter`. This causes the total count to always reflect active-only records even when filtering for inactive. Apply the filter to `baseQuery` first, then derive `cursorFilter` from it.
 
