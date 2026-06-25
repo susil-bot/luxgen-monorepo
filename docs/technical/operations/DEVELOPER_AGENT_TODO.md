@@ -1703,19 +1703,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` autoplay does not pause when the user focuses an element inside the carousel (WCAG 2.1 success criterion 2.2.2).
       **Fix:** Pause autoplay on `focusin` event; resume on `focusout`.
 
-- [ ] **UI-169** `[a11y]`
+- [x] **UI-169** `[a11y]`
       `packages/ui/src/Modal/Modal.tsx` does not trap focus inside the modal when open. Tab-navigation escapes into the background content.
       **Fix:** Implement focus trap using `focus-trap-react` or a custom `useEffect` that constrains focus to modal children.
 
-- [ ] **UI-170** `[a11y]`
+- [x] **UI-170** `[a11y]`
       `packages/ui/src/Select/Select.tsx` custom dropdown is not keyboard-navigable. Users cannot open the dropdown, navigate options, or select with keyboard alone.
       **Fix:** Implement full keyboard navigation: `Enter`/`Space` to open, `Arrow` to navigate, `Enter` to select, `Escape` to close; add `role="listbox"` and `role="option"` ARIA roles.
 
-- [ ] **UI-171** `[a11y]`
+- [x] **UI-171** `[a11y]`
       `packages/ui/src/CountryLanguageDropdown/CountryLanguageDropdown.tsx` tab panels do not have `role="tab"` / `role="tabpanel"` / `aria-selected` attributes.
       **Fix:** Apply the ARIA tabs pattern to the Country/Language tab interface.
 
-- [ ] **UI-172** `[a11y]`
+- [x] **UI-172** `[a11y]`
       `packages/ui/src/Accordion/Accordion.tsx` toggle buttons do not have `aria-expanded` or `aria-controls` attributes. Screen readers cannot announce whether a section is open or closed.
       **Fix:** Add `aria-expanded={isOpen}` and `aria-controls={panelId}` to each trigger button; add `id={panelId}` and `role="region"` to each panel.
 

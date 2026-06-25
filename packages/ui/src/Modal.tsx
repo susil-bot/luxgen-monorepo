@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -9,6 +9,7 @@ export interface ModalProps {
 }
 
 export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md' }) => {
+  const panelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!isOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -38,6 +39,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
       />
 
       <div
+        ref={panelRef}
         className={`relative w-full ${sizeClasses[size]} rounded-xl shadow-xl`}
         style={{
           background: 'var(--color-bg-primary)',
