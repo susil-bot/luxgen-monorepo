@@ -13,7 +13,7 @@ export default function Custom500() {
 
   return (
     <>
-      <Head><title>Server Error - LuxGen</title></Head>
+      <Head><title>Server Error - LuxGen</title><meta name="robots" content="noindex, nofollow" /></Head>
       <AppLayout sidebarSections={getDefaultSidebarSections()} user={layoutUser ?? undefined} logo={getDefaultLogo()} onUserAction={handleUserAction} {...headerProps} responsive>
         <NotFound title="Something went wrong" description="We hit an unexpected error. Try again or return home." variant="detailed" showIllustration onGoHome={() => router.push('/')} onGoBack={() => router.back()} customActions={
           <div className="flex flex-wrap justify-center gap-2 mt-6">
