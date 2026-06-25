@@ -118,7 +118,7 @@
       **File:** `packages/db/src/tenant.ts` lines 62–64 vs `packages/db/src/subscription.ts` line 5
       Billing plan is stored in two separate places: `ITenant.metadata.plan` and `ITenantSubscription.plan`. These can diverge (e.g., a Stripe webhook that updates the subscription but not the tenant). Pick one authoritative source and remove the other.
 
-- [ ] **H-18** `[arch]`
+- [x] **H-18** `[arch]`
       **File:** `apps/web/lib/plan-gate.ts` lines 11–28
       `fetchTenantBilling` makes an outbound HTTP call from a Next.js API route back to the backend to check billing. This adds latency, a failure mode (500 → silent default to 'free'), and a circular dependency locally. Read billing status directly from the DB or a shared module.
 
