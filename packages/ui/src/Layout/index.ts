@@ -4,6 +4,8 @@ export {
   getDefaultNavItems,
   getDefaultMenuItems,
   getDefaultUser,
+  DEFAULT_USER,
+  DEFAULT_SIDEBAR_SECTIONS,
   getDefaultLogo,
   getDefaultSidebarSections,
 } from './DefaultNavigation';

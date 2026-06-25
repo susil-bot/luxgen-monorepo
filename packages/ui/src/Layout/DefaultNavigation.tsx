@@ -237,19 +237,21 @@ export const getDefaultMenuItems = (): MenuItem[] => [
 ];
 
 /** @deprecated Layout/storybook placeholder only — never pass to AppLayout/NavBar on real pages. Use useLayoutUser() or transformUserDataFromSession(); omit `user` when guest. */
-export const getDefaultUser = (): UserMenu => ({
+export const DEFAULT_USER: UserMenu = {
   name: 'John Doe',
   email: 'john.doe@example.com',
   role: 'Admin',
   tenant: { name: 'Demo Platform', subdomain: 'demo' },
-});
+};
+
+export const getDefaultUser = (): UserMenu => DEFAULT_USER;
 
 export const getDefaultLogo = () => ({
   text: 'LuxGen',
   href: '/dashboard',
 });
 
-export const getDefaultSidebarSections = (): SidebarSection[] => [
+export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
   {
     id: 'navigation',
     title: 'Navigation',
@@ -631,3 +633,5 @@ export const getDefaultSidebarSections = (): SidebarSection[] => [
     ],
   },
 ];
+
+export const getDefaultSidebarSections = (): SidebarSection[] => DEFAULT_SIDEBAR_SECTIONS;
