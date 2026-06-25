@@ -240,6 +240,13 @@ export default function AgentTransparency({
   }, [sessionId]);
 
   const handleApplyAll = async () => {
+    if (validation?.passed === false) {
+      const proceed = window.confirm(
+        'Validation failed for one or more checks. Apply staged changes to the filesystem anyway?',
+      );
+      if (!proceed) return;
+    }
+
     setApplying(true);
     setActionError(null);
     try {
@@ -250,7 +257,13 @@ export default function AgentTransparency({
       });
       const data = await res.json();
       if (!res.ok) {
-        setActionError(data.error || 'Apply failed');
+        if (data.blocked && data.conflicts?.length) {
+          setActionError(
+            `Apply blocked — ${data.conflicts.length} file(s) changed on disk since staging: ${data.conflicts.join(', ')}`,
+          );
+        } else {
+          setActionError(data.error || 'Apply failed');
+        }
         return;
       }
       onApplied(data.applied || []);

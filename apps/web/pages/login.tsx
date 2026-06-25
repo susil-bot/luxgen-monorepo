@@ -13,6 +13,7 @@ import { safeRedirectPath } from '../lib/safe-redirect';
 
 const DEV_DEMO_EMAIL = 'alex.thompson@demo.com';
 const DEV_DEMO_PASSWORD = 'password123';
+const SOCIAL_LOGIN_ENABLED = process.env.NEXT_PUBLIC_SOCIAL_LOGIN_ENABLED === 'true';
 
 const LoginPageContent: React.FC = () => {
   const router = useRouter();
@@ -116,13 +117,14 @@ const LoginPageContent: React.FC = () => {
                 {authNotice && <AuthNoticeBanner notice={authNotice} onDismiss={() => setAuthNoticeDismissed(true)} />}
                 <LoginForm
                   onSubmit={handleLogin}
-                  onSocialLogin={handleSocialLogin}
+                  onSocialLogin={SOCIAL_LOGIN_ENABLED ? handleSocialLogin : undefined}
                   onForgotPassword={handleForgotPassword}
                   onSignUp={handleSignUp}
                   loading={loading}
                   title="Welcome Back"
                   subtitle="Sign in to your account to continue"
-                  socialProviders={['google', 'linkedin', 'github']}
+                  showSocialLogin={SOCIAL_LOGIN_ENABLED}
+                  socialProviders={SOCIAL_LOGIN_ENABLED ? ['google', 'linkedin', 'github'] : []}
                   defaultEmail={process.env.NODE_ENV === 'development' ? DEV_DEMO_EMAIL : undefined}
                   defaultPassword={process.env.NODE_ENV === 'development' ? DEV_DEMO_PASSWORD : undefined}
                   className=""

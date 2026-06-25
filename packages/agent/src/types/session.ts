@@ -47,4 +47,5 @@ export interface ApplyResult {
   conflicts: string[];
   mode?: 'filesystem' | 'worktree';
   branch?: string;
+  blocked?: boolean;
 }

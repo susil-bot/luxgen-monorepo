@@ -1,21 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAIStudio } from '@luxgen/ui';
 import AgentChat from './AgentChat';
 
-function makeSessionId() {
-  return `sidekick-${Date.now().toString(36)}`;
+function makeSessionId(baseId: string, suffix: string) {
+  return `sidekick-${baseId}-${suffix}`;
 }
 
 /** Global Sidekick panel — agent chat in Shopify-style docked layout. */
 export function AIStudioSidekickPanel() {
   const router = useRouter();
   const { setTitle } = useAIStudio();
-  const [sessionId, setSessionId] = useState('');
-
-  useEffect(() => {
-    setSessionId(makeSessionId());
-  }, []);
+  const baseId = useId().replace(/:/g, '');
+  const [sessionSuffix, setSessionSuffix] = useState('0');
+  const sessionId = makeSessionId(baseId, sessionSuffix);
 
   useEffect(() => {
     const path = router.pathname;
@@ -32,14 +30,12 @@ export function AIStudioSidekickPanel() {
     }
   }, [router.pathname, setTitle]);
 
-  if (!sessionId) return null;
-
   return (
     <AgentChat
       sessionId={sessionId}
       layout="sidekick"
       onFileStaged={() => {}}
-      onSessionChange={() => setSessionId(makeSessionId())}
+      onSessionChange={() => setSessionSuffix(String(Date.now()))}
     />
   );
 }
