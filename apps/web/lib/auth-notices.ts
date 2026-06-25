@@ -20,8 +20,9 @@ export const AUTH_NOTICE_BY_REASON: Record<AuthRedirectReason, AuthNoticeContent
   session_expired: {
     variant: 'warning',
     icon: '⏱️',
-    title: 'Session expired',
-    message: 'Your sign-in session ended. Please sign in again to continue.',
+    title: 'Your session timed out',
+    message:
+      'For your security, we signed you out after a period of inactivity. Sign in again to pick up where you left off.',
   },
   unauthorized: {
     variant: 'warning',

@@ -1,0 +1,48 @@
+# Playwright E2E — review-only stub (Track C / P0-1)
+# Enable after P0-1 merge + manual QA. See docs/technical/operations/PR_ENGAGEMENT_MANIFEST.md
+
+name: E2E (Playwright)
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [main, master]
+    paths:
+      - 'apps/web/e2e/**'
+      - 'apps/web/playwright.config.ts'
+      - '.github/workflows/e2e.yml'
+
+concurrency:
+  group: e2e-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PLAYWRIGHT_BASE_URL: http://localhost:3000
+  PLAYWRIGHT_SKIP_WEBSERVER: '1'
+  NEXT_PUBLIC_GRAPHQL_URL: http://localhost:4000/graphql
+  NEXT_PUBLIC_API_URL: http://localhost:4000
+
+jobs:
+  playwright:
+    name: Playwright (stub)
+    runs-on: ubuntu-latest
+    # Stub: do not run until infra is merged and services are wired in CI.
+    if: false
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+        working-directory: apps/web
+
+      - name: Run Playwright tests
+        run: npm run test:e2e
+        working-directory: apps/web

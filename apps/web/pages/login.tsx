@@ -5,6 +5,7 @@ import { useMutation } from '@apollo/client';
 import { LoginForm, LoginFormData, RegisterVisual, SnackbarProvider, useSnackbar } from '@luxgen/ui';
 import { PageWrapper } from '@luxgen/ui';
 import { AuthNoticeBanner } from '../components/auth/AuthNoticeBanner';
+import { PageLoadingState } from '../components/common/PageStates';
 import { LOGIN_MUTATION } from '../graphql/queries/auth';
 import { AUTH_NOTICE_BY_REASON, formatLoginError, parseAuthRedirectReason } from '../lib/auth-notices';
 import { clearStoredSession, persistSession } from '../lib/session';
@@ -97,6 +98,19 @@ const LoginPageContent: React.FC = () => {
   const handleSignUp = () => {
     router.push('/register');
   };
+
+  if (!router.isReady) {
+    return (
+      <>
+        <Head>
+          <title>Login - LuxGen</title>
+        </Head>
+        <PageWrapper>
+          <PageLoadingState label="Loading sign-in…" />
+        </PageWrapper>
+      </>
+    );
+  }
 
   return (
     <>
