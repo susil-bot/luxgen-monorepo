@@ -1,6 +1,5 @@
 import { type PlanTier, normalizePlan, hasFeature } from '@luxgen/billing';
-import { Tenant } from './tenant';
-import { TenantSubscription } from './subscription';
+import { Tenant, TenantSubscription } from '@luxgen/db';
 
 export function buildTenantFeatureFlags(plan: PlanTier): Record<string, boolean> {
   return {

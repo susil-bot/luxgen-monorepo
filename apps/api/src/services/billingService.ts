@@ -6,14 +6,9 @@ import {
   listPublicPlans,
   getPlanFeatures,
   getPlanLimits,
+  hasFeature,
 } from '@luxgen/billing';
-import {
-  Tenant,
-  TenantSubscription,
-  type ITenantSubscription,
-  resolveEffectivePlan,
-  buildTenantFeatureFlags,
-} from '@luxgen/db';
+import { Tenant, TenantSubscription, type ITenantSubscription } from '@luxgen/db';
 import { listingSubscriptionService } from './listingSubscriptionService';
 import { enrollmentService } from './enrollmentService';
 import { logger } from '../utils/logger';
@@ -57,7 +52,18 @@ function planFromPriceId(priceId: string): PlanTier | null {
 
 export class BillingService {
   async getEffectivePlan(tenantId: string): Promise<PlanTier> {
-    return resolveEffectivePlan(tenantId);
+    const sub = await TenantSubscription.findOne({ tenantId });
+    if (sub && ['active', 'trialing'].includes(sub.status)) {
+      return normalizePlan(sub.plan);
+    }
+
+    // tenantId may be a MongoDB ObjectId string or a subdomain — support both
+    const tenant = (await Tenant.findById(tenantId).lean()) ?? (await Tenant.findOne({ subdomain: tenantId }).lean());
+    if (tenant?.metadata?.plan) {
+      return normalizePlan(tenant.metadata.plan);
+    }
+
+    return 'free';
   }
 
   async getOrCreateSubscription(tenantId: string): Promise<ITenantSubscription> {
@@ -97,7 +103,16 @@ export class BillingService {
       limits: getPlanLimits(plan),
       features: definition.features,
       enabledFeatures: getPlanFeatures(plan),
-      featureFlags: buildTenantFeatureFlags(plan),
+      featureFlags: {
+        automations: hasFeature(plan, 'automations'),
+        analytics: hasFeature(plan, 'analytics'),
+        project: hasFeature(plan, 'project'),
+        webhooks: hasFeature(plan, 'webhooks'),
+        customDomain: hasFeature(plan, 'customDomain'),
+        agentStudio: hasFeature(plan, 'agentStudio'),
+        mobileApp: hasFeature(plan, 'mobileApp'),
+        apiAccess: hasFeature(plan, 'apiAccess'),
+      },
     };
   }
 

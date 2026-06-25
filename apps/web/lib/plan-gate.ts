@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { hasFeature, getRequiredPlan, type BillingFeature, type PlanTier } from '@luxgen/billing';
-import { resolveTenantBillingSnapshot } from '@luxgen/db';
+import { resolveTenantBillingSnapshot } from './tenant-billing';
 import { ensureDbConnection } from './ensure-db';
 
 export interface TenantBillingSnapshot {
