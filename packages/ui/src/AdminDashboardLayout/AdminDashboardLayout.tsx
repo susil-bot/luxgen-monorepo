@@ -86,6 +86,8 @@ export interface AdminDashboardLayoutProps extends BaseComponentProps {
   };
   variant?: 'default' | 'compact' | 'detailed';
   loading?: boolean;
+  /** Optional slot above dashboard content (e.g. onboarding checklist) */
+  onboardingSlot?: React.ReactNode;
   onUserAction?: (action: 'profile' | 'settings' | 'logout') => void;
   pathname?: string;
   onNavigate?: (href: string) => void;
@@ -194,6 +196,7 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
   dashboardData = {},
   variant = 'default',
   loading = false,
+  onboardingSlot,
   onUserAction,
   pathname,
   onNavigate,
@@ -266,6 +269,7 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
           tabletBreakpoint={tabletBreakpoint}
           desktopBreakpoint={desktopBreakpoint}
         >
+          {onboardingSlot}
           <AdminDashboard
             tenantTheme={tenantTheme}
             title={dashboardData.title || 'Admin Dashboard'}
