@@ -1683,7 +1683,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` `slides` prop items have a `backgroundColor` field, but the dashboard page passes slides with only `image` and `buttonText`. The mismatch means the `backgroundColor` fallback is always triggered.
       **Fix:** Align the `BannerSlide` type with the data shape used by the dashboard.
 
-- [ ] **UI-165** `[api]`
+- [x] **UI-165** `[api]`
       `packages/ui/src/Chip/Chip.tsx` and `packages/ui/src/Badge/Badge.tsx` are near-identical components (both render a styled pill with optional close button, icon, and label). Having both in the design system creates decision fatigue.
       **Fix:** Consolidate into a single `Tag` component with `variant` controlling size/weight; deprecate one.
 
@@ -1691,15 +1691,15 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 10 — Accessibility (UI-166 → UI-180)
 
-- [ ] **UI-166** `[a11y]`
+- [x] **UI-166** `[a11y]`
       `packages/ui/src/ActionMenu/ActionMenu.tsx` trigger button shows `'···'` with no `aria-label`. Screen readers announce this as "button, middle dot middle dot middle dot".
       **Fix:** Add `aria-label="More actions"` to the trigger button.
 
-- [ ] **UI-167** `[a11y]`
+- [x] **UI-167** `[a11y]`
       `packages/ui/src/Carousel/Carousel.tsx` has no keyboard navigation (left/right arrow keys). Users who cannot use a pointer cannot advance slides.
       **Fix:** Add `onKeyDown` handler on the carousel container; handle `ArrowLeft`/`ArrowRight`/`Home`/`End`.
 
-- [ ] **UI-168** `[a11y]`
+- [x] **UI-168** `[a11y]`
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` autoplay does not pause when the user focuses an element inside the carousel (WCAG 2.1 success criterion 2.2.2).
       **Fix:** Pause autoplay on `focusin` event; resume on `focusout`.
 
