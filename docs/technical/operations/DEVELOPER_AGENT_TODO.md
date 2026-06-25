@@ -336,7 +336,7 @@
       **File:** `apps/web/pages/login.tsx` line 37
       `console.log('🔐 Attempting login with email:', data.email)` logs PII (email address) to the browser console on every login attempt. Remove.
 
-- [ ] **L-20** `[style]` `[security]`
+- [x] **L-20** `[style]` `[security]`
       **File:** `apps/web/pages/register.tsx` lines 33–34
       `console.log('Registration data:', data)` logs full form data including password fields to the browser console. Remove immediately.
 
