@@ -272,7 +272,7 @@
       **File:** `apps/web/pages/api/users/current.ts`
       Duplicate of `me.ts` (see M-12). Once `me.ts` is canonical, delete this file entirely.
 
-- [ ] **L-04** `[dead-code]`
+- [x] **L-04** `[dead-code]`
       **File:** `packages/auth/src/roles.ts` lines 59–90
       `isSuperAdmin`, `isAdmin`, `canManageUsers`, `canInviteUsers`, etc. are thin wrappers never imported anywhere outside the package's own `index.ts`. The entire module is superseded by `@luxgen/db` role definitions. Delete or consolidate.
 
