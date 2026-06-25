@@ -182,7 +182,7 @@
       **File:** `apps/api/src/app.ts` line 55
       `express.json({ limit: '10mb' })` applies to all routes including `/api/auth/login`. A 10MB body on a login endpoint is never legitimate and allows DoS before the rate limiter fires. Tighten: set `'50kb'` globally and allow larger limits only on specific upload routes.
 
-- [ ] **M-06** `[arch]`
+- [x] **M-06** `[arch]`
       **File:** `apps/api/src/services/userService.ts` vs `apps/api/src/routes/auth.ts`
       `UserService.login()` and `UserService.register()` duplicate logic from the REST route handlers; neither the REST routes nor the GraphQL resolvers use these service methods. Consolidate: migrate routes to use the service methods, or delete the duplicate service logic.
 
@@ -455,11 +455,12 @@
       **Fix approach:** Either wire `AIStudioSidekickPanel` into a page (e.g., as a floating sidekick on other admin pages using `layout="sidekick"` mode of `AgentChat`) or delete the file. If wiring: import from a persistent layout component, pass a stable `sessionId` from `getServerSideProps` or `useId()`.
       _Wired globally via `AIStudioPanelSlot` in `apps/web/pages/_app.tsx` (M-23 session id fix)._
 
-- [ ] **A-14** `[feat]`
+- [x] **A-14** `[feat]`
       **File:** `packages/agent/src/types/session.ts`, `packages/agent/src/changeset/session-store.ts`
       Chat message history is **never persisted**. `AgentSession.files` stores staged file changes but has no `messages` field. On page refresh or session reload, all conversation context is lost — the agent starts cold with no knowledge of prior turns.
       **How to build:** 1. Add `messages?: Array<{ role: 'user' | 'assistant'; content: string; timestamp: number }>` to `AgentSession` in `packages/agent/src/types/session.ts`. 2. After `runAgentLoop` completes in `chat.ts`, save the messages to the session via `saveSession`. 3. On page load in `AgentChat.tsx`, call `GET /api/agent/stage?sessionId=<id>` and populate `messages` state from `session.messages` (filtering out the welcome message). 4. Update `syncSessionToMongo` to include messages in the `AgentTask` document for audit/history.
       **Cap at 50 messages** to avoid unbounded session file growth.
+      **Done (2026-06-25):** Session message persistence with 50-message cap.
 
 - [x] **A-15** `[arch]`
       **File:** `packages/agent/src/persistence/mongo.ts` lines 43–66, `packages/agent/src/types/task.ts` lines 14–27
@@ -552,7 +553,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | -------------------- | ------- | ------ |
 | CRITICAL             | 7       | 7 ✅   |
 | HIGH                 | 27      | 20     |
-| MEDIUM               | 24      | 21     |
+| MEDIUM               | 24      | 22     |
 | LOW                  | 25      | 22     |
 | **Agent / A-HIGH**   | **7**   | **5**  |
 | **Agent / A-MEDIUM** | **10**  | **3**  |

@@ -40,6 +40,25 @@ export function saveSession(session: AgentSession): void {
   void syncSessionToMongo(session).catch(() => {});
 }
 
+export const MAX_SESSION_MESSAGES = 50;
+
+export function saveSessionMessages(
+  sessionId: string,
+  turns: Array<{ role: 'user' | 'assistant'; content: string }>,
+): void {
+  if (turns.length === 0) return;
+  const session = loadSession(sessionId);
+  const now = Date.now();
+  const appended = turns.map((m, i) => ({
+    role: m.role,
+    content: m.content,
+    timestamp: now + i,
+  }));
+  session.messages = [...(session.messages ?? []), ...appended].slice(-MAX_SESSION_MESSAGES);
+  session.updatedAt = Date.now();
+  saveSession(session);
+}
+
 export function stageFile(
   sessionId: string,
   staged: Omit<StagedFile, 'stagedAt' | 'type' | 'originalContent'>,
