@@ -446,11 +446,11 @@
        ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
-- [ ] **A-13** `[bug]` `[dead-code]`
+- [x] **A-13** `[bug]` `[dead-code]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx`
       This component exists but is **imported by no page**. `apps/web/pages/agent.tsx` imports `AgentChat` and `AgentTransparency` directly. The panel's `sessionId` initialisation also has the SSR hydration mismatch noted in M-23.
       **Fix approach:** Either wire `AIStudioSidekickPanel` into a page (e.g., as a floating sidekick on other admin pages using `layout="sidekick"` mode of `AgentChat`) or delete the file. If wiring: import from a persistent layout component, pass a stable `sessionId` from `getServerSideProps` or `useId()`.
-      **Decision needed:** Define where the sidekick panel should live (every admin page? dashboard only?) before implementing.
+      _Wired globally via `AIStudioPanelSlot` in `apps/web/pages/_app.tsx` (M-23 session id fix)._
 
 - [ ] **A-14** `[feat]`
       **File:** `packages/agent/src/types/session.ts`, `packages/agent/src/changeset/session-store.ts`
@@ -494,7 +494,7 @@
       `search_code` truncates at 50 results with no way for the agent to page through or narrow the search. Add an optional `maxResults` parameter (default 50, max 200) and `offset` parameter so the agent can request the next page of results when the first page is insufficient.
       **Files to change:** `packages/agent/src/tools/definitions.ts`, `packages/agent/src/tools/execute.ts`.
 
-- [ ] **A-20** `[enhancement]`
+- [x] **A-20** `[enhancement]`
       **File:** `apps/web/components/agent/AgentTransparency.tsx` lines 36–88
       The custom diff algorithm is a naive greedy O(n²) approximation with a lookahead of 8 lines. For files with repeated patterns it produces misleading or incorrect diffs. Replace with the `diff` npm package (`npm i diff` in `apps/web`) using `Diff.structuredPatch` for accurate unified diffs.
       **Files to change:** `apps/web/components/agent/AgentTransparency.tsx`. Import: `import { diffLines } from 'diff'`.
@@ -552,8 +552,8 @@
 | MEDIUM               | 24      | 20     |
 | LOW                  | 25      | 22     |
 | **Agent / A-HIGH**   | **7**   | **4**  |
-| **Agent / A-MEDIUM** | **10**  | **1**  |
-| **Agent / A-LOW**    | **10**  | **0**  |
-| **Total**            | **110** | **75** |
+| **Agent / A-MEDIUM** | **10**  | **2**  |
+| **Agent / A-LOW**    | **10**  | **1**  |
+| **Total**            | **110** | **77** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.

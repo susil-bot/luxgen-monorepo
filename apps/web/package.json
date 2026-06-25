@@ -22,6 +22,7 @@
     "@luxgen/ui": "*",
     "@luxgen/utils": "*",
     "buffer": "^6.0.3",
+    "diff": "^7.0.0",
     "graphql": "^16.8.0",
     "graphql-ws": "^5.16.0",
     "next": "^14.0.0",
@@ -29,6 +30,7 @@
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
+    "@types/diff": "^7.0.2",
     "@types/node": "^20.0.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
