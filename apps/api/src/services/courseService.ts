@@ -1,5 +1,6 @@
 import { Course, ICourse } from '@luxgen/db';
 import { logger } from '../utils/logger';
+import { commerceFromDescription, type CourseCommerceFields } from '../utils/productMeta';
 
 export interface CreateCourseInput {
   title: string;
@@ -8,6 +9,7 @@ export interface CreateCourseInput {
   tenantId: string;
   startDate?: Date;
   endDate?: Date;
+  commerce?: CourseCommerceFields;
 }
 
 export interface UpdateCourseInput {
@@ -17,6 +19,21 @@ export interface UpdateCourseInput {
   startDate?: Date;
   endDate?: Date;
   status?: string;
+  commerce?: CourseCommerceFields;
+}
+
+function mergeCommerce(
+  explicit: CourseCommerceFields | undefined,
+  description: string | undefined,
+  existing?: CourseCommerceFields | null,
+): CourseCommerceFields {
+  const fromDescription = description !== undefined ? commerceFromDescription(description) : {};
+  return {
+    currency: 'usd',
+    ...existing,
+    ...fromDescription,
+    ...explicit,
+  };
 }
 
 const POPULATE = [
@@ -39,6 +56,7 @@ export class CourseService {
   }
 
   async createCourse(input: CreateCourseInput): Promise<ICourse> {
+    const commerce = mergeCommerce(input.commerce, input.description);
     const course = new Course({
       title: input.title,
       description: input.description,
@@ -47,6 +65,7 @@ export class CourseService {
       startDate: input.startDate,
       endDate: input.endDate,
       students: [],
+      commerce,
     });
 
     await course.save();
@@ -57,6 +76,9 @@ export class CourseService {
   }
 
   async updateCourse(id: string, tenantId: string, input: UpdateCourseInput): Promise<ICourse> {
+    const existing = await Course.findOne({ _id: id, tenant: tenantId });
+    if (!existing) throw new Error('Course not found');
+
     const update: Record<string, unknown> = {};
     if (input.title !== undefined) update.title = input.title;
     if (input.description !== undefined) update.description = input.description;
@@ -64,6 +86,11 @@ export class CourseService {
     if (input.startDate !== undefined) update.startDate = input.startDate;
     if (input.endDate !== undefined) update.endDate = input.endDate;
     if (input.status !== undefined) update.status = input.status;
+
+    if (input.commerce !== undefined || input.description !== undefined) {
+      const nextDescription = input.description !== undefined ? input.description : existing.description;
+      update.commerce = mergeCommerce(input.commerce, nextDescription, existing.commerce);
+    }
 
     const course = await Course.findOneAndUpdate(
       { _id: id, tenant: tenantId },

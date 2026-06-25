@@ -7,6 +7,14 @@ export enum CourseStatus {
   CANCELLED = 'CANCELLED',
 }
 
+export interface ICourseCommerce {
+  priceCents?: number;
+  compareAtPriceCents?: number;
+  sku?: string;
+  category?: string;
+  currency?: string;
+}
+
 export interface ICourse extends Document {
   title: string;
   description?: string;
@@ -16,6 +24,7 @@ export interface ICourse extends Document {
   startDate?: Date;
   endDate?: Date;
   status: CourseStatus;
+  commerce?: ICourseCommerce;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,6 +66,13 @@ const courseSchema = new Schema<ICourse>(
       type: String,
       enum: Object.values(CourseStatus),
       default: CourseStatus.DRAFT,
+    },
+    commerce: {
+      priceCents: { type: Number, min: 0 },
+      compareAtPriceCents: { type: Number, min: 0 },
+      sku: { type: String, trim: true },
+      category: { type: String, trim: true },
+      currency: { type: String, trim: true, default: 'usd' },
     },
   },
   {
