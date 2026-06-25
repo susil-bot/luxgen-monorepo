@@ -12,7 +12,7 @@ export interface ChatMessage {
 export interface ToolEvent {
   id: string;
   name: string;
-  input: Record<string, any>;
+  input: Record<string, unknown>;
   result?: string;
   status: 'running' | 'done';
 }

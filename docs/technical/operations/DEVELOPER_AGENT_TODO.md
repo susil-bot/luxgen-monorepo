@@ -1370,18 +1370,18 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `AdminDashboardLayout` `onDashboardAction` prop accepts `data?: any`. Given the 11 different action types being wired to no-ops, this should be a discriminated union.
       **Fix:** Define `type DashboardAction = { type: 'view_course'; courseId: string } | { type: 'view_survey'; surveyId: string } | ...`.
 
-- [ ] **UI-89** `[type]`
+- [x] **UI-89** `[type]`
       No shared `ApiError` type is defined. Error handling across all pages uses `err instanceof Error ? err.message : String(err)` inline. This pattern is repeated in 40+ places.
       **Fix:** Export a shared `extractErrorMessage(err: unknown): string` utility from a shared package.
 
-- [ ] **UI-90** `[type]`
+- [x] **UI-90** `[type]`
       `packages/ui/src/Heading/Heading.tsx` accepts a `loading` prop that is silently extracted via destructuring (`const { loading, ...headingProps } = props`) but never used — it disappears without effect.
       **Fix:** Either implement a skeleton/loading state for headings, or remove the `loading` prop entirely from the type definition.
 
-- [ ] **UI-91** `[type]`
+- [x] **UI-91** `[type]`
       `apps/web/components/agent/AgentChat.tsx`: `input: Record<string, any>` in the `ToolEvent` interface. The tool input shape is known for each tool — use discriminated unions per tool name.
 
-- [ ] **UI-92** `[type]`
+- [x] **UI-92** `[type]`
       `apps/web/pages/groups/[id]/edit.tsx` likely uses typed `any` for form state. Audit and apply proper types.
 
 - [ ] **UI-93** `[type]`
@@ -1848,7 +1848,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | Global Layout Architecture (UI-01–20)           | 20      | 0     |
 | Responsive Design (UI-21–45)                    | 25      | 0     |
 | Hardcoded Values / Tokens (UI-46–75)            | 30      | 0     |
-| TypeScript & Type Safety (UI-76–95)             | 20      | 0     |
+| TypeScript & Type Safety (UI-76–95)             | 20      | 4     |
 | Dead Code & Unused Props (UI-96–110)            | 15      | 0     |
 | Missing States (UI-111–125)                     | 15      | 0     |
 | SEO & Head Management (UI-126–135)              | 10      | 0     |
@@ -1857,6 +1857,6 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | Accessibility (UI-166–180)                      | 15      | 0     |
 | Duplicate Components (UI-181–190)               | 10      | 0     |
 | No-Op Wiring / Missing Connections (UI-191–200) | 10      | 0     |
-| **Total**                                       | **200** | **0** |
+| **Total**                                       | **200** | **4** |
 
 > Update Done column as items are completed. Priority order: Layout → Responsive → Hardcoded → TypeScript → Dead Code.
