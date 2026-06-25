@@ -43,6 +43,12 @@ async function uniqueSlug(tenantId: string, base: string): Promise<string> {
   return slug;
 }
 
+function isDuplicateSlugError(error: unknown): boolean {
+  if (!error || typeof error !== 'object') return false;
+  const err = error as { code?: number; name?: string };
+  return err.code === 11000 || err.name === 'MongoServerError' || err.name === 'MongoError';
+}
+
 function emailContext(listing: IBusinessListing) {
   return {
     applicantName: listing.applicantName || listing.applicantEmail.split('@')[0],
@@ -78,18 +84,28 @@ export class ListingService {
 
   async createDraft(input: CreateListingInput): Promise<IBusinessListing> {
     const baseSlug = slugify(input.businessName) || 'listing';
-    const slug = await uniqueSlug(input.tenantId, baseSlug);
+    const maxAttempts = 8;
 
-    const listing = await BusinessListing.create({
-      ...input,
-      slug,
-      applicationStatus: 'draft',
-      publicationStatus: 'unpublished',
-      statusHistory: [{ status: 'draft', at: new Date() }],
-    });
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      const slugCandidate = attempt === 0 ? baseSlug : `${baseSlug}-${attempt}`;
+      const slug = await uniqueSlug(input.tenantId, slugCandidate);
+      try {
+        const listing = await BusinessListing.create({
+          ...input,
+          slug,
+          applicationStatus: 'draft',
+          publicationStatus: 'unpublished',
+          statusHistory: [{ status: 'draft', at: new Date() }],
+        });
 
-    logger.info(`Listing draft created: ${listing.businessName} (${listing.tenantId})`);
-    return listing;
+        logger.info(`Listing draft created: ${listing.businessName} (${listing.tenantId})`);
+        return listing;
+      } catch (error) {
+        if (!isDuplicateSlugError(error) || attempt === maxAttempts - 1) throw error;
+      }
+    }
+
+    throw new Error('Could not allocate a unique listing slug');
   }
 
   async updateDraft(id: string, input: UpdateListingInput): Promise<IBusinessListing | null> {

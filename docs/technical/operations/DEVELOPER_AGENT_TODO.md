@@ -164,7 +164,7 @@
       **File:** `apps/api/src/services/groupService.ts` lines 55–56
       Relay-spec `pageInfo` fields are computed incorrectly: `hasPreviousPage` is set to `hasCursor` when paginating forward (should always be `false`), and `hasNextPage` is set to `hasCursor` when paginating backward. This breaks standard Relay infinite-scroll clients.
 
-- [ ] **M-02** `[bug]`
+- [x] **M-02** `[bug]`
       **File:** `apps/api/src/services/listingService.ts` lines 36–43
       `uniqueSlug` uses a sequential polling loop to find a free slug — a classic TOCTOU race condition. Two concurrent `createDraft` calls with the same name will both see the slug as free. Add a unique index on `{tenantId, slug}` and handle the duplicate-key error to retry.
 
@@ -363,12 +363,12 @@
 
 ## Progress Summary
 
-| Tier      | Total  | Done  |
-| --------- | ------ | ----- |
-| CRITICAL  | 7      | 7 ✅  |
-| HIGH      | 27     | 0     |
-| MEDIUM    | 24     | 0     |
-| LOW       | 25     | 0     |
-| **Total** | **83** | **7** |
+| Tier      | Total  | Done   |
+| --------- | ------ | ------ |
+| CRITICAL  | 7      | 7 ✅   |
+| HIGH      | 27     | 18     |
+| MEDIUM    | 24     | 17     |
+| LOW       | 25     | 22     |
+| **Total** | **83** | **57** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
