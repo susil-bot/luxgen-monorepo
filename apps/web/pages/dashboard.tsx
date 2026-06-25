@@ -138,8 +138,8 @@ export default function Dashboard({ tenant }: DashboardProps) {
         onUserAction={onUserAction}
         {...headerProps}
         onDashboardAction={onDashboardAction}
-        onDataPointClick={() => {}}
-        onSegmentClick={() => {}}
+        onDataPointClick={() => undefined /* TODO: navigate */}
+        onSegmentClick={() => undefined}
         onActivityClick={() => {}}
         onSurveyClick={() => {}}
         onRequestClick={() => {}}

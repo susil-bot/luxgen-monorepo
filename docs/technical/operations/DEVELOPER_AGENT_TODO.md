@@ -1416,19 +1416,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/pages/dashboard.tsx`: 11 handler props passed as `() => {}` to `AdminDashboardLayout` (`onDataPointClick`, `onSegmentClick`, `onActivityClick`, `onSurveyClick`, `onRequestClick`, `onViewSurvey`, `onEditSurvey`, `onShareSurvey`, `onApproveRequest`, `onDenyRequest`, `onViewDetails`).
       **Fix:** Implement navigation or mutation logic for each, or add `// TODO: implement` with a tracking reference.
 
-- [ ] **UI-101** `[dead]`
+- [x] **UI-101** `[dead]`
       `apps/web/pages/products/index.tsx`: `onAddFilter={() => {}}` and `onSortDirectionChange={() => {}}` are no-ops. Filter chips and sort direction controls render but clicking them does nothing.
       **Fix:** Wire to `setActiveFilters` and `setSortDirection` state handlers already present in the page.
 
-- [ ] **UI-102** `[dead]`
+- [x] **UI-102** `[dead]`
       `apps/web/pages/organization/roles.tsx`: `onTabChange={() => {}}` on `DataListPage`. The role list has tabs visible but tab-switching does nothing.
       **Fix:** Implement tab filtering (e.g., filter by system vs custom roles).
 
-- [ ] **UI-103** `[dead]`
+- [x] **UI-103** `[dead]`
       `apps/web/pages/automations/index.tsx`: `onUserAction={() => {}}` on `AppLayout`. The user menu action (profile/settings/logout) silently does nothing on the automations page — the only page with this bug.
       **Fix:** Replace with `createHandleUserAction(router)`.
 
-- [ ] **UI-104** `[dead]`
+- [x] **UI-104** `[dead]`
       `apps/web/pages/courses.tsx`: `handleNavigate` only calls `console.log('Navigate to:', path)`. The `CourseMenu` navigation links fire this function but no routing occurs.
       **Fix:** Replace `console.log` with `router.push(path)`.
 
