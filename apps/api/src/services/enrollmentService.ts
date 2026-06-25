@@ -8,7 +8,8 @@ import {
   enrollmentSubjectId,
   type IEnrollment,
 } from '@luxgen/db';
-import { emitAutomationEvent, emitCommerceAutomationEvent } from '@luxgen/agent';
+import { emitCommerceAutomationEvent } from '@luxgen/agent';
+import { automationService } from './automationService';
 import { activityEventService } from './activityEventService';
 import { checkoutSessionService } from './checkoutSessionService';
 import { isBillingDevMode, isStripeEnabled } from './billingService';
@@ -306,19 +307,16 @@ export class EnrollmentService {
     const courseId = enrollment.course.toString();
     const studentId = enrollment.student.toString();
 
-    void emitAutomationEvent({
-      tenantId,
-      triggerType: 'COURSE_COMPLETED',
-      payload: {
+    void automationService
+      .triggerAutomations(tenantId, 'COURSE_COMPLETED', {
         courseId,
         studentId,
         userId: studentId,
         courseTitle: course?.title,
         customerEmail: student?.email,
         progressPercent: enrollment.progressPercent,
-      },
-      source: 'lms',
-    }).catch(() => undefined);
+      }, 'lms')
+      .catch(() => undefined);
   }
 
   async updateProgress(courseId: string, studentId: string, progressPercent: number): Promise<IEnrollment> {

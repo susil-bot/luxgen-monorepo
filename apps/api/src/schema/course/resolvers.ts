@@ -1,7 +1,7 @@
 import { courseService } from '../../services/courseService';
 import { activityEventService, actorFromContext } from '../../services/activityEventService';
 import { enrollmentService } from '../../services/enrollmentService';
-import { emitAutomationEvent } from '@luxgen/agent';
+import { automationService } from '../../services/automationService';
 import { CourseStatus } from '@luxgen/db';
 import type { GraphQLContext } from '../../context';
 import { scopedTenantId } from '../../graphql/tenantScope';
@@ -97,18 +97,15 @@ export const courseResolvers = {
         student?.email ?? 'customer',
         actor,
       );
-      void emitAutomationEvent({
-        tenantId,
-        triggerType: 'USER_ENROLLED',
-        payload: {
+      void automationService
+        .triggerAutomations(tenantId, 'USER_ENROLLED', {
           courseId,
           studentId,
           userId: studentId,
           orderId: `${courseId}:${studentId}`,
           customerEmail: student?.email,
-        },
-        source: 'lms',
-      }).catch(() => undefined);
+        }, 'lms')
+        .catch(() => undefined);
       void import('../../services/pushNotificationService').then(({ pushNotificationService }) =>
         pushNotificationService.sendEnrollmentConfirmation(studentId, course.title),
       );

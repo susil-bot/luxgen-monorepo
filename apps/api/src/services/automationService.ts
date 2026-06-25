@@ -7,6 +7,7 @@ import {
   type IAutomationAction,
   type IAutomationRun,
 } from '@luxgen/db';
+import { emitAutomationEvent } from '@luxgen/agent';
 import { logger } from '../utils/logger';
 
 export interface AutomationActionInput {
@@ -139,6 +140,69 @@ export class AutomationService {
     const result = await Automation.findOneAndDelete({ _id: id, tenantId });
     return Boolean(result);
   }
+
+  async executeAutomation(
+    automationId: string,
+    tenantId: string,
+    payload: Record<string, unknown> = {},
+  ): Promise<IAutomationRun | null> {
+    const automation = await this.getAutomationById(automationId, tenantId);
+    if (!automation?.enabled) return null;
+
+    const started = Date.now();
+    const run = await AutomationRun.create({
+      automationId: String(automation._id),
+      automationName: automation.name,
+      tenantId,
+      triggerType: automation.triggerType,
+      status: 'running',
+      durationMs: 0,
+      payload,
+      triggeredAt: new Date(),
+    });
+
+    try {
+      await this.executeAutomationActions(automation, payload);
+      const durationMs = Date.now() - started;
+      await AutomationRun.updateOne({ _id: run._id }, { status: 'success', durationMs });
+      await Automation.updateOne(
+        { _id: automation._id },
+        { $inc: { runCount: 1 }, $set: { lastRunAt: new Date() } },
+      );
+      return AutomationRun.findById(run._id);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      const durationMs = Date.now() - started;
+      await AutomationRun.updateOne({ _id: run._id }, { status: 'error', durationMs, error: message });
+      await Automation.updateOne(
+        { _id: automation._id },
+        { $inc: { runCount: 1 }, $set: { lastRunAt: new Date() } },
+      );
+      logger.error(`Automation run failed for "${automation.name}": ${message}`);
+      return AutomationRun.findById(run._id);
+    }
+  }
+
+  private async executeAutomationActions(automation: IAutomation, _payload: Record<string, unknown>): Promise<void> {
+    for (const action of automation.actions) {
+      logger.info(
+        `[automation] ${action.type} for "${automation.name}" (tenant=${automation.tenantId})`,
+        action.config ?? {},
+      );
+    }
+  }
+
+  async triggerAutomations(
+    tenantId: string,
+    triggerType: AutomationTriggerType,
+    payload: Record<string, unknown> = {},
+    source: 'system' | 'lms' | 'commerce' | 'agent' | 'webhook' = 'system',
+  ): Promise<number> {
+    const automations = await this.getAutomationsByTrigger(tenantId, triggerType);
+    if (automations.length === 0) return 0;
+    return emitAutomationEvent({ tenantId, triggerType, payload, source });
+  }
+
 
   toGraphQL(automation: IAutomation) {
     return {

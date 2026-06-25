@@ -130,7 +130,7 @@
       **File:** `apps/api/src/routes/auth.ts` (missing endpoint)
       No token refresh endpoint exists. Tokens expire after 7 days with no silent renewal path. Implement `POST /api/auth/refresh` using a separate long-lived refresh token (httpOnly cookie).
 
-- [ ] **H-21** `[feat]`
+- [x] **H-21** `[feat]`
       **File:** `apps/api/src/services/automationService.ts` (entire service)
       `AutomationService` provides CRUD but automations are never executed. `runCount` and `lastRunAt` fields are set only in seed data. Implement `executeAutomation` and hook it to the trigger events defined in `getAutomationsByTrigger`.
 
