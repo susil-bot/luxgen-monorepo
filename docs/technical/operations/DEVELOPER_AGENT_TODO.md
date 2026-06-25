@@ -1129,7 +1129,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/components/store/ProductCard.tsx` uses `h-32` fixed height for its image area. On mobile this clips long product titles and the layout breaks when 3-column grid collapses.
       **Fix:** Use `aspect-video` or `aspect-square` instead of a fixed height; ensure the grid switches to 1-column at `sm:`.
 
-- [ ] **UI-29** `[responsive]`
+- [x] **UI-29** `[responsive]`
       `packages/ui/src/Table/Table.tsx` has no horizontal scroll wrapper. Wide data tables overflow and clip on mobile screens.
       **Fix:** Wrap the `<table>` in `<div className="overflow-x-auto">`.
 
@@ -1137,35 +1137,35 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/GridContainer/GridContainer.tsx` accepts a single `columns` number. On mobile this still renders N columns. The component has no responsive column array (e.g., `[1, 2, 3]` for sm/md/lg).
       **Fix:** Accept `columns: number | { sm?: number; md?: number; lg?: number }` and generate responsive CSS grid accordingly.
 
-- [ ] **UI-31** `[responsive]`
+- [x] **UI-31** `[responsive]`
       `packages/ui/src/ActionMenu/ActionMenu.tsx` renders a `min-w-[220px]` dropdown. On a 320px screen the menu overflows the right edge.
       **Fix:** Add `max-w-[calc(100vw-2rem)]` and flip alignment to `right` when near the edge via a position calculation.
 
-- [ ] **UI-32** `[responsive]`
+- [x] **UI-32** `[responsive]`
       `packages/ui/src/Modal/Modal.tsx` has no `xs` size for very small screens. All sizes render with `mx-auto` but no `mx-4` fallback means the modal content can overflow on screens narrower than its `max-w`.
       **Fix:** Add `mx-4 sm:mx-auto` to ensure minimum horizontal margin on mobile.
 
-- [ ] **UI-33** `[responsive]`
+- [x] **UI-33** `[responsive]`
       `apps/web/pages/courses/analytics.tsx` and `pages/groups/analytics.tsx` render stat cards in a fixed row. On mobile they overflow rather than wrapping to a single column.
       **Fix:** Wrap in `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4`.
 
-- [ ] **UI-34** `[responsive]`
+- [x] **UI-34** `[responsive]`
       `apps/web/pages/orders/index.tsx` uses `OrderListView` which renders a table. No horizontal scroll container is applied at the page level. Order rows overflow on screens < 768px.
       **Fix:** Wrap the `OrderListView` in `<div className="overflow-x-auto -mx-4 px-4">`.
 
-- [ ] **UI-35** `[responsive]`
+- [x] **UI-35** `[responsive]`
       `packages/ui/src/Carousel/Carousel.tsx` uses JavaScript-calculated `translateX` percentages. The carousel does not support touch swipe gestures on mobile, making it unusable as a primary navigation pattern on touch devices.
       **Fix:** Add `touchstart`/`touchmove`/`touchend` listeners to handle swipe navigation.
 
-- [ ] **UI-36** `[responsive]`
+- [x] **UI-36** `[responsive]`
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` plays automatically by default (`autoPlay: true`). On mobile, autoplay can drain battery and cause motion sickness. The `prefers-reduced-motion` media query is not respected.
       **Fix:** Check `window.matchMedia('(prefers-reduced-motion: reduce)').matches` and disable autoplay/transitions when true.
 
-- [ ] **UI-37** `[responsive]`
+- [x] **UI-37** `[responsive]`
       `pages/automations/tower/[id].tsx` (TowerShell page) renders a graph canvas with hardcoded pixel dimensions. The canvas does not reflow on window resize.
       **Fix:** Make the canvas dimensions reactive using a `ResizeObserver` on the container element.
 
-- [ ] **UI-38** `[responsive]`
+- [x] **UI-38** `[responsive]`
       `apps/web/components/agent/AgentTransparency.tsx` uses a side-by-side panel layout (file tree + diff viewer). On screens < 1024px the diff viewer is cramped. On mobile it is unusable.
       **Fix:** Stack the panels vertically below `lg:` breakpoint using `flex-col lg:flex-row`.
 
