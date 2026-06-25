@@ -138,17 +138,17 @@ export default function Dashboard({ tenant }: DashboardProps) {
         onUserAction={onUserAction}
         {...headerProps}
         onDashboardAction={onDashboardAction}
-        onDataPointClick={(point: any) => console.log('Data point clicked:', point)}
-        onSegmentClick={(segment: any) => console.log('Segment clicked:', segment)}
-        onActivityClick={(activity: any) => console.log('Activity clicked:', activity)}
-        onSurveyClick={(survey: any) => console.log('Survey clicked:', survey)}
-        onRequestClick={(request: any) => console.log('Request clicked:', request)}
-        onViewSurvey={(survey: any) => console.log('View survey:', survey)}
-        onEditSurvey={(survey: any) => console.log('Edit survey:', survey)}
-        onShareSurvey={(survey: any) => console.log('Share survey:', survey)}
-        onApproveRequest={(request: any) => console.log('Approve request:', request)}
-        onDenyRequest={(request: any) => console.log('Deny request:', request)}
-        onViewDetails={(request: any) => console.log('View details:', request)}
+        onDataPointClick={() => {}}
+        onSegmentClick={() => {}}
+        onActivityClick={() => {}}
+        onSurveyClick={() => {}}
+        onRequestClick={() => {}}
+        onViewSurvey={() => {}}
+        onEditSurvey={() => {}}
+        onShareSurvey={() => {}}
+        onApproveRequest={() => {}}
+        onDenyRequest={() => {}}
+        onViewDetails={() => {}}
       />
     </>
   );
