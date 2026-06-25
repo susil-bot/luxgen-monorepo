@@ -3,7 +3,6 @@ import { Card } from '../Card';
 import { Form } from '../Form';
 import { Heading } from '../Heading';
 import { Text } from '../Text';
-import { Button } from '../Button';
 import { withSSR } from '../ssr';
 
 export interface RegisterFormData {

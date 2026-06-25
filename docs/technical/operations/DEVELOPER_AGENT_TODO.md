@@ -1635,19 +1635,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/InputWithLabel/InputWithLabel.tsx` is functionally identical to `<Input label="..." />`. The component adds no unique behaviour — it is a wrapper that could be replaced by a prop on `Input`.
       **Fix:** Add a `label?: string` prop directly to `Input`; deprecate and remove `InputWithLabel`.
 
-- [ ] **UI-153** `[api]`
+- [x] **UI-153** `[api]`
       `packages/ui/src/Form/Form.tsx` provides no form validation integration (no context, no `react-hook-form` compatibility, no schema). It is just a styled `<form>` wrapper that adds no value over native HTML.
       **Fix:** Either integrate with a validation library (`react-hook-form`) and provide a `FormContext`, or remove it and use native `<form>` elements.
 
-- [ ] **UI-154** `[api]`
+- [x] **UI-154** `[api]`
       `packages/ui/src/RegisterForm/RegisterForm.tsx` exposes `ADMIN` and `SUPER_ADMIN` as selectable role options in the role dropdown. Self-registration as ADMIN must never be permitted from the frontend.
       **Fix:** Remove `ADMIN` and `SUPER_ADMIN` from the role options; only expose `USER` / `STUDENT`. See security note in BA-24.
 
-- [ ] **UI-155** `[api]`
+- [x] **UI-155** `[api]`
       `packages/ui/src/LoginForm/LoginForm.tsx` accepts `defaultEmail` and `defaultPassword` props. Pre-populating the password field is a security anti-pattern.
       **Fix:** Remove `defaultPassword` prop entirely; remove any callers.
 
-- [ ] **UI-156** `[api]`
+- [x] **UI-156** `[api]`
       `packages/ui/src/Table/Table.tsx` has no pagination support. Callers must implement their own pagination outside the table, resulting in inconsistent pagination UIs across the app.
       **Fix:** Add optional `pagination: { page: number; pageSize: number; total: number; onPageChange: (p: number) => void }` prop.
 

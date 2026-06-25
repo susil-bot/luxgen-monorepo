@@ -6,12 +6,20 @@ export interface Column<T> {
   render?: (value: unknown, item: T) => React.ReactNode;
 }
 
+export interface TablePagination {
+  page: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (p: number) => void;
+}
+
 export interface TableProps<T> {
   data: T[];
   columns: Column<T>[];
   loading?: boolean;
   emptyMessage?: string;
   className?: string;
+  pagination?: TablePagination;
 }
 
 export const Table = <T extends Record<string, unknown>>({
