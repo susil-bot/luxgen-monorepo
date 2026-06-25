@@ -77,7 +77,7 @@ function ProductsPage({ tenant }: ProductsPageProps) {
   const { data, loading, error, refetch } = useQuery(GET_COURSES, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: 'cache-first',
   });
 
   const [updateCourse] = useMutation(UPDATE_COURSE);

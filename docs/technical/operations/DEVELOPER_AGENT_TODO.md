@@ -1129,19 +1129,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/components/store/ProductCard.tsx` uses `h-32` fixed height for its image area. On mobile this clips long product titles and the layout breaks when 3-column grid collapses.
       **Fix:** Use `aspect-video` or `aspect-square` instead of a fixed height; ensure the grid switches to 1-column at `sm:`.
 
-- [ ] **UI-29** `[responsive]`
+- [x] **UI-29** `[responsive]`
       `packages/ui/src/Table/Table.tsx` has no horizontal scroll wrapper. Wide data tables overflow and clip on mobile screens.
       **Fix:** Wrap the `<table>` in `<div className="overflow-x-auto">`.
 
-- [ ] **UI-30** `[responsive]`
+- [x] **UI-30** `[responsive]`
       `packages/ui/src/GridContainer/GridContainer.tsx` accepts a single `columns` number. On mobile this still renders N columns. The component has no responsive column array (e.g., `[1, 2, 3]` for sm/md/lg).
       **Fix:** Accept `columns: number | { sm?: number; md?: number; lg?: number }` and generate responsive CSS grid accordingly.
 
-- [ ] **UI-31** `[responsive]`
+- [x] **UI-31** `[responsive]`
       `packages/ui/src/ActionMenu/ActionMenu.tsx` renders a `min-w-[220px]` dropdown. On a 320px screen the menu overflows the right edge.
       **Fix:** Add `max-w-[calc(100vw-2rem)]` and flip alignment to `right` when near the edge via a position calculation.
 
-- [ ] **UI-32** `[responsive]`
+- [x] **UI-32** `[responsive]`
       `packages/ui/src/Modal/Modal.tsx` has no `xs` size for very small screens. All sizes render with `mx-auto` but no `mx-4` fallback means the modal content can overflow on screens narrower than its `max-w`.
       **Fix:** Add `mx-4 sm:mx-auto` to ensure minimum horizontal margin on mobile.
 

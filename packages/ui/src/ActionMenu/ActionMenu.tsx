@@ -69,7 +69,7 @@ export function ActionMenu({
         <ul
           id={menuId}
           role="menu"
-          className={`absolute z-50 mt-1 min-w-[220px] py-1 rounded-xl shadow-lg ios-card ${
+          className={`absolute z-50 mt-1 min-w-[220px] max-w-[calc(100vw-2rem)] py-1 rounded-xl shadow-lg ios-card ${
             align === 'right' ? 'right-0' : 'left-0'
           }`}
           style={{ border: '1px solid var(--color-separator)' }}
