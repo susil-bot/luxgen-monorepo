@@ -1,6 +1,7 @@
 import { UserRole } from '@luxgen/db';
 import type { GraphQLContext } from '../../context';
 import { scopedTenantId } from '../../graphql/tenantScope';
+import { enrollmentService } from '../../services/enrollmentService';
 import { learnerService, type CustomerSegmentId } from '../../services/learnerService';
 
 const STAFF_ROLES = new Set<UserRole>([UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.INSTRUCTOR]);
@@ -24,6 +25,25 @@ function assertStaff(context: GraphQLContext): void {
 
 export const learnerResolvers = {
   Query: {
+    enrollmentProgress: async (
+      _: unknown,
+      { courseId, studentId }: { courseId: string; studentId: string },
+      context: GraphQLContext,
+    ) => {
+      assertCanViewLearner(context, studentId);
+      const enrollment = await enrollmentService.getByCourseAndStudent(courseId, studentId);
+      if (!enrollment) throw new Error('Enrollment not found');
+      const totalLessons = 4;
+      const completedLessons = Math.round(((enrollment.progressPercent ?? 0) / 100) * totalLessons);
+      return {
+        courseId,
+        studentId,
+        progressPercent: enrollment.progressPercent ?? 0,
+        completedLessons,
+        totalLessons,
+        resumeLessonIndex: Math.min(completedLessons, totalLessons - 1),
+      };
+    },
     learnerDashboard: async (
       _: unknown,
       { tenantId, studentId }: { tenantId: string; studentId?: string },

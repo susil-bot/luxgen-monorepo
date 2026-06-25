@@ -53,7 +53,17 @@ export const learnerTypeDefs = `
     segment: CustomerSegmentId!
   }
 
+  type EnrollmentProgressDetail {
+    courseId: ID!
+    studentId: ID!
+    progressPercent: Int!
+    completedLessons: Int!
+    totalLessons: Int!
+    resumeLessonIndex: Int!
+  }
+
   extend type Query {
+    enrollmentProgress(courseId: ID!, studentId: ID!): EnrollmentProgressDetail!
     learnerDashboard(tenantId: ID!, studentId: ID): LearnerDashboard!
     customerSegments(tenantId: ID!): [CustomerSegmentSummary!]!
     customersInSegment(tenantId: ID!, segment: CustomerSegmentId!): [CustomerSegmentMember!]!
