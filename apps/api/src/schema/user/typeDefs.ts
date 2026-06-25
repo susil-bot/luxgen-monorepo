@@ -18,9 +18,11 @@ export const userTypeDefs = `
   }
 
   enum UserRole {
+    SUPER_ADMIN
     ADMIN
     INSTRUCTOR
     STUDENT
+    USER
   }
 
   enum UserStatus {
