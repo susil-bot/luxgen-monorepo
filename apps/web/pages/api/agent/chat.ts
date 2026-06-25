@@ -13,6 +13,7 @@ import { getOllamaUrl } from '@luxgen/config';
 type EventType = 'text' | 'tool_start' | 'tool_result' | 'file_staged' | 'error' | 'done' | 'heartbeat';
 
 function sendEvent(res: NextApiResponse, type: EventType, data: Record<string, unknown> = {}) {
+  if (res.writableEnded) return;
   res.write(`data: ${JSON.stringify({ type, ...data })}\n\n`);
   (res as NextApiResponse & { flush?: () => void }).flush?.();
 }
@@ -82,6 +83,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   res.flushHeaders();
 
   let isCancelled = false;
+  let responseEnded = false;
+
+  const endResponse = () => {
+    if (responseEnded || res.writableEnded) return;
+    responseEnded = true;
+    res.end();
+  };
 
   const heartbeatInterval = setInterval(() => {
     if (isCancelled) {
@@ -94,13 +102,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   req.on('close', () => {
     isCancelled = true;
     clearInterval(heartbeatInterval);
+    endResponse();
   });
 
   const connectionTimer = setTimeout(() => {
     if (!isCancelled) {
       isCancelled = true;
       sendEvent(res, 'error', { message: 'Connection timed out after 2 minutes.' });
-      res.end();
+      endResponse();
     }
   }, 120_000);
 
@@ -126,6 +135,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } finally {
     clearInterval(heartbeatInterval);
     clearTimeout(connectionTimer);
-    res.end();
+    endResponse();
   }
 }
