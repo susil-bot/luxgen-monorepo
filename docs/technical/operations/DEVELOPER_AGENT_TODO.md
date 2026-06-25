@@ -239,7 +239,7 @@
       **File:** `k8s/deploy.sh` lines 26–53
       Deploy script has interactive `read -p` prompts, making it incompatible with CI/CD pipelines. Add `set -euo pipefail`, validate that all required secret keys are present in `.env.production` before applying, and document the non-interactive invocation pattern.
 
-- [ ] **M-20** `[missing-test]`
+- [x] **M-20** `[missing-test]`
       **File:** `apps/api/src/middleware/loginRateLimit.ts` lines 33–40
       The Redis-path of `isRateLimited` (the increment + pexpire flow) has no test coverage. Only the in-memory fallback is exercised by the existing test suite. Add a test with a mocked Redis client.
 
@@ -442,8 +442,8 @@
       The agent has no **`run_command` tool**. It can read, search, write, and delete files but cannot execute any shell command (`npm install`, `npx prisma migrate`, `npm run build`, `npm test`). This blocks workflows where a new package must be installed or a migration run after code changes.
       **How to build:** 1. Add tool definition to `packages/agent/src/tools/definitions.ts`:
       `ts
-     { name: 'run_command', description: 'Run a safe shell command (npm/npx only) from the monorepo root. Returns stdout/stderr. Blocked commands: rm, curl, wget, git push, chmod, sudo.', input_schema: { type: 'object', properties: { command: { type: 'string' }, args: { type: 'array', items: { type: 'string' } }, cwd: { type: 'string', description: 'Optional: relative path from monorepo root' } }, required: ['command', 'args'] } }
-     ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
+   { name: 'run_command', description: 'Run a safe shell command (npm/npx only) from the monorepo root. Returns stdout/stderr. Blocked commands: rm, curl, wget, git push, chmod, sudo.', input_schema: { type: 'object', properties: { command: { type: 'string' }, args: { type: 'array', items: { type: 'string' } }, cwd: { type: 'string', description: 'Optional: relative path from monorepo root' } }, required: ['command', 'args'] } }
+   ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
 - [x] **A-13** `[bug]` `[dead-code]`
@@ -475,11 +475,10 @@
       There is **no endpoint to list all agent tasks for a tenant** (for admin oversight). A tenant admin cannot see what their team's agent sessions are doing, which sessions are running, or audit past changes.
       **What to build:** `GET /api/agent/tasks/list?tenantId=<id>&status=<status>&limit=20&cursor=<id>` — requires `ADMIN` role, reads from MongoDB `AgentTask` collection. Return `{ tasks: AgentTaskRecord[], nextCursor }`. Wire into a new admin page `apps/web/pages/admin/agent-tasks.tsx`.
       **API contract:**
-      `     GET /api/agent/tasks/list
-  Auth: Bearer token, role >= ADMIN
-  Query: tenantId (string), status? (TaskStatus), limit? (number, max 50), cursor? (string)
-  Response: { tasks: AgentTaskRecord[], nextCursor: string | null, total: number }
-  `
+      `    GET /api/agent/tasks/list
+Auth: Bearer token, role >= ADMIN
+Query: tenantId (string), status? (TaskStatus), limit? (number, max 50), cursor? (string)
+Response: { tasks: AgentTaskRecord[], nextCursor: string | null, total: number }`
       **Files to create:** `apps/web/pages/api/agent/tasks/list.ts`, `apps/web/pages/admin/agent-tasks.tsx`.
 
 ### A-LOW — Tech Debt / Polish
@@ -533,12 +532,12 @@
       **File:** `packages/agent/src/prompts/system.ts` line 54
       System prompt template includes `useState<any>(null)` — the agent learns to generate `any`-typed state. Update the embedded page template to use proper types:
       `tsx
-  // Replace:
-  const [user, setUser] = useState<any>(null);
-  // With:
-  import type { UserMenu } from '@luxgen/ui';
-  const [user, setUser] = useState<UserMenu | null>(null);
-  `
+// Replace:
+const [user, setUser] = useState<any>(null);
+// With:
+import type { UserMenu } from '@luxgen/ui';
+const [user, setUser] = useState<UserMenu | null>(null);
+`
       **Files to change:** `packages/agent/src/prompts/system.ts`.
 
 ---
