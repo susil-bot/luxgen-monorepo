@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { withSSR } from '../ssr';
 import { defaultTheme, TenantTheme } from '../theme';
 
@@ -152,7 +152,7 @@ const MenuComponent: React.FC<MenuProps> = ({
     const itemClasses = `
       ${styles.item}
       flex items-center justify-between
-      ${isActive ? 'bg-blue-100 text-blue-900 border-r-2 border-blue-500' : 'text-gray-700 hover:bg-gray-100'}
+      ${isActive ? 'bg-[color-mix(in_srgb,var(--color-blue)_10%,transparent)] text-primary border-r-2 border-[var(--color-blue)]' : 'text-gray-700 hover:bg-gray-100'}
       ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
       ${isHovered ? 'bg-gray-50' : ''}
       transition-colors duration-200

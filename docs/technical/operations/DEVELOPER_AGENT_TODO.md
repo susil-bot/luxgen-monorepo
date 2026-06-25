@@ -462,7 +462,7 @@
 ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
-      _Resolved: `run_command` tool with npm/npx/node allowlist._
+        _Resolved: `run_command` tool with npm/npx/node allowlist._
 
 - [x] **A-13** `[bug]` `[dead-code]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx`
@@ -581,14 +581,14 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ## Progress Summary
 
-| Tier                 | Total   | Done   |
-| -------------------- | ------- | ------ |
-| CRITICAL             | 7       | 7 ✅   |
-| HIGH                 | 27      | 21     |
-| MEDIUM               | 24      | 23     |
-| LOW                  | 25      | 24     |
-| **Agent / A-MEDIUM** | **10**  | **10** ✅ |
-| **Agent / A-LOW**    | **10**  | **10** ✅ |
+| Tier                 | Total   | Done       |
+| -------------------- | ------- | ---------- |
+| CRITICAL             | 7       | 7 ✅       |
+| HIGH                 | 27      | 21         |
+| MEDIUM               | 24      | 23         |
+| LOW                  | 25      | 24         |
+| **Agent / A-MEDIUM** | **10**  | **10** ✅  |
+| **Agent / A-LOW**    | **10**  | **10** ✅  |
 | **Total**            | **110** | **110** ✅ |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
@@ -1213,19 +1213,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/ProductCard/ProductCard.tsx` hardcodes like-icon fill colour as `'#EF4444'` (active) and `'#6B7280'` (inactive).
       **Fix:** Use `var(--color-red)` and `var(--color-label-tertiary)`.
 
-- [ ] **UI-49** `[hardcode]`
+- [x] **UI-49** `[hardcode]`
       `packages/ui/src/CountryLanguageDropdown/CountryLanguageDropdown.tsx` contains a hard-coded list of 12 countries and 12 languages as default props. These cannot be extended without modifying the library.
       **Fix:** Remove default data from the component; require the caller to pass `countries` and `languages`. Provide a separate exported `DEFAULT_COUNTRIES` / `DEFAULT_LANGUAGES` constant for convenience.
 
-- [ ] **UI-50** `[hardcode]`
+- [x] **UI-50** `[hardcode]`
       `packages/ui/src/NotFound/NotFound.tsx` uses Tailwind colour classes `'bg-blue-600'`, `'hover:bg-blue-700'`, `'border-gray-300'`, `'text-gray-700'` for buttons, bypassing the CSS variable system.
       **Fix:** Replace with `var(--color-blue)` and `var(--color-separator)` via `style={{}}` or custom class names.
 
-- [ ] **UI-51** `[hardcode]`
+- [x] **UI-51** `[hardcode]`
       `packages/ui/src/Menu/Menu.tsx` uses Tailwind colours for the active state: `'bg-blue-100 text-blue-900 border-r-2 border-blue-500'`. These do not respond to dark mode.
       **Fix:** Replace with CSS variables: `var(--color-blue)` at 10% opacity background, `var(--color-label-primary)` text.
 
-- [ ] **UI-52** `[hardcode]`
+- [x] **UI-52** `[hardcode]`
       `packages/ui/src/LoginForm/LoginForm.tsx` and `RegisterForm/RegisterForm.tsx` share identical hardcoded success colour strings (`'bg-green-600'`, `'hover:bg-green-700'`, etc.). The same value is duplicated in two files.
       **Fix:** Extract to a shared `formTheme` constant; replace with `var(--color-green)`.
 
@@ -1847,7 +1847,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | ----------------------------------------------- | ------- | ----- |
 | Global Layout Architecture (UI-01–20)           | 20      | 0     |
 | Responsive Design (UI-21–45)                    | 25      | 0     |
-| Hardcoded Values / Tokens (UI-46–75)            | 30      | 0     |
+| Hardcoded Values / Tokens (UI-46–75)            | 30      | 4     |
 | TypeScript & Type Safety (UI-76–95)             | 20      | 0     |
 | Dead Code & Unused Props (UI-96–110)            | 15      | 0     |
 | Missing States (UI-111–125)                     | 15      | 0     |
