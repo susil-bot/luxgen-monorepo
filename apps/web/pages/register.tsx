@@ -44,14 +44,8 @@ const RegisterPageContent: React.FC<RegisterPageProps> = ({ tenant }) => {
         const { token, user } = result.data.register;
 
         persistSession(token, user);
-
-        const roleDisplayName = 'Student';
-        showSuccess(`Registration successful! Welcome ${data.firstName} ${data.lastName} as ${roleDisplayName}`);
-
-        // Redirect after a short delay
-        setTimeout(() => {
-          router.push('/login');
-        }, 1500);
+        showSuccess('Registration successful! Check your email to verify your account.');
+        setTimeout(() => router.push('/verify-email'), 1200);
       }
     } catch (error: any) {
       console.error('Registration error:', error);
