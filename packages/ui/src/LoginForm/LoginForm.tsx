@@ -40,7 +40,6 @@ export interface LoginFormProps extends BaseComponentProps {
   socialLoginText?: string;
   /** Dev-only prefill — not for production */
   defaultEmail?: string;
-  defaultPassword?: string;
 }
 
 const LoginFormComponent: React.FC<LoginFormProps> = ({

@@ -462,7 +462,7 @@
 ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
-      _Resolved: `run_command` tool with npm/npx/node allowlist._
+        _Resolved: `run_command` tool with npm/npx/node allowlist._
 
 - [x] **A-13** `[bug]` `[dead-code]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx`
@@ -581,14 +581,14 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ## Progress Summary
 
-| Tier                 | Total   | Done   |
-| -------------------- | ------- | ------ |
-| CRITICAL             | 7       | 7 ✅   |
-| HIGH                 | 27      | 21     |
-| MEDIUM               | 24      | 23     |
-| LOW                  | 25      | 24     |
-| **Agent / A-MEDIUM** | **10**  | **10** ✅ |
-| **Agent / A-LOW**    | **10**  | **10** ✅ |
+| Tier                 | Total   | Done       |
+| -------------------- | ------- | ---------- |
+| CRITICAL             | 7       | 7 ✅       |
+| HIGH                 | 27      | 21         |
+| MEDIUM               | 24      | 23         |
+| LOW                  | 25      | 24         |
+| **Agent / A-MEDIUM** | **10**  | **10** ✅  |
+| **Agent / A-LOW**    | **10**  | **10** ✅  |
 | **Total**            | **110** | **110** ✅ |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
@@ -1635,19 +1635,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/InputWithLabel/InputWithLabel.tsx` is functionally identical to `<Input label="..." />`. The component adds no unique behaviour — it is a wrapper that could be replaced by a prop on `Input`.
       **Fix:** Add a `label?: string` prop directly to `Input`; deprecate and remove `InputWithLabel`.
 
-- [ ] **UI-153** `[api]`
+- [x] **UI-153** `[api]`
       `packages/ui/src/Form/Form.tsx` provides no form validation integration (no context, no `react-hook-form` compatibility, no schema). It is just a styled `<form>` wrapper that adds no value over native HTML.
       **Fix:** Either integrate with a validation library (`react-hook-form`) and provide a `FormContext`, or remove it and use native `<form>` elements.
 
-- [ ] **UI-154** `[api]`
+- [x] **UI-154** `[api]`
       `packages/ui/src/RegisterForm/RegisterForm.tsx` exposes `ADMIN` and `SUPER_ADMIN` as selectable role options in the role dropdown. Self-registration as ADMIN must never be permitted from the frontend.
       **Fix:** Remove `ADMIN` and `SUPER_ADMIN` from the role options; only expose `USER` / `STUDENT`. See security note in BA-24.
 
-- [ ] **UI-155** `[api]`
+- [x] **UI-155** `[api]`
       `packages/ui/src/LoginForm/LoginForm.tsx` accepts `defaultEmail` and `defaultPassword` props. Pre-populating the password field is a security anti-pattern.
       **Fix:** Remove `defaultPassword` prop entirely; remove any callers.
 
-- [ ] **UI-156** `[api]`
+- [x] **UI-156** `[api]`
       `packages/ui/src/Table/Table.tsx` has no pagination support. Callers must implement their own pagination outside the table, resulting in inconsistent pagination UIs across the app.
       **Fix:** Add optional `pagination: { page: number; pageSize: number; total: number; onPageChange: (p: number) => void }` prop.
 

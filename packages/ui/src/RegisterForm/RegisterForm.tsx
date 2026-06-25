@@ -3,7 +3,6 @@ import { Card } from '../Card';
 import { Form } from '../Form';
 import { Heading } from '../Heading';
 import { Text } from '../Text';
-import { Button } from '../Button';
 import { withSSR } from '../ssr';
 
 export interface RegisterFormData {
@@ -350,8 +349,6 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
           >
             <option value="">Select a role</option>
             <option value="USER">User</option>
-            <option value="ADMIN">Admin</option>
-            <option value="SUPER_ADMIN">Super Admin</option>
           </select>
           {errors.role && <p className="mt-1 text-sm text-red-400">{errors.role}</p>}
         </div>
