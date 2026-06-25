@@ -200,7 +200,7 @@
       **File:** `apps/web/pages/dashboard.tsx` lines 33–38
       `transformUserData(tenant)` runs in a `useEffect` on every `tenant` change and sets user state, but the initial `useState` (line 18) already calls `transformUserData`. If `GET_DASHBOARD_DATA` returns actual user data it is never applied. Consolidate into a single data source.
 
-- [ ] **M-11** `[bug]`
+- [x] **M-11** `[bug]`
       **File:** `apps/web/pages/api/agent/chat.ts` lines 120–122
       After cancellation, `res.end()` may already be called by the `close` listener (lines 94–97). A subsequent write to the closed `ServerResponse` from the `done` event path will throw an unhandled error. Guard all writes after cancellation with an `isClosed` flag.
 
