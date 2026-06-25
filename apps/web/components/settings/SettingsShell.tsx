@@ -1,10 +1,11 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { AppLayout, getDefaultLogo, getDefaultSidebarSections, SplitPageLayout } from '@luxgen/ui';
+import { AppLayout, SplitPageLayout } from '@luxgen/ui';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import { SETTINGS_GROUPS, SETTINGS_SECTIONS, type SettingsSectionId } from '../../lib/settings-sections';
 
 interface SettingsShellProps {
@@ -20,6 +21,7 @@ export function SettingsShell({ tenant, activeSection, title, subtitle, children
   const layoutUser = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
   const headerProps = useAppLayoutHeader();
+  const { sidebarSections, logo } = useAppShellConfig();
   const resolvedSection = activeSection ?? SETTINGS_SECTIONS.find((s) => router.pathname.startsWith(s.href))?.id;
 
   const settingsNav = (
@@ -85,9 +87,9 @@ export function SettingsShell({ tenant, activeSection, title, subtitle, children
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive

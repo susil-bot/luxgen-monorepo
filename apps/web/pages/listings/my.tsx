@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
+import { useLayoutUser } from '../../lib/app-layout-user';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useQuery, useMutation } from '@apollo/client';
-import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo } from '@luxgen/ui';
+import { AppLayout } from '@luxgen/ui';
 import { GET_MY_LISTINGS, CREATE_LISTING_CHECKOUT } from '../../graphql/queries/listings';
 import { getWebUrl } from '../../lib/urls';
 
@@ -18,10 +20,11 @@ const STATUS_LABEL: Record<string, string> = {
   AWAITING_PAYMENT: 'Approved — pay to publish',
   PUBLISHED: 'Published',
   EXPIRED: 'Expired',
-  REJECTED: 'Rejected',
-};
+  REJECTED: 'Rejected' };
 
 export default function MyListingsPage({ tenant }: Props) {
+  const layoutUser = useLayoutUser();
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const [email, setEmail] = useState('');
 
@@ -41,8 +44,7 @@ export default function MyListingsPage({ tenant }: Props) {
   const { data, refetch } = useQuery(GET_MY_LISTINGS, {
     variables: { tenantId: tenant, email },
     skip: !email,
-    errorPolicy: 'ignore',
-  });
+    errorPolicy: 'ignore' });
 
   const [createCheckout] = useMutation(CREATE_LISTING_CHECKOUT);
   const appUrl = getWebUrl();
@@ -50,8 +52,7 @@ export default function MyListingsPage({ tenant }: Props) {
   const pay = async (listingId: string) => {
     const returnUrl = `${appUrl}/listings/my?tenant=${tenant}&email=${encodeURIComponent(email)}&paid=1`;
     const { data: checkout } = await createCheckout({
-      variables: { listingId, successUrl: returnUrl, cancelUrl: returnUrl },
-    });
+      variables: { listingId, successUrl: returnUrl, cancelUrl: returnUrl } });
     if (checkout?.createListingCheckoutSession?.url) {
       window.location.href = checkout.createListingCheckoutSession.url;
     }
@@ -66,9 +67,9 @@ export default function MyListingsPage({ tenant }: Props) {
       </Head>
       <AppLayout
         responsive
-        sidebarSections={getDefaultSidebarSections()}
-        user={getDefaultUser()}
-        logo={getDefaultLogo()}
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
+        logo={logo}
       >
         <div className="max-w-3xl mx-auto px-4 py-8">
           <h1 className="ios-large-title mb-4">My listing applications</h1>
@@ -130,5 +131,4 @@ export default function MyListingsPage({ tenant }: Props) {
 }
 
 export const getServerSideProps = async (ctx: { query: { tenant?: string } }) => ({
-  props: { tenant: ctx.query.tenant || 'demo' },
-});
+  props: { tenant: ctx.query.tenant || 'demo' } });

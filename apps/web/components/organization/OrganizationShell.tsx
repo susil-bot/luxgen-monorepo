@@ -1,10 +1,11 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { AppLayout, getDefaultLogo, getDefaultSidebarSections, SplitPageLayout } from '@luxgen/ui';
+import { AppLayout, SplitPageLayout } from '@luxgen/ui';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import { ORGANIZATION_SECTIONS, buildOrganizationBreadcrumbs, type OrganizationBreadcrumb, type OrganizationSectionId, type OrganizationSecuritySectionId } from '../../lib/organization-sections';
 
 interface OrganizationShellProps {
@@ -37,6 +38,7 @@ export function OrganizationShell({
   const layoutUser = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
   const headerProps = useAppLayoutHeader();
+  const { sidebarSections, logo } = useAppShellConfig();
 
   const displayName = tenantDisplayName ?? tenant.charAt(0).toUpperCase() + tenant.slice(1);
   const breadcrumbTrail =
@@ -70,9 +72,9 @@ export function OrganizationShell({
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive

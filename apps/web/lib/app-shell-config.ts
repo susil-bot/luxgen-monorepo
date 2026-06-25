@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
-import { getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { useSidebarSections } from './use-sidebar-sections';
+import { useTenantLogo } from './use-tenant-logo';
 
-/** Memoized sidebar + logo for layout shells (UI-10). */
+/** Sidebar, logo, and layout chrome shared by AppLayout shells (UI-10, UI-14, UI-16). */
 export function useAppShellConfig() {
-  const sidebarSections = useMemo(() => getDefaultSidebarSections(), []);
-  const logo = useMemo(() => getDefaultLogo(), []);
+  const sidebarSections = useSidebarSections();
+  const logo = useTenantLogo();
   return { sidebarSections, logo };
 }

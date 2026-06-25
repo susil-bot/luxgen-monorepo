@@ -1,15 +1,17 @@
 import { useState, useEffect } from 'react';
+import { useAppShellConfig } from '../../../lib/app-shell-config';
 import { useRouter } from 'next/router';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import Head from 'next/head';
 import { useQuery, useMutation } from '@apollo/client';
-import { SnackbarProvider, useSnackbar, AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { SnackbarProvider, useSnackbar, AppLayout } from '@luxgen/ui';
 import { useLayoutUser } from '../../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
 import { GET_GROUP, UPDATE_GROUP } from '../../../graphql/queries/groups';
 import { PageLoadingState, PageEmptyState } from '../../../components/common/PageStates';
 
 const EditGroupPageContent: React.FC = () => {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const { id } = router.query;
   const groupId = typeof id === 'string' ? id : '';
@@ -25,8 +27,7 @@ const EditGroupPageContent: React.FC = () => {
   const { data, loading, error } = useQuery(GET_GROUP, {
     variables: { id: groupId },
     skip: !groupId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const [updateGroup, { loading: isSaving }] = useMutation(UPDATE_GROUP);
 
@@ -47,10 +48,7 @@ const EditGroupPageContent: React.FC = () => {
             id: groupId,
             name,
             description,
-            settings: { maxMembers: maxUsers },
-          },
-        },
-      });
+            settings: { maxMembers: maxUsers } } } });
       showSuccess('Group updated successfully!');
       void router.push(`/groups/${groupId}`);
     } catch (err: unknown) {
@@ -85,11 +83,11 @@ const EditGroupPageContent: React.FC = () => {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={user ?? undefined}
         onUserAction={handleUserAction}
         {...headerProps}
-        logo={getDefaultLogo()}
+        logo={logo}
         sidebarCollapsible={true}
         sidebarDefaultCollapsed={false}
         responsive={true}

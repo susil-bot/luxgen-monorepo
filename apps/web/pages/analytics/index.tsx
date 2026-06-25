@@ -1,7 +1,9 @@
 import Head from 'next/head';
+import { useAppShellConfig } from '../../lib/app-shell-config';
+import { useLayoutUser } from '../../lib/app-layout-user';
 import Link from 'next/link';
 import { useQuery } from '@apollo/client';
-import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo } from '@luxgen/ui';
+import { AppLayout } from '@luxgen/ui';
 import { PlanGate } from '../../components/billing/PlanGate';
 import { GET_TENANT_BILLING } from '../../graphql/queries/billing';
 import { normalizePlan } from '@luxgen/billing';
@@ -15,21 +17,20 @@ const ANALYTICS_LINKS = [
     href: '/courses/analytics',
     title: 'Course analytics',
     description: 'Enrollments, completion rates, and top-performing courses.',
-    emoji: '📚',
-  },
+    emoji: '📚' },
   {
     href: '/groups/analytics',
     title: 'Group analytics',
     description: 'Member activity, engagement, and cohort progress.',
-    emoji: '👥',
-  },
+    emoji: '👥' },
 ];
 
 export default function AnalyticsHubPage({ tenant }: Props) {
+  const layoutUser = useLayoutUser();
+  const { sidebarSections, logo } = useAppShellConfig();
   const { data: billingData } = useQuery(GET_TENANT_BILLING, {
     variables: { tenantId: tenant },
-    errorPolicy: 'ignore',
-  });
+    errorPolicy: 'ignore' });
 
   const tenantPlan = normalizePlan(billingData?.tenantBilling?.plan?.toLowerCase?.() ?? 'free');
 
@@ -40,9 +41,9 @@ export default function AnalyticsHubPage({ tenant }: Props) {
       </Head>
       <AppLayout
         responsive
-        sidebarSections={getDefaultSidebarSections()}
-        user={getDefaultUser()}
-        logo={getDefaultLogo()}
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
+        logo={logo}
       >
         <PlanGate feature="analytics" currentPlan={tenantPlan} tenant={tenant}>
           <div className="max-w-3xl mx-auto px-4 py-8">
@@ -64,8 +65,7 @@ export default function AnalyticsHubPage({ tenant }: Props) {
                   style={{
                     background: 'var(--color-bg-secondary)',
                     borderColor: 'var(--color-border)',
-                    textDecoration: 'none',
-                  }}
+                    textDecoration: 'none' }}
                 >
                   <div className="flex items-start gap-4">
                     <span className="text-2xl">{link.emoji}</span>
@@ -89,5 +89,4 @@ export default function AnalyticsHubPage({ tenant }: Props) {
 }
 
 export const getServerSideProps = async (ctx: { query: { tenant?: string } }) => ({
-  props: { tenant: ctx.query.tenant || 'demo' },
-});
+  props: { tenant: ctx.query.tenant || 'demo' } });

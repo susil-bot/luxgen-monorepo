@@ -1,17 +1,18 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
+import { useLayoutUser } from '../../lib/app-layout-user';
 import { useRouter } from 'next/router';
 import { createHandleUserAction } from '../../lib/user-actions';
 import Head from 'next/head';
 import { useQuery, useMutation } from '@apollo/client';
-import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo } from '@luxgen/ui';
+import { AppLayout } from '@luxgen/ui';
 import {
   GET_AUTOMATIONS,
   GET_AUTOMATION_RUNS,
   TOGGLE_AUTOMATION,
   CREATE_AUTOMATION,
   UPDATE_AUTOMATION,
-  DELETE_AUTOMATION,
-} from '../../graphql/queries/automations';
+  DELETE_AUTOMATION } from '../../graphql/queries/automations';
 import { PlanGate } from '../../components/billing/PlanGate';
 import { GET_TENANT_BILLING } from '../../graphql/queries/billing';
 import { normalizePlan } from '@luxgen/billing';
@@ -23,8 +24,7 @@ import {
   formatRelativeTime,
   formatRunTimestamp,
   type UiTriggerType,
-  type UiActionType,
-} from '../../lib/automation-map';
+  type UiActionType } from '../../lib/automation-map';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useTenantScope } from '../../lib/use-tenant-scope';
 
@@ -67,8 +67,7 @@ const TRIGGERS: { type: TriggerType; label: string; emoji: string; desc: string 
     type: 'code_change_committed',
     label: 'Code Change Committed',
     emoji: '✔️',
-    desc: 'When an agent commit lands on branch',
-  },
+    desc: 'When an agent commit lands on branch' },
   { type: 'code_change_merged', label: 'Code Change Merged', emoji: '🔀', desc: 'When agent branch merges to main' },
   { type: 'code_change_failed', label: 'Code Change Failed', emoji: '⚠️', desc: 'When validation or agent run fails' },
 ];
@@ -92,6 +91,8 @@ interface BuilderState {
 }
 
 export default function AutomationsPage({ tenant }: Props) {
+  const layoutUser = useLayoutUser();
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const { queryTenantId, subdomain } = useTenantScope(tenant);
   const [automations, setAutomations] = useState<Automation[]>([]);
@@ -100,24 +101,21 @@ export default function AutomationsPage({ tenant }: Props) {
   const { data: billingData } = useQuery(GET_TENANT_BILLING, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    errorPolicy: 'ignore',
-  });
+    errorPolicy: 'ignore' });
   const tenantPlan = normalizePlan(billingData?.tenantBilling?.plan?.toLowerCase?.() ?? 'free');
 
   const { data: gqlData, refetch: refetchAutomations } = useQuery(GET_AUTOMATIONS, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
     errorPolicy: 'ignore',
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const automationsReady = gqlData?.automations != null;
   const { data: runsData, refetch: refetchRuns } = useQuery(GET_AUTOMATION_RUNS, {
     variables: { tenantId: queryTenantId, limit: 10 },
     skip: !queryTenantId || !automationsReady,
     errorPolicy: 'ignore',
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const [toggleMutation] = useMutation(TOGGLE_AUTOMATION);
   const [createMutation] = useMutation(CREATE_AUTOMATION);
@@ -148,8 +146,7 @@ export default function AutomationsPage({ tenant }: Props) {
           actions: a.actions.map((x) => ({ type: actionFromGql(x.type), label: x.label })),
           runCount: a.runCount,
           lastRunAt: formatRelativeTime(a.lastRunAt),
-          createdAt: formatRelativeTime(a.createdAt) ?? 'Recently',
-        }),
+          createdAt: formatRelativeTime(a.createdAt) ?? 'Recently' }),
       ),
     );
   }, [gqlData]);
@@ -171,8 +168,7 @@ export default function AutomationsPage({ tenant }: Props) {
           triggeredAt: formatRunTimestamp(r.triggeredAt),
           status: r.status,
           durationMs: r.durationMs,
-          error: r.error,
-        }),
+          error: r.error }),
       ),
     );
   }, [runsData]);
@@ -213,8 +209,7 @@ export default function AutomationsPage({ tenant }: Props) {
         enabled: false,
         runCount: 0,
         lastRunAt: null,
-        createdAt: 'Just now',
-      },
+        createdAt: 'Just now' },
     ]);
   };
 
@@ -253,8 +248,7 @@ export default function AutomationsPage({ tenant }: Props) {
     if (graphqlReady) {
       const gqlActions = actionMetas.map((a) => ({
         type: actionToGql(a.type),
-        label: a.label,
-      }));
+        label: a.label }));
       try {
         if (editingId) {
           await updateMutation({
@@ -264,10 +258,7 @@ export default function AutomationsPage({ tenant }: Props) {
                 name: builder.name,
                 triggerType: triggerToGql(builder.trigger!),
                 triggerLabel: triggerMeta.label,
-                actions: gqlActions,
-              },
-            },
-          });
+                actions: gqlActions } } });
         } else {
           await createMutation({
             variables: {
@@ -277,10 +268,7 @@ export default function AutomationsPage({ tenant }: Props) {
                 triggerType: triggerToGql(builder.trigger!),
                 triggerLabel: triggerMeta.label,
                 actions: gqlActions,
-                enabled: false,
-              },
-            },
-          });
+                enabled: false } } });
         }
         await refetchAutomations();
         await refetchRuns();
@@ -295,8 +283,7 @@ export default function AutomationsPage({ tenant }: Props) {
                 ...a,
                 name: builder.name,
                 trigger: { type: builder.trigger!, label: triggerMeta.label },
-                actions: actionMetas,
-              }
+                actions: actionMetas }
             : a,
         ),
       );
@@ -311,8 +298,7 @@ export default function AutomationsPage({ tenant }: Props) {
           actions: actionMetas,
           runCount: 0,
           lastRunAt: null,
-          createdAt: 'Just now',
-        },
+          createdAt: 'Just now' },
       ]);
     }
     setBuilderOpen(false);
@@ -330,8 +316,7 @@ export default function AutomationsPage({ tenant }: Props) {
   const counts = {
     all: automations.length,
     active: automations.filter((a) => a.enabled).length,
-    paused: automations.filter((a) => !a.enabled).length,
-  };
+    paused: automations.filter((a) => !a.enabled).length };
 
   return (
     <>
@@ -340,9 +325,9 @@ export default function AutomationsPage({ tenant }: Props) {
       </Head>
       <AppLayout
         responsive
-        sidebarSections={getDefaultSidebarSections()}
-        user={getDefaultUser()}
-        logo={getDefaultLogo()}
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
+        logo={logo}
         onUserAction={createHandleUserAction(router)}
         showSearch
         showNotifications
@@ -426,8 +411,7 @@ export default function AutomationsPage({ tenant }: Props) {
                             inset: 0,
                             background: auto.enabled ? 'var(--color-green)' : 'var(--color-fill-secondary)',
                             borderRadius: 24,
-                            transition: 'background var(--transition-fast)',
-                          }}
+                            transition: 'background var(--transition-fast)' }}
                         />
                         <span
                           style={{
@@ -439,8 +423,7 @@ export default function AutomationsPage({ tenant }: Props) {
                             background: '#fff',
                             borderRadius: '50%',
                             boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-                            transition: 'left var(--transition-fast)',
-                          }}
+                            transition: 'left var(--transition-fast)' }}
                         />
                       </label>
                     </div>
@@ -487,8 +470,7 @@ export default function AutomationsPage({ tenant }: Props) {
                   padding: '20px 24px 16px',
                   fontWeight: 600,
                   fontSize: 16,
-                  color: 'var(--color-label-primary)',
-                }}
+                  color: 'var(--color-label-primary)' }}
               >
                 Recent Runs
               </div>
@@ -560,8 +542,7 @@ export default function AutomationsPage({ tenant }: Props) {
                     flexDirection: 'column',
                     gap: 20,
                     overflowY: 'auto',
-                    flex: 1,
-                  }}
+                    flex: 1 }}
                 >
                   {/* Name */}
                   <div>
@@ -571,8 +552,7 @@ export default function AutomationsPage({ tenant }: Props) {
                         fontWeight: 600,
                         fontSize: 14,
                         marginBottom: 8,
-                        color: 'var(--color-label-primary)',
-                      }}
+                        color: 'var(--color-label-primary)' }}
                     >
                       Name
                     </label>
@@ -590,8 +570,7 @@ export default function AutomationsPage({ tenant }: Props) {
                         background: 'var(--color-bg-primary)',
                         color: 'var(--color-label-primary)',
                         fontSize: 14,
-                        fontFamily: 'inherit',
-                      }}
+                        fontFamily: 'inherit' }}
                     />
                   </div>
 
@@ -603,8 +582,7 @@ export default function AutomationsPage({ tenant }: Props) {
                         fontWeight: 600,
                         fontSize: 14,
                         marginBottom: 10,
-                        color: 'var(--color-label-primary)',
-                      }}
+                        color: 'var(--color-label-primary)' }}
                     >
                       When this happens… (Trigger)
                     </label>
@@ -635,8 +613,7 @@ export default function AutomationsPage({ tenant }: Props) {
                         fontWeight: 600,
                         fontSize: 14,
                         marginBottom: 10,
-                        color: 'var(--color-label-primary)',
-                      }}
+                        color: 'var(--color-label-primary)' }}
                     >
                       Do this… (Actions)
                     </label>
@@ -657,8 +634,7 @@ export default function AutomationsPage({ tenant }: Props) {
                                   borderRadius: 'var(--radius-sm)',
                                   padding: '2px 8px',
                                   fontSize: 12,
-                                  color: 'var(--color-label-secondary)',
-                                }}
+                                  color: 'var(--color-label-secondary)' }}
                               >
                                 Step {idx + 1}
                               </span>
@@ -685,8 +661,7 @@ export default function AutomationsPage({ tenant }: Props) {
                                   background: 'var(--color-bg-secondary)',
                                   color: 'var(--color-label-primary)',
                                   fontSize: 13,
-                                  fontFamily: 'inherit',
-                                }}
+                                  fontFamily: 'inherit' }}
                               />
                             </div>
                           </div>
@@ -743,8 +718,7 @@ export default function AutomationsPage({ tenant }: Props) {
                       fontSize: 18,
                       fontWeight: 700,
                       textAlign: 'center',
-                      color: 'var(--color-label-primary)',
-                    }}
+                      color: 'var(--color-label-primary)' }}
                   >
                     Delete Automation?
                   </h3>
@@ -753,8 +727,7 @@ export default function AutomationsPage({ tenant }: Props) {
                       margin: '0 0 20px',
                       fontSize: 14,
                       color: 'var(--color-label-secondary)',
-                      textAlign: 'center',
-                    }}
+                      textAlign: 'center' }}
                   >
                     This will permanently delete the automation and its run history.
                   </p>

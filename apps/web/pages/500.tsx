@@ -1,13 +1,15 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { AppLayout, EmptyState, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
-import { createHandleUserAction } from '../lib/user-actions';
+import { AppLayout, EmptyState } from '@luxgen/ui';
+import { useAppShellConfig } from '../lib/app-shell-config';
 import { useLayoutUser } from '../lib/app-layout-user';
 import { useAppLayoutHeader } from '../lib/app-layout-header';
+import { createHandleUserAction } from '../lib/user-actions';
 
 export default function Custom500() {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
-  const user = useLayoutUser();
+  const layoutUser = useLayoutUser();
   const headerProps = useAppLayoutHeader();
   const handleUserAction = createHandleUserAction(router);
 
@@ -20,10 +22,10 @@ export default function Custom500() {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
-        user={user ?? undefined}
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
         onUserAction={handleUserAction}
-        logo={getDefaultLogo()}
+        logo={logo}
         sidebarCollapsible
         responsive
         {...headerProps}

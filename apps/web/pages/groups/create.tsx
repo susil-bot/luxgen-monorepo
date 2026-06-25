@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useMutation } from '@apollo/client';
@@ -6,9 +7,10 @@ import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
 import { CREATE_GROUP } from '../../graphql/queries/groups';
-import { SnackbarProvider, useSnackbar, AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { SnackbarProvider, useSnackbar, AppLayout } from '@luxgen/ui';
 
 const CreateGroupPageContent: React.FC = () => {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const { showSuccess, showError } = useSnackbar();
   const user = useLayoutUser();
@@ -17,8 +19,7 @@ const CreateGroupPageContent: React.FC = () => {
     name: '',
     description: '',
     maxUsers: '',
-    isPublic: false,
-  });
+    isPublic: false });
 
   const handleUserAction = createHandleUserAction(router);
   const headerProps = useAppLayoutHeader();
@@ -27,8 +28,7 @@ const CreateGroupPageContent: React.FC = () => {
     const { name, value, type } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
-    }));
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,11 +41,7 @@ const CreateGroupPageContent: React.FC = () => {
             description: formData.description,
             settings: {
               maxMembers: formData.maxUsers ? Number(formData.maxUsers) : undefined,
-              allowSelfJoin: formData.isPublic,
-            },
-          },
-        },
-      });
+              allowSelfJoin: formData.isPublic } } } });
       showSuccess('Group created successfully!');
       const newId = data?.createGroup?.id;
       void router.push(newId ? `/groups/${newId}` : '/groups');
@@ -63,16 +59,14 @@ const CreateGroupPageContent: React.FC = () => {
     fontSize: '14px',
     color: 'var(--color-label-primary)',
     outline: 'none',
-    fontFamily: 'inherit',
-  };
+    fontFamily: 'inherit' };
 
   const labelStyle: React.CSSProperties = {
     display: 'block',
     fontSize: '13px',
     fontWeight: 500,
     color: 'var(--color-label-secondary)',
-    marginBottom: '6px',
-  };
+    marginBottom: '6px' };
 
   return (
     <>
@@ -82,11 +76,11 @@ const CreateGroupPageContent: React.FC = () => {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={user ?? undefined}
         onUserAction={handleUserAction}
         {...headerProps}
-        logo={getDefaultLogo()}
+        logo={logo}
         sidebarCollapsible={true}
         sidebarDefaultCollapsed={false}
         responsive={true}
@@ -103,8 +97,7 @@ const CreateGroupPageContent: React.FC = () => {
               className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
               style={{
                 backgroundColor: 'var(--color-fill-secondary)',
-                color: 'var(--color-label-primary)',
-              }}
+                color: 'var(--color-label-primary)' }}
             >
               Cancel
             </button>
@@ -173,8 +166,7 @@ const CreateGroupPageContent: React.FC = () => {
                   className="px-5 py-2.5 rounded-xl text-sm font-medium transition-all"
                   style={{
                     backgroundColor: 'var(--color-fill-secondary)',
-                    color: 'var(--color-label-primary)',
-                  }}
+                    color: 'var(--color-label-primary)' }}
                 >
                   Cancel
                 </button>

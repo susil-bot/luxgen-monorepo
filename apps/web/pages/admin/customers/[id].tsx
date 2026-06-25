@@ -1,18 +1,16 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useAppShellConfig } from '../../../lib/app-shell-config';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMutation, useQuery } from '@apollo/client';
 import {
   AppLayout,
-  getDefaultLogo,
-  getDefaultSidebarSections,
   CustomerDetailView,
   buildCustomerDetailFromUser,
   SnackbarProvider,
   useSnackbar,
-  type CustomerDetail,
-} from '@luxgen/ui';
+  type CustomerDetail } from '@luxgen/ui';
 import { PageLoadingState } from '../../../components/common/PageStates';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../../lib/app-layout-user';
@@ -34,6 +32,7 @@ interface Props {
 }
 
 function AdminCustomerDetailContent({ tenant }: Props) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
@@ -50,26 +49,22 @@ function AdminCustomerDetailContent({ tenant }: Props) {
   const { data: userData, loading: userLoading } = useQuery(GET_USER, {
     variables: { id: customerId },
     skip: !customerId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const { data: coursesData, loading: coursesLoading } = useQuery(GET_COURSES, {
     variables: { tenantId: queryTenantId },
     skip: !isMongoObjectId(queryTenantId),
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
     variables: { tenantId: queryTenantId },
     skip: !isMongoObjectId(queryTenantId),
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const { data: enrollmentsData } = useQuery(GET_ENROLLMENTS, {
     variables: { tenantId: queryTenantId },
     skip: !isMongoObjectId(queryTenantId),
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const learners = useMemo(
     () => (usersData?.users ?? []).filter((u: { role: string }) => isLearnerRole(u.role)),
@@ -139,8 +134,7 @@ function AdminCustomerDetailContent({ tenant }: Props) {
   const {
     notes: customerNotes,
     onNotesChange: onCustomerNotesChange,
-    savingNotes: savingCustomerNotes,
-  } = useCustomerNotes(customerId, timelineTenantId, customer?.notes ?? '');
+    savingNotes: savingCustomerNotes } = useCustomerNotes(customerId, timelineTenantId, customer?.notes ?? '');
 
   const [deleteUser] = useMutation(DELETE_USER);
 
@@ -172,9 +166,9 @@ function AdminCustomerDetailContent({ tenant }: Props) {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive
@@ -215,5 +209,3 @@ export default function AdminCustomerDetailPage(props: Props) {
     </SnackbarProvider>
   );
 }
-
-export const getServerSideProps = getTenantPageProps;

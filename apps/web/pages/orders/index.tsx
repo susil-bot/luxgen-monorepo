@@ -1,11 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useQuery } from '@apollo/client';
 import {
   AppLayout,
-  getDefaultLogo,
-  getDefaultSidebarSections,
   OrderListView,
   buildOrdersFromEnrollments,
   filterOrdersByTab,
@@ -28,6 +27,7 @@ interface OrdersPageProps {
 }
 
 function OrdersPageContent({ tenant }: OrdersPageProps) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
@@ -40,20 +40,17 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
   const { data: coursesData, loading: coursesLoading } = useQuery(GET_COURSES, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const { data: enrollmentsData, loading: enrollmentsLoading } = useQuery(GET_ENROLLMENTS, {
     variables: { tenantId: queryTenantId },
     skip: !isMongoObjectId(queryTenantId),
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   useEffect(() => {
     const q = router.query.search;
@@ -71,8 +68,7 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
       unpaid: filterOrdersByTab(allOrders, 'unpaid').length,
       unfulfilled: filterOrdersByTab(allOrders, 'unfulfilled').length,
       open: filterOrdersByTab(allOrders, 'open').length,
-      archived: filterOrdersByTab(allOrders, 'archived').length,
-    }),
+      archived: filterOrdersByTab(allOrders, 'archived').length }),
     [allOrders],
   );
 
@@ -102,9 +98,9 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive
@@ -143,5 +139,3 @@ export default function OrdersPage(props: OrdersPageProps) {
     </SnackbarProvider>
   );
 }
-
-export const getServerSideProps = getTenantPageProps;

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { AppLayout, getDefaultLogo, getDefaultSidebarSections, SnackbarProvider } from '@luxgen/ui';
+import { AppLayout, SnackbarProvider } from '@luxgen/ui';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
@@ -37,6 +38,7 @@ const STATUS_OPTIONS = [
 ];
 
 function AgentTasksContent({ tenant }: Props) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const layoutUser = useLayoutUser();
   const headerProps = useAppLayoutHeader();
@@ -61,8 +63,7 @@ function AgentTasksContent({ tenant }: Props) {
         if (cursor) params.set('cursor', cursor);
 
         const res = await fetch(`/api/agent/tasks/list?${params}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {},
-        });
+          headers: token ? { Authorization: `Bearer ${token}` } : {} });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to load tasks');
 
@@ -91,8 +92,8 @@ function AgentTasksContent({ tenant }: Props) {
       <AppLayout
         responsive
         user={layoutUser}
-        logo={getDefaultLogo()}
-        sidebarSections={getDefaultSidebarSections()}
+        logo={logo}
+        sidebarSections={sidebarSections}
         onUserAction={handleUserAction}
         showSearch
         {...headerProps}
@@ -198,5 +199,3 @@ export default function AgentTasksPage(props: Props) {
     </SnackbarProvider>
   );
 }
-
-export const getServerSideProps = getTenantPageProps;

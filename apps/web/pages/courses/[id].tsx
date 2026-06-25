@@ -1,16 +1,14 @@
 import Head from 'next/head';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useQuery } from '@apollo/client';
 import {
   AppLayout,
-  getDefaultSidebarSections,
-  getDefaultLogo,
   TenantDebug,
   CourseDetailMenu,
   CourseOverview,
-  CourseAnalytics,
-} from '@luxgen/ui';
+  CourseAnalytics } from '@luxgen/ui';
 import { TenantBanner } from '../../components/tenant/TenantBanner';
 import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
@@ -20,6 +18,7 @@ import { mapCourseToOverview, roleFromSession } from '../../lib/course-display';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
 export default function CoursePage({ tenant }: { tenant: string }) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const courseId = typeof router.query.id === 'string' ? router.query.id : '';
   const layoutUser = useLayoutUser();
@@ -28,8 +27,7 @@ export default function CoursePage({ tenant }: { tenant: string }) {
   const { data, loading, error } = useQuery(GET_COURSE, {
     variables: { id: courseId },
     skip: !courseId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
   const node = data?.course;
   const course = node ? mapCourseToOverview(node) : null;
   if (!courseId || (loading && !course)) return <PageLoadingState label="Loading course…" />;
@@ -52,9 +50,9 @@ export default function CoursePage({ tenant }: { tenant: string }) {
         <title>{course.title}</title>
       </Head>
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={createHandleUserAction(router)}
         {...headerProps}
         responsive
@@ -71,8 +69,7 @@ export default function CoursePage({ tenant }: { tenant: string }) {
                 totalEnrollments: node?.students?.length ?? 0,
                 completionRate: 0,
                 averageRating: 0,
-                engagementScore: 0,
-              }}
+                engagementScore: 0 }}
             />
           )}
           <CourseDetailMenu

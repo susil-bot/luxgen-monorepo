@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useAppShellConfig } from '../lib/app-shell-config';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMutation } from '@apollo/client';
-import { AppLayout, getDefaultLogo, getDefaultSidebarSections, SnackbarProvider, useSnackbar } from '@luxgen/ui';
+import { AppLayout, SnackbarProvider, useSnackbar } from '@luxgen/ui';
 import { createHandleUserAction } from '../lib/user-actions';
 import { useLayoutUser } from '../lib/app-layout-user';
 import { useAppLayoutHeader } from '../lib/app-layout-header';
@@ -16,6 +17,7 @@ interface ProfilePageProps {
 }
 
 function ProfileContent({ tenant }: ProfilePageProps) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const layoutUser = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
@@ -97,9 +99,7 @@ function ProfileContent({ tenant }: ProfilePageProps) {
       await updateUser({
         variables: {
           id: session.id,
-          input: { firstName: firstName.trim(), lastName: lastName.trim() },
-        },
-      });
+          input: { firstName: firstName.trim(), lastName: lastName.trim() } } });
       updateStoredUser({ firstName: firstName.trim(), lastName: lastName.trim() });
       showSuccess('Your profile changes were saved successfully.');
     } catch (err: unknown) {
@@ -119,9 +119,9 @@ function ProfileContent({ tenant }: ProfilePageProps) {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive
@@ -221,5 +221,3 @@ export default function ProfilePage(props: ProfilePageProps) {
     </SnackbarProvider>
   );
 }
-
-export const getServerSideProps = getTenantPageProps;

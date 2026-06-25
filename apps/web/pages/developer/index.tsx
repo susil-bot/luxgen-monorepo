@@ -1,20 +1,18 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import {
   SnackbarProvider,
   useSnackbar,
-  AppLayout,
-  getDefaultUser,
-  getDefaultLogo,
-  getDefaultSidebarSections,
-} from '@luxgen/ui';
+  AppLayout } from '@luxgen/ui';
 import AgentChat from '../../components/agent/AgentChat';
 import AgentTransparency from '../../components/agent/AgentTransparency';
 import { AGENT_TOOLS } from '@luxgen/agent';
 import { SYSTEM_PROMPT } from '../../lib/agent-system-prompt';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
+import { useLayoutUser } from '../../lib/app-layout-user';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -64,8 +62,7 @@ function IosToggle({ checked, onChange, disabled }: { checked: boolean; onChange
         height: 22,
         flexShrink: 0,
         opacity: disabled ? 0.4 : 1,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-      }}
+        cursor: disabled ? 'not-allowed' : 'pointer' }}
     >
       <input
         type="checkbox"
@@ -80,8 +77,7 @@ function IosToggle({ checked, onChange, disabled }: { checked: boolean; onChange
           inset: 0,
           background: checked ? 'var(--color-green)' : 'var(--color-fill-secondary)',
           borderRadius: 22,
-          transition: 'background 150ms ease',
-        }}
+          transition: 'background 150ms ease' }}
       />
       <span
         style={{
@@ -94,8 +90,7 @@ function IosToggle({ checked, onChange, disabled }: { checked: boolean; onChange
           borderRadius: '50%',
           boxShadow: '0 1px 3px rgba(0,0,0,0.25)',
           transition: 'left 150ms ease',
-          pointerEvents: 'none',
-        }}
+          pointerEvents: 'none' }}
       />
     </label>
   );
@@ -110,8 +105,7 @@ function ParamRow({
   max,
   step,
   display,
-  onChange,
-}: {
+  onChange }: {
   label: string;
   value: number;
   min: number;
@@ -130,8 +124,7 @@ function ParamRow({
             fontWeight: 600,
             color: 'var(--color-label-primary)',
             minWidth: 48,
-            textAlign: 'right',
-          }}
+            textAlign: 'right' }}
         >
           {display ?? value}
         </span>
@@ -180,8 +173,7 @@ function ConfigPanel({
   onMaxTokensChange,
   onToolToggle,
   onSystemPromptModeChange,
-  onCustomSystemPromptChange,
-}: ConfigPanelProps) {
+  onCustomSystemPromptChange }: ConfigPanelProps) {
   const [promptExpanded, setPromptExpanded] = useState(false);
 
   const selectedMeta = models.find((m) => m.name === selectedModel);
@@ -196,8 +188,7 @@ function ConfigPanel({
         gap: 0,
         borderRight: '1px solid var(--color-separator)',
         overflowY: 'auto',
-        background: 'var(--color-bg-secondary)',
-      }}
+        background: 'var(--color-bg-secondary)' }}
     >
       {/* Model section */}
       <div style={{ padding: '16px 16px 12px', borderBottom: '1px solid var(--color-separator)' }}>
@@ -208,8 +199,7 @@ function ConfigPanel({
             textTransform: 'uppercase',
             letterSpacing: '0.06em',
             color: 'var(--color-label-tertiary)',
-            marginBottom: 10,
-          }}
+            marginBottom: 10 }}
         >
           Model
         </p>
@@ -247,8 +237,7 @@ function ConfigPanel({
           borderBottom: '1px solid var(--color-separator)',
           display: 'flex',
           flexDirection: 'column',
-          gap: 14,
-        }}
+          gap: 14 }}
       >
         <p
           style={{
@@ -257,8 +246,7 @@ function ConfigPanel({
             textTransform: 'uppercase',
             letterSpacing: '0.06em',
             color: 'var(--color-label-tertiary)',
-            margin: 0,
-          }}
+            margin: 0 }}
         >
           Parameters
         </p>
@@ -292,8 +280,7 @@ function ConfigPanel({
               textTransform: 'uppercase',
               letterSpacing: '0.06em',
               color: 'var(--color-label-tertiary)',
-              margin: 0,
-            }}
+              margin: 0 }}
           >
             Tools
           </p>
@@ -313,8 +300,7 @@ function ConfigPanel({
                 background: enabledTools.has(tool.id) ? 'rgba(10,132,255,0.06)' : 'var(--color-bg-primary)',
                 border: `1px solid ${enabledTools.has(tool.id) ? 'rgba(10,132,255,0.25)' : 'var(--color-separator)'}`,
                 borderRadius: 'var(--radius-md)',
-                transition: 'all 150ms ease',
-              }}
+                transition: 'all 150ms ease' }}
             >
               <span style={{ fontSize: 16, flexShrink: 0 }}>{tool.emoji}</span>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -324,8 +310,7 @@ function ConfigPanel({
                     fontWeight: 600,
                     fontFamily: 'ui-monospace, monospace',
                     color: 'var(--color-label-primary)',
-                    marginBottom: 1,
-                  }}
+                    marginBottom: 1 }}
                 >
                   {tool.label}
                 </div>
@@ -347,8 +332,7 @@ function ConfigPanel({
               textTransform: 'uppercase',
               letterSpacing: '0.06em',
               color: 'var(--color-label-tertiary)',
-              margin: 0,
-            }}
+              margin: 0 }}
           >
             System Prompt
           </p>
@@ -360,8 +344,7 @@ function ConfigPanel({
               background: 'none',
               border: 'none',
               cursor: 'pointer',
-              fontFamily: 'inherit',
-            }}
+              fontFamily: 'inherit' }}
           >
             {promptExpanded ? 'Hide' : 'Edit'}
           </button>
@@ -383,8 +366,7 @@ function ConfigPanel({
                 fontWeight: 500,
                 background: systemPromptMode === mode ? 'var(--color-blue)' : 'var(--color-fill-tertiary)',
                 color: systemPromptMode === mode ? '#fff' : 'var(--color-label-secondary)',
-                transition: 'all 150ms ease',
-              }}
+                transition: 'all 150ms ease' }}
             >
               {mode === 'default' ? 'Default' : 'Custom'}
             </button>
@@ -408,8 +390,7 @@ function ConfigPanel({
                   maxHeight: 200,
                   overflowY: 'auto',
                   whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                }}
+                  wordBreak: 'break-word' }}
               >
                 {SYSTEM_PROMPT.slice(0, 600)}…
               </pre>
@@ -437,10 +418,11 @@ function ConfigPanel({
 function AIStudioContent() {
   const router = useRouter();
   const { showSuccess, showInfo } = useSnackbar();
+  const layoutUser = useLayoutUser();
+  const { sidebarSections, logo } = useAppShellConfig();
 
   // Session
   const [sessionId, setSessionId] = useState('');
-  const [user, setUser] = useState<import('@luxgen/ui').UserMenu | null>(null);
 
   // Ollama
   const [ollamaStatus, setOllamaStatus] = useState<OllamaStatus>('checking');
@@ -466,19 +448,6 @@ function AIStudioContent() {
   useEffect(() => {
     // Session ID (client-only to avoid hydration mismatch)
     setSessionId(`session-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`);
-
-    // User from localStorage
-    try {
-      const raw = localStorage.getItem('user');
-      if (raw) {
-        const p = JSON.parse(raw);
-        setUser({ name: `${p.firstName} ${p.lastName}`, email: p.email, role: p.role });
-      } else {
-        setUser(getDefaultUser());
-      }
-    } catch {
-      setUser(getDefaultUser());
-    }
 
     // Ollama health + model list
     const checkHealth = async () => {
@@ -594,10 +563,10 @@ function AIStudioContent() {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
-        user={user}
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
         onUserAction={handleUserAction}
-        logo={getDefaultLogo()}
+        logo={logo}
         sidebarCollapsible
         responsive
         contentMaxWidth={false}
@@ -613,8 +582,7 @@ function AIStudioContent() {
               borderBottom: '1px solid var(--color-separator)',
               background: 'var(--color-bg-secondary)',
               flexShrink: 0,
-              gap: 12,
-            }}
+              gap: 12 }}
           >
             {/* Left: identity */}
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -628,8 +596,7 @@ function AIStudioContent() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: 17,
-                }}
+                  fontSize: 17 }}
               >
                 🤖
               </div>
@@ -649,8 +616,7 @@ function AIStudioContent() {
                   alignItems: 'center',
                   gap: 5,
                   fontSize: 12,
-                  color: 'var(--color-label-secondary)',
-                }}
+                  color: 'var(--color-label-secondary)' }}
               >
                 <span
                   style={{
@@ -659,8 +625,7 @@ function AIStudioContent() {
                     borderRadius: '50%',
                     background: statusDot,
                     display: 'inline-block',
-                    flexShrink: 0,
-                  }}
+                    flexShrink: 0 }}
                 />
                 {statusText}
                 {selectedModel && ollamaStatus === 'ready' && (
@@ -688,8 +653,7 @@ function AIStudioContent() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: 5,
-                  transition: 'all 150ms ease',
-                }}
+                  transition: 'all 150ms ease' }}
               >
                 ⚙️ {configOpen ? 'Hide Config' : 'Show Config'}
               </button>
@@ -706,8 +670,7 @@ function AIStudioContent() {
                 gap: 10,
                 background: 'rgba(255,59,48,0.08)',
                 borderBottom: '1px solid rgba(255,59,48,0.20)',
-                flexShrink: 0,
-              }}
+                flexShrink: 0 }}
             >
               <span style={{ fontSize: 16 }}>🔴</span>
               <div>
@@ -720,8 +683,7 @@ function AIStudioContent() {
                       borderRadius: 4,
                       background: 'var(--color-fill-secondary)',
                       fontFamily: 'ui-monospace, monospace',
-                      fontSize: 11,
-                    }}
+                      fontSize: 11 }}
                   >
                     docker compose up ollama -d
                   </code>
@@ -738,8 +700,7 @@ function AIStudioContent() {
                 gap: 10,
                 background: 'rgba(255,149,0,0.08)',
                 borderBottom: '1px solid rgba(255,149,0,0.20)',
-                flexShrink: 0,
-              }}
+                flexShrink: 0 }}
             >
               <span style={{ fontSize: 16 }}>🟡</span>
               <div>
@@ -754,8 +715,7 @@ function AIStudioContent() {
                       borderRadius: 4,
                       background: 'var(--color-fill-secondary)',
                       fontFamily: 'ui-monospace, monospace',
-                      fontSize: 11,
-                    }}
+                      fontSize: 11 }}
                   >
                     ollama pull mistral
                   </code>{' '}
@@ -766,8 +726,7 @@ function AIStudioContent() {
                       borderRadius: 4,
                       background: 'var(--color-fill-secondary)',
                       fontFamily: 'ui-monospace, monospace',
-                      fontSize: 11,
-                    }}
+                      fontSize: 11 }}
                   >
                     docker compose up ollama-model-pull
                   </code>
@@ -783,8 +742,7 @@ function AIStudioContent() {
               flex: 1,
               minHeight: 0,
               overflow: 'hidden',
-              userSelect: isDragging ? 'none' : 'auto',
-            }}
+              userSelect: isDragging ? 'none' : 'auto' }}
           >
             {/* Zone 1: Config panel (collapsible) */}
             {configOpen && (
@@ -813,8 +771,7 @@ function AIStudioContent() {
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                width: `${100 - rightPanelWidth}%`,
-              }}
+                width: `${100 - rightPanelWidth}%` }}
             >
               {sessionId && (
                 <AgentChat
@@ -841,16 +798,14 @@ function AIStudioContent() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                transition: 'background 100ms ease',
-              }}
+                transition: 'background 100ms ease' }}
             >
               <div
                 style={{
                   width: 2,
                   height: 32,
                   borderRadius: 2,
-                  background: isDragging ? 'var(--color-blue)' : 'var(--color-separator-opaque)',
-                }}
+                  background: isDragging ? 'var(--color-blue)' : 'var(--color-separator-opaque)' }}
               />
             </div>
 
@@ -862,8 +817,7 @@ function AIStudioContent() {
                 display: 'flex',
                 flexDirection: 'column',
                 overflow: 'hidden',
-                borderLeft: '1px solid var(--color-separator)',
-              }}
+                borderLeft: '1px solid var(--color-separator)' }}
             >
               {sessionId && (
                 <AgentTransparency

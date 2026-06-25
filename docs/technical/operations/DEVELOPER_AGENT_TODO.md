@@ -1060,19 +1060,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       No `pages/500.tsx` custom error page exists. Next.js defaults to a plain white page for 500 errors.
       **Fix:** Create `pages/500.tsx` consistent with `pages/404.tsx` using `AppLayout` and the `PageEmptyState` component.
 
-- [ ] **UI-13** `[layout]` `[arch]`
+- [x] **UI-13** `[layout]` `[arch]`
       `overflow-x: hidden` is set on `body` in `globals.css`. This hides overflowing content instead of fixing the root overflow cause, and on iOS it can break `position: sticky` elements inside the body.
       **Fix:** Remove `overflow-x: hidden` from `body`; find and fix the element that overflows instead.
 
-- [ ] **UI-14** `[layout]` `[arch]`
+- [x] **UI-14** `[layout]` `[arch]`
       `getDefaultSidebarSections()` returns a static navigation array that is hard-coded in `@luxgen/ui`. Any page using it ignores: tenant-specific menu items, user-role-based item visibility, and feature-flag gates. Approximately 28 pages are affected.
       **Fix:** Replace all `getDefaultSidebarSections()` calls with a hook (`useSidebarSections()`) that reads from the session role and billing plan to filter items dynamically.
 
-- [ ] **UI-15** `[layout]` `[arch]`
+- [x] **UI-15** `[layout]` `[arch]`
       `getDefaultUser()` is called in 16 page files. It returns a static object `{ name: 'Admin User', email: 'admin@luxgen.com', role: 'ADMIN' }`. On production pages this fake user appears in the nav bar initials/avatar whenever real session data has not yet loaded, creating a brief incorrect flash.
       **Fix:** Return `null` or `undefined` until the real session is confirmed; use a skeleton/spinner in the NavBar while loading.
 
-- [ ] **UI-16** `[layout]` `[arch]`
+- [x] **UI-16** `[layout]` `[arch]`
       `getDefaultLogo()` returns a static object. All 28 usages ignore the real tenant's logo URL that may be stored in the database and accessible via `GET_TENANT`.
       **Fix:** Replace with a `useTenantLogo()` hook that fetches from the tenant config query.
 
