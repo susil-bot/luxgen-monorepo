@@ -80,7 +80,7 @@ export const requirePermissions = (requiredPermissions: string[]) => {
       }
 
       const hasAllPermissions = requiredPermissions.every((permission) =>
-        hasPermission(req.user!.role as any, permission),
+        hasPermission(req.user!.role, permission),
       );
 
       if (!hasAllPermissions) {
@@ -198,7 +198,7 @@ export const canInviteUsers = async (req: RoleManagementRequest, res: Response, 
       });
     }
 
-    if (!hasPermission(req.user.role as any, 'invite:send')) {
+    if (!hasPermission(req.user.role, 'invite:send')) {
       return res.status(403).json({
         success: false,
         message: 'Insufficient privileges to invite users',
@@ -227,7 +227,7 @@ export const canApproveRequests = async (req: RoleManagementRequest, res: Respon
       });
     }
 
-    if (!hasPermission(req.user.role as any, 'request:approve')) {
+    if (!hasPermission(req.user.role, 'request:approve')) {
       return res.status(403).json({
         success: false,
         message: 'Insufficient privileges to approve requests',

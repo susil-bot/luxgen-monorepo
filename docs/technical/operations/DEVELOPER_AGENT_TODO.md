@@ -284,7 +284,7 @@
       **File:** `apps/api/src/utils/jwt.ts` line 25
       `expiresIn` cast with `as any` to satisfy `jwt.sign`. `jsonwebtoken` v9 accepts `string | number` directly. Remove the cast and type the parameter correctly.
 
-- [ ] **L-07** `[type]`
+- [x] **L-07** `[type]`
       **File:** `apps/api/src/middleware/roleManagement.ts` lines 69, 188, 217
       `req.user!.role as any` passed to `hasPermission` because `IUser.role` is typed as `string`. Type `IUser.role` as `UserRole` (from the canonical definition after H-16 is fixed) to eliminate these casts.
 
