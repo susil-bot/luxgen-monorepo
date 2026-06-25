@@ -48,9 +48,6 @@ export interface SidebarProps {
   };
   onUserAction?: (action: 'profile' | 'settings' | 'logout') => void;
   className?: string;
-  variant?: 'default' | 'compact' | 'minimal';
-  position?: 'fixed' | 'sticky' | 'static';
-  width?: 'narrow' | 'normal' | 'wide';
   showUserSection?: boolean;
   showLogo?: boolean;
   collapsible?: boolean;
