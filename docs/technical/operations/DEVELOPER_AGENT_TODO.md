@@ -1229,19 +1229,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/LoginForm/LoginForm.tsx` and `RegisterForm/RegisterForm.tsx` share identical hardcoded success colour strings (`'bg-green-600'`, `'hover:bg-green-700'`, etc.). The same value is duplicated in two files.
       **Fix:** Extract to a shared `formTheme` constant; replace with `var(--color-green)`.
 
-- [ ] **UI-53** `[hardcode]`
+- [x] **UI-53** `[hardcode]`
       `packages/ui/src/Accordion/Accordion.tsx` uses `'all 0.2s ease'` for transitions instead of the CSS variable `var(--transition-base)` defined in `globals.css`.
       **Fix:** Replace all hardcoded transition strings with CSS variable references.
 
-- [ ] **UI-54** `[hardcode]`
+- [x] **UI-54** `[hardcode]`
       `packages/ui/src/Carousel/Carousel.tsx` uses `'transform 0.3s ease'` hardcoded.
       **Fix:** Replace with `var(--transition-base)`.
 
-- [ ] **UI-55** `[hardcode]`
+- [x] **UI-55** `[hardcode]`
       `packages/ui/src/Snackbar/Snackbar.tsx` uses Tailwind colour classes for type variants (`'bg-green-50 border-green-200 text-green-800'`) which do not honour the design token system.
       **Fix:** Map `type` to CSS variable pairs: `success → var(--color-green)`, `error → var(--color-red)`, etc.
 
-- [ ] **UI-56** `[hardcode]`
+- [x] **UI-56** `[hardcode]`
       `packages/ui/src/Input/Input.tsx` uses `'border-gray-300'` and `'border-red-300'` classes instead of `var(--color-separator)` and `var(--color-red)`.
       **Fix:** Replace Tailwind colour classes with CSS variable references.
 
