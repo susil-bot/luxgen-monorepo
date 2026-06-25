@@ -6,15 +6,13 @@ export enum LogLevel {
 }
 
 function resolveLogLevel(): LogLevel {
-  const raw = process.env.LOG_LEVEL?.toLowerCase();
-  if (raw && Object.values(LogLevel).includes(raw as LogLevel)) {
-    return raw as LogLevel;
-  }
+  const raw = process.env.LOG_LEVEL as LogLevel | undefined;
+  if (raw && Object.values(LogLevel).includes(raw)) return raw;
   return LogLevel.INFO;
 }
 
 function useJsonLogs(): boolean {
-  return process.env.JSON_LOGS === 'true';
+  return process.env.JSON_LOGS === 'true' || process.env.JSON_LOGS === '1';
 }
 
 class Logger {
@@ -25,42 +23,52 @@ class Logger {
     return messageLevelIndex <= currentLevelIndex;
   }
 
-  private write(level: LogLevel, message: string, meta?: unknown): void {
-    if (!this.shouldLog(level)) return;
-
-    const timestamp = new Date().toISOString();
+  private formatMessage(level: LogLevel, message: string, meta?: unknown): string {
     if (useJsonLogs()) {
-      const payload = { timestamp, level, message, ...(meta && typeof meta === 'object' ? meta : { meta }) };
-      const line = JSON.stringify(payload);
-      if (level === LogLevel.ERROR) console.error(line);
-      else if (level === LogLevel.WARN) console.warn(line);
-      else if (level === LogLevel.DEBUG) console.debug(line);
-      else console.info(line);
-      return;
+      return JSON.stringify({
+        ts: new Date().toISOString(),
+        level,
+        message,
+        ...(meta !== undefined ? { meta } : {}),
+      });
     }
+    const timestamp = new Date().toISOString();
+    const metaStr = meta !== undefined ? ` ${JSON.stringify(meta)}` : '';
+    return `[${timestamp}] ${level.toUpperCase()}: ${message}${metaStr}`;
+  }
 
-    const metaStr = meta ? ` ${JSON.stringify(meta)}` : '';
-    const line = `[${timestamp}] ${level.toUpperCase()}: ${message}${metaStr}`;
-    if (level === LogLevel.ERROR) console.error(line);
-    else if (level === LogLevel.WARN) console.warn(line);
-    else if (level === LogLevel.DEBUG) console.debug(line);
-    else console.info(line);
+  private emit(level: LogLevel, message: string, meta?: unknown): void {
+    if (!this.shouldLog(level)) return;
+    const line = this.formatMessage(level, message, meta);
+    switch (level) {
+      case LogLevel.ERROR:
+        console.error(line);
+        break;
+      case LogLevel.WARN:
+        console.warn(line);
+        break;
+      case LogLevel.DEBUG:
+        console.debug(line);
+        break;
+      default:
+        console.info(line);
+    }
   }
 
   error(message: string, meta?: unknown): void {
-    this.write(LogLevel.ERROR, message, meta);
+    this.emit(LogLevel.ERROR, message, meta);
   }
 
   warn(message: string, meta?: unknown): void {
-    this.write(LogLevel.WARN, message, meta);
+    this.emit(LogLevel.WARN, message, meta);
   }
 
   info(message: string, meta?: unknown): void {
-    this.write(LogLevel.INFO, message, meta);
+    this.emit(LogLevel.INFO, message, meta);
   }
 
   debug(message: string, meta?: unknown): void {
-    this.write(LogLevel.DEBUG, message, meta);
+    this.emit(LogLevel.DEBUG, message, meta);
   }
 }
 

@@ -292,11 +292,11 @@
       **File:** `apps/api/src/schema/group/resolvers.ts` — throughout
       All resolver arguments typed as `any` (`_: any`, `{ input }: { input: any }`). Add precise input types matching the GraphQL schema for all 12 mutations and queries.
 
-- [ ] **L-09** `[type]`
+- [x] **L-09** `[type]`
       **File:** `apps/web/pages/automations/index.tsx` line 864 · `apps/web/pages/dashboard.tsx` line 149
       `getServerSideProps` typed as `async (ctx: any)`. Replace with `GetServerSideProps<PageProps>` for proper Next.js type safety.
 
-- [ ] **L-10** `[type]`
+- [x] **L-10** `[type]`
       **File:** `apps/api/src/schema/index.ts` lines 73–93
       Custom JSON scalar `parseLiteral` uses `any` throughout; the `ast` parameter should be typed as `graphql.ValueNode`. (Related to M-13 which replaces this implementation entirely.)
 
@@ -344,7 +344,7 @@
       **File:** `apps/web/pages/api/users/me.ts` line 122 · `apps/web/pages/api/users/current.ts` line 122
       Server-side `console.log` outputs user name, email, role, and tenant on every authenticated request. PII should not appear in server logs without scrubbing. Remove or redact.
 
-- [ ] **L-22** `[style]`
+- [x] **L-22** `[style]`
       **File:** `apps/web/pages/dashboard.tsx` line 100
       Hard-coded `'Welcome to Ideavibes'` in the banner carousel. Banner content must come from tenant configuration. Reference `tenantConfig.brand.name` or equivalent.
 
