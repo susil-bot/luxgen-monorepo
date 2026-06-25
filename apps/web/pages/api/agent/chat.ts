@@ -1,5 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { runAgentLoop, findAvailableModel, ensureGitSession, bindSessionAuth, appendAuditEntry } from '@luxgen/agent';
+import {
+  runAgentLoop,
+  findAvailableModel,
+  ensureGitSession,
+  bindSessionAuth,
+  appendAuditEntry,
+  acquireTenantStreamSlot,
+  releaseTenantStreamSlot,
+  isAgentMessageRateLimited,
+} from '@luxgen/agent';
 import { requireAgentStudio } from '../../../lib/agent-auth';
 import { getOllamaUrl } from '@luxgen/config';
 
@@ -46,84 +55,103 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const auth = await requireAgentStudio(req, res);
   if (!auth) return;
 
-  bindSessionAuth(sessionId, auth, { mode: 'interactive' });
-  await appendAuditEntry({
-    sessionId,
-    tenantId: auth.tenantId,
-    userId: auth.userId,
-    action: 'run_started',
-    details: { mode: 'interactive' },
-  }).catch(() => {});
-
-  const requestedModelVal = requestedModel || DEFAULT_MODEL;
-  const available = await findAvailableModel(OLLAMA_HOST, requestedModelVal);
-  if (!available) {
-    res.status(503).json({
-      error: `Ollama not reachable or no models available at ${OLLAMA_HOST}. Run: docker compose up ollama`,
+  if (await isAgentMessageRateLimited(auth.userId)) {
+    res.status(429).json({
+      error: 'Too many agent messages. Please wait a minute before sending more.',
     });
     return;
   }
 
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache, no-transform');
-  res.setHeader('Connection', 'keep-alive');
-  res.setHeader('X-Accel-Buffering', 'no');
-  res.status(200);
-  res.flushHeaders();
-
-  let isCancelled = false;
-  let responseEnded = false;
-
-  const endResponse = () => {
-    if (responseEnded || res.writableEnded) return;
-    responseEnded = true;
-    res.end();
-  };
-
-  const heartbeatInterval = setInterval(() => {
-    if (isCancelled) {
-      clearInterval(heartbeatInterval);
-      return;
-    }
-    sendEvent(res, 'heartbeat', { ts: Date.now() });
-  }, 15_000);
-
-  req.on('close', () => {
-    isCancelled = true;
-    clearInterval(heartbeatInterval);
-    endResponse();
-  });
-
-  const connectionTimer = setTimeout(() => {
-    if (!isCancelled) {
-      isCancelled = true;
-      sendEvent(res, 'error', { message: 'Connection timed out after 2 minutes.' });
-      endResponse();
-    }
-  }, 120_000);
+  const streamSlotAcquired = await acquireTenantStreamSlot(auth.tenantId);
+  if (!streamSlotAcquired) {
+    res.status(429).json({
+      error: 'Too many concurrent agent sessions for this tenant. Try again when a session finishes.',
+    });
+    return;
+  }
 
   try {
-    await ensureGitSession(sessionId);
-
-    await runAgentLoop({
+    bindSessionAuth(sessionId, auth, { mode: 'interactive' });
+    await appendAuditEntry({
       sessionId,
-      messages,
-      ollamaHost: OLLAMA_HOST,
-      model: requestedModelVal,
-      temperature: requestedTemp,
-      maxTokens: requestedMaxTokens,
-      toolFilter,
-      systemPrompt: requestedSystem,
-      shouldCancel: () => isCancelled,
-      onEvent: (event) => {
-        if (isCancelled && event.type !== 'done') return;
-        const { type, ...rest } = event;
-        sendEvent(res, type as EventType, rest);
-      },
+      tenantId: auth.tenantId,
+      userId: auth.userId,
+      action: 'run_started',
+      details: { mode: 'interactive' },
+    }).catch(() => {});
+
+    const requestedModelVal = requestedModel || DEFAULT_MODEL;
+    const available = await findAvailableModel(OLLAMA_HOST, requestedModelVal);
+    if (!available) {
+      res.status(503).json({
+        error: `Ollama not reachable or no models available at ${OLLAMA_HOST}. Run: docker compose up ollama`,
+      });
+      return;
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.status(200);
+    res.flushHeaders();
+
+    let isCancelled = false;
+    let responseEnded = false;
+
+    const endResponse = () => {
+      if (responseEnded || res.writableEnded) return;
+      responseEnded = true;
+      res.end();
+    };
+
+    const heartbeatInterval = setInterval(() => {
+      if (isCancelled) {
+        clearInterval(heartbeatInterval);
+        return;
+      }
+      sendEvent(res, 'heartbeat', { ts: Date.now() });
+    }, 15_000);
+
+    req.on('close', () => {
+      isCancelled = true;
+      clearInterval(heartbeatInterval);
+      endResponse();
     });
+
+    const connectionTimer = setTimeout(() => {
+      if (!isCancelled) {
+        isCancelled = true;
+        sendEvent(res, 'error', { message: 'Connection timed out after 2 minutes.' });
+        endResponse();
+      }
+    }, 120_000);
+
+    try {
+      await ensureGitSession(sessionId);
+
+      await runAgentLoop({
+        sessionId,
+        messages,
+        ollamaHost: OLLAMA_HOST,
+        model: requestedModelVal,
+        temperature: requestedTemp,
+        maxTokens: requestedMaxTokens,
+        toolFilter,
+        systemPrompt: requestedSystem,
+        shouldCancel: () => isCancelled,
+        onEvent: (event) => {
+          if (isCancelled && event.type !== 'done') return;
+          const { type, ...rest } = event;
+          sendEvent(res, type as EventType, rest);
+        },
+      });
+    } finally {
+      clearInterval(heartbeatInterval);
+      clearTimeout(connectionTimer);
+      endResponse();
+    }
   } finally {
-    clearInterval(heartbeatInterval);
-    clearTimeout(connectionTimer);
-    endResponse();
+    await releaseTenantStreamSlot(auth.tenantId);
   }
 }
