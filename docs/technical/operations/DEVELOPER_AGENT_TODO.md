@@ -462,7 +462,7 @@
 ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
-      _Resolved: `run_command` tool with npm/npx/node allowlist._
+        _Resolved: `run_command` tool with npm/npx/node allowlist._
 
 - [x] **A-13** `[bug]` `[dead-code]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx`
@@ -581,14 +581,14 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ## Progress Summary
 
-| Tier                 | Total   | Done   |
-| -------------------- | ------- | ------ |
-| CRITICAL             | 7       | 7 ✅   |
-| HIGH                 | 27      | 21     |
-| MEDIUM               | 24      | 23     |
-| LOW                  | 25      | 24     |
-| **Agent / A-MEDIUM** | **10**  | **10** ✅ |
-| **Agent / A-LOW**    | **10**  | **10** ✅ |
+| Tier                 | Total   | Done       |
+| -------------------- | ------- | ---------- |
+| CRITICAL             | 7       | 7 ✅       |
+| HIGH                 | 27      | 21         |
+| MEDIUM               | 24      | 23         |
+| LOW                  | 25      | 24         |
+| **Agent / A-MEDIUM** | **10**  | **10** ✅  |
+| **Agent / A-LOW**    | **10**  | **10** ✅  |
 | **Total**            | **110** | **110** ✅ |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
@@ -1533,19 +1533,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       No Open Graph (`og:title`, `og:description`, `og:image`) meta tags on any page. Sharing links on Slack/Twitter will show blank previews.
       **Fix:** Add `<meta property="og:*" />` tags to all public-facing pages (`/learn`, `/store`, `/listings`).
 
-- [ ] **UI-129** `[seo]`
+- [x] **UI-129** `[seo]`
       No Twitter Card meta tags on any page.
       **Fix:** Add `<meta name="twitter:card" content="summary_large_image" />` alongside Open Graph tags.
 
-- [ ] **UI-130** `[seo]`
+- [x] **UI-130** `[seo]`
       No canonical URL `<link rel="canonical">` on any page. Duplicate content (e.g., same page accessible via subdomain and query param) is not disambiguated.
       **Fix:** Derive the canonical URL from `req.headers.host` in `getServerSideProps` and inject it per page.
 
-- [ ] **UI-131** `[seo]`
+- [x] **UI-131** `[seo]`
       No `robots` meta tag. Admin-only pages (`/admin/*`, `/agent`, `/developer`) should be `noindex, nofollow`.
       **Fix:** Add `<meta name="robots" content="noindex,nofollow">` to all authenticated admin pages.
 
-- [ ] **UI-132** `[seo]`
+- [x] **UI-132** `[seo]`
       No `sitemap.xml` generation. Public-facing store, learn, and listing pages are not discoverable by crawlers.
       **Fix:** Add a `pages/sitemap.xml.tsx` using `getServerSideProps` that queries all published courses and listings.
 
