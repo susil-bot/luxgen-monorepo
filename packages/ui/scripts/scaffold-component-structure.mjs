@@ -24,10 +24,7 @@ function toKebab(name) {
 }
 
 function hasFixture(dir, name) {
-  return (
-    fs.existsSync(path.join(dir, 'fixture.ts')) ||
-    fs.existsSync(path.join(dir, 'fixture.tsx'))
-  );
+  return fs.existsSync(path.join(dir, 'fixture.ts')) || fs.existsSync(path.join(dir, 'fixture.tsx'));
 }
 
 function hasSpec(dir, name) {
@@ -76,9 +73,7 @@ export const fetch${name}SSR = async (tenantId?: string): Promise<{ html: string
 
 function templateFixture(name, propsType) {
   const camel = toCamel(name);
-  const propsImport = propsType
-    ? `import type { ${propsType} } from './${name}';\n\n`
-    : '';
+  const propsImport = propsType ? `import type { ${propsType} } from './${name}';\n\n` : '';
   const propsCast = propsType ? ` as ${propsType}` : '';
   return `${propsImport}import { defaultTheme } from '../theme';
 
@@ -119,9 +114,7 @@ export type ${name}Translations = typeof ${name}Translations;
 
 function templateSpec(name, propsType) {
   const camel = toCamel(name);
-  const fixtureImport = hasFixture(path.join(SRC, name), name)
-    ? `import { ${camel}Fixtures } from './fixture';\n`
-    : '';
+  const fixtureImport = hasFixture(path.join(SRC, name), name) ? `import { ${camel}Fixtures } from './fixture';\n` : '';
   const propsSpread = hasFixture(path.join(SRC, name), name) ? `{...${camel}Fixtures.default}` : '';
   return `import React from 'react';
 import { render } from '@testing-library/react';
