@@ -165,19 +165,13 @@ export class AutomationService {
       await this.executeAutomationActions(automation, payload);
       const durationMs = Date.now() - started;
       await AutomationRun.updateOne({ _id: run._id }, { status: 'success', durationMs });
-      await Automation.updateOne(
-        { _id: automation._id },
-        { $inc: { runCount: 1 }, $set: { lastRunAt: new Date() } },
-      );
+      await Automation.updateOne({ _id: automation._id }, { $inc: { runCount: 1 }, $set: { lastRunAt: new Date() } });
       return AutomationRun.findById(run._id);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
       const durationMs = Date.now() - started;
       await AutomationRun.updateOne({ _id: run._id }, { status: 'error', durationMs, error: message });
-      await Automation.updateOne(
-        { _id: automation._id },
-        { $inc: { runCount: 1 }, $set: { lastRunAt: new Date() } },
-      );
+      await Automation.updateOne({ _id: automation._id }, { $inc: { runCount: 1 }, $set: { lastRunAt: new Date() } });
       logger.error(`Automation run failed for "${automation.name}": ${message}`);
       return AutomationRun.findById(run._id);
     }
@@ -202,7 +196,6 @@ export class AutomationService {
     if (automations.length === 0) return 0;
     return emitAutomationEvent({ tenantId, triggerType, payload, source });
   }
-
 
   toGraphQL(automation: IAutomation) {
     return {

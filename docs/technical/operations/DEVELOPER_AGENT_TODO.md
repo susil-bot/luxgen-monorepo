@@ -562,7 +562,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | LOW                  | 25      | 24     |
 | **Agent / A-MEDIUM** | **10**  | **3**  |
 | **Agent / A-LOW**    | **10**  | **2**  |
-| **Total**            | **110** | **81** |
+| **Total**            | **110** | **82** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
 

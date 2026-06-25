@@ -308,14 +308,19 @@ export class EnrollmentService {
     const studentId = enrollment.student.toString();
 
     void automationService
-      .triggerAutomations(tenantId, 'COURSE_COMPLETED', {
-        courseId,
-        studentId,
-        userId: studentId,
-        courseTitle: course?.title,
-        customerEmail: student?.email,
-        progressPercent: enrollment.progressPercent,
-      }, 'lms')
+      .triggerAutomations(
+        tenantId,
+        'COURSE_COMPLETED',
+        {
+          courseId,
+          studentId,
+          userId: studentId,
+          courseTitle: course?.title,
+          customerEmail: student?.email,
+          progressPercent: enrollment.progressPercent,
+        },
+        'lms',
+      )
       .catch(() => undefined);
   }
 
