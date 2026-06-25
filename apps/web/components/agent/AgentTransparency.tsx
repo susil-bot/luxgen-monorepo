@@ -118,9 +118,9 @@ function DiffViewer({ file }: { file: StagedFile & { pendingDelete?: boolean } }
             style={{
               backgroundColor:
                 line.type === 'add'
-                  ? 'rgba(52,199,89,0.12)'
+                  ? 'var(--color-green-subtle)'
                   : line.type === 'remove'
-                    ? 'rgba(255,59,48,0.10)'
+                    ? 'var(--color-red-subtle)'
                     : 'transparent',
             }}
           >
@@ -350,7 +350,10 @@ export default function AgentTransparency({
       {actionError && (
         <div
           className="px-4 py-2 border-b flex items-center gap-2 flex-shrink-0"
-          style={{ borderColor: 'rgba(255,59,48,0.2)', backgroundColor: 'rgba(255,59,48,0.08)' }}
+          style={{
+            borderColor: 'color-mix(in srgb, var(--color-red) 20%, transparent)',
+            backgroundColor: 'var(--color-red-subtle)',
+          }}
         >
           <span className="text-xs" style={{ color: 'var(--color-red)' }}>
             ⚠ {actionError}

@@ -2815,6 +2815,7 @@ html.dark [data-tenant='demo'] {
   cursor: pointer;
 }
 
-.lux-card-container {
-  container-type: inline-size;
+:root {
+  --color-green-subtle: color-mix(in srgb, var(--color-green) 12%, transparent);
+  --color-red-subtle: color-mix(in srgb, var(--color-red) 10%, transparent);
 }

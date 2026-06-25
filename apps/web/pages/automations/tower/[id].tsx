@@ -155,7 +155,7 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
   if (loading) {
     return (
       <div className={styles.editorRoot} style={{ alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: '#616161' }}>Loading tower…</p>
+        <p style={{ color: 'var(--color-label-secondary)' }}>Loading tower…</p>
       </div>
     );
   }
@@ -212,7 +212,7 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
           </span>
 
           {saveError ? (
-            <span className={styles.statusPill} style={{ color: '#d72c0d' }} title={saveError}>
+            <span className={styles.statusPill} style={{ color: 'var(--color-red)' }} title={saveError}>
               {saveError}
             </span>
           ) : null}
@@ -233,7 +233,7 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
 
           <main className={styles.canvas}>
             <div className={styles.testBar}>
-              <span style={{ fontSize: 13, fontWeight: 600, color: '#202223' }}>Test tower</span>
+              <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-label-primary)' }}>Test tower</span>
               <input
                 type="text"
                 className={styles.configInput}
@@ -297,7 +297,7 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
                   onSelectStep={setSelectedStepId}
                 />
 
-                <p style={{ fontSize: 12, color: '#616161', lineHeight: 1.5, margin: 0 }}>
+                <p style={{ fontSize: 12, color: 'var(--color-label-secondary)', lineHeight: 1.5, margin: 0 }}>
                   Persisted as <code>TowerFlowDocument</code> v1 on <code>Automation.flowDefinition</code>.
                 </p>
               </div>
