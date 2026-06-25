@@ -1583,19 +1583,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `getDefaultUser()` similarly creates a new object on every call — 16 pages affected.
       **Fix:** Export a `DEFAULT_USER` constant instead of a function.
 
-- [ ] **UI-141** `[perf]`
+- [x] **UI-141** `[perf]`
       `apps/web/components/agent/AgentTransparency.tsx` and `apps/web/pages/automations/tower/[id].tsx` (TowerGraphCanvas) are heavy components that are included in the main bundle. They are only used in specific routes.
       **Fix:** Use `next/dynamic` with `{ ssr: false }` for both components to split them into separate chunks.
 
-- [ ] **UI-142** `[perf]`
+- [x] **UI-142** `[perf]`
       `packages/ui/src/Arrow/Arrow.tsx` and `packages/ui/src/ProductCard/ProductCard.tsx` inject `<style>` tags at render time. Each mount creates a new `<style>` element, causing style duplication and Cumulative Layout Shift (CLS).
       **Fix:** Move CSS to module files or `globals.css`. Remove `<style>` injection from components.
 
-- [ ] **UI-143** `[perf]`
+- [x] **UI-143** `[perf]`
       No `prefetch` strategy is used on any navigation link. `next/link` prefetches on hover by default, but `router.push` (used in most action handlers) does not prefetch.
       **Fix:** Use `router.prefetch('/courses')` in `useEffect` for commonly accessed next routes.
 
-- [ ] **UI-144** `[perf]`
+- [x] **UI-144** `[perf]`
       `globals.css` loads 135+ CSS custom properties on every page including properties only relevant to specific contexts (e.g., `--lux-sidebar-*` properties loaded even on pages with no sidebar).
       **Fix:** Split `globals.css` into: `base.css` (tokens + resets), `sidebar.css`, `agent.css`, etc. Import only what each layout needs.
 
