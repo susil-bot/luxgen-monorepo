@@ -22,7 +22,7 @@ export const generateToken = (payload: JwtPayload, tenantId?: string): string =>
   const secret = tenantKeyManager.getTenantKey(keyId);
 
   return jwt.sign(payload, secret, {
-    expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as any,
+    expiresIn: process.env.JWT_EXPIRES_IN ?? '7d',
     header: {
       alg: 'HS256',
       typ: 'JWT',

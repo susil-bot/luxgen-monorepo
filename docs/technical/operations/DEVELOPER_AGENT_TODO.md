@@ -280,7 +280,7 @@
       **File:** `apps/api/src/config/tenants/index.ts` line 79
       `config.integrations.emailProvider` for the demo tenant is set to `demoFeaturesConfig.platform.analytics.provider` (an analytics provider, not an email provider) — this is a copy-paste error. In `tenants.ts:68` it is correctly set to `'sendgrid'`. Fix the modular config.
 
-- [ ] **L-06** `[type]`
+- [x] **L-06** `[type]`
       **File:** `apps/api/src/utils/jwt.ts` line 25
       `expiresIn` cast with `as any` to satisfy `jwt.sign`. `jsonwebtoken` v9 accepts `string | number` directly. Remove the cast and type the parameter correctly.
 
