@@ -1,17 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useQuery } from '@apollo/client';
-import { AdminDashboardLayout, UserMenu } from '@luxgen/ui';
+import { AdminDashboardLayout } from '@luxgen/ui';
 import { GET_DASHBOARD_DATA } from '../graphql/queries/dashboard';
 import {
   transformDashboardData,
-  transformUserDataFromSession,
   handleDashboardAction,
   handleUserAction,
 } from '../lib/transformer';
 import { useAppLayoutHeader } from '../lib/app-layout-header';
-import { AUTH_SESSION_CHANGE_EVENT } from '../lib/session';
+import { useLayoutUser } from '../lib/app-layout-user';
 import { getTenantPageProps } from '../lib/tenant-page-props';
 import { useDashboardTenant, useTenantScope } from '../lib/use-tenant-scope';
 import { PageEmptyState, PageLoadingState } from '../components/common/PageStates';
@@ -24,7 +23,7 @@ interface DashboardProps {
 export default function Dashboard({ tenant }: DashboardProps) {
   const router = useRouter();
   const headerProps = useAppLayoutHeader();
-  const [user, setUser] = useState<UserMenu | null>(null);
+  const layoutUser = useLayoutUser();
   const dashboardTenant = useDashboardTenant(tenant);
   const { subdomain } = useTenantScope(tenant);
   const displayName = subdomain.charAt(0).toUpperCase() + subdomain.slice(1);
@@ -38,17 +37,6 @@ export default function Dashboard({ tenant }: DashboardProps) {
     skip: !dashboardTenant,
     fetchPolicy: 'cache-first',
   });
-
-  useEffect(() => {
-    const refresh = () => setUser(transformUserDataFromSession());
-    refresh();
-    window.addEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
-    window.addEventListener('storage', refresh);
-    return () => {
-      window.removeEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
-      window.removeEventListener('storage', refresh);
-    };
-  }, [subdomain]);
 
   const onUserAction = (action: 'profile' | 'settings' | 'logout') => {
     handleUserAction(action, router);
@@ -85,18 +73,29 @@ export default function Dashboard({ tenant }: DashboardProps) {
         <meta name="description" content="Learning management dashboard" />
       </Head>
 
+      {layoutUser?.name && (
+        <p className="max-w-5xl mx-auto px-4 pt-4 text-sm text-secondary" aria-live="polite">
+          Welcome back, {layoutUser.name.split(' ')[0]} — here is what is happening today.
+        </p>
+      )}
+      {!dashboardData?.getDashboardData && (
+        <div className="max-w-3xl mx-auto px-4 py-3 text-center">
+          <p className="text-sm text-secondary">No KPI data yet. Create a course to populate your dashboard.</p>
+          <button type="button" className="ios-btn-primary text-sm mt-2" onClick={() => router.push('/courses/create')}>Create course</button>
+        </div>
+      )}
       <AdminDashboardLayout
         currentTenant={{
           name: displayName,
           subdomain,
         }}
         user={
-          user
+          layoutUser
             ? {
-                name: user.name,
-                email: user.email,
-                role: user.role || 'User',
-                initials: user.name
+                name: layoutUser.name,
+                email: layoutUser.email,
+                role: layoutUser.role || 'User',
+                initials: layoutUser.name
                   .split(' ')
                   .map((n) => n[0])
                   .join(''),
