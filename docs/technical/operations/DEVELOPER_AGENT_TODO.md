@@ -1370,18 +1370,18 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `AdminDashboardLayout` `onDashboardAction` prop accepts `data?: any`. Given the 11 different action types being wired to no-ops, this should be a discriminated union.
       **Fix:** Define `type DashboardAction = { type: 'view_course'; courseId: string } | { type: 'view_survey'; surveyId: string } | ...`.
 
-- [ ] **UI-89** `[type]`
+- [x] **UI-89** `[type]`
       No shared `ApiError` type is defined. Error handling across all pages uses `err instanceof Error ? err.message : String(err)` inline. This pattern is repeated in 40+ places.
       **Fix:** Export a shared `extractErrorMessage(err: unknown): string` utility from a shared package.
 
-- [ ] **UI-90** `[type]`
+- [x] **UI-90** `[type]`
       `packages/ui/src/Heading/Heading.tsx` accepts a `loading` prop that is silently extracted via destructuring (`const { loading, ...headingProps } = props`) but never used — it disappears without effect.
       **Fix:** Either implement a skeleton/loading state for headings, or remove the `loading` prop entirely from the type definition.
 
-- [ ] **UI-91** `[type]`
+- [x] **UI-91** `[type]`
       `apps/web/components/agent/AgentChat.tsx`: `input: Record<string, any>` in the `ToolEvent` interface. The tool input shape is known for each tool — use discriminated unions per tool name.
 
-- [ ] **UI-92** `[type]`
+- [x] **UI-92** `[type]`
       `apps/web/pages/groups/[id]/edit.tsx` likely uses typed `any` for form state. Audit and apply proper types.
 
 - [ ] **UI-93** `[type]`

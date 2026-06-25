@@ -128,3 +128,4 @@ export {
 export * from './types';
 export * from './theme';
 export * from './ssr';
+export { extractErrorMessage } from './utils/extractErrorMessage';
