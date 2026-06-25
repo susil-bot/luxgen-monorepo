@@ -43,3 +43,35 @@ export function resolveProductPriceCents(description: string | undefined, fallba
   const meta = parseProductMetaFromDescription(description);
   return priceStringToCents(meta.price) ?? fallbackCents;
 }
+
+export interface CourseCommerceFields {
+  priceCents?: number;
+  compareAtPriceCents?: number;
+  sku?: string;
+  category?: string;
+  currency?: string;
+}
+
+/** Extract commerce fields from luxgen-product-meta in course.description. */
+export function commerceFromDescription(description?: string | null): CourseCommerceFields {
+  const meta = parseProductMetaFromDescription(description);
+  const priceCents = priceStringToCents(meta.price);
+  const compareAtPriceCents = priceStringToCents(meta.compareAtPrice);
+  const commerce: CourseCommerceFields = { currency: 'usd' };
+  if (priceCents != null) commerce.priceCents = priceCents;
+  if (compareAtPriceCents != null) commerce.compareAtPriceCents = compareAtPriceCents;
+  if (meta.sku?.trim()) commerce.sku = meta.sku.trim();
+  if (meta.category?.trim()) commerce.category = meta.category.trim();
+  return commerce;
+}
+
+export function resolveCoursePriceCents(
+  commerce: CourseCommerceFields | undefined | null,
+  description: string | undefined,
+  fallbackCents: number,
+): number {
+  if (commerce?.priceCents != null && commerce.priceCents >= 0) {
+    return commerce.priceCents;
+  }
+  return resolveProductPriceCents(description, fallbackCents);
+}
