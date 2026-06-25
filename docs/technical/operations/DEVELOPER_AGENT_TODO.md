@@ -344,7 +344,7 @@
       **File:** `apps/web/pages/api/users/me.ts` line 122 · `apps/web/pages/api/users/current.ts` line 122
       Server-side `console.log` outputs user name, email, role, and tenant on every authenticated request. PII should not appear in server logs without scrubbing. Remove or redact.
 
-- [ ] **L-22** `[style]`
+- [x] **L-22** `[style]`
       **File:** `apps/web/pages/dashboard.tsx` line 100
       Hard-coded `'Welcome to Ideavibes'` in the banner carousel. Banner content must come from tenant configuration. Reference `tenantConfig.brand.name` or equivalent.
 
