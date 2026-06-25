@@ -25,6 +25,7 @@ export default function HeadlessTaskPanel({ sessionId, prompt, onComplete, onClo
   const [status, setStatus] = useState('created');
   const [validation, setValidation] = useState<{ passed?: boolean; checks?: unknown[] } | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
@@ -81,7 +82,7 @@ export default function HeadlessTaskPanel({ sessionId, prompt, onComplete, onClo
 
     void connect();
     return () => abortRef.current?.abort();
-  }, [sessionId, onComplete]);
+  }, [sessionId, onComplete, retryKey]);
 
   const statusInfo = STATUS_LABELS[status] || { label: status, color: 'var(--color-label-secondary)' };
   const isActive = !TERMINAL.has(status) && !error;
@@ -138,9 +139,21 @@ export default function HeadlessTaskPanel({ sessionId, prompt, onComplete, onClo
       )}
 
       {error && (
-        <p className="text-xs mt-1" style={{ color: 'var(--color-red)' }}>
-          {error}
-        </p>
+        <div className="mt-1 flex items-center gap-2">
+          <p className="text-xs" style={{ color: 'var(--color-red)' }}>
+            {error}
+          </p>
+          <button
+            type="button"
+            className="text-xs underline"
+            onClick={() => {
+              setError(null);
+              setRetryKey((k) => k + 1);
+            }}
+          >
+            Retry
+          </button>
+        </div>
       )}
 
       <p className="text-xs mt-2 font-mono truncate" style={{ color: 'var(--color-label-tertiary)' }}>

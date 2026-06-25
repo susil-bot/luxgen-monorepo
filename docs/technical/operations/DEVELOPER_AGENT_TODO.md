@@ -1483,18 +1483,18 @@ const [user, setUser] = useState<UserMenu | null>(null);
 - [ ] **UI-116** `[state]`
       `apps/web/pages/groups/create.tsx` same issue as UI-115.
 
-- [ ] **UI-117** `[state]`
+- [x] **UI-117** `[state]`
       `apps/web/pages/listings/apply.tsx` — verify that form validation errors are displayed to the user and not just silently suppressed.
 
-- [ ] **UI-118** `[state]`
+- [x] **UI-118** `[state]`
       `apps/web/components/agent/HeadlessTaskPanel.tsx` shows an error string but provides no retry button. Users must manually re-trigger the task.
       **Fix:** Add a "Retry" button that re-fires the `POST /api/agent/tasks` endpoint with the same prompt.
 
-- [ ] **UI-119** `[state]`
+- [x] **UI-119** `[state]`
       `apps/web/components/agent/AgentChat.tsx` has no recovery UI when the SSE stream connection drops mid-response. The chat appears to hang indefinitely.
       **Fix:** Detect `EventSource` `onerror` events; display a "Connection lost — retry?" banner with a reconnect button.
 
-- [ ] **UI-120** `[state]`
+- [x] **UI-120** `[state]`
       `apps/web/pages/organization/roles.tsx` renders an empty list when there are no custom roles but shows no empty state call-to-action (e.g., "Create your first role").
       **Fix:** Add an `EmptyState` component with a "Create role" button when the list is empty.
 
