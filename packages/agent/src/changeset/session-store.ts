@@ -88,6 +88,16 @@ export function applySession(sessionId: string): ApplyResult {
     }
   }
 
+  if (conflicts.length > 0 && !useGit) {
+    return {
+      applied: [],
+      errors: [],
+      conflicts,
+      blocked: true,
+      mode: 'filesystem',
+    };
+  }
+
   for (const [filePath, staged] of Object.entries(session.files)) {
     try {
       const absPath = path.join(root, filePath);

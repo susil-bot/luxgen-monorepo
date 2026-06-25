@@ -222,9 +222,10 @@
       **File:** `apps/api/src/utils/logger.ts` lines 9–12
       Logger reads `LOG_LEVEL` once at construction time (stale in test environments) and has no structured JSON output mode for production log aggregators. Add a `JSON_LOGS=true` env flag to emit structured output and read `LOG_LEVEL` per-call.
 
-- [ ] **M-16** `[arch]` `[bug]`
+- [x] **M-16** `[arch]` `[bug]`
       **File:** `apps/web/pages/billing/index.tsx` lines 44, 262–273
       The "Dev plan override" UI is gated on the build-time variable `NEXT_PUBLIC_APP_ENV`. If a dev build artifact is promoted to production, these buttons will be visible and functional in production. Gate this UI server-side using a runtime check, not a baked-in build variable.
+      _Resolved: dev override UI removed from billing pages; `setTenantPlanDev` is server-gated via `BILLING_DEV_MODE` only._
 
 - [ ] **M-17** `[infra]`
       **File:** `k8s/api.yaml` lines 27–36
@@ -246,11 +247,12 @@
       **File:** `apps/web/pages/index.tsx` lines 17–20
       Redirect to `/dashboard` only fires when `currentTenant !== 'demo'`. An already-authenticated `demo` tenant user visiting `/` sees the public landing page with Sign In / Create Account links rather than being redirected. Apply the redirect for all authenticated users regardless of tenant.
 
-- [ ] **M-22** `[feat]`
+- [x] **M-22** `[feat]`
       **File:** `apps/web/pages/groups/[id].tsx` — `apps/web/pages/login.tsx:76-91`
       Social login (Google, LinkedIn, GitHub) UI is fully rendered with loading states and redirect messages but is entirely unimplemented (stub `TODO` comments). Either implement OAuth flows or hide the buttons behind a feature flag until implementation is ready.
+      _Fixed: hidden unless `NEXT_PUBLIC_SOCIAL_LOGIN_ENABLED=true` on login and register._
 
-- [ ] **M-23** `[bug]`
+- [x] **M-23** `[bug]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx` line 14–17, 35
       `sessionId` initialises as `''` and is only set via `useEffect` on mount, causing a `null` render flash and SSR hydration mismatch. Initialise `sessionId` with a stable SSR-safe value (e.g., `useId()` or generate on the server side via `getServerSideProps`).
 
@@ -387,7 +389,7 @@
       Path allow-listing (`isPathAllowed`, `isSensitiveFile`) was only applied for `read_file` and `write_file`. **`list_files` and `search_code` accepted arbitrary paths**, allowing the agent to traverse and enumerate sensitive directories not covered by `ALLOWED_PATHS`.
       **Fix applied:** Extended guard to `list_files` and `search_code` with directory validation (2026-06-25).
 
-- [ ] **A-04** `[security]` `[bug]`
+- [x] **A-04** `[security]` `[bug]`
       **File:** `packages/agent/src/changeset/session-store.ts` lines 69–113
       `applySession()` detects file conflicts (disk content differs from `originalContent` captured at staging time) but **writes the staged content anyway**, silently overwriting the developer's manual edits. The conflict array is populated and returned but never used to block the apply.
       **How to fix:** Before the write loop, if `conflicts.length > 0` and mode is `'filesystem'`, return early with `{ applied: [], errors: [], conflicts, mode: 'filesystem' }`. The API route (`apply.ts`) already includes `conflictWarning` in the response — update the UI in `AgentTransparency.tsx:handleApplyAll` to block and display conflicts instead of proceeding.
@@ -462,7 +464,7 @@
       **Fix:** In `worker.ts:processHeadlessJob`, after loading the session, store `job.model` on `session.metadata` (add `metadata?: { model?: string }` to `AgentSession`). Then include `metadata.model` in the `syncSessionToMongo` upsert body.
       **Files to change:** `packages/agent/src/types/session.ts`, `packages/agent/src/persistence/mongo.ts`, `packages/agent/src/queue/worker.ts`.
 
-- [ ] **A-16** `[enhancement]`
+- [x] **A-16** `[enhancement]`
       **File:** `apps/web/components/agent/AgentTransparency.tsx` lines 232–248
       The "Apply All" button is shown regardless of validation state. If validation has run and failed, the user can still click Apply and write broken code to the filesystem. The commit route (`commit.ts`) enforces the validation policy server-side, but **the Apply route (`apply.ts`) does not** — and Apply bypasses git entirely (it writes directly to the filesystem for local mode).
       **Fix:** In `handleApplyAll` (client side), check `validation?.passed === false` and display a blocking warning: "Validation failed — apply anyway?" with explicit confirmation. Server-side, add an optional `validation` check in `apply.ts` gated on `getValidationPolicy() === 'strict'`.
@@ -547,11 +549,11 @@
 | -------------------- | ------- | ------ |
 | CRITICAL             | 7       | 7 ✅   |
 | HIGH                 | 27      | 20     |
-| MEDIUM               | 24      | 17     |
+| MEDIUM               | 24      | 20     |
 | LOW                  | 25      | 22     |
-| **Agent / A-HIGH**   | **7**   | **3**  |
-| **Agent / A-MEDIUM** | **10**  | **0**  |
+| **Agent / A-HIGH**   | **7**   | **4**  |
+| **Agent / A-MEDIUM** | **10**  | **1**  |
 | **Agent / A-LOW**    | **10**  | **0**  |
-| **Total**            | **110** | **69** |
+| **Total**            | **110** | **75** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.

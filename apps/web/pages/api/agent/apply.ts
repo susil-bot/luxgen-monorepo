@@ -21,8 +21,20 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
   try {
     const result = applySession(sessionId);
+
+    if (result.blocked) {
+      res.status(409).json({
+        ...result,
+        blocked: true,
+        hasConflicts: true,
+        error: `${result.conflicts.length} file(s) changed on disk since staging. Apply blocked to protect your edits.`,
+      });
+      return;
+    }
+
     res.status(200).json({
       ...result,
+      blocked: false,
       hasConflicts: result.conflicts.length > 0,
       conflictWarning:
         result.conflicts.length > 0
