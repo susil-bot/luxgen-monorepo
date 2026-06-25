@@ -52,8 +52,8 @@ async function paginate<T extends { _id: unknown }>(
   return {
     edges,
     pageInfo: {
-      hasNextPage: args.before ? hasCursor : hasMore,
-      hasPreviousPage: args.after ? hasCursor : hasMore,
+      hasNextPage: (args.before ?? args.last) ? hasCursor : hasMore,
+      hasPreviousPage: (args.before ?? args.last) ? hasMore : Boolean(args.after),
       startCursor: edges[0]?.cursor ?? null,
       endCursor: edges[edges.length - 1]?.cursor ?? null,
     },
