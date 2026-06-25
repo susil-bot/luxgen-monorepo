@@ -454,4 +454,35 @@ router.patch('/storefront', async (req: Request, res: Response) => {
   }
 });
 
+
+const MAX_LOGO_BYTES = 512_000;
+const LOGO_PREFIXES = ['data:image/jpeg;', 'data:image/png;', 'data:image/svg+xml;', 'data:image/webp;'];
+
+function isValidLogoUrl(value: string): boolean {
+  if (value.startsWith('https://') || value.startsWith('http://')) return value.length <= 2048;
+  if (!LOGO_PREFIXES.some((p) => value.startsWith(p))) return false;
+  const base64Part = value.split(',')[1];
+  if (!base64Part) return false;
+  return Math.ceil((base64Part.length * 3) / 4) <= MAX_LOGO_BYTES;
+}
+
+router.post('/branding/logo', async (req: Request, res: Response) => {
+  try {
+    if (!req.user) return res.status(401).json({ success: false, message: 'Authentication required' });
+    const tenantContext = getTenantContext(req);
+    if (!tenantContext) return res.status(404).json({ success: false, message: 'No tenant context found' });
+    const { logoUrl } = req.body as { logoUrl?: string };
+    if (!logoUrl || !isValidLogoUrl(logoUrl)) {
+      return res.status(400).json({ success: false, message: 'Invalid logo URL or image (max 500KB)' });
+    }
+    const updated = await Tenant.findByIdAndUpdate(tenantContext.tenantId, { 'settings.branding.logo': logoUrl, updatedAt: new Date() }, { new: true });
+    if (!updated) return res.status(404).json({ success: false, message: 'Tenant not found' });
+    res.json({ success: true, data: { logo: updated.settings?.branding?.logo } });
+  } catch (error) {
+    console.error('Logo upload error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+
 export default router;
