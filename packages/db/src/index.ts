@@ -28,6 +28,8 @@ export type {
 export { Automation, AutomationRun } from './automation';
 export type { ITenantSubscription, SubscriptionStatus } from './subscription';
 export { TenantSubscription } from './subscription';
+export type { TenantBillingSnapshot } from './tenant-billing';
+export { buildTenantFeatureFlags, resolveEffectivePlan, resolveTenantBillingSnapshot } from './tenant-billing';
 export type { ITenantUsageMonthly } from './usage';
 export { TenantUsageMonthly, currentUsagePeriod } from './usage';
 export type { IAutomationTemplate, TemplateCategory } from './automation-template';
