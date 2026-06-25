@@ -42,6 +42,7 @@ export * from './Logout';
 
 // Display Components
 export * from './Chip';
+export * from './Tag/Tag';
 export * from './UserManagement';
 export * from './CourseMenu';
 export * from './Arrow';

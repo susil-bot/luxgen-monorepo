@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Arrow } from '../Arrow';
 
 export interface BannerSlide {
@@ -39,7 +39,16 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
-
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const pause = () => setIsPlaying(false);
+    const resume = () => setIsPlaying(autoPlay);
+    el.addEventListener('focusin', pause);
+    el.addEventListener('focusout', resume);
+    return () => { el.removeEventListener('focusin', pause); el.removeEventListener('focusout', resume); };
+  }, [autoPlay]);
   useEffect(() => {
     if (!isPlaying || slides.length <= 1) return;
 
@@ -83,7 +92,7 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
   const currentSlideData = slides[currentSlide];
 
   return (
-    <div className={`relative overflow-hidden rounded-lg ${className}`}>
+    <div ref={rootRef} className={`relative overflow-hidden rounded-lg ${className}`}>
       {/* Banner Container */}
       <div
         className="relative w-full h-64 md:h-80 lg:h-96 flex items-center"

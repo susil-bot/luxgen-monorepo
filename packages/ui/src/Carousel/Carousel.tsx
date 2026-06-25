@@ -75,6 +75,12 @@ const CarouselComponent: React.FC<CarouselProps> = ({
       goToSlide(Math.max(currentIndex - slidesToScroll, 0));
     }
   };
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') prevSlide();
+    if (e.key === 'ArrowRight') nextSlide();
+    if (e.key === 'Home') goToSlide(0);
+    if (e.key === 'End') goToSlide(totalSlides - 1);
+  };
 
   const startAutoPlay = () => {
     if (autoPlay && totalSlides > 1) {
@@ -123,6 +129,8 @@ const CarouselComponent: React.FC<CarouselProps> = ({
   return (
     <div
       ref={carouselRef}
+      tabIndex={0}
+      onKeyDown={onKeyDown}
       className={`carousel ${className}`}
       style={styles}
       onMouseEnter={handleMouseEnter}
