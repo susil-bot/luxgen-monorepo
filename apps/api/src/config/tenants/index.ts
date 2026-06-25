@@ -85,7 +85,7 @@ const loadDemoTenantConfig = (): Partial<ITenant> => ({
     plan: 'pro',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null as any,
+    createdBy: '000000000000000000000001',
   },
 });
 
@@ -148,7 +148,7 @@ const loadIdeaVibesTenantConfig = (): Partial<ITenant> => ({
     plan: 'enterprise',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null as any,
+    createdBy: '000000000000000000000001',
   },
 });
 
@@ -204,7 +204,7 @@ const loadDefaultTenantConfig = (): Partial<ITenant> => ({
     plan: 'free',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null as any,
+    createdBy: '000000000000000000000001',
   },
 });
 

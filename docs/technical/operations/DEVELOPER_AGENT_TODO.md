@@ -188,7 +188,7 @@
       **File:** `apps/api/src/context/buildContext.ts` lines 30–51 vs `apps/api/src/middleware/auth.ts` lines 8–43
       Token verification logic is duplicated: both files independently call `verifyToken`, load the user from DB, call `isAccountActive`, and check tenant mismatch. Extract to a single `resolveAuthenticatedUser(token)` function in a shared utility.
 
-- [ ] **M-08** `[arch]` `[type]`
+- [x] **M-08** `[arch]` `[type]`
       **File:** `apps/api/src/config/tenants/index.ts` line 80 · `apps/api/src/config/tenants.ts` line 78
       `createdBy: null as any` used to satisfy the `ITenant` type, erasing type safety where a valid ObjectId is expected. Define a proper seed-user ObjectId constant or make `createdBy` optional in `ITenant` for system-seeded tenants.
 
