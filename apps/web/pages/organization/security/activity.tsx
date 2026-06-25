@@ -17,6 +17,7 @@ export default function OrganizationSecurityActivityPage({ tenant }: Props) {
     <OrganizationShell
       tenant={tenant}
       activeSection="security"
+      securitySectionId="activity"
       title="User activity logs"
       subtitle="Monitor and review user activities"
       securityNav={<OrganizationSecurityNav activeId="activity" />}

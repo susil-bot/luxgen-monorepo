@@ -1080,15 +1080,15 @@ const [user, setUser] = useState<UserMenu | null>(null);
       No shared GraphQL error handler exists. Each page duplicates its own error-handling pattern (some use `errorPolicy: 'ignore'`, some check `if (error)`, some do nothing). A GraphQL 401/403 should globally redirect to `/login?reason=session_expired`.
       **Fix:** Add an Apollo `onError` link in the Apollo Client setup that intercepts `UNAUTHENTICATED` errors and redirects.
 
-- [ ] **UI-18** `[layout]`
+- [x] **UI-18** `[layout]`
       `LearnLayout`, `StoreLayout`, and `ProjectShell` each define their own top navigation bar. `AppLayout` uses `NavBar` from `@luxgen/ui`. The four navigation implementations are not visually or behaviourally consistent.
       **Fix:** Standardise all layouts to use the same `NavBar` component from `@luxgen/ui` with appropriate prop configuration.
 
-- [ ] **UI-19** `[layout]`
+- [x] **UI-19** `[layout]`
       `SettingsShell` renders a left-side settings navigation that links via `<a href>` instead of `<Link>` from Next.js, causing full page reloads between settings sections instead of client-side navigation.
       **Fix:** Replace all `<a href>` in `SettingsShell` nav with `<Link href>`.
 
-- [ ] **UI-20** `[layout]`
+- [x] **UI-20** `[layout]`
       `OrganizationShell` breadcrumb navigation is not implemented — the component accepts `breadcrumbs` but the rendered DOM shows no breadcrumb trail. On deep pages like `organization/security/saml`, users have no visual indication of where they are.
       **Fix:** Implement breadcrumb rendering in `OrganizationShell` and pass page-specific breadcrumb arrays from each page.
 
