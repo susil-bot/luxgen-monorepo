@@ -39,8 +39,6 @@ const LoginPageContent: React.FC = () => {
     setLoading(true);
 
     try {
-      console.log('🔐 Attempting login with email:', data.email);
-
       // Call GraphQL login mutation
       const result = await loginMutation({
         variables: {

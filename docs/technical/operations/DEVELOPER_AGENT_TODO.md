@@ -332,7 +332,7 @@
       **File:** `apps/web/pages/dashboard.tsx` lines 33, 35, 37
       Debug `console.log` statements with emoji (`'🔍 Dashboard useEffect running'`, etc.) left in production code. Remove all debug logs from this file.
 
-- [ ] **L-19** `[style]` `[security]`
+- [x] **L-19** `[style]` `[security]`
       **File:** `apps/web/pages/login.tsx` line 37
       `console.log('🔐 Attempting login with email:', data.email)` logs PII (email address) to the browser console on every login attempt. Remove.
 
