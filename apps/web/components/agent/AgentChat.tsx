@@ -38,6 +38,10 @@ const TOOL_ICONS: Record<string, string> = {
   delete_file: '🗑️',
   search_code: '🔍',
   read_automation_schema: '⚙️',
+  rename_file: '📦',
+  run_command: '▶️',
+  fetch_url: '🌐',
+  read_project_config: '📋',
 };
 
 function ToolBadge({ event }: { event: ToolEvent }) {

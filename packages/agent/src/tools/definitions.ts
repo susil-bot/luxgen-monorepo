@@ -52,6 +52,11 @@ export const AGENT_TOOLS = [
           description: 'Optional: limit search to this directory (relative to monorepo root)',
         },
         file_extension: { type: 'string', description: 'Optional: filter by file extension e.g. ".tsx" or ".ts"' },
+        maxResults: {
+          type: 'number',
+          description: 'Max matches to return (default 50, max 200)',
+        },
+        offset: { type: 'number', description: 'Skip this many matches for pagination' },
       },
       required: ['query'],
     },
@@ -79,6 +84,57 @@ export const AGENT_TOOLS = [
     input_schema: {
       type: 'object',
       properties: {},
+    },
+  },
+  {
+    name: 'rename_file',
+    description: 'Rename or move a file in the staging area (atomic rename: new path + delete old path).',
+    input_schema: {
+      type: 'object',
+      properties: {
+        from_path: { type: 'string', description: 'Current relative path from monorepo root' },
+        to_path: { type: 'string', description: 'New relative path from monorepo root' },
+        description: { type: 'string', description: 'Short reason for the rename' },
+      },
+      required: ['from_path', 'to_path'],
+    },
+  },
+  {
+    name: 'run_command',
+    description:
+      'Run a safe shell command (npm/npx/node only) from the monorepo root. Returns stdout/stderr. Blocked: rm, curl, wget, git push, chmod, sudo.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        command: { type: 'string', enum: ['npm', 'npx', 'node'] },
+        args: { type: 'array', items: { type: 'string' } },
+        cwd: { type: 'string', description: 'Optional relative path from monorepo root' },
+      },
+      required: ['command', 'args'],
+    },
+  },
+  {
+    name: 'fetch_url',
+    description:
+      'Fetch text from an allowlisted HTTPS URL (docs.*, npmjs.com, github.com) for API/library reference.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        url: { type: 'string', description: 'HTTPS URL to fetch' },
+      },
+      required: ['url'],
+    },
+  },
+  {
+    name: 'read_project_config',
+    description:
+      'Read package.json dependencies and tsconfig paths for a workspace (e.g. apps/web, packages/agent).',
+    input_schema: {
+      type: 'object',
+      properties: {
+        workspace: { type: 'string', description: 'Workspace path relative to monorepo root' },
+      },
+      required: ['workspace'],
     },
   },
 ] as const;

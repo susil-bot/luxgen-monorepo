@@ -1,11 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import {
-  bindSessionAuth,
+  bindSessionAuthAsync,
   enqueueHeadlessTask,
   isQueueEnabled,
   getTaskFromMongo,
   appendAuditEntry,
   loadSession,
+  ensureSessionHydrated,
   ensureGitSession,
 } from '@luxgen/agent';
 import { getOllamaUrl } from '@luxgen/config';
@@ -22,6 +23,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return;
     }
 
+    await ensureSessionHydrated(sessionId);
     const fsSession = loadSession(sessionId);
     const mongoTask = await getTaskFromMongo(sessionId);
 
@@ -45,7 +47,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return;
     }
 
-    bindSessionAuth(sessionId, auth, { mode: 'headless', prompt });
+    await bindSessionAuthAsync(sessionId, auth, { mode: 'headless', prompt });
     await ensureGitSession(sessionId);
 
     const ollamaHost = getOllamaUrl();

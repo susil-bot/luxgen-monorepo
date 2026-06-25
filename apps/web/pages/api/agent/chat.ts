@@ -3,7 +3,7 @@ import {
   runAgentLoop,
   findAvailableModel,
   ensureGitSession,
-  bindSessionAuth,
+  bindSessionAuthAsync,
   appendAuditEntry,
   acquireTenantStreamSlot,
   releaseTenantStreamSlot,
@@ -72,7 +72,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   try {
-    bindSessionAuth(sessionId, auth, { mode: 'interactive' });
+    await bindSessionAuthAsync(sessionId, auth, { mode: 'interactive' });
     await appendAuditEntry({
       sessionId,
       tenantId: auth.tenantId,

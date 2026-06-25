@@ -1,6 +1,7 @@
 import Redis from 'ioredis';
 import { randomUUID } from 'crypto';
 import type { HeadlessTaskJob } from '../types/task';
+import { DEFAULT_HEADLESS_MAX_ATTEMPTS } from '../types/task';
 
 const QUEUE_KEY = 'luxgen:agent:tasks';
 const TENANT_STREAM_KEY_PREFIX = 'luxgen:agent:streams:tenant:';
@@ -170,6 +171,8 @@ export async function enqueueHeadlessTask(
     ...job,
     id: randomUUID(),
     enqueuedAt: Date.now(),
+    maxAttempts: job.maxAttempts ?? DEFAULT_HEADLESS_MAX_ATTEMPTS,
+    attempts: job.attempts ?? 0,
   };
 
   await client.lpush(QUEUE_KEY, JSON.stringify(fullJob));
@@ -264,6 +267,44 @@ export async function getQueueDepth(): Promise<number> {
   if (!client) return 0;
   await connectQueue();
   return client.llen(QUEUE_KEY);
+}
+
+export async function requeueHeadlessTask(job: HeadlessTaskJob): Promise<void> {
+  const client = getRedisClient();
+  if (!client) return;
+  await connectQueue();
+  await client.lpush(QUEUE_KEY, JSON.stringify(job));
+  await client.hdel(PROCESSING_KEY, job.id);
+}
+
+export async function moveJobToDeadLetter(job: HeadlessTaskJob): Promise<void> {
+  const client = getRedisClient();
+  if (!client) return;
+  await connectQueue();
+  await client.lpush(DEAD_KEY, JSON.stringify(job));
+  await client.hdel(PROCESSING_KEY, job.id);
+}
+
+export async function listDeadLetterJobs(limit = 50): Promise<HeadlessTaskJob[]> {
+  const client = getRedisClient();
+  if (!client) return [];
+  await connectQueue();
+  const items = await client.lrange(DEAD_KEY, 0, limit - 1);
+  return items.map((raw) => JSON.parse(raw) as HeadlessTaskJob);
+}
+
+export async function handleJobFailure(job: HeadlessTaskJob, error: string): Promise<void> {
+  const attempts = (job.attempts ?? 0) + 1;
+  const maxAttempts = job.maxAttempts ?? DEFAULT_HEADLESS_MAX_ATTEMPTS;
+  const failedJob: HeadlessTaskJob = { ...job, attempts, lastError: error };
+
+  if (attempts < maxAttempts) {
+    console.warn(`[agent-queue] Re-queueing job ${job.id} (attempt ${attempts}/${maxAttempts}): ${error}`);
+    await requeueHeadlessTask(failedJob);
+  } else {
+    console.error(`[agent-queue] Job ${job.id} moved to dead letter after ${attempts} attempts`);
+    await moveJobToDeadLetter(failedJob);
+  }
 }
 
 export async function disconnectQueue(): Promise<void> {

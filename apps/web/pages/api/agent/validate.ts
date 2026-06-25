@@ -3,7 +3,7 @@ import {
   runValidationPipeline,
   getSessionValidation,
   appendAuditEntry,
-  bindSessionAuth,
+  bindSessionAuthAsync,
   updateTaskValidation,
 } from '@luxgen/agent';
 import { requireAgentAuth } from '../../../lib/agent-auth';
@@ -38,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
-  bindSessionAuth(id, auth);
+  await bindSessionAuthAsync(id, auth);
 
   try {
     const result = await runValidationPipeline(id);
