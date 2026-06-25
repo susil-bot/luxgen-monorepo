@@ -460,11 +460,12 @@
       **How to build:** 1. Add `messages?: Array<{ role: 'user' | 'assistant'; content: string; timestamp: number }>` to `AgentSession` in `packages/agent/src/types/session.ts`. 2. After `runAgentLoop` completes in `chat.ts`, save the messages to the session via `saveSession`. 3. On page load in `AgentChat.tsx`, call `GET /api/agent/stage?sessionId=<id>` and populate `messages` state from `session.messages` (filtering out the welcome message). 4. Update `syncSessionToMongo` to include messages in the `AgentTask` document for audit/history.
       **Cap at 50 messages** to avoid unbounded session file growth.
 
-- [ ] **A-15** `[arch]`
+- [x] **A-15** `[arch]`
       **File:** `packages/agent/src/persistence/mongo.ts` lines 43–66, `packages/agent/src/types/task.ts` lines 14–27
       `AgentTaskRecord.metadata.model` is defined in the type but **`syncSessionToMongo` never writes it**. Which model processed each task is unauditable — you cannot correlate quality issues to model selection.
       **Fix:** In `worker.ts:processHeadlessJob`, after loading the session, store `job.model` on `session.metadata` (add `metadata?: { model?: string }` to `AgentSession`). Then include `metadata.model` in the `syncSessionToMongo` upsert body.
       **Files to change:** `packages/agent/src/types/session.ts`, `packages/agent/src/persistence/mongo.ts`, `packages/agent/src/queue/worker.ts`.
+      _Fix applied: `AgentSession.metadata.model`, worker sets from `job.model`, `syncSessionToMongo` persists it (2026-06-25)._
 
 - [x] **A-16** `[enhancement]`
       **File:** `apps/web/components/agent/AgentTransparency.tsx` lines 232–248
@@ -553,9 +554,9 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | MEDIUM               | 24      | 20     |
 | LOW                  | 25      | 22     |
 | **Agent / A-HIGH**   | **7**   | **5**  |
-| **Agent / A-MEDIUM** | **10**  | **2**  |
+| **Agent / A-MEDIUM** | **10**  | **3**  |
 | **Agent / A-LOW**    | **10**  | **1**  |
-| **Total**            | **110** | **78** |
+| **Total**            | **110** | **79** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
 

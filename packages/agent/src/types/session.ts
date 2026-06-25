@@ -39,6 +39,9 @@ export interface AgentSession {
   status?: import('./task').TaskStatus;
   mode?: import('./task').TaskMode;
   prompt?: string;
+  metadata?: {
+    model?: string;
+  };
 }
 
 export interface ApplyResult {
