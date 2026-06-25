@@ -196,7 +196,7 @@
       **File:** `apps/web/pages/login.tsx` lines 93–96
       `handleForgotPassword` shows `showSuccess('Password reset email sent!')` with no API call behind it. Users receive a fake success notification. Disable the button until H-19 (forgot-password endpoint) is implemented, or display a "coming soon" message instead.
 
-- [ ] **M-10** `[bug]`
+- [x] **M-10** `[bug]`
       **File:** `apps/web/pages/dashboard.tsx` lines 33–38
       `transformUserData(tenant)` runs in a `useEffect` on every `tenant` change and sets user state, but the initial `useState` (line 18) already calls `transformUserData`. If `GET_DASHBOARD_DATA` returns actual user data it is never applied. Consolidate into a single data source.
 
