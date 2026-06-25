@@ -12,12 +12,14 @@ import { storeServerProps } from '../../../lib/learn-store';
 import { categoryLabel } from '../../../lib/store-categories';
 import { formatStorefrontPrice } from '../../../lib/storefront-format';
 import { useLearnEnroll } from '../../../lib/use-learn-enroll';
+import { SnackbarProvider, useSnackbar } from '@luxgen/ui';
 
 interface Props {
   tenantSubdomain: string;
 }
 
-export default function StoreProductDetailPage({ tenantSubdomain }: Props) {
+function StoreProductDetailContent({ tenantSubdomain }: Props) {
+  const { showSuccess } = useSnackbar();
   const router = useRouter();
   const productId = router.query.id as string;
   const { tenantName, tenantSettings } = useLearnTenant(tenantSubdomain);
@@ -30,6 +32,7 @@ export default function StoreProductDetailPage({ tenantSubdomain }: Props) {
   const product = data?.storefrontProduct;
   const returnPath = `/store/product/${productId}`;
   const { enroll, loading: enrolling, success } = useLearnEnroll({ courseId: productId, returnPath });
+  const handleBuy = async () => { await enroll(); showSuccess('Added to cart — enrollment started'); };
 
   return (
     <>
@@ -92,13 +95,21 @@ export default function StoreProductDetailPage({ tenantSubdomain }: Props) {
               category={product.category}
               priceCents={product.priceCents}
               currency={product.currency}
-              onBuy={() => void enroll()}
+              onBuy={() => void handleBuy()}
               buying={enrolling}
             />
           </div>
         )}
       </StoreLayout>
     </>
+  );
+}
+
+export default function StoreProductDetailPage(props: Props) {
+  return (
+    <SnackbarProvider position="top-right" maxSnackbars={3}>
+      <StoreProductDetailContent {...props} />
+    </SnackbarProvider>
   );
 }
 
