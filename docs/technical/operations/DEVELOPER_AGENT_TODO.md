@@ -1615,11 +1615,11 @@ const [user, setUser] = useState<UserMenu | null>(null);
       No Intersection Observer or virtualization is used for long lists. Pages with 100+ rows (users, orders) render all rows into the DOM simultaneously.
       **Fix:** Implement windowing with `react-virtual` or `@tanstack/react-virtual` for tables with > 50 rows.
 
-- [ ] **UI-149** `[perf]`
+- [x] **UI-149** `[perf]`
       `apps/web/pages/automations/index.tsx` imports the full automation runner graph and trigger/action type definitions on the client, increasing the JS bundle for this page.
       **Fix:** Move trigger/action type resolution to the API; return only serialisable data to the client.
 
-- [ ] **UI-150** `[perf]`
+- [x] **UI-150** `[perf]`
       `packages/ui/src/index.ts` exports every component in a single barrel file. Tree-shaking relies on build tooling being configured correctly, but side-effect-containing components (those with `<style>` injection — UI-58, UI-59) defeat tree-shaking.
       **Fix:** Mark the UI package `"sideEffects": false` in `package.json` after removing all inline `<style>` injections.
 
@@ -1627,11 +1627,11 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 9 — Component API Design (UI-151 → UI-165)
 
-- [ ] **UI-151** `[api]`
+- [x] **UI-151** `[api]`
       `packages/ui/src/Select/Select.tsx` is not a generic component. The `onChange` callback receives `any`. All consumers must manually cast the value.
       **Fix:** Make `Select` generic: `Select<T extends string | number>` with `onChange: (value: T | T[]) => void`.
 
-- [ ] **UI-152** `[api]`
+- [x] **UI-152** `[api]`
       `packages/ui/src/InputWithLabel/InputWithLabel.tsx` is functionally identical to `<Input label="..." />`. The component adds no unique behaviour — it is a wrapper that could be replaced by a prop on `Input`.
       **Fix:** Add a `label?: string` prop directly to `Input`; deprecate and remove `InputWithLabel`.
 
