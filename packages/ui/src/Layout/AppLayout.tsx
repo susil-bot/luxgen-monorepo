@@ -319,6 +319,9 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
       {/* Main Content Area + optional Sidekick column */}
       <div className="flex flex-1 min-w-0">
         <div className="flex flex-col flex-1 min-w-0">
+          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--color-bg-secondary)] focus:text-[var(--color-label-primary)]">
+            Skip to content
+          </a>
           {/* NavBar - Always rendered */}
           <NavBar
             user={user}
@@ -350,7 +353,7 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
           />
 
           {/* Main Content - Dynamic children */}
-          <main className={`flex-1 overflow-y-auto p-4 ${getMainContentStyles()}`} style={{ paddingTop: '80px' }}>
+          <main id="main-content" className={`flex-1 overflow-y-auto p-4 ${getMainContentStyles()}`} style={{ paddingTop: '80px' }}>
             {children}
           </main>
         </div>
