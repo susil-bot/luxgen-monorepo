@@ -83,7 +83,6 @@ export interface ITenant extends Document {
     config: TenantConfig;
   };
   metadata: {
-    plan: 'free' | 'starter' | 'pro' | 'business' | 'enterprise';
     createdAt: Date;
     lastActive: Date;
     createdBy: Schema.Types.ObjectId;
@@ -260,11 +259,6 @@ const tenantSchema = new Schema<ITenant>(
       },
     },
     metadata: {
-      plan: {
-        type: String,
-        enum: ['free', 'starter', 'pro', 'business', 'enterprise'],
-        default: 'free',
-      },
       createdAt: {
         type: Date,
         default: Date.now,
@@ -288,6 +282,4 @@ const tenantSchema = new Schema<ITenant>(
 tenantSchema.index({ subdomain: 1 });
 tenantSchema.index({ domain: 1 });
 tenantSchema.index({ status: 1 });
-tenantSchema.index({ 'metadata.plan': 1 });
-
 export const Tenant = model<ITenant>('Tenant', tenantSchema);

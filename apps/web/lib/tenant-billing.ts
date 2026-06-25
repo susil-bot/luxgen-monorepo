@@ -1,5 +1,7 @@
-import { type PlanTier, normalizePlan, hasFeature } from '@luxgen/billing';
-import { Tenant, TenantSubscription } from '@luxgen/db';
+import { type PlanTier, hasFeature } from '@luxgen/billing';
+import { resolveEffectivePlan } from '@luxgen/db';
+
+export { resolveEffectivePlan };
 
 export function buildTenantFeatureFlags(plan: PlanTier): Record<string, boolean> {
   return {
@@ -12,21 +14,6 @@ export function buildTenantFeatureFlags(plan: PlanTier): Record<string, boolean>
     mobileApp: hasFeature(plan, 'mobileApp'),
     apiAccess: hasFeature(plan, 'apiAccess'),
   };
-}
-
-/** Resolve effective plan from subscription row or tenant metadata (id or subdomain). */
-export async function resolveEffectivePlan(tenantId: string): Promise<PlanTier> {
-  const sub = await TenantSubscription.findOne({ tenantId });
-  if (sub && ['active', 'trialing'].includes(sub.status)) {
-    return normalizePlan(sub.plan);
-  }
-
-  const tenant = (await Tenant.findById(tenantId).lean()) ?? (await Tenant.findOne({ subdomain: tenantId }).lean());
-  if (tenant?.metadata?.plan) {
-    return normalizePlan(tenant.metadata.plan);
-  }
-
-  return 'free';
 }
 
 export interface TenantBillingSnapshot {

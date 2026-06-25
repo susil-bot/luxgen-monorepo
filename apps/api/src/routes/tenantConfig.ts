@@ -1,5 +1,5 @@
 import { Router, Request, Response } from 'express';
-import { Tenant } from '@luxgen/db';
+import { Tenant, TenantSubscription } from '@luxgen/db';
 
 const router = Router();
 
@@ -79,13 +79,18 @@ router.get('/available', async (req: Request, res: Response) => {
   try {
     const tenants = await Tenant.find({
       status: 'active',
-    }).select('subdomain name metadata.plan');
+    }).select('subdomain name');
+
+    const subs = await TenantSubscription.find({
+      tenantId: { $in: tenants.map((t) => t.subdomain) },
+    }).lean();
+    const planByTenant = new Map(subs.map((s) => [s.tenantId, s.plan]));
 
     const availableTenants = tenants.map((tenant) => ({
       id: tenant.subdomain,
       name: tenant.name,
       subdomain: tenant.subdomain,
-      plan: tenant.metadata?.plan || 'free',
+      plan: planByTenant.get(tenant.subdomain) ?? 'free',
     }));
 
     res.json({
