@@ -1,6 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { listDeadLetterJobs } from '@luxgen/agent';
-import { requireAgentAdmin } from '../../../lib/agent-auth';
+import { requireAgentAdmin } from '../../../../lib/agent-auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'GET') {

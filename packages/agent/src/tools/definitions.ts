@@ -115,8 +115,7 @@ export const AGENT_TOOLS = [
   },
   {
     name: 'fetch_url',
-    description:
-      'Fetch text from an allowlisted HTTPS URL (docs.*, npmjs.com, github.com) for API/library reference.',
+    description: 'Fetch text from an allowlisted HTTPS URL (docs.*, npmjs.com, github.com) for API/library reference.',
     input_schema: {
       type: 'object',
       properties: {
@@ -127,8 +126,7 @@ export const AGENT_TOOLS = [
   },
   {
     name: 'read_project_config',
-    description:
-      'Read package.json dependencies and tsconfig paths for a workspace (e.g. apps/web, packages/agent).',
+    description: 'Read package.json dependencies and tsconfig paths for a workspace (e.g. apps/web, packages/agent).',
     input_schema: {
       type: 'object',
       properties: {

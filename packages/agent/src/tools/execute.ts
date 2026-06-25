@@ -5,13 +5,7 @@ import readline from 'readline';
 import { execFile } from 'child_process';
 import { promisify } from 'util';
 import { getAgentConfig } from '../config/agent-mode';
-import {
-  isPathAllowed,
-  isSensitiveFile,
-  isAllowedCommand,
-  isFetchUrlAllowed,
-  getMonorepoRoot,
-} from '../config/paths';
+import { isPathAllowed, isSensitiveFile, isAllowedCommand, isFetchUrlAllowed, getMonorepoRoot } from '../config/paths';
 import { getWorkspaceRoot } from '../changeset/session-store';
 import {
   MAX_DIR_ENTRIES,
@@ -77,10 +71,7 @@ export function listDirRecursive(dir: string, recursive: boolean, ext?: string):
   return [...walkFiles(dir, recursive, ext)];
 }
 
-async function searchLinesInFile(
-  filePath: string,
-  lq: string,
-): Promise<Array<{ line: number; text: string }>> {
+async function searchLinesInFile(filePath: string, lq: string): Promise<Array<{ line: number; text: string }>> {
   const hits: Array<{ line: number; text: string }> = [];
   let stat: fs.Stats;
   try {
@@ -207,8 +198,7 @@ async function executeToolInner(name: string, input: Record<string, unknown>, se
 
   if (name === 'search_code') {
     const searchRoot = input.directory ? path.join(root, String(input.directory)) : root;
-    const maxResults =
-      input.maxResults !== undefined ? Number(input.maxResults) : DEFAULT_SEARCH_RESULTS;
+    const maxResults = input.maxResults !== undefined ? Number(input.maxResults) : DEFAULT_SEARCH_RESULTS;
     const offset = input.offset !== undefined ? Number(input.offset) : 0;
     const search = await searchInDir(searchRoot, String(input.query ?? ''), {
       ext: input.file_extension as string | undefined,
@@ -217,7 +207,9 @@ async function executeToolInner(name: string, input: Record<string, unknown>, se
     });
     if (search.results.length === 0) return 'No matches found.';
     const lines = search.results.map((r) => `${path.relative(root, r.file)}:${r.line}: ${r.text}`);
-    const header = search.hasMore ? `\n(showing ${search.results.length} of ${search.total}+ matches; use offset to page)` : '';
+    const header = search.hasMore
+      ? `\n(showing ${search.results.length} of ${search.total}+ matches; use offset to page)`
+      : '';
     return lines.join('\n') + header;
   }
 
@@ -316,9 +308,7 @@ async function executeToolInner(name: string, input: Record<string, unknown>, se
       const res = await fetch(url, { signal: AbortSignal.timeout(5_000) });
       if (!res.ok) return `Error: HTTP ${res.status} for ${url}`;
       const text = await res.text();
-      return text.length > MAX_FETCH_URL_CHARS
-        ? text.slice(0, MAX_FETCH_URL_CHARS) + '\n... (truncated)'
-        : text;
+      return text.length > MAX_FETCH_URL_CHARS ? text.slice(0, MAX_FETCH_URL_CHARS) + '\n... (truncated)' : text;
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);
       return `Error fetching URL: ${message}`;

@@ -1,10 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  isAllowedCommand,
-  isFetchUrlAllowed,
-  isPathAllowed,
-  sanitizeSessionId,
-} from '../config/paths';
+import { isAllowedCommand, isFetchUrlAllowed, isPathAllowed, sanitizeSessionId } from '../config/paths';
 
 describe('sanitizeSessionId', () => {
   it('replaces unsafe characters', () => {

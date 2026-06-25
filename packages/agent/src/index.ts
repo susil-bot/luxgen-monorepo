@@ -118,7 +118,13 @@ export {
 } from './persistence/mongo';
 
 // Auth
-export { isAuthRequired, resolveAgentAuth, bindSessionAuth, bindSessionAuthAsync, extractBearerToken } from './auth/context';
+export {
+  isAuthRequired,
+  resolveAgentAuth,
+  bindSessionAuth,
+  bindSessionAuthAsync,
+  extractBearerToken,
+} from './auth/context';
 export type { TaskStatus, TaskMode, AgentAuthContext, HeadlessTaskJob, AuditAction } from './types/task';
 
 // Queue
