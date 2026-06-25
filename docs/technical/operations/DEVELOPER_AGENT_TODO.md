@@ -1384,20 +1384,20 @@ const [user, setUser] = useState<UserMenu | null>(null);
 - [x] **UI-92** `[type]`
       `apps/web/pages/groups/[id]/edit.tsx` likely uses typed `any` for form state. Audit and apply proper types.
 
-- [ ] **UI-93** `[type]`
+- [x] **UI-93** `[type]`
       GraphQL query variables typed as `Record<string, any>` in some utility hooks. Replace with generated types matching the query variables definition.
 
-- [ ] **UI-94** `[type]`
+- [x] **UI-94** `[type]`
       `apps/web/pages/admin/customers/[id].tsx` likely uses `any` for the customer data shape returned by the GraphQL query. Generate or define a `Customer` type.
 
-- [ ] **UI-95** `[type]`
+- [x] **UI-95** `[type]`
       `apps/web/lib/automation-map.ts` `UiTriggerType` and `UiActionType` are defined locally. They should be generated from or derived from the `@luxgen/automation-flow` package's canonical types to prevent drift.
 
 ---
 
 ### Section 5 — Dead Code & Unused Props (UI-96 → UI-110)
 
-- [ ] **UI-96** `[dead]`
+- [x] **UI-96** `[dead]`
       `packages/ui/src/Sidebar/Sidebar.tsx`: `variant`, `position`, and `width` props are accepted in the TypeScript interface and documented but are never referenced in the component's render logic. Callers passing these props believe they have an effect when they do not.
       **Fix:** Either implement each prop's intended behaviour, or remove them from the interface and add a TODO comment.
 

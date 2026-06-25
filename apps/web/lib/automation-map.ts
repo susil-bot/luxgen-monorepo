@@ -1,5 +1,6 @@
 /** Map between GraphQL SCREAMING_SNAKE enums and automations page snake_case types. */
 
+/** Canonical types should mirror @luxgen/automation-flow */
 export type UiTriggerType =
   | 'course_completed'
   | 'user_enrolled'
@@ -12,6 +13,7 @@ export type UiTriggerType =
   | 'code_change_merged'
   | 'code_change_failed';
 
+/** Canonical types should mirror @luxgen/automation-flow */
 export type UiActionType =
   | 'send_email'
   | 'add_to_group'
