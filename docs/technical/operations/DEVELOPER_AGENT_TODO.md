@@ -104,7 +104,7 @@
       **File:** `k8s/configmap.yaml` lines 10–11 vs `k8s/ingress.yaml`
       `NEXT_PUBLIC_API_URL` points to `api.luxgen.yourdomain.com` but the Ingress defines no rule for that subdomain — it only routes `luxgen.yourdomain.com/api/...`. The frontend will be unable to reach the API in production. Align the ConfigMap URL with the actual Ingress route.
 
-- [ ] **H-15** `[infra]`
+- [x] **H-15** `[infra]`
       **File:** `k8s/ingress.yaml` lines 13–17, 42–47
       TLS configuration is entirely commented out and there is no `ssl-redirect`. All production traffic would be served over plaintext HTTP. Uncomment TLS, reference the TLS secret, and add the SSL redirect annotation.
 
