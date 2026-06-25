@@ -259,9 +259,14 @@ export class GroupService {
           { _id: new Types.ObjectId(id), tenant: tenantId },
           { session },
         ).lean<IGroup>();
-        if (!deleted) throw new GraphQLError('Group not found', { extensions: { code: 'NOT_FOUND' } });
+        if (!deleted) throw new Error('Group not found');
         await GroupMember.deleteMany({ groupId: id }, { session });
       });
+    } catch (err) {
+      if (err instanceof Error && err.message === 'Group not found') {
+        throw new GraphQLError('Group not found', { extensions: { code: 'NOT_FOUND' } });
+      }
+      throw err;
     } finally {
       await session.endSession();
     }
