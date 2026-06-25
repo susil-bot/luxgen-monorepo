@@ -76,7 +76,7 @@ function CreateCustomerContent({ tenant }: Props) {
         <title>Add customer — {tenant}</title>
       </Head>
 
-      <AppLayout {...appLayoutProps}>
+      <AppLayout responsive {...appLayoutProps}>
         <CustomerCreateForm
           firstName={firstName}
           lastName={lastName}

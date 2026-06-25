@@ -118,7 +118,7 @@ function CreateOrderContent({ tenant }: Props) {
         <title>Create order — {tenant}</title>
       </Head>
 
-      <AppLayout {...appLayoutProps}>
+      <AppLayout responsive {...appLayoutProps}>
         <OrderCreateForm
           students={students}
           courses={courses}

@@ -38,7 +38,12 @@ export default function AnalyticsHubPage({ tenant }: Props) {
       <Head>
         <title>Analytics — {tenant}</title>
       </Head>
-      <AppLayout sidebarSections={getDefaultSidebarSections()} user={getDefaultUser()} logo={getDefaultLogo()}>
+      <AppLayout
+        responsive
+        sidebarSections={getDefaultSidebarSections()}
+        user={getDefaultUser()}
+        logo={getDefaultLogo()}
+      >
         <PlanGate feature="analytics" currentPlan={tenantPlan} tenant={tenant}>
           <div className="max-w-3xl mx-auto px-4 py-8">
             <header className="mb-8">

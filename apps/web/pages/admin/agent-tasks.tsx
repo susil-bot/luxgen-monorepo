@@ -89,6 +89,7 @@ function AgentTasksContent({ tenant }: Props) {
         <title>Agent tasks — LuxGen</title>
       </Head>
       <AppLayout
+        responsive
         user={layoutUser}
         logo={getDefaultLogo()}
         sidebarSections={getDefaultSidebarSections()}

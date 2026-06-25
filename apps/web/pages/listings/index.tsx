@@ -21,7 +21,12 @@ export default function ListingsDirectoryPage({ tenant }: Props) {
       <Head>
         <title>Business Listings — {tenant}</title>
       </Head>
-      <AppLayout sidebarSections={getDefaultSidebarSections()} user={getDefaultUser()} logo={getDefaultLogo()}>
+      <AppLayout
+        responsive
+        sidebarSections={getDefaultSidebarSections()}
+        user={getDefaultUser()}
+        logo={getDefaultLogo()}
+      >
         <div className="max-w-4xl mx-auto px-4 py-8">
           <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>

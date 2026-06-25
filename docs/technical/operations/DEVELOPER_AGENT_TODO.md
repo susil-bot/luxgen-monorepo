@@ -1096,20 +1096,20 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 2 — Responsive Design (UI-21 → UI-45)
 
-- [ ] **UI-21** `[responsive]`
+- [x] **UI-21** `[responsive]`
       `AppLayout` receives no `responsive` prop on approximately 30 pages, meaning the sidebar does NOT collapse on mobile for those pages. The sidebar overlaps content on narrow screens.
       **Affected pages:** All `orders/*`, `admin/*`, `analytics/*`, `courses/*`, `groups/*`, `listings/*`, `marketplace/*`, `organization/*` pages.
       **Fix:** Add `responsive` (or `responsive={true}`) to every `AppLayout` usage.
 
-- [ ] **UI-22** `[responsive]`
+- [x] **UI-22** `[responsive]`
       `packages/ui/src/Sidebar/Sidebar.tsx` has no CSS media-query or JavaScript breakpoint logic to auto-collapse on mobile. The `collapsible` prop only applies to the manual toggle button. On viewport < 768px the full sidebar renders and obscures content.
       **Fix:** Add a `useEffect` in `Sidebar` that collapses automatically when `window.innerWidth < 768`. Add a mobile overlay/backdrop.
 
-- [ ] **UI-23** `[responsive]`
+- [x] **UI-23** `[responsive]`
       `packages/ui/src/NavBar/NavBar.tsx` hides the search bar at `sm:` breakpoint (640px) but search remains accessible via no icon or alternative UI. Users on small tablets (640–768px) lose search completely.
       **Fix:** Add a search icon that expands to a full-width search bar overlay on mobile instead of hiding entirely.
 
-- [ ] **UI-24** `[responsive]`
+- [x] **UI-24** `[responsive]`
       `apps/web/components/BannerCarousel.tsx` uses a fixed `h-64` class with no responsive height variants. On mobile, the banner is tall relative to viewport, pushing content below the fold.
       **Fix:** Apply `h-40 sm:h-56 md:h-64` responsive height classes.
 

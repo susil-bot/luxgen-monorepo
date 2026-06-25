@@ -335,6 +335,7 @@ export default function AutomationsPage({ tenant }: Props) {
         <title>Automations — {subdomain.charAt(0).toUpperCase() + subdomain.slice(1)}</title>
       </Head>
       <AppLayout
+        responsive
         sidebarSections={getDefaultSidebarSections()}
         user={getDefaultUser()}
         logo={getDefaultLogo()}

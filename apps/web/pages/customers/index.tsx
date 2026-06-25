@@ -135,6 +135,7 @@ function CustomersContent({ tenant }: Props) {
           <title>My Learning — {tenant}</title>
         </Head>
         <AppLayout
+          responsive
           sidebarSections={getDefaultSidebarSections()}
           user={undefined}
           logo={getDefaultLogo()}
@@ -160,6 +161,7 @@ function CustomersContent({ tenant }: Props) {
           <title>My Learning — {tenant}</title>
         </Head>
         <AppLayout
+          responsive
           sidebarSections={getDefaultSidebarSections()}
           user={layoutUser}
           logo={getDefaultLogo()}
@@ -179,6 +181,7 @@ function CustomersContent({ tenant }: Props) {
           <title>My Learning — {tenant}</title>
         </Head>
         <AppLayout
+          responsive
           sidebarSections={getDefaultSidebarSections()}
           user={layoutUser}
           logo={getDefaultLogo()}
@@ -199,6 +202,7 @@ function CustomersContent({ tenant }: Props) {
         <title>My Learning — {tenant.charAt(0).toUpperCase() + tenant.slice(1)}</title>
       </Head>
       <AppLayout
+        responsive
         sidebarSections={getDefaultSidebarSections()}
         user={layoutUser}
         logo={getDefaultLogo()}
