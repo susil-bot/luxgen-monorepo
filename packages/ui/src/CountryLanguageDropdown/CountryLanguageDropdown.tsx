@@ -29,7 +29,7 @@ export interface CountryLanguageDropdownProps {
 }
 
 // Default countries and languages
-const defaultCountries: Country[] = [
+export const DEFAULT_COUNTRIES: Country[] = [
   { code: 'US', name: 'United States', flag: '🇺🇸' },
   { code: 'GB', name: 'United Kingdom', flag: '🇬🇧' },
   { code: 'CA', name: 'Canada', flag: '🇨🇦' },
@@ -44,7 +44,7 @@ const defaultCountries: Country[] = [
   { code: 'BR', name: 'Brazil', flag: '🇧🇷' },
 ];
 
-const defaultLanguages: Language[] = [
+export const DEFAULT_LANGUAGES: Language[] = [
   { code: 'en', name: 'English', nativeName: 'English' },
   { code: 'es', name: 'Spanish', nativeName: 'Español' },
   { code: 'fr', name: 'French', nativeName: 'Français' },

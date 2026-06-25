@@ -1213,19 +1213,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/ProductCard/ProductCard.tsx` hardcodes like-icon fill colour as `'#EF4444'` (active) and `'#6B7280'` (inactive).
       **Fix:** Use `var(--color-red)` and `var(--color-label-tertiary)`.
 
-- [ ] **UI-49** `[hardcode]`
+- [x] **UI-49** `[hardcode]`
       `packages/ui/src/CountryLanguageDropdown/CountryLanguageDropdown.tsx` contains a hard-coded list of 12 countries and 12 languages as default props. These cannot be extended without modifying the library.
       **Fix:** Remove default data from the component; require the caller to pass `countries` and `languages`. Provide a separate exported `DEFAULT_COUNTRIES` / `DEFAULT_LANGUAGES` constant for convenience.
 
-- [ ] **UI-50** `[hardcode]`
+- [x] **UI-50** `[hardcode]`
       `packages/ui/src/NotFound/NotFound.tsx` uses Tailwind colour classes `'bg-blue-600'`, `'hover:bg-blue-700'`, `'border-gray-300'`, `'text-gray-700'` for buttons, bypassing the CSS variable system.
       **Fix:** Replace with `var(--color-blue)` and `var(--color-separator)` via `style={{}}` or custom class names.
 
-- [ ] **UI-51** `[hardcode]`
+- [x] **UI-51** `[hardcode]`
       `packages/ui/src/Menu/Menu.tsx` uses Tailwind colours for the active state: `'bg-blue-100 text-blue-900 border-r-2 border-blue-500'`. These do not respond to dark mode.
       **Fix:** Replace with CSS variables: `var(--color-blue)` at 10% opacity background, `var(--color-label-primary)` text.
 
-- [ ] **UI-52** `[hardcode]`
+- [x] **UI-52** `[hardcode]`
       `packages/ui/src/LoginForm/LoginForm.tsx` and `RegisterForm/RegisterForm.tsx` share identical hardcoded success colour strings (`'bg-green-600'`, `'hover:bg-green-700'`, etc.). The same value is duplicated in two files.
       **Fix:** Extract to a shared `formTheme` constant; replace with `var(--color-green)`.
 

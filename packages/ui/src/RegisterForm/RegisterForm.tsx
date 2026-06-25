@@ -417,7 +417,7 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
         <button
           type="submit"
           disabled={isDisabled}
-          className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-600/50 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+          className="w-full bg-[var(--color-green)] hover:bg-green-700 disabled:bg-[var(--color-green)]/50 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
         >
           {loading || isSubmitting ? (
             <div className="flex items-center justify-center">
