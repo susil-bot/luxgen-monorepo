@@ -1342,18 +1342,18 @@ const [user, setUser] = useState<UserMenu | null>(null);
 - [x] **UI-80** `[type]`
       `packages/ui/src/Select/Select.tsx`: `onChange: (value: any) => void`. Should be generic: `onChange: (value: T | T[]) => void` where `T = string | number`.
 
-- [ ] **UI-81** `[type]`
+- [x] **UI-81** `[type]`
       `packages/ui/src/InputWithLabel/InputWithLabel.tsx`: `value: any`, `onChange: (value: any) => void` inherited from `BaseFormProps`. The `any` propagates into every usage.
       **Fix:** Make `BaseFormProps` generic: `BaseFormProps<T = string>`.
 
-- [ ] **UI-82** `[type]`
+- [x] **UI-82** `[type]`
       `apps/web/lib/transformer.ts` has `metadata: any` in multiple type definitions, `transformDashboardData(graphqlData: any)`, and multiple `.map((item: any) => ...)`.
       **Fix:** Replace each `any` with the generated GraphQL type or an explicit interface matching the query shape.
 
-- [ ] **UI-83** `[type]`
+- [x] **UI-83** `[type]`
       `apps/web/pages/courses/create.tsx`, `courses/analytics.tsx`, `groups/analytics.tsx`, `developer/index.tsx`: all use `useState<any>(null)` for user state. Should be `useState<UserMenu | null>(null)`.
 
-- [ ] **UI-84** `[type]`
+- [x] **UI-84** `[type]`
       `apps/web/pages/dashboard.tsx`: `onDashboardAction(action: string, data?: any)`. The `action` should be a typed literal union of all supported action strings.
 
 - [ ] **UI-85** `[type]`

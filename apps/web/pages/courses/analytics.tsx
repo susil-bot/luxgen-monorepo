@@ -15,7 +15,7 @@ interface CourseAnalyticsPageProps {
 
 export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps) {
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<import('@luxgen/ui').UserMenu | null>(null);
   const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'learner'>('learner');
 
   const { data: billingData } = useQuery(GET_TENANT_BILLING, {
