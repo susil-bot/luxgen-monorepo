@@ -2814,3 +2814,7 @@ html.dark [data-tenant='demo'] {
   font-family: inherit;
   cursor: pointer;
 }
+
+.lux-card-container {
+  container-type: inline-size;
+}
