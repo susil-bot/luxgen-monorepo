@@ -4,7 +4,12 @@ import { User } from '@luxgen/db';
 import { UserRole } from '@luxgen/auth';
 import { verifyPassword, hashPassword } from '@luxgen/auth';
 import { generateToken } from '../utils/jwt';
-import { validateLogin, validateRegister, validateForgotPassword, validateResetPassword } from '../middleware/validation';
+import {
+  validateLogin,
+  validateRegister,
+  validateForgotPassword,
+  validateResetPassword,
+} from '../middleware/validation';
 import { loginRateLimitMiddleware } from '../middleware/loginRateLimit';
 import { isAccountActive, ACCOUNT_DEACTIVATED_MESSAGE } from '../utils/accountStatus';
 import { UserRegistrationService } from '../services/userRegistrationService';
@@ -21,8 +26,7 @@ function hashResetToken(token: string): string {
   return crypto.createHash('sha256').update(token).digest('hex');
 }
 
-const PASSWORD_RESET_SENT_MESSAGE =
-  'If an account exists with that email, a password reset link has been sent.';
+const PASSWORD_RESET_SENT_MESSAGE = 'If an account exists with that email, a password reset link has been sent.';
 
 // Login endpoint
 router.post('/login', loginRateLimitMiddleware, validateLogin, async (req: Request, res: Response) => {
