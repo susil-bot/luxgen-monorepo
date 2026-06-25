@@ -31,7 +31,6 @@ function AuthGuardRedirect({ returnPath, reason }: { returnPath: string; reason:
 export function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
-  const [sessionVersion, setSessionVersion] = useState(0);
 
   useEffect(() => {
     setMounted(true);
@@ -45,7 +44,7 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }, []);
 
   // Re-render when sessionVersion bumps after login/logout
-  void sessionVersion;
+  
 
   // Public routes must match SSR HTML — do not gate on router.isReady
   if (!requiresAuth(router.pathname)) {

@@ -34,7 +34,7 @@ export function AIStudioSidekickPanel() {
     <AgentChat
       sessionId={sessionId}
       layout="sidekick"
-      onFileStaged={() => {}}
+      onFileStaged={() => window.dispatchEvent(new CustomEvent('luxgen:file-staged'))}
       onSessionChange={() => setSessionSuffix(String(Date.now()))}
     />
   );

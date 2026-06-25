@@ -1401,18 +1401,18 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/Sidebar/Sidebar.tsx`: `variant`, `position`, and `width` props are accepted in the TypeScript interface and documented but are never referenced in the component's render logic. Callers passing these props believe they have an effect when they do not.
       **Fix:** Either implement each prop's intended behaviour, or remove them from the interface and add a TODO comment.
 
-- [ ] **UI-97** `[dead]`
+- [x] **UI-97** `[dead]`
       `packages/ui/src/Heading/Heading.tsx`: `loading` prop extracted via destructuring but discarded silently. See UI-90.
 
-- [ ] **UI-98** `[dead]`
+- [x] **UI-98** `[dead]`
       `apps/web/components/auth/AuthGuard.tsx`: `sessionVersion` state is incremented by `setSessionVersion(v => v + 1)` on auth changes but is immediately suppressed via `void sessionVersion`. The increment triggers a re-render but the value is never consumed. This is a code smell.
       **Fix:** Remove `sessionVersion` state; use a `key` prop on the child content or a direct `router.reload()` approach.
 
-- [ ] **UI-99** `[dead]`
+- [x] **UI-99** `[dead]`
       `apps/web/components/agent/AIStudioSidekickPanel.tsx`: `onFileStaged={() => {}}` is a no-op. The event fires in the underlying `AgentChat` but nothing happens.
       **Fix:** Implement the callback to refresh a file list or emit an event to the parent page.
 
-- [ ] **UI-100** `[dead]`
+- [x] **UI-100** `[dead]`
       `apps/web/pages/dashboard.tsx`: 11 handler props passed as `() => {}` to `AdminDashboardLayout` (`onDataPointClick`, `onSegmentClick`, `onActivityClick`, `onSurveyClick`, `onRequestClick`, `onViewSurvey`, `onEditSurvey`, `onShareSurvey`, `onApproveRequest`, `onDenyRequest`, `onViewDetails`).
       **Fix:** Implement navigation or mutation logic for each, or add `// TODO: implement` with a tracking reference.
 
@@ -1849,7 +1849,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | Responsive Design (UI-21–45)                    | 25      | 0     |
 | Hardcoded Values / Tokens (UI-46–75)            | 30      | 4     |
 | TypeScript & Type Safety (UI-76–95)             | 20      | 0     |
-| Dead Code & Unused Props (UI-96–110)            | 15      | 0     |
+| Dead Code & Unused Props (UI-96–110)            | 15      | 4     |
 | Missing States (UI-111–125)                     | 15      | 0     |
 | SEO & Head Management (UI-126–135)              | 10      | 0     |
 | Performance (UI-136–150)                        | 15      | 0     |
