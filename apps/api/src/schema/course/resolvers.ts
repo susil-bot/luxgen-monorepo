@@ -5,6 +5,7 @@ import { emitAutomationEvent } from '@luxgen/agent';
 import { CourseStatus } from '@luxgen/db';
 import type { GraphQLContext } from '../../context';
 import { scopedTenantId } from '../../graphql/tenantScope';
+import type { CourseCommerceFields } from '../../utils/productMeta';
 
 function publishedCoursesOnly<T extends { status: string }>(courses: T[], context: GraphQLContext): T[] {
   if (context.user) return courses;
@@ -12,6 +13,9 @@ function publishedCoursesOnly<T extends { status: string }>(courses: T[], contex
 }
 
 export const courseResolvers = {
+  Course: {
+    commerce: (parent: { commerce?: CourseCommerceFields | null }) => parent.commerce ?? { currency: 'usd' },
+  },
   Query: {
     course: async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
       const course = await courseService.getCourseById(id);

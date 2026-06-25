@@ -21,6 +21,13 @@ export const GET_COURSE = gql`
       startDate
       endDate
       status
+      commerce {
+        priceCents
+        compareAtPriceCents
+        sku
+        category
+        currency
+      }
       createdAt
       tenant {
         id
@@ -46,6 +53,13 @@ export const GET_COURSES = gql`
       startDate
       endDate
       status
+      commerce {
+        priceCents
+        compareAtPriceCents
+        sku
+        category
+        currency
+      }
       updatedAt
       createdAt
     }

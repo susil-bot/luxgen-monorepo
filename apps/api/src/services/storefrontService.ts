@@ -13,7 +13,7 @@ import {
 import { courseService } from './courseService';
 import { enrollmentService } from './enrollmentService';
 import { isBillingDevMode } from './billingService';
-import { resolveProductPriceCents } from '../utils/productMeta';
+import { resolveCoursePriceCents } from '../utils/productMeta';
 
 const PRODUCT_CATEGORIES = ['men', 'women', 'interior', 'dresses', 'digital'] as const;
 
@@ -48,16 +48,15 @@ function mapProduct(course: Awaited<ReturnType<typeof courseService.getCourseByI
   };
   const title = course.title;
   const description = course.description ?? '';
+  const category = course.commerce?.category?.trim() || inferProductCategory(title, description, index);
+  const fallbackCents = category === 'digital' ? 4900 : 12900;
   return {
     id: course._id?.toString?.() ?? course.id,
     title,
     description,
     status: course.status,
-    category: inferProductCategory(title, description, index),
-    priceCents: resolveProductPriceCents(
-      description,
-      inferProductCategory(title, description, index) === 'digital' ? 4900 : 12900,
-    ),
+    category,
+    priceCents: resolveCoursePriceCents(course.commerce, description, fallbackCents),
     currency: 'usd',
     instructorName: instructor ? `${instructor.firstName ?? ''} ${instructor.lastName ?? ''}`.trim() : null,
     enrollmentCount: (course.students as unknown[])?.length ?? 0,
