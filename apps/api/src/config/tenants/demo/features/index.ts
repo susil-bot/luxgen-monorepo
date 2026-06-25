@@ -160,5 +160,6 @@ export const demoFeaturesConfig = {
     'ai-assistant': false,
     learnerDashboard: true,
     customerSegmentation: true,
+    'commerce-phase-4': true,
   },
 };
