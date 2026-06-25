@@ -9,10 +9,63 @@
 # Usage (CI / non-interactive — secrets already exist in the cluster):
 #   LUXGEN_SECRETS_ALREADY_EXIST=true ./k8s/deploy.sh
 #
+# Non-interactive mode skips secret creation when the cluster already has
+# `luxgen-secrets`. No prompts are used; the script exits on the first error.
+#
 set -euo pipefail
 
 NAMESPACE=luxgen
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+# Required keys — keep in sync with k8s/secret.yaml.example
+REQUIRED_SECRET_KEYS=(
+  MONGODB_URI
+  JWT_SECRET
+  JWT_EXPIRES_IN
+  SEED_IF_EMPTY
+  TENANT_DEMO_KEY
+  TENANT_IDEA-VIBES_KEY
+  MONGO_INITDB_ROOT_USERNAME
+  MONGO_INITDB_ROOT_PASSWORD
+  MONGO_INITDB_DATABASE
+)
+
+validate_env_production() {
+  local env_file="$1"
+  local missing=()
+  local empty=()
+
+  for key in "${REQUIRED_SECRET_KEYS[@]}"; do
+    local line
+    line="$(grep -E "^${key}=" "$env_file" | tail -n 1 || true)"
+    if [ -z "$line" ]; then
+      missing+=("$key")
+      continue
+    fi
+    local value="${line#*=}"
+    value="${value%\"}"
+    value="${value#\"}"
+    value="${value%\'}"
+    value="${value#\'}"
+    if [ -z "$value" ]; then
+      empty+=("$key")
+    fi
+  done
+
+  if [ "${#missing[@]}" -gt 0 ] || [ "${#empty[@]}" -gt 0 ]; then
+    echo "❌ .env.production is missing required secret keys:"
+    for key in "${missing[@]}"; do
+      echo "   - $key (not set)"
+    done
+    for key in "${empty[@]}"; do
+      echo "   - $key (empty value)"
+    done
+    echo ""
+    echo "   See k8s/secret.yaml.example for the full list."
+    exit 1
+  fi
+}
 
 echo "🚀 Deploying LuxGen to Kubernetes..."
 
@@ -39,11 +92,12 @@ kubectl apply -f "$SCRIPT_DIR/namespace.yaml"
 
 echo "🔐 Setting up secrets..."
 
-if [ -f "$SCRIPT_DIR/../.env.production" ]; then
+if [ -f "$REPO_ROOT/.env.production" ]; then
   echo "📝 Using .env.production for secrets..."
+  validate_env_production "$REPO_ROOT/.env.production"
   kubectl create secret generic luxgen-secrets \
     --namespace="$NAMESPACE" \
-    --from-env-file="$SCRIPT_DIR/../.env.production" \
+    --from-env-file="$REPO_ROOT/.env.production" \
     --dry-run=client -o yaml | kubectl apply -f -
 
 elif [ "${LUXGEN_SECRETS_ALREADY_EXIST:-false}" = "true" ]; then
