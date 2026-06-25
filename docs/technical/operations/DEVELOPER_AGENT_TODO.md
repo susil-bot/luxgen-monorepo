@@ -114,7 +114,7 @@
       **File:** `packages/auth/src/roles.ts` lines 1–5 vs `packages/db/src/user.ts` lines 3–10 vs `apps/api/src/schema/user/typeDefs.ts` lines 17–21
       Three separate, divergent `UserRole` enum definitions exist across the monorepo. `@luxgen/auth` has `{SUPER_ADMIN, ADMIN, USER}`; `@luxgen/db` has `{SUPER_ADMIN, ADMIN, INSTRUCTOR, STUDENT, USER}`; the GraphQL schema has `{ADMIN, INSTRUCTOR, STUDENT}`. Consolidate to a single canonical definition in `@luxgen/db` or a dedicated `@luxgen/types` package.
 
-- [ ] **H-17** `[arch]`
+- [x] **H-17** `[arch]`
       **File:** `packages/db/src/tenant.ts` lines 62–64 vs `packages/db/src/subscription.ts` line 5
       Billing plan is stored in two separate places: `ITenant.metadata.plan` and `ITenantSubscription.plan`. These can diverge (e.g., a Stripe webhook that updates the subscription but not the tenant). Pick one authoritative source and remove the other.
 
@@ -126,7 +126,7 @@
       **File:** `apps/api/src/routes/auth.ts` (missing endpoint)
       No password reset / forgot-password endpoint exists anywhere. `config/tenants/demo/features/index.ts:34` has `passwordReset: true` but the API is completely absent. Implement `POST /api/auth/forgot-password` and `POST /api/auth/reset-password`.
 
-- [ ] **H-20** `[feat]`
+- [x] **H-20** `[feat]`
       **File:** `apps/api/src/routes/auth.ts` (missing endpoint)
       No token refresh endpoint exists. Tokens expire after 7 days with no silent renewal path. Implement `POST /api/auth/refresh` using a separate long-lived refresh token (httpOnly cookie).
 
@@ -146,7 +146,7 @@
       **File:** `apps/agent-worker/src/index.ts` lines 5–6
       Agent worker loads `.env` files via hard-coded relative paths from `__dirname`. Inside a Docker container or K8s pod, `__dirname` resolves to the compiled `dist/` directory and the `../../../` traversal won't reach the monorepo root. All env vars silently fail to load. Use explicit `ENV_FILE` env var or inject vars via K8s ConfigMap/Secret.
 
-- [ ] **H-25** `[missing-test]`
+- [x] **H-25** `[missing-test]`
       **File:** `apps/api/src/services/` — all five: `listingService.ts`, `billingService.ts`, `courseService.ts`, `automationService.ts`, `groupService.ts`
       Zero test files exist for any of these services. The entire billing, course, listing, automation, and group domains are untested. Create integration test suites for each service.
 
@@ -475,7 +475,7 @@
       **Fix:** In `handleApplyAll` (client side), check `validation?.passed === false` and display a blocking warning: "Validation failed — apply anyway?" with explicit confirmation. Server-side, add an optional `validation` check in `apply.ts` gated on `getValidationPolicy() === 'strict'`.
       **Files to change:** `apps/web/components/agent/AgentTransparency.tsx`, `apps/web/pages/api/agent/apply.ts`.
 
-- [ ] **A-17** `[feat]`
+- [x] **A-17** `[feat]`
       **File:** `apps/web/pages/api/agent/tasks.ts` — missing admin endpoint
       There is **no endpoint to list all agent tasks for a tenant** (for admin oversight). A tenant admin cannot see what their team's agent sessions are doing, which sessions are running, or audit past changes.
       **What to build:** `GET /api/agent/tasks/list?tenantId=<id>&status=<status>&limit=20&cursor=<id>` — requires `ADMIN` role, reads from MongoDB `AgentTask` collection. Return `{ tasks: AgentTaskRecord[], nextCursor }`. Wire into a new admin page `apps/web/pages/admin/agent-tasks.tsx`.
@@ -485,6 +485,7 @@ Auth: Bearer token, role >= ADMIN
 Query: tenantId (string), status? (TaskStatus), limit? (number, max 50), cursor? (string)
 Response: { tasks: AgentTaskRecord[], nextCursor: string | null, total: number }`
       **Files to create:** `apps/web/pages/api/agent/tasks/list.ts`, `apps/web/pages/admin/agent-tasks.tsx`.
+      **Done (2026-06-25):** Admin list endpoint + agent-tasks page.
 
 ### A-LOW — Tech Debt / Polish
 
