@@ -164,7 +164,7 @@
       **File:** `apps/api/src/services/groupService.ts` lines 55–56
       Relay-spec `pageInfo` fields are computed incorrectly: `hasPreviousPage` is set to `hasCursor` when paginating forward (should always be `false`), and `hasNextPage` is set to `hasCursor` when paginating backward. This breaks standard Relay infinite-scroll clients.
 
-- [ ] **M-02** `[bug]`
+- [x] **M-02** `[bug]`
       **File:** `apps/api/src/services/listingService.ts` lines 36–43
       `uniqueSlug` uses a sequential polling loop to find a free slug — a classic TOCTOU race condition. Two concurrent `createDraft` calls with the same name will both see the slug as free. Add a unique index on `{tenantId, slug}` and handle the duplicate-key error to retry.
 
@@ -200,7 +200,7 @@
       **File:** `apps/web/pages/dashboard.tsx` lines 33–38
       `transformUserData(tenant)` runs in a `useEffect` on every `tenant` change and sets user state, but the initial `useState` (line 18) already calls `transformUserData`. If `GET_DASHBOARD_DATA` returns actual user data it is never applied. Consolidate into a single data source.
 
-- [ ] **M-11** `[bug]`
+- [x] **M-11** `[bug]`
       **File:** `apps/web/pages/api/agent/chat.ts` lines 120–122
       After cancellation, `res.end()` may already be called by the `close` listener (lines 94–97). A subsequent write to the closed `ServerResponse` from the `done` event path will throw an unhandled error. Guard all writes after cancellation with an `isClosed` flag.
 
@@ -216,7 +216,7 @@
       **File:** `apps/api/src/lib/redis.ts` lines 16–27
       Redis client uses `lazyConnect: true` but `connect()` is never explicitly called. The `.on('error', () => {})` handler swallows all errors with no log message, making Redis misconfiguration invisible. Log the error, and add an explicit startup connectivity check.
 
-- [ ] **M-15** `[enhancement]`
+- [x] **M-15** `[enhancement]`
       **File:** `apps/api/src/utils/logger.ts` lines 9–12
       Logger reads `LOG_LEVEL` once at construction time (stale in test environments) and has no structured JSON output mode for production log aggregators. Add a `JSON_LOGS=true` env flag to emit structured output and read `LOG_LEVEL` per-call.
 
@@ -363,12 +363,12 @@
 
 ## Progress Summary
 
-| Tier      | Total  | Done  |
-| --------- | ------ | ----- |
-| CRITICAL  | 7      | 7 ✅  |
-| HIGH      | 27     | 0     |
-| MEDIUM    | 24     | 0     |
-| LOW       | 25     | 0     |
-| **Total** | **83** | **7** |
+| Tier      | Total  | Done   |
+| --------- | ------ | ------ |
+| CRITICAL  | 7      | 7 ✅   |
+| HIGH      | 27     | 18     |
+| MEDIUM    | 24     | 17     |
+| LOW       | 25     | 22     |
+| **Total** | **83** | **57** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.

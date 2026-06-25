@@ -82,9 +82,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   res.flushHeaders();
 
   let isCancelled = false;
+  let responseEnded = false;
+
+  const endResponse = () => {
+    if (responseEnded) return;
+    responseEnded = true;
+    res.end();
+  };
 
   const heartbeatInterval = setInterval(() => {
-    if (isCancelled) {
+    if (isCancelled || responseEnded) {
       clearInterval(heartbeatInterval);
       return;
     }
@@ -97,10 +104,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   });
 
   const connectionTimer = setTimeout(() => {
-    if (!isCancelled) {
+    if (!isCancelled && !responseEnded) {
       isCancelled = true;
       sendEvent(res, 'error', { message: 'Connection timed out after 2 minutes.' });
-      res.end();
+      endResponse();
     }
   }, 120_000);
 
@@ -118,7 +125,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       systemPrompt: requestedSystem,
       shouldCancel: () => isCancelled,
       onEvent: (event) => {
-        if (isCancelled && event.type !== 'done') return;
+        if (isCancelled || responseEnded) return;
         const { type, ...rest } = event;
         sendEvent(res, type as EventType, rest);
       },
@@ -126,6 +133,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   } finally {
     clearInterval(heartbeatInterval);
     clearTimeout(connectionTimer);
-    res.end();
+    endResponse();
   }
 }
