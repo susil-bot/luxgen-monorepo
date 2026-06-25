@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {
   AppLayout,
   getDefaultSidebarSections,
-  getDefaultUser,
   getDefaultLogo,
   TenantDebug,
   CourseMenu,
@@ -12,7 +12,8 @@ import {
   CourseAnalytics,
 } from '@luxgen/ui';
 import { TenantBanner } from '../components/tenant/TenantBanner';
-import { PageLoadingState } from '../components/common/PageStates';
+import { PageLoadingState, PageEmptyState } from '../components/common/PageStates';
+import { useLayoutUser } from '../lib/app-layout-user';
 import { createHandleUserAction } from '../lib/user-actions';
 
 interface CoursesPageProps {
@@ -21,6 +22,7 @@ interface CoursesPageProps {
 
 export default function CoursesPage({ tenant }: CoursesPageProps) {
   const router = useRouter();
+  const layoutUser = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
   const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'learner' | 'user'>('learner');
   const [loading, setLoading] = useState(true);
@@ -37,6 +39,7 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
     enrolledCount: 1250,
     thumbnail: '/images/course-thumbnail.jpg',
   });
+  const [catalogCourses] = useState<unknown[]>([]);
 
   const [analyticsMetrics] = useState({
     totalEnrollments: 1250,
@@ -69,7 +72,7 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
 
       <AppLayout
         sidebarSections={getDefaultSidebarSections()}
-        user={getDefaultUser()}
+        user={layoutUser ?? undefined}
         logo={getDefaultLogo()}
         onUserAction={handleUserAction}
         showSearch={true}
@@ -86,6 +89,19 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
             <p className="mt-1 text-secondary text-sm">Browse and manage learning content</p>
           </div>
           <div className="space-y-8">
+            {catalogCourses.length === 0 && (
+              <PageEmptyState
+                icon="📚"
+                title="No courses yet"
+                subtitle="Create your first course or browse the learn catalog."
+                action={
+                  <div className="flex flex-wrap justify-center gap-2 mt-4">
+                    <Link href="/courses/create" className="ios-btn-primary text-sm">Create course</Link>
+                    <Link href="/learn" className="ios-btn-secondary text-sm">Browse catalog</Link>
+                  </div>
+                }
+              />
+            )}
             {/* Course Overview */}
             <CourseOverview course={sampleCourse} userRole={userRole} enrollmentStatus="enrolled" />
 
