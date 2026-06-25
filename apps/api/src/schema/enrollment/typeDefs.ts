@@ -108,6 +108,7 @@ export const enrollmentTypeDefs = `
     updateCustomerNotes(input: UpdateCustomerNotesInput!): User!
     createOrderCheckoutSession(input: CreateOrderCheckoutInput!): OrderCheckoutSession!
     confirmOrderPaymentDev(courseId: ID!, studentId: ID!, tenantId: ID!): Enrollment!
+    sendCheckoutRecoveryEmail(tenantId: ID!, checkoutSessionId: ID!): Boolean!
     updateEnrollmentProgress(input: UpdateEnrollmentProgressInput!): Enrollment!
     markCourseComplete(courseId: ID!): Enrollment!
   }

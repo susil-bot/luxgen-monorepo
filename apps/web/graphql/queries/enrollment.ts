@@ -201,3 +201,10 @@ export const CONFIRM_ORDER_PAYMENT_DEV = gql`
     }
   }
 `;
+
+
+export const SEND_CHECKOUT_RECOVERY = gql`
+  mutation SendCheckoutRecoveryEmail($tenantId: ID!, $checkoutSessionId: ID!) {
+    sendCheckoutRecoveryEmail(tenantId: $tenantId, checkoutSessionId: $checkoutSessionId)
+  }
+`;
