@@ -168,7 +168,7 @@
       **File:** `apps/api/src/services/listingService.ts` lines 36–43
       `uniqueSlug` uses a sequential polling loop to find a free slug — a classic TOCTOU race condition. Two concurrent `createDraft` calls with the same name will both see the slug as free. Add a unique index on `{tenantId, slug}` and handle the duplicate-key error to retry.
 
-- [ ] **M-03** `[bug]`
+- [x] **M-03** `[bug]`
       **File:** `apps/web/components/agent/AgentChat.tsx` lines 370, 199, 225
       UI tells the user "Press Escape to stop" but no `keydown` listener exists that calls `abortRef.current?.abort()`. The Escape key does nothing. Wire `window.addEventListener('keydown', handler)` in the message-streaming `useEffect`.
 

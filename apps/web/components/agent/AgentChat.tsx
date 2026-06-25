@@ -150,6 +150,15 @@ export default function AgentChat({
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    if (!isStreaming) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') abortRef.current?.abort();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isStreaming]);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
