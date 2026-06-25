@@ -304,7 +304,7 @@
       **File:** `apps/web/pages/agent.tsx` line 19
       `useState<any>(null)` for user state. Reference the `SessionUser` type from `../lib/session`.
 
-- [ ] **L-12** `[enhancement]`
+- [x] **L-12** `[enhancement]`
       **File:** `apps/api/src/db/connect.ts` lines 5–18
       `connectDB` calls `process.exit(1)` on connection error and does not monitor `disconnected`/`reconnected` events. Silent reconnection failures cause all DB calls to hang. Add `mongoose.connection.on('disconnected', ...)` handler and set `serverSelectionTimeoutMS` / `socketTimeoutMS` in options.
 
