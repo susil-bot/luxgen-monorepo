@@ -20,6 +20,7 @@ export function SettingsShell({ tenant, activeSection, title, subtitle, children
   const layoutUser = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
   const headerProps = useAppLayoutHeader();
+  const resolvedSection = activeSection ?? SETTINGS_SECTIONS.find((s) => router.pathname.startsWith(s.href))?.id;
 
   const settingsNav = (
     <nav className="ios-card p-3 space-y-4 h-fit">
@@ -30,7 +31,7 @@ export function SettingsShell({ tenant, activeSection, title, subtitle, children
             {group.ids.map((id) => {
               const section = SETTINGS_SECTIONS.find((s) => s.id === id);
               if (!section) return null;
-              const active = activeSection === id;
+              const active = (resolvedSection ?? activeSection) === id;
               return (
                 <li key={id}>
                   <Link href={section.href} className={`nav-item block rounded-lg ${active ? 'active' : ''}`}>

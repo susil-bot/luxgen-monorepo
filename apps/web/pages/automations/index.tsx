@@ -108,9 +108,10 @@ export default function AutomationsPage({ tenant }: Props) {
     fetchPolicy: 'cache-and-network',
   });
 
+  const automationsReady = gqlData?.automations != null;
   const { data: runsData, refetch: refetchRuns } = useQuery(GET_AUTOMATION_RUNS, {
     variables: { tenantId: queryTenantId, limit: 10 },
-    skip: !queryTenantId,
+    skip: !queryTenantId || !automationsReady,
     errorPolicy: 'ignore',
     fetchPolicy: 'cache-and-network',
   });

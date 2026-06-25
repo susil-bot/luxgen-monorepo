@@ -1823,19 +1823,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `Sidebar` `onUserAction` for `'logout'` fires `handleUserAction` which calls `router.push('/login')` but does NOT clear the Apollo Client cache. Cached data from the previous user's session can leak to the next login.
       **Fix:** Call `apolloClient.clearStore()` before redirecting on logout.
 
-- [ ] **UI-197** `[arch]`
+- [x] **UI-197** `[arch]`
       `ProjectShell` `activeTab` (current/next iteration, priority, workflows) is not persisted between refreshes. Users are returned to the default tab on every page load.
       **Fix:** Persist the active project tab in the URL query string (`?tab=current`) or `localStorage`.
 
-- [ ] **UI-198** `[arch]`
+- [x] **UI-198** `[arch]`
       `SettingsShell` navigation does not highlight the currently active settings section on initial page load (no `useRouter` to detect current path).
       **Fix:** Read `router.pathname` to determine the active nav item and apply an active style.
 
-- [ ] **UI-199** `[arch]`
+- [x] **UI-199** `[arch]`
       `OrganizationShell` receives a `profileOpen` state managed inside the billing page (`organization/billing.tsx`) but this state is not used consistently across other organization pages. Profile/account settings access differs by page.
       **Fix:** Lift the `profileOpen` state to `OrganizationShell` and wire the profile action from `onUserAction`.
 
-- [ ] **UI-200** `[arch]`
+- [x] **UI-200** `[arch]`
       `apps/web/pages/automations/index.tsx` fetches automation run history separately from automations themselves, using two `useQuery` calls that are not coordinated. If the first fails, the second still fires and displays partial data (runs for automations that may not have loaded).
       **Fix:** Use Apollo `useQuery` `skip` option on the runs query, gating it on successful automations load; or combine into a single `GET_AUTOMATIONS_WITH_RUNS` query.
 
