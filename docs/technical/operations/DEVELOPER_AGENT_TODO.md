@@ -204,7 +204,7 @@
       **File:** `apps/web/pages/api/agent/chat.ts` lines 120–122
       After cancellation, `res.end()` may already be called by the `close` listener (lines 94–97). A subsequent write to the closed `ServerResponse` from the `done` event path will throw an unhandled error. Guard all writes after cancellation with an `isClosed` flag.
 
-- [ ] **M-12** `[bug]`
+- [x] **M-12** `[bug]`
       **File:** `apps/web/pages/api/users/me.ts` and `apps/web/pages/api/users/current.ts`
       These two files are **byte-for-byte identical** — same handler, same imports, same JWT verification. Two separate routes (`/api/users/me` and `/api/users/current`) serve the exact same response. Delete `current.ts` and update all callers to use `/api/users/me`.
 
@@ -268,7 +268,7 @@
       **File:** `apps/web/components/layout/Sidebar.tsx`
       Legacy sidebar component never imported by any page (pages use the `@luxgen/ui` sidebar). It has its own static nav array with emoji icons and hardcoded routes. Delete the file.
 
-- [ ] **L-03** `[dead-code]`
+- [x] **L-03** `[dead-code]`
       **File:** `apps/web/pages/api/users/current.ts`
       Duplicate of `me.ts` (see M-12). Once `me.ts` is canonical, delete this file entirely.
 
