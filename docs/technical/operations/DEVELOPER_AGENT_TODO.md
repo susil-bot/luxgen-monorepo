@@ -236,9 +236,10 @@
       **File:** `k8s/mongodb.yaml` lines 57–72
       MongoDB runs as a single-replica StatefulSet with no replica set configuration, no backup CronJob, and no `PodDisruptionBudget`. Pod eviction causes data unavailability. Add `--replSet rs0` flag, a backup job, and a PDB with `minAvailable: 1`.
 
-- [ ] **M-19** `[infra]`
+- [x] **M-19** `[infra]`
       **File:** `k8s/deploy.sh` lines 26–53
       Deploy script has interactive `read -p` prompts, making it incompatible with CI/CD pipelines. Add `set -euo pipefail`, validate that all required secret keys are present in `.env.production` before applying, and document the non-interactive invocation pattern.
+      _Resolved: `validate_env_production` checks required keys; `LUXGEN_SECRETS_ALREADY_EXIST=true` documented in deploy.sh and k8s/README._
 
 - [x] **M-20** `[missing-test]`
       **File:** `apps/api/src/middleware/loginRateLimit.ts` lines 33–40
@@ -552,7 +553,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | -------------------- | ------- | ------ |
 | CRITICAL             | 7       | 7 ✅   |
 | HIGH                 | 27      | 20     |
-| MEDIUM               | 24      | 21     |
+| MEDIUM               | 24      | 22     |
 | LOW                  | 25      | 22     |
 | **Agent / A-HIGH**   | **7**   | **5**  |
 | **Agent / A-MEDIUM** | **10**  | **3**  |
