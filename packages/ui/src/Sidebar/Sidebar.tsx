@@ -235,7 +235,7 @@ const SidebarComponent: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        <nav className="lux-sidebar-nav" aria-label="Main navigation">
+        <nav className="lux-sidebar-nav" aria-label="Main navigation" /* UI-178 */>
           {sections.map((section, sectionIndex) => (
             <div key={section.id} className="lux-sidebar-section">
               {section.separator && sectionIndex > 0 ? <div className="lux-separator" /> : null}

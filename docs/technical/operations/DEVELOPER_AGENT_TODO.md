@@ -462,7 +462,7 @@
 ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
-      _Resolved: `run_command` tool with npm/npx/node allowlist._
+        _Resolved: `run_command` tool with npm/npx/node allowlist._
 
 - [x] **A-13** `[bug]` `[dead-code]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx`
@@ -581,14 +581,14 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ## Progress Summary
 
-| Tier                 | Total   | Done   |
-| -------------------- | ------- | ------ |
-| CRITICAL             | 7       | 7 ✅   |
-| HIGH                 | 27      | 21     |
-| MEDIUM               | 24      | 23     |
-| LOW                  | 25      | 24     |
-| **Agent / A-MEDIUM** | **10**  | **10** ✅ |
-| **Agent / A-LOW**    | **10**  | **10** ✅ |
+| Tier                 | Total   | Done       |
+| -------------------- | ------- | ---------- |
+| CRITICAL             | 7       | 7 ✅       |
+| HIGH                 | 27      | 21         |
+| MEDIUM               | 24      | 23         |
+| LOW                  | 25      | 24         |
+| **Agent / A-MEDIUM** | **10**  | **10** ✅  |
+| **Agent / A-LOW**    | **10**  | **10** ✅  |
 | **Total**            | **110** | **110** ✅ |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
@@ -1044,19 +1044,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `TenantThemeBridge` (in `apps/web/components/theme/`) exists to apply tenant-specific CSS overrides via `data-tenant` attributes, but it is not present in every page or in `_app.tsx`. Pages that do not include it will not receive tenant colour overrides.
       **Fix:** Move `TenantThemeBridge` into `_app.tsx` so it wraps the entire application.
 
-- [ ] **UI-09** `[layout]` `[arch]`
+- [x] **UI-09** `[layout]` `[arch]`
       All user state is read from `localStorage` via `getStoredUser()`. There is no server-side hydration of user data in `getServerSideProps`. This causes a flash of unauthenticated UI on every protected page load.
       **Fix:** Read user from a secure HTTP-only cookie on the server and pass it as a `pageProps.user` from `getServerSideProps` (or a shared middleware).
 
-- [ ] **UI-10** `[layout]` `[arch]`
+- [x] **UI-10** `[layout]` `[arch]`
       Three shell components — `OrganizationShell`, `SettingsShell`, `ProjectShell` — each independently call `getDefaultSidebarSections()` and `getDefaultLogo()`, which return new object instances on every render and are not memoized. This creates hidden coupling and prevents real sidebar data from flowing in.
       **Fix:** Pass sidebar config as props down from `_app.tsx` or a shared hook; remove `getDefault*` calls from shell internals.
 
-- [ ] **UI-11** `[layout]` `[arch]`
+- [x] **UI-11** `[layout]` `[arch]`
       No CSS methodology is documented or enforced. Pages simultaneously use four styling approaches: Tailwind utility classes, iOS-design-system class names (`ios-btn-primary`, `ios-card`), CSS custom properties (`var(--color-blue)`), and inline `style={{ ... }}` objects. This makes it impossible to apply global changes consistently.
       **Fix:** Adopt a single primary approach (CSS variables + utility classes); document in `CONTRIBUTING.md` and lint via a Stylelint rule.
 
-- [ ] **UI-12** `[layout]` `[arch]`
+- [x] **UI-12** `[layout]` `[arch]`
       No `pages/500.tsx` custom error page exists. Next.js defaults to a plain white page for 500 errors.
       **Fix:** Create `pages/500.tsx` consistent with `pages/404.tsx` using `AppLayout` and the `PageEmptyState` component.
 
@@ -1735,19 +1735,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/Snackbar/Snackbar.tsx` renders notifications without `role="alert"` or `aria-live="assertive"`. Screen readers will not announce toast messages.
       **Fix:** Add `role="alert"` to error/warning snackbars and `aria-live="polite"` to success/info snackbars.
 
-- [ ] **UI-177** `[a11y]`
+- [x] **UI-177** `[a11y]`
       `packages/ui/src/SearchBar/SearchBar.tsx` suggestions list has no `role="listbox"` / `role="option"` ARIA structure. The suggestion dropdown is not announced to screen readers.
       **Fix:** Apply the ARIA combobox pattern: `role="combobox"` on the input, `aria-expanded`, `role="listbox"` on the suggestions list.
 
-- [ ] **UI-178** `[a11y]`
+- [x] **UI-178** `[a11y]`
       All pages that use `AppLayout` render the sidebar landmark with no `<nav aria-label>`. If multiple `<nav>` elements exist on a page, they must be distinguished by label.
       **Fix:** Add `aria-label="Main navigation"` to the sidebar nav and `aria-label="Page navigation"` to any secondary nav.
 
-- [ ] **UI-179** `[a11y]`
+- [x] **UI-179** `[a11y]`
       Colour contrast between `var(--color-label-secondary)` text on `var(--color-bg-secondary)` background has not been verified against WCAG 2.1 AA (4.5:1 for normal text). Several card subtitles and table cell values use this pairing.
       **Fix:** Run a contrast audit using `axe-core` or browser DevTools; adjust token values if below 4.5:1.
 
-- [ ] **UI-180** `[a11y]`
+- [x] **UI-180** `[a11y]`
       `apps/web/pages/agent.tsx` and `pages/developer/index.tsx` use custom toggle switches (inline SVG/CSS) without `role="switch"` or `aria-checked`.
       **Fix:** Add `role="switch"` and `aria-checked={checked}` to all toggle controls; or replace with the `Switch` component from `@luxgen/ui`.
 
