@@ -1599,19 +1599,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `globals.css` loads 135+ CSS custom properties on every page including properties only relevant to specific contexts (e.g., `--lux-sidebar-*` properties loaded even on pages with no sidebar).
       **Fix:** Split `globals.css` into: `base.css` (tokens + resets), `sidebar.css`, `agent.css`, etc. Import only what each layout needs.
 
-- [ ] **UI-145** `[perf]`
+- [x] **UI-145** `[perf]`
       The Apollo Client cache policy `fetchPolicy: 'cache-and-network'` is used on most data queries. This causes a double-fetch on every page load (cache read + network request). For stable data (courses, user list), `cache-first` is appropriate.
       **Fix:** Audit each query's `fetchPolicy`. Use `cache-first` for reference data; keep `cache-and-network` only for frequently updated data (orders, enrollments).
 
-- [ ] **UI-146** `[perf]`
+- [x] **UI-146** `[perf]`
       No React `memo()` or `useMemo` is used on any list-rendering component in `apps/web/pages/`. Pages with large lists (users, orders, courses) re-render their entire list on any state change.
       **Fix:** Wrap row components in `React.memo`; memoize the filtered/sorted list with `useMemo`.
 
-- [ ] **UI-147** `[perf]`
+- [x] **UI-147** `[perf]`
       `apps/web/pages/orders/index.tsx` calls three separate GraphQL queries (courses, users, enrollments) to construct order rows client-side. This is N+1 at the page level.
       **Fix:** Add a `orders(tenantId: ID!)` GraphQL query that returns pre-joined order data from the API.
 
-- [ ] **UI-148** `[perf]`
+- [x] **UI-148** `[perf]`
       No Intersection Observer or virtualization is used for long lists. Pages with 100+ rows (users, orders) render all rows into the DOM simultaneously.
       **Fix:** Implement windowing with `react-virtual` or `@tanstack/react-virtual` for tables with > 50 rows.
 
