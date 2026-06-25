@@ -158,5 +158,7 @@ export const demoFeaturesConfig = {
     'experimental-ui': false,
     'advanced-analytics': false,
     'ai-assistant': false,
+    learnerDashboard: true,
+    customerSegmentation: true,
   },
 };
