@@ -1,23 +1,15 @@
-export enum UserRole {
-  SUPER_ADMIN = 'SUPER_ADMIN',
-  ADMIN = 'ADMIN',
-  USER = 'USER',
-}
+import { UserRole, UserStatus } from '@luxgen/db';
 
-export enum UserStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  PENDING = 'PENDING',
-  SUSPENDED = 'SUSPENDED',
-}
+export { UserRole, UserStatus };
 
 const ROLE_RANK: Record<UserRole, number> = {
-  [UserRole.SUPER_ADMIN]: 3,
-  [UserRole.ADMIN]: 2,
-  [UserRole.USER]: 1,
+  [UserRole.SUPER_ADMIN]: 5,
+  [UserRole.ADMIN]: 4,
+  [UserRole.INSTRUCTOR]: 3,
+  [UserRole.STUDENT]: 2,
+  [UserRole.USER]: 2,
 };
 
-/** Returns true when userRole meets or exceeds minimumRole (SUPER_ADMIN ≥ ADMIN ≥ USER). */
 export const hasRoleAtLeast = (userRole: UserRole, minimumRole: UserRole): boolean => {
   const userRank = ROLE_RANK[userRole];
   const minimumRank = ROLE_RANK[minimumRole];
@@ -25,7 +17,9 @@ export const hasRoleAtLeast = (userRole: UserRole, minimumRole: UserRole): boole
   return userRank >= minimumRank;
 };
 
-export const ROLE_PERMISSIONS = {
+const LEARNER_PERMISSIONS = ['course:read', 'group:read', 'profile:read', 'profile:write'];
+
+export const ROLE_PERMISSIONS: Record<UserRole, string[]> = {
   [UserRole.SUPER_ADMIN]: [
     'tenant:read',
     'tenant:write',
@@ -67,9 +61,18 @@ export const ROLE_PERMISSIONS = {
     'request:deny',
     'manage_tenant_users',
   ],
-  [UserRole.USER]: ['course:read', 'group:read', 'profile:read', 'profile:write'],
+  [UserRole.INSTRUCTOR]: ['course:read', 'course:write', 'group:read', 'profile:read', 'profile:write', 'report:read'],
+  [UserRole.STUDENT]: LEARNER_PERMISSIONS,
+  [UserRole.USER]: LEARNER_PERMISSIONS,
 };
 
-export const hasPermission = (role: UserRole, permission: string): boolean => {
-  return ROLE_PERMISSIONS[role]?.includes(permission) || false;
-};
+export const hasPermission = (role: UserRole, permission: string): boolean =>
+  ROLE_PERMISSIONS[role]?.includes(permission) || false;
+
+export const isSuperAdmin = (role: UserRole): boolean => role === UserRole.SUPER_ADMIN;
+export const isAdmin = (role: UserRole): boolean => role === UserRole.ADMIN;
+export const isUser = (role: UserRole): boolean => role === UserRole.USER || role === UserRole.STUDENT;
+export const canManageTenants = (role: UserRole): boolean => role === UserRole.SUPER_ADMIN;
+export const canManageUsers = (role: UserRole): boolean => role === UserRole.SUPER_ADMIN || role === UserRole.ADMIN;
+export const canInviteUsers = (role: UserRole): boolean => role === UserRole.SUPER_ADMIN || role === UserRole.ADMIN;
+export const canApproveRequests = (role: UserRole): boolean => role === UserRole.SUPER_ADMIN || role === UserRole.ADMIN;
