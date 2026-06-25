@@ -300,7 +300,7 @@
       **File:** `apps/api/src/schema/index.ts` lines 73–93
       Custom JSON scalar `parseLiteral` uses `any` throughout; the `ast` parameter should be typed as `graphql.ValueNode`. (Related to M-13 which replaces this implementation entirely.)
 
-- [ ] **L-11** `[type]`
+- [x] **L-11** `[type]`
       **File:** `apps/web/pages/agent.tsx` line 19
       `useState<any>(null)` for user state. Reference the `SessionUser` type from `../lib/session`.
 
