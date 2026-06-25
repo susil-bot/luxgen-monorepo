@@ -363,6 +363,8 @@ html.dark [data-tenant='demo'] {
   .nav-item.active {
     background-color: var(--color-sidebar-item-active);
     color: var(--color-blue);
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 var(--color-blue);
   }
 
   .badge {
