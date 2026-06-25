@@ -53,8 +53,8 @@ export function AuthLoadingScreen({ label = 'Loading…' }: AuthLoadingScreenPro
         style={{
           width: 32,
           height: 32,
-          border: '3px solid rgba(120,120,128,0.2)',
-          borderTopColor: 'var(--color-blue, #007aff)',
+          border: '3px solid var(--color-fill-secondary)',
+          borderTopColor: 'var(--color-blue)',
           borderRadius: '50%',
         }}
       />

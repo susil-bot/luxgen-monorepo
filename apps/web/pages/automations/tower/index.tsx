@@ -227,10 +227,12 @@ function TowerListContent({ tenant }: TowerPageProps) {
                         </button>
                       </td>
                       <td>{statusBadge(auto.status)}</td>
-                      <td style={{ color: '#616161' }}>{auto.trigger.label}</td>
-                      <td style={{ color: '#616161' }}>{auto.actions.length + 1}</td>
-                      <td style={{ color: '#616161', whiteSpace: 'nowrap' }}>{auto.lastRunAt ?? '—'}</td>
-                      <td style={{ color: '#616161' }}>{auto.runCount.toLocaleString()}</td>
+                      <td style={{ color: 'var(--color-label-secondary)' }}>{auto.trigger.label}</td>
+                      <td style={{ color: 'var(--color-label-secondary)' }}>{auto.actions.length + 1}</td>
+                      <td style={{ color: 'var(--color-label-secondary)', whiteSpace: 'nowrap' }}>
+                        {auto.lastRunAt ?? '—'}
+                      </td>
+                      <td style={{ color: 'var(--color-label-secondary)' }}>{auto.runCount.toLocaleString()}</td>
                       <td>
                         <button
                           type="button"

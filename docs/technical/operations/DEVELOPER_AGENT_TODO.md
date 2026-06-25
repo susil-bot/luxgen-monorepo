@@ -1113,87 +1113,87 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/components/BannerCarousel.tsx` uses a fixed `h-64` class with no responsive height variants. On mobile, the banner is tall relative to viewport, pushing content below the fold.
       **Fix:** Apply `h-40 sm:h-56 md:h-64` responsive height classes.
 
-- [x] **UI-25** `[responsive]`
+- [ ] **UI-25** `[responsive]`
       `apps/web/components/tenant/TenantSwitcher.tsx` renders a dropdown with a hardcoded `w-56` width. On viewport < 280px this overflows.
       **Fix:** Use `w-full max-w-[14rem]` or `min-w-[12rem]` to allow natural flow.
 
-- [x] **UI-26** `[responsive]`
+- [ ] **UI-26** `[responsive]`
       `apps/web/components/agent/AIStudioSidekickPanel.tsx` has no responsive constraints. It renders as a fixed-size panel that overlaps main content on narrow screens.
       **Fix:** Apply `max-w-xs sm:max-w-sm` and position it as a slide-over drawer on mobile.
 
-- [x] **UI-27** `[responsive]`
+- [ ] **UI-27** `[responsive]`
       `apps/web/components/agent/HeadlessTaskPanel.tsx` uses fixed-width inline styles with no responsive fallbacks.
       **Fix:** Replace fixed-width styles with responsive Tailwind classes; ensure it stacks vertically on mobile.
 
-- [x] **UI-28** `[responsive]`
+- [ ] **UI-28** `[responsive]`
       `apps/web/components/store/ProductCard.tsx` uses `h-32` fixed height for its image area. On mobile this clips long product titles and the layout breaks when 3-column grid collapses.
       **Fix:** Use `aspect-video` or `aspect-square` instead of a fixed height; ensure the grid switches to 1-column at `sm:`.
 
-- [x] **UI-29** `[responsive]`
+- [ ] **UI-29** `[responsive]`
       `packages/ui/src/Table/Table.tsx` has no horizontal scroll wrapper. Wide data tables overflow and clip on mobile screens.
       **Fix:** Wrap the `<table>` in `<div className="overflow-x-auto">`.
 
-- [x] **UI-30** `[responsive]`
+- [ ] **UI-30** `[responsive]`
       `packages/ui/src/GridContainer/GridContainer.tsx` accepts a single `columns` number. On mobile this still renders N columns. The component has no responsive column array (e.g., `[1, 2, 3]` for sm/md/lg).
       **Fix:** Accept `columns: number | { sm?: number; md?: number; lg?: number }` and generate responsive CSS grid accordingly.
 
-- [x] **UI-31** `[responsive]`
+- [ ] **UI-31** `[responsive]`
       `packages/ui/src/ActionMenu/ActionMenu.tsx` renders a `min-w-[220px]` dropdown. On a 320px screen the menu overflows the right edge.
       **Fix:** Add `max-w-[calc(100vw-2rem)]` and flip alignment to `right` when near the edge via a position calculation.
 
-- [x] **UI-32** `[responsive]`
+- [ ] **UI-32** `[responsive]`
       `packages/ui/src/Modal/Modal.tsx` has no `xs` size for very small screens. All sizes render with `mx-auto` but no `mx-4` fallback means the modal content can overflow on screens narrower than its `max-w`.
       **Fix:** Add `mx-4 sm:mx-auto` to ensure minimum horizontal margin on mobile.
 
-- [x] **UI-33** `[responsive]`
+- [ ] **UI-33** `[responsive]`
       `apps/web/pages/courses/analytics.tsx` and `pages/groups/analytics.tsx` render stat cards in a fixed row. On mobile they overflow rather than wrapping to a single column.
       **Fix:** Wrap in `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4`.
 
-- [x] **UI-34** `[responsive]`
+- [ ] **UI-34** `[responsive]`
       `apps/web/pages/orders/index.tsx` uses `OrderListView` which renders a table. No horizontal scroll container is applied at the page level. Order rows overflow on screens < 768px.
       **Fix:** Wrap the `OrderListView` in `<div className="overflow-x-auto -mx-4 px-4">`.
 
-- [x] **UI-35** `[responsive]`
+- [ ] **UI-35** `[responsive]`
       `packages/ui/src/Carousel/Carousel.tsx` uses JavaScript-calculated `translateX` percentages. The carousel does not support touch swipe gestures on mobile, making it unusable as a primary navigation pattern on touch devices.
       **Fix:** Add `touchstart`/`touchmove`/`touchend` listeners to handle swipe navigation.
 
-- [x] **UI-36** `[responsive]`
+- [ ] **UI-36** `[responsive]`
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` plays automatically by default (`autoPlay: true`). On mobile, autoplay can drain battery and cause motion sickness. The `prefers-reduced-motion` media query is not respected.
       **Fix:** Check `window.matchMedia('(prefers-reduced-motion: reduce)').matches` and disable autoplay/transitions when true.
 
-- [x] **UI-37** `[responsive]`
+- [ ] **UI-37** `[responsive]`
       `pages/automations/tower/[id].tsx` (TowerShell page) renders a graph canvas with hardcoded pixel dimensions. The canvas does not reflow on window resize.
       **Fix:** Make the canvas dimensions reactive using a `ResizeObserver` on the container element.
 
-- [x] **UI-38** `[responsive]`
+- [ ] **UI-38** `[responsive]`
       `apps/web/components/agent/AgentTransparency.tsx` uses a side-by-side panel layout (file tree + diff viewer). On screens < 1024px the diff viewer is cramped. On mobile it is unusable.
       **Fix:** Stack the panels vertically below `lg:` breakpoint using `flex-col lg:flex-row`.
 
-- [x] **UI-39** `[responsive]`
+- [ ] **UI-39** `[responsive]`
       `OrganizationSecurityNav` (sidebar nav within the security section) renders as a list. On mobile it takes up the full screen width but has no drawer/accordion treatment.
       **Fix:** Collapse to a `<select>` or accordion on `< md` breakpoints.
 
-- [x] **UI-40** `[responsive]`
+- [ ] **UI-40** `[responsive]`
       `SettingsShell` renders a vertical tab list on the left. On narrow screens this pushes the main content off-screen.
       **Fix:** Collapse the settings tab list to a horizontal scrollable `<nav>` or `<select>` below `md:`.
 
-- [x] **UI-41** `[responsive]`
+- [ ] **UI-41** `[responsive]`
       `packages/ui/src/CountryLanguageDropdown/CountryLanguageDropdown.tsx` hardcodes `w-80` (320px). On screens narrower than 360px this causes horizontal overflow.
       **Fix:** Use `w-full max-w-xs` and set `min-w-0` on the parent container.
 
-- [x] **UI-42** `[responsive]`
+- [ ] **UI-42** `[responsive]`
       59 out of 88 pages have zero responsive Tailwind classes. These pages likely look acceptable on laptop screens but are broken on mobile.
       **Fix:** Audit each of the 59 pages. At minimum, ensure every page content container uses `px-4 sm:px-6 lg:px-8` padding and `max-w-7xl mx-auto`.
 
-- [x] **UI-43** `[responsive]`
+- [ ] **UI-43** `[responsive]`
       No CSS Container Queries are used anywhere. Several components (e.g., `Card`, `ProductCard`, `GroupCard`) would benefit from container-based breakpoints rather than viewport breakpoints, since they appear in both narrow sidebars and wide main content areas.
       **Fix:** Evaluate and introduce `@container` queries for the card components.
 
-- [x] **UI-44** `[responsive]`
+- [ ] **UI-44** `[responsive]`
       `packages/ui/src/Select/Select.tsx` custom dropdown does not handle the case where it opens near the bottom of the viewport. The dropdown can be clipped by the viewport edge on mobile.
       **Fix:** Detect available space and flip the dropdown to open upward (`dropup`) when needed.
 
-- [x] **UI-45** `[responsive]`
+- [ ] **UI-45** `[responsive]`
       `apps/web/components/agent/AgentChat.tsx` textarea has `maxHeight: '160px'` hardcoded as an inline style. On small phones this is too tall relative to the available screen height, pushing the send button below the fold.
       **Fix:** Use `max-h-24 sm:max-h-40` or compute max height relative to `window.innerHeight`.
 
@@ -1201,15 +1201,15 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 3 — Hardcoded Values & Design Tokens (UI-46 → UI-75)
 
-- [x] **UI-46** `[hardcode]`
+- [ ] **UI-46** `[hardcode]`
       `packages/ui/src/Footer/Footer.tsx` default copyright prop is `'© 2024 LuxGen. All rights reserved.'`. The year 2024 is stale. It is also hardcoded as a `LuxGen` brand name that should be the tenant's name.
       **Fix:** Change default to `© ${new Date().getFullYear()} LuxGen. All rights reserved.` and make it tenant-aware via a `companyName` prop.
 
-- [x] **UI-47** `[hardcode]`
+- [ ] **UI-47** `[hardcode]`
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` hardcodes the CTA button colour as `'#F78C4A'` and text colour as `'#FFFFFF'`. These override any tenant theme.
       **Fix:** Replace with CSS variable references `var(--color-orange)` / `var(--color-label-on-fill)`.
 
-- [x] **UI-48** `[hardcode]`
+- [ ] **UI-48** `[hardcode]`
       `packages/ui/src/ProductCard/ProductCard.tsx` hardcodes like-icon fill colour as `'#EF4444'` (active) and `'#6B7280'` (inactive).
       **Fix:** Use `var(--color-red)` and `var(--color-label-tertiary)`.
 
@@ -1277,19 +1277,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/components/agent/AgentChat.tsx` uses `rgba(0,122,255,0.1)` for the user message bubble background.
       **Fix:** Use `color-mix(in srgb, var(--color-blue) 10%, transparent)` or define `--color-blue-10` in `globals.css`.
 
-- [ ] **UI-65** `[hardcode]`
+- [x] **UI-65** `[hardcode]`
       `apps/web/components/agent/AgentTransparency.tsx` uses `rgba(52,199,89,0.12)` and `rgba(255,59,48,0.10)` for diff-viewer row highlights.
       **Fix:** Define `--color-green-subtle` and `--color-red-subtle` tokens in `globals.css`.
 
-- [ ] **UI-66** `[hardcode]`
+- [x] **UI-66** `[hardcode]`
       `apps/web/components/auth/AuthNoticeBanner.tsx` hardcodes `#007aff` and `rgba(120,120,128,0.2)`.
       **Fix:** Use `var(--color-blue)` and `var(--color-fill-secondary)`.
 
-- [ ] **UI-67** `[hardcode]`
+- [x] **UI-67** `[hardcode]`
       `apps/web/pages/developer/index.tsx` uses `'#fff'` four times as `style={{ color: '#fff' }}`.
       **Fix:** Use `var(--color-label-on-fill)` or `var(--color-bg-primary)`.
 
-- [ ] **UI-68** `[hardcode]`
+- [x] **UI-68** `[hardcode]`
       `apps/web/pages/automations/tower/index.tsx` and `tower/[id].tsx` use `#616161`, `#d72c0d`, `#202223`, `#fff` in six or more places. The tower UI has the highest density of hardcoded colour values in the entire codebase.
       **Fix:** Map each value to a CSS variable; consolidate in `globals.css` under a `[data-tower]` scope.
 
@@ -1328,76 +1328,76 @@ const [user, setUser] = useState<UserMenu | null>(null);
 - [ ] **UI-76** `[type]`
       `packages/ui/src/Arrow/Arrow.tsx`: `tenantTheme: any`. Should be typed as `TenantTheme` (the type exists in `packages/ui/src/types`).
 
-- [x] **UI-77** `[type]`
+- [ ] **UI-77** `[type]`
       `packages/ui/src/Snackbar/Snackbar.tsx`: `tenantTheme: any`. Same fix — use `TenantTheme`.
 
-- [x] **UI-78** `[type]`
+- [ ] **UI-78** `[type]`
       `packages/ui/src/RegisterForm/RegisterForm.tsx`: `tenantTheme: any` and a catch-all `[key: string]: any` index signature. The index signature effectively disables prop type-checking for all callers.
       **Fix:** Remove the index signature; use explicit optional props for all supported keys.
 
-- [x] **UI-79** `[type]`
+- [ ] **UI-79** `[type]`
       `packages/ui/src/Input/Input.tsx`: `[key: string]: any` catch-all. Same issue as UI-78.
       **Fix:** Extend `React.InputHTMLAttributes<HTMLInputElement>` explicitly instead of an index signature.
 
-- [x] **UI-80** `[type]`
+- [ ] **UI-80** `[type]`
       `packages/ui/src/Select/Select.tsx`: `onChange: (value: any) => void`. Should be generic: `onChange: (value: T | T[]) => void` where `T = string | number`.
 
-- [x] **UI-81** `[type]`
+- [ ] **UI-81** `[type]`
       `packages/ui/src/InputWithLabel/InputWithLabel.tsx`: `value: any`, `onChange: (value: any) => void` inherited from `BaseFormProps`. The `any` propagates into every usage.
       **Fix:** Make `BaseFormProps` generic: `BaseFormProps<T = string>`.
 
-- [x] **UI-82** `[type]`
+- [ ] **UI-82** `[type]`
       `apps/web/lib/transformer.ts` has `metadata: any` in multiple type definitions, `transformDashboardData(graphqlData: any)`, and multiple `.map((item: any) => ...)`.
       **Fix:** Replace each `any` with the generated GraphQL type or an explicit interface matching the query shape.
 
-- [x] **UI-83** `[type]`
+- [ ] **UI-83** `[type]`
       `apps/web/pages/courses/create.tsx`, `courses/analytics.tsx`, `groups/analytics.tsx`, `developer/index.tsx`: all use `useState<any>(null)` for user state. Should be `useState<UserMenu | null>(null)`.
 
-- [x] **UI-84** `[type]`
+- [ ] **UI-84** `[type]`
       `apps/web/pages/dashboard.tsx`: `onDashboardAction(action: string, data?: any)`. The `action` should be a typed literal union of all supported action strings.
 
-- [x] **UI-85** `[type]`
+- [ ] **UI-85** `[type]`
       Multiple `getServerSideProps` functions are typed as `async (context: any)`. Should use `GetServerSidePropsContext` from `next`.
 
-- [x] **UI-86** `[type]`
+- [ ] **UI-86** `[type]`
       `RegisterForm` in `@luxgen/ui` exposes `ADMIN` and `SUPER_ADMIN` as selectable role options in the UI. These values flow into `REGISTER_MUTATION` with no type guard on the frontend.
       **Fix:** Type the `role` field as `'USER' | 'STUDENT'` only; remove ADMIN/SUPER_ADMIN from the UI form entirely (backend validates but defence-in-depth applies to UI too).
 
-- [x] **UI-87** `[type]`
+- [ ] **UI-87** `[type]`
       `apps/web/components/automations/tower/TowerShell/TowerShell.tsx` and its sub-components likely have implicit `any` from the flow graph data model. Audit and type the node/edge data structures.
 
-- [x] **UI-88** `[type]`
+- [ ] **UI-88** `[type]`
       `AdminDashboardLayout` `onDashboardAction` prop accepts `data?: any`. Given the 11 different action types being wired to no-ops, this should be a discriminated union.
       **Fix:** Define `type DashboardAction = { type: 'view_course'; courseId: string } | { type: 'view_survey'; surveyId: string } | ...`.
 
-- [x] **UI-89** `[type]`
+- [ ] **UI-89** `[type]`
       No shared `ApiError` type is defined. Error handling across all pages uses `err instanceof Error ? err.message : String(err)` inline. This pattern is repeated in 40+ places.
       **Fix:** Export a shared `extractErrorMessage(err: unknown): string` utility from a shared package.
 
-- [x] **UI-90** `[type]`
+- [ ] **UI-90** `[type]`
       `packages/ui/src/Heading/Heading.tsx` accepts a `loading` prop that is silently extracted via destructuring (`const { loading, ...headingProps } = props`) but never used — it disappears without effect.
       **Fix:** Either implement a skeleton/loading state for headings, or remove the `loading` prop entirely from the type definition.
 
-- [x] **UI-91** `[type]`
+- [ ] **UI-91** `[type]`
       `apps/web/components/agent/AgentChat.tsx`: `input: Record<string, any>` in the `ToolEvent` interface. The tool input shape is known for each tool — use discriminated unions per tool name.
 
-- [x] **UI-92** `[type]`
+- [ ] **UI-92** `[type]`
       `apps/web/pages/groups/[id]/edit.tsx` likely uses typed `any` for form state. Audit and apply proper types.
 
-- [x] **UI-93** `[type]`
+- [ ] **UI-93** `[type]`
       GraphQL query variables typed as `Record<string, any>` in some utility hooks. Replace with generated types matching the query variables definition.
 
-- [x] **UI-94** `[type]`
+- [ ] **UI-94** `[type]`
       `apps/web/pages/admin/customers/[id].tsx` likely uses `any` for the customer data shape returned by the GraphQL query. Generate or define a `Customer` type.
 
-- [x] **UI-95** `[type]`
+- [ ] **UI-95** `[type]`
       `apps/web/lib/automation-map.ts` `UiTriggerType` and `UiActionType` are defined locally. They should be generated from or derived from the `@luxgen/automation-flow` package's canonical types to prevent drift.
 
 ---
 
 ### Section 5 — Dead Code & Unused Props (UI-96 → UI-110)
 
-- [x] **UI-96** `[dead]`
+- [ ] **UI-96** `[dead]`
       `packages/ui/src/Sidebar/Sidebar.tsx`: `variant`, `position`, and `width` props are accepted in the TypeScript interface and documented but are never referenced in the component's render logic. Callers passing these props believe they have an effect when they do not.
       **Fix:** Either implement each prop's intended behaviour, or remove them from the interface and add a TODO comment.
 
@@ -1533,19 +1533,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       No Open Graph (`og:title`, `og:description`, `og:image`) meta tags on any page. Sharing links on Slack/Twitter will show blank previews.
       **Fix:** Add `<meta property="og:*" />` tags to all public-facing pages (`/learn`, `/store`, `/listings`).
 
-- [x] **UI-129** `[seo]`
+- [ ] **UI-129** `[seo]`
       No Twitter Card meta tags on any page.
       **Fix:** Add `<meta name="twitter:card" content="summary_large_image" />` alongside Open Graph tags.
 
-- [x] **UI-130** `[seo]`
+- [ ] **UI-130** `[seo]`
       No canonical URL `<link rel="canonical">` on any page. Duplicate content (e.g., same page accessible via subdomain and query param) is not disambiguated.
       **Fix:** Derive the canonical URL from `req.headers.host` in `getServerSideProps` and inject it per page.
 
-- [x] **UI-131** `[seo]`
+- [ ] **UI-131** `[seo]`
       No `robots` meta tag. Admin-only pages (`/admin/*`, `/agent`, `/developer`) should be `noindex, nofollow`.
       **Fix:** Add `<meta name="robots" content="noindex,nofollow">` to all authenticated admin pages.
 
-- [x] **UI-132** `[seo]`
+- [ ] **UI-132** `[seo]`
       No `sitemap.xml` generation. Public-facing store, learn, and listing pages are not discoverable by crawlers.
       **Fix:** Add a `pages/sitemap.xml.tsx` using `getServerSideProps` that queries all published courses and listings.
 
@@ -1567,19 +1567,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       Zero pages use `next/image` (`<Image>` component). All images use external URLs passed to `<img>` or background CSS. `next/image` provides lazy loading, size optimisation, and format conversion (WebP/AVIF) for free.
       **Fix:** Migrate all `<img>` in page-level components to `<Image>` from `next/image`. Add `domains` config to `next.config.js` for Unsplash and other external hosts.
 
-- [x] **UI-137** `[perf]`
+- [ ] **UI-137** `[perf]`
       Dashboard banner carousel uses Unsplash URLs directly (e.g., `https://images.unsplash.com/...?w=2071`). These large images load synchronously and block initial render.
       **Fix:** Use `next/image` with `priority={index === 0}` for the first slide and `loading="lazy"` for others.
 
-- [x] **UI-138** `[perf]`
+- [ ] **UI-138** `[perf]`
       Inter font is loaded via Google Fonts in `_document.tsx`. The recommended approach for Next.js 13+ is `next/font/google` which self-hosts fonts and eliminates the extra DNS resolution and request to Google.
       **Fix:** Migrate to `import { Inter } from 'next/font/google'` and apply the font class to `<html>` in `_document.tsx`.
 
-- [x] **UI-139** `[perf]`
+- [ ] **UI-139** `[perf]`
       `getDefaultSidebarSections()` creates a new array on every call with no memoisation. It is called 25+ times across pages/shells on every render.
       **Fix:** Use `useMemo(() => getDefaultSidebarSections(), [])` at each call site, or export a singleton constant.
 
-- [x] **UI-140** `[perf]`
+- [ ] **UI-140** `[perf]`
       `getDefaultUser()` similarly creates a new object on every call — 16 pages affected.
       **Fix:** Export a `DEFAULT_USER` constant instead of a function.
 
@@ -1599,19 +1599,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `globals.css` loads 135+ CSS custom properties on every page including properties only relevant to specific contexts (e.g., `--lux-sidebar-*` properties loaded even on pages with no sidebar).
       **Fix:** Split `globals.css` into: `base.css` (tokens + resets), `sidebar.css`, `agent.css`, etc. Import only what each layout needs.
 
-- [x] **UI-145** `[perf]`
+- [ ] **UI-145** `[perf]`
       The Apollo Client cache policy `fetchPolicy: 'cache-and-network'` is used on most data queries. This causes a double-fetch on every page load (cache read + network request). For stable data (courses, user list), `cache-first` is appropriate.
       **Fix:** Audit each query's `fetchPolicy`. Use `cache-first` for reference data; keep `cache-and-network` only for frequently updated data (orders, enrollments).
 
-- [x] **UI-146** `[perf]`
+- [ ] **UI-146** `[perf]`
       No React `memo()` or `useMemo` is used on any list-rendering component in `apps/web/pages/`. Pages with large lists (users, orders, courses) re-render their entire list on any state change.
       **Fix:** Wrap row components in `React.memo`; memoize the filtered/sorted list with `useMemo`.
 
-- [x] **UI-147** `[perf]`
+- [ ] **UI-147** `[perf]`
       `apps/web/pages/orders/index.tsx` calls three separate GraphQL queries (courses, users, enrollments) to construct order rows client-side. This is N+1 at the page level.
       **Fix:** Add a `orders(tenantId: ID!)` GraphQL query that returns pre-joined order data from the API.
 
-- [x] **UI-148** `[perf]`
+- [ ] **UI-148** `[perf]`
       No Intersection Observer or virtualization is used for long lists. Pages with 100+ rows (users, orders) render all rows into the DOM simultaneously.
       **Fix:** Implement windowing with `react-virtual` or `@tanstack/react-virtual` for tables with > 50 rows.
 
@@ -1846,9 +1846,9 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | Section                                         | Items   | Done  |
 | ----------------------------------------------- | ------- | ----- |
 | Global Layout Architecture (UI-01–20)           | 20      | 0     |
-| Responsive Design (UI-21–45)                    | 25      | 4     |
-| Hardcoded Values / Tokens (UI-46–75)            | 30      | 0     |
-| TypeScript & Type Safety (UI-76–95)             | 20      | 4     |
+| Responsive Design (UI-21–45)                    | 25      | 0     |
+| Hardcoded Values / Tokens (UI-46–75)            | 30      | 4     |
+| TypeScript & Type Safety (UI-76–95)             | 20      | 0     |
 | Dead Code & Unused Props (UI-96–110)            | 15      | 0     |
 | Missing States (UI-111–125)                     | 15      | 0     |
 | SEO & Head Management (UI-126–135)              | 10      | 0     |
