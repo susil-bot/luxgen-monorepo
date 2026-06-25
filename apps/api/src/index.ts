@@ -6,6 +6,7 @@ import { seedDatabaseIfEmpty } from './db/seed';
 import { ensureDemoStorefrontCourses } from './db/storefrontSeed';
 import { ensureDemoStorefrontBundles } from './services/storefrontService';
 import { startTimelineRedisBridge } from './lib/timelineRedisBridge';
+import { tenantKeyManager } from './utils/tenantKeys';
 
 const REQUIRED_ENV = ['JWT_SECRET', 'MONGODB_URI'] as const;
 for (const key of REQUIRED_ENV) {
@@ -21,6 +22,9 @@ async function startServer() {
   try {
     await connectDB();
     console.log('✅ Connected to MongoDB');
+
+    await tenantKeyManager.hydrateFromDatabase();
+    console.log('✅ Tenant signing keys loaded from database');
 
     const autoSeed = process.env.SEED_IF_EMPTY !== 'false' && process.env.NODE_ENV !== 'production';
     if (autoSeed) {

@@ -52,7 +52,7 @@
       **File:** `apps/api/src/utils/jwt.ts` lines 37–54
       `verifyToken` decodes the JWT header without verification to extract `kid`, then uses that `kid` to select the signing key. An attacker can craft a token with an arbitrary `kid` pointing to a weak/known key and bypass tenant-key isolation. Validate `kid` against an allowlist before key selection.
 
-- [ ] **H-02** `[security]`
+- [x] **H-02** `[security]`
       **File:** `apps/api/src/routes/admin.ts` lines 43–62
       Generated tenant keys are stored in the in-process `tenantKeyManager` only — never persisted. On any server restart, all tokens signed with generated keys become invalid. Persist keys to the database and implement proper token invalidation for rotated keys.
 
@@ -366,9 +366,9 @@
 | Tier      | Total  | Done   |
 | --------- | ------ | ------ |
 | CRITICAL  | 7      | 7 ✅   |
-| HIGH      | 27     | 19     |
+| HIGH      | 27     | 20     |
 | MEDIUM    | 24     | 17     |
 | LOW       | 25     | 22     |
-| **Total** | **83** | **58** |
+| **Total** | **83** | **59** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
