@@ -59,6 +59,9 @@ export interface IUser extends Document {
   marketingWhatsapp?: boolean;
   /** Expo push tokens registered from mobile devices */
   pushTokens?: string[];
+  /** SHA-256 hash of password reset token */
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
   isActive: boolean;
   metadata: IUserMetadata;
   createdAt: Date;
@@ -129,6 +132,14 @@ const userSchema = new Schema<IUser>(
     pushTokens: {
       type: [String],
       default: [],
+    },
+    passwordResetToken: {
+      type: String,
+      select: false,
+    },
+    passwordResetExpires: {
+      type: Date,
+      select: false,
     },
     isActive: {
       type: Boolean,

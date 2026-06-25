@@ -122,7 +122,7 @@
       **File:** `apps/web/lib/plan-gate.ts` lines 11–28
       `fetchTenantBilling` makes an outbound HTTP call from a Next.js API route back to the backend to check billing. This adds latency, a failure mode (500 → silent default to 'free'), and a circular dependency locally. Read billing status directly from the DB or a shared module.
 
-- [ ] **H-19** `[feat]`
+- [x] **H-19** `[feat]`
       **File:** `apps/api/src/routes/auth.ts` (missing endpoint)
       No password reset / forgot-password endpoint exists anywhere. `config/tenants/demo/features/index.ts:34` has `passwordReset: true` but the API is completely absent. Implement `POST /api/auth/forgot-password` and `POST /api/auth/reset-password`.
 

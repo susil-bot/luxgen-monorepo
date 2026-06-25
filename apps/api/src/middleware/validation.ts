@@ -62,6 +62,58 @@ export const validateLogin = (req: Request, res: Response, next: NextFunction) =
   next();
 };
 
+export const validateForgotPassword = (req: Request, res: Response, next: NextFunction) => {
+  const { email } = req.body;
+  const errors: ValidationError[] = [];
+
+  const emailError = validateEmail(email);
+  if (emailError) errors.push({ field: 'email', message: emailError });
+
+  if (errors.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.reduce(
+        (acc, error) => {
+          acc[error.field] = error.message;
+          return acc;
+        },
+        {} as Record<string, string>,
+      ),
+    });
+  }
+
+  next();
+};
+
+export const validateResetPassword = (req: Request, res: Response, next: NextFunction) => {
+  const { token, password } = req.body;
+  const errors: ValidationError[] = [];
+
+  if (!token || typeof token !== 'string' || token.trim().length < 16) {
+    errors.push({ field: 'token', message: 'Valid reset token is required' });
+  }
+
+  const passwordError = validatePassword(password);
+  if (passwordError) errors.push({ field: 'password', message: passwordError });
+
+  if (errors.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.reduce(
+        (acc, error) => {
+          acc[error.field] = error.message;
+          return acc;
+        },
+        {} as Record<string, string>,
+      ),
+    });
+  }
+
+  next();
+};
+
 export const validateRegister = (req: Request, res: Response, next: NextFunction) => {
   const { email, password, firstName, lastName } = req.body;
   const errors: ValidationError[] = [];
