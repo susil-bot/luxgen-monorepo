@@ -10,6 +10,7 @@ import { AuthGuard } from '../components/auth/AuthGuard';
 import { SessionMonitor } from '../components/auth/SessionMonitor';
 import { SessionSync } from '../components/auth/SessionSync';
 import { SuperAdminTenantSwitchProvider } from '../components/layout/SuperAdminTenantSwitchProvider';
+import { GlobalNotificationHost } from '../lib/global-notifications';
 import { AIStudioSidekickPanel } from '../components/agent/AIStudioSidekickPanel';
 import '../styles/globals.css';
 import '../../../packages/ui/src/Sidebar/sidebar.css';
@@ -40,6 +41,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <AIStudioProvider>
             <WebNavigationProvider>
               <SuperAdminTenantSwitchProvider>
+                <GlobalNotificationHost>
                 <SessionMonitor />
                 <SessionSync />
                 <AIStudioPanelSlot>
@@ -56,6 +58,7 @@ export default function App({ Component, pageProps }: AppProps) {
                     <Component {...pageProps} />
                   </ErrorBoundary>
                 </AuthGuard>
+                </GlobalNotificationHost>
               </SuperAdminTenantSwitchProvider>
             </WebNavigationProvider>
           </AIStudioProvider>
