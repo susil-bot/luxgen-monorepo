@@ -22,7 +22,7 @@ export function SettingsShell({ tenant, activeSection, title, subtitle, children
   const headerProps = useAppLayoutHeader();
 
   const settingsNav = (
-    <nav className="ios-card p-3 space-y-4 h-fit">
+    <nav className="ios-card p-3 space-y-4 h-fit flex md:flex-col overflow-x-auto md:overflow-visible gap-2 md:gap-0">
       {SETTINGS_GROUPS.map((group) => (
         <div key={group.title}>
           <p className="text-xs font-semibold uppercase tracking-wide text-tertiary px-2 mb-1">{group.title}</p>
