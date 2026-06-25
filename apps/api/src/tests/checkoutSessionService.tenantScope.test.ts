@@ -5,8 +5,6 @@ jest.mock('@luxgen/db', () => ({
   CheckoutSessionStatus: { OPEN: 'OPEN', COMPLETED: 'COMPLETED', ABANDONED: 'ABANDONED', EXPIRED: 'EXPIRED' },
 }));
 
-jest.mock('../utils/email', () => ({ sendTransactionalEmail: jest.fn().mockResolvedValue(undefined) }));
-
 import { CheckoutSession } from '@luxgen/db';
 import { checkoutSessionService } from '../services/checkoutSessionService';
 
@@ -22,10 +20,9 @@ describe('checkoutSessionService tenant scoping', () => {
     expect(CheckoutSession.find).toHaveBeenCalledWith(expect.objectContaining({ tenant: tenantA }));
   });
 
-  it('sendRecoveryEmail requires matching tenant on session', async () => {
-    (CheckoutSession.findOne as jest.Mock).mockResolvedValue(null);
-    const ok = await checkoutSessionService.sendRecoveryEmail(tenantA, 'sess1');
-    expect(CheckoutSession.findOne).toHaveBeenCalledWith({ _id: 'sess1', tenant: tenantA });
-    expect(ok).toBe(false);
+  it('refreshStaleSessions scopes updateMany to tenant', async () => {
+    (CheckoutSession.updateMany as jest.Mock).mockResolvedValue({});
+    await checkoutSessionService.listAbandoned(tenantA);
+    expect(CheckoutSession.updateMany).toHaveBeenCalledWith(expect.objectContaining({ tenant: tenantA }), expect.any(Object));
   });
 });
