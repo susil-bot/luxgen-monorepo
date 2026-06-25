@@ -216,7 +216,7 @@
       **File:** `apps/api/src/lib/redis.ts` lines 16–27
       Redis client uses `lazyConnect: true` but `connect()` is never explicitly called. The `.on('error', () => {})` handler swallows all errors with no log message, making Redis misconfiguration invisible. Log the error, and add an explicit startup connectivity check.
 
-- [ ] **M-15** `[enhancement]`
+- [x] **M-15** `[enhancement]`
       **File:** `apps/api/src/utils/logger.ts` lines 9–12
       Logger reads `LOG_LEVEL` once at construction time (stale in test environments) and has no structured JSON output mode for production log aggregators. Add a `JSON_LOGS=true` env flag to emit structured output and read `LOG_LEVEL` per-call.
 
