@@ -240,11 +240,11 @@ export class ListingService {
   }
 
   async getPublishedListings(tenantId: string) {
-    return BusinessListing.find({ tenantId, publicationStatus: 'published' }).sort({ publishedAt: -1 });
+    return BusinessListing.find({ tenantId, publicationStatus: 'published' }).sort({ publishedAt: -1 }).lean();
   }
 
   async getListingBySlug(tenantId: string, slug: string) {
-    return BusinessListing.findOne({ tenantId, slug, publicationStatus: 'published' });
+    return BusinessListing.findOne({ tenantId, slug, publicationStatus: 'published' }).lean();
   }
 
   async getListingById(id: string) {
@@ -258,11 +258,11 @@ export class ListingService {
     } else {
       filter.applicationStatus = { $in: ['submitted', 'need_more_information', 'awaiting_payment'] };
     }
-    return BusinessListing.find(filter).sort({ submittedAt: -1, updatedAt: -1 });
+    return BusinessListing.find(filter).sort({ submittedAt: -1, updatedAt: -1 }).lean();
   }
 
   async getApplicantListings(tenantId: string, email: string) {
-    return BusinessListing.find({ tenantId, applicantEmail: email.toLowerCase() }).sort({ updatedAt: -1 });
+    return BusinessListing.find({ tenantId, applicantEmail: email.toLowerCase() }).sort({ updatedAt: -1 }).lean();
   }
 
   toGraphQL(listing: IBusinessListing) {

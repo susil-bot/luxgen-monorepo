@@ -312,7 +312,7 @@
       **File:** `packages/db/src/connection.ts` lines 1–21
       No Mongoose connection options set: no `serverSelectionTimeoutMS`, `socketTimeoutMS`, or pool size. Production defaults (30s selection timeout, unbounded pool) are inappropriate. Configure sensible production options.
 
-- [ ] **L-14** `[enhancement]`
+- [x] **L-14** `[enhancement]`
       **File:** `apps/api/src/services/listingService.ts` lines 242–262
       `getPublishedListings`, `getListingBySlug`, `getApplicationsForReview`, and `getApplicantListings` return full Mongoose documents. Add `.lean()` to all read-only queries for performance.
 
