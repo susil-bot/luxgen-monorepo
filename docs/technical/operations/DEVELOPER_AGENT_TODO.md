@@ -1328,18 +1328,18 @@ const [user, setUser] = useState<UserMenu | null>(null);
 - [ ] **UI-76** `[type]`
       `packages/ui/src/Arrow/Arrow.tsx`: `tenantTheme: any`. Should be typed as `TenantTheme` (the type exists in `packages/ui/src/types`).
 
-- [ ] **UI-77** `[type]`
+- [x] **UI-77** `[type]`
       `packages/ui/src/Snackbar/Snackbar.tsx`: `tenantTheme: any`. Same fix — use `TenantTheme`.
 
-- [ ] **UI-78** `[type]`
+- [x] **UI-78** `[type]`
       `packages/ui/src/RegisterForm/RegisterForm.tsx`: `tenantTheme: any` and a catch-all `[key: string]: any` index signature. The index signature effectively disables prop type-checking for all callers.
       **Fix:** Remove the index signature; use explicit optional props for all supported keys.
 
-- [ ] **UI-79** `[type]`
+- [x] **UI-79** `[type]`
       `packages/ui/src/Input/Input.tsx`: `[key: string]: any` catch-all. Same issue as UI-78.
       **Fix:** Extend `React.InputHTMLAttributes<HTMLInputElement>` explicitly instead of an index signature.
 
-- [ ] **UI-80** `[type]`
+- [x] **UI-80** `[type]`
       `packages/ui/src/Select/Select.tsx`: `onChange: (value: any) => void`. Should be generic: `onChange: (value: T | T[]) => void` where `T = string | number`.
 
 - [ ] **UI-81** `[type]`
@@ -1848,7 +1848,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | Global Layout Architecture (UI-01–20)           | 20      | 0     |
 | Responsive Design (UI-21–45)                    | 25      | 4     |
 | Hardcoded Values / Tokens (UI-46–75)            | 30      | 0     |
-| TypeScript & Type Safety (UI-76–95)             | 20      | 0     |
+| TypeScript & Type Safety (UI-76–95)             | 20      | 4     |
 | Dead Code & Unused Props (UI-96–110)            | 15      | 0     |
 | Missing States (UI-111–125)                     | 15      | 0     |
 | SEO & Head Management (UI-126–135)              | 10      | 0     |
@@ -1857,6 +1857,6 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | Accessibility (UI-166–180)                      | 15      | 0     |
 | Duplicate Components (UI-181–190)               | 10      | 0     |
 | No-Op Wiring / Missing Connections (UI-191–200) | 10      | 0     |
-| **Total**                                       | **200** | **0** |
+| **Total**                                       | **200** | **4** |
 
 > Update Done column as items are completed. Priority order: Layout → Responsive → Hardcoded → TypeScript → Dead Code.
