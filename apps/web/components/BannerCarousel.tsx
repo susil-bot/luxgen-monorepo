@@ -54,7 +54,7 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
 
   return (
     <div
-      className={`relative w-full h-64 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg overflow-hidden ${className}`}
+      className={`relative w-full h-40 sm:h-56 md:h-64 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg overflow-hidden ${className}`}
     >
       {/* Background Image */}
       <div

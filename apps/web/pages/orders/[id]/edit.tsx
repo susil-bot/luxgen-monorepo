@@ -95,7 +95,7 @@ function EditOrderContent({ tenant }: Props) {
         </title>
       </Head>
 
-      <AppLayout {...appLayoutProps}>
+      <AppLayout responsive {...appLayoutProps}>
         {loading ? (
           <PageLoadingState label="Loading order…" />
         ) : !order ? (

@@ -69,6 +69,7 @@ const NavBarComponent: React.FC<NavBarProps> = ({
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isTenantMenuOpen, setIsTenantMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const tenantMenuRef = useRef<HTMLDivElement>(null);
   const aiStudio = useAIStudioOptional();
@@ -191,11 +192,29 @@ const NavBarComponent: React.FC<NavBarProps> = ({
           )}
         </div>
 
-        {/* Search Bar — visible at all breakpoints */}
         {showSearch && (
-          <div className="flex-1 min-w-0 max-w-md mx-2 sm:mx-4">
-            <SearchBar placeholder={searchPlaceholder} onSearch={handleSearch} size="sm" />
-          </div>
+          <>
+            <button
+              type="button"
+              className="sm:hidden p-2"
+              aria-label="Search"
+              onClick={() => setMobileSearchOpen((v) => !v)}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </button>
+            <div
+              className={`${mobileSearchOpen ? 'fixed inset-x-0 top-14 z-50 px-4 py-2 bg-[var(--color-bg-primary)] sm:static sm:flex-1 sm:min-w-0 sm:max-w-md sm:mx-4' : 'hidden sm:block sm:flex-1 sm:min-w-0 sm:max-w-md sm:mx-2 sm:mx-4'}`}
+            >
+              <SearchBar placeholder={searchPlaceholder} onSearch={handleSearch} size="sm" />
+            </div>
+          </>
         )}
 
         {/* Right Section */}

@@ -87,6 +87,20 @@ const SidebarComponent: React.FC<SidebarProps> = ({
   const effectiveNavigate = onNavigate ?? navigation.onNavigate;
 
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const onChange = () => {
+      if (mq.matches) {
+        setIsCollapsed(true);
+        setMobileOpen(false);
+      }
+    };
+    onChange();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
   const [expandedSections, setExpandedSections] = useState<Set<string>>(() => {
     const initial = new Set<string>();
     sections.forEach((section) => {

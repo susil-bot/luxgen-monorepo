@@ -63,7 +63,12 @@ export default function MyListingsPage({ tenant }: Props) {
       <Head>
         <title>My listings — {tenant}</title>
       </Head>
-      <AppLayout sidebarSections={getDefaultSidebarSections()} user={getDefaultUser()} logo={getDefaultLogo()}>
+      <AppLayout
+        responsive
+        sidebarSections={getDefaultSidebarSections()}
+        user={getDefaultUser()}
+        logo={getDefaultLogo()}
+      >
         <div className="max-w-3xl mx-auto px-4 py-8">
           <h1 className="ios-large-title mb-4">My listing applications</h1>
 
