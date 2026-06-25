@@ -406,10 +406,11 @@
       **Files to change:** `apps/web/pages/api/agent/chat.ts`, `packages/agent/src/queue/redis-queue.ts` (add helpers for stream counting).
       _Fix applied: `acquireTenantStreamSlot` / `releaseTenantStreamSlot` (max 3 per tenant) and `isAgentMessageRateLimited` (20/min per user) in `redis-queue.ts`; wired in `chat.ts` (2026-06-25)._
 
-- [ ] **A-06** `[bug]` `[arch]`
+- [x] **A-06** `[bug]` `[arch]`
       **File:** `packages/agent/src/git/service.ts` lines 297–304
       `mergeAgentBranch()` runs `git checkout <baseBranch>` followed by `git merge --squash <agentBranch>` directly on the **shared monorepo root** working tree. Two concurrent merge calls will race: the second `git checkout` will be on the wrong branch when the first merge commits. The function must instead create a throwaway worktree for the base branch merge, execute the merge there, then `git push` — or use `git merge-tree` to generate the merge result without touching the working tree.
       **Fix approach:** In `mergeAgentBranch`, add a temporary worktree at `.agent-worktrees/merge-<sessionId>`, checkout `baseBranch` there, squash-merge into it, commit, then remove the temp worktree. Never touch `root` working tree.
+      _Resolved: detached merge worktree at `.agent-worktrees/merge-<sessionId>`, squash-merge + commit, `git branch -f` updates base ref, worktree removed in `finally` — root checkout untouched._
 
 - [x] **A-07** `[feat]`
       **File:** `apps/web/pages/api/agent/tasks.ts` — no status-stream endpoint exists
@@ -559,12 +560,12 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | Tier                 | Total   | Done   |
 | -------------------- | ------- | ------ |
 | CRITICAL             | 7       | 7 ✅   |
-| HIGH                 | 27      | 20     |
+| HIGH                 | 27      | 21     |
 | MEDIUM               | 24      | 23     |
 | LOW                  | 25      | 24     |
 | **Agent / A-MEDIUM** | **10**  | **3**  |
 | **Agent / A-LOW**    | **10**  | **3**  |
-| **Total**            | **110** | **97** |
+| **Total**            | **110** | **98** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
 
