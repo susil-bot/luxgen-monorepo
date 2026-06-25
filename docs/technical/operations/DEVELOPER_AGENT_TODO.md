@@ -328,7 +328,7 @@
       **File:** `apps/api/src/app.ts` line 89
       Apollo `formatError` uses `console.error('GraphQL Error:', error)` instead of `logger.error(...)`. Inconsistent with the rest of the codebase.
 
-- [ ] **L-18** `[style]`
+- [x] **L-18** `[style]`
       **File:** `apps/web/pages/dashboard.tsx` lines 33, 35, 37
       Debug `console.log` statements with emoji (`'🔍 Dashboard useEffect running'`, etc.) left in production code. Remove all debug logs from this file.
 
