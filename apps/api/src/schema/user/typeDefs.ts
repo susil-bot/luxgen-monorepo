@@ -9,6 +9,7 @@ export const userTypeDefs = `
     isActive: Boolean!
     tenant: Tenant!
     phone: String
+    avatar: String
     marketingEmail: Boolean
     marketingSms: Boolean
     marketingWhatsapp: Boolean
@@ -47,6 +48,7 @@ export const userTypeDefs = `
     lastName: String
     role: UserRole
     phone: String
+    avatar: String
     marketingEmail: Boolean
     marketingSms: Boolean
     marketingWhatsapp: Boolean

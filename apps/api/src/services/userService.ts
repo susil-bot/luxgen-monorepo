@@ -62,6 +62,7 @@ export interface UpdateUserInput {
   marketingEmail?: boolean;
   marketingSms?: boolean;
   marketingWhatsapp?: boolean;
+  avatar?: string;
 }
 
 export class UserService {
