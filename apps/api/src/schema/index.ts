@@ -1,5 +1,5 @@
 import type { ValueNode } from 'graphql';
-import { Kind } from 'graphql';
+import { GraphQLJSON } from 'graphql-scalars';
 import { makeExecutableSchema } from 'graphql-tools';
 import { mergeTypeDefs, mergeResolvers } from '@graphql-tools/merge';
 import { secureResolvers } from '../graphql/authPolicy';
@@ -86,32 +86,7 @@ const scalarResolvers = {
     parseValue: (value: string) => new Date(value),
     parseLiteral: (ast: ValueNode) => new Date((ast as { value: string }).value),
   },
-  JSON: {
-    serialize: (value: any) => value,
-    parseValue: (value: any) => value,
-    parseLiteral: (ast: ValueNode) => {
-      switch (ast.kind) {
-        case Kind.STRING:
-        case Kind.BOOLEAN:
-          return (ast as { value: string | boolean }).value;
-        case Kind.INT:
-        case Kind.FLOAT:
-          return parseFloat((ast as { value: string }).value);
-        case Kind.OBJECT:
-          return (ast as { fields: Array<{ name: { value: string }; value: { value: string } }> }).fields.reduce(
-            (obj: Record<string, unknown>, field) => {
-              obj[field.name.value] = JSON.parse(field.value.value);
-              return obj;
-            },
-            {},
-          );
-        case Kind.LIST:
-          return (ast as { values: Array<{ value: string }> }).values.map((value) => JSON.parse(value.value));
-        default:
-          return null;
-      }
-    },
-  },
+  JSON: GraphQLJSON,
 };
 
 // Merge all resolvers, then enforce auth on protected Query/Mutation fields
