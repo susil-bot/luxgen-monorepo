@@ -21,9 +21,10 @@ const FooterComponent: React.FC<FooterProps> = ({
   className = '',
   style,
   links = [],
-  copyright = '© 2024 LuxGen. All rights reserved.',
+  copyright,
   ...props
 }) => {
+  const resolvedCopyright = copyright ?? `© ${new Date().getFullYear()} LuxGen. All rights reserved.`;
   const styles = {
     ...style,
     backgroundColor: tenantTheme.colors.surface,
@@ -47,7 +48,7 @@ const FooterComponent: React.FC<FooterProps> = ({
           )}
 
           <div className="footer-copyright">
-            <p>{copyright}</p>
+            <p>{resolvedCopyright}</p>
           </div>
         </div>
       </div>

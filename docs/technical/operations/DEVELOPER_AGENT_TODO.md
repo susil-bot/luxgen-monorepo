@@ -462,7 +462,7 @@
 ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
-      _Resolved: `run_command` tool with npm/npx/node allowlist._
+        _Resolved: `run_command` tool with npm/npx/node allowlist._
 
 - [x] **A-13** `[bug]` `[dead-code]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx`
@@ -581,14 +581,14 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ## Progress Summary
 
-| Tier                 | Total   | Done   |
-| -------------------- | ------- | ------ |
-| CRITICAL             | 7       | 7 ✅   |
-| HIGH                 | 27      | 21     |
-| MEDIUM               | 24      | 23     |
-| LOW                  | 25      | 24     |
-| **Agent / A-MEDIUM** | **10**  | **10** ✅ |
-| **Agent / A-LOW**    | **10**  | **10** ✅ |
+| Tier                 | Total   | Done       |
+| -------------------- | ------- | ---------- |
+| CRITICAL             | 7       | 7 ✅       |
+| HIGH                 | 27      | 21         |
+| MEDIUM               | 24      | 23         |
+| LOW                  | 25      | 24         |
+| **Agent / A-MEDIUM** | **10**  | **10** ✅  |
+| **Agent / A-LOW**    | **10**  | **10** ✅  |
 | **Total**            | **110** | **110** ✅ |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
@@ -1193,7 +1193,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/Select/Select.tsx` custom dropdown does not handle the case where it opens near the bottom of the viewport. The dropdown can be clipped by the viewport edge on mobile.
       **Fix:** Detect available space and flip the dropdown to open upward (`dropup`) when needed.
 
-- [ ] **UI-45** `[responsive]`
+- [x] **UI-45** `[responsive]`
       `apps/web/components/agent/AgentChat.tsx` textarea has `maxHeight: '160px'` hardcoded as an inline style. On small phones this is too tall relative to the available screen height, pushing the send button below the fold.
       **Fix:** Use `max-h-24 sm:max-h-40` or compute max height relative to `window.innerHeight`.
 
@@ -1201,15 +1201,15 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 3 — Hardcoded Values & Design Tokens (UI-46 → UI-75)
 
-- [ ] **UI-46** `[hardcode]`
+- [x] **UI-46** `[hardcode]`
       `packages/ui/src/Footer/Footer.tsx` default copyright prop is `'© 2024 LuxGen. All rights reserved.'`. The year 2024 is stale. It is also hardcoded as a `LuxGen` brand name that should be the tenant's name.
       **Fix:** Change default to `© ${new Date().getFullYear()} LuxGen. All rights reserved.` and make it tenant-aware via a `companyName` prop.
 
-- [ ] **UI-47** `[hardcode]`
+- [x] **UI-47** `[hardcode]`
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` hardcodes the CTA button colour as `'#F78C4A'` and text colour as `'#FFFFFF'`. These override any tenant theme.
       **Fix:** Replace with CSS variable references `var(--color-orange)` / `var(--color-label-on-fill)`.
 
-- [ ] **UI-48** `[hardcode]`
+- [x] **UI-48** `[hardcode]`
       `packages/ui/src/ProductCard/ProductCard.tsx` hardcodes like-icon fill colour as `'#EF4444'` (active) and `'#6B7280'` (inactive).
       **Fix:** Use `var(--color-red)` and `var(--color-label-tertiary)`.
 

@@ -118,7 +118,7 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
             {/* Title */}
             <h2
               className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 leading-tight"
-              style={{ color: currentSlideData.textColor || '#FFFFFF' }}
+              style={{ color: currentSlideData.textColor || 'var(--color-label-on-fill)' }}
             >
               {currentSlideData.title}
             </h2>
@@ -127,7 +127,7 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
             {currentSlideData.subtitle && (
               <h3
                 className="text-lg md:text-xl lg:text-2xl font-semibold mb-3"
-                style={{ color: currentSlideData.textColor || '#FFFFFF' }}
+                style={{ color: currentSlideData.textColor || 'var(--color-label-on-fill)' }}
               >
                 {currentSlideData.subtitle}
               </h3>
@@ -149,8 +149,8 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
                 onClick={() => handleCtaClick(currentSlideData)}
                 className="inline-flex items-center px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/50"
                 style={{
-                  backgroundColor: currentSlideData.ctaColor || '#F78C4A',
-                  color: '#FFFFFF',
+                  backgroundColor: currentSlideData.ctaColor || 'var(--color-orange)',
+                  color: 'var(--color-label-on-fill)',
                 }}
               >
                 {currentSlideData.ctaText}
