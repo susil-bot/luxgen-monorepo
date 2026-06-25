@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 
+import { Toolkit, type ToolkitItem } from '@luxgen/ui';
 import {
   FlowConfigFieldInput,
   TowerGraphCanvas,
@@ -109,10 +110,6 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
     }));
   };
 
-  const handleSave = async () => {
-    await save(flow);
-  };
-
   const updateFlow = (updater: (prev: TowerFlowDocument) => TowerFlowDocument) => {
     setFlow(updater);
   };
@@ -130,6 +127,30 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
       return next;
     });
   };
+
+  const editorToolkitItems = useMemo<ToolkitItem[]>(
+    () => [
+      {
+        id: 'save',
+        label: saveState === 'saving' ? 'Saving…' : 'Save',
+        onClick: () => void save(flow),
+        disabled: saveState === 'saving',
+      },
+      {
+        id: 'run-logs',
+        label: 'View run logs',
+        onClick: () => void router.push('/automations/tower/runs'),
+      },
+      {
+        id: 'toggle',
+        label: flow.meta.enabled ? 'Turn off' : 'Turn on',
+        active: flow.meta.enabled,
+        destructive: flow.meta.enabled,
+        onClick: () => setFlow((prev) => ({ ...prev, meta: { ...prev.meta, enabled: !prev.meta.enabled } })),
+      },
+    ],
+    [flow, router, save, saveState, setFlow],
+  );
 
   if (loading) {
     return (
@@ -198,30 +219,7 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
 
           <div style={{ flex: 1 }} />
 
-          <button
-            type="button"
-            className={styles.secondaryBtn}
-            onClick={() => void handleSave()}
-            disabled={saveState === 'saving'}
-          >
-            {saveState === 'saving' ? 'Saving…' : 'Save'}
-          </button>
-
-          <button
-            type="button"
-            className={styles.secondaryBtn}
-            onClick={() => void router.push('/automations/tower/runs')}
-          >
-            View run logs
-          </button>
-
-          <button
-            type="button"
-            className={flow.meta.enabled ? styles.toggleOff : styles.toggleOn}
-            onClick={() => setFlow((prev) => ({ ...prev, meta: { ...prev.meta, enabled: !prev.meta.enabled } }))}
-          >
-            {flow.meta.enabled ? 'Turn off' : 'Turn on'}
-          </button>
+          <Toolkit ariaLabel="Tower editor actions" size="small" items={editorToolkitItems} />
         </header>
 
         <div className={styles.editorBody}>
