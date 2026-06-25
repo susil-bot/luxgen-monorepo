@@ -45,13 +45,18 @@
     "test:k8s": "node --test scripts/k8s-config-ingress-smoke.mjs",
     "init:tenant-workflow": "node scripts/init-tenant-workflow.js",
     "init:tenants": "node scripts/init-tenants.js",
-    "select-tenant": "node scripts/select-tenant.js"
+    "select-tenant": "node scripts/select-tenant.js",
+    "test:auto": "vitest run -c vitest.workspace.ts",
+    "test:auto:api": "vitest run -c vitest.workspace.ts --project api-auto",
+    "test:auto:web": "vitest run -c vitest.workspace.ts --project web-auto",
+    "test:auto:ui": "vitest run -c vitest.workspace.ts --project ui-auto"
   },
   "dependencies": {
     "classnames": "^2.5.1",
     "prop-types": "^15.8.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
@@ -65,7 +70,8 @@
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.0",
     "turbo": "^1.10.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^2.1.9"
   },
   "engines": {
     "node": ">=18.0.0"
