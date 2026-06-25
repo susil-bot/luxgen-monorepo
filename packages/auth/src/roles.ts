@@ -73,31 +73,3 @@ export const ROLE_PERMISSIONS = {
 export const hasPermission = (role: UserRole, permission: string): boolean => {
   return ROLE_PERMISSIONS[role]?.includes(permission) || false;
 };
-
-export const isSuperAdmin = (role: UserRole): boolean => {
-  return role === UserRole.SUPER_ADMIN;
-};
-
-export const isAdmin = (role: UserRole): boolean => {
-  return role === UserRole.ADMIN;
-};
-
-export const isUser = (role: UserRole): boolean => {
-  return role === UserRole.USER;
-};
-
-export const canManageTenants = (role: UserRole): boolean => {
-  return role === UserRole.SUPER_ADMIN;
-};
-
-export const canManageUsers = (role: UserRole): boolean => {
-  return role === UserRole.SUPER_ADMIN || role === UserRole.ADMIN;
-};
-
-export const canInviteUsers = (role: UserRole): boolean => {
-  return role === UserRole.SUPER_ADMIN || role === UserRole.ADMIN;
-};
-
-export const canApproveRequests = (role: UserRole): boolean => {
-  return role === UserRole.SUPER_ADMIN || role === UserRole.ADMIN;
-};
