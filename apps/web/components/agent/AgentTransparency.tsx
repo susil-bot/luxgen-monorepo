@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import type { AgentSession, StagedFile } from '../../../../packages/agent/src/types/session';
+import type { ValidationCheckName } from '../../../../packages/agent/src/types/validation';
 import ValidationReport from './ValidationReport';
 
 interface AgentTransparencyProps {
@@ -29,7 +30,7 @@ interface GitStatus {
 
 interface ValidationState {
   passed: boolean | null;
-  checks: Array<{ name: string; scope: string; passed: boolean; output: string; durationMs: number }>;
+  checks: Array<{ name: ValidationCheckName; scope: string; passed: boolean; output: string; durationMs: number }>;
   ranAt: number | null;
 }
 
@@ -87,9 +88,10 @@ function computeDiff(
   return result;
 }
 
-function DiffViewer({ file }: { file: StagedFile }) {
-  const diff =
-    file.type === 'new'
+function DiffViewer({ file }: { file: StagedFile & { pendingDelete?: boolean } }) {
+  const diff = file.pendingDelete
+    ? (file.originalContent || '').split('\n').map((text, i) => ({ type: 'remove' as const, text, lineNum: i + 1 }))
+    : file.type === 'new'
       ? file.content.split('\n').map((text, i) => ({ type: 'add' as const, text, lineNum: i + 1 }))
       : computeDiff(file.originalContent || '', file.content);
 
@@ -110,8 +112,14 @@ function DiffViewer({ file }: { file: StagedFile }) {
           <p className="text-xs text-secondary mt-0.5">{file.description}</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className={`badge ${file.type === 'new' ? 'badge-green' : 'badge-blue'}`}>
-            {file.type === 'new' ? 'NEW' : 'MODIFIED'}
+          <span
+            className={`badge ${(file as StagedFile & { pendingDelete?: boolean }).pendingDelete ? 'badge-red' : file.type === 'new' ? 'badge-green' : 'badge-blue'}`}
+          >
+            {(file as StagedFile & { pendingDelete?: boolean }).pendingDelete
+              ? 'DELETE'
+              : file.type === 'new'
+                ? 'NEW'
+                : 'MODIFIED'}
           </span>
           <span className="text-xs font-medium" style={{ color: 'var(--color-green)' }}>
             +{stats.added}
@@ -187,7 +195,8 @@ export default function AgentTransparency({
   const [validating, setValidating] = useState(false);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
-  const [_loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const loadSession = useCallback(async () => {
     setLoading(true);
@@ -204,11 +213,12 @@ export default function AgentTransparency({
       setGitStatus(git);
       if (val && val.ranAt) setValidation(val);
       const paths = Object.keys(data.files || {});
-      if (paths.length > 0 && !selectedPath) setSelectedPath(paths[0]);
+      // Only auto-select first file if nothing is currently selected.
+      setSelectedPath((prev) => (prev ? prev : (paths[0] ?? null)));
     } finally {
       setLoading(false);
     }
-  }, [sessionId, selectedPath]);
+  }, [sessionId]);
 
   useEffect(() => {
     loadSession();
@@ -231,6 +241,7 @@ export default function AgentTransparency({
 
   const handleApplyAll = async () => {
     setApplying(true);
+    setActionError(null);
     try {
       const res = await fetch('/api/agent/apply', {
         method: 'POST',
@@ -238,6 +249,10 @@ export default function AgentTransparency({
         body: JSON.stringify({ sessionId }),
       });
       const data = await res.json();
+      if (!res.ok) {
+        setActionError(data.error || 'Apply failed');
+        return;
+      }
       onApplied(data.applied || []);
       setSession((prev) => (prev ? { ...prev, files: {} } : prev));
       setSelectedPath(null);
@@ -249,6 +264,7 @@ export default function AgentTransparency({
 
   const handleCommit = async () => {
     setApplying(true);
+    setActionError(null);
     try {
       const res = await fetch('/api/agent/commit', {
         method: 'POST',
@@ -256,11 +272,14 @@ export default function AgentTransparency({
         body: JSON.stringify({ sessionId }),
       });
       const data = await res.json();
-      if (data.committed) {
-        onCommitted?.({ branch: data.branch, commitSha: data.commitSha });
-        setSession((prev) => (prev ? { ...prev, files: {} } : prev));
-        setSelectedPath(null);
+      if (!res.ok || !data.committed) {
+        setActionError(data.error || 'Commit failed — check validation results.');
+        await loadSession();
+        return;
       }
+      onCommitted?.({ branch: data.branch, commitSha: data.commitSha });
+      setSession((prev) => (prev ? { ...prev, files: {} } : prev));
+      setSelectedPath(null);
       await loadSession();
     } finally {
       setApplying(false);
@@ -269,6 +288,7 @@ export default function AgentTransparency({
 
   const handleMerge = async () => {
     setApplying(true);
+    setActionError(null);
     try {
       const res = await fetch('/api/agent/merge', {
         method: 'POST',
@@ -276,9 +296,16 @@ export default function AgentTransparency({
         body: JSON.stringify({ sessionId }),
       });
       const data = await res.json();
-      if (data.merged) {
-        onMerged?.();
+      if (!res.ok || !data.merged) {
+        setActionError(
+          data.errors?.join('; ') ||
+            data.error ||
+            `Merge failed${data.conflicts?.length ? ' — conflicts detected' : ''}`,
+        );
+        await loadSession();
+        return;
       }
+      onMerged?.();
       await loadSession();
     } finally {
       setApplying(false);
@@ -287,12 +314,17 @@ export default function AgentTransparency({
 
   const handleCreatePr = async () => {
     setApplying(true);
+    setActionError(null);
     try {
-      await fetch('/api/agent/pr', {
+      const res = await fetch('/api/agent/pr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId }),
       });
+      const data = await res.json();
+      if (!res.ok || !data.created) {
+        setActionError(data.error || 'Failed to create pull request');
+      }
       await loadSession();
     } finally {
       setApplying(false);
@@ -314,6 +346,32 @@ export default function AgentTransparency({
 
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
+      {loading && (
+        <div
+          className="px-4 py-2 border-b text-xs text-secondary flex items-center gap-2 flex-shrink-0"
+          style={{ borderColor: 'var(--color-separator)' }}
+        >
+          <div className="w-3 h-3 border border-current rounded-full border-t-transparent animate-spin" />
+          Loading session…
+        </div>
+      )}
+      {actionError && (
+        <div
+          className="px-4 py-2 border-b flex items-center gap-2 flex-shrink-0"
+          style={{ borderColor: 'rgba(255,59,48,0.2)', backgroundColor: 'rgba(255,59,48,0.08)' }}
+        >
+          <span className="text-xs" style={{ color: 'var(--color-red)' }}>
+            ⚠ {actionError}
+          </span>
+          <button
+            className="ml-auto text-xs underline"
+            style={{ color: 'var(--color-red)' }}
+            onClick={() => setActionError(null)}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
       {gitActive && gitStatus?.session && (
         <div
           className="px-4 py-2 border-b flex items-center gap-2 flex-shrink-0 text-xs"
@@ -461,7 +519,13 @@ export default function AgentTransparency({
                   <div className="flex items-center gap-2">
                     <span
                       className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: file.type === 'new' ? 'var(--color-green)' : 'var(--color-blue)' }}
+                      style={{
+                        backgroundColor: (file as StagedFile & { pendingDelete?: boolean }).pendingDelete
+                          ? 'var(--color-red)'
+                          : file.type === 'new'
+                            ? 'var(--color-green)'
+                            : 'var(--color-blue)',
+                      }}
                     />
                     <span className="text-xs font-mono truncate">{file.path.split('/').pop()}</span>
                   </div>

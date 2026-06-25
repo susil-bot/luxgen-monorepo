@@ -12,6 +12,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { sessionId } = req.query as { sessionId?: string };
 
   if (req.method === 'GET') {
+    const getAuth = requireAgentAuth(req, res);
+    if (!getAuth) return;
     if (!sessionId) {
       res.status(400).json({ error: 'Missing sessionId' });
       return;

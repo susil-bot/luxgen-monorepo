@@ -57,6 +57,22 @@ export const AGENT_TOOLS = [
     },
   },
   {
+    name: 'delete_file',
+    description:
+      'Stage a file for deletion. The file is added to the staging area as a deletion — the user must approve before it is removed from the real codebase.',
+    input_schema: {
+      type: 'object',
+      properties: {
+        path: {
+          type: 'string',
+          description: 'Relative file path from monorepo root (e.g. "apps/web/pages/old-page.tsx")',
+        },
+        reason: { type: 'string', description: 'Short reason why this file is being deleted' },
+      },
+      required: ['path', 'reason'],
+    },
+  },
+  {
     name: 'read_automation_schema',
     description:
       'Returns LuxGen Automations trigger and action types. Use when wiring agent lifecycle events to tenant workflows.',

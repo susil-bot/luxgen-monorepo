@@ -91,8 +91,12 @@ export async function runAgentLoop(options: RunAgentLoopOptions): Promise<RunAge
       const totalChars = JSON.stringify(currentMessages).length;
       if (totalChars > MAX_CONTEXT_CHARS) {
         const systemMsg = currentMessages[0];
-        const lastMessages = currentMessages.slice(-6);
-        currentMessages = [systemMsg, ...lastMessages];
+        // Keep last N messages, but always start on a user or assistant (non-tool) boundary
+        // to avoid orphaned tool_call_id references that confuse the model.
+        let tail = currentMessages.slice(-8);
+        while (tail.length > 0 && tail[0].role === 'tool') tail = tail.slice(1);
+        if (tail.length === 0) tail = currentMessages.slice(-2);
+        currentMessages = [systemMsg, ...tail];
         onEvent({ type: 'text', content: '\n\n_[Context window optimized — older messages trimmed]_' });
       }
 
@@ -230,7 +234,7 @@ export async function runAgentLoop(options: RunAgentLoopOptions): Promise<RunAge
 
           const toolResult = await executeToolWithTimeout(tc.name, input, sessionId);
 
-          if (tc.name === 'write_file') {
+          if (tc.name === 'write_file' || tc.name === 'delete_file') {
             try {
               const parsed = JSON.parse(toolResult) as {
                 staged?: boolean;
@@ -244,7 +248,7 @@ export async function runAgentLoop(options: RunAgentLoopOptions): Promise<RunAge
                   type: 'file_staged',
                   path: parsed.path,
                   stagedType: parsed.type,
-                  description: input.description,
+                  description: tc.name === 'delete_file' ? `DELETE: ${String(input.reason ?? '')}` : input.description,
                 });
               } else if (parsed.error) {
                 onEvent({ type: 'text', content: `\n\n_[⚠️ ${parsed.message}]_` });
@@ -273,8 +277,8 @@ export async function runAgentLoop(options: RunAgentLoopOptions): Promise<RunAge
           {
             role: 'assistant',
             content: textContent || null,
-            tool_calls: toolCallArr.map((tc) => ({
-              id: tc.id || `call_${tc.name}`,
+            tool_calls: toolCallArr.map((tc, idx) => ({
+              id: tc.id || `call_${tc.name}_${idx}_${Date.now()}`,
               type: 'function',
               function: { name: tc.name, arguments: tc.arguments },
             })),

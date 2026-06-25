@@ -176,8 +176,12 @@ function writeStagedFilesToWorkspace(
   for (const [filePath, staged] of Object.entries(session.files)) {
     try {
       const absPath = path.join(workspaceRoot, filePath);
-      fs.mkdirSync(path.dirname(absPath), { recursive: true });
-      fs.writeFileSync(absPath, staged.content, 'utf-8');
+      if (staged.pendingDelete) {
+        if (fs.existsSync(absPath)) fs.unlinkSync(absPath);
+      } else {
+        fs.mkdirSync(path.dirname(absPath), { recursive: true });
+        fs.writeFileSync(absPath, staged.content, 'utf-8');
+      }
       applied.push(filePath);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : String(e);

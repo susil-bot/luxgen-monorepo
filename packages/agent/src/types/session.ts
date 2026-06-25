@@ -21,6 +21,7 @@ export interface StagedFile {
   type: 'new' | 'modified';
   description: string;
   stagedAt: number;
+  pendingDelete?: boolean;
 }
 
 import type { AgentSessionGit } from './git';

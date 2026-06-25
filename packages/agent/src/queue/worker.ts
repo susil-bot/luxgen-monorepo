@@ -1,6 +1,6 @@
 import { ensureGitSession } from '../git/service';
 import { runAgentLoop } from '../core/orchestrator';
-import { loadSession, saveSession } from '../changeset/session-store';
+import { loadSession, saveSession, pruneOldSessions } from '../changeset/session-store';
 import { appendAuditEntry, syncSessionToMongo } from '../persistence/mongo';
 import { runValidationPipeline } from '../validation/pipeline';
 import { emitAgentAutomationEvent } from '../automation/bridge';
@@ -54,7 +54,19 @@ export async function processHeadlessJob(job: HeadlessTaskJob): Promise<void> {
       userId: job.userId,
     }).catch(() => {});
 
+    // Mark as validating before running checks so task status is accurate.
+    updated.status = 'validating';
+    saveSession(updated);
+    await syncSessionToMongo(updated);
+
     const validation = await runValidationPipeline(job.sessionId);
+
+    // Update final status based on validation outcome.
+    const afterValidation = loadSession(job.sessionId);
+    afterValidation.status = validation.passed ? 'pending_review' : 'staged';
+    saveSession(afterValidation);
+    await syncSessionToMongo(afterValidation);
+
     await appendAuditEntry({
       sessionId: job.sessionId,
       tenantId: job.tenantId,
@@ -73,6 +85,8 @@ export async function runWorkerLoop(options: { pollIntervalMs?: number } = {}): 
   }
 
   console.log('[agent-worker] Listening for headless tasks…');
+  const pruned = pruneOldSessions();
+  if (pruned > 0) console.log(`[agent-worker] Pruned ${pruned} expired session file(s)`);
 
   while (true) {
     try {

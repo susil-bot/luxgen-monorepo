@@ -1,12 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import {
-  runAgentLoop,
-  pingOllama,
-  findAvailableModel,
-  ensureGitSession,
-  bindSessionAuth,
-  appendAuditEntry,
-} from '@luxgen/agent';
+import { runAgentLoop, findAvailableModel, ensureGitSession, bindSessionAuth, appendAuditEntry } from '@luxgen/agent';
 import { requireAgentStudio } from '../../../lib/agent-auth';
 import { getOllamaUrl } from '@luxgen/config';
 
@@ -62,16 +55,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     details: { mode: 'interactive' },
   }).catch(() => {});
 
-  const reachable = await pingOllama(OLLAMA_HOST);
-  if (!reachable) {
-    res.status(503).json({ error: `Ollama not reachable at ${OLLAMA_HOST}. Run: docker compose up ollama` });
-    return;
-  }
-
   const requestedModelVal = requestedModel || DEFAULT_MODEL;
   const available = await findAvailableModel(OLLAMA_HOST, requestedModelVal);
   if (!available) {
-    res.status(503).json({ error: 'No Ollama models available. Pull a model first.' });
+    res.status(503).json({
+      error: `Ollama not reachable or no models available at ${OLLAMA_HOST}. Run: docker compose up ollama`,
+    });
     return;
   }
 
