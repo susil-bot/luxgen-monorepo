@@ -7,43 +7,22 @@ import {
   AssetManagerProvider,
   useAssetManager,
   AppLayout,
-  getDefaultUser,
   getDefaultLogo,
   getDefaultSidebarSections,
 } from '@luxgen/ui';
 import { getBrandAssetsForTenant } from '@luxgen/ui/src/Assets/DefaultBrandAssets';
+import { useLayoutUser } from '../lib/app-layout-user';
+import { useAppLayoutHeader } from '../lib/app-layout-header';
 
 const NotFoundPageContent: React.FC = () => {
   const router = useRouter();
+  const layoutUser = useLayoutUser();
+  const headerProps = useAppLayoutHeader();
   const { getBrandAssets } = useAssetManager();
-  const [user, setUser] = useState<any>(null);
 
-  // Get tenant from subdomain or default to 'demo'
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const tenantId = hostname.includes('idea-vibes') ? 'idea-vibes' : hostname.includes('demo') ? 'demo' : 'default';
-
   const _brandAssets = getBrandAssets(tenantId);
-
-  // Load user data
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser({
-          name: `${parsedUser.firstName} ${parsedUser.lastName}`,
-          email: parsedUser.email,
-          role: parsedUser.role,
-          tenant: parsedUser.tenant,
-        });
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        setUser(getDefaultUser());
-      }
-    } else {
-      setUser(getDefaultUser());
-    }
-  }, []);
 
   const handleGoHome = () => {
     router.push('/');
@@ -78,7 +57,8 @@ const NotFoundPageContent: React.FC = () => {
 
       <AppLayout
         sidebarSections={getDefaultSidebarSections()}
-        user={user}
+        user={layoutUser ?? undefined}
+        {...headerProps}
         onUserAction={handleUserAction}
         onSearch={handleSearch}
         onNotificationClick={handleNotificationClick}
@@ -115,9 +95,8 @@ const NotFoundPageContent: React.FC = () => {
                 <button type="button" onClick={() => router.push('/users')} className="ios-btn-secondary">
                   Users
                 </button>
-                <button type="button" onClick={() => router.push('/analytics')} className="ios-btn-secondary">
-                  Analytics
-                </button>
+                <button type="button" onClick={() => router.push('/analytics')} className="ios-btn-secondary">Analytics</button>
+                <button type="button" onClick={() => router.push('/login')} className="ios-btn-primary">Sign in</button>
               </div>
             </div>
           }
