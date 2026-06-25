@@ -239,7 +239,7 @@
       **File:** `k8s/deploy.sh` lines 26–53
       Deploy script has interactive `read -p` prompts, making it incompatible with CI/CD pipelines. Add `set -euo pipefail`, validate that all required secret keys are present in `.env.production` before applying, and document the non-interactive invocation pattern.
 
-- [ ] **M-20** `[missing-test]`
+- [x] **M-20** `[missing-test]`
       **File:** `apps/api/src/middleware/loginRateLimit.ts` lines 33–40
       The Redis-path of `isRateLimited` (the increment + pexpire flow) has no test coverage. Only the in-memory fallback is exercised by the existing test suite. Add a test with a mocked Redis client.
 
@@ -292,7 +292,7 @@
       **File:** `apps/api/src/middleware/roleManagement.ts` lines 69, 188, 217
       `req.user!.role as any` passed to `hasPermission` because `IUser.role` is typed as `string`. Type `IUser.role` as `UserRole` (from the canonical definition after H-16 is fixed) to eliminate these casts.
 
-- [ ] **L-08** `[type]`
+- [x] **L-08** `[type]`
       **File:** `apps/api/src/schema/group/resolvers.ts` — throughout
       All resolver arguments typed as `any` (`_: any`, `{ input }: { input: any }`). Add precise input types matching the GraphQL schema for all 12 mutations and queries.
 
@@ -405,11 +405,12 @@
       `mergeAgentBranch()` runs `git checkout <baseBranch>` followed by `git merge --squash <agentBranch>` directly on the **shared monorepo root** working tree. Two concurrent merge calls will race: the second `git checkout` will be on the wrong branch when the first merge commits. The function must instead create a throwaway worktree for the base branch merge, execute the merge there, then `git push` — or use `git merge-tree` to generate the merge result without touching the working tree.
       **Fix approach:** In `mergeAgentBranch`, add a temporary worktree at `.agent-worktrees/merge-<sessionId>`, checkout `baseBranch` there, squash-merge into it, commit, then remove the temp worktree. Never touch `root` working tree.
 
-- [ ] **A-07** `[feat]`
+- [x] **A-07** `[feat]`
       **File:** `apps/web/pages/api/agent/tasks.ts` — no status-stream endpoint exists
       `POST /api/agent/tasks` enqueues a headless job and returns `{ status: 'enqueued' }`, but there is **no mechanism for the UI or API caller to poll or stream job status**. The UI has no panel showing headless task progress. A caller must guess when the job completes.
       **What to build:** 1. Add `GET /api/agent/tasks?sessionId=<id>` — already exists; returns `{ session, task, queueEnabled }`. Ensure `task.status` reflects the live MongoDB status set by the worker. 2. Add `GET /api/agent/tasks/stream?sessionId=<id>` — SSE endpoint that polls MongoDB every 2 seconds for status changes and emits `{ type: 'status', status, validation }` events until the task reaches a terminal state (`pending_review`, `failed`, `merged`, `cancelled`). 3. Add a `HeadlessTaskPanel` UI component in `apps/web/components/agent/` that opens when a headless task is enqueued and streams from the new SSE endpoint.
       **Files to create:** `apps/web/pages/api/agent/tasks/stream.ts`, `apps/web/components/agent/HeadlessTaskPanel.tsx`.
+      **Done (2026-06-25):** SSE stream endpoint + `HeadlessTaskPanel` component.
 
 ### A-MEDIUM — Fix in Next Sprint
 
@@ -442,8 +443,8 @@
       The agent has no **`run_command` tool**. It can read, search, write, and delete files but cannot execute any shell command (`npm install`, `npx prisma migrate`, `npm run build`, `npm test`). This blocks workflows where a new package must be installed or a migration run after code changes.
       **How to build:** 1. Add tool definition to `packages/agent/src/tools/definitions.ts`:
       `ts
-     { name: 'run_command', description: 'Run a safe shell command (npm/npx only) from the monorepo root. Returns stdout/stderr. Blocked commands: rm, curl, wget, git push, chmod, sudo.', input_schema: { type: 'object', properties: { command: { type: 'string' }, args: { type: 'array', items: { type: 'string' } }, cwd: { type: 'string', description: 'Optional: relative path from monorepo root' } }, required: ['command', 'args'] } }
-     ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
+   { name: 'run_command', description: 'Run a safe shell command (npm/npx only) from the monorepo root. Returns stdout/stderr. Blocked commands: rm, curl, wget, git push, chmod, sudo.', input_schema: { type: 'object', properties: { command: { type: 'string' }, args: { type: 'array', items: { type: 'string' } }, cwd: { type: 'string', description: 'Optional: relative path from monorepo root' } }, required: ['command', 'args'] } }
+   ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
 - [x] **A-13** `[bug]` `[dead-code]`
@@ -475,11 +476,10 @@
       There is **no endpoint to list all agent tasks for a tenant** (for admin oversight). A tenant admin cannot see what their team's agent sessions are doing, which sessions are running, or audit past changes.
       **What to build:** `GET /api/agent/tasks/list?tenantId=<id>&status=<status>&limit=20&cursor=<id>` — requires `ADMIN` role, reads from MongoDB `AgentTask` collection. Return `{ tasks: AgentTaskRecord[], nextCursor }`. Wire into a new admin page `apps/web/pages/admin/agent-tasks.tsx`.
       **API contract:**
-      `     GET /api/agent/tasks/list
-  Auth: Bearer token, role >= ADMIN
-  Query: tenantId (string), status? (TaskStatus), limit? (number, max 50), cursor? (string)
-  Response: { tasks: AgentTaskRecord[], nextCursor: string | null, total: number }
-  `
+      `    GET /api/agent/tasks/list
+Auth: Bearer token, role >= ADMIN
+Query: tenantId (string), status? (TaskStatus), limit? (number, max 50), cursor? (string)
+Response: { tasks: AgentTaskRecord[], nextCursor: string | null, total: number }`
       **Files to create:** `apps/web/pages/api/agent/tasks/list.ts`, `apps/web/pages/admin/agent-tasks.tsx`.
 
 ### A-LOW — Tech Debt / Polish
@@ -533,12 +533,12 @@
       **File:** `packages/agent/src/prompts/system.ts` line 54
       System prompt template includes `useState<any>(null)` — the agent learns to generate `any`-typed state. Update the embedded page template to use proper types:
       `tsx
-  // Replace:
-  const [user, setUser] = useState<any>(null);
-  // With:
-  import type { UserMenu } from '@luxgen/ui';
-  const [user, setUser] = useState<UserMenu | null>(null);
-  `
+// Replace:
+const [user, setUser] = useState<any>(null);
+// With:
+import type { UserMenu } from '@luxgen/ui';
+const [user, setUser] = useState<UserMenu | null>(null);
+`
       **Files to change:** `packages/agent/src/prompts/system.ts`.
 
 ---
