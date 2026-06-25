@@ -15,6 +15,7 @@ import { AUTH_SESSION_CHANGE_EVENT } from '../lib/session';
 import { getTenantPageProps } from '../lib/tenant-page-props';
 import { useDashboardTenant, useTenantScope } from '../lib/use-tenant-scope';
 import { PageEmptyState, PageLoadingState } from '../components/common/PageStates';
+import { OnboardingWizardStep1 } from '../components/onboarding/OnboardingWizardStep1';
 
 interface DashboardProps {
   tenant: string;
@@ -149,6 +150,7 @@ export default function Dashboard({ tenant }: DashboardProps) {
         onApproveRequest={() => {}}
         onDenyRequest={() => {}}
         onViewDetails={() => {}}
+        onboardingSlot={<OnboardingWizardStep1 tenant={tenant} />}
       />
     </>
   );
