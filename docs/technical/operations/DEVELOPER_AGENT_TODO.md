@@ -1719,19 +1719,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/Accordion/Accordion.tsx` toggle buttons do not have `aria-expanded` or `aria-controls` attributes. Screen readers cannot announce whether a section is open or closed.
       **Fix:** Add `aria-expanded={isOpen}` and `aria-controls={panelId}` to each trigger button; add `id={panelId}` and `role="region"` to each panel.
 
-- [ ] **UI-173** `[a11y]`
+- [x] **UI-173** `[a11y]`
       `packages/ui/src/Table/Table.tsx` has no `aria-sort` attribute on sortable column headers. Screen readers cannot announce the current sort direction.
       **Fix:** Add `aria-sort="ascending" | "descending" | "none"` to `<th>` elements based on current sort state.
 
-- [ ] **UI-174** `[a11y]`
+- [x] **UI-174** `[a11y]`
       No skip-to-main-content link exists in `_app.tsx` or any layout. Keyboard users must tab through the entire navigation on every page load.
       **Fix:** Add `<a href="#main-content" className="sr-only focus:not-sr-only">Skip to main content</a>` as the first element in the document body; add `id="main-content"` to the `<main>` element.
 
-- [ ] **UI-175** `[a11y]`
+- [x] **UI-175** `[a11y]`
       Form validation error states in `Checkbox`, `RadioGroup`, and `Switch` are displayed visually but are not announced via `aria-live` regions. Screen reader users may not notice that a validation error appeared.
       **Fix:** Add an `aria-live="polite"` region near each form field group that announces error messages.
 
-- [ ] **UI-176** `[a11y]`
+- [x] **UI-176** `[a11y]`
       `packages/ui/src/Snackbar/Snackbar.tsx` renders notifications without `role="alert"` or `aria-live="assertive"`. Screen readers will not announce toast messages.
       **Fix:** Add `role="alert"` to error/warning snackbars and `aria-live="polite"` to success/info snackbars.
 
