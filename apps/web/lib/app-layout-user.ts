@@ -13,6 +13,7 @@ export interface LayoutUser {
   email: string;
   role: string;
   tenant: string;
+  avatarUrl?: string;
 }
 
 /** Map persisted session user to AppLayout user prop */
@@ -22,6 +23,7 @@ export function sessionToLayoutUser(session: SessionUser): LayoutUser {
     email: session.email,
     role: session.role,
     tenant: session.tenant.subdomain,
+    avatarUrl: session.avatar,
   };
 }
 
