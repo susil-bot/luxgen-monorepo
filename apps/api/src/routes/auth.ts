@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
-import { User } from '@luxgen/db';
+import { User, IUser } from '@luxgen/db';
 import { UserRole } from '@luxgen/auth';
 import { hashPassword } from '@luxgen/auth';
 import {
@@ -17,6 +17,14 @@ import { requireRole, canInviteUsers, logRoleAccess } from '../middleware/roleMa
 import { sendTransactionalEmail } from '../utils/email';
 import { logger } from '../utils/logger';
 import { getWebUrl } from '@luxgen/config';
+import { generateToken } from '../utils/jwt';
+import {
+  REFRESH_COOKIE_NAME,
+  setRefreshCookie,
+  clearRefreshCookie,
+  verifyRefreshToken,
+  type RefreshTokenPayload,
+} from '../utils/refreshToken';
 
 const router = Router();
 
@@ -28,6 +36,20 @@ function hashResetToken(token: string): string {
 
 const PASSWORD_RESET_SENT_MESSAGE = 'If an account exists with that email, a password reset link has been sent.';
 
+function refreshPayloadFromUser(user: IUser): RefreshTokenPayload {
+  const tenant = user.tenant as { _id?: { toString(): string } } | undefined;
+  const id = user._id?.toString();
+  if (!id) {
+    throw new Error('User id is required for refresh token');
+  }
+  return {
+    id,
+    email: user.email,
+    tenant: tenant?._id?.toString(),
+    role: user.role,
+  };
+}
+
 // Login endpoint
 router.post('/login', loginRateLimitMiddleware, validateLogin, async (req: Request, res: Response) => {
   try {
@@ -37,6 +59,7 @@ router.post('/login', loginRateLimitMiddleware, validateLogin, async (req: Reque
       password,
       tenantId: tenant,
     });
+    setRefreshCookie(res, refreshPayloadFromUser(user));
 
     res.json({
       success: true,
@@ -85,6 +108,7 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
       role: role || UserRole.USER,
       tenantId,
     });
+    setRefreshCookie(res, refreshPayloadFromUser(user));
 
     res.status(201).json({
       success: true,
@@ -153,8 +177,69 @@ router.get('/me', async (req: Request, res: Response) => {
   }
 });
 
-// Logout endpoint (client-side token removal)
+// Refresh access token using httpOnly refresh cookie
+router.post('/refresh', async (req: Request, res: Response) => {
+  try {
+    const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: 'Refresh token required',
+      });
+    }
+
+    const payload = verifyRefreshToken(refreshToken);
+    if (!payload) {
+      clearRefreshCookie(res);
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired refresh token',
+      });
+    }
+
+    const user = await User.findById(payload.id).populate('tenant');
+    if (!user) {
+      clearRefreshCookie(res);
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid refresh token',
+      });
+    }
+
+    if (!isAccountActive(user)) {
+      clearRefreshCookie(res);
+      return res.status(403).json({
+        success: false,
+        message: ACCOUNT_DEACTIVATED_MESSAGE,
+      });
+    }
+
+    const tokenPayload = refreshPayloadFromUser(user);
+    const token = generateToken(tokenPayload, tokenPayload.tenant);
+    setRefreshCookie(res, tokenPayload);
+
+    res.json({
+      success: true,
+      message: 'Token refreshed',
+      data: {
+        token,
+        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+      },
+    });
+  } catch (error) {
+    logger.error('Token refresh error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error:
+        process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
+    });
+  }
+});
+
+// Logout endpoint — clears httpOnly refresh cookie
 router.post('/logout', (req: Request, res: Response) => {
+  clearRefreshCookie(res);
   res.json({
     success: true,
     message: 'Logout successful',

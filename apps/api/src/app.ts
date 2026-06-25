@@ -6,6 +6,7 @@ import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 
 import { schema } from './schema';
 import { context, buildGraphQLContext, type GraphQLContext } from './context';
@@ -56,6 +57,7 @@ app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), stri
 // ── Body parsing ───────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // ── Tenant resolution (must run before auth) ───────────────────────────────
 app.use(tenantRoutingMiddleware);
