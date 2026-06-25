@@ -240,7 +240,7 @@
       **File:** `apps/api/src/middleware/loginRateLimit.ts` lines 33–40
       The Redis-path of `isRateLimited` (the increment + pexpire flow) has no test coverage. Only the in-memory fallback is exercised by the existing test suite. Add a test with a mocked Redis client.
 
-- [ ] **M-21** `[bug]`
+- [x] **M-21** `[bug]`
       **File:** `apps/web/pages/index.tsx` lines 17–20
       Redirect to `/dashboard` only fires when `currentTenant !== 'demo'`. An already-authenticated `demo` tenant user visiting `/` sees the public landing page with Sign In / Create Account links rather than being redirected. Apply the redirect for all authenticated users regardless of tenant.
 
