@@ -9,6 +9,7 @@ import helmet from 'helmet';
 
 import { schema } from './schema';
 import { context, buildGraphQLContext, type GraphQLContext } from './context';
+import { logger } from './utils/logger';
 import { errorHandler, notFoundHandler } from './utils/errorHandler';
 
 // Middleware
@@ -88,7 +89,7 @@ const apolloServer = new ApolloServer({
   context,
   introspection: process.env.APOLLO_INTROSPECTION === 'true',
   formatError: (error) => {
-    console.error('GraphQL Error:', error);
+    logger.error('GraphQL Error', { error });
     return { message: error.message, locations: error.locations, path: error.path };
   },
 });
