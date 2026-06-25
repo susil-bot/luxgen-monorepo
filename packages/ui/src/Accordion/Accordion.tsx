@@ -155,7 +155,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
                 fontFamily: tenantTheme.fonts.primary,
                 fontSize: sizeStyles.fontSize,
                 color: isDisabled ? tenantTheme.colors.textSecondary : tenantTheme.colors.text,
-                transition: 'all 0.2s ease',
+                transition: 'var(--transition-base, all 0.25s ease)',
                 ...(isOpen && {
                   backgroundColor: tenantTheme.colors.backgroundSecondary,
                 }),

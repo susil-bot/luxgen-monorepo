@@ -462,7 +462,7 @@
 ` 2. Add allowlist in `packages/agent/src/config/paths.ts`: `ALLOWED_COMMANDS = ['npm', 'npx', 'node']`. 3. Implement handler in `packages/agent/src/tools/execute.ts` using `execFileAsync` with `TOOL_TIMEOUTS['run_command'] = 60_000`, output capped at 4000 chars. 4. Add icon `'▶️'` and label in `apps/web/components/agent/AgentChat.tsx:TOOL_ICONS`.
       **Security note:** The command allowlist must be validated before `execFileAsync` — never pass raw user input to the shell. Validate `command` is in `ALLOWED_COMMANDS` and `cwd` passes `isPathAllowed`.
 
-      _Resolved: `run_command` tool with npm/npx/node allowlist._
+        _Resolved: `run_command` tool with npm/npx/node allowlist._
 
 - [x] **A-13** `[bug]` `[dead-code]`
       **File:** `apps/web/components/agent/AIStudioSidekickPanel.tsx`
@@ -581,14 +581,14 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ## Progress Summary
 
-| Tier                 | Total   | Done   |
-| -------------------- | ------- | ------ |
-| CRITICAL             | 7       | 7 ✅   |
-| HIGH                 | 27      | 21     |
-| MEDIUM               | 24      | 23     |
-| LOW                  | 25      | 24     |
-| **Agent / A-MEDIUM** | **10**  | **10** ✅ |
-| **Agent / A-LOW**    | **10**  | **10** ✅ |
+| Tier                 | Total   | Done       |
+| -------------------- | ------- | ---------- |
+| CRITICAL             | 7       | 7 ✅       |
+| HIGH                 | 27      | 21         |
+| MEDIUM               | 24      | 23         |
+| LOW                  | 25      | 24         |
+| **Agent / A-MEDIUM** | **10**  | **10** ✅  |
+| **Agent / A-LOW**    | **10**  | **10** ✅  |
 | **Total**            | **110** | **110** ✅ |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
@@ -1229,19 +1229,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/LoginForm/LoginForm.tsx` and `RegisterForm/RegisterForm.tsx` share identical hardcoded success colour strings (`'bg-green-600'`, `'hover:bg-green-700'`, etc.). The same value is duplicated in two files.
       **Fix:** Extract to a shared `formTheme` constant; replace with `var(--color-green)`.
 
-- [ ] **UI-53** `[hardcode]`
+- [x] **UI-53** `[hardcode]`
       `packages/ui/src/Accordion/Accordion.tsx` uses `'all 0.2s ease'` for transitions instead of the CSS variable `var(--transition-base)` defined in `globals.css`.
       **Fix:** Replace all hardcoded transition strings with CSS variable references.
 
-- [ ] **UI-54** `[hardcode]`
+- [x] **UI-54** `[hardcode]`
       `packages/ui/src/Carousel/Carousel.tsx` uses `'transform 0.3s ease'` hardcoded.
       **Fix:** Replace with `var(--transition-base)`.
 
-- [ ] **UI-55** `[hardcode]`
+- [x] **UI-55** `[hardcode]`
       `packages/ui/src/Snackbar/Snackbar.tsx` uses Tailwind colour classes for type variants (`'bg-green-50 border-green-200 text-green-800'`) which do not honour the design token system.
       **Fix:** Map `type` to CSS variable pairs: `success → var(--color-green)`, `error → var(--color-red)`, etc.
 
-- [ ] **UI-56** `[hardcode]`
+- [x] **UI-56** `[hardcode]`
       `packages/ui/src/Input/Input.tsx` uses `'border-gray-300'` and `'border-red-300'` classes instead of `var(--color-separator)` and `var(--color-red)`.
       **Fix:** Replace Tailwind colour classes with CSS variable references.
 
@@ -1847,7 +1847,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | ----------------------------------------------- | ------- | ----- |
 | Global Layout Architecture (UI-01–20)           | 20      | 0     |
 | Responsive Design (UI-21–45)                    | 25      | 0     |
-| Hardcoded Values / Tokens (UI-46–75)            | 30      | 0     |
+| Hardcoded Values / Tokens (UI-46–75)            | 30      | 4     |
 | TypeScript & Type Safety (UI-76–95)             | 20      | 0     |
 | Dead Code & Unused Props (UI-96–110)            | 15      | 0     |
 | Missing States (UI-111–125)                     | 15      | 0     |

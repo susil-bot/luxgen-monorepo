@@ -110,7 +110,7 @@ const CarouselComponent: React.FC<CarouselProps> = ({
     const offset = (index - currentIndex) * 100;
     return {
       transform: `translateX(${offset}%)`,
-      transition: isTransitioning ? 'transform 0.3s ease' : 'none',
+      transition: isTransitioning ? 'var(--transition-base, transform 0.25s ease)' : 'none',
     };
   };
 
