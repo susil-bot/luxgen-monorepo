@@ -23,14 +23,12 @@ export function CategoryRail({ active }: CategoryRailProps) {
             key={id}
             type="button"
             onClick={() => setCategory(id)}
-            className="flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm transition-all"
+            className={`flex-shrink-0 flex items-center gap-2 px-4 py-2.5 rounded-2xl text-sm transition-all ${
+              isActive ? 'lux-category-chip-active' : ''
+            }`}
             style={
               isActive
-                ? {
-                    background: 'linear-gradient(135deg, #007AFF, #5856D6)',
-                    color: '#fff',
-                    boxShadow: '0 4px 20px rgba(0,122,255,0.35)',
-                  }
+                ? undefined
                 : {
                     background: 'var(--color-bg-secondary)',
                     border: '1px solid var(--color-separator)',

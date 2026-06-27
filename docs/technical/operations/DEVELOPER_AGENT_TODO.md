@@ -1249,27 +1249,27 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/ErrorBoundary.tsx` uses `'bg-blue-600 hover:bg-blue-700'` for the retry button.
       **Fix:** Replace with `var(--color-blue)` background.
 
-- [ ] **UI-58** `[hardcode]`
+- [x] **UI-58** `[hardcode]`
       `packages/ui/src/Arrow/Arrow.tsx` injects a `<style>{arrowCSS}</style>` tag inline inside the React component. This causes style duplication on every render and is a well-known anti-pattern.
       **Fix:** Move arrow CSS to a `.css` module or to `globals.css`. Remove the `<style>` injection.
 
-- [ ] **UI-59** `[hardcode]`
+- [x] **UI-59** `[hardcode]`
       `packages/ui/src/ProductCard/ProductCard.tsx` also injects `<style>{productCardCSS}</style>`. Same anti-pattern as UI-58.
       **Fix:** Move to a CSS module file.
 
-- [ ] **UI-60** `[hardcode]`
+- [x] **UI-60** `[hardcode]`
       `apps/web/components/store/GptSalesAssistant.tsx` hardcodes `linear-gradient(135deg, #007AFF, #AF52DE)` for its header. This duplicates the brand gradient that is already available as a CSS pattern in `globals.css`.
       **Fix:** Use a shared `lux-brand-gradient` CSS class defined once in `globals.css`.
 
-- [ ] **UI-61** `[hardcode]`
+- [x] **UI-61** `[hardcode]`
       `apps/web/components/store/CategoryRail.tsx` hardcodes `#007AFF` and `#5856D6` directly in `style={{}}` for active chip colours.
       **Fix:** Use `var(--color-blue)` and `var(--color-purple)`.
 
-- [ ] **UI-62** `[hardcode]`
+- [x] **UI-62** `[hardcode]`
       `apps/web/components/store/StoreLayout.tsx` hardcodes a `radial-gradient(...)` with `rgba(...)` values for its background overlay.
       **Fix:** Extract to a named CSS class in `globals.css`.
 
-- [ ] **UI-63** `[hardcode]`
+- [x] **UI-63** `[hardcode]`
       `apps/web/components/tenant/TenantBanner.tsx` uses Tailwind `from-blue-600 to-purple-600` gradient classes.
       **Fix:** Replace with the `lux-brand-gradient` CSS class (see UI-60).
 
