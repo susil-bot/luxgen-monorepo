@@ -45,7 +45,13 @@ const SelectComponent: React.FC<SelectProps> = ({
     ? options.filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
     : options;
 
-  const selectedOptions = multi ? (Array.isArray(value) ? value : []) : value ? [value] : [];
+  const selectedOptions: Array<string | number> = multi
+    ? Array.isArray(value)
+      ? value
+      : []
+    : value !== undefined && value !== null && !Array.isArray(value)
+      ? [value]
+      : [];
 
   const handleSelect = (option: SelectOption) => {
     if (disabled || option.disabled) return;

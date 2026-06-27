@@ -238,8 +238,8 @@ export const getDefaultDashboardData = (_tenant: string): DashboardData => ({
  * Transform GraphQL dashboard data to component format
  */
 export const transformDashboardData = (graphqlData: Record<string, unknown>, tenant: string): TransformedDashboardData => {
-  // Use GraphQL data if available, otherwise use defaults
-  const data = graphqlData?.getDashboardData || getDefaultDashboardData(tenant);
+  const data: DashboardData =
+    (graphqlData?.getDashboardData as DashboardData | undefined) ?? getDefaultDashboardData(tenant);
 
   return {
     title: `Welcome to ${tenant.charAt(0).toUpperCase() + tenant.slice(1)}`,
@@ -266,22 +266,22 @@ export const transformDashboardData = (graphqlData: Record<string, unknown>, ten
             label: '30 days',
           },
         ],
-    engagementData: data.engagementBreakdown?.map((item: Record<string, unknown>) => ({
-      id: item.category.toLowerCase().replace(/\s+/g, '-'),
-      label: item.category,
-      value: item.value,
-      color: item.color,
-      percentage: item.value,
+    engagementData: data.engagementBreakdown?.map((item) => ({
+      id: String(item.category).toLowerCase().replace(/\s+/g, '-'),
+      label: String(item.category),
+      value: Number(item.value),
+      color: String(item.color),
+      percentage: Number(item.value),
     })) || [
       { id: 'courses', label: 'Courses', value: 45, color: '#3B82F6', percentage: 45 },
       { id: 'groups', label: 'Groups', value: 30, color: '#10B981', percentage: 30 },
       { id: 'discussions', label: 'Discussions', value: 25, color: '#F59E0B', percentage: 25 },
     ],
     trendsData:
-      data.engagementTrends?.map((item: Record<string, unknown>) => ({
-        label: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        interactions: item.activeUsers,
-        completions: item.completedCourses,
+      data.engagementTrends?.map((item) => ({
+        label: new Date(String(item.date)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        interactions: Number(item.activeUsers),
+        completions: Number(item.completedCourses),
       })) ||
       Array.from({ length: 7 }, (_, i) => ({
         label: new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
