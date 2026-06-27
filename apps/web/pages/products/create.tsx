@@ -1,11 +1,10 @@
 import { useState } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useMutation } from '@apollo/client';
 import {
   AppLayout,
-  getDefaultLogo,
-  getDefaultSidebarSections,
   SnackbarProvider,
   useSnackbar,
   ProductEditForm,
@@ -15,8 +14,7 @@ import {
   buildCourseUpdateInput,
   type ProductEditMeta,
   type ProductSeo,
-  type ProductStatus,
-} from '@luxgen/ui';
+  type ProductStatus } from '@luxgen/ui';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import { getStoredUser } from '../../lib/session';
@@ -30,6 +28,7 @@ interface Props {
 }
 
 function CreateProductContent({ tenant }: Props) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const layoutUser = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
@@ -73,9 +72,7 @@ function CreateProductContent({ tenant }: Props) {
     try {
       const { data } = await createCourse({
         variables: {
-          input: buildCourseCreateInput({ title, bodyHtml, seo, meta }, instructorId, tid),
-        },
-      });
+          input: buildCourseCreateInput({ title, bodyHtml, seo, meta }, instructorId, tid) } });
 
       const id = data?.createCourse?.id as string | undefined;
       if (!id) {
@@ -87,9 +84,7 @@ function CreateProductContent({ tenant }: Props) {
         await updateCourse({
           variables: {
             id,
-            input: buildCourseUpdateInput({ title, bodyHtml, seo, meta, status }),
-          },
-        });
+            input: buildCourseUpdateInput({ title, bodyHtml, seo, meta, status }) } });
       }
 
       showSuccess('Product created');
@@ -110,9 +105,9 @@ function CreateProductContent({ tenant }: Props) {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive
@@ -147,5 +142,3 @@ export default function CreateProductPage(props: Props) {
     </SnackbarProvider>
   );
 }
-
-export const getServerSideProps = getTenantPageProps;

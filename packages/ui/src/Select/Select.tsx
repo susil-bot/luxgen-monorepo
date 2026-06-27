@@ -1,11 +1,13 @@
 import React, { useState, useRef } from 'react';
-import { BaseComponentProps, TenantTheme, BaseFormProps, SelectOption } from '../types';
+import { BaseComponentProps, TenantTheme, SelectOption } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
-export interface SelectProps extends BaseComponentProps, BaseFormProps {
+export interface SelectProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
   options: SelectOption[];
+  value?: string | number | Array<string | number>;
+  onChange?: (value: string | number | Array<string | number>) => void;
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
@@ -59,7 +61,13 @@ const SelectComponent: React.FC<SelectProps> = ({
     ? options.filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
     : options;
 
-  const selectedOptions = multi ? (Array.isArray(value) ? value : []) : value ? [value] : [];
+  const selectedOptions: Array<string | number> = multi
+    ? Array.isArray(value)
+      ? value
+      : []
+    : value !== undefined && value !== null && !Array.isArray(value)
+      ? [value]
+      : [];
 
   const handleSelect = (option: SelectOption) => {
     if (disabled || option.disabled) return;

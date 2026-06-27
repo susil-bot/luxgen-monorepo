@@ -31,10 +31,11 @@ function AuthGuardRedirect({ returnPath, reason }: { returnPath: string; reason:
 export function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const [, setAuthEpoch] = useState(0);
 
   useEffect(() => {
     setMounted(true);
-    const bump = () => setSessionVersion((v) => v + 1);
+    const bump = () => setAuthEpoch((v) => v + 1);
     window.addEventListener(AUTH_SESSION_CHANGE_EVENT, bump);
     window.addEventListener('storage', bump);
     return () => {
@@ -42,8 +43,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
       window.removeEventListener('storage', bump);
     };
   }, []);
-
-  // Re-render when sessionVersion bumps after login/logout
 
   // Public routes must match SSR HTML — do not gate on router.isReady
   if (!requiresAuth(router.pathname)) {

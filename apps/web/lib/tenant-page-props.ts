@@ -1,7 +1,10 @@
 import type { GetServerSideProps, GetServerSidePropsContext } from 'next';
+import type { LayoutUser } from './app-layout-user';
+import { getLayoutUserFromRequest } from './server-layout-user';
 
 export interface TenantPageProps {
   tenant: string;
+  layoutUser?: LayoutUser | null;
 }
 
 /** Resolve tenant subdomain from host + query (matches users.tsx pattern) */
@@ -24,5 +27,11 @@ export function resolvePageTenant(context: GetServerSidePropsContext): string {
 }
 
 export const getTenantPageProps: GetServerSideProps<TenantPageProps> = async (context) => {
-  return { props: { tenant: resolvePageTenant(context) } };
+  const layoutUser = getLayoutUserFromRequest(context.req);
+  return {
+    props: {
+      tenant: resolvePageTenant(context),
+      ...(layoutUser ? { layoutUser } : {}),
+    },
+  };
 };

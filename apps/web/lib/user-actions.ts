@@ -49,9 +49,11 @@ export function createHandleUserAction(router: Pick<NextRouter, 'push'>) {
       case 'settings':
         void router.push('/settings');
         break;
-      case 'logout':
+      case 'logout': {
+        if (typeof window !== 'undefined' && !window.confirm('Sign out of LuxGen?')) return;
         performLogout({ router });
         break;
+      }
     }
   };
 }

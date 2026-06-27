@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
+import { useLayoutUser } from '../../lib/app-layout-user';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useMutation } from '@apollo/client';
-import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo } from '@luxgen/ui';
+import { AppLayout } from '@luxgen/ui';
 import { CREATE_LISTING_DRAFT, SUBMIT_LISTING } from '../../graphql/queries/listings';
 
 interface Props {
@@ -10,6 +12,8 @@ interface Props {
 }
 
 export default function ApplyListingPage({ tenant }: Props) {
+  const layoutUser = useLayoutUser();
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const [form, setForm] = useState({
     applicantEmail: '',
@@ -18,8 +22,7 @@ export default function ApplyListingPage({ tenant }: Props) {
     description: '',
     category: '',
     website: '',
-    phone: '',
-  });
+    phone: '' });
 
   const [createDraft] = useMutation(CREATE_LISTING_DRAFT);
   const [submitListing] = useMutation(SUBMIT_LISTING);
@@ -34,9 +37,7 @@ export default function ApplyListingPage({ tenant }: Props) {
     }
     const { data } = await createDraft({
       variables: {
-        input: { tenantId: tenant, ...form },
-      },
-    });
+        input: { tenantId: tenant, ...form } } });
     const id = data?.createListingDraft?.id;
     if (!id) return;
 
@@ -51,9 +52,9 @@ export default function ApplyListingPage({ tenant }: Props) {
       </Head>
       <AppLayout
         responsive
-        sidebarSections={getDefaultSidebarSections()}
-        user={getDefaultUser()}
-        logo={getDefaultLogo()}
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
+        logo={logo}
       >
         <div className="max-w-lg mx-auto px-4 py-8">
           <h1 className="ios-large-title mb-2">List your business</h1>
@@ -100,5 +101,4 @@ export default function ApplyListingPage({ tenant }: Props) {
 }
 
 export const getServerSideProps = async (ctx: { query: { tenant?: string } }) => ({
-  props: { tenant: ctx.query.tenant || 'demo' },
-});
+  props: { tenant: ctx.query.tenant || 'demo' } });

@@ -3,7 +3,7 @@ import { BaseComponentProps, TenantTheme, VariantProps } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
-export interface HeadingProps extends BaseComponentProps, VariantProps {
+export interface HeadingProps extends Omit<BaseComponentProps, 'loading'>, VariantProps {
   tenantTheme?: TenantTheme;
   level: 1 | 2 | 3 | 4 | 5 | 6;
   text: string;
@@ -74,10 +74,8 @@ const HeadingComponent: React.FC<HeadingProps> = ({
   const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
   const sizeClass = getSizeClass();
 
-  const { loading, ...headingProps } = props;
-
   return (
-    <HeadingTag className={`heading heading-${sizeClass} ${className}`} style={styles} {...headingProps}>
+    <HeadingTag className={`heading heading-${sizeClass} ${className}`} style={styles} {...props}>
       {text}
     </HeadingTag>
   );

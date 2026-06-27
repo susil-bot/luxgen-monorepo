@@ -1,21 +1,16 @@
 import { useRouter } from 'next/router';
+import { useAppShellConfig } from '../../../lib/app-shell-config';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import Head from 'next/head';
 import { useQuery } from '@apollo/client';
-import {
-  GroupMemberList,
-  SnackbarProvider,
-  AppLayout,
-  getDefaultLogo,
-  getDefaultSidebarSections,
-  useSnackbar,
-} from '@luxgen/ui';
+import { GroupMemberList, SnackbarProvider, AppLayout, useSnackbar } from '@luxgen/ui';
 import { useLayoutUser } from '../../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
 import { GET_GROUP, GET_GROUP_MEMBERS } from '../../../graphql/queries/groups';
 import { PageLoadingState, PageEmptyState } from '../../../components/common/PageStates';
 
 const GroupMembersPageContent: React.FC = () => {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const { showSuccess } = useSnackbar();
   const { id } = router.query;
@@ -27,22 +22,18 @@ const GroupMembersPageContent: React.FC = () => {
   const {
     data: groupData,
     loading: groupLoading,
-    error: groupError,
-  } = useQuery(GET_GROUP, {
+    error: groupError } = useQuery(GET_GROUP, {
     variables: { id: groupId },
     skip: !groupId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const {
     data: membersData,
     loading: membersLoading,
-    refetch: refetchMembers,
-  } = useQuery(GET_GROUP_MEMBERS, {
+    refetch: refetchMembers } = useQuery(GET_GROUP_MEMBERS, {
     variables: { groupId, first: 100 },
     skip: !groupId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const group = groupData?.group;
   const members =
@@ -56,8 +47,7 @@ const GroupMembersPageContent: React.FC = () => {
         };
       }) => ({
         ...edge.node,
-        permissions: [] as string[],
-      }),
+        permissions: [] as string[] }),
     ) ?? [];
 
   const loading = groupLoading || membersLoading;
@@ -89,11 +79,11 @@ const GroupMembersPageContent: React.FC = () => {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={user ?? undefined}
         onUserAction={handleUserAction}
         {...headerProps}
-        logo={getDefaultLogo()}
+        logo={logo}
         sidebarCollapsible={true}
         sidebarDefaultCollapsed={false}
         responsive={true}

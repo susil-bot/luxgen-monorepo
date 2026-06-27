@@ -1,15 +1,13 @@
 import { useMemo, useState } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useMutation, useQuery } from '@apollo/client';
 import {
   AppLayout,
-  getDefaultLogo,
-  getDefaultSidebarSections,
   AbandonedCheckoutListView,
   buildAbandonedCheckoutRows,
-  SnackbarProvider,
-} from '@luxgen/ui';
+  SnackbarProvider } from '@luxgen/ui';
 import { PageLoadingState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
@@ -25,6 +23,7 @@ interface Props {
 }
 
 function OrdersAbandonedContent({ tenant }: Props) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
@@ -37,14 +36,12 @@ function OrdersAbandonedContent({ tenant }: Props) {
   const { data: checkoutData, loading: checkoutLoading } = useQuery(GET_ABANDONED_CHECKOUTS, {
     variables: { tenantId: queryTenantId },
     skip: !isMongoObjectId(queryTenantId),
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const checkouts = useMemo(
     () => buildAbandonedCheckoutRows(checkoutData?.abandonedCheckouts, usersData?.users),
@@ -59,9 +56,9 @@ function OrdersAbandonedContent({ tenant }: Props) {
         <title>Abandoned checkouts — Orders — {tenant}</title>
       </Head>
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive
@@ -94,5 +91,3 @@ export default function OrdersAbandonedPage(props: Props) {
     </SnackbarProvider>
   );
 }
-
-export const getServerSideProps = getTenantPageProps;

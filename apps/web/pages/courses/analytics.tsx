@@ -1,36 +1,37 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useQuery } from '@apollo/client';
-import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo } from '@luxgen/ui';
+import { AppLayout } from '@luxgen/ui';
 import { TenantBanner } from '../../components/tenant/TenantBanner';
 import { PlanGate } from '../../components/billing/PlanGate';
 import { GET_TENANT_BILLING } from '../../graphql/queries/billing';
 import { normalizePlan } from '@luxgen/billing';
 import { GET_COURSE_ANALYTICS } from '../../graphql/queries/analytics';
-import { useAppTenantId } from '../../lib/app-layout-user';
+import { useAppTenantId, useLayoutUser } from '../../lib/app-layout-user';
 import { isMongoObjectId } from '../../lib/mongo-id';
+import { getTenantPageProps } from '../../lib/tenant-page-props';
 
 interface CourseAnalyticsPageProps {
   tenant: string;
 }
 
 export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps) {
+  const layoutUser = useLayoutUser();
+  const { sidebarSections, logo } = useAppShellConfig();
   const [days, setDays] = useState(30);
   const router = useRouter();
-  const [user, setUser] = useState<import('@luxgen/ui').UserMenu | null>(null);
-  const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'learner'>('learner');
+  const userRole = (layoutUser?.role?.toLowerCase() as 'admin' | 'instructor' | 'learner' | undefined) ?? 'learner';
 
   const { data: billingData } = useQuery(GET_TENANT_BILLING, {
     variables: { tenantId: tenant },
-    errorPolicy: 'ignore',
-  });
+    errorPolicy: 'ignore' });
   const tenantId = useAppTenantId();
   const { data: analyticsQueryData } = useQuery(GET_COURSE_ANALYTICS, {
     variables: { tenantId, days },
-    skip: !isMongoObjectId(tenantId),
-  });
+    skip: !isMongoObjectId(tenantId) });
   const liveAnalytics = analyticsQueryData?.courseAnalytics;
   const tenantPlan = normalizePlan(billingData?.tenantBilling?.plan?.toLowerCase?.() ?? 'free');
 
@@ -48,10 +49,8 @@ export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps
           title: c.title,
           enrollments: c.enrollments,
           rating: 0,
-          completionRate: c.completionRate,
-        })),
-        enrollmentTrends: liveAnalytics.enrollmentTrends.map((t) => ({ month: t.label, enrollments: t.enrollments })),
-      }
+          completionRate: c.completionRate })),
+        enrollmentTrends: liveAnalytics.enrollmentTrends.map((t) => ({ month: t.label, enrollments: t.enrollments })) }
     : {
         totalCourses: 24,
         totalEnrollments: 3456,
@@ -72,27 +71,7 @@ export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps
           { month: 'Apr', enrollments: 367 },
           { month: 'May', enrollments: 423 },
           { month: 'Jun', enrollments: 398 },
-        ],
-      };
-
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const parsed = JSON.parse(userData);
-        setUser({
-          name: `${parsed.firstName} ${parsed.lastName}`,
-          email: parsed.email,
-          role: parsed.role,
-        });
-        setUserRole(parsed.role as 'admin' | 'instructor' | 'learner');
-      } catch {
-        setUser(getDefaultUser());
-      }
-    } else {
-      setUser(getDefaultUser());
-    }
-  }, []);
+        ] };
 
   const handleUserAction = createHandleUserAction(router);
 
@@ -103,10 +82,10 @@ export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
-        user={user}
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
         onUserAction={handleUserAction}
-        logo={getDefaultLogo()}
+        logo={logo}
         sidebarCollapsible
         responsive
       >
@@ -191,8 +170,7 @@ export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps
                           className="h-full rounded-full"
                           style={{
                             width: `${(trend.enrollments / 500) * 100}%`,
-                            backgroundColor: 'var(--color-blue)',
-                          }}
+                            backgroundColor: 'var(--color-blue)' }}
                         />
                       </div>
                       <span className="text-xs font-medium text-primary w-12 text-right">{trend.enrollments}</span>
@@ -258,11 +236,4 @@ export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps
   );
 }
 
-export const getServerSideProps = async (context: any) => {
-  const { tenant } = context.query;
-  return {
-    props: {
-      tenant: tenant || 'demo',
-    },
-  };
-};
+export const getServerSideProps = getTenantPageProps;

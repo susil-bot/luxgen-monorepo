@@ -8,6 +8,7 @@ import {
   patchTenantBranding,
   type TenantBrandingPayload,
 } from '../../lib/tenant-api';
+import { OptimizedImage } from '../../components/media/OptimizedImage';
 
 interface Props {
   tenant: string;
@@ -91,7 +92,9 @@ function BrandingContent({ tenant }: Props) {
                 accept="image/png,image/svg+xml,image/x-icon"
                 onChange={(e) => handleFaviconFile(e.target.files?.[0] ?? null)}
               />
-              {faviconPreview && <img src={faviconPreview} alt="" className="mt-2 h-8 w-8" />}
+              {faviconPreview && (
+                <OptimizedImage src={faviconPreview} alt="" width={32} height={32} unoptimized className="mt-2 h-8 w-8" />
+              )}
             </div>
             <div className="ios-form-group">
               <label htmlFor="logoText">Logo text</label>

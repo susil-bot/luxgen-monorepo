@@ -19,23 +19,24 @@ export function useAppLayoutHeader() {
 
   const onSearch = useCallback((query: string) => {
     const q = query.trim();
-    if (!q) return;
-    // Page-local search routing preserved for non-global-search pages
-    if (typeof window !== 'undefined') {
-      const path = window.location.pathname;
-      const url = new URL(window.location.href);
-      url.searchParams.set('search', q);
-      if (
-        path.startsWith('/products') ||
-        path.startsWith('/groups') ||
-        path.startsWith('/users') ||
-        path.startsWith('/courses') ||
-        path.startsWith('/customers')
-      ) {
-        window.history.pushState({}, '', url.toString());
-        window.dispatchEvent(new PopStateEvent('popstate'));
-      }
+    if (!q || typeof window === 'undefined') return;
+    const path = window.location.pathname;
+    const url = new URL(window.location.href);
+    url.searchParams.set('search', q);
+    if (
+      path.startsWith('/products') ||
+      path.startsWith('/groups') ||
+      path.startsWith('/users') ||
+      path.startsWith('/courses') ||
+      path.startsWith('/customers')
+    ) {
+      window.history.pushState({}, '', url.toString());
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      return;
     }
+    const tenant = new URLSearchParams(window.location.search).get('tenant');
+    const searchUrl = `/search?q=${encodeURIComponent(q)}${tenant ? `&tenant=${encodeURIComponent(tenant)}` : ''}`;
+    window.location.assign(searchUrl);
   }, []);
 
   return {

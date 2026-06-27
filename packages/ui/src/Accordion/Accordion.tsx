@@ -14,6 +14,7 @@ export interface AccordionItem {
 export interface AccordionProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
   items: AccordionItem[];
+  loading?: boolean;
   allowMultiple?: boolean;
   allowNone?: boolean;
   variant?: 'default' | 'bordered' | 'filled' | 'minimal';
@@ -37,6 +38,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
   showIcon = true,
   onToggle,
   onItemClick,
+  loading = false,
   ...props
 }) => {
   const [openItems, setOpenItems] = useState<Set<string>>(
@@ -123,6 +125,16 @@ const AccordionComponent: React.FC<AccordionProps> = ({
     color: tenantTheme.colors.text,
     ...variantStyles,
   };
+
+  if (loading) {
+    return (
+      <div className={`accordion accordion--loading ${className}`} style={styles} aria-busy="true" {...props}>
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="accordion-skeleton ios-card p-4 mb-2 animate-pulse h-12 rounded-lg" style={{ background: 'var(--color-fill-tertiary)' }} />
+        ))}
+      </div>
+    );
+  }
 
   return (
     <div className={`accordion accordion-${variant} accordion-${size} ${className}`} style={styles} {...props}>

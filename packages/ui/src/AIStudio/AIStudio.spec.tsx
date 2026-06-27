@@ -1,15 +1,15 @@
 import React from 'react';
 import { render } from '@testing-library/react';
-import { AIStudio } from './AIStudio';
+import { AIStudioLogo } from './AIStudioLogo';
 
-describe('AIStudio (logo)', () => {
+describe('AIStudioLogo', () => {
   it('renders without crashing', () => {
-    const { container } = render(<AIStudio />);
+    const { container } = render(<AIStudioLogo />);
     expect(container.firstChild).toBeInTheDocument();
   });
 
   it('renders an SVG icon', () => {
-    const { container } = render(<AIStudio />);
+    const { container } = render(<AIStudioLogo />);
     expect(container.querySelector('svg')).toBeInTheDocument();
   });
 

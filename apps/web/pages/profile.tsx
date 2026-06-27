@@ -1,21 +1,24 @@
 import { useState, useEffect } from 'react';
+import { useAppShellConfig } from '../lib/app-shell-config';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMutation } from '@apollo/client';
-import { AppLayout, getDefaultLogo, getDefaultSidebarSections, SnackbarProvider, useSnackbar } from '@luxgen/ui';
+import { AppLayout, SnackbarProvider, useSnackbar } from '@luxgen/ui';
 import { createHandleUserAction } from '../lib/user-actions';
 import { useLayoutUser } from '../lib/app-layout-user';
 import { useAppLayoutHeader } from '../lib/app-layout-header';
 import { getStoredUser, updateStoredUser, AUTH_STORAGE_KEYS } from '../lib/session';
 import { UPDATE_USER } from '../graphql/queries/auth';
 import { getTenantPageProps } from '../lib/tenant-page-props';
+import { OptimizedImage } from '../components/media/OptimizedImage';
 
 interface ProfilePageProps {
   tenant: string;
 }
 
 function ProfileContent({ tenant }: ProfilePageProps) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const layoutUser = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
@@ -97,9 +100,7 @@ function ProfileContent({ tenant }: ProfilePageProps) {
       await updateUser({
         variables: {
           id: session.id,
-          input: { firstName: firstName.trim(), lastName: lastName.trim() },
-        },
-      });
+          input: { firstName: firstName.trim(), lastName: lastName.trim() } } });
       updateStoredUser({ firstName: firstName.trim(), lastName: lastName.trim() });
       showSuccess('Your profile changes were saved successfully.');
     } catch (err: unknown) {
@@ -119,9 +120,9 @@ function ProfileContent({ tenant }: ProfilePageProps) {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive
@@ -135,8 +136,14 @@ function ProfileContent({ tenant }: ProfilePageProps) {
           <div className="ios-card p-6 flex items-center gap-4">
             <div className="relative">
               {avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarUrl} alt="" className="ios-avatar ios-avatar-xl object-cover" />
+                <OptimizedImage
+                  src={avatarUrl}
+                  alt=""
+                  width={80}
+                  height={80}
+                  unoptimized
+                  className="ios-avatar ios-avatar-xl object-cover"
+                />
               ) : (
                 <div className="ios-avatar ios-avatar-xl">{displayName.charAt(0).toUpperCase()}</div>
               )}
@@ -221,5 +228,3 @@ export default function ProfilePage(props: ProfilePageProps) {
     </SnackbarProvider>
   );
 }
-
-export const getServerSideProps = getTenantPageProps;

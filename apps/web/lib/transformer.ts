@@ -1,6 +1,37 @@
 import { UserMenu } from '@luxgen/ui';
+import type { NextRouter } from 'next/router';
 import { createHandleUserAction } from './user-actions';
 import { getStoredUser, isStoredSessionExpired } from './session';
+
+type DashboardGraphRow = Record<string, unknown>;
+
+interface DashboardGraphActivity extends DashboardGraphRow {
+  id: string;
+  user: string;
+  userAvatar?: string;
+  description: string;
+  timestamp: string;
+  status: string;
+}
+
+interface DashboardGraphPermissionRequest extends DashboardGraphRow {
+  id: string;
+  user: string;
+  userAvatar?: string;
+  requestType: string;
+  description: string;
+  status: string;
+  requestedAt: string;
+  metadata?: Record<string, unknown>;
+}
+
+export type DashboardActionType =
+  | 'retention_click'
+  | 'engagement_click'
+  | 'trend_click'
+  | 'activity_click'
+  | 'survey_click'
+  | 'request_click';
 
 export interface DashboardData {
   stats: {
@@ -206,12 +237,9 @@ export const getDefaultDashboardData = (_tenant: string): DashboardData => ({
 /**
  * Transform GraphQL dashboard data to component format
  */
-export const transformDashboardData = (
-  graphqlData: Record<string, unknown>,
-  tenant: string,
-): TransformedDashboardData => {
-  // Use GraphQL data if available, otherwise use defaults
-  const data = graphqlData?.getDashboardData || getDefaultDashboardData(tenant);
+export const transformDashboardData = (graphqlData: Record<string, unknown>, tenant: string): TransformedDashboardData => {
+  const data: DashboardData =
+    (graphqlData?.getDashboardData as DashboardData | undefined) ?? getDefaultDashboardData(tenant);
 
   return {
     title: `Welcome to ${tenant.charAt(0).toUpperCase() + tenant.slice(1)}`,
@@ -238,22 +266,22 @@ export const transformDashboardData = (
             label: '30 days',
           },
         ],
-    engagementData: data.engagementBreakdown?.map((item: Record<string, unknown>) => ({
-      id: item.category.toLowerCase().replace(/\s+/g, '-'),
-      label: item.category,
-      value: item.value,
-      color: item.color,
-      percentage: item.value,
+    engagementData: data.engagementBreakdown?.map((item) => ({
+      id: String(item.category).toLowerCase().replace(/\s+/g, '-'),
+      label: String(item.category),
+      value: Number(item.value),
+      color: String(item.color),
+      percentage: Number(item.value),
     })) || [
       { id: 'courses', label: 'Courses', value: 45, color: '#3B82F6', percentage: 45 },
       { id: 'groups', label: 'Groups', value: 30, color: '#10B981', percentage: 30 },
       { id: 'discussions', label: 'Discussions', value: 25, color: '#F59E0B', percentage: 25 },
     ],
     trendsData:
-      data.engagementTrends?.map((item: Record<string, unknown>) => ({
-        label: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        interactions: item.activeUsers,
-        completions: item.completedCourses,
+      data.engagementTrends?.map((item) => ({
+        label: new Date(String(item.date)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        interactions: Number(item.activeUsers),
+        completions: Number(item.completedCourses),
       })) ||
       Array.from({ length: 7 }, (_, i) => ({
         label: new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
@@ -263,7 +291,7 @@ export const transformDashboardData = (
         interactions: Math.floor(Math.random() * 50) + 100,
         completions: Math.floor(Math.random() * 20) + 10,
       })),
-    activitiesData: data.recentActivities?.map((activity: any) => ({
+    activitiesData: data.recentActivities?.map((activity: DashboardGraphActivity) => ({
       id: activity.id,
       user: {
         name: activity.user,
@@ -335,7 +363,7 @@ export const transformDashboardData = (
           targetResponses: 100,
         },
     requestsData:
-      data.permissionRequests?.map((request: any) => ({
+      data.permissionRequests?.map((request: DashboardGraphPermissionRequest) => ({
         id: request.id,
         user: request.user,
         userAvatar: request.userAvatar,
@@ -386,7 +414,7 @@ export const transformUserData = (tenant: string): UserMenu => ({
 /**
  * Handle dashboard action events
  */
-export const handleDashboardAction = (action: string, data?: any) => {
+export const handleDashboardAction = (action: DashboardActionType | string, data?: unknown) => {
   console.log('Dashboard action:', action, data);
   // Handle dashboard-specific actions
   switch (action) {
@@ -416,6 +444,6 @@ export const handleDashboardAction = (action: string, data?: any) => {
 /**
  * Handle user action events
  */
-export const handleUserAction = (action: 'profile' | 'settings' | 'logout', router: any) => {
+export const handleUserAction = (action: 'profile' | 'settings' | 'logout', router: NextRouter) => {
   createHandleUserAction(router)(action);
 };

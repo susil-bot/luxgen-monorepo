@@ -151,7 +151,12 @@
     background-color: var(--color-bg-primary);
     color: var(--color-label-primary);
     min-height: 100vh;
-    overflow-x: hidden;
+  }
+
+  #__next {
+    max-width: 100%;
+    min-height: 100vh;
+    overflow-x: clip;
   }
 
   html.route-loading::after {

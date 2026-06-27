@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useQuery } from '@apollo/client';
-import { SnackbarProvider, AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { SnackbarProvider, AppLayout } from '@luxgen/ui';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
@@ -19,6 +20,7 @@ interface GroupNode {
 }
 
 const GroupDashboardPageContent: React.FC = () => {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const user = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
@@ -32,8 +34,7 @@ const GroupDashboardPageContent: React.FC = () => {
 
   const { data, loading, error } = useQuery(GET_GROUPS, {
     variables: { first: 100, isActive: undefined },
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const allGroups: GroupNode[] = data?.groups?.edges?.map((edge: { node: GroupNode }) => edge.node) ?? [];
   const groups = useMemo(() => filterGroupsBySearch(allGroups, search), [allGroups, search]);
@@ -50,11 +51,11 @@ const GroupDashboardPageContent: React.FC = () => {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={user ?? undefined}
         onUserAction={handleUserAction}
         {...headerProps}
-        logo={getDefaultLogo()}
+        logo={logo}
         sidebarCollapsible={true}
         sidebarDefaultCollapsed={false}
         responsive={true}
@@ -167,8 +168,7 @@ const GroupDashboardPageContent: React.FC = () => {
                       className="p-4 rounded-xl w-full text-left transition-opacity hover:opacity-80"
                       style={{
                         border: '1.5px dashed var(--color-separator)',
-                        backgroundColor: 'var(--color-fill-quaternary)',
-                      }}
+                        backgroundColor: 'var(--color-fill-quaternary)' }}
                     >
                       <p className="text-sm font-medium text-primary">{action.label}</p>
                       <p className="text-sm text-secondary mt-1">{action.sub}</p>

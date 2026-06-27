@@ -18,6 +18,7 @@ import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { GET_USERS, GET_PENDING_USERS, ACTIVATE_USER, SUSPEND_USER } from '../../graphql/queries/users';
 import { type GraphQLUser, toUserTableRow, roleIcon, userStatusBadge } from '../../lib/user-display';
 import { downloadCsv, exportUsersCsv } from '../../lib/export-csv';
+import { CACHE_FIRST } from '../../lib/apollo-policies';
 
 interface Props {
   tenant: string;
@@ -58,7 +59,7 @@ function OrganizationUsersContent({ tenant }: Props) {
   const { data, loading, error } = useQuery(GET_USERS, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: CACHE_FIRST,
   });
   const { data: pendingData, refetch: refetchPending } = useQuery(GET_PENDING_USERS, {
     variables: { tenantId: queryTenantId },

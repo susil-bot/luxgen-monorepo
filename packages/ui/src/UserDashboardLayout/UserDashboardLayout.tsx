@@ -7,6 +7,10 @@ import { UserDashboard } from '../UserDashboard';
 import { getDefaultNavItems, getDefaultLogo } from '../Layout/DefaultNavigation';
 import { getUserDashboardLayoutStyles, userDashboardLayoutCSS } from './styles';
 
+/**
+ * Learner-facing dashboard shell (progress, courses, streaks).
+ * Use `AdminDashboardLayout` for tenant admin analytics; this layout targets end learners.
+ */
 export interface UserDashboardLayoutProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
   currentTenant?: {

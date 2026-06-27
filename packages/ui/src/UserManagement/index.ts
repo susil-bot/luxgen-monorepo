@@ -1,3 +1,4 @@
+/** @deprecated Prefer DataListPage on organization/users (UI-188). */
 export { UserTable } from './UserTable';
 export { RoleCard } from './RoleCard';
 export { UserRow } from './UserRow';

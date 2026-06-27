@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useQuery } from '@apollo/client';
-import { AppLayout, getDefaultLogo, getDefaultSidebarSections, SnackbarProvider } from '@luxgen/ui';
+import { AppLayout, SnackbarProvider } from '@luxgen/ui';
 import { PageLoadingState } from '../../components/common/PageStates';
 import { GET_LEARNER_DASHBOARD } from '../../graphql/queries/learner';
 import { GET_STOREFRONT_PRODUCTS } from '../../graphql/queries/storefront';
@@ -80,6 +81,7 @@ function ProgressRing({ progress }: { progress: number }) {
 }
 
 function CustomersContent({ tenant }: Props) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
@@ -97,14 +99,12 @@ function CustomersContent({ tenant }: Props) {
   const { data, loading, error } = useQuery(GET_LEARNER_DASHBOARD, {
     variables: { tenantId, studentId },
     skip: !isMongoObjectId(tenantId) || !studentId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const { data: catalogData } = useQuery(GET_STOREFRONT_PRODUCTS, {
     variables: { tenantId },
     skip: !isMongoObjectId(tenantId),
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const dashboard = data?.learnerDashboard;
   const enrolledCourses = dashboard?.courses ?? [];
@@ -136,9 +136,9 @@ function CustomersContent({ tenant }: Props) {
         </Head>
         <AppLayout
           responsive
-          sidebarSections={getDefaultSidebarSections()}
+          sidebarSections={sidebarSections}
           user={undefined}
-          logo={getDefaultLogo()}
+          logo={logo}
           onUserAction={handleUserAction}
           {...headerProps}
         >
@@ -162,9 +162,9 @@ function CustomersContent({ tenant }: Props) {
         </Head>
         <AppLayout
           responsive
-          sidebarSections={getDefaultSidebarSections()}
+          sidebarSections={sidebarSections}
           user={layoutUser}
-          logo={getDefaultLogo()}
+          logo={logo}
           onUserAction={handleUserAction}
           {...headerProps}
         >
@@ -182,9 +182,9 @@ function CustomersContent({ tenant }: Props) {
         </Head>
         <AppLayout
           responsive
-          sidebarSections={getDefaultSidebarSections()}
+          sidebarSections={sidebarSections}
           user={layoutUser}
-          logo={getDefaultLogo()}
+          logo={logo}
           onUserAction={handleUserAction}
           {...headerProps}
         >
@@ -203,9 +203,9 @@ function CustomersContent({ tenant }: Props) {
       </Head>
       <AppLayout
         responsive
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         showSearch
@@ -313,8 +313,7 @@ function CustomersContent({ tenant }: Props) {
                             fontWeight: 600,
                             fontSize: 15,
                             color: 'var(--color-label-primary)',
-                            lineHeight: 1.4,
-                          }}
+                            lineHeight: 1.4 }}
                         >
                           {course.courseTitle}
                         </div>
@@ -397,8 +396,7 @@ function CustomersContent({ tenant }: Props) {
                             fontWeight: 600,
                             fontSize: 15,
                             color: 'var(--color-label-primary)',
-                            lineHeight: 1.4,
-                          }}
+                            lineHeight: 1.4 }}
                         >
                           {product.title}
                         </div>
@@ -432,5 +430,3 @@ export default function CustomersPage(props: Props) {
     </SnackbarProvider>
   );
 }
-
-export const getServerSideProps = getTenantPageProps;
