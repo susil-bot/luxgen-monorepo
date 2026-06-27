@@ -1,5 +1,6 @@
 import React from 'react';
-import { getArrowStyles, getArrowConfig, arrowClasses, arrowCSS } from './styles';
+import './arrow.css';
+import { getArrowStyles, arrowClasses } from './styles';
 import { defaultTheme } from '../theme';
 
 export interface ArrowProps {
@@ -28,10 +29,8 @@ export const Arrow: React.FC<ArrowProps> = ({
   const styles = getArrowStyles(direction, size, variant, disabled, tenantTheme);
 
   return (
-    <>
-      <style>{arrowCSS}</style>
-      <button
-        className={`${arrowClasses.button} ${className}`}
+    <button
+      className={`${arrowClasses.button} ${className}`}
         style={styles.button}
         onClick={onClick}
         disabled={disabled}
@@ -57,6 +56,5 @@ export const Arrow: React.FC<ArrowProps> = ({
           />
         </svg>
       </button>
-    </>
   );
 };

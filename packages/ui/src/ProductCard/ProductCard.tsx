@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
+import './product-card.css';
 import { BaseComponentProps, TenantTheme } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
-import { getProductCardStyles, getProgressColor, getTagColor, productCardClasses, productCardCSS } from './styles';
+import { getProductCardStyles, getProgressColor, getTagColor, productCardClasses } from './styles';
 
 export interface ProductCardProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
@@ -73,10 +74,8 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
   const styles = getProductCardStyles(tenantTheme, variant, product.tagColor, product.progress?.scoreColor, isLiked);
 
   return (
-    <>
-      <style>{productCardCSS}</style>
-      <div
-        className={`${productCardClasses.card} product-card-${variant} ${className}`}
+    <div
+      className={`${productCardClasses.card} product-card-${variant} ${className}`}
         style={styles.card}
         onClick={handleViewDetails}
         {...props}
@@ -202,7 +201,6 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
           )}
         </div>
       </div>
-    </>
   );
 };
 

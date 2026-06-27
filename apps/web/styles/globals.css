@@ -1260,6 +1260,41 @@ html.dark [data-tenant='demo'] {
   justify-content: space-between;
   gap: 16px;
 }
+
+/* UI-60/63: shared brand gradient for store + tenant surfaces */
+.lux-brand-gradient {
+  background: linear-gradient(135deg, var(--color-blue), var(--color-purple));
+}
+
+.lux-brand-gradient-text {
+  color: var(--color-label-on-fill);
+}
+
+.lux-brand-gradient-muted {
+  color: color-mix(in srgb, var(--color-label-on-fill) 75%, transparent);
+}
+
+.lux-store-assistant-shell {
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-blue) 8%, transparent),
+    color-mix(in srgb, var(--color-purple) 6%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--color-blue) 20%, transparent);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.lux-store-bg-overlay {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, color-mix(in srgb, var(--color-blue) 25%, transparent), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 50%, color-mix(in srgb, var(--color-purple) 12%, transparent), transparent);
+}
+
+.lux-category-chip-active {
+  background: linear-gradient(135deg, var(--color-blue), var(--color-indigo));
+  color: var(--color-label-on-fill);
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--color-blue) 35%, transparent);
+}
 .lux-streak-badge {
   display: inline-flex;
   align-items: center;
