@@ -8,6 +8,7 @@
 |-----|----------|
 | **[14-junior-qa-react](./14-junior-qa-react.md)** | React / Next.js / hooks / AuthGuard |
 | **[15-junior-qa-mern](./15-junior-qa-mern.md)** | Node, GraphQL, MongoDB, auth, tenancy |
+| **[16-junior-qa-javascript](./16-junior-qa-javascript.md)** | JS fundamentals with repo examples |
 | [12-cheatsheet](./12-cheatsheet.md) | 30 minutes before interview |
 | [01-project-overview](./01-project-overview.md) | "Tell me about your project" |
 
@@ -25,7 +26,7 @@
 node scripts/generate-interview-prep.mjs
 ```
 
-This walks **all** `apps/` and `packages/` `.ts/.tsx/.js` files (~1,591) and writes `docs/file-analysis/<slug>.md`.
+This walks **all** `apps/` and `packages/` `.ts/.tsx/.js` files (~1,591) and writes **brief junior Q&A** `docs/file-analysis/<slug>.md` (★ hand-enriched files are skipped).
 
 ## Scope
 
@@ -59,4 +60,4 @@ This walks **all** `apps/` and `packages/` `.ts/.tsx/.js` files (~1,591) and wri
 | `context.ts` (API) | [apps-api-src-context-ts.md](../file-analysis/apps-api-src-context-ts.md) |
 | `client.ts` (Apollo) | [apps-web-graphql-client-ts.md](../file-analysis/apps-web-graphql-client-ts.md) |
 
-Full junior Q&A notebooks: **[14-junior-qa-react](./14-junior-qa-react.md)** · **[15-junior-qa-mern](./15-junior-qa-mern.md)**
+Full junior Q&A notebooks: **[14](./14-junior-qa-react.md)** · **[15](./15-junior-qa-mern.md)** · **[16](./16-junior-qa-javascript.md)**

@@ -1,175 +1,76 @@
-# fetcher.ts
+# fetcher.ts — Brief + Junior Q&A
 
-## File Path
-
-`packages/ui/src/Order/fetcher.ts`
-
-## Purpose
-
-Shared UI component or design-system module
-
-## Stats
-
-| Metric | Value |
-|--------|-------|
-| Lines | 445 |
-| Exports | 30 |
-| Functions (detected) | 12 |
-
-## Imports (external / workspace)
-
-- `./orderId`
-- `./orderId`
-
+**Path:** `packages/ui/src/Order/fetcher.ts` (445 lines)  
+**Role:** Shared UI component or hook
 
 ## Exports
 
-- `OrderPaymentStatus`
-- `OrderFulfillmentStatus`
-- `OrderFilterTab`
-- `OrderLineItem`
-- `OrderTimelineEvent`
-- `OrderRow`
-- `OrderDetail`
-- `EnrollmentCourseSource`
-- `EnrollmentUserSource`
-- `mapEnrollmentPaymentStatus`
-- `paymentBadgeClass`
-- `fulfillmentBadgeClass`
-- `paymentDisplayLabel`
-- `fulfillmentDisplayLabel`
-- `buildOrdersFromEnrollments`
-- `buildOrdersFromEnrollmentList`
-- `AbandonedCheckoutSource`
-- `AbandonedCheckoutRow`
-- `buildAbandonedCheckoutRows`
-- `filterOrdersByTab`
-- `buildOrderDetail`
-- `findOrderDetail`
-- `formatOrderListDate`
-- `buildOrderId`
-- `buildOrderSubjectId`
-- `enrollmentPairKey`
-- `isLegacyOrderId`
-- `isStandardOrderId`
-- `parseLegacyOrderId`
-- `formatOrderDate`
-
-## Design Pattern
-
-Module / Utility
-
-## Dependencies
-
-- **Runtime:** Derived from import graph above.
-- **Workspace packages:** none
-
-## Function-Level Notes
-
-### `mapEnrollmentPaymentStatus`
-
-- **Approx. line:** 121
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `mapEnrollmentPaymentStatus`?"
-
-### `paymentBadgeClass`
-
-- **Approx. line:** 147
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `paymentBadgeClass`?"
-
-### `fulfillmentBadgeClass`
-
-- **Approx. line:** 162
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `fulfillmentBadgeClass`?"
-
-### `paymentDisplayLabel`
-
-- **Approx. line:** 177
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `paymentDisplayLabel`?"
-
-### `fulfillmentDisplayLabel`
-
-- **Approx. line:** 187
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `fulfillmentDisplayLabel`?"
-
-### `buildOrdersFromEnrollments`
-
-- **Approx. line:** 210
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `buildOrdersFromEnrollments`?"
-
-### `buildOrdersFromEnrollmentList`
-
-- **Approx. line:** 258
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `buildOrdersFromEnrollmentList`?"
-
-### `buildAbandonedCheckoutRows`
-
-- **Approx. line:** 338
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `buildAbandonedCheckoutRows`?"
-
-### `filterOrdersByTab`
-
-- **Approx. line:** 362
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `filterOrdersByTab`?"
-
-### `buildOrderDetail`
-
-- **Approx. line:** 377
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `buildOrderDetail`?"
-
-### `findOrderDetail`
-
-- **Approx. line:** 418
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `findOrderDetail`?"
-
-### `formatOrderListDate`
-
-- **Approx. line:** 432
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `formatOrderListDate`?"
-
-
-## Interview Questions
-
-- Walk me through OrderPaymentStatus line by line.
-- What would break if we removed this file?
-- How would you unit test this module?
-
-## Possible Improvements
-
-- Add explicit unit tests if missing.
-- Document edge cases in JSDoc on public exports.
-- Avoid circular imports with sibling modules.
-
-## Senior-Level Discussion
-
-- **Why this way?** Colocated with feature domain (`packages/ui/src`).
-- **Tradeoff:** Monorepo shared package vs app-local — weigh bundle size and coupling.
-- **Production concern:** Verify error boundaries, auth gates, and tenant scoping on every data path.
-
-## Real-World Usage
-
-Search repo for imports of this file:
-
-```bash
-rg "fetcher" apps packages --glob '*.{ts,tsx}'
-```
-
-## Related Concepts
-
-- See [03-react.md](../interview-prep/03-react.md) for React patterns.
-- See [05-node.md](../interview-prep/05-node.md) for API/middleware patterns.
-- See [06-mongodb.md](../interview-prep/06-mongodb.md) for Mongoose models.
+- `OrderPaymentStatus` — line 3
+- `OrderFulfillmentStatus` — line 4
+- `OrderFilterTab` — line 5
+- `OrderLineItem` — line 7
+- `OrderTimelineEvent` — line 17
+- `OrderRow` — line 24
+- `OrderDetail` — line 44
+- `EnrollmentCourseSource` — line 58
+- `EnrollmentUserSource` — line 67
+- `mapEnrollmentPaymentStatus` — line 121
+- `paymentBadgeClass` — line 147
+- `fulfillmentBadgeClass` — line 162
+- `paymentDisplayLabel` — line 177
+- `fulfillmentDisplayLabel` — line 187
+- `buildOrdersFromEnrollments` — line 210
+- `buildOrdersFromEnrollmentList` — line 258
+- `AbandonedCheckoutSource` — line 301
+- `AbandonedCheckoutRow` — line 316
+- `buildAbandonedCheckoutRows` — line 338
+- `filterOrdersByTab` — line 362
+- `buildOrderDetail` — line 377
+- `findOrderDetail` — line 418
+- `formatOrderListDate` — line 432
+- `buildOrderId` — line 197
+- `buildOrderSubjectId` — line 197
+- `enrollmentPairKey` — line 197
+- `isLegacyOrderId` — line 197
+- `isStandardOrderId` — line 197
+- `parseLegacyOrderId` — line 197
+- `formatOrderDate` — line 444
 
 ---
-_Auto-generated by `scripts/generate-interview-prep.mjs`. Enrich manually for hot-path files._
+
+## Junior Q&A
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[0] What does this file do?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Shared UI component or hook. Main exports: `OrderPaymentStatus`, `OrderFulfillmentStatus`, `OrderFilterTab`.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[1] What is `OrderPaymentStatus`?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Exported symbol — open source at **packages/ui/src/Order/fetcher.ts:3** and read the function body.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[2] What does `mapEnrollmentPaymentStatus` do?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** See **packages/ui/src/Order/fetcher.ts:121** — check parameters, return value, and side effects.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[3] What breaks if we delete this file?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Search imports: `rg "fetcher" apps packages --glob '*.{ts,tsx}'`.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[4] What is `OrderFulfillmentStatus`?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Second export at **packages/ui/src/Order/fetcher.ts:4**.
+
+**More:** [14-junior-qa-react.md](../interview-prep/14-junior-qa-react.md) · [15-junior-qa-mern.md](../interview-prep/15-junior-qa-mern.md)
+
+---
+_Auto-generated by `scripts/generate-interview-prep.mjs`. Hand-enriched ★ files are skipped._

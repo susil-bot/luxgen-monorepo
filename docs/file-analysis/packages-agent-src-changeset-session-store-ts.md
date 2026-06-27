@@ -1,171 +1,54 @@
-# session-store.ts
+# session-store.ts — Brief + Junior Q&A
 
-## File Path
-
-`packages/agent/src/changeset/session-store.ts`
-
-## Purpose
-
-Application module
-
-## Stats
-
-| Metric | Value |
-|--------|-------|
-| Lines | 252 |
-| Exports | 14 |
-| Functions (detected) | 13 |
-
-## Imports (external / workspace)
-
-- `fs`
-- `path`
-- `../types/session`
-- `../config/paths`
-- `../persistence/mongo`
-- `../git/exec`
-
+**Path:** `packages/agent/src/changeset/session-store.ts` (252 lines)  
+**Role:** Application module
 
 ## Exports
 
-- `clearSessionCache`
-- `ensureSessionHydrated`
-- `getWorkspaceRoot`
-- `isGitWorktreeActive`
-- `getSessionPath`
-- `loadSession`
-- `saveSession`
-- `MAX_SESSION_MESSAGES`
-- `saveSessionMessages`
-- `stageFile`
-- `applySession`
-- `discardSession`
-- `pruneOldSessions`
-- `pruneOldWorktrees`
-
-## Design Pattern
-
-Module / Utility
-
-## Dependencies
-
-- **Runtime:** Derived from import graph above.
-- **Workspace packages:** none
-
-## Function-Level Notes
-
-### `clearSessionCache`
-
-- **Approx. line:** 10
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `clearSessionCache`?"
-
-### `ensureSessionHydrated`
-
-- **Approx. line:** 24
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `ensureSessionHydrated`?"
-
-### `getWorkspaceRoot`
-
-- **Approx. line:** 42
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getWorkspaceRoot`?"
-
-### `isGitWorktreeActive`
-
-- **Approx. line:** 50
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `isGitWorktreeActive`?"
-
-### `getSessionPath`
-
-- **Approx. line:** 16
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getSessionPath`?"
-
-### `loadSession`
-
-- **Approx. line:** 15
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `loadSession`?"
-
-### `saveSession`
-
-- **Approx. line:** 68
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `saveSession`?"
-
-### `saveSessionMessages`
-
-- **Approx. line:** 86
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `saveSessionMessages`?"
-
-### `stageFile`
-
-- **Approx. line:** 103
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `stageFile`?"
-
-### `applySession`
-
-- **Approx. line:** 129
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `applySession`?"
-
-### `discardSession`
-
-- **Approx. line:** 190
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `discardSession`?"
-
-### `pruneOldSessions`
-
-- **Approx. line:** 198
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `pruneOldSessions`?"
-
-### `pruneOldWorktrees`
-
-- **Approx. line:** 225
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `pruneOldWorktrees`?"
-
-
-## Interview Questions
-
-- How does this module prevent fabricated users on 401/expired JWT?
-- What happens on cross-tab logout?
-- Walk me through clearSessionCache line by line.
-- What would break if we removed this file?
-- How would you unit test this module?
-
-## Possible Improvements
-
-- Add explicit unit tests if missing.
-- Document edge cases in JSDoc on public exports.
-- Avoid circular imports with sibling modules.
-
-## Senior-Level Discussion
-
-- **Why this way?** Colocated with feature domain (`packages/agent/src`).
-- **Tradeoff:** Monorepo shared package vs app-local — weigh bundle size and coupling.
-- **Production concern:** Verify error boundaries, auth gates, and tenant scoping on every data path.
-
-## Real-World Usage
-
-Search repo for imports of this file:
-
-```bash
-rg "session-store" apps packages --glob '*.{ts,tsx}'
-```
-
-## Related Concepts
-
-- See [03-react.md](../interview-prep/03-react.md) for React patterns.
-- See [05-node.md](../interview-prep/05-node.md) for API/middleware patterns.
-- See [06-mongodb.md](../interview-prep/06-mongodb.md) for Mongoose models.
+- `clearSessionCache` — line 10
+- `ensureSessionHydrated` — line 24
+- `getWorkspaceRoot` — line 42
+- `isGitWorktreeActive` — line 50
+- `getSessionPath` — line 55
+- `loadSession` — line 59
+- `saveSession` — line 68
+- `MAX_SESSION_MESSAGES` — line 84
+- `saveSessionMessages` — line 86
+- `stageFile` — line 103
+- `applySession` — line 129
+- `discardSession` — line 190
+- `pruneOldSessions` — line 198
+- `pruneOldWorktrees` — line 225
 
 ---
-_Auto-generated by `scripts/generate-interview-prep.mjs`. Enrich manually for hot-path files._
+
+## Junior Q&A
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[0] What does this file do?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Application module. Main exports: `clearSessionCache`, `ensureSessionHydrated`, `getWorkspaceRoot`.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[1] What is `clearSessionCache`?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Exported symbol — open source at **packages/agent/src/changeset/session-store.ts:10** and read the function body.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[2] How does this relate to login/session?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Part of auth flow — see `apps/web/lib/session.ts` and [15-junior-qa-mern.md](../interview-prep/15-junior-qa-mern.md).
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[3] What is `ensureSessionHydrated`?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Second export at **packages/agent/src/changeset/session-store.ts:24**.
+
+**More:** [14-junior-qa-react.md](../interview-prep/14-junior-qa-react.md) · [15-junior-qa-mern.md](../interview-prep/15-junior-qa-mern.md)
+
+---
+_Auto-generated by `scripts/generate-interview-prep.mjs`. Hand-enriched ★ files are skipped._

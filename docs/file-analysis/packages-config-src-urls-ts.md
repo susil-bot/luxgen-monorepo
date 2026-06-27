@@ -1,177 +1,55 @@
-# urls.ts
+# urls.ts — Brief + Junior Q&A
 
-## File Path
-
-`packages/config/src/urls.ts`
-
-## Purpose
-
-Application module
-
-## Stats
-
-| Metric | Value |
-|--------|-------|
-| Lines | 180 |
-| Exports | 15 |
-| Functions (detected) | 15 |
-
-## Imports (external / workspace)
-
-- `./url-defaults`
-
+**Path:** `packages/config/src/urls.ts` (180 lines)  
+**Role:** Application module
 
 ## Exports
 
-- `getAppDomain`
-- `getWebUrl`
-- `getApiUrl`
-- `getGraphqlUrl`
-- `getOllamaUrl`
-- `getMongoUri`
-- `getRedisUrl`
-- `getTenantDomain`
-- `getTenantWebOrigin`
-- `isDevLocalOrigin`
-- `getCorsOrigins`
-- `getClientGraphqlUrl`
-- `getGraphqlWsUrl`
-- `getClientGraphqlWsUrl`
-- `urls`
-
-## Design Pattern
-
-Module / Utility
-
-## Dependencies
-
-- **Runtime:** Derived from import graph above.
-- **Workspace packages:** none
-
-## Function-Level Notes
-
-### `getAppDomain`
-
-- **Approx. line:** 12
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getAppDomain`?"
-
-### `getWebUrl`
-
-- **Approx. line:** 16
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getWebUrl`?"
-
-### `getApiUrl`
-
-- **Approx. line:** 34
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getApiUrl`?"
-
-### `getGraphqlUrl`
-
-- **Approx. line:** 47
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getGraphqlUrl`?"
-
-### `getOllamaUrl`
-
-- **Approx. line:** 53
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getOllamaUrl`?"
-
-### `getMongoUri`
-
-- **Approx. line:** 57
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getMongoUri`?"
-
-### `getRedisUrl`
-
-- **Approx. line:** 61
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getRedisUrl`?"
-
-### `getTenantDomain`
-
-- **Approx. line:** 66
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getTenantDomain`?"
-
-### `getTenantWebOrigin`
-
-- **Approx. line:** 71
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getTenantWebOrigin`?"
-
-### `isDevLocalOrigin`
-
-- **Approx. line:** 89
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `isDevLocalOrigin`?"
-
-### `getCorsOrigins`
-
-- **Approx. line:** 101
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getCorsOrigins`?"
-
-### `getClientGraphqlUrl`
-
-- **Approx. line:** 127
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getClientGraphqlUrl`?"
-
-### `getGraphqlWsUrl`
-
-- **Approx. line:** 135
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getGraphqlWsUrl`?"
-
-### `getClientGraphqlWsUrl`
-
-- **Approx. line:** 150
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getClientGraphqlWsUrl`?"
-
-### `tenants`
-
-- **Approx. line:** 116
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `tenants`?"
-
-
-## Interview Questions
-
-- Walk me through getAppDomain line by line.
-- What would break if we removed this file?
-- How would you unit test this module?
-
-## Possible Improvements
-
-- Add explicit unit tests if missing.
-- Document edge cases in JSDoc on public exports.
-- Avoid circular imports with sibling modules.
-
-## Senior-Level Discussion
-
-- **Why this way?** Colocated with feature domain (`packages/config/src`).
-- **Tradeoff:** Monorepo shared package vs app-local — weigh bundle size and coupling.
-- **Production concern:** Verify error boundaries, auth gates, and tenant scoping on every data path.
-
-## Real-World Usage
-
-Search repo for imports of this file:
-
-```bash
-rg "urls" apps packages --glob '*.{ts,tsx}'
-```
-
-## Related Concepts
-
-- See [03-react.md](../interview-prep/03-react.md) for React patterns.
-- See [05-node.md](../interview-prep/05-node.md) for API/middleware patterns.
-- See [06-mongodb.md](../interview-prep/06-mongodb.md) for Mongoose models.
+- `getAppDomain` — line 12
+- `getWebUrl` — line 16
+- `getApiUrl` — line 34
+- `getGraphqlUrl` — line 47
+- `getOllamaUrl` — line 53
+- `getMongoUri` — line 57
+- `getRedisUrl` — line 61
+- `getTenantDomain` — line 66
+- `getTenantWebOrigin` — line 71
+- `isDevLocalOrigin` — line 89
+- `getCorsOrigins` — line 101
+- `getClientGraphqlUrl` — line 127
+- `getGraphqlWsUrl` — line 135
+- `getClientGraphqlWsUrl` — line 150
+- `urls` — line 166
 
 ---
-_Auto-generated by `scripts/generate-interview-prep.mjs`. Enrich manually for hot-path files._
+
+## Junior Q&A
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[0] What does this file do?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Application module. Main exports: `getAppDomain`, `getWebUrl`, `getApiUrl`.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[1] What is `getAppDomain`?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Exported symbol — open source at **packages/config/src/urls.ts:12** and read the function body.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[2] What breaks if we delete this file?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Search imports: `rg "urls" apps packages --glob '*.{ts,tsx}'`.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[3] What is `getWebUrl`?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Second export at **packages/config/src/urls.ts:16**.
+
+**More:** [14-junior-qa-react.md](../interview-prep/14-junior-qa-react.md) · [15-junior-qa-mern.md](../interview-prep/15-junior-qa-mern.md)
+
+---
+_Auto-generated by `scripts/generate-interview-prep.mjs`. Hand-enriched ★ files are skipped._
