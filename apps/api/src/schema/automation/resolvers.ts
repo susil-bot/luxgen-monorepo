@@ -42,7 +42,11 @@ async function runAgentTaskViaQueue(
 
 export const automationResolvers = {
   Query: {
-    automations: async (_: unknown, { tenantId, limit, offset }: { tenantId: string; limit?: number; offset?: number }, ctx: GraphQLContext) => {
+    automations: async (
+      _: unknown,
+      { tenantId, limit, offset }: { tenantId: string; limit?: number; offset?: number },
+      ctx: GraphQLContext,
+    ) => {
       const scoped = scopedTenantId(ctx, tenantId);
       const items = await automationService.getAutomations(scoped, limit ?? 50, offset ?? 0);
       return items.map((a) => automationService.toGraphQL(a));

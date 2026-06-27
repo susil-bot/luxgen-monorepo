@@ -654,7 +654,7 @@
 .branchRow {
   display: flex;
   gap: 24px;
-  width: min(520px, 100%);
+  width: min(520px, var(--tower-canvas-width, 100%));
   justify-content: center;
   margin-top: 4px;
 }
@@ -1076,9 +1076,35 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-wrap: wrap;
   gap: 8px;
   padding: 12px;
   background: rgba(246, 246, 247, 0.92);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid #e1e3e5;
+}
+
+.testBarInput {
+  flex: 1 1 160px;
+  min-width: 0;
+  max-width: 280px;
+}
+
+@media (max-width: 1023px) {
+  .editorBody {
+    flex-direction: column;
+  }
+
+  .stepRail {
+    width: 100%;
+    max-height: 200px;
+    border-right: none;
+    border-bottom: 1px solid #e1e3e5;
+  }
+
+  .configPanel {
+    width: 100%;
+    border-left: none;
+    border-top: 1px solid #e1e3e5;
+  }
 }

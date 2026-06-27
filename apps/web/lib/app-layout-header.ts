@@ -25,7 +25,13 @@ export function useAppLayoutHeader() {
       const path = window.location.pathname;
       const url = new URL(window.location.href);
       url.searchParams.set('search', q);
-      if (path.startsWith('/products') || path.startsWith('/groups') || path.startsWith('/users') || path.startsWith('/courses') || path.startsWith('/customers')) {
+      if (
+        path.startsWith('/products') ||
+        path.startsWith('/groups') ||
+        path.startsWith('/users') ||
+        path.startsWith('/courses') ||
+        path.startsWith('/customers')
+      ) {
         window.history.pushState({}, '', url.toString());
         window.dispatchEvent(new PopStateEvent('popstate'));
       }
@@ -35,7 +41,6 @@ export function useAppLayoutHeader() {
   return {
     showSearch: true,
     showThemeToggle: true,
-    onNotificationClick: () => {},
     isDarkMode: resolvedTheme === 'dark',
     onThemeToggle: toggleTheme,
     onSearch,
