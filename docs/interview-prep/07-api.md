@@ -9,6 +9,7 @@
 | GraphQL HTTP | `http://localhost:4000/graphql` |
 | GraphQL WS | `ws://localhost:4000/graphql` |
 | Web app | `http://localhost:3000` |
+| **SDL file** | `apps/api/schema.graphql` (regenerate: `npm run schema:export --workspace=@luxgen/api`) |
 
 ## Headers (web → API)
 

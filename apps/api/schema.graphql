@@ -1,0 +1,1495 @@
+# LuxGen GraphQL Schema (auto-generated)
+# Do not edit by hand — update typeDefs in src/schema/* and re-run:
+#   npm run schema:export --workspace=@luxgen/api
+#
+# Generated: 2026-06-27T14:12:39.600Z
+
+scalar Date
+
+"""
+The `JSON` scalar type represents JSON values as specified by [ECMA-404](http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf).
+"""
+scalar JSON @specifiedBy(url: "http://www.ecma-international.org/publications/files/ECMA-ST/ECMA-404.pdf")
+
+type Query {
+  _empty: String
+  tenant(id: ID!): Tenant
+  tenantBySubdomain(subdomain: String!): Tenant
+  tenants: [Tenant!]!
+  user(id: ID!): User
+  users(tenantId: ID!): [User!]!
+  customers(tenantId: ID!, search: String): [User!]!
+  currentUser: User
+  course(id: ID!): Course
+  courses(tenantId: ID!): [Course!]!
+  coursesByInstructor(instructorId: ID!): [Course!]!
+  groups(first: Int, after: String, last: Int, before: String, search: String, isActive: Boolean, createdBy: ID): GroupConnection!
+  group(id: ID!): Group
+  groupMembers(groupId: ID!, first: Int, after: String, last: Int, before: String, role: GroupMemberRole, isActive: Boolean): GroupMemberConnection!
+  userGroups(userId: ID!, first: Int, after: String, last: Int, before: String, role: GroupMemberRole, isActive: Boolean): GroupConnection!
+  getDashboardData(tenant: String): DashboardData!
+  getDashboardStats(tenant: String): DashboardStats!
+  getUserRetentionData(tenant: String, period: String): [UserRetentionData!]!
+  getEngagementBreakdown(tenant: String): [EngagementBreakdownData!]!
+  getEngagementTrends(tenant: String, days: Int): [EngagementTrendData!]!
+  getRecentActivities(tenant: String, limit: Int): [RecentActivity!]!
+  getLastSurvey(tenant: String): SurveyData
+  getPermissionRequests(tenant: String, status: String, limit: Int): [PermissionRequest!]!
+  getUsers(tenantId: ID, role: UserRole, status: UserStatus, limit: Int, offset: Int): [User!]!
+  getUserById(userId: ID!): User
+  getUsersByRole(role: UserRole!, tenantId: ID): [User!]!
+  getPendingUsers(tenantId: ID): [User!]!
+  getUserPermissions(userId: ID!): UserPermissions!
+  getRoleAssignments(userId: ID!): [RoleAssignment!]!
+  getTenantAdmins(tenantId: ID!): [User!]!
+  getUserInvitations(tenantId: ID, status: String): [UserInvitation!]!
+  automations(tenantId: String!, limit: Int, offset: Int): [Automation!]!
+  automation(id: ID!): Automation
+  automationRuns(tenantId: String!, limit: Int): [AutomationRun!]!
+  automationSchema: JSON!
+  tenantBilling(tenantId: String!): TenantBilling!
+  pricingPlans: [PricingPlan!]!
+  automationTemplates(category: TemplateCategory, featured: Boolean): [AutomationTemplate!]!
+  automationTemplate(slug: String!): AutomationTemplate
+  tenantUsage(tenantId: String!): TenantUsageSummary!
+  publishedListings(tenantId: String!): [BusinessListing!]!
+  publishedListing(tenantId: String!, slug: String!): BusinessListing
+  listing(id: ID!): BusinessListing
+  myListings(tenantId: String!, email: String!): [BusinessListing!]!
+  listingsForReview(tenantId: String!, status: ApplicationStatus): [BusinessListing!]!
+  listingNotifications(listingId: ID!, limit: Int): [EmailNotification!]!
+  activityEvents(tenantId: ID!, subjectType: ActivitySubjectType!, subjectId: String!, first: Int, after: String): ActivityEventConnection!
+  enrollment(courseId: ID!, studentId: ID!): Enrollment
+  enrollmentById(id: ID!): Enrollment
+  enrollments(tenantId: ID!): [Enrollment!]!
+  studentEnrollments(tenantId: ID!, studentId: ID!): [Enrollment!]!
+  draftEnrollments(tenantId: ID!): [Enrollment!]!
+  abandonedCheckouts(tenantId: ID!): [AbandonedCheckout!]!
+  orderRows(tenantId: ID!): [OrderRow!]!
+  storefrontProducts(tenantId: ID!, category: String): [StorefrontProduct!]!
+  storefrontProduct(id: ID!): StorefrontProduct
+  storefrontCollections(tenantId: ID!): [StorefrontCollection!]!
+  storefrontCollection(id: ID!, tenantId: ID!): StorefrontCollection
+  storefrontBundles(tenantId: ID!): [StorefrontBundle!]!
+  storefrontBundle(id: ID!, tenantId: ID!): StorefrontBundle
+  learnerSubscriptions(tenantId: ID!): [LearnerSubscriptionRecord!]!
+  projectItems(tenantId: String!, iteration: ProjectItemIteration, status: ProjectItemStatus, priority: ProjectItemPriority, assigneeId: ID, search: String): [ProjectItem!]!
+  projectItem(id: ID!, tenantId: String!): ProjectItem
+  mcpApiKeys(tenantId: String!): [McpApiKey!]!
+  mcpKeyContext: McpKeyContext
+  mcpToolAuditLog(tenantId: String!, limit: Int): [McpToolAuditEntry!]!
+  enrollmentProgress(courseId: ID!, studentId: ID!): EnrollmentProgressDetail!
+  learnerDashboard(tenantId: ID!, studentId: ID): LearnerDashboard!
+  customerSegments(tenantId: ID!): [CustomerSegmentSummary!]!
+  customersInSegment(tenantId: ID!, segment: CustomerSegmentId!): [CustomerSegmentMember!]!
+  courseAnalytics(tenantId: ID!, days: Int): CourseAnalyticsSummary!
+  groupAnalytics(tenantId: ID!): GroupAnalyticsSummary!
+  learnerCertificates(studentId: ID): [Certificate!]!
+  enrollmentStatusSummary(courseId: ID!): EnrollmentStatusSummary!
+  storeCatalogFacets(tenantId: ID!): [StoreCatalogFacet!]!
+  cartSession(sessionId: ID!): CartSession!
+  checkoutSessionStatus(tenantId: ID!, courseId: ID!): CheckoutSessionStatus!
+  engagementUserPreferences: EngagementUserPreferences!
+  userActivityFeed(tenantId: ID!, limit: Int): [UserActivityFeedItem!]!
+  courseProgressPercent(courseId: ID!): CourseProgressPercent!
+}
+
+type Mutation {
+  _empty: String
+  createTenant(input: CreateTenantInput!): Tenant!
+  updateTenant(id: ID!, input: UpdateTenantInput!): Tenant!
+  deleteTenant(id: ID!): Boolean!
+  createUser(input: CreateUserInput!): User!
+  updateUser(id: ID!, input: UpdateUserInput!): User!
+  deleteUser(id: ID!): Boolean!
+  login(input: LoginInput!): AuthPayload!
+  register(input: CreateUserInput!): AuthPayload!
+  registerPushToken(token: String!): Boolean!
+  createCourse(input: CreateCourseInput!): Course!
+  updateCourse(id: ID!, input: UpdateCourseInput!): Course!
+  deleteCourse(id: ID!): Boolean!
+  enrollStudent(courseId: ID!, studentId: ID!): Course!
+  unenrollStudent(courseId: ID!, studentId: ID!): Course!
+  createGroup(input: CreateGroupInput!): Group!
+  updateGroup(input: UpdateGroupInput!): Group!
+  deleteGroup(id: ID!): Boolean!
+  addGroupMember(input: AddGroupMemberInput!): GroupMember!
+  removeGroupMember(input: RemoveGroupMemberInput!): Boolean!
+  updateGroupMember(input: UpdateGroupMemberInput!): GroupMember!
+  joinGroup(groupId: ID!): GroupMember!
+  leaveGroup(groupId: ID!): Boolean!
+  bulkAddGroupMembers(groupId: ID!, userIds: [ID!]!, role: GroupMemberRole): [GroupMember!]!
+  bulkRemoveGroupMembers(groupId: ID!, userIds: [ID!]!): Boolean!
+  registerUser(input: UserRegistrationInput!): UserRegistrationResult!
+  inviteUser(input: UserInvitationInput!): UserInvitationResult!
+  updateUserRole(input: RoleUpdateInput!): RoleUpdateResult!
+  activateUser(userId: ID!): UserRegistrationResult!
+  deactivateUser(userId: ID!): UserRegistrationResult!
+  suspendUser(userId: ID!, reason: String): UserRegistrationResult!
+  updateUserPermissions(userId: ID!, permissions: UserPermissionsInput!): UserRegistrationResult!
+  assignTenantRole(userId: ID!, tenantId: ID!, role: UserRole!): RoleUpdateResult!
+  removeTenantRole(userId: ID!, tenantId: ID!): RoleUpdateResult!
+  bulkUpdateUserRoles(updates: [RoleUpdateInput!]!): [RoleUpdateResult!]!
+  createAutomation(input: CreateAutomationInput!): Automation!
+  updateAutomation(id: ID!, input: UpdateAutomationInput!): Automation
+  toggleAutomation(id: ID!, enabled: Boolean!): Automation
+  deleteAutomation(id: ID!): Boolean!
+  runAgentTask(input: RunAgentTaskInput!): AgentTaskResult!
+  createCheckoutSession(tenantId: String!, plan: PlanTier!, successUrl: String!, cancelUrl: String!): CheckoutSession!
+  createBillingPortalSession(tenantId: String!, returnUrl: String!): BillingPortalSession!
+  setTenantPlanDev(tenantId: String!, plan: PlanTier!): TenantBilling!
+  installAutomationTemplate(tenantId: String!, slug: String!, nameOverride: String): Automation!
+  createListingDraft(input: CreateListingInput!): BusinessListing!
+  updateListingDraft(id: ID!, input: UpdateListingInput!): BusinessListing
+  submitListingApplication(id: ID!): BusinessListing
+  requestListingInformation(id: ID!, notes: String!): BusinessListing
+  approveListing(id: ID!): BusinessListing
+  rejectListing(id: ID!, notes: String!): BusinessListing
+  createListingCheckoutSession(listingId: ID!, successUrl: String!, cancelUrl: String!): ListingCheckoutSession!
+  processListingReminders(tenantId: String): ReminderJobResult!
+  addActivityComment(input: AddActivityCommentInput!): ActivityEvent!
+  updateOrderNotes(input: UpdateOrderNotesInput!): Enrollment!
+  updateOrder(input: UpdateOrderInput!): Enrollment!
+  refundOrder(courseId: ID!, studentId: ID!): Enrollment!
+  cancelOrder(courseId: ID!, studentId: ID!): Enrollment!
+  updateCustomerNotes(input: UpdateCustomerNotesInput!): User!
+  createOrderCheckoutSession(input: CreateOrderCheckoutInput!): OrderCheckoutSession!
+  confirmOrderPaymentDev(courseId: ID!, studentId: ID!, tenantId: ID!): Enrollment!
+  sendCheckoutRecoveryEmail(tenantId: ID!, checkoutSessionId: ID!): Boolean!
+  updateEnrollmentProgress(input: UpdateEnrollmentProgressInput!): Enrollment!
+  markCourseComplete(courseId: ID!): Enrollment!
+  subscribeToBundle(bundleId: ID!): SubscribeToBundleResult!
+  cancelLearnerSubscription(subscriptionId: ID!): Boolean!
+  createProjectItem(input: CreateProjectItemInput!): ProjectItem!
+  updateProjectItem(id: ID!, tenantId: String!, input: UpdateProjectItemInput!): ProjectItem
+  moveProjectItem(id: ID!, tenantId: String!, status: ProjectItemStatus!): ProjectItem
+  deleteProjectItem(id: ID!, tenantId: String!): Boolean!
+  createMcpApiKey(tenantId: String!, name: String!, scopes: [McpApiKeyScope!]!): McpApiKeyCreateResult!
+  revokeMcpApiKey(id: ID!): McpApiKey
+  recordMcpToolAudit(input: RecordMcpToolAuditInput!): Boolean!
+  issueCertificate(courseId: ID!, studentId: ID): Certificate!
+  upsertCartSession(sessionId: ID!, items: [CartSessionItemInput!]!): CartSession!
+  updateEngagementUserPreferences(theme: String, notifications: Boolean, language: String): EngagementUserPreferences!
+}
+
+type Subscription {
+  _empty: String
+  activityEventAdded(tenantId: ID!, subjectType: ActivitySubjectType!, subjectId: String!): ActivityEvent!
+}
+
+type Tenant {
+  id: ID!
+  name: String!
+  subdomain: String!
+  settings: JSON
+  createdAt: Date!
+  updatedAt: Date!
+}
+
+input CreateTenantInput {
+  name: String!
+  subdomain: String!
+  settings: JSON
+}
+
+input UpdateTenantInput {
+  name: String
+  subdomain: String
+  settings: JSON
+}
+
+type User {
+  id: ID!
+  email: String!
+  firstName: String!
+  lastName: String!
+  role: UserRole!
+  status: UserStatus!
+  isActive: Boolean!
+  tenant: Tenant!
+  phone: String
+  avatar: String
+  marketingEmail: Boolean
+  marketingSms: Boolean
+  marketingWhatsapp: Boolean
+  staffNotes: String
+  createdAt: Date!
+  updatedAt: Date!
+  username: String
+  metadata: UserMetadata!
+}
+
+enum UserRole {
+  SUPER_ADMIN
+  ADMIN
+  USER
+  INSTRUCTOR
+  STUDENT
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  PENDING
+  SUSPENDED
+}
+
+input CreateUserInput {
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String!
+  role: UserRole!
+  tenantId: ID!
+}
+
+input UpdateUserInput {
+  email: String
+  firstName: String
+  lastName: String
+  role: UserRole
+  phone: String
+  avatar: String
+  marketingEmail: Boolean
+  marketingSms: Boolean
+  marketingWhatsapp: Boolean
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+type AuthPayload {
+  token: String!
+  user: User!
+}
+
+type CourseCommerce {
+  priceCents: Int
+  compareAtPriceCents: Int
+  sku: String
+  category: String
+  currency: String
+}
+
+type Course {
+  id: ID!
+  title: String!
+  description: String
+  instructor: User!
+  students: [User!]!
+  tenant: Tenant!
+  startDate: Date
+  endDate: Date
+  status: CourseStatus!
+  commerce: CourseCommerce
+  createdAt: Date!
+  updatedAt: Date!
+}
+
+enum CourseStatus {
+  DRAFT
+  PUBLISHED
+  COMPLETED
+  CANCELLED
+}
+
+input CourseCommerceInput {
+  priceCents: Int
+  compareAtPriceCents: Int
+  sku: String
+  category: String
+  currency: String
+}
+
+input CreateCourseInput {
+  title: String!
+  description: String
+  instructorId: ID!
+  tenantId: ID!
+  startDate: Date
+  endDate: Date
+  commerce: CourseCommerceInput
+}
+
+input UpdateCourseInput {
+  title: String
+  description: String
+  instructorId: ID
+  startDate: Date
+  endDate: Date
+  status: CourseStatus
+  commerce: CourseCommerceInput
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type Group {
+  id: ID!
+  name: String!
+  description: String
+  color: String
+  icon: String
+  tenant: Tenant!
+  createdBy: User!
+  members: [User!]!
+  memberCount: Int!
+  isActive: Boolean!
+  settings: GroupSettings
+  createdAt: Date!
+  updatedAt: Date!
+}
+
+type GroupSettings {
+  allowSelfJoin: Boolean!
+  requireApproval: Boolean!
+  maxMembers: Int
+  allowFileSharing: Boolean!
+  allowComments: Boolean!
+  allowNudges: Boolean!
+  canSendNudges: Boolean!
+  notifications: GroupNotificationSettings
+}
+
+type GroupNotificationSettings {
+  onMemberJoin: Boolean!
+  onMemberLeave: Boolean!
+  onTrainingUpdate: Boolean!
+  onNudgeSent: Boolean!
+  onReportGenerated: Boolean!
+}
+
+type GroupMember {
+  id: ID!
+  user: User!
+  group: Group!
+  role: GroupMemberRole!
+  joinedAt: Date!
+  isActive: Boolean!
+  permissions: GroupMemberPermissions
+}
+
+type GroupMemberPermissions {
+  canInviteMembers: Boolean!
+  canRemoveMembers: Boolean!
+  canEditGroup: Boolean!
+  canViewReports: Boolean!
+  canManageTraining: Boolean!
+  canSendNudges: Boolean!
+}
+
+enum GroupMemberRole {
+  ADMIN
+  MODERATOR
+  MEMBER
+}
+
+input CreateGroupInput {
+  name: String!
+  description: String
+  color: String
+  icon: String
+  settings: GroupSettingsInput
+}
+
+input GroupSettingsInput {
+  allowSelfJoin: Boolean
+  requireApproval: Boolean
+  maxMembers: Int
+  allowFileSharing: Boolean
+  allowComments: Boolean
+  allowNudges: Boolean
+  canSendNudges: Boolean
+  notifications: GroupNotificationSettingsInput
+}
+
+input GroupNotificationSettingsInput {
+  onMemberJoin: Boolean
+  onMemberLeave: Boolean
+  onTrainingUpdate: Boolean
+  onNudgeSent: Boolean
+  onReportGenerated: Boolean
+}
+
+input UpdateGroupInput {
+  id: ID!
+  name: String
+  description: String
+  color: String
+  icon: String
+  settings: GroupSettingsInput
+}
+
+input AddGroupMemberInput {
+  groupId: ID!
+  userId: ID!
+  role: GroupMemberRole
+}
+
+input RemoveGroupMemberInput {
+  groupId: ID!
+  userId: ID!
+}
+
+input UpdateGroupMemberInput {
+  groupId: ID!
+  userId: ID!
+  role: GroupMemberRole
+  permissions: GroupMemberPermissionsInput
+}
+
+input GroupMemberPermissionsInput {
+  canInviteMembers: Boolean
+  canRemoveMembers: Boolean
+  canEditGroup: Boolean
+  canViewReports: Boolean
+  canManageTraining: Boolean
+  canSendNudges: Boolean
+}
+
+type GroupConnection {
+  edges: [GroupEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type GroupEdge {
+  node: Group!
+  cursor: String!
+}
+
+type GroupMemberConnection {
+  edges: [GroupMemberEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type GroupMemberEdge {
+  node: GroupMember!
+  cursor: String!
+}
+
+type DashboardStats {
+  totalCourses: Int!
+  activeStudents: Int!
+  completionRate: Float!
+  totalGroups: Int!
+  pendingRequests: Int!
+  recentActivities: Int!
+}
+
+type UserRetentionData {
+  period: String!
+  retention: Float!
+  users: Int!
+}
+
+type EngagementBreakdownData {
+  category: String!
+  value: Float!
+  color: String!
+}
+
+type EngagementTrendData {
+  date: String!
+  activeUsers: Int!
+  completedCourses: Int!
+  newUsers: Int!
+}
+
+type RecentActivity {
+  id: ID!
+  type: String!
+  title: String!
+  description: String!
+  user: String!
+  userAvatar: String
+  timestamp: String!
+  status: String
+  metadata: JSON
+}
+
+type SurveyData {
+  id: ID!
+  title: String!
+  description: String!
+  status: String!
+  progress: Float!
+  totalQuestions: Int!
+  completedQuestions: Int!
+  createdAt: String!
+  expiresAt: String
+  responses: Int!
+}
+
+type PermissionRequest {
+  id: ID!
+  user: String!
+  userAvatar: String
+  requestType: String!
+  description: String!
+  status: String!
+  requestedAt: String!
+  metadata: JSON
+}
+
+type DashboardData {
+  stats: DashboardStats!
+  userRetention: [UserRetentionData!]!
+  engagementBreakdown: [EngagementBreakdownData!]!
+  engagementTrends: [EngagementTrendData!]!
+  recentActivities: [RecentActivity!]!
+  lastSurvey: SurveyData
+  permissionRequests: [PermissionRequest!]!
+}
+
+type UserPermissions {
+  canManageUsers: Boolean!
+  canManageTenants: Boolean!
+  canManageCourses: Boolean!
+  canManageGroups: Boolean!
+  canViewReports: Boolean!
+  canManageSettings: Boolean!
+  canInviteUsers: Boolean!
+  canApproveRequests: Boolean!
+}
+
+type UserMetadata {
+  lastLogin: Date
+  loginCount: Int!
+  preferences: UserPreferences!
+  permissions: UserPermissions!
+  tenantRoles: [TenantRole!]!
+}
+
+type UserPreferences {
+  theme: String!
+  notifications: Boolean!
+  language: String!
+}
+
+type TenantRole {
+  tenantId: ID!
+  role: UserRole!
+  assignedBy: ID!
+  assignedAt: Date!
+}
+
+type UserInvitation {
+  id: ID!
+  email: String!
+  firstName: String!
+  lastName: String!
+  role: UserRole!
+  tenant: Tenant!
+  invitedBy: User!
+  invitedAt: Date!
+  status: String!
+  expiresAt: Date!
+}
+
+type RoleAssignment {
+  id: ID!
+  user: User!
+  newRole: UserRole!
+  previousRole: UserRole!
+  assignedBy: User!
+  assignedAt: Date!
+  reason: String
+}
+
+input UserRegistrationInput {
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String!
+  role: UserRole!
+  tenantId: ID!
+  invitedBy: ID
+  metadata: UserMetadataInput
+}
+
+input UserMetadataInput {
+  preferences: UserPreferencesInput
+}
+
+input UserPreferencesInput {
+  theme: String
+  notifications: Boolean
+  language: String
+}
+
+input UserPermissionsInput {
+  canManageUsers: Boolean
+  canManageTenants: Boolean
+  canManageCourses: Boolean
+  canManageGroups: Boolean
+  canViewReports: Boolean
+  canManageSettings: Boolean
+  canInviteUsers: Boolean
+  canApproveRequests: Boolean
+}
+
+input UserInvitationInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  role: UserRole!
+  tenantId: ID!
+}
+
+input RoleUpdateInput {
+  userId: ID!
+  newRole: UserRole!
+  reason: String
+}
+
+type UserRegistrationResult {
+  success: Boolean!
+  message: String!
+  user: User
+  errors: JSON
+}
+
+type UserInvitationResult {
+  success: Boolean!
+  message: String!
+  invitation: UserInvitation
+  tempPassword: String
+  errors: JSON
+}
+
+type RoleUpdateResult {
+  success: Boolean!
+  message: String!
+  assignment: RoleAssignment
+  errors: JSON
+}
+
+enum AutomationTriggerType {
+  COURSE_COMPLETED
+  USER_ENROLLED
+  GROUP_JOINED
+  CERTIFICATE_ISSUED
+  SCHEDULE
+  WEBHOOK
+  ORDER_CREATED
+  ORDER_DRAFTED
+  ORDER_UPDATED
+  PAYMENT_SENT
+  CODE_CHANGE_STAGED
+  CODE_CHANGE_COMMITTED
+  CODE_CHANGE_MERGED
+  CODE_CHANGE_FAILED
+}
+
+enum AutomationActionType {
+  SEND_EMAIL
+  ADD_TO_GROUP
+  REMOVE_FROM_GROUP
+  ENROLL_IN_COURSE
+  ISSUE_CERTIFICATE
+  CALL_WEBHOOK
+  NOTIFY_SLACK
+  TAG_USER
+  RUN_AGENT_TASK
+  UPDATE_ORDER_FIELDS
+}
+
+enum AutomationRunStatus {
+  success
+  error
+  running
+}
+
+type AutomationAction {
+  type: AutomationActionType!
+  label: String!
+  config: JSON
+}
+
+type Automation {
+  id: ID!
+  tenantId: String!
+  name: String!
+  enabled: Boolean!
+  triggerType: AutomationTriggerType!
+  triggerLabel: String!
+  actions: [AutomationAction!]!
+  flowDefinition: JSON
+  runCount: Int!
+  lastRunAt: Date
+  createdAt: Date!
+  updatedAt: Date!
+}
+
+type AutomationRun {
+  id: ID!
+  automationId: ID!
+  automationName: String!
+  tenantId: String!
+  triggerType: AutomationTriggerType!
+  status: AutomationRunStatus!
+  durationMs: Int!
+  error: String
+  triggeredAt: Date!
+}
+
+type AgentTaskResult {
+  sessionId: ID!
+  status: String!
+  jobId: String
+}
+
+input AutomationActionInput {
+  type: AutomationActionType!
+  label: String!
+  config: JSON
+}
+
+input CreateAutomationInput {
+  tenantId: String!
+  name: String!
+  triggerType: AutomationTriggerType!
+  triggerLabel: String!
+  actions: [AutomationActionInput!]!
+  enabled: Boolean
+  flowDefinition: JSON
+}
+
+input UpdateAutomationInput {
+  name: String
+  triggerType: AutomationTriggerType
+  triggerLabel: String
+  actions: [AutomationActionInput!]
+  enabled: Boolean
+  flowDefinition: JSON
+}
+
+input RunAgentTaskInput {
+  tenantId: String!
+  prompt: String!
+  model: String
+}
+
+enum PlanTier {
+  FREE
+  STARTER
+  PRO
+  BUSINESS
+  ENTERPRISE
+}
+
+enum SubscriptionStatus {
+  active
+  trialing
+  past_due
+  canceled
+  incomplete
+  incomplete_expired
+  unpaid
+  paused
+}
+
+type PlanLimits {
+  maxLearners: Int!
+  maxAutomations: Int!
+  maxAutomationRunsPerMonth: Int!
+}
+
+type PlanFeatureFlags {
+  automations: Boolean!
+  analytics: Boolean!
+  project: Boolean!
+  webhooks: Boolean!
+  customDomain: Boolean!
+  agentStudio: Boolean!
+  mobileApp: Boolean!
+  apiAccess: Boolean!
+}
+
+type PricingPlan {
+  id: PlanTier!
+  name: String!
+  priceMonthly: Int!
+  description: String!
+  features: [String!]!
+  limits: PlanLimits!
+}
+
+type TenantBilling {
+  tenantId: String!
+  plan: PlanTier!
+  planName: String!
+  priceMonthly: Int!
+  subscriptionStatus: SubscriptionStatus!
+  stripeConfigured: Boolean!
+  stripeCustomerId: String
+  currentPeriodEnd: Date
+  cancelAtPeriodEnd: Boolean!
+  limits: PlanLimits!
+  features: [String!]!
+  featureFlags: PlanFeatureFlags!
+}
+
+type CheckoutSession {
+  url: String!
+  sessionId: String!
+}
+
+type BillingPortalSession {
+  url: String!
+}
+
+enum TemplateCategory {
+  ONBOARDING
+  COMPLETION
+  ENGAGEMENT
+  RETENTION
+  AGENT_OPS
+  INTEGRATIONS
+}
+
+type AutomationTemplateAction {
+  type: AutomationActionType!
+  label: String!
+  config: JSON
+}
+
+type AutomationTemplate {
+  id: ID!
+  slug: String!
+  name: String!
+  description: String!
+  category: TemplateCategory!
+  priceCents: Int!
+  priceLabel: String!
+  featured: Boolean!
+  triggerType: AutomationTriggerType!
+  triggerLabel: String!
+  actions: [AutomationTemplateAction!]!
+  installCount: Int!
+  tags: [String!]!
+}
+
+type UsageLimitsStatus {
+  automationRuns: Boolean!
+  activeLearners: Boolean!
+  automations: Boolean!
+}
+
+type UsagePercentUsed {
+  automationRuns: Int!
+  activeLearners: Int!
+}
+
+type TenantUsageSummary {
+  tenantId: String!
+  period: String!
+  plan: PlanTier!
+  automationRuns: Int!
+  activeLearners: Int!
+  agentTasks: Int!
+  automationCount: Int!
+  limits: PlanLimits!
+  percentUsed: UsagePercentUsed!
+  withinLimits: UsageLimitsStatus!
+}
+
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  NEED_MORE_INFORMATION
+  APPROVED
+  REJECTED
+  AWAITING_PAYMENT
+  PUBLISHED
+  EXPIRED
+}
+
+enum PublicationStatus {
+  UNPUBLISHED
+  PUBLISHED
+  EXPIRED
+}
+
+type StatusHistoryEntry {
+  status: ApplicationStatus!
+  at: Date!
+  by: String
+  note: String
+}
+
+type BusinessListing {
+  id: ID!
+  tenantId: String!
+  applicantEmail: String!
+  applicantName: String
+  businessName: String!
+  slug: String!
+  description: String
+  category: String
+  website: String
+  phone: String
+  address: String
+  applicationStatus: ApplicationStatus!
+  publicationStatus: PublicationStatus!
+  reviewerNotes: String
+  subscriptionActive: Boolean!
+  publishedAt: Date
+  expiredAt: Date
+  submittedAt: Date
+  approvedAt: Date
+  paymentCompletedAt: Date
+  statusHistory: [StatusHistoryEntry!]!
+  createdAt: Date!
+  updatedAt: Date!
+}
+
+type EmailNotification {
+  id: ID!
+  template: String!
+  subject: String!
+  status: String!
+  sentAt: Date!
+}
+
+type ListingCheckoutSession {
+  url: String!
+  sessionId: String!
+}
+
+type ReminderJobResult {
+  sent: Int!
+}
+
+input CreateListingInput {
+  tenantId: String!
+  applicantEmail: String!
+  applicantName: String
+  businessName: String!
+  description: String
+  category: String
+  website: String
+  phone: String
+  address: String
+}
+
+input UpdateListingInput {
+  businessName: String
+  description: String
+  category: String
+  website: String
+  phone: String
+  address: String
+  applicantName: String
+}
+
+enum ActivitySubjectType {
+  PRODUCT
+  ORDER
+  CUSTOMER
+}
+
+enum ActivityEventKind {
+  SYSTEM
+  STAFF_COMMENT
+  APP
+  FIELD_CHANGE
+}
+
+enum ActivityActorType {
+  SYSTEM
+  STAFF
+  APP
+}
+
+type ActivityEvent {
+  id: ID!
+  subjectType: ActivitySubjectType!
+  subjectId: String!
+  kind: ActivityEventKind!
+  eventType: String!
+  message: String!
+  createdAt: Date!
+  actorType: ActivityActorType!
+  actorName: String
+  field: String
+  oldValue: String
+  newValue: String
+  metadata: JSON
+  criticalAlert: Boolean!
+}
+
+type ActivityEventEdge {
+  node: ActivityEvent!
+  cursor: String!
+}
+
+type ActivityEventPageInfo {
+  hasNextPage: Boolean!
+  endCursor: String
+}
+
+type ActivityEventConnection {
+  edges: [ActivityEventEdge!]!
+  pageInfo: ActivityEventPageInfo!
+  totalCount: Int!
+}
+
+input ActivityCommentAttachmentInput {
+  url: String!
+  name: String!
+  mimeType: String
+}
+
+input AddActivityCommentInput {
+  tenantId: ID!
+  subjectType: ActivitySubjectType!
+  subjectId: String!
+  message: String!
+  mentions: [String!]
+  attachments: [ActivityCommentAttachmentInput!]
+}
+
+enum EnrollmentPaymentStatus {
+  PENDING
+  PAID
+  REFUNDED
+  VOIDED
+}
+
+enum EnrollmentLearningStatus {
+  ACTIVE
+  COMPLETED
+}
+
+type Enrollment {
+  id: ID!
+  courseId: ID!
+  studentId: ID!
+  notes: String!
+  tags: [String!]!
+  paymentStatus: EnrollmentPaymentStatus!
+  progressPercent: Int!
+  learningStatus: EnrollmentLearningStatus!
+  lastAccessedAt: Date
+  completedAt: Date
+  paidAt: Date
+  cancelledAt: Date
+  enrolledAt: Date!
+}
+
+input UpdateOrderNotesInput {
+  courseId: ID!
+  studentId: ID!
+  notes: String!
+}
+
+input UpdateOrderInput {
+  courseId: ID!
+  studentId: ID!
+  notes: String
+  tags: [String!]
+  paymentStatus: EnrollmentPaymentStatus
+}
+
+input UpdateCustomerNotesInput {
+  customerId: ID!
+  notes: String!
+}
+
+input CreateOrderCheckoutInput {
+  tenantId: ID!
+  courseId: ID!
+  studentId: ID!
+  amountCents: Int!
+  courseTitle: String!
+  customerEmail: String
+  successUrl: String!
+  cancelUrl: String!
+}
+
+type OrderCheckoutSession {
+  url: String!
+  sessionId: String!
+}
+
+input UpdateEnrollmentProgressInput {
+  courseId: ID!
+  studentId: ID!
+  progressPercent: Int!
+}
+
+type CheckoutSessionStatus {
+  active: Boolean!
+  status: String!
+  courseId: ID
+  studentId: ID
+  tenantId: ID
+}
+
+type AbandonedCheckout {
+  id: ID!
+  courseId: ID!
+  studentId: ID!
+  stripeSessionId: String!
+  amountCents: Int!
+  currency: String!
+  status: CheckoutSessionStatus!
+  customerEmail: String
+  checkoutUrl: String
+  courseTitle: String
+  createdAt: Date!
+  abandonedAt: Date
+  expiresAt: Date
+}
+
+type OrderRow {
+  id: ID!
+  subjectId: ID!
+  courseId: ID!
+  studentId: ID!
+  orderNumber: String!
+  date: Date!
+  customerId: ID!
+  customerName: String!
+  customerEmail: String!
+  paymentStatus: String!
+  fulfillmentStatus: String!
+  total: String!
+  itemCount: Int!
+  courseTitle: String!
+  archived: Boolean!
+}
+
+type StorefrontProduct {
+  id: ID!
+  title: String!
+  description: String!
+  status: String!
+  category: String!
+  priceCents: Int!
+  currency: String!
+  instructorName: String
+  enrollmentCount: Int!
+  tenantId: ID!
+}
+
+type StorefrontCollection {
+  id: ID!
+  name: String!
+  description: String!
+  color: String
+  icon: String
+  memberCount: Int!
+  tenantId: ID!
+}
+
+type StorefrontBundle {
+  id: ID!
+  title: String!
+  description: String!
+  slug: String!
+  courseIds: [ID!]!
+  priceCents: Int!
+  currency: String!
+  billingInterval: String!
+  status: String!
+}
+
+type LearnerSubscriptionRecord {
+  id: ID!
+  status: String!
+  currentPeriodEnd: Date
+  bundle: StorefrontBundle
+}
+
+type SubscribeToBundleResult {
+  subscriptionId: ID!
+  alreadySubscribed: Boolean!
+  bundleId: ID!
+}
+
+enum ProjectItemStatus {
+  BACKLOG
+  READY
+  IN_PROGRESS
+  IN_REVIEW
+  DONE
+}
+
+enum ProjectItemIteration {
+  CURRENT
+  NEXT
+}
+
+enum ProjectItemPriority {
+  P0
+  P1
+  P2
+  P3
+}
+
+type ProjectItem {
+  id: ID!
+  tenantId: String!
+  title: String!
+  description: String!
+  status: ProjectItemStatus!
+  iteration: ProjectItemIteration!
+  priority: ProjectItemPriority!
+  assigneeName: String
+  assigneeId: ID
+  startDate: Date
+  endDate: Date
+  estimate: Int
+  labels: [String!]!
+  courseId: ID
+  sortOrder: Int!
+  createdAt: Date!
+  updatedAt: Date!
+}
+
+input CreateProjectItemInput {
+  tenantId: String!
+  title: String!
+  description: String
+  status: ProjectItemStatus
+  iteration: ProjectItemIteration
+  priority: ProjectItemPriority
+  assigneeName: String
+  assigneeId: ID
+  startDate: Date
+  endDate: Date
+  estimate: Int
+  labels: [String!]
+  courseId: ID
+}
+
+input UpdateProjectItemInput {
+  title: String
+  description: String
+  status: ProjectItemStatus
+  iteration: ProjectItemIteration
+  priority: ProjectItemPriority
+  assigneeName: String
+  assigneeId: ID
+  startDate: Date
+  endDate: Date
+  estimate: Int
+  labels: [String!]
+  courseId: ID
+  sortOrder: Int
+}
+
+enum McpApiKeyScope {
+  READ
+  WRITE
+}
+
+type McpApiKey {
+  id: ID!
+  tenantId: String!
+  name: String!
+  scopes: [McpApiKeyScope!]!
+  keyPrefix: String!
+  createdAt: Date!
+  revokedAt: Date
+  lastUsedAt: Date
+}
+
+type McpApiKeyCreateResult {
+  key: McpApiKey!
+  secret: String!
+}
+
+type McpKeyContext {
+  keyId: ID!
+  tenantId: String!
+  name: String!
+  scopes: [McpApiKeyScope!]!
+}
+
+type McpToolAuditEntry {
+  id: ID!
+  tenantId: String!
+  keyId: String
+  userId: String
+  tool: String!
+  success: Boolean!
+  durationMs: Int!
+  error: String
+  timestamp: Date!
+}
+
+input RecordMcpToolAuditInput {
+  tenantId: String!
+  tool: String!
+  success: Boolean!
+  durationMs: Int!
+  error: String
+}
+
+enum CustomerSegmentId {
+  ALL
+  ACTIVE_LEARNERS
+  AT_RISK
+  HIGH_VALUE
+  INACTIVE
+}
+
+type LearnerCourseProgress {
+  enrollmentId: ID!
+  courseId: ID!
+  courseTitle: String!
+  instructorName: String!
+  progressPercent: Int!
+  learningStatus: String!
+  lastAccessedAt: Date
+  completedAt: Date
+  enrolledAt: Date!
+  paymentStatus: String!
+}
+
+type LearnerDashboardStats {
+  enrolledCount: Int!
+  inProgressCount: Int!
+  completedCount: Int!
+  certificateCount: Int!
+}
+
+type LearnerDashboard {
+  studentId: ID!
+  courses: [LearnerCourseProgress!]!
+  subscriptions: [LearnerSubscriptionRecord!]!
+  stats: LearnerDashboardStats!
+}
+
+type CustomerSegmentSummary {
+  segment: CustomerSegmentId!
+  label: String!
+  customerCount: Int!
+  orderCount: Int!
+  avgProgressPercent: Int!
+}
+
+type CustomerSegmentMember {
+  customerId: ID!
+  customerName: String!
+  customerEmail: String!
+  orderCount: Int!
+  lastOrderAt: Date
+  totalPaidCents: Int!
+  avgProgressPercent: Int!
+  segment: CustomerSegmentId!
+}
+
+type EnrollmentProgressDetail {
+  courseId: ID!
+  studentId: ID!
+  progressPercent: Int!
+  completedLessons: Int!
+  totalLessons: Int!
+  resumeLessonIndex: Int!
+}
+
+type CourseAnalyticsTopCourse {
+  id: ID!
+  title: String!
+  enrollments: Int!
+  completionRate: Int!
+}
+
+type EnrollmentTrendPoint {
+  label: String!
+  enrollments: Int!
+}
+
+type CourseAnalyticsSummary {
+  totalCourses: Int!
+  totalEnrollments: Int!
+  activeStudents: Int!
+  completionRate: Int!
+  averageRating: Int!
+  revenueCents: Int!
+  topCourses: [CourseAnalyticsTopCourse!]!
+  enrollmentTrends: [EnrollmentTrendPoint!]!
+}
+
+type GroupAnalyticsTopGroup {
+  id: ID!
+  name: String!
+  memberCount: Int!
+  isActive: Boolean!
+}
+
+type GroupAnalyticsSummary {
+  totalGroups: Int!
+  activeGroups: Int!
+  totalMembers: Int!
+  averageMembersPerGroup: Int!
+  topGroups: [GroupAnalyticsTopGroup!]!
+}
+
+type Certificate {
+  id: ID!
+  courseId: ID!
+  courseTitle: String!
+  studentId: ID!
+  issuedAt: Date!
+  verificationCode: String!
+}
+
+type EnrollmentStatusSummary {
+  enrolled: Boolean!
+  paymentStatus: String
+  learningStatus: String
+  progressPercent: Int!
+}
+
+type StoreCatalogFacet {
+  category: String!
+  count: Int!
+}
+
+type CartSessionItem {
+  productId: ID!
+  qty: Int!
+}
+
+type CartSession {
+  sessionId: ID!
+  items: [CartSessionItem!]!
+  updatedAt: Date!
+}
+
+input CartSessionItemInput {
+  productId: ID!
+  qty: Int!
+}
+
+type EngagementUserPreferences {
+  theme: String!
+  notifications: Boolean!
+  language: String!
+}
+
+type UserActivityFeedItem {
+  id: ID!
+  eventType: String!
+  message: String!
+  createdAt: Date!
+}
+
+type CourseProgressPercent {
+  courseId: ID!
+  studentId: ID!
+  progressPercent: Int!
+}

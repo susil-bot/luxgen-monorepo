@@ -13,6 +13,7 @@
     "seed": "ts-node src/db/seed.ts",
     "seed:if-empty": "ts-node src/db/seed.ts --if-empty",
     "backfill:course-commerce": "ts-node src/scripts/backfill-course-commerce.ts",
+    "schema:export": "ts-node --transpile-only src/scripts/export-schema-graphql.ts",
     "test:auto": "vitest run"
   },
   "dependencies": {
