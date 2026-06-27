@@ -46,6 +46,7 @@ const CarouselComponent: React.FC<CarouselProps> = ({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const touchStartX = useRef<number | null>(null);
 
   const totalSlides = items.length;
   const maxIndex = Math.max(0, totalSlides - slidesToShow);
@@ -97,19 +98,22 @@ const CarouselComponent: React.FC<CarouselProps> = ({
 
   useEffect(() => {
     startAutoPlay();
-    const touchStartX = useRef<number | null>(null);
-    const onTouchStart = (e: React.TouchEvent) => {
-      touchStartX.current = e.touches[0].clientX;
-    };
-    const onTouchEnd = (e: React.TouchEvent) => {
-      if (touchStartX.current == null) return;
-      const dx = e.changedTouches[0].clientX - touchStartX.current;
-      if (dx > 50) goToPrevious?.();
-      if (dx < -50) goToNext?.();
-      touchStartX.current = null;
-    };
     return () => stopAutoPlay();
   }, [currentIndex, autoPlay, autoPlayInterval]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    stopAutoPlay();
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current == null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (dx > 50) prevSlide();
+    if (dx < -50) nextSlide();
+    touchStartX.current = null;
+    if (autoPlay) startAutoPlay();
+  };
 
   const handleItemClick = (item: CarouselItem, index: number) => {
     onItemClick?.(item, index);
@@ -146,6 +150,8 @@ const CarouselComponent: React.FC<CarouselProps> = ({
       style={styles}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       {...props}
     >
       {/* Main carousel container */}

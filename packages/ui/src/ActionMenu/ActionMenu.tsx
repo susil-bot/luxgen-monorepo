@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 
 export interface ActionMenuItem {
   id: string;
@@ -25,8 +25,31 @@ export function ActionMenu({
   className = '',
 }: ActionMenuProps) {
   const [open, setOpen] = useState(false);
+  const [resolvedAlign, setResolvedAlign] = useState<'left' | 'right'>(align);
   const rootRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLUListElement>(null);
   const menuId = useId();
+
+  useLayoutEffect(() => {
+    setResolvedAlign(align);
+  }, [align]);
+
+  useLayoutEffect(() => {
+    if (!open || !rootRef.current) return;
+
+    const margin = 16;
+    const triggerRect = rootRef.current.getBoundingClientRect();
+    const menuWidth = menuRef.current?.offsetWidth ?? 220;
+    const viewportWidth = window.innerWidth;
+
+    let next = align;
+    if (align === 'right') {
+      if (triggerRect.right - menuWidth < margin) next = 'left';
+    } else if (triggerRect.left + menuWidth > viewportWidth - margin) {
+      next = 'right';
+    }
+    setResolvedAlign(next);
+  }, [open, align]);
 
   useEffect(() => {
     if (!open) return;
@@ -67,10 +90,11 @@ export function ActionMenu({
 
       {open && (
         <ul
+          ref={menuRef}
           id={menuId}
           role="menu"
           className={`absolute z-50 mt-1 min-w-[220px] max-w-[calc(100vw-2rem)] py-1 rounded-xl shadow-lg ios-card ${
-            align === 'right' ? 'right-0' : 'left-0'
+            resolvedAlign === 'right' ? 'right-0' : 'left-0'
           }`}
           style={{ border: '1px solid var(--color-separator)' }}
         >

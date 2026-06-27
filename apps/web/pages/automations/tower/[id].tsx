@@ -247,9 +247,8 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
               <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--color-label-primary)' }}>Test tower</span>
               <input
                 type="text"
-                className={styles.configInput}
+                className={`${styles.configInput} ${styles.testBarInput}`}
                 placeholder="Enter test payload…"
-                style={{ width: 220 }}
               />
               <button type="button" className={styles.toggleOn}>
                 Run test
