@@ -1,8 +1,7 @@
 #!/usr/bin/env node
 /**
- * Walk apps/ + packages/ and emit docs/file-analysis/*.md for every .ts/.tsx/.js source file.
+ * Walk apps/ + packages/ and emit brief junior Q&A docs/file-analysis/*.md
  * Run: node scripts/generate-interview-prep.mjs
- * Re-run after repo changes to refresh the living notebook index.
  */
 import fs from 'fs';
 import path from 'path';
@@ -13,6 +12,19 @@ const OUT = path.join(ROOT, 'docs', 'file-analysis');
 const SCAN = [path.join(ROOT, 'apps'), path.join(ROOT, 'packages')];
 const SKIP_DIRS = new Set(['node_modules', '.next', 'dist', 'build', '.turbo', 'coverage', '__tests__']);
 const EXT = new Set(['.ts', '.tsx', '.js']);
+
+/** Hand-curated brief Q&A — do not overwrite on regenerate */
+const HAND_ENRICHED = new Set([
+  'apps-web-pages-_app-tsx',
+  'apps-web-components-auth-AuthGuard-tsx',
+  'apps-web-lib-session-ts',
+  'apps-api-src-app-ts',
+  'packages-ui-src-NavBar-NavBar-tsx',
+  'packages-db-src-tenant-ts',
+  'apps-web-lib-use-sidebar-sections-ts',
+  'apps-api-src-context-ts',
+  'apps-web-graphql-client-ts',
+]);
 
 function walk(dir, acc = []) {
   if (!fs.existsSync(dir)) return acc;
@@ -33,28 +45,36 @@ function slug(p) {
   return rel(p).replace(/[/.]/g, '-').replace(/^-+|-+$/g, '');
 }
 
-function extractExports(content) {
+function findLine(lines, patterns) {
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (patterns.some((p) => (typeof p === 'string' ? line.includes(p) : p.test(line)))) return i + 1;
+  }
+  return null;
+}
+
+function extractExports(content, lines) {
   const exports = [];
   const re = /export\s+(?:default\s+)?(?:async\s+)?(?:function|class|const|enum|type|interface)\s+(\w+)/g;
   let m;
-  while ((m = re.exec(content))) exports.push(m[1]);
+  while ((m = re.exec(content))) {
+    const line = content.slice(0, m.index).split('\n').length;
+    exports.push({ name: m[1], line });
+  }
   const re2 = /export\s*\{([^}]+)\}/g;
   while ((m = re2.exec(content))) {
+    const line = content.slice(0, m.index).split('\n').length;
     m[1].split(',').forEach((part) => {
       const name = part.trim().split(/\s+as\s+/).pop()?.trim();
-      if (name) exports.push(name);
+      if (name) exports.push({ name, line });
     });
   }
-  if (/export\s+default/.test(content) && !exports.includes('default')) exports.push('default');
-  return [...new Set(exports)];
-}
-
-function extractImports(content) {
-  const imports = [];
-  const re = /import\s+(?:type\s+)?(?:\{[^}]+\}|\*\s+as\s+\w+|\w+)\s+from\s+['"]([^'"]+)['"]/g;
-  let m;
-  while ((m = re.exec(content))) imports.push(m[1]);
-  return imports;
+  const seen = new Set();
+  return exports.filter((e) => {
+    if (seen.has(e.name)) return false;
+    seen.add(e.name);
+    return true;
+  });
 }
 
 function extractFunctions(content) {
@@ -66,151 +86,156 @@ function extractFunctions(content) {
   ];
   for (const re of patterns) {
     let m;
-    while ((m = re.exec(content))) fns.push(m[1]);
+    while ((m = re.exec(content))) {
+      const line = content.slice(0, m.index).split('\n').length;
+      fns.push({ name: m[1], line });
+    }
   }
-  return [...new Set(fns)];
+  const seen = new Set();
+  return fns.filter((f) => {
+    if (seen.has(f.name)) return false;
+    seen.add(f.name);
+    return true;
+  });
 }
 
 function inferPurpose(filePath, content) {
   const r = rel(filePath);
-  if (r.includes('/pages/api/')) return 'Next.js API route (serverless handler)';
-  if (r.includes('/pages/') && r.endsWith('.tsx')) return 'Next.js page route (SSR/CSR)';
-  if (r.includes('/schema/') && r.includes('resolvers')) return 'GraphQL resolver module';
+  if (r.includes('/pages/api/')) return 'Next.js API route handler';
+  if (r.includes('/pages/') && r.endsWith('.tsx')) return 'Next.js page component';
+  if (r.includes('/schema/') && r.includes('resolvers')) return 'GraphQL resolver';
   if (r.includes('/schema/') && r.includes('typeDefs')) return 'GraphQL type definitions';
   if (r.includes('/middleware/')) return 'Express middleware';
-  if (r.includes('/routes/')) return 'Express REST route module';
-  if (r.includes('packages/db/src/') && !r.includes('tenant-config')) return 'Mongoose model or DB utility';
-  if (r.includes('packages/ui/src/')) return 'Shared UI component or design-system module';
+  if (r.includes('/routes/')) return 'Express REST route';
+  if (r.includes('packages/db/src/') && !r.includes('tenant-config')) return 'Mongoose model or DB helper';
+  if (r.includes('packages/ui/src/')) return 'Shared UI component or hook';
   if (r.includes('/hooks/') || /^use[A-Z]/.test(path.basename(r))) return 'React custom hook';
-  if (r.includes('/graphql/queries/')) return 'Apollo GraphQL operation document';
-  if (content.includes('model<') || content.includes('mongoose.models')) return 'Database model registration';
-  if (content.includes('ApolloServer') || content.includes('apollo-server')) return 'GraphQL server setup';
+  if (r.includes('/graphql/queries/')) return 'GraphQL query/mutation document';
+  if (content.includes('model<') || content.includes('mongoose.models')) return 'Database model';
+  if (content.includes('ApolloServer')) return 'GraphQL server setup';
   if (content.includes('createContext') && content.includes('Provider')) return 'React context provider';
   return 'Application module';
 }
 
-function inferPattern(filePath, content) {
-  if (content.includes('Provider') && content.includes('createContext')) return 'React Context Provider';
-  if (content.includes('getServerSideProps')) return 'Next.js SSR data fetching';
-  if (content.includes('useQuery') || content.includes('useMutation')) return 'Apollo Client data layer';
-  if (content.includes('model<') || content.includes('Schema(')) return 'Repository / Active Record (Mongoose)';
-  if (content.includes('middleware')) return 'Middleware / Pipeline';
-  if (content.includes('Router') || content.includes('express()')) return 'Router / MVC Controller';
-  if (filePath.includes('/fixture')) return 'Test fixture / Storybook data';
-  return 'Module / Utility';
-}
-
-function interviewQuestions(filePath, exports, fns) {
+function juniorQuestions(filePath, content, purpose, exports, fns) {
   const r = rel(filePath);
+  const base = path.basename(filePath);
   const qs = [];
+
+  qs.push({
+    q: 'What does this file do?',
+    a: purpose + (exports[0] ? `. Main exports: ${exports.slice(0, 3).map((e) => `\`${e.name}\``).join(', ')}.` : '.'),
+  });
+
+  if (exports.length > 0) {
+    const e = exports[0];
+    qs.push({
+      q: `What is \`${e.name}\`?`,
+      a: `Exported symbol — open source at **${r}:${e.line}** and read the function body.`,
+    });
+  }
+
+  if (fns.length > 0 && (!exports[0] || fns[0].name !== exports[0].name)) {
+    const f = fns[0];
+    qs.push({
+      q: `What does \`${f.name}\` do?`,
+      a: `See **${r}:${f.line}** — check parameters, return value, and side effects.`,
+    });
+  }
+
   if (r.includes('Auth') || r.includes('session')) {
-    qs.push('How does this module prevent fabricated users on 401/expired JWT?');
-    qs.push('What happens on cross-tab logout?');
+    qs.push({
+      q: 'How does this relate to login/session?',
+      a: 'Part of auth flow — see `apps/web/lib/session.ts` and [15-junior-qa-mern.md](../interview-prep/15-junior-qa-mern.md).',
+    });
+  } else if (r.includes('tenant') || r.includes('Tenant')) {
+    qs.push({
+      q: 'How does multi-tenancy apply here?',
+      a: 'Tenant scope via subdomain or `tenantId` — see [15-junior-qa-mern.md](../interview-prep/15-junior-qa-mern.md#12-what-is-multi-tenancy-in-luxgen).',
+    });
+  } else if (r.includes('/middleware/')) {
+    qs.push({
+      q: 'When does this middleware run?',
+      a: 'In Express pipeline before routes — order matters. See `apps/api/src/app.ts`.',
+    });
+  } else if (r.includes('/pages/') && r.endsWith('.tsx')) {
+    qs.push({
+      q: 'What URL maps to this page?',
+      a: `File-based routing: \`pages/\` path → URL (e.g. \`dashboard.tsx\` → \`/dashboard\`).`,
+    });
+  } else if (fns.some((f) => f.name.startsWith('use'))) {
+    const hook = fns.find((f) => f.name.startsWith('use'));
+    qs.push({
+      q: 'What hooks does this file use?',
+      a: `Custom hook \`${hook?.name}\` at line ${hook?.line} — list \`useEffect\` deps to explain re-renders.`,
+    });
+  } else if (r.includes('resolver')) {
+    qs.push({
+      q: 'What is GraphQL context here?',
+      a: 'Resolvers receive `(parent, args, context)` — use `context.user` and `context.tenantId` for auth.',
+    });
+  } else {
+    qs.push({
+      q: 'What breaks if we delete this file?',
+      a: `Search imports: \`rg "${base.replace(/\.[^.]+$/, '')}" apps packages --glob '*.{ts,tsx}'\`.`,
+    });
   }
-  if (r.includes('Sidebar') || r.includes('NavBar')) {
-    qs.push('How do you avoid duplicate navigation callbacks (onNavigate vs onItemClick)?');
+
+  if (exports.length > 1) {
+    const e = exports[1];
+    qs.push({
+      q: `What is \`${e.name}\`?`,
+      a: `Second export at **${r}:${e.line}**.`,
+    });
   }
-  if (r.includes('Tenant') || r.includes('tenant')) {
-    qs.push('How is tenant resolved: subdomain, header, or JWT claim?');
-  }
-  if (fns.some((f) => f.startsWith('use'))) {
-    qs.push('What triggers re-renders when this hook runs?');
-    qs.push('What belongs in the useEffect dependency array?');
-  }
-  if (exports.length === 0) qs.push('Why is this file side-effect only?');
-  qs.push(`Walk me through ${exports[0] ?? path.basename(r)} line by line.`);
-  qs.push('What would break if we removed this file?');
-  qs.push('How would you unit test this module?');
-  return qs.slice(0, 8);
+
+  return qs.slice(0, 6);
 }
 
 function buildMd(filePath, content) {
   const lines = content.split('\n');
   const lineCount = lines.length;
-  const exports = extractExports(content);
-  const imports = extractImports(content);
-  const fns = extractFunctions(content);
+  const fileRel = rel(filePath);
+  const base = path.basename(filePath);
   const purpose = inferPurpose(filePath, content);
-  const pattern = inferPattern(filePath, content);
+  const exports = extractExports(content, lines);
+  const fns = extractFunctions(content);
+  const questions = juniorQuestions(filePath, content, purpose, exports, fns);
 
-  const fnBlocks = fns.slice(0, 15).map((name) => {
-    const idx = lines.findIndex((l) => l.includes(name) && (l.includes('function') || l.includes('const')));
-    const start = idx >= 0 ? idx + 1 : '?';
-    return `### \`${name}\`\n\n- **Approx. line:** ${start}\n- **Role:** Implementation detail — open source file for full signature.\n- **Interview:** "What are inputs, outputs, and side effects of \`${name}\`?"\n`;
-  }).join('\n');
+  const exportLines =
+    exports.length > 0
+      ? exports.map((e) => `- \`${e.name}\` — line ${e.line}`).join('\n')
+      : '- _(none)_';
 
-  return `# ${path.basename(filePath)}
+  const qaBlocks = questions
+    .map(
+      (item, i) => `--------------------------------------------------------------------------------------------------------------------------------------------
+**[${i}] ${item.q}**
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-## File Path
+**ANS.** ${item.a}
+`,
+    )
+    .join('\n');
 
-\`${rel(filePath)}\`
+  return `# ${base} — Brief + Junior Q&A
 
-## Purpose
-
-${purpose}
-
-## Stats
-
-| Metric | Value |
-|--------|-------|
-| Lines | ${lineCount} |
-| Exports | ${exports.length} |
-| Functions (detected) | ${fns.length} |
-
-## Imports (external / workspace)
-
-${imports.slice(0, 20).map((i) => `- \`${i}\``).join('\n') || '- _(none detected)_'}
-${imports.length > 20 ? `\n_…and ${imports.length - 20} more_` : ''}
+**Path:** \`${fileRel}\` (${lineCount} lines)  
+**Role:** ${purpose}
 
 ## Exports
 
-${exports.map((e) => `- \`${e}\``).join('\n') || '- _(none detected)_'}
-
-## Design Pattern
-
-${pattern}
-
-## Dependencies
-
-- **Runtime:** Derived from import graph above.
-- **Workspace packages:** ${[...new Set(imports.filter((i) => i.startsWith('@luxgen/')))] .join(', ') || 'none'}
-
-## Function-Level Notes
-
-${fnBlocks || '_No named functions detected (types-only or re-export barrel)._'}
-
-## Interview Questions
-
-${interviewQuestions(filePath, exports, fns).map((q) => `- ${q}`).join('\n')}
-
-## Possible Improvements
-
-- Add explicit unit tests if missing.
-- Document edge cases in JSDoc on public exports.
-- Avoid circular imports with sibling modules.
-
-## Senior-Level Discussion
-
-- **Why this way?** Colocated with feature domain (\`${rel(filePath).split('/').slice(0, 3).join('/')}\`).
-- **Tradeoff:** Monorepo shared package vs app-local — weigh bundle size and coupling.
-- **Production concern:** Verify error boundaries, auth gates, and tenant scoping on every data path.
-
-## Real-World Usage
-
-Search repo for imports of this file:
-
-\`\`\`bash
-rg "${path.basename(filePath, path.extname(filePath))}" apps packages --glob '*.{ts,tsx}'
-\`\`\`
-
-## Related Concepts
-
-- See [03-react.md](../interview-prep/03-react.md) for React patterns.
-- See [05-node.md](../interview-prep/05-node.md) for API/middleware patterns.
-- See [06-mongodb.md](../interview-prep/06-mongodb.md) for Mongoose models.
+${exportLines}
 
 ---
-_Auto-generated by \`scripts/generate-interview-prep.mjs\`. Enrich manually for hot-path files._
+
+## Junior Q&A
+
+${qaBlocks}
+**More:** [14-junior-qa-react.md](../interview-prep/14-junior-qa-react.md) · [15-junior-qa-mern.md](../interview-prep/15-junior-qa-mern.md)
+
+---
+_Auto-generated by \`scripts/generate-interview-prep.mjs\`. Hand-enriched ★ files are skipped._
 `;
 }
 
@@ -218,19 +243,31 @@ function main() {
   fs.mkdirSync(OUT, { recursive: true });
   const files = SCAN.flatMap((d) => walk(d)).sort();
   const manifest = [];
+  let skipped = 0;
 
   for (const file of files) {
+    const s = slug(file);
+    if (HAND_ENRICHED.has(s)) {
+      skipped++;
+      const content = fs.readFileSync(file, 'utf8');
+      manifest.push({ path: rel(file), doc: `file-analysis/${s}.md`, lines: content.split('\n').length, hand: true });
+      continue;
+    }
     const content = fs.readFileSync(file, 'utf8');
-    const outFile = path.join(OUT, `${slug(file)}.md`);
+    const outFile = path.join(OUT, `${s}.md`);
     fs.writeFileSync(outFile, buildMd(file, content));
-    manifest.push({ path: rel(file), doc: `file-analysis/${slug(file)}.md`, lines: content.split('\n').length });
+    manifest.push({ path: rel(file), doc: `file-analysis/${s}.md`, lines: content.split('\n').length, hand: false });
   }
 
   const index = `# File Analysis Index
 
-> **${manifest.length}** source files · Generated ${new Date().toISOString().slice(0, 10)}
+> **${manifest.length}** source files · Brief junior Q&A format · Generated ${new Date().toISOString().slice(0, 10)}
 
 Re-generate: \`node scripts/generate-interview-prep.mjs\`
+
+**Study:** [14-junior-qa-react.md](../interview-prep/14-junior-qa-react.md) · [15-junior-qa-mern.md](../interview-prep/15-junior-qa-mern.md) · [16-junior-qa-javascript.md](../interview-prep/16-junior-qa-javascript.md)
+
+★ = hand-enriched (not overwritten by generator)
 
 ## By area
 
@@ -247,11 +284,11 @@ Re-generate: \`node scripts/generate-interview-prep.mjs\`
 
 | Source | Lines | Analysis |
 |--------|-------|----------|
-${manifest.map((m) => `| \`${m.path}\` | ${m.lines} | [${path.basename(m.doc, '.md')}](${m.doc}) |`).join('\n')}
+${manifest.map((m) => `| \`${m.path}\` | ${m.lines} | [${path.basename(m.doc, '.md')}](${m.doc})${m.hand ? ' ★' : ''} |`).join('\n')}
 `;
 
   fs.writeFileSync(path.join(OUT, 'INDEX.md'), index);
-  console.log(`Wrote ${manifest.length} file analyses + INDEX.md`);
+  console.log(`Wrote ${manifest.length - skipped} analyses (${skipped} hand-enriched skipped) + INDEX.md`);
 }
 
 main();

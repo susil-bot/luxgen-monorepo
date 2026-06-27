@@ -1,197 +1,81 @@
-# styles.ts
+# styles.ts — Brief + Junior Q&A
 
-## File Path
-
-`packages/ui/src/GroupDashboardCard/styles.ts`
-
-## Purpose
-
-Shared UI component or design-system module
-
-## Stats
-
-| Metric | Value |
-|--------|-------|
-| Lines | 280 |
-| Exports | 35 |
-| Functions (detected) | 35 |
-
-## Imports (external / workspace)
-
-- `../theme`
-
+**Path:** `packages/ui/src/GroupDashboardCard/styles.ts` (280 lines)  
+**Role:** Shared UI component or hook
 
 ## Exports
 
-- `GroupDashboardCardStyles`
-- `getGroupDashboardCardStyles`
-- `getRoleColor`
-- `getStatusColor`
-- `getProgressColor`
-- `getAvatarInitials`
-- `formatUserCount`
-- `formatProgressPercentage`
-- `getResponsiveGridClasses`
-- `getCardHoverEffects`
-- `getLoadingSkeleton`
-- `getErrorState`
-- `getEmptyState`
-- `getSuccessState`
-- `getWarningState`
-- `getInfoState`
-- `getFadeInAnimation`
-- `getSlideInAnimation`
-- `getBounceAnimation`
-- `getPulseAnimation`
-- `getSpinAnimation`
-- `getResponsiveText`
-- `getResponsiveSpacing`
-- `getResponsiveGrid`
-- `getFocusRing`
-- `getScreenReaderOnly`
-- `getHighContrast`
-- `getDarkModeClasses`
-- `getDarkModeHover`
-- `getDarkModeText`
-- `getDarkModeBorder`
-- `getPrintHidden`
-- `getPrintVisible`
-- `getPrintText`
-- `getPrintBackground`
-
-## Design Pattern
-
-Module / Utility
-
-## Dependencies
-
-- **Runtime:** Derived from import graph above.
-- **Workspace packages:** none
-
-## Function-Level Notes
-
-### `getGroupDashboardCardStyles`
-
-- **Approx. line:** 28
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getGroupDashboardCardStyles`?"
-
-### `getVariantStyles`
-
-- **Approx. line:** 34
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getVariantStyles`?"
-
-### `getRoleColor`
-
-- **Approx. line:** 92
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getRoleColor`?"
-
-### `getStatusColor`
-
-- **Approx. line:** 107
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getStatusColor`?"
-
-### `getProgressColor`
-
-- **Approx. line:** 122
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getProgressColor`?"
-
-### `getAvatarInitials`
-
-- **Approx. line:** 129
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getAvatarInitials`?"
-
-### `formatUserCount`
-
-- **Approx. line:** 138
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `formatUserCount`?"
-
-### `formatProgressPercentage`
-
-- **Approx. line:** 143
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `formatProgressPercentage`?"
-
-### `getResponsiveGridClasses`
-
-- **Approx. line:** 148
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getResponsiveGridClasses`?"
-
-### `getCardHoverEffects`
-
-- **Approx. line:** 160
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getCardHoverEffects`?"
-
-### `getLoadingSkeleton`
-
-- **Approx. line:** 164
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getLoadingSkeleton`?"
-
-### `getErrorState`
-
-- **Approx. line:** 168
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getErrorState`?"
-
-### `getEmptyState`
-
-- **Approx. line:** 172
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getEmptyState`?"
-
-### `getSuccessState`
-
-- **Approx. line:** 176
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getSuccessState`?"
-
-### `getWarningState`
-
-- **Approx. line:** 180
-- **Role:** Implementation detail — open source file for full signature.
-- **Interview:** "What are inputs, outputs, and side effects of `getWarningState`?"
-
-
-## Interview Questions
-
-- Walk me through GroupDashboardCardStyles line by line.
-- What would break if we removed this file?
-- How would you unit test this module?
-
-## Possible Improvements
-
-- Add explicit unit tests if missing.
-- Document edge cases in JSDoc on public exports.
-- Avoid circular imports with sibling modules.
-
-## Senior-Level Discussion
-
-- **Why this way?** Colocated with feature domain (`packages/ui/src`).
-- **Tradeoff:** Monorepo shared package vs app-local — weigh bundle size and coupling.
-- **Production concern:** Verify error boundaries, auth gates, and tenant scoping on every data path.
-
-## Real-World Usage
-
-Search repo for imports of this file:
-
-```bash
-rg "styles" apps packages --glob '*.{ts,tsx}'
-```
-
-## Related Concepts
-
-- See [03-react.md](../interview-prep/03-react.md) for React patterns.
-- See [05-node.md](../interview-prep/05-node.md) for API/middleware patterns.
-- See [06-mongodb.md](../interview-prep/06-mongodb.md) for Mongoose models.
+- `GroupDashboardCardStyles` — line 3
+- `getGroupDashboardCardStyles` — line 28
+- `getRoleColor` — line 92
+- `getStatusColor` — line 107
+- `getProgressColor` — line 122
+- `getAvatarInitials` — line 129
+- `formatUserCount` — line 138
+- `formatProgressPercentage` — line 143
+- `getResponsiveGridClasses` — line 148
+- `getCardHoverEffects` — line 160
+- `getLoadingSkeleton` — line 164
+- `getErrorState` — line 168
+- `getEmptyState` — line 172
+- `getSuccessState` — line 176
+- `getWarningState` — line 180
+- `getInfoState` — line 184
+- `getFadeInAnimation` — line 189
+- `getSlideInAnimation` — line 193
+- `getBounceAnimation` — line 197
+- `getPulseAnimation` — line 201
+- `getSpinAnimation` — line 205
+- `getResponsiveText` — line 210
+- `getResponsiveSpacing` — line 220
+- `getResponsiveGrid` — line 230
+- `getFocusRing` — line 235
+- `getScreenReaderOnly` — line 239
+- `getHighContrast` — line 243
+- `getDarkModeClasses` — line 248
+- `getDarkModeHover` — line 252
+- `getDarkModeText` — line 256
+- `getDarkModeBorder` — line 260
+- `getPrintHidden` — line 265
+- `getPrintVisible` — line 269
+- `getPrintText` — line 273
+- `getPrintBackground` — line 277
 
 ---
-_Auto-generated by `scripts/generate-interview-prep.mjs`. Enrich manually for hot-path files._
+
+## Junior Q&A
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[0] What does this file do?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Shared UI component or hook. Main exports: `GroupDashboardCardStyles`, `getGroupDashboardCardStyles`, `getRoleColor`.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[1] What is `GroupDashboardCardStyles`?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Exported symbol — open source at **packages/ui/src/GroupDashboardCard/styles.ts:3** and read the function body.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[2] What does `getGroupDashboardCardStyles` do?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** See **packages/ui/src/GroupDashboardCard/styles.ts:28** — check parameters, return value, and side effects.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[3] What breaks if we delete this file?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Search imports: `rg "styles" apps packages --glob '*.{ts,tsx}'`.
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[4] What is `getGroupDashboardCardStyles`?**
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+**ANS.** Second export at **packages/ui/src/GroupDashboardCard/styles.ts:28**.
+
+**More:** [14-junior-qa-react.md](../interview-prep/14-junior-qa-react.md) · [15-junior-qa-mern.md](../interview-prep/15-junior-qa-mern.md)
+
+---
+_Auto-generated by `scripts/generate-interview-prep.mjs`. Hand-enriched ★ files are skipped._

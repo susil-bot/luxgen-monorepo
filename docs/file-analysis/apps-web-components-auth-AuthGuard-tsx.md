@@ -1,48 +1,54 @@
-# AuthGuard.tsx — Deep Analysis (Hand-enriched)
+# AuthGuard.tsx — Brief + Junior Q&A
 
-## File Path
+**Path:** `apps/web/components/auth/AuthGuard.tsx`  
+**Role:** Block protected pages when there is no valid session.
 
-`apps/web/components/auth/AuthGuard.tsx`
+---
 
-## Purpose
+## Junior Q&A
 
-Client-side route guard for **authenticated-only** paths. Works with `requiresAuth()` from `lib/auth-routes.ts`.
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[0] Where is AuthGuard mounted?**
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-Does **not** replace server auth — API still enforces JWT.
+**ANS.** Wraps every page in `_app.tsx:68-72`.
 
-## Key Functions
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[1] What is the first check on every render?**
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-### `AuthGuardRedirect` — Lines 14–24
+**ANS.** If route is public (`requiresAuth` false) → render children — `AuthGuard.tsx:47-50`.
 
-- **Effect:** `router.replace(buildLoginRedirect(returnPath, reason))` once
-- **Pattern:** `useRef(didRedirect)` prevents redirect loop
-- **UX:** Shows `AuthLoadingScreen` while redirecting
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[2] Why wait for `mounted` before redirecting?**
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-### `AuthGuard` — Lines 31–65
+**ANS.** `localStorage` does not exist on server. First client paint must match SSR HTML — `AuthGuard.tsx:52-56`.
 
-| Phase | Behavior |
-|-------|----------|
-| Public route | Render children (no auth check) |
-| `!mounted` | Render children (SSR/hydration safe) |
-| Invalid session | `AuthGuardRedirect` |
-| Valid session | Render children |
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[3] How does it know the session is valid?**
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-### `authEpoch` state (line 33)
+**ANS.** Calls `validateClientSession()` from `session-guard.ts` — token, expiry, tenant match — `AuthGuard.tsx:58-61`.
 
-- Incremented on `AUTH_SESSION_CHANGE_EVENT` and `storage`
-- Forces re-render → re-run `validateClientSession()`
-- **Fixed bug:** was `setSessionVersion` after state removed (UI-98)
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[4] What happens when validation fails?**
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-## Interview Questions
+**ANS.** `AuthGuardRedirect` sends user to `/login?reason=...` — `AuthGuard.tsx:14-24`, `60`.
 
-1. Why render children before mount on protected routes?  
-2. Difference vs middleware-only auth?  
-3. How to test AuthGuard with React Testing Library?
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[5] How does AuthGuard know user just logged in?**
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-## Real-world usage
+**ANS.** `useEffect` listens to `luxgen-auth-change` and `storage` — bumps state to re-render — `AuthGuard.tsx:36-45`.
 
-Wrapped in `_app.tsx` around every page component.
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[6] What is `useRef` used for here?**
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-## Refactor option
+**ANS.** `didRedirect` ref stops double redirect in React Strict Mode — `AuthGuard.tsx:16-20`.
 
-Use Next middleware for coarse gate + AuthGuard for fine-grained client refresh (current hybrid).
+---
+
+**More:** [14-junior-qa-react.md](../interview-prep/14-junior-qa-react.md#22-how-does-authguard-protect-routes)
