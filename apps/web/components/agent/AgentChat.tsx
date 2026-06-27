@@ -415,9 +415,8 @@ export default function AgentChat({
               onKeyDown={handleKeyDown}
               placeholder="Describe what you want to build… (Enter to send, Shift+Enter for new line)"
               rows={2}
-              className="flex-1 resize-none input-field"
+              className="flex-1 resize-none input-field min-h-14 max-h-24 sm:max-h-40"
               disabled={isStreaming}
-              style={{ minHeight: '56px', maxHeight: 'min(40vh, 160px)' }}
             />
             <button
               onClick={sendMessage}
