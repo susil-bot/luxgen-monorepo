@@ -121,13 +121,11 @@ export const validateVerifyEmail = (req: Request, res: Response, next: NextFunct
     errors.push({ field: 'token', message: 'Valid verification token is required' });
   }
   if (errors.length) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        message: 'Validation failed',
-        errors: errors.reduce((acc, e) => ({ ...acc, [e.field]: e.message }), {} as Record<string, string>),
-      });
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.reduce((acc, e) => ({ ...acc, [e.field]: e.message }), {} as Record<string, string>),
+    });
   }
   next();
 };
