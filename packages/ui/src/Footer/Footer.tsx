@@ -14,6 +14,7 @@ export interface FooterProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
   links?: FooterLink[];
   copyright?: string;
+  companyName?: string;
 }
 
 const FooterComponent: React.FC<FooterProps> = ({
@@ -22,9 +23,11 @@ const FooterComponent: React.FC<FooterProps> = ({
   style,
   links = [],
   copyright,
+  companyName = 'LuxGen',
   ...props
 }) => {
-  const resolvedCopyright = copyright ?? `© ${new Date().getFullYear()} LuxGen. All rights reserved.`;
+  const resolvedCopyright =
+    copyright ?? `© ${new Date().getFullYear()} ${companyName}. All rights reserved.`;
   const styles = {
     ...style,
     backgroundColor: tenantTheme.colors.surface,

@@ -1181,11 +1181,11 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/CountryLanguageDropdown/CountryLanguageDropdown.tsx` hardcodes `w-80` (320px). On screens narrower than 360px this causes horizontal overflow.
       **Fix:** Use `w-full max-w-xs` and set `min-w-0` on the parent container.
 
-- [ ] **UI-42** `[responsive]`
+- [x] **UI-42** `[responsive]`
       59 out of 88 pages have zero responsive Tailwind classes. These pages likely look acceptable on laptop screens but are broken on mobile.
       **Fix:** Audit each of the 59 pages. At minimum, ensure every page content container uses `px-4 sm:px-6 lg:px-8` padding and `max-w-7xl mx-auto`.
 
-- [ ] **UI-43** `[responsive]`
+- [x] **UI-43** `[responsive]`
       No CSS Container Queries are used anywhere. Several components (e.g., `Card`, `ProductCard`, `GroupCard`) would benefit from container-based breakpoints rather than viewport breakpoints, since they appear in both narrow sidebars and wide main content areas.
       **Fix:** Evaluate and introduce `@container` queries for the card components.
 
@@ -1201,15 +1201,15 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 3 — Hardcoded Values & Design Tokens (UI-46 → UI-75)
 
-- [ ] **UI-46** `[hardcode]`
+- [x] **UI-46** `[hardcode]`
       `packages/ui/src/Footer/Footer.tsx` default copyright prop is `'© 2024 LuxGen. All rights reserved.'`. The year 2024 is stale. It is also hardcoded as a `LuxGen` brand name that should be the tenant's name.
       **Fix:** Change default to `© ${new Date().getFullYear()} LuxGen. All rights reserved.` and make it tenant-aware via a `companyName` prop.
 
-- [ ] **UI-47** `[hardcode]`
+- [x] **UI-47** `[hardcode]`
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` hardcodes the CTA button colour as `'#F78C4A'` and text colour as `'#FFFFFF'`. These override any tenant theme.
       **Fix:** Replace with CSS variable references `var(--color-orange)` / `var(--color-label-on-fill)`.
 
-- [ ] **UI-48** `[hardcode]`
+- [x] **UI-48** `[hardcode]`
       `packages/ui/src/ProductCard/ProductCard.tsx` hardcodes like-icon fill colour as `'#EF4444'` (active) and `'#6B7280'` (inactive).
       **Fix:** Use `var(--color-red)` and `var(--color-label-tertiary)`.
 
@@ -1245,7 +1245,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/Input/Input.tsx` uses `'border-gray-300'` and `'border-red-300'` classes instead of `var(--color-separator)` and `var(--color-red)`.
       **Fix:** Replace Tailwind colour classes with CSS variable references.
 
-- [ ] **UI-57** `[hardcode]`
+- [x] **UI-57** `[hardcode]`
       `packages/ui/src/ErrorBoundary.tsx` uses `'bg-blue-600 hover:bg-blue-700'` for the retry button.
       **Fix:** Replace with `var(--color-blue)` background.
 

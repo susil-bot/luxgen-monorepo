@@ -118,7 +118,7 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
             {currentSlideData.date && (
               <div
                 className="text-sm md:text-base mb-2 opacity-80"
-                style={{ color: currentSlideData.textColor || '#E5E7EB' }}
+                style={{ color: currentSlideData.textColor || 'var(--color-label-secondary)' }}
               >
                 {currentSlideData.date}
               </div>
@@ -146,7 +146,7 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
             {currentSlideData.description && (
               <p
                 className="text-sm md:text-base mb-6 opacity-90 max-w-2xl"
-                style={{ color: currentSlideData.textColor || '#E5E7EB' }}
+                style={{ color: currentSlideData.textColor || 'var(--color-label-secondary)' }}
               >
                 {currentSlideData.description}
               </p>
