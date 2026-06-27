@@ -55,7 +55,16 @@ export default function LearnCatalogPage({ tenantSubdomain }: Props) {
           <div className="ios-card p-4 mb-6 flex items-center gap-4">
             <svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true">
               <circle cx="28" cy="28" r="24" fill="none" stroke="var(--color-fill-tertiary)" strokeWidth="6" />
-              <circle cx="28" cy="28" r="24" fill="none" stroke="var(--color-blue)" strokeWidth="6" strokeDasharray={`${progressPercent * 1.51} 151`} transform="rotate(-90 28 28)" />
+              <circle
+                cx="28"
+                cy="28"
+                r="24"
+                fill="none"
+                stroke="var(--color-blue)"
+                strokeWidth="6"
+                strokeDasharray={`${progressPercent * 1.51} 151`}
+                transform="rotate(-90 28 28)"
+              />
             </svg>
             <div>
               <p className="font-semibold text-primary">Your learning progress</p>

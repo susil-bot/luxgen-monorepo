@@ -380,13 +380,26 @@ const NavBarComponent: React.FC<NavBarProps> = ({
             </div>
           ) : (
             <div className="flex items-center gap-2" role="group" aria-label="Account actions">
-              <a href="/login" tabIndex={0} className="ios-btn-secondary text-sm px-4 py-2 font-semibold hidden sm:inline-flex ring-2 ring-transparent focus-visible:ring-[var(--color-blue)]">
+              <a
+                href="/login"
+                tabIndex={0}
+                className="ios-btn-secondary text-sm px-4 py-2 font-semibold hidden sm:inline-flex ring-2 ring-transparent focus-visible:ring-[var(--color-blue)]"
+              >
                 Login
               </a>
-              <a href="/register" tabIndex={0} className="ios-btn-primary text-sm px-4 py-2 font-semibold hidden sm:inline-flex ring-2 ring-transparent focus-visible:ring-[var(--color-blue)]">
+              <a
+                href="/register"
+                tabIndex={0}
+                className="ios-btn-primary text-sm px-4 py-2 font-semibold hidden sm:inline-flex ring-2 ring-transparent focus-visible:ring-[var(--color-blue)]"
+              >
                 Sign Up
               </a>
-              <a href="/register" tabIndex={0} className="ios-btn-primary text-sm px-4 py-2 sm:hidden" aria-label="Sign up">
+              <a
+                href="/register"
+                tabIndex={0}
+                className="ios-btn-primary text-sm px-4 py-2 sm:hidden"
+                aria-label="Sign up"
+              >
                 Sign Up
               </a>
             </div>

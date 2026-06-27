@@ -191,7 +191,12 @@ const SnackbarComponent: React.FC<SnackbarProps> = ({
   const positionStyles = getPositionStyles();
 
   return (
-    <div role="alert" aria-live="polite" className={`fixed z-50 max-w-sm w-full ${positionStyles} ${className}`} {...props}>
+    <div
+      role="alert"
+      aria-live="polite"
+      className={`fixed z-50 max-w-sm w-full ${positionStyles} ${className}`}
+      {...props}
+    >
       <div
         className={`
           ${styles.bg} ${styles.border} ${styles.text}

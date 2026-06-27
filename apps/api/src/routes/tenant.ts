@@ -454,7 +454,6 @@ router.patch('/storefront', async (req: Request, res: Response) => {
   }
 });
 
-
 const MAX_LOGO_BYTES = 512_000;
 const LOGO_PREFIXES = ['data:image/jpeg;', 'data:image/png;', 'data:image/svg+xml;', 'data:image/webp;'];
 
@@ -475,7 +474,11 @@ router.post('/branding/logo', async (req: Request, res: Response) => {
     if (!logoUrl || !isValidLogoUrl(logoUrl)) {
       return res.status(400).json({ success: false, message: 'Invalid logo URL or image (max 500KB)' });
     }
-    const updated = await Tenant.findByIdAndUpdate(tenantContext.tenantId, { 'settings.branding.logo': logoUrl, updatedAt: new Date() }, { new: true });
+    const updated = await Tenant.findByIdAndUpdate(
+      tenantContext.tenantId,
+      { 'settings.branding.logo': logoUrl, updatedAt: new Date() },
+      { new: true },
+    );
     if (!updated) return res.status(404).json({ success: false, message: 'Tenant not found' });
     res.json({ success: true, data: { logo: updated.settings?.branding?.logo } });
   } catch (error) {
@@ -483,6 +486,5 @@ router.post('/branding/logo', async (req: Request, res: Response) => {
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
-
 
 export default router;

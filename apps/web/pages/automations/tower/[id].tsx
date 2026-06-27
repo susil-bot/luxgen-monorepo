@@ -214,10 +214,14 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
             </button>
           )}
 
-          <span className={styles.statusPill}><span className="inline-flex items-center gap-1.5">
-                {runLiveLabel(saveState).live && <span className="run-live-indicator w-2 h-2 rounded-full bg-green-500 animate-pulse" aria-hidden />}
-                {saveStatusLabel(isNew, persistedId, saveState)}
-              </span></span>
+          <span className={styles.statusPill}>
+            <span className="inline-flex items-center gap-1.5">
+              {runLiveLabel(saveState).live && (
+                <span className="run-live-indicator w-2 h-2 rounded-full bg-green-500 animate-pulse" aria-hidden />
+              )}
+              {saveStatusLabel(isNew, persistedId, saveState)}
+            </span>
+          </span>
           <span className={styles.statusPill} style={{ fontFamily: 'monospace', fontSize: 10 }}>
             v{flow.version}
           </span>

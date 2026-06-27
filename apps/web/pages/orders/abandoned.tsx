@@ -76,7 +76,9 @@ function OrdersAbandonedContent({ tenant }: Props) {
             sendingId={sendingId}
             onSendRecovery={(checkoutSessionId) => {
               setSendingId(checkoutSessionId);
-              void sendRecovery({ variables: { tenantId: queryTenantId, checkoutSessionId } }).finally(() => setSendingId(null));
+              void sendRecovery({ variables: { tenantId: queryTenantId, checkoutSessionId } }).finally(() =>
+                setSendingId(null),
+              );
             }}
           />
         )}
