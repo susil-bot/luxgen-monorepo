@@ -26,6 +26,20 @@ import { useCustomerProfile } from '../../../lib/use-customer-profile';
 import { applyProfilePatch, marketingPatch } from '../../../lib/customer-profile';
 import { isMongoObjectId } from '../../../lib/mongo-id';
 import { isLearnerRole } from '../../../lib/user-roles';
+import { CACHE_FIRST, CACHE_AND_NETWORK } from '../../../lib/apollo-policies';
+
+/** GraphQL user shape for customer detail pages (UI-94). */
+interface GraphqlUserRecord {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  role: string;
+  staffNotes?: string;
+  marketingEmail?: boolean;
+  marketingSms?: boolean;
+  marketingWhatsapp?: boolean;
+}
 
 interface Props {
   tenant: string;
@@ -46,25 +60,29 @@ function AdminCustomerDetailContent({ tenant }: Props) {
 
   const customerId = typeof router.query.id === 'string' ? router.query.id : '';
 
-  const { data: userData, loading: userLoading } = useQuery(GET_USER, {
+  const { data: userData, loading: userLoading } = useQuery<{ user?: GraphqlUserRecord }>(GET_USER, {
     variables: { id: customerId },
     skip: !customerId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: CACHE_FIRST,
+  });
 
   const { data: coursesData, loading: coursesLoading } = useQuery(GET_COURSES, {
     variables: { tenantId: queryTenantId },
     skip: !isMongoObjectId(queryTenantId),
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: CACHE_FIRST,
+  });
 
   const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
     variables: { tenantId: queryTenantId },
     skip: !isMongoObjectId(queryTenantId),
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: CACHE_FIRST,
+  });
 
   const { data: enrollmentsData } = useQuery(GET_ENROLLMENTS, {
     variables: { tenantId: queryTenantId },
     skip: !isMongoObjectId(queryTenantId),
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: CACHE_AND_NETWORK,
+  });
 
   const learners = useMemo(
     () => (usersData?.users ?? []).filter((u: { role: string }) => isLearnerRole(u.role)),

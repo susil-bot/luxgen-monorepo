@@ -11,6 +11,7 @@ import { useAppLayoutHeader } from '../lib/app-layout-header';
 import { getStoredUser, updateStoredUser, AUTH_STORAGE_KEYS } from '../lib/session';
 import { UPDATE_USER } from '../graphql/queries/auth';
 import { getTenantPageProps } from '../lib/tenant-page-props';
+import { OptimizedImage } from '../components/media/OptimizedImage';
 
 interface ProfilePageProps {
   tenant: string;
@@ -135,8 +136,14 @@ function ProfileContent({ tenant }: ProfilePageProps) {
           <div className="ios-card p-6 flex items-center gap-4">
             <div className="relative">
               {avatarUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={avatarUrl} alt="" className="ios-avatar ios-avatar-xl object-cover" />
+                <OptimizedImage
+                  src={avatarUrl}
+                  alt=""
+                  width={80}
+                  height={80}
+                  unoptimized
+                  className="ios-avatar ios-avatar-xl object-cover"
+                />
               ) : (
                 <div className="ios-avatar ios-avatar-xl">{displayName.charAt(0).toUpperCase()}</div>
               )}

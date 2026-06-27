@@ -5,6 +5,7 @@ import { Heading } from '../Heading';
 import { Text } from '../Text';
 import { withSSR } from '../ssr';
 import { isValidEmail, passwordMeetsMinimum, passwordErrorMessage } from '../validation';
+import { SocialLoginButtons } from '../SocialLoginButtons/SocialLoginButtons';
 
 export interface RegisterFormData {
   firstName: string;
@@ -466,32 +467,13 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
           )}
         </button>
 
-        {/* Social Login */}
-        {showSocialLogin && socialProviders.length > 0 && (
-          <div className="mt-8">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">{socialLoginText}</span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {socialProviders.map((provider) => (
-                <button
-                  key={provider}
-                  type="button"
-                  onClick={() => handleSocialLogin(provider)}
-                  disabled={loading || isSubmitting}
-                  className="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-lg bg-white text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {getSocialProviderIcon(provider)}
-                </button>
-              ))}
-            </div>
-          </div>
+        {showSocialLogin && (
+          <SocialLoginButtons
+            providers={socialProviders}
+            disabled={loading || isSubmitting}
+            heading={socialLoginText}
+            onSocialLogin={handleSocialLogin}
+          />
         )}
 
         {/* Login Link */}

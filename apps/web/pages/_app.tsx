@@ -14,6 +14,7 @@ import { GlobalNotificationHost } from '../lib/global-notifications';
 import { AIStudioSidekickPanel } from '../components/agent/AIStudioSidekickPanel';
 import { DefaultPageHead } from '../components/seo/PageHead';
 import { LayoutUserProvider, type LayoutUser } from '../lib/app-layout-user';
+import { inter } from '../lib/fonts';
 import '../styles/globals.css';
 import '../../../packages/ui/src/Sidebar/sidebar.css';
 import '../../../packages/ui/src/Arrow/arrow.css';
@@ -40,6 +41,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const layoutUser = (pageProps as { layoutUser?: LayoutUser | null }).layoutUser ?? null;
 
   return (
+    <div className={inter.className}>
     <ApolloProvider client={client}>
       <ThemeProvider>
         <GlobalProvider initialTenant={pageProps.tenant || 'demo'}>
@@ -75,5 +77,6 @@ export default function App({ Component, pageProps }: AppProps) {
         </GlobalProvider>
       </ThemeProvider>
     </ApolloProvider>
+    </div>
   );
 }

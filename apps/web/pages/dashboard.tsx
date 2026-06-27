@@ -1,20 +1,16 @@
-import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useQuery } from '@apollo/client';
 import { AdminDashboardLayout } from '@luxgen/ui';
 import { GET_DASHBOARD_DATA } from '../graphql/queries/dashboard';
-import {
-  transformDashboardData,
-  handleDashboardAction,
-  handleUserAction,
-  type DashboardActionType,
-} from '../lib/transformer';
+import { transformDashboardData, handleUserAction } from '../lib/transformer';
+import { createDashboardActionHandler } from '../lib/dashboard-actions';
 import { useAppLayoutHeader } from '../lib/app-layout-header';
 import { useLayoutUser } from '../lib/app-layout-user';
 import { getTenantPageProps } from '../lib/tenant-page-props';
 import { useDashboardTenant, useTenantScope } from '../lib/use-tenant-scope';
 import { PageEmptyState, PageLoadingState } from '../components/common/PageStates';
+import { DashboardBanner } from '../components/dashboard/DashboardBanner';
 import { OnboardingWizardStep1 } from '../components/onboarding/OnboardingWizardStep1';
 
 interface DashboardProps {
@@ -43,9 +39,7 @@ export default function Dashboard({ tenant }: DashboardProps) {
     handleUserAction(action, router);
   };
 
-  const onDashboardAction = (action: DashboardActionType | string, data?: unknown) => {
-    handleDashboardAction(action, data);
-  };
+  const onDashboardAction = createDashboardActionHandler(router);
 
   if (dataLoading) {
     return <PageLoadingState label="Loading dashboard…" />;
@@ -103,53 +97,44 @@ export default function Dashboard({ tenant }: DashboardProps) {
               }
             : undefined
         }
-        bannerCarousel={{
-          banners: [
-            {
-              id: '1',
-              title: `Welcome to ${displayName}`,
-              description: 'Your learning management dashboard',
-              image:
-                'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2071&q=80',
-              buttonText: 'Get Started',
-            },
-            {
-              id: '2',
-              title: 'Explore New Courses',
-              description: 'Discover our latest learning content and enhance your skills',
-              image:
-                'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-              buttonText: 'Browse Courses',
-            },
-            {
-              id: '3',
-              title: 'Track Your Progress',
-              description: 'Monitor your learning journey and achieve your goals',
-              image:
-                'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80',
-              buttonText: 'View Analytics',
-            },
-          ],
-          autoPlay: true,
-          interval: 5000,
-        }}
+        bannerSlot={
+          <DashboardBanner
+            banners={[
+              {
+                id: '1',
+                title: `Welcome to ${displayName}`,
+                description: 'Your learning management dashboard',
+                image:
+                  'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=2071&q=80',
+                buttonText: 'Get Started',
+              },
+              {
+                id: '2',
+                title: 'Explore New Courses',
+                description: 'Discover our latest learning content and enhance your skills',
+                image:
+                  'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+                buttonText: 'Browse Courses',
+              },
+              {
+                id: '3',
+                title: 'Track Your Progress',
+                description: 'Monitor your learning journey and achieve your goals',
+                image:
+                  'https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80',
+                buttonText: 'View Analytics',
+              },
+            ]}
+            autoPlay
+            interval={5000}
+          />
+        }
         dashboardData={transformedDashboardData}
         variant="default"
         loading={dataLoading}
         onUserAction={onUserAction}
         {...headerProps}
         onDashboardAction={onDashboardAction}
-        onDataPointClick={() => undefined /* TODO: navigate */}
-        onSegmentClick={() => undefined}
-        onActivityClick={() => {}}
-        onSurveyClick={() => {}}
-        onRequestClick={() => {}}
-        onViewSurvey={() => {}}
-        onEditSurvey={() => {}}
-        onShareSurvey={() => {}}
-        onApproveRequest={() => {}}
-        onDenyRequest={() => {}}
-        onViewDetails={() => {}}
         onboardingSlot={<OnboardingWizardStep1 tenant={tenant} />}
       />
     </>

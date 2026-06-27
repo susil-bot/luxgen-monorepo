@@ -54,6 +54,7 @@ export interface SidebarProps {
   defaultCollapsed?: boolean;
   onToggle?: (collapsed: boolean) => void;
   onItemClick?: (item: SidebarItem) => void;
+  /** @deprecated Prefer `onNavigate` — item clicks route via href when provided (UI-162). */
   pathname?: string;
   onNavigate?: (href: string) => void;
 }
@@ -171,12 +172,16 @@ const SidebarComponent: React.FC<SidebarProps> = ({
   );
 
   const handleItemClick = (item: SidebarItem) => {
-    onItemClick?.(item);
+    if (item.disabled) return;
     if (item.onClick) {
       item.onClick();
-    } else if (item.href) {
-      navigateTo(item.href, item.external);
+      return;
     }
+    if (item.href && effectiveNavigate) {
+      effectiveNavigate(item.href);
+      return;
+    }
+    onItemClick?.(item);
   };
 
   const isItemActive = useCallback(

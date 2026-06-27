@@ -17,6 +17,7 @@ import { GET_COURSE } from '../../graphql/queries/courses';
 import { mapCourseToOverview, roleFromSession } from '../../lib/course-display';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
+import { CACHE_FIRST } from '../../lib/apollo-policies';
 export default function CoursePage({ tenant }: { tenant: string }) {
   const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
@@ -27,7 +28,7 @@ export default function CoursePage({ tenant }: { tenant: string }) {
   const { data, loading, error } = useQuery(GET_COURSE, {
     variables: { id: courseId },
     skip: !courseId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: CACHE_FIRST,
   const node = data?.course;
   const course = node ? mapCourseToOverview(node) : null;
   if (!courseId || (loading && !course)) return <PageLoadingState label="Loading course…" />;

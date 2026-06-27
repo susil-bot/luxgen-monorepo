@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { categoryLabel } from '../../lib/store-categories';
 import { formatStorefrontPrice } from '../../lib/storefront-format';
 
-interface ProductCardProps {
+interface StorefrontProductCardProps {
   id: string;
   title: string;
   description: string;
@@ -12,7 +12,7 @@ interface ProductCardProps {
   currency: string;
 }
 
-export function ProductCard({ id, title, description, category, priceCents, currency }: ProductCardProps) {
+export function StorefrontProductCard({ id, title, description, category, priceCents, currency }: StorefrontProductCardProps) {
   const cleanDesc = description.replace(/<!--[\s\S]*?-->/g, '').trim();
 
   return (

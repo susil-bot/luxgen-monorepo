@@ -3,7 +3,7 @@ import { useRouter } from 'next/router';
 import { useQuery } from '@apollo/client';
 
 import { CategoryRail } from '../../../components/store/CategoryRail';
-import { ProductCard } from '../../../components/store/ProductCard';
+import { StorefrontProductCard } from '../../../components/store/StorefrontProductCard';
 import { StoreLayout } from '../../../components/store/StoreLayout';
 import { PageLoadingState } from '../../../components/common/PageStates';
 import { GET_STOREFRONT_PRODUCTS } from '../../../graphql/queries/storefront';
@@ -82,7 +82,7 @@ export default function StoreProductPage({ tenantSubdomain }: Props) {
               priceCents: number;
               currency: string;
             }) => (
-              <ProductCard key={product.id} {...product} />
+              <StorefrontProductCard key={product.id} {...product} />
             ),
           )}
         </div>

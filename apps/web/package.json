@@ -23,6 +23,7 @@
     "@luxgen/test-harness": "*",
     "@luxgen/ui": "*",
     "@luxgen/utils": "*",
+    "@tanstack/react-virtual": "^3.14.4",
     "buffer": "^6.0.3",
     "diff": "^7.0.0",
     "graphql": "^16.8.0",

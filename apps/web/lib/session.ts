@@ -191,3 +191,9 @@ export function getMsUntilExpiry(): number | null {
   if (!expiresAt) return null;
   return Math.max(0, expiresAt - Date.now());
 }
+
+/**
+ * Canonical client auth persistence (UI-190).
+ * `@luxgen/ui` UserContext reads the same keys via `getSessionUserAsUserMenu()` in userService.
+ */
+export const CANONICAL_SESSION_DOC = 'apps/web/lib/session.ts' as const;

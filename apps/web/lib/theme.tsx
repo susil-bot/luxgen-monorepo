@@ -22,11 +22,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const applyTheme = (resolved: 'light' | 'dark') => {
     const html = document.documentElement;
-    if (resolved === 'dark') {
-      html.classList.add('dark');
-    } else {
-      html.classList.remove('dark');
-    }
+    html.classList.toggle('dark', resolved === 'dark');
+    html.setAttribute('data-theme', resolved);
     setResolvedTheme(resolved);
   };
 

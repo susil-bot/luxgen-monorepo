@@ -1363,10 +1363,10 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `RegisterForm` in `@luxgen/ui` exposes `ADMIN` and `SUPER_ADMIN` as selectable role options in the UI. These values flow into `REGISTER_MUTATION` with no type guard on the frontend.
       **Fix:** Type the `role` field as `'USER' | 'STUDENT'` only; remove ADMIN/SUPER_ADMIN from the UI form entirely (backend validates but defence-in-depth applies to UI too).
 
-- [ ] **UI-87** `[type]`
+- [x] **UI-87** `[type]`
       `apps/web/components/automations/tower/TowerShell/TowerShell.tsx` and its sub-components likely have implicit `any` from the flow graph data model. Audit and type the node/edge data structures.
 
-- [ ] **UI-88** `[type]`
+- [x] **UI-88** `[type]`
       `AdminDashboardLayout` `onDashboardAction` prop accepts `data?: any`. Given the 11 different action types being wired to no-ops, this should be a discriminated union.
       **Fix:** Define `type DashboardAction = { type: 'view_course'; courseId: string } | { type: 'view_survey'; surveyId: string } | ...`.
 
@@ -1381,16 +1381,16 @@ const [user, setUser] = useState<UserMenu | null>(null);
 - [x] **UI-91** `[type]`
       `apps/web/components/agent/AgentChat.tsx`: `input: Record<string, any>` in the `ToolEvent` interface. The tool input shape is known for each tool — use discriminated unions per tool name.
 
-- [ ] **UI-92** `[type]`
+- [x] **UI-92** `[type]`
       `apps/web/pages/groups/[id]/edit.tsx` likely uses typed `any` for form state. Audit and apply proper types.
 
-- [ ] **UI-93** `[type]`
+- [x] **UI-93** `[type]`
       GraphQL query variables typed as `Record<string, any>` in some utility hooks. Replace with generated types matching the query variables definition.
 
-- [ ] **UI-94** `[type]`
+- [x] **UI-94** `[type]`
       `apps/web/pages/admin/customers/[id].tsx` likely uses `any` for the customer data shape returned by the GraphQL query. Generate or define a `Customer` type.
 
-- [ ] **UI-95** `[type]`
+- [x] **UI-95** `[type]`
       `apps/web/lib/automation-map.ts` `UiTriggerType` and `UiActionType` are defined locally. They should be generated from or derived from the `@luxgen/automation-flow` package's canonical types to prevent drift.
 
 ---
@@ -1513,7 +1513,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/pages/analytics/index.tsx` has a `PlanGate` wrapper, but when the plan check fails (API error), the `PlanGate` renders the upgrade prompt. However if the API is unavailable, `normalizePlan` defaults to `'free'` blocking all analytics access — even for paying tenants — with no error message.
       **Fix:** Distinguish between "plan is free" and "plan check failed"; show an error state in the latter case.
 
-- [ ] **UI-125** `[state]`
+- [x] **UI-125** `[state]`
       `apps/web/pages/automations/index.tsx` shows a confirmation dialog for delete but not for the destructive "disable all" or "bulk delete" scenarios. Bulk-delete with no confirmation is a UX and data-loss risk.
       **Fix:** Add a confirmation modal (count of affected automations) before bulk destructive operations.
 
@@ -1563,15 +1563,15 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 8 — Performance (UI-136 → UI-150)
 
-- [ ] **UI-136** `[perf]`
+- [x] **UI-136** `[perf]`
       Zero pages use `next/image` (`<Image>` component). All images use external URLs passed to `<img>` or background CSS. `next/image` provides lazy loading, size optimisation, and format conversion (WebP/AVIF) for free.
       **Fix:** Migrate all `<img>` in page-level components to `<Image>` from `next/image`. Add `domains` config to `next.config.js` for Unsplash and other external hosts.
 
-- [ ] **UI-137** `[perf]`
+- [x] **UI-137** `[perf]`
       Dashboard banner carousel uses Unsplash URLs directly (e.g., `https://images.unsplash.com/...?w=2071`). These large images load synchronously and block initial render.
       **Fix:** Use `next/image` with `priority={index === 0}` for the first slide and `loading="lazy"` for others.
 
-- [ ] **UI-138** `[perf]`
+- [x] **UI-138** `[perf]`
       Inter font is loaded via Google Fonts in `_document.tsx`. The recommended approach for Next.js 13+ is `next/font/google` which self-hosts fonts and eliminates the extra DNS resolution and request to Google.
       **Fix:** Migrate to `import { Inter } from 'next/font/google'` and apply the font class to `<html>` in `_document.tsx`.
 
@@ -1599,19 +1599,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `globals.css` loads 135+ CSS custom properties on every page including properties only relevant to specific contexts (e.g., `--lux-sidebar-*` properties loaded even on pages with no sidebar).
       **Fix:** Split `globals.css` into: `base.css` (tokens + resets), `sidebar.css`, `agent.css`, etc. Import only what each layout needs.
 
-- [ ] **UI-145** `[perf]`
+- [x] **UI-145** `[perf]`
       The Apollo Client cache policy `fetchPolicy: 'cache-and-network'` is used on most data queries. This causes a double-fetch on every page load (cache read + network request). For stable data (courses, user list), `cache-first` is appropriate.
       **Fix:** Audit each query's `fetchPolicy`. Use `cache-first` for reference data; keep `cache-and-network` only for frequently updated data (orders, enrollments).
 
-- [ ] **UI-146** `[perf]`
+- [x] **UI-146** `[perf]`
       No React `memo()` or `useMemo` is used on any list-rendering component in `apps/web/pages/`. Pages with large lists (users, orders, courses) re-render their entire list on any state change.
       **Fix:** Wrap row components in `React.memo`; memoize the filtered/sorted list with `useMemo`.
 
-- [ ] **UI-147** `[perf]`
+- [x] **UI-147** `[perf]`
       `apps/web/pages/orders/index.tsx` calls three separate GraphQL queries (courses, users, enrollments) to construct order rows client-side. This is N+1 at the page level.
       **Fix:** Add a `orders(tenantId: ID!)` GraphQL query that returns pre-joined order data from the API.
 
-- [ ] **UI-148** `[perf]`
+- [x] **UI-148** `[perf]`
       No Intersection Observer or virtualization is used for long lists. Pages with 100+ rows (users, orders) render all rows into the DOM simultaneously.
       **Fix:** Implement windowing with `react-virtual` or `@tanstack/react-virtual` for tables with > 50 rows.
 
@@ -1655,31 +1655,31 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/Card/Card.tsx` `imagePosition: 'left' | 'right'` values are accepted by the TypeScript type but the component only implements `'top'` and `'bottom'` layout in its render logic. Passing `'left'` or `'right'` silently falls back to `'top'`.
       **Fix:** Either implement side-image layouts, or remove `'left' | 'right'` from the union type.
 
-- [ ] **UI-158** `[api]`
+- [x] **UI-158** `[api]`
       `packages/ui/src/AdminDashboardLayout/` and `packages/ui/src/UserDashboardLayout/` are separate components exported from the index, but the distinction between when to use each is not documented.
       **Fix:** Add JSDoc comments on each; if they serve the same purpose, consolidate with a `userType: 'admin' | 'learner'` prop.
 
-- [ ] **UI-159** `[api]`
+- [x] **UI-159** `[api]`
       The `AppLayout` component (from `packages/ui/src/Layout/`) accepts `onSearch` but the search handler is never connected to a real search endpoint in any page. It is always either missing or wired to a no-op.
       **Fix:** Define the expected search behaviour contract; implement `GET /api/search` or a client-side Fuse.js search; wire `onSearch` in `_app.tsx`.
 
-- [ ] **UI-160** `[api]`
+- [x] **UI-160** `[api]`
       `packages/ui/src/NavBar/NavBar.tsx` accepts `showThemeToggle` and `onThemeToggle` props, but dark mode is not implemented in the CSS (`globals.css` has a `@media (prefers-color-scheme: dark)` block that maps some variables, but it is not wired to a user toggle).
       **Fix:** Either implement the dark mode toggle end-to-end (persist preference in `localStorage`, apply a `data-theme="dark"` attribute on `<html>`), or remove the `showThemeToggle` prop until it is ready.
 
-- [ ] **UI-161** `[api]`
+- [x] **UI-161** `[api]`
       `packages/ui/src/Logout/Logout.tsx` has a `showConfirmation` prop (default `true`) that shows "Are you sure?" — but the app's NavBar user menu calls the logout action directly via `onUserAction('logout')` bypassing this confirmation entirely.
       **Fix:** Ensure the NavBar logout flow goes through the `Logout` component's confirmation, or remove the confirmation-only component and handle it inline.
 
-- [ ] **UI-162** `[api]`
+- [x] **UI-162** `[api]`
       `packages/ui/src/Sidebar/Sidebar.tsx` accepts `onItemClick` but most pages also have `onNavigate` wired to `router.push`. There are two parallel navigation callback paths that can conflict.
       **Fix:** Standardise on one callback; remove the redundant one.
 
-- [ ] **UI-163** `[api]`
+- [x] **UI-163** `[api]`
       `packages/ui/src/GroupCard/GroupForm/GroupMemberList` components are exported from the UI library but the actual group management pages (`organization/groups`) do not use them — they use `DataListPage` directly with custom row rendering.
       **Fix:** Either use the exported group components in the pages, or remove them from the library if they are not referenced anywhere.
 
-- [ ] **UI-164** `[api]`
+- [x] **UI-164** `[api]`
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` `slides` prop items have a `backgroundColor` field, but the dashboard page passes slides with only `image` and `buttonText`. The mismatch means the `backgroundColor` fallback is always triggered.
       **Fix:** Align the `BannerSlide` type with the data shape used by the dashboard.
 
@@ -1755,19 +1755,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 11 — Duplicate Components (UI-181 → UI-190)
 
-- [ ] **UI-181** `[dup]`
+- [x] **UI-181** `[dup]`
       `packages/ui/src/BannerCarousel/` (exported) and `apps/web/components/BannerCarousel.tsx` (local) are two separate banner carousel implementations. The local version is simpler and may be what the dashboard page actually renders.
       **Fix:** Remove the local component; migrate its callers to the `@luxgen/ui` version.
 
-- [ ] **UI-182** `[dup]`
+- [x] **UI-182** `[dup]`
       `packages/ui/src/ProductCard/ProductCard.tsx` (full-featured, tenant-themed) and `apps/web/components/store/ProductCard.tsx` (store-specific) are two separate product card components.
       **Fix:** Consolidate to the `@luxgen/ui` version with store-specific props; remove the local component.
 
-- [ ] **UI-183** `[dup]`
+- [x] **UI-183** `[dup]`
       `packages/ui/src/Header/Header.tsx` (simple header with logo + menu) and `packages/ui/src/NavBar/NavBar.tsx` (full-featured with search, notifications, AI Studio) overlap in purpose. Both are exported from the index.
       **Fix:** Clarify the intended scope for each; deprecate `Header` if `NavBar` covers all use cases.
 
-- [ ] **UI-184** `[dup]`
+- [x] **UI-184** `[dup]`
       `apps/web/components/storefront/LearnifyStorefront.tsx` and `apps/web/components/storefront/SimpleHomeWelcome.tsx` both appear to be landing-page templates. Only one should be active per tenant.
       **Fix:** Document which component is canonical for which tenant type; remove the unused one from the bundle via tree-shaking or conditional import.
 
@@ -1779,19 +1779,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       Password validation logic (minimum length check, error message) is duplicated in `LoginForm` (min 6 chars) and `RegisterForm` (min 8 chars). The inconsistency means a user can create an account with 8 chars but the backend might accept 6.
       **Fix:** Define a single `PASSWORD_MIN_LENGTH` constant in a shared package; enforce consistently.
 
-- [ ] **UI-187** `[dup]`
+- [x] **UI-187** `[dup]`
       Social login button rendering is duplicated inside both `LoginForm` and `RegisterForm`. The same Google/LinkedIn/GitHub button array is built twice.
       **Fix:** Extract a `SocialLoginButtons` component shared by both forms.
 
-- [ ] **UI-188** `[dup]`
+- [x] **UI-188** `[dup]`
       `packages/ui/src/UserManagement/` exports user management components. `apps/web/pages/organization/users.tsx` does not use them — it builds the user list via `DataListPage` with custom row rendering. The `UserManagement` library components appear unused.
       **Fix:** Either use the library components in the users page, or remove `UserManagement` from the package to reduce bundle size.
 
-- [ ] **UI-189** `[dup]`
+- [x] **UI-189** `[dup]`
       `apps/web/components/common/PageStates.tsx` defines `PageLoadingState` and `PageEmptyState`. `packages/ui/src/NotFound/NotFound.tsx` provides similar empty-state UI. Two separate empty-state patterns coexist.
       **Fix:** Standardise on one; use `NotFound` from `@luxgen/ui` for all empty/error states.
 
-- [ ] **UI-190** `[dup]`
+- [x] **UI-190** `[dup]`
       `packages/ui/src/context/UserContext.tsx` and `apps/web/lib/session.ts` both manage user state (localStorage-based). Any change to user data must be updated in both systems.
       **Fix:** Consolidate into a single `UserContext` that wraps `lib/session.ts`; remove the parallel system.
 
@@ -1845,18 +1845,18 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 | Section                                         | Items   | Done  |
 | ----------------------------------------------- | ------- | ----- |
-| Global Layout Architecture (UI-01–20)           | 20      | 18    |
-| Responsive Design (UI-21–45)                    | 25      | 22    |
+| Global Layout Architecture (UI-01–20)           | 20      | 20    |
+| Responsive Design (UI-21–45)                    | 25      | 25    |
 | Hardcoded Values / Tokens (UI-46–75)            | 30      | 30    |
-| TypeScript & Type Safety (UI-76–95)             | 20      | 15    |
-| Dead Code & Unused Props (UI-96–110)            | 15      | 12    |
-| Missing States (UI-111–125)                     | 15      | 10    |
-| SEO & Head Management (UI-126–135)              | 10      | 9     |
-| Performance (UI-136–150)                        | 15      | 6     |
-| Component API Design (UI-151–165)               | 15      | 10    |
+| TypeScript & Type Safety (UI-76–95)             | 20      | 20    |
+| Dead Code & Unused Props (UI-96–110)            | 15      | 15    |
+| Missing States (UI-111–125)                     | 15      | 15    |
+| SEO & Head Management (UI-126–135)              | 10      | 10    |
+| Performance (UI-136–150)                        | 15      | 15    |
+| Component API Design (UI-151–165)               | 15      | 15    |
 | Accessibility (UI-166–180)                      | 15      | 15    |
-| Duplicate Components (UI-181–190)               | 10      | 2     |
-| No-Op Wiring / Missing Connections (UI-191–200) | 10      | 8     |
-| **Total**                                       | **200** | **171** |
+| Duplicate Components (UI-181–190)               | 10      | 10    |
+| No-Op Wiring / Missing Connections (UI-191–200) | 10      | 10    |
+| **Total**                                       | **200** | **200** |
 
 > Update Done column as items are completed. Priority order: Layout → Responsive → Hardcoded → TypeScript → Dead Code.

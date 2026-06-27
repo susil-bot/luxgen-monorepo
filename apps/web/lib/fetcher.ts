@@ -1,52 +1,16 @@
-import { client } from '../graphql/client';
-import { DocumentNode } from 'graphql';
+import type { DocumentNode } from 'graphql';
 
-export interface GraphQLResponse<T = any> {
-  data?: T;
-  errors?: Array<{
-    message: string;
-    locations?: Array<{
-      line: number;
-      column: number;
-    }>;
-    path?: string[];
-  }>;
-}
+/** Typed GraphQL variables helper (UI-93). */
+export type GraphQLVariables = Record<string, unknown>;
 
-export const fetcher = async <T = any>(query: DocumentNode, variables?: Record<string, any>): Promise<T> => {
-  try {
-    const result = await client.query({
-      query,
-      variables,
-      errorPolicy: 'all',
-    });
-
-    if (result.errors && result.errors.length > 0) {
-      throw new Error(result.errors[0].message);
-    }
-
-    return result.data;
-  } catch (error) {
-    console.error('GraphQL query error:', error);
-    throw error;
-  }
+export const fetcher = async <T>(query: DocumentNode, variables?: GraphQLVariables): Promise<T> => {
+  const { client } = await import('../graphql/client');
+  const result = await client.query({ query, variables });
+  return result.data as T;
 };
 
-export const mutation = async <T = any>(mutation: DocumentNode, variables?: Record<string, any>): Promise<T> => {
-  try {
-    const result = await client.mutate({
-      mutation,
-      variables,
-      errorPolicy: 'all',
-    });
-
-    if (result.errors && result.errors.length > 0) {
-      throw new Error(result.errors[0].message);
-    }
-
-    return result.data;
-  } catch (error) {
-    console.error('GraphQL mutation error:', error);
-    throw error;
-  }
+export const mutation = async <T>(mutationDoc: DocumentNode, variables?: GraphQLVariables): Promise<T> => {
+  const { client } = await import('../graphql/client');
+  const result = await client.mutate({ mutation: mutationDoc, variables });
+  return result.data as T;
 };

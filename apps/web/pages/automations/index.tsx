@@ -176,6 +176,8 @@ export default function AutomationsPage({ tenant }: Props) {
   const [builderOpen, setBuilderOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkConfirm, setBulkConfirm] = useState<'pause-filtered' | 'delete-selected' | null>(null);
   const [builder, setBuilder] = useState<BuilderState>({ name: '', trigger: null, actions: [] });
 
   const filtered = useMemo(() => {
@@ -224,6 +226,44 @@ export default function AutomationsPage({ tenant }: Props) {
     }
     setAutomations((prev) => prev.filter((a) => a.id !== id));
     setDeleteId(null);
+  };
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const pauseFilteredAutomations = async () => {
+    const targets = filtered.filter((a) => a.enabled);
+    if (!targets.length) {
+      setBulkConfirm(null);
+      return;
+    }
+    for (const auto of targets) {
+      await toggleEnabled(auto.id);
+    }
+    setBulkConfirm(null);
+  };
+
+  const deleteSelectedAutomations = async () => {
+    const ids = [...selectedIds];
+    for (const id of ids) {
+      if (graphqlReady) {
+        try {
+          await deleteMutation({ variables: { id } });
+        } catch {
+          continue;
+        }
+      }
+      setAutomations((prev) => prev.filter((a) => a.id !== id));
+    }
+    if (graphqlReady) await refetchAutomations();
+    setSelectedIds(new Set());
+    setBulkConfirm(null);
   };
 
   const openBuilder = (id?: string) => {
@@ -371,6 +411,28 @@ export default function AutomationsPage({ tenant }: Props) {
               ))}
             </div>
 
+            {filtered.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                <button
+                  type="button"
+                  className="ios-btn-secondary"
+                  disabled={!filtered.some((a) => a.enabled)}
+                  onClick={() => setBulkConfirm('pause-filtered')}
+                >
+                  Pause all in tab ({filtered.filter((a) => a.enabled).length})
+                </button>
+                <button
+                  type="button"
+                  className="ios-btn-secondary"
+                  disabled={selectedIds.size === 0}
+                  onClick={() => setBulkConfirm('delete-selected')}
+                  style={{ color: 'var(--color-red)' }}
+                >
+                  Delete selected ({selectedIds.size})
+                </button>
+              </div>
+            )}
+
             {/* Automations grid */}
             {filtered.length === 0 ? (
               <div className="ios-empty-state">
@@ -384,6 +446,14 @@ export default function AutomationsPage({ tenant }: Props) {
               <div className="lux-automation-grid">
                 {filtered.map((auto) => (
                   <div key={auto.id} className="lux-automation-card">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(auto.id)}
+                        onChange={() => toggleSelected(auto.id)}
+                        aria-label={`Select ${auto.name}`}
+                      />
+                    </div>
                     {/* Header row */}
                     <div className="lux-automation-header-row">
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
@@ -701,6 +771,39 @@ export default function AutomationsPage({ tenant }: Props) {
                   >
                     {editingId ? 'Save Changes' : 'Create Automation'}
                   </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Bulk confirmation (UI-125) */}
+          {bulkConfirm && (
+            <div className="lux-step-builder-modal" onClick={() => setBulkConfirm(null)}>
+              <div className="lux-step-builder-sheet" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
+                <div style={{ padding: '24px' }}>
+                  <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, textAlign: 'center' }}>
+                    {bulkConfirm === 'pause-filtered' ? 'Pause automations?' : 'Delete selected automations?'}
+                  </h3>
+                  <p style={{ margin: '0 0 20px', fontSize: 14, color: 'var(--color-label-secondary)', textAlign: 'center' }}>
+                    {bulkConfirm === 'pause-filtered'
+                      ? `This will pause ${filtered.filter((a) => a.enabled).length} active automation(s) in the current tab.`
+                      : `This will permanently delete ${selectedIds.size} automation(s) and their run history.`}
+                  </p>
+                  <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                    <button className="ios-btn-secondary" type="button" onClick={() => setBulkConfirm(null)}>
+                      Cancel
+                    </button>
+                    <button
+                      className="ios-btn-primary"
+                      type="button"
+                      style={bulkConfirm === 'delete-selected' ? { background: 'var(--color-red)' } : undefined}
+                      onClick={() =>
+                        void (bulkConfirm === 'pause-filtered' ? pauseFilteredAutomations() : deleteSelectedAutomations())
+                      }
+                    >
+                      {bulkConfirm === 'pause-filtered' ? 'Pause all' : 'Delete'}
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
