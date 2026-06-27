@@ -48,6 +48,8 @@ export interface AppLayoutProps {
   sidebarCollapsible?: boolean;
   sidebarDefaultCollapsed?: boolean;
   responsive?: boolean;
+  /** When true (default), constrain main content to max-w-7xl. Set false for full-bleed editors. */
+  contentMaxWidth?: boolean;
   mobileBreakpoint?: number;
   tabletBreakpoint?: number;
   desktopBreakpoint?: number;
@@ -86,6 +88,7 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   sidebarCollapsible = true,
   sidebarDefaultCollapsed = false,
   responsive = true,
+  contentMaxWidth = true,
   mobileBreakpoint = 640,
   tabletBreakpoint = 768,
   desktopBreakpoint = 1024,
@@ -319,7 +322,10 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
       {/* Main Content Area + optional Sidekick column */}
       <div className="flex flex-1 min-w-0">
         <div className="flex flex-col flex-1 min-w-0">
-          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--color-bg-secondary)] focus:text-[var(--color-label-primary)]">
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--color-bg-secondary)] focus:text-[var(--color-label-primary)]"
+          >
             Skip to content
           </a>
           {/* NavBar - Always rendered */}
@@ -353,8 +359,16 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
           />
 
           {/* Main Content - Dynamic children */}
-          <main id="main-content" className={`flex-1 overflow-y-auto p-4 ${getMainContentStyles()}`} style={{ paddingTop: '80px' }}>
-            {children}
+          <main
+            id="main-content"
+            className={`flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 ${getMainContentStyles()}`}
+            style={{ paddingTop: '80px' }}
+          >
+            {responsive && contentMaxWidth ? (
+              <div className="lux-page-content w-full min-w-0 max-w-7xl mx-auto">{children}</div>
+            ) : (
+              children
+            )}
           </main>
         </div>
 

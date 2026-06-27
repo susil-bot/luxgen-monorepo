@@ -120,7 +120,11 @@ export async function patchTenantGeneral(input: {
 }
 
 export async function patchNotificationTemplate(templateId: string, input: { subject?: string; body?: string }) {
-  const response = await fetch(apiPath(`/api/notifications/templates/${templateId}`), { method: 'PATCH', headers: tenantRequestHeaders(), body: JSON.stringify(input) });
+  const response = await fetch(apiPath(`/api/notifications/templates/${templateId}`), {
+    method: 'PATCH',
+    headers: tenantRequestHeaders(),
+    body: JSON.stringify(input),
+  });
   return parseJson(response);
 }
 

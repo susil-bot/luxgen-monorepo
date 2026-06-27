@@ -34,6 +34,7 @@ export function TowerShell({ activeSubNav, title, lead, primaryAction, children 
       user={layoutUser ?? undefined}
       logo={getDefaultLogo()}
       onUserAction={handleUserAction}
+      contentMaxWidth={false}
       {...headerProps}
     >
       <div className={styles.shell}>

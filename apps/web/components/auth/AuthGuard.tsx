@@ -44,7 +44,6 @@ export function AuthGuard({ children }: AuthGuardProps) {
   }, []);
 
   // Re-render when sessionVersion bumps after login/logout
-  
 
   // Public routes must match SSR HTML — do not gate on router.isReady
   if (!requiresAuth(router.pathname)) {

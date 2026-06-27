@@ -1,1 +1,7 @@
-import{enrollmentService}from'./enrollmentService';export const courseProgressPercentService={async get(courseId:string,studentId:string){const e=await enrollmentService.getByCourseAndStudent(courseId,studentId);return{courseId,studentId,progressPercent:e?.progressPercent??0};}};
+import { enrollmentService } from './enrollmentService';
+export const courseProgressPercentService = {
+  async get(courseId: string, studentId: string) {
+    const e = await enrollmentService.getByCourseAndStudent(courseId, studentId);
+    return { courseId, studentId, progressPercent: e?.progressPercent ?? 0 };
+  },
+};

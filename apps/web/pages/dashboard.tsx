@@ -1,14 +1,9 @@
-import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useQuery } from '@apollo/client';
 import { AdminDashboardLayout } from '@luxgen/ui';
 import { GET_DASHBOARD_DATA } from '../graphql/queries/dashboard';
-import {
-  transformDashboardData,
-  handleDashboardAction,
-  handleUserAction,
-} from '../lib/transformer';
+import { transformDashboardData, handleDashboardAction, handleUserAction } from '../lib/transformer';
 import { useAppLayoutHeader } from '../lib/app-layout-header';
 import { useLayoutUser } from '../lib/app-layout-user';
 import { getTenantPageProps } from '../lib/tenant-page-props';
@@ -81,7 +76,9 @@ export default function Dashboard({ tenant }: DashboardProps) {
       {!dashboardData?.getDashboardData && (
         <div className="max-w-3xl mx-auto px-4 py-3 text-center">
           <p className="text-sm text-secondary">No KPI data yet. Create a course to populate your dashboard.</p>
-          <button type="button" className="ios-btn-primary text-sm mt-2" onClick={() => router.push('/courses/create')}>Create course</button>
+          <button type="button" className="ios-btn-primary text-sm mt-2" onClick={() => router.push('/courses/create')}>
+            Create course
+          </button>
         </div>
       )}
       <AdminDashboardLayout

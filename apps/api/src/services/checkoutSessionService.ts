@@ -65,7 +65,13 @@ export class CheckoutSessionService {
     await sendTransactionalEmail({
       to: session.customerEmail,
       subject: 'Complete your checkout',
-      body: [`Hello,`, '', 'You left items in your cart. Complete checkout here:', url || '(contact support for a new link)', ''].join('\n'),
+      body: [
+        `Hello,`,
+        '',
+        'You left items in your cart. Complete checkout here:',
+        url || '(contact support for a new link)',
+        '',
+      ].join('\n'),
     });
     return true;
   }

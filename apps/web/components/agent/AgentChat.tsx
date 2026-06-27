@@ -353,9 +353,22 @@ export default function AgentChat({
   return (
     <div className={isSidekick ? 'lux-sidekick-chat' : 'flex flex-col h-full'}>
       {streamError && (
-        <div role="alert" className="mx-4 mt-2 p-3 text-sm rounded-lg flex items-center justify-between gap-3" style={{ background: 'rgba(255,59,48,0.12)', color: 'var(--color-red)' }}>
+        <div
+          role="alert"
+          className="mx-4 mt-2 p-3 text-sm rounded-lg flex items-center justify-between gap-3"
+          style={{ background: 'rgba(255,59,48,0.12)', color: 'var(--color-red)' }}
+        >
           <span>{streamError}</span>
-          <button type="button" className="ios-btn-secondary text-xs py-1 px-2" onClick={() => { setStreamError(null); void sendMessage(); }}>Reconnect</button>
+          <button
+            type="button"
+            className="ios-btn-secondary text-xs py-1 px-2"
+            onClick={() => {
+              setStreamError(null);
+              void sendMessage();
+            }}
+          >
+            Reconnect
+          </button>
         </div>
       )}
       {/* Messages */}
@@ -402,9 +415,8 @@ export default function AgentChat({
               onKeyDown={handleKeyDown}
               placeholder="Describe what you want to build… (Enter to send, Shift+Enter for new line)"
               rows={2}
-              className="flex-1 resize-none input-field"
+              className="flex-1 resize-none input-field min-h-14 max-h-24 sm:max-h-40"
               disabled={isStreaming}
-              style={{ minHeight: '56px', maxHeight: 'min(40vh, 160px)' }}
             />
             <button
               onClick={sendMessage}

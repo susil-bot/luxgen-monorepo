@@ -157,7 +157,7 @@ export const getProductCardStyles = (
 
     progressText: {
       fontSize: '0.875rem',
-      color: '#6B7280',
+      color: 'var(--color-label-tertiary)',
       fontWeight: '500',
     },
 
@@ -182,9 +182,9 @@ export const getProductCardStyles = (
 
     discount: {
       fontSize: '0.75rem',
-      color: '#EF4444',
+      color: 'var(--color-red)',
       fontWeight: '500',
-      backgroundColor: '#FEF2F2',
+      backgroundColor: 'color-mix(in srgb, var(--color-red) 8%, transparent)',
       padding: '2px 6px',
       borderRadius: '4px',
     },
@@ -254,7 +254,7 @@ export const getProgressColor = (score?: number, customColor?: string): string =
   if (score >= 80) return '#10B981'; // green
   if (score >= 60) return '#F59E0B'; // yellow
   if (score >= 40) return '#F97316'; // orange
-  return '#EF4444'; // red
+  return 'var(--color-red)';
 };
 
 export const getTagColor = (customColor?: string): string => {
@@ -280,35 +280,4 @@ export const productCardClasses = {
   addToCartButton: 'product-card-add-to-cart-button',
 };
 
-// CSS styles for additional hover effects and animations
-export const productCardCSS = `
-  .product-card {
-    transition: all 0.2s ease;
-  }
-  
-  .product-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .product-card-image img {
-    transition: transform 0.2s ease;
-  }
-  
-  .product-card-image:hover img {
-    transform: scale(1.05);
-  }
-  
-  .product-card-like-button:hover {
-    background-color: rgba(255, 255, 255, 1) !important;
-    transform: scale(1.1);
-  }
-  
-  .product-card-edit-button:hover {
-    background-color: #E5E7EB !important;
-  }
-  
-  .product-card-add-to-cart-button:hover {
-    transform: translateY(-1px);
-  }
-`;
+// Hover rules live in ./product-card.css (imported once from ProductCard.tsx or _app.tsx).

@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { useEffect } from 'react';
 
 import { applyLearnTenantTheme } from '../../lib/learn-theme';
@@ -24,13 +23,7 @@ export function StoreLayout({ tenantSubdomain, tenantName, tenantSettings, child
 
   return (
     <div className="min-h-screen relative overflow-hidden" style={{ background: 'var(--color-bg-primary)' }}>
-      <div
-        className="pointer-events-none absolute inset-0 opacity-40"
-        style={{
-          background:
-            'radial-gradient(ellipse 80% 50% at 50% -20%, rgba(0,122,255,0.25), transparent), radial-gradient(ellipse 60% 40% at 100% 50%, rgba(175,82,222,0.12), transparent)',
-        }}
-      />
+      <div className="lux-store-bg-overlay pointer-events-none absolute inset-0 opacity-40" />
       <div className="relative">
         <StorefrontNavBar logoText="GPT Store" logoHref="/store/product" subtitle={displayName} />
       </div>

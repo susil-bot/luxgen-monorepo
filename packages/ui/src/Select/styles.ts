@@ -137,6 +137,12 @@ export const selectStyles = {
       overflow-y: auto;
     }
 
+    .select-dropdown--dropup {
+      top: auto;
+      bottom: 100%;
+      margin-bottom: 0.25rem;
+    }
+
     .select-search {
       padding: 0.5rem;
       border-bottom: 1px solid var(--color-border);

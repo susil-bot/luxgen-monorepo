@@ -493,10 +493,10 @@ export default function AgentTransparency({
           </p>
         </div>
       ) : (
-        <div className="flex flex-1 min-h-0">
+        <div className="flex flex-col lg:flex-row flex-1 min-h-0">
           {/* File tree */}
           <div
-            className="w-56 flex-shrink-0 border-r overflow-y-auto"
+            className="w-full lg:w-56 flex-shrink-0 border-b lg:border-b-0 lg:border-r overflow-y-auto max-h-48 lg:max-h-none"
             style={{ borderColor: 'var(--color-separator)', backgroundColor: 'var(--color-bg-secondary)' }}
           >
             <div className="px-3 py-2">

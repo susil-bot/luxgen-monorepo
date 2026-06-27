@@ -61,10 +61,10 @@ const GroupCardComponent: React.FC<GroupCardProps> = ({
   const styles = getVariantStyles();
 
   return (
-    <div className={`${styles.container} surface ${className}`} {...props}>
+    <div className={`${styles.container} surface lux-card-container lux-card-adaptive ${className}`} {...props}>
       {/* Header */}
       <div className={styles.header}>
-        <div className="flex items-start justify-between">
+        <div className="lux-group-card-header flex items-start justify-between">
           <div className="flex items-center gap-3">
             {/* Group Icon */}
             <div
@@ -96,7 +96,7 @@ const GroupCardComponent: React.FC<GroupCardProps> = ({
 
       {/* Stats */}
       {showStats && (
-        <div className="grid grid-cols-3 gap-4 mb-4">
+        <div className="lux-group-card-stats grid grid-cols-3 gap-4 mb-4">
           <div className="text-center">
             <div className={`${styles.stats} font-semibold text-primary`}>{group.memberCount}</div>
             <div className="text-xs text-secondary">Members</div>
@@ -123,7 +123,7 @@ const GroupCardComponent: React.FC<GroupCardProps> = ({
       {/* Actions */}
       {showActions && (
         <div
-          className="flex items-center justify-between pt-4"
+          className="lux-group-card-actions flex items-center justify-between pt-4"
           style={{ borderTop: '1px solid var(--color-separator)' }}
         >
           <div className="flex items-center gap-2">

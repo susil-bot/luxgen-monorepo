@@ -1129,7 +1129,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/components/store/ProductCard.tsx` uses `h-32` fixed height for its image area. On mobile this clips long product titles and the layout breaks when 3-column grid collapses.
       **Fix:** Use `aspect-video` or `aspect-square` instead of a fixed height; ensure the grid switches to 1-column at `sm:`.
 
-- [ ] **UI-29** `[responsive]`
+- [x] **UI-29** `[responsive]`
       `packages/ui/src/Table/Table.tsx` has no horizontal scroll wrapper. Wide data tables overflow and clip on mobile screens.
       **Fix:** Wrap the `<table>` in `<div className="overflow-x-auto">`.
 
@@ -1137,63 +1137,63 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/GridContainer/GridContainer.tsx` accepts a single `columns` number. On mobile this still renders N columns. The component has no responsive column array (e.g., `[1, 2, 3]` for sm/md/lg).
       **Fix:** Accept `columns: number | { sm?: number; md?: number; lg?: number }` and generate responsive CSS grid accordingly.
 
-- [ ] **UI-31** `[responsive]`
+- [x] **UI-31** `[responsive]`
       `packages/ui/src/ActionMenu/ActionMenu.tsx` renders a `min-w-[220px]` dropdown. On a 320px screen the menu overflows the right edge.
       **Fix:** Add `max-w-[calc(100vw-2rem)]` and flip alignment to `right` when near the edge via a position calculation.
 
-- [ ] **UI-32** `[responsive]`
+- [x] **UI-32** `[responsive]`
       `packages/ui/src/Modal/Modal.tsx` has no `xs` size for very small screens. All sizes render with `mx-auto` but no `mx-4` fallback means the modal content can overflow on screens narrower than its `max-w`.
       **Fix:** Add `mx-4 sm:mx-auto` to ensure minimum horizontal margin on mobile.
 
-- [ ] **UI-33** `[responsive]`
+- [x] **UI-33** `[responsive]`
       `apps/web/pages/courses/analytics.tsx` and `pages/groups/analytics.tsx` render stat cards in a fixed row. On mobile they overflow rather than wrapping to a single column.
       **Fix:** Wrap in `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4`.
 
-- [ ] **UI-34** `[responsive]`
+- [x] **UI-34** `[responsive]`
       `apps/web/pages/orders/index.tsx` uses `OrderListView` which renders a table. No horizontal scroll container is applied at the page level. Order rows overflow on screens < 768px.
       **Fix:** Wrap the `OrderListView` in `<div className="overflow-x-auto -mx-4 px-4">`.
 
-- [ ] **UI-35** `[responsive]`
+- [x] **UI-35** `[responsive]`
       `packages/ui/src/Carousel/Carousel.tsx` uses JavaScript-calculated `translateX` percentages. The carousel does not support touch swipe gestures on mobile, making it unusable as a primary navigation pattern on touch devices.
       **Fix:** Add `touchstart`/`touchmove`/`touchend` listeners to handle swipe navigation.
 
-- [ ] **UI-36** `[responsive]`
+- [x] **UI-36** `[responsive]`
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` plays automatically by default (`autoPlay: true`). On mobile, autoplay can drain battery and cause motion sickness. The `prefers-reduced-motion` media query is not respected.
       **Fix:** Check `window.matchMedia('(prefers-reduced-motion: reduce)').matches` and disable autoplay/transitions when true.
 
-- [ ] **UI-37** `[responsive]`
+- [x] **UI-37** `[responsive]`
       `pages/automations/tower/[id].tsx` (TowerShell page) renders a graph canvas with hardcoded pixel dimensions. The canvas does not reflow on window resize.
       **Fix:** Make the canvas dimensions reactive using a `ResizeObserver` on the container element.
 
-- [ ] **UI-38** `[responsive]`
+- [x] **UI-38** `[responsive]`
       `apps/web/components/agent/AgentTransparency.tsx` uses a side-by-side panel layout (file tree + diff viewer). On screens < 1024px the diff viewer is cramped. On mobile it is unusable.
       **Fix:** Stack the panels vertically below `lg:` breakpoint using `flex-col lg:flex-row`.
 
-- [ ] **UI-39** `[responsive]`
+- [x] **UI-39** `[responsive]`
       `OrganizationSecurityNav` (sidebar nav within the security section) renders as a list. On mobile it takes up the full screen width but has no drawer/accordion treatment.
       **Fix:** Collapse to a `<select>` or accordion on `< md` breakpoints.
 
-- [ ] **UI-40** `[responsive]`
+- [x] **UI-40** `[responsive]`
       `SettingsShell` renders a vertical tab list on the left. On narrow screens this pushes the main content off-screen.
       **Fix:** Collapse the settings tab list to a horizontal scrollable `<nav>` or `<select>` below `md:`.
 
-- [ ] **UI-41** `[responsive]`
+- [x] **UI-41** `[responsive]`
       `packages/ui/src/CountryLanguageDropdown/CountryLanguageDropdown.tsx` hardcodes `w-80` (320px). On screens narrower than 360px this causes horizontal overflow.
       **Fix:** Use `w-full max-w-xs` and set `min-w-0` on the parent container.
 
-- [ ] **UI-42** `[responsive]`
+- [x] **UI-42** `[responsive]`
       59 out of 88 pages have zero responsive Tailwind classes. These pages likely look acceptable on laptop screens but are broken on mobile.
       **Fix:** Audit each of the 59 pages. At minimum, ensure every page content container uses `px-4 sm:px-6 lg:px-8` padding and `max-w-7xl mx-auto`.
 
-- [ ] **UI-43** `[responsive]`
+- [x] **UI-43** `[responsive]`
       No CSS Container Queries are used anywhere. Several components (e.g., `Card`, `ProductCard`, `GroupCard`) would benefit from container-based breakpoints rather than viewport breakpoints, since they appear in both narrow sidebars and wide main content areas.
       **Fix:** Evaluate and introduce `@container` queries for the card components.
 
-- [ ] **UI-44** `[responsive]`
+- [x] **UI-44** `[responsive]`
       `packages/ui/src/Select/Select.tsx` custom dropdown does not handle the case where it opens near the bottom of the viewport. The dropdown can be clipped by the viewport edge on mobile.
       **Fix:** Detect available space and flip the dropdown to open upward (`dropup`) when needed.
 
-- [ ] **UI-45** `[responsive]`
+- [x] **UI-45** `[responsive]`
       `apps/web/components/agent/AgentChat.tsx` textarea has `maxHeight: '160px'` hardcoded as an inline style. On small phones this is too tall relative to the available screen height, pushing the send button below the fold.
       **Fix:** Use `max-h-24 sm:max-h-40` or compute max height relative to `window.innerHeight`.
 
@@ -1201,15 +1201,15 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 3 — Hardcoded Values & Design Tokens (UI-46 → UI-75)
 
-- [ ] **UI-46** `[hardcode]`
+- [x] **UI-46** `[hardcode]`
       `packages/ui/src/Footer/Footer.tsx` default copyright prop is `'© 2024 LuxGen. All rights reserved.'`. The year 2024 is stale. It is also hardcoded as a `LuxGen` brand name that should be the tenant's name.
       **Fix:** Change default to `© ${new Date().getFullYear()} LuxGen. All rights reserved.` and make it tenant-aware via a `companyName` prop.
 
-- [ ] **UI-47** `[hardcode]`
+- [x] **UI-47** `[hardcode]`
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` hardcodes the CTA button colour as `'#F78C4A'` and text colour as `'#FFFFFF'`. These override any tenant theme.
       **Fix:** Replace with CSS variable references `var(--color-orange)` / `var(--color-label-on-fill)`.
 
-- [ ] **UI-48** `[hardcode]`
+- [x] **UI-48** `[hardcode]`
       `packages/ui/src/ProductCard/ProductCard.tsx` hardcodes like-icon fill colour as `'#EF4444'` (active) and `'#6B7280'` (inactive).
       **Fix:** Use `var(--color-red)` and `var(--color-label-tertiary)`.
 
@@ -1245,31 +1245,31 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/Input/Input.tsx` uses `'border-gray-300'` and `'border-red-300'` classes instead of `var(--color-separator)` and `var(--color-red)`.
       **Fix:** Replace Tailwind colour classes with CSS variable references.
 
-- [ ] **UI-57** `[hardcode]`
+- [x] **UI-57** `[hardcode]`
       `packages/ui/src/ErrorBoundary.tsx` uses `'bg-blue-600 hover:bg-blue-700'` for the retry button.
       **Fix:** Replace with `var(--color-blue)` background.
 
-- [ ] **UI-58** `[hardcode]`
+- [x] **UI-58** `[hardcode]`
       `packages/ui/src/Arrow/Arrow.tsx` injects a `<style>{arrowCSS}</style>` tag inline inside the React component. This causes style duplication on every render and is a well-known anti-pattern.
       **Fix:** Move arrow CSS to a `.css` module or to `globals.css`. Remove the `<style>` injection.
 
-- [ ] **UI-59** `[hardcode]`
+- [x] **UI-59** `[hardcode]`
       `packages/ui/src/ProductCard/ProductCard.tsx` also injects `<style>{productCardCSS}</style>`. Same anti-pattern as UI-58.
       **Fix:** Move to a CSS module file.
 
-- [ ] **UI-60** `[hardcode]`
+- [x] **UI-60** `[hardcode]`
       `apps/web/components/store/GptSalesAssistant.tsx` hardcodes `linear-gradient(135deg, #007AFF, #AF52DE)` for its header. This duplicates the brand gradient that is already available as a CSS pattern in `globals.css`.
       **Fix:** Use a shared `lux-brand-gradient` CSS class defined once in `globals.css`.
 
-- [ ] **UI-61** `[hardcode]`
+- [x] **UI-61** `[hardcode]`
       `apps/web/components/store/CategoryRail.tsx` hardcodes `#007AFF` and `#5856D6` directly in `style={{}}` for active chip colours.
       **Fix:** Use `var(--color-blue)` and `var(--color-purple)`.
 
-- [ ] **UI-62** `[hardcode]`
+- [x] **UI-62** `[hardcode]`
       `apps/web/components/store/StoreLayout.tsx` hardcodes a `radial-gradient(...)` with `rgba(...)` values for its background overlay.
       **Fix:** Extract to a named CSS class in `globals.css`.
 
-- [ ] **UI-63** `[hardcode]`
+- [x] **UI-63** `[hardcode]`
       `apps/web/components/tenant/TenantBanner.tsx` uses Tailwind `from-blue-600 to-purple-600` gradient classes.
       **Fix:** Replace with the `lux-brand-gradient` CSS class (see UI-60).
 
