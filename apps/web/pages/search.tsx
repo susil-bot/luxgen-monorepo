@@ -1,12 +1,10 @@
 import { useRouter } from 'next/router';
-import { useQuery } from '@apollo/client';
 import { AppLayout } from '@luxgen/ui';
 import { useAppShellConfig } from '../lib/app-shell-config';
 import { useLayoutUser, useAppTenantId } from '../lib/app-layout-user';
 import { PageHead } from '../components/seo/PageHead';
 import { PageEmptyState } from '../components/common/PageStates';
-import { GET_COURSES } from '../graphql/queries/courses';
-import { GET_USERS } from '../graphql/queries/users';
+import { useSearchPresenter } from '../presenters/search';
 
 export default function SearchPage() {
   const router = useRouter();
@@ -16,28 +14,11 @@ export default function SearchPage() {
   const { sidebarSections, logo } = useAppShellConfig();
   const tenantId = useAppTenantId();
 
-  const { data: coursesData, loading: coursesLoading } = useQuery(GET_COURSES, {
-    variables: { tenantId: tenantId ?? '' },
-    skip: !q || !tenantId,
+  const { viewModel, loading } = useSearchPresenter({
+    query: q,
+    tenantId,
+    tenant,
   });
-  const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
-    variables: { tenantId: tenantId ?? '' },
-    skip: !q || !tenantId,
-  });
-
-  const needle = q.toLowerCase();
-  const courseHits =
-    coursesData?.courses?.filter(
-      (c: { title?: string }) => c.title?.toLowerCase().includes(needle),
-    ) ?? [];
-  const userHits =
-    usersData?.users?.filter(
-      (u: { email?: string; firstName?: string; lastName?: string }) =>
-        u.email?.toLowerCase().includes(needle) ||
-        `${u.firstName ?? ''} ${u.lastName ?? ''}`.toLowerCase().includes(needle),
-    ) ?? [];
-
-  const loading = coursesLoading || usersLoading;
 
   return (
     <>
@@ -45,18 +26,20 @@ export default function SearchPage() {
       <AppLayout sidebarSections={sidebarSections} user={layoutUser ?? undefined} logo={logo} responsive>
         <div className="max-w-3xl mx-auto px-4 py-8">
           <h1 className="ios-large-title mb-2">Search</h1>
-          {!q ? (
+          {!viewModel.hasQuery ? (
             <PageEmptyState title="Enter a search term" subtitle="Use the nav search bar to find courses and users." />
           ) : loading ? (
             <p className="text-secondary text-sm">Searching…</p>
+          ) : viewModel.isEmpty ? (
+            <PageEmptyState title="No results" subtitle={`Nothing matched "${viewModel.query}".`} />
           ) : (
             <div className="space-y-6">
               <section>
-                <h2 className="font-semibold mb-2">Courses ({courseHits.length})</h2>
+                <h2 className="font-semibold mb-2">Courses ({viewModel.courseCount})</h2>
                 <ul className="space-y-2">
-                  {courseHits.map((c: { id: string; title: string }) => (
+                  {viewModel.courses.map((c) => (
                     <li key={c.id}>
-                      <a href={`/courses/${c.id}?tenant=${tenant}`} className="text-blue hover:underline">
+                      <a href={c.href} className="text-blue hover:underline">
                         {c.title}
                       </a>
                     </li>
@@ -64,11 +47,14 @@ export default function SearchPage() {
                 </ul>
               </section>
               <section>
-                <h2 className="font-semibold mb-2">Users ({userHits.length})</h2>
+                <h2 className="font-semibold mb-2">Users ({viewModel.userCount})</h2>
                 <ul className="space-y-2">
-                  {userHits.map((u: { id: string; email: string }) => (
+                  {viewModel.users.map((u) => (
                     <li key={u.id}>
-                      <span className="text-primary">{u.email}</span>
+                      <span className="text-primary">{u.label}</span>
+                      {u.email && u.label !== u.email ? (
+                        <span className="text-secondary text-sm ml-2">{u.email}</span>
+                      ) : null}
                     </li>
                   ))}
                 </ul>
