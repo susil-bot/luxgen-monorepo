@@ -335,6 +335,7 @@ function TowerEditRoomPage(props: TowerEditRoomProps) {
       logo={getDefaultLogo()}
       onUserAction={createHandleUserAction(router)}
       responsive
+      contentMaxWidth={false}
       {...headerProps}
     >
       <TowerEditContent {...props} />

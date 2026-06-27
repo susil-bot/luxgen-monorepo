@@ -157,7 +157,7 @@ export const getProductCardStyles = (
 
     progressText: {
       fontSize: '0.875rem',
-      color: '#6B7280',
+      color: 'var(--color-label-tertiary)',
       fontWeight: '500',
     },
 
@@ -182,9 +182,9 @@ export const getProductCardStyles = (
 
     discount: {
       fontSize: '0.75rem',
-      color: '#EF4444',
+      color: 'var(--color-red)',
       fontWeight: '500',
-      backgroundColor: '#FEF2F2',
+      backgroundColor: 'color-mix(in srgb, var(--color-red) 8%, transparent)',
       padding: '2px 6px',
       borderRadius: '4px',
     },
@@ -254,7 +254,7 @@ export const getProgressColor = (score?: number, customColor?: string): string =
   if (score >= 80) return '#10B981'; // green
   if (score >= 60) return '#F59E0B'; // yellow
   if (score >= 40) return '#F97316'; // orange
-  return '#EF4444'; // red
+  return 'var(--color-red)';
 };
 
 export const getTagColor = (customColor?: string): string => {

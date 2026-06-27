@@ -599,6 +599,7 @@ function AIStudioContent() {
         logo={getDefaultLogo()}
         sidebarCollapsible
         responsive
+        contentMaxWidth={false}
       >
         <div style={{ display: 'flex', flexDirection: 'column', height: 'calc(100vh - 64px)', overflow: 'hidden' }}>
           {/* ── Top bar ───────────────────────────────────────────────────────── */}
