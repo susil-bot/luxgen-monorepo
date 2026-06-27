@@ -1325,41 +1325,41 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 4 — TypeScript & Type Safety (UI-76 → UI-95)
 
-- [ ] **UI-76** `[type]`
+- [x] **UI-76** `[type]`
       `packages/ui/src/Arrow/Arrow.tsx`: `tenantTheme: any`. Should be typed as `TenantTheme` (the type exists in `packages/ui/src/types`).
 
-- [ ] **UI-77** `[type]`
+- [x] **UI-77** `[type]`
       `packages/ui/src/Snackbar/Snackbar.tsx`: `tenantTheme: any`. Same fix — use `TenantTheme`.
 
-- [ ] **UI-78** `[type]`
+- [x] **UI-78** `[type]`
       `packages/ui/src/RegisterForm/RegisterForm.tsx`: `tenantTheme: any` and a catch-all `[key: string]: any` index signature. The index signature effectively disables prop type-checking for all callers.
       **Fix:** Remove the index signature; use explicit optional props for all supported keys.
 
-- [ ] **UI-79** `[type]`
+- [x] **UI-79** `[type]`
       `packages/ui/src/Input/Input.tsx`: `[key: string]: any` catch-all. Same issue as UI-78.
       **Fix:** Extend `React.InputHTMLAttributes<HTMLInputElement>` explicitly instead of an index signature.
 
-- [ ] **UI-80** `[type]`
+- [x] **UI-80** `[type]`
       `packages/ui/src/Select/Select.tsx`: `onChange: (value: any) => void`. Should be generic: `onChange: (value: T | T[]) => void` where `T = string | number`.
 
-- [ ] **UI-81** `[type]`
+- [x] **UI-81** `[type]`
       `packages/ui/src/InputWithLabel/InputWithLabel.tsx`: `value: any`, `onChange: (value: any) => void` inherited from `BaseFormProps`. The `any` propagates into every usage.
       **Fix:** Make `BaseFormProps` generic: `BaseFormProps<T = string>`.
 
-- [ ] **UI-82** `[type]`
+- [x] **UI-82** `[type]`
       `apps/web/lib/transformer.ts` has `metadata: any` in multiple type definitions, `transformDashboardData(graphqlData: any)`, and multiple `.map((item: any) => ...)`.
       **Fix:** Replace each `any` with the generated GraphQL type or an explicit interface matching the query shape.
 
-- [ ] **UI-83** `[type]`
+- [x] **UI-83** `[type]`
       `apps/web/pages/courses/create.tsx`, `courses/analytics.tsx`, `groups/analytics.tsx`, `developer/index.tsx`: all use `useState<any>(null)` for user state. Should be `useState<UserMenu | null>(null)`.
 
-- [ ] **UI-84** `[type]`
+- [x] **UI-84** `[type]`
       `apps/web/pages/dashboard.tsx`: `onDashboardAction(action: string, data?: any)`. The `action` should be a typed literal union of all supported action strings.
 
-- [ ] **UI-85** `[type]`
+- [x] **UI-85** `[type]`
       Multiple `getServerSideProps` functions are typed as `async (context: any)`. Should use `GetServerSidePropsContext` from `next`.
 
-- [ ] **UI-86** `[type]`
+- [x] **UI-86** `[type]`
       `RegisterForm` in `@luxgen/ui` exposes `ADMIN` and `SUPER_ADMIN` as selectable role options in the UI. These values flow into `REGISTER_MUTATION` with no type guard on the frontend.
       **Fix:** Type the `role` field as `'USER' | 'STUDENT'` only; remove ADMIN/SUPER_ADMIN from the UI form entirely (backend validates but defence-in-depth applies to UI too).
 
@@ -1370,15 +1370,15 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `AdminDashboardLayout` `onDashboardAction` prop accepts `data?: any`. Given the 11 different action types being wired to no-ops, this should be a discriminated union.
       **Fix:** Define `type DashboardAction = { type: 'view_course'; courseId: string } | { type: 'view_survey'; surveyId: string } | ...`.
 
-- [ ] **UI-89** `[type]`
+- [x] **UI-89** `[type]`
       No shared `ApiError` type is defined. Error handling across all pages uses `err instanceof Error ? err.message : String(err)` inline. This pattern is repeated in 40+ places.
       **Fix:** Export a shared `extractErrorMessage(err: unknown): string` utility from a shared package.
 
-- [ ] **UI-90** `[type]`
+- [x] **UI-90** `[type]`
       `packages/ui/src/Heading/Heading.tsx` accepts a `loading` prop that is silently extracted via destructuring (`const { loading, ...headingProps } = props`) but never used — it disappears without effect.
       **Fix:** Either implement a skeleton/loading state for headings, or remove the `loading` prop entirely from the type definition.
 
-- [ ] **UI-91** `[type]`
+- [x] **UI-91** `[type]`
       `apps/web/components/agent/AgentChat.tsx`: `input: Record<string, any>` in the `ToolEvent` interface. The tool input shape is known for each tool — use discriminated unions per tool name.
 
 - [ ] **UI-92** `[type]`

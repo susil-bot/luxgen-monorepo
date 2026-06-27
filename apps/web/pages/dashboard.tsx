@@ -8,6 +8,7 @@ import {
   transformDashboardData,
   handleDashboardAction,
   handleUserAction,
+  type DashboardActionType,
 } from '../lib/transformer';
 import { useAppLayoutHeader } from '../lib/app-layout-header';
 import { useLayoutUser } from '../lib/app-layout-user';
@@ -42,7 +43,7 @@ export default function Dashboard({ tenant }: DashboardProps) {
     handleUserAction(action, router);
   };
 
-  const onDashboardAction = (action: string, data?: any) => {
+  const onDashboardAction = (action: DashboardActionType | string, data?: unknown) => {
     handleDashboardAction(action, data);
   };
 
