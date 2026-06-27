@@ -154,6 +154,7 @@ const CardComponent: React.FC<CardProps> = ({
           objectFit: 'cover',
           order: imagePosition === 'bottom' || imagePosition === 'right' ? 1 : 0,
         }}
+        className={imagePosition === 'left' || imagePosition === 'right' ? 'card-adaptive-image-side' : undefined}
       />
     );
   };
@@ -243,7 +244,7 @@ const CardComponent: React.FC<CardProps> = ({
 
   return (
     <div
-      className={`card card-${variant} card-${size} ${clickable ? 'card-clickable' : ''} ${hover ? 'card-hover' : ''} ${className}`}
+      className={`card card-${variant} card-${size} lux-card-container lux-card-adaptive ${clickable ? 'card-clickable' : ''} ${hover ? 'card-hover' : ''} ${className}`}
       style={styles as React.CSSProperties}
       onClick={handleClick}
       {...props}
@@ -251,7 +252,10 @@ const CardComponent: React.FC<CardProps> = ({
       {image && imagePosition === 'top' && renderImage()}
       {image && imagePosition === 'left' && renderImage()}
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' } as React.CSSProperties}>
+      <div
+        className="card-adaptive-body"
+        style={{ flex: 1, display: 'flex', flexDirection: 'column' } as React.CSSProperties}
+      >
         {renderHeader()}
 
         <div

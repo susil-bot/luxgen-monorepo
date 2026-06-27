@@ -978,6 +978,52 @@ html.dark [data-tenant='demo'] {
     border: 1px solid var(--color-separator);
   }
 
+  /* UI-42: shared page content constraint (also applied via AppLayout when contentMaxWidth) */
+  .lux-page-content {
+    width: 100%;
+    min-width: 0;
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* UI-43: container queries — cards adapt in narrow sidebars/columns */
+  .lux-card-container {
+    container-type: inline-size;
+    container-name: lux-card;
+  }
+
+  @container lux-card (max-width: 320px) {
+    .lux-card-adaptive .lux-group-card-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .lux-card-adaptive .lux-group-card-stats {
+      grid-template-columns: 1fr;
+    }
+
+    .lux-card-adaptive .lux-group-card-actions {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+    }
+
+    .lux-card-adaptive .card-adaptive-body {
+      flex-direction: column !important;
+    }
+
+    .lux-card-adaptive .card-adaptive-image-side {
+      width: 100% !important;
+      height: auto !important;
+    }
+
+    .lux-card-adaptive .lux-store-product-title {
+      -webkit-line-clamp: 2;
+    }
+  }
+
   .admin-list-page .ios-card {
     background-color: var(--color-bg-primary);
     border: 1px solid var(--color-separator);

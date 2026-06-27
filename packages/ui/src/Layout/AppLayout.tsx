@@ -48,6 +48,8 @@ export interface AppLayoutProps {
   sidebarCollapsible?: boolean;
   sidebarDefaultCollapsed?: boolean;
   responsive?: boolean;
+  /** When true (default), constrain main content to max-w-7xl. Set false for full-bleed editors. */
+  contentMaxWidth?: boolean;
   mobileBreakpoint?: number;
   tabletBreakpoint?: number;
   desktopBreakpoint?: number;
@@ -86,6 +88,7 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   sidebarCollapsible = true,
   sidebarDefaultCollapsed = false,
   responsive = true,
+  contentMaxWidth = true,
   mobileBreakpoint = 640,
   tabletBreakpoint = 768,
   desktopBreakpoint = 1024,
@@ -358,10 +361,14 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
           {/* Main Content - Dynamic children */}
           <main
             id="main-content"
-            className={`flex-1 overflow-y-auto p-4 ${getMainContentStyles()}`}
+            className={`flex-1 overflow-y-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 ${getMainContentStyles()}`}
             style={{ paddingTop: '80px' }}
           >
-            {children}
+            {responsive && contentMaxWidth ? (
+              <div className="lux-page-content w-full min-w-0 max-w-7xl mx-auto">{children}</div>
+            ) : (
+              children
+            )}
           </main>
         </div>
 
