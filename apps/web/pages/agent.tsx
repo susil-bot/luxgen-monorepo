@@ -138,6 +138,7 @@ function AgentStudioContent() {
         logo={getDefaultLogo()}
         sidebarCollapsible
         responsive
+        contentMaxWidth={false}
       >
         <div className="flex flex-col h-full" style={{ height: 'calc(100vh - 64px)' }}>
           {/* Top bar */}
