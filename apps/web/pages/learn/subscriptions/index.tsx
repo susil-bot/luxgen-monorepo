@@ -102,7 +102,13 @@ export default function StorefrontSubscriptionsPage({ tenantSubdomain }: Props) 
                     type="button"
                     className="ios-btn-secondary text-sm"
                     disabled={canceling}
-                    onClick={() => setPendingCancel({ id: sub.id, title: sub.bundle?.title ?? 'Bundle', periodEnd: sub.currentPeriodEnd })}
+                    onClick={() =>
+                      setPendingCancel({
+                        id: sub.id,
+                        title: sub.bundle?.title ?? 'Bundle',
+                        periodEnd: sub.currentPeriodEnd,
+                      })
+                    }
                   >
                     Cancel
                   </button>
@@ -112,13 +118,31 @@ export default function StorefrontSubscriptionsPage({ tenantSubdomain }: Props) 
           )}
         </div>
         {pendingCancel && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }}>
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: 'rgba(0,0,0,0.4)' }}
+          >
             <div className="ios-card p-6 max-w-md w-full space-y-4" role="dialog" aria-modal="true">
               <h2 className="text-lg font-semibold text-primary">Cancel subscription?</h2>
-              <p className="text-sm text-secondary">Access to <strong>{pendingCancel.title}</strong> ends{pendingCancel.periodEnd ? ` on ${new Date(pendingCancel.periodEnd).toLocaleDateString()}` : ' at period end'}.</p>
+              <p className="text-sm text-secondary">
+                Access to <strong>{pendingCancel.title}</strong> ends
+                {pendingCancel.periodEnd
+                  ? ` on ${new Date(pendingCancel.periodEnd).toLocaleDateString()}`
+                  : ' at period end'}
+                .
+              </p>
               <div className="flex gap-3 justify-end">
-                <button type="button" className="ios-btn-secondary" onClick={() => setPendingCancel(null)}>Keep</button>
-                <button type="button" className="ios-btn-primary" disabled={canceling} onClick={() => void handleCancel(pendingCancel.id)}>{canceling ? 'Canceling…' : 'Confirm cancel'}</button>
+                <button type="button" className="ios-btn-secondary" onClick={() => setPendingCancel(null)}>
+                  Keep
+                </button>
+                <button
+                  type="button"
+                  className="ios-btn-primary"
+                  disabled={canceling}
+                  onClick={() => void handleCancel(pendingCancel.id)}
+                >
+                  {canceling ? 'Canceling…' : 'Confirm cancel'}
+                </button>
               </div>
             </div>
           </div>

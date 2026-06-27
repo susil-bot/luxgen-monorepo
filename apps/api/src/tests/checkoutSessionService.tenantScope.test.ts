@@ -23,6 +23,9 @@ describe('checkoutSessionService tenant scoping', () => {
   it('refreshStaleSessions scopes updateMany to tenant', async () => {
     (CheckoutSession.updateMany as jest.Mock).mockResolvedValue({});
     await checkoutSessionService.listAbandoned(tenantA);
-    expect(CheckoutSession.updateMany).toHaveBeenCalledWith(expect.objectContaining({ tenant: tenantA }), expect.any(Object));
+    expect(CheckoutSession.updateMany).toHaveBeenCalledWith(
+      expect.objectContaining({ tenant: tenantA }),
+      expect.any(Object),
+    );
   });
 });

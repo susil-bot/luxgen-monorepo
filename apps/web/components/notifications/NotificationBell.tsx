@@ -49,7 +49,11 @@ export function NotificationPanel({ onClose }: NotificationPanelProps) {
         <span className="font-semibold text-primary">Notifications</span>
         <div className="flex gap-2">
           {unread > 0 && (
-            <button type="button" className="text-xs text-secondary hover:text-primary" onClick={() => void handleMarkAll()}>
+            <button
+              type="button"
+              className="text-xs text-secondary hover:text-primary"
+              onClick={() => void handleMarkAll()}
+            >
               Mark all read
             </button>
           )}

@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { useEffect } from 'react';
 
 import { applyLearnTenantTheme } from '../../lib/learn-theme';

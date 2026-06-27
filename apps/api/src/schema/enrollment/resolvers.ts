@@ -120,7 +120,11 @@ export const enrollmentResolvers = {
     },
   },
   Mutation: {
-    sendCheckoutRecoveryEmail: async (_: unknown, { tenantId, checkoutSessionId }: { tenantId: string; checkoutSessionId: string }, ctx: GraphQLContext) => {
+    sendCheckoutRecoveryEmail: async (
+      _: unknown,
+      { tenantId, checkoutSessionId }: { tenantId: string; checkoutSessionId: string },
+      ctx: GraphQLContext,
+    ) => {
       const scoped = scopedTenantId(ctx, tenantId);
       return checkoutSessionService.sendRecoveryEmail(scoped, checkoutSessionId);
     },

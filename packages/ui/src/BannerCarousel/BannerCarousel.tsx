@@ -47,7 +47,10 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
     const resume = () => setIsPlaying(autoPlay);
     el.addEventListener('focusin', pause);
     el.addEventListener('focusout', resume);
-    return () => { el.removeEventListener('focusin', pause); el.removeEventListener('focusout', resume); };
+    return () => {
+      el.removeEventListener('focusin', pause);
+      el.removeEventListener('focusout', resume);
+    };
   }, [autoPlay]);
   useEffect(() => {
     if (!isPlaying || slides.length <= 1) return;

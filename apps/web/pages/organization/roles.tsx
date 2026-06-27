@@ -53,7 +53,10 @@ function OrganizationRolesContent({ tenant }: Props) {
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [detailRole, setDetailRole] = useState<OrganizationRoleDefinition | null>(null);
 
-  const { data: customRoleData, refetch: refetchCustomRoles } = useQuery(GET_CUSTOM_ROLES, { variables: { tenantId: queryTenantId }, skip: !queryTenantId });
+  const { data: customRoleData, refetch: refetchCustomRoles } = useQuery(GET_CUSTOM_ROLES, {
+    variables: { tenantId: queryTenantId },
+    skip: !queryTenantId,
+  });
   const [createCustomRole] = useMutation(CREATE_CUSTOM_ROLE);
   const [showCreate, setShowCreate] = useState(false);
   const [newRoleName, setNewRoleName] = useState('');
@@ -75,7 +78,12 @@ function OrganizationRolesContent({ tenant }: Props) {
   }, [data]);
 
   const roles = useMemo(() => {
-    const extras = (customRoleData?.customRoles ?? []).map((r) => ({ id: r.id, name: r.name, description: r.description ?? '', permissions: [] }));
+    const extras = (customRoleData?.customRoles ?? []).map((r) => ({
+      id: r.id,
+      name: r.name,
+      description: r.description ?? '',
+      permissions: [],
+    }));
     let list = [...ORGANIZATION_SYSTEM_ROLES, ...extras];
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -206,7 +214,10 @@ function OrganizationRolesContent({ tenant }: Props) {
         </div>
       )}
       {showCreate && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.4)' }}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.4)' }}
+        >
           <div className="ios-card p-6 max-w-md w-full space-y-4">
             <h2 className="text-lg font-semibold">Create custom role</h2>
             <input
@@ -226,7 +237,11 @@ function OrganizationRolesContent({ tenant }: Props) {
                 onClick={async () => {
                   await createCustomRole({
                     variables: {
-                      input: { tenantId: queryTenantId, name: newRoleName.trim(), permissions: { canViewReports: true } },
+                      input: {
+                        tenantId: queryTenantId,
+                        name: newRoleName.trim(),
+                        permissions: { canViewReports: true },
+                      },
                     },
                   });
                   setNewRoleName('');

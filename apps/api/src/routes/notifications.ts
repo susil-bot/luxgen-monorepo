@@ -4,7 +4,9 @@ import { getTenantContext } from '../middleware/tenantRouting';
 
 const router = Router();
 const templateOverrides = new Map();
-function overrideKey(tenantId, templateId) { return `${tenantId}:${templateId}`; }
+function overrideKey(tenantId, templateId) {
+  return `${tenantId}:${templateId}`;
+}
 
 const TEMPLATE_META: Record<
   ListingEmailTemplate,
@@ -89,7 +91,8 @@ router.get('/templates', async (req: Request, res: Response) => {
 router.patch('/templates/:id', async (req, res) => {
   const tenantContext = getTenantContext(req);
   if (!tenantContext) return res.status(404).json({ success: false, message: 'No tenant context' });
-  const { id } = req.params; const { subject, body } = req.body;
+  const { id } = req.params;
+  const { subject, body } = req.body;
   templateOverrides.set(overrideKey(tenantContext.tenantId, id), { subject, body });
   res.json({ success: true, data: { id, subject, body } });
 });

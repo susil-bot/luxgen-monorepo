@@ -1,1 +1,1 @@
-export const CheckoutSessionStatusTypeDefs=`type CheckoutSessionStatus{active:Boolean!status:String!courseId:ID studentId:ID tenantId:ID} extend type Query{checkoutSessionStatus(tenantId:ID!,courseId:ID!):CheckoutSessionStatus!}`;
+export const CheckoutSessionStatusTypeDefs = `type CheckoutSessionStatus{active:Boolean!status:String!courseId:ID studentId:ID tenantId:ID} extend type Query{checkoutSessionStatus(tenantId:ID!,courseId:ID!):CheckoutSessionStatus!}`;

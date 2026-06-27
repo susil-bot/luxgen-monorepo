@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { createHandleUserAction } from '../lib/user-actions';
@@ -95,8 +95,12 @@ const NotFoundPageContent: React.FC = () => {
                 <button type="button" onClick={() => router.push('/users')} className="ios-btn-secondary">
                   Users
                 </button>
-                <button type="button" onClick={() => router.push('/analytics')} className="ios-btn-secondary">Analytics</button>
-                <button type="button" onClick={() => router.push('/login')} className="ios-btn-primary">Sign in</button>
+                <button type="button" onClick={() => router.push('/analytics')} className="ios-btn-secondary">
+                  Analytics
+                </button>
+                <button type="button" onClick={() => router.push('/login')} className="ios-btn-primary">
+                  Sign in
+                </button>
               </div>
             </div>
           }

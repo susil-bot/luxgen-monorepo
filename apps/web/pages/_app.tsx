@@ -44,22 +44,22 @@ export default function App({ Component, pageProps }: AppProps) {
             <WebNavigationProvider>
               <SuperAdminTenantSwitchProvider>
                 <GlobalNotificationHost>
-                <SessionMonitor />
-                <SessionSync />
-                <AIStudioPanelSlot>
-                  <AIStudioSidekickPanel />
-                </AIStudioPanelSlot>
-                <a
-                  href="#main-content"
-                  className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:px-3 focus:py-2"
-                >
-                  Skip to main content
-                </a>
-                <AuthGuard>
-                  <ErrorBoundary>
-                    <Component {...pageProps} />
-                  </ErrorBoundary>
-                </AuthGuard>
+                  <SessionMonitor />
+                  <SessionSync />
+                  <AIStudioPanelSlot>
+                    <AIStudioSidekickPanel />
+                  </AIStudioPanelSlot>
+                  <a
+                    href="#main-content"
+                    className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:px-3 focus:py-2"
+                  >
+                    Skip to main content
+                  </a>
+                  <AuthGuard>
+                    <ErrorBoundary>
+                      <Component {...pageProps} />
+                    </ErrorBoundary>
+                  </AuthGuard>
                 </GlobalNotificationHost>
               </SuperAdminTenantSwitchProvider>
             </WebNavigationProvider>

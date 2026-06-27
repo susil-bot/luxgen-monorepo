@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { SettingsShell } from '../../components/settings/SettingsShell';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
-import { fetchNotificationTemplates, patchNotificationTemplate, type NotificationTemplateSummary } from '../../lib/tenant-api';
+import {
+  fetchNotificationTemplates,
+  patchNotificationTemplate,
+  type NotificationTemplateSummary,
+} from '../../lib/tenant-api';
 
 interface Props {
   tenant: string;
@@ -78,7 +82,49 @@ export default function SettingsNotificationsPage({ tenant }: Props) {
                       <pre className="text-xs text-secondary whitespace-pre-wrap bg-[var(--color-fill-quaternary)] rounded-lg p-3">
                         {t.bodyPreview}
                       </pre>
-                      {editingId === t.id ? (<div className="space-y-3 pt-2"><input className="ios-input w-full text-sm" value={editSubject} onChange={(e) => setEditSubject(e.target.value)} /><textarea className="ios-input w-full text-sm min-h-[120px]" value={editBody} onChange={(e) => setEditBody(e.target.value)} /><button type="button" className="ios-btn-primary text-sm" disabled={saving} onClick={async () => { setSaving(true); try { await patchNotificationTemplate(t.id, { subject: editSubject, body: editBody }); setTemplates(await fetchNotificationTemplates()); setEditingId(null); } finally { setSaving(false); } }}>Save</button></div>) : (<button type="button" className="ios-btn-secondary text-sm mt-2" onClick={() => { setEditingId(t.id); setEditSubject(t.subject); setEditBody(t.bodyPreview); }}>Edit</button>)}
+                      {editingId === t.id ? (
+                        <div className="space-y-3 pt-2">
+                          <input
+                            className="ios-input w-full text-sm"
+                            value={editSubject}
+                            onChange={(e) => setEditSubject(e.target.value)}
+                          />
+                          <textarea
+                            className="ios-input w-full text-sm min-h-[120px]"
+                            value={editBody}
+                            onChange={(e) => setEditBody(e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            className="ios-btn-primary text-sm"
+                            disabled={saving}
+                            onClick={async () => {
+                              setSaving(true);
+                              try {
+                                await patchNotificationTemplate(t.id, { subject: editSubject, body: editBody });
+                                setTemplates(await fetchNotificationTemplates());
+                                setEditingId(null);
+                              } finally {
+                                setSaving(false);
+                              }
+                            }}
+                          >
+                            Save
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          className="ios-btn-secondary text-sm mt-2"
+                          onClick={() => {
+                            setEditingId(t.id);
+                            setEditSubject(t.subject);
+                            setEditBody(t.bodyPreview);
+                          }}
+                        >
+                          Edit
+                        </button>
+                      )}
                     </div>
                   )}
                 </li>
