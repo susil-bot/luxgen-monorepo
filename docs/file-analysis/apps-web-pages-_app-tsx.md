@@ -1,103 +1,54 @@
-# _app.tsx — Deep Analysis (Hand-enriched)
+# _app.tsx — Brief + Junior Q&A
 
-## File Path
+**Path:** `apps/web/pages/_app.tsx`  
+**Role:** Root wrapper for all pages — global CSS, providers, auth guard.
 
-`apps/web/pages/_app.tsx` (83 lines)
+---
 
-## Purpose
+## Junior Q&A
 
-Root Next.js Pages Router application shell. Wires **every page** to:
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[0] What is `_app.tsx` in Next.js?**
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-- Apollo GraphQL client
-- Theme + tenant design tokens
-- Global UI providers from `@luxgen/ui`
-- Auth/session guards and cross-tab sync
-- Agent Studio sidekick panel slot
-- SEO default head tags
-- Inter font (`next/font`)
+**ANS.** Custom App component — runs for every route. Wraps `<Component {...pageProps} />`.
 
-**Why it exists:** Single composition root so individual pages stay thin (no repeated provider boilerplate).
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[1] List the provider order (outer → inner).**
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-## Imports & Exports
+**ANS.** `ApolloProvider` → `ThemeProvider` → `GlobalProvider` → `AIStudioProvider` → `WebNavigationProvider` → `LayoutUserProvider` → `SuperAdminTenantSwitchProvider` → `GlobalNotificationHost` → `AuthGuard` → page — `_app.tsx:46-72`.
 
-| Import source | Symbols |
-|---------------|---------|
-| `next/app` | `AppProps` |
-| `@apollo/client` | `ApolloProvider` |
-| `../graphql/client` | `client` |
-| `@luxgen/ui` | `GlobalProvider`, `NavigationProvider`, `AIStudioProvider`, `AIStudioPanelSlot`, `ErrorBoundary` |
-| `../lib/theme` | `ThemeProvider` |
-| `../lib/layout-user-context` | `LayoutUserProvider` |
-| `../lib/layout-user-shared` | `LayoutUser` (type) |
-| `../components/auth/*` | `AuthGuard`, `SessionMonitor`, `SessionSync` |
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[2] Why is ApolloProvider at the top?**
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-**Exports:** `default function App`
+**ANS.** Any page/hook using `useQuery` needs Apollo context — `_app.tsx:46`.
 
-## Design Pattern
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[3] What is `LayoutUserProvider`?**
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-**Composite Root Provider** + **Adapter** (`WebNavigationProvider` adapts Next router to UI `NavigationProvider`).
+**ANS.** Shares SSR/hydrated layout user to NavBar/sidebar — `_app.tsx:54`, `layout-user-context.tsx`.
 
-## Function-Level Analysis
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[4] What is `WebNavigationProvider`?**
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-### `WebNavigationProvider` — Lines 25–38
+**ANS.** Connects `@luxgen/ui` sidebar navigation to `router.push` — `_app.tsx:25-38`.
 
-| | |
-|--|--|
-| **Inputs** | `children: React.ReactNode` |
-| **Outputs** | JSX wrapping `NavigationProvider` |
-| **Side effects** | `router.push(href)` on navigate |
-| **Pure?** | Impure (navigation) |
-| **Re-renders when** | Parent re-renders; `router.pathname` from `useRouter()` |
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[5] Where is the skip link for accessibility?**
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-**Interview:** Why not put `useRouter` inside `@luxgen/ui`?  
-**Answer:** UI package must stay framework-agnostic; adapter lives in `apps/web`.
+**ANS.** Anchor to `#main-content` — `_app.tsx:62-67`.
 
-### `App` — Lines 41–82
+--------------------------------------------------------------------------------------------------------------------------------------------
+**[6] Where does `layoutUser` for SSR come from?**
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-| | |
-|--|--|
-| **Inputs** | `Component` (active page), `pageProps` (incl. `tenant`, `layoutUser` from GSSP) |
-| **Outputs** | Full provider tree |
-| **Side effects** | None directly (delegated to children) |
+**ANS.** `pageProps.layoutUser` from `getServerSideProps` — read at `_app.tsx:42`.
 
-**SSR note:** `layoutUser` hydrated from `getTenantPageProps` optional cookie for first paint.
+---
 
-## Rendering / Re-render Triggers
-
-- Any parent state change in providers (theme, auth epoch, Apollo cache)
-- Route change → `Component` swap
-- `layoutUser` prop change from page transition
-
-## Performance
-
-- Provider depth is deep (~12 levels) — acceptable for admin app; avoid putting heavy state high in tree
-- CSS imports pull sidebar/arrow/product-card/kicker styles globally
-
-## Accessibility
-
-- Skip link lines 62–66 → `#main-content` (pages must set `id="main-content"` on `<main>`)
-
-## Possible Improvements
-
-1. Split providers into `AppProviders.tsx` for testability
-2. Lazy-load `AIStudioSidekickPanel` with `dynamic(..., { ssr: false })`
-3. Move global CSS imports to `_app` only (already done) — avoid duplicate in pages
-
-## Interview Questions
-
-**Easy:** What is `_app.tsx` in Next.js?  
-**Medium:** Provider order — what breaks if Apollo is inside AuthGuard?  
-**Hard:** Design SSR auth without flashing guest UI on protected routes.  
-**System:** How would you micro-frontend this shell?
-
-## Senior Discussion
-
-- **FAANG:** Would require explicit boundary between shell and feature teams
-- **Startup:** This monolithic shell is correct for velocity
-- **Bug we fixed:** `LayoutUserProvider` circular import — split `layout-user-shared.ts`
-
-## Related files
-
-- [apps-web-components-auth-AuthGuard-tsx.md](./apps-web-components-auth-AuthGuard-tsx.md)
-- [apps-web-lib-session-ts.md](./apps-web-lib-session-ts.md)
-- [03-react.md](../interview-prep/03-react.md)
+**More:** [14-junior-qa-react.md](../interview-prep/14-junior-qa-react.md#21-what-is-_apptsx-responsible-for)

@@ -1,5 +1,7 @@
 # 12 — Live Interview Cheatsheet (One-Pager)
 
+**Full Q&A with file:line:** [14-junior-qa-react](./14-junior-qa-react.md) · [15-junior-qa-mern](./15-junior-qa-mern.md)
+
 ## React (30 sec each)
 
 - **Virtual DOM:** JS representation; diff → patch real DOM  
