@@ -14,6 +14,7 @@ import AgentTransparency from '../../components/agent/AgentTransparency';
 import { AGENT_TOOLS } from '@luxgen/agent';
 import { SYSTEM_PROMPT } from '../../lib/agent-system-prompt';
 import { createHandleUserAction } from '../../lib/user-actions';
+import { getTenantPageProps } from '../../lib/tenant-page-props';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -889,6 +890,4 @@ export default function AiStudioPage() {
   );
 }
 
-export const getServerSideProps = async (ctx: any) => ({
-  props: { tenant: ctx.query.tenant || 'demo' },
-});
+export const getServerSideProps = getTenantPageProps;

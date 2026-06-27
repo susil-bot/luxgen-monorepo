@@ -11,6 +11,7 @@ import { normalizePlan } from '@luxgen/billing';
 import { GET_COURSE_ANALYTICS } from '../../graphql/queries/analytics';
 import { useAppTenantId } from '../../lib/app-layout-user';
 import { isMongoObjectId } from '../../lib/mongo-id';
+import { getTenantPageProps } from '../../lib/tenant-page-props';
 
 interface CourseAnalyticsPageProps {
   tenant: string;
@@ -258,11 +259,4 @@ export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps
   );
 }
 
-export const getServerSideProps = async (context: any) => {
-  const { tenant } = context.query;
-  return {
-    props: {
-      tenant: tenant || 'demo',
-    },
-  };
-};
+export const getServerSideProps = getTenantPageProps;

@@ -10,6 +10,7 @@ import {
   Arrow,
 } from '@luxgen/ui';
 import { TenantBanner } from '../components/tenant/TenantBanner';
+import { getTenantPageProps } from '../lib/tenant-page-props';
 
 interface BannerDemoProps {
   tenant: string;
@@ -169,29 +170,4 @@ export default function BannerDemo({ tenant }: BannerDemoProps) {
   );
 }
 
-export const getServerSideProps = async (context: any) => {
-  const host = context.req.headers.host;
-  let tenant = 'demo'; // Default tenant
-
-  // Extract tenant from subdomain
-  if (host && host.includes('.')) {
-    const parts = host.split('.');
-    if (parts.length > 1) {
-      const subdomain = parts[0];
-      if (subdomain !== 'www' && subdomain !== 'localhost' && subdomain !== '127.0.0.1') {
-        tenant = subdomain;
-      }
-    }
-  }
-
-  // Check query parameter as fallback
-  if (context.query.tenant) {
-    tenant = context.query.tenant;
-  }
-
-  return {
-    props: {
-      tenant,
-    },
-  };
-};
+export const getServerSideProps = getTenantPageProps;

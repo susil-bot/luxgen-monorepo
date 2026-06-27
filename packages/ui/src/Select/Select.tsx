@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { BaseComponentProps, TenantTheme, BaseFormProps, SelectOption } from '../types';
+import { BaseComponentProps, TenantTheme, SelectOption } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
-export interface SelectProps extends BaseComponentProps, BaseFormProps {
+export interface SelectProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
   options: SelectOption[];
+  value?: string | number | Array<string | number>;
+  onChange?: (value: string | number | Array<string | number>) => void;
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
