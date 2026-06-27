@@ -1,6 +1,6 @@
 import { useQuery } from '@apollo/client';
 import { GET_NOTIFICATIONS } from '../graphql/queries/notifications';
-import { validateClientSession } from './session-guard';
+import { validateClientSession } from '../lib/session-guard';
 
 /** Poll notification unread count for layout headers */
 export function useNotificationCount(pollMs = 60_000): number {
