@@ -59,19 +59,9 @@ export function GptSalesAssistant({
   );
 
   return (
-    <aside
-      className="rounded-2xl p-5 flex flex-col gap-4 h-fit sticky top-24"
-      style={{
-        background: 'linear-gradient(160deg, rgba(0,122,255,0.08), rgba(175,82,222,0.06))',
-        border: '1px solid rgba(0,122,255,0.2)',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.08)',
-      }}
-    >
+    <aside className="lux-store-assistant-shell rounded-2xl p-5 flex flex-col gap-4 h-fit sticky top-24">
       <div className="flex items-center gap-2">
-        <span
-          className="h-9 w-9 rounded-full flex items-center justify-center text-xs font-bold text-white"
-          style={{ background: 'linear-gradient(135deg, #007AFF, #AF52DE)' }}
-        >
+        <span className="lux-brand-gradient lux-brand-gradient-text h-9 w-9 rounded-full flex items-center justify-center text-xs font-bold">
           GPT
         </span>
         <div>

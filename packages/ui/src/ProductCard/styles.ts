@@ -280,35 +280,4 @@ export const productCardClasses = {
   addToCartButton: 'product-card-add-to-cart-button',
 };
 
-// CSS styles for additional hover effects and animations
-export const productCardCSS = `
-  .product-card {
-    transition: all 0.2s ease;
-  }
-  
-  .product-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px -5px rgba(0, 0, 0, 0.1);
-  }
-  
-  .product-card-image img {
-    transition: transform 0.2s ease;
-  }
-  
-  .product-card-image:hover img {
-    transform: scale(1.05);
-  }
-  
-  .product-card-like-button:hover {
-    background-color: rgba(255, 255, 255, 1) !important;
-    transform: scale(1.1);
-  }
-  
-  .product-card-edit-button:hover {
-    background-color: #E5E7EB !important;
-  }
-  
-  .product-card-add-to-cart-button:hover {
-    transform: translateY(-1px);
-  }
-`;
+// Hover rules live in ./product-card.css (imported once from ProductCard.tsx or _app.tsx).
