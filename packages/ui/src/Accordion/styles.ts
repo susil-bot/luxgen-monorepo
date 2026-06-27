@@ -32,7 +32,7 @@ export const accordionStyles = {
       font-family: var(--font-primary);
       font-size: 1rem;
       color: var(--color-text);
-      transition: all 0.2s ease;
+      transition: all var(--transition-fast, 120ms ease);
     }
 
     .accordion-trigger:hover {
@@ -65,7 +65,7 @@ export const accordionStyles = {
       height: 1.5rem;
       font-size: 1rem;
       color: var(--color-text-secondary);
-      transition: transform 0.2s ease;
+      transition: transform var(--transition-fast, 120ms ease);
     }
 
     .accordion-item.open .accordion-icon {
@@ -77,7 +77,7 @@ export const accordionStyles = {
     .accordion-content {
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.3s ease;
+      transition: max-height var(--transition-slow, 350ms ease);
       background-color: var(--color-background);
     }
 

@@ -1273,7 +1273,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/components/tenant/TenantBanner.tsx` uses Tailwind `from-blue-600 to-purple-600` gradient classes.
       **Fix:** Replace with the `lux-brand-gradient` CSS class (see UI-60).
 
-- [ ] **UI-64** `[hardcode]`
+- [x] **UI-64** `[hardcode]`
       `apps/web/components/agent/AgentChat.tsx` uses `rgba(0,122,255,0.1)` for the user message bubble background.
       **Fix:** Use `color-mix(in srgb, var(--color-blue) 10%, transparent)` or define `--color-blue-10` in `globals.css`.
 
@@ -1293,31 +1293,31 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/pages/automations/tower/index.tsx` and `tower/[id].tsx` use `#616161`, `#d72c0d`, `#202223`, `#fff` in six or more places. The tower UI has the highest density of hardcoded colour values in the entire codebase.
       **Fix:** Map each value to a CSS variable; consolidate in `globals.css` under a `[data-tower]` scope.
 
-- [ ] **UI-69** `[hardcode]`
+- [x] **UI-69** `[hardcode]`
       `packages/ui/src/Badge/Badge.tsx` computes background as `${color}20` (appending hex opacity). This is not a standard CSS pattern and breaks if `color` is a CSS variable or `rgb()` function.
       **Fix:** Use `color-mix(in srgb, ${color} 12%, transparent)` or define explicit CSS variable pairs per variant.
 
-- [ ] **UI-70** `[hardcode]`
+- [x] **UI-70** `[hardcode]`
       `packages/ui/src/NavBar/NavBar.tsx` hardcodes `height: 56px` for the navbar. If the font size or padding increases, the navbar will overflow.
       **Fix:** Define `--lux-navbar-height: 56px` as a CSS variable (already done for sidebar — apply the same pattern to navbar).
 
-- [ ] **UI-71** `[hardcode]`
+- [x] **UI-71** `[hardcode]`
       `packages/ui/src/Card/Card.tsx` hardcodes `minHeight` in `rem` values (`8rem | 10rem | 12rem`) for size variants. These do not scale with the user's chosen base font size.
       **Fix:** Express minimum heights as unitless multiples or `ch` units that scale with content.
 
-- [ ] **UI-72** `[hardcode]`
+- [x] **UI-72** `[hardcode]`
       `packages/ui/src/Kicker/Kicker.tsx` hardcodes letter-spacing values (`0.05em | 0.1em | 0.15em`) and line-heights (`1.2 | 1.3 | 1.4`) as inline style objects. These are typography decisions that should live in CSS.
       **Fix:** Move to CSS classes or CSS variables.
 
-- [ ] **UI-73** `[hardcode]`
+- [x] **UI-73** `[hardcode]`
       `packages/ui/src/Select/Select.tsx` uses `'▼'` as the dropdown indicator arrow — a Unicode character, not an SVG icon. Screen readers will announce this as "black down-pointing triangle".
       **Fix:** Replace with an inline SVG chevron with `aria-hidden="true"`.
 
-- [ ] **UI-74** `[hardcode]`
+- [x] **UI-74** `[hardcode]`
       `packages/ui/src/ActionMenu/ActionMenu.tsx` trigger button uses `'···'` (three dots) as its label — a Unicode ellipsis that screen readers announce literally.
       **Fix:** Replace with an SVG icon and add `aria-label="More actions"`.
 
-- [ ] **UI-75** `[hardcode]`
+- [x] **UI-75** `[hardcode]`
       Animation durations across components are inconsistent: Accordion uses `0.2s`, Carousel uses `0.3s`, Snackbar uses `300ms`, Logout uses `dur="2s"`. No shared timing token is referenced.
       **Fix:** Define `--transition-fast: 150ms`, `--transition-base: 250ms`, `--transition-slow: 400ms` in `globals.css` and reference them in all components.
 

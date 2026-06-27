@@ -113,7 +113,7 @@ const NavBarComponent: React.FC<NavBarProps> = ({
         left: 0,
         right: 0,
         zIndex: 50,
-        height: '56px',
+        height: 'var(--lux-navbar-height, var(--lux-header-height, 56px))',
       }}
       {...props}
     >

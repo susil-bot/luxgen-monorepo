@@ -65,9 +65,9 @@ function ToolBadge({ event }: { event: ToolEvent }) {
     <div
       className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium my-1 animate-fade-in"
       style={{
-        backgroundColor: event.status === 'running' ? 'rgba(0,122,255,0.1)' : 'var(--color-fill-quaternary)',
+        backgroundColor: event.status === 'running' ? 'var(--color-blue-subtle)' : 'var(--color-fill-quaternary)',
         color: event.status === 'running' ? 'var(--color-blue)' : 'var(--color-label-secondary)',
-        border: `1px solid ${event.status === 'running' ? 'rgba(0,122,255,0.2)' : 'var(--color-separator)'}`,
+        border: `1px solid ${event.status === 'running' ? 'var(--color-blue-subtle-border)' : 'var(--color-separator)'}`,
       }}
     >
       <span>{icon}</span>

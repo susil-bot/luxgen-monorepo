@@ -16,6 +16,7 @@ import '../styles/globals.css';
 import '../../../packages/ui/src/Sidebar/sidebar.css';
 import '../../../packages/ui/src/Arrow/arrow.css';
 import '../../../packages/ui/src/ProductCard/product-card.css';
+import '../../../packages/ui/src/Kicker/kicker.css';
 
 function WebNavigationProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();

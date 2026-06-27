@@ -245,7 +245,7 @@ const CarouselComponent: React.FC<CarouselProps> = ({
                     : tenantTheme.colors.border,
                 margin: '0 0.25rem',
                 cursor: 'pointer',
-                transition: 'background-color 0.2s ease',
+                transition: 'background-color var(--transition-fast, 120ms ease)',
               }}
             />
           ))}
@@ -269,7 +269,7 @@ const CarouselComponent: React.FC<CarouselProps> = ({
                 cursor: 'pointer',
                 margin: '0 0.25rem',
                 overflow: 'hidden',
-                transition: 'border-color 0.2s ease',
+                transition: 'border-color var(--transition-fast, 120ms ease)',
               }}
             >
               {item.content}
