@@ -1,11 +1,11 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { SnackbarProvider, DataListPage, EmptyState, type DataListTab, type FilterChipData } from '@luxgen/ui';
 import { OrganizationShell } from '../../../components/organization/OrganizationShell';
 import { PageLoadingState } from '../../../components/common/PageStates';
 import { filterGroupsBySearch } from '../../../lib/group-display';
-import { GET_GROUPS } from '../../../graphql/queries/groups';
+import { CREATE_GROUP, GET_GROUPS } from '../../../graphql/queries/groups';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 
 interface Props {
@@ -37,6 +37,9 @@ function OrganizationGroupsContent({ tenant }: Props) {
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState('all');
   const [activeFilters, setActiveFilters] = useState<FilterChipData[]>([]);
+  const [showCreate, setShowCreate] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [createGroup, { loading: creating }] = useMutation(CREATE_GROUP);
 
   useEffect(() => {
     const q = router.query.search;
@@ -85,7 +88,7 @@ function OrganizationGroupsContent({ tenant }: Props) {
         breadcrumb="Organization"
         title="Groups"
         secondaryAction={{ label: 'Analytics', onClick: () => void router.push('/groups/analytics') }}
-        primaryAction={{ label: 'Create group', onClick: () => void router.push('/groups/create') }}
+        primaryAction={{ label: 'Create group', onClick: () => setShowCreate(true) }}
         tabs={tabs}
         activeTab={activeTab}
         onTabChange={handleTabChange}
@@ -150,6 +153,40 @@ function OrganizationGroupsContent({ tenant }: Props) {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+        {showCreate && (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center p-4"
+            style={{ background: 'rgba(0,0,0,0.4)' }}
+          >
+            <div className="ios-card p-6 w-full max-w-md space-y-4">
+              <h2 className="font-semibold">Create group</h2>
+              <input
+                className="input-field"
+                placeholder="Group name"
+                value={newGroupName}
+                onChange={(e) => setNewGroupName(e.target.value)}
+              />
+              <div className="flex justify-end gap-2">
+                <button type="button" className="ios-btn-secondary" onClick={() => setShowCreate(false)}>
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  className="ios-btn-primary"
+                  disabled={creating || !newGroupName.trim()}
+                  onClick={async () => {
+                    const { data } = await createGroup({ variables: { input: { name: newGroupName.trim() } } });
+                    setShowCreate(false);
+                    const id = data?.createGroup?.id;
+                    if (id) void router.push(`/groups/${id}`);
+                  }}
+                >
+                  Create
+                </button>
+              </div>
+            </div>
           </div>
         )}
       </DataListPage>

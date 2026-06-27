@@ -23,6 +23,8 @@
     "dev:stack:mobile": "bash scripts/dev-stack.sh mobile",
     "dev:stack:api": "bash scripts/dev-stack.sh api",
     "dev:agent-worker": "turbo run dev --filter=@luxgen/agent-worker",
+    "dev:mcp": "npm run build:mcp && node apps/mcp-server/dist/index.js",
+    "build:mcp": "turbo run build --filter=@luxgen/mcp-server^... --filter=@luxgen/mcp-server",
     "dev:docker": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
     "dev:docker:detach": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d",
     "dev:docker:build": "docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build",
@@ -40,28 +42,36 @@
     "prepare": "husky",
     "validate": "sh scripts/validate.sh",
     "validate:build": "sh scripts/validate-build.sh",
+    "test:k8s": "node --test scripts/k8s-config-ingress-smoke.mjs",
     "init:tenant-workflow": "node scripts/init-tenant-workflow.js",
     "init:tenants": "node scripts/init-tenants.js",
-    "select-tenant": "node scripts/select-tenant.js"
+    "select-tenant": "node scripts/select-tenant.js",
+    "test:auto": "vitest run -c vitest.workspace.ts",
+    "test:auto:api": "vitest run -c vitest.workspace.ts --project api-auto",
+    "test:auto:web": "vitest run -c vitest.workspace.ts --project web-auto",
+    "test:auto:ui": "vitest run -c vitest.workspace.ts --project ui-auto"
   },
   "dependencies": {
     "classnames": "^2.5.1",
     "prop-types": "^15.8.1"
   },
   "devDependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^6.0.0",
     "@typescript-eslint/parser": "^6.0.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^8.0.0",
     "husky": "^9.1.7",
+    "is-potential-custom-element-name": "^1.0.1",
     "lint-staged": "^15.5.2",
     "oxfmt": "^0.55.0",
     "oxlint": "^1.70.0",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.0",
     "turbo": "^1.10.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^2.1.9"
   },
   "engines": {
     "node": ">=18.0.0"

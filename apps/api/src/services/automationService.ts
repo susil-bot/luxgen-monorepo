@@ -7,6 +7,7 @@ import {
   type IAutomationAction,
   type IAutomationRun,
 } from '@luxgen/db';
+import { emitAutomationEvent } from '@luxgen/agent';
 import { logger } from '../utils/logger';
 
 export interface AutomationActionInput {
@@ -22,6 +23,7 @@ export interface CreateAutomationInput {
   triggerLabel: string;
   actions: AutomationActionInput[];
   enabled?: boolean;
+  flowDefinition?: Record<string, unknown>;
 }
 
 export interface UpdateAutomationInput {
@@ -30,6 +32,7 @@ export interface UpdateAutomationInput {
   triggerLabel?: string;
   actions?: AutomationActionInput[];
   enabled?: boolean;
+  flowDefinition?: Record<string, unknown>;
 }
 
 const DEMO_SEED: Omit<CreateAutomationInput, 'tenantId'>[] = [
@@ -98,9 +101,11 @@ export class AutomationService {
     logger.info(`Seeded ${DEMO_SEED.length} automations for tenant ${tenantId}`);
   }
 
-  async getAutomations(tenantId: string): Promise<IAutomation[]> {
+  async getAutomations(tenantId: string, limit = 50, offset = 0): Promise<IAutomation[]> {
     await this.ensureSeedForTenant(tenantId);
-    return Automation.find({ tenantId }).sort({ createdAt: -1 });
+    const safeLimit = Math.min(Math.max(limit, 1), 100);
+    const safeOffset = Math.max(offset, 0);
+    return Automation.find({ tenantId }).sort({ createdAt: -1 }).skip(safeOffset).limit(safeLimit);
   }
 
   async getAutomationById(id: string, tenantId: string): Promise<IAutomation | null> {
@@ -138,6 +143,62 @@ export class AutomationService {
     return Boolean(result);
   }
 
+  async executeAutomation(
+    automationId: string,
+    tenantId: string,
+    payload: Record<string, unknown> = {},
+  ): Promise<IAutomationRun | null> {
+    const automation = await this.getAutomationById(automationId, tenantId);
+    if (!automation?.enabled) return null;
+
+    const started = Date.now();
+    const run = await AutomationRun.create({
+      automationId: String(automation._id),
+      automationName: automation.name,
+      tenantId,
+      triggerType: automation.triggerType,
+      status: 'running',
+      durationMs: 0,
+      payload,
+      triggeredAt: new Date(),
+    });
+
+    try {
+      await this.executeAutomationActions(automation, payload);
+      const durationMs = Date.now() - started;
+      await AutomationRun.updateOne({ _id: run._id }, { status: 'success', durationMs });
+      await Automation.updateOne({ _id: automation._id }, { $inc: { runCount: 1 }, $set: { lastRunAt: new Date() } });
+      return AutomationRun.findById(run._id);
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      const durationMs = Date.now() - started;
+      await AutomationRun.updateOne({ _id: run._id }, { status: 'error', durationMs, error: message });
+      await Automation.updateOne({ _id: automation._id }, { $inc: { runCount: 1 }, $set: { lastRunAt: new Date() } });
+      logger.error(`Automation run failed for "${automation.name}": ${message}`);
+      return AutomationRun.findById(run._id);
+    }
+  }
+
+  private async executeAutomationActions(automation: IAutomation, _payload: Record<string, unknown>): Promise<void> {
+    for (const action of automation.actions) {
+      logger.info(
+        `[automation] ${action.type} for "${automation.name}" (tenant=${automation.tenantId})`,
+        action.config ?? {},
+      );
+    }
+  }
+
+  async triggerAutomations(
+    tenantId: string,
+    triggerType: AutomationTriggerType,
+    payload: Record<string, unknown> = {},
+    source: 'system' | 'lms' | 'commerce' | 'agent' | 'webhook' = 'system',
+  ): Promise<number> {
+    const automations = await this.getAutomationsByTrigger(tenantId, triggerType);
+    if (automations.length === 0) return 0;
+    return emitAutomationEvent({ tenantId, triggerType, payload, source });
+  }
+
   toGraphQL(automation: IAutomation) {
     return {
       id: String(automation._id),
@@ -151,6 +212,7 @@ export class AutomationService {
         label: a.label,
         config: a.config ?? null,
       })),
+      flowDefinition: automation.flowDefinition ?? null,
       runCount: automation.runCount,
       lastRunAt: automation.lastRunAt ?? null,
       createdAt: automation.createdAt,

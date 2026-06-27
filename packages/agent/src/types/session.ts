@@ -21,10 +21,18 @@ export interface StagedFile {
   type: 'new' | 'modified';
   description: string;
   stagedAt: number;
+  pendingDelete?: boolean;
 }
 
 import type { AgentSessionGit } from './git';
 import type { ValidationResult } from './validation';
+
+/** Persisted chat turn (capped at 50 per session). */
+export interface SessionChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+}
 
 export interface AgentSession {
   id: string;
@@ -38,6 +46,10 @@ export interface AgentSession {
   status?: import('./task').TaskStatus;
   mode?: import('./task').TaskMode;
   prompt?: string;
+  metadata?: {
+    model?: string;
+  };
+  messages?: SessionChatMessage[];
 }
 
 export interface ApplyResult {
@@ -46,4 +58,5 @@ export interface ApplyResult {
   conflicts: string[];
   mode?: 'filesystem' | 'worktree';
   branch?: string;
+  blocked?: boolean;
 }

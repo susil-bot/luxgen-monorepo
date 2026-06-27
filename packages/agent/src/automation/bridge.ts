@@ -1,27 +1,26 @@
 import {
   Automation,
   AutomationRun,
-  Tenant,
-  TenantSubscription,
+  Enrollment,
   TenantUsageMonthly,
+  resolveEffectivePlan,
   currentUsagePeriod,
   ActivityEventKind,
   ActivityActorType,
+  enrollmentSubjectId,
   type AutomationTriggerType,
   type IAutomation,
   type IAutomationAction,
 } from '@luxgen/db';
-import { assertWithinLimit, normalizePlan } from '@luxgen/billing';
+import { assertWithinLimit } from '@luxgen/billing';
 import { randomUUID } from 'crypto';
 import { enqueueHeadlessTask } from '../queue/redis-queue';
 import { ensureMongoConnection } from '../persistence/mongo';
 import { getRedisClient } from '../queue/redis-queue';
 import { getOllamaUrl } from '@luxgen/config';
 import { AUTOMATION_EVENTS_CHANNEL, type AutomationEventPayload } from './events';
-import {
-  recordTimelineEvent,
-  subjectsFromAutomationPayload,
-} from '../timeline/record';
+import { recordTimelineEvent, subjectsFromAutomationPayload } from '../timeline/record';
+import { planFlowExecutionFromDefinition } from '@luxgen/automation-flow';
 
 export interface EmitAutomationEventOptions {
   tenantId: string;
@@ -122,11 +121,31 @@ async function publishAutomationEvent(event: AutomationEventPayload): Promise<vo
   }
 }
 
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 async function executeAutomationActions(
   automation: IAutomation,
   event: AutomationEventPayload,
   runId: string,
 ): Promise<void> {
+  const flowSteps = planFlowExecutionFromDefinition(automation.flowDefinition, event.payload);
+
+  if (flowSteps) {
+    for (const step of flowSteps) {
+      if (step.kind === 'wait') {
+        if (step.seconds > 0) {
+          console.log(`[automation-bridge] Wait ${step.seconds}s (${step.title}) for "${automation.name}"`);
+          await sleep(step.seconds * 1000);
+        }
+        continue;
+      }
+      await executeAction(step.action as IAutomationAction, automation, event, runId);
+    }
+    return;
+  }
+
   for (const action of automation.actions) {
     await executeAction(action, automation, event, runId);
   }
@@ -180,6 +199,9 @@ async function executeAction(
         runId,
       });
       break;
+    case 'UPDATE_ORDER_FIELDS':
+      await executeUpdateOrderFields(action, automation, event, runId);
+      break;
     default:
       console.warn(`[automation-bridge] Unknown action type: ${action.type}`);
   }
@@ -195,6 +217,7 @@ const ACTION_LABELS: Record<string, string> = {
   NOTIFY_SLACK: 'sent a Slack notification',
   TAG_USER: 'tagged the customer',
   RUN_AGENT_TASK: 'ran an agent task',
+  UPDATE_ORDER_FIELDS: 'updated order fields',
 };
 
 async function recordAutomationTimeline(params: {
@@ -208,7 +231,13 @@ async function recordAutomationTimeline(params: {
   const subjects = subjectsFromAutomationPayload(params.event.payload);
   if (subjects.length === 0) return;
 
-  const actionSummary = params.automation.actions.map((a) => a.label || a.type).join(', ');
+  const flowSteps = planFlowExecutionFromDefinition(params.automation.flowDefinition, params.event.payload);
+  const actionSummary = flowSteps
+    ? flowSteps
+        .filter((step) => step.kind === 'action')
+        .map((step) => step.action.label || step.action.type)
+        .join(', ')
+    : params.automation.actions.map((a) => a.label || a.type).join(', ');
   const message =
     params.status === 'success'
       ? `${params.automation.name} ran (${actionSummary})`
@@ -279,6 +308,113 @@ async function recordAutomationActionTimeline(params: {
   }
 }
 
+function resolveOrderIds(
+  payload: Record<string, unknown>,
+): { courseId: string; studentId: string; orderId: string } | null {
+  const courseId = payload.courseId as string | undefined;
+  const studentId = (payload.studentId ?? payload.userId) as string | undefined;
+  const orderIdRaw = payload.orderId as string | undefined;
+
+  if (courseId && studentId) {
+    return { courseId, studentId, orderId: enrollmentSubjectId(courseId, studentId) };
+  }
+  if (orderIdRaw?.includes(':')) {
+    const [parsedCourseId, parsedStudentId] = orderIdRaw.split(':');
+    if (parsedCourseId && parsedStudentId) {
+      return { courseId: parsedCourseId, studentId: parsedStudentId, orderId: orderIdRaw };
+    }
+  }
+  return null;
+}
+
+async function executeUpdateOrderFields(
+  action: IAutomationAction,
+  automation: IAutomation,
+  event: AutomationEventPayload,
+  runId: string,
+): Promise<void> {
+  const orderIds = resolveOrderIds(event.payload);
+  if (!orderIds) {
+    throw new Error('UPDATE_ORDER_FIELDS requires orderId or courseId+studentId in trigger payload');
+  }
+
+  const enrollment = await Enrollment.findOne({
+    tenant: event.tenantId,
+    course: orderIds.courseId,
+    student: orderIds.studentId,
+  });
+  if (!enrollment) {
+    throw new Error(`Order not found: ${orderIds.orderId}`);
+  }
+
+  const config = action.config ?? {};
+  const note = typeof config.note === 'string' ? config.note.trim() : '';
+  const tagsRaw = typeof config.tags === 'string' ? config.tags : '';
+  const customFields =
+    config.customFields && typeof config.customFields === 'object' && !Array.isArray(config.customFields)
+      ? (config.customFields as Record<string, unknown>)
+      : undefined;
+
+  if (note) enrollment.notes = note;
+
+  if (tagsRaw.trim()) {
+    const incoming = tagsRaw
+      .split(',')
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+    const merged = new Set([...(enrollment.tags ?? []), ...incoming]);
+    enrollment.tags = [...merged];
+  }
+
+  if (customFields && Object.keys(customFields).length > 0) {
+    enrollment.metadata = { ...enrollment.metadata, ...customFields };
+  }
+
+  await enrollment.save();
+
+  await recordAutomationActionTimeline({
+    tenantId: event.tenantId,
+    automation,
+    action,
+    payload: {
+      ...event.payload,
+      orderId: orderIds.orderId,
+      courseId: orderIds.courseId,
+      studentId: orderIds.studentId,
+    },
+    runId,
+  });
+}
+
+export type CommerceAutomationEventKind = 'order_created' | 'order_drafted' | 'payment_sent';
+
+/** Map commerce order lifecycle events to automation triggers. */
+export async function emitCommerceAutomationEvent(
+  tenantId: string,
+  kind: CommerceAutomationEventKind,
+  details: Record<string, unknown>,
+): Promise<number> {
+  const map: Record<CommerceAutomationEventKind, AutomationTriggerType> = {
+    order_created: 'ORDER_CREATED',
+    order_drafted: 'ORDER_DRAFTED',
+    payment_sent: 'PAYMENT_SENT',
+  };
+
+  const courseId = details.courseId as string | undefined;
+  const studentId = (details.studentId ?? details.userId) as string | undefined;
+  const payload: Record<string, unknown> = {
+    ...details,
+    ...(courseId && studentId ? { orderId: enrollmentSubjectId(courseId, studentId) } : {}),
+  };
+
+  return emitAutomationEvent({
+    tenantId,
+    triggerType: map[kind],
+    payload,
+    source: 'commerce',
+  });
+}
+
 /** Map agent lifecycle events to automation triggers. */
 export async function emitAgentAutomationEvent(
   tenantId: string,
@@ -301,12 +437,7 @@ export async function emitAgentAutomationEvent(
 }
 
 async function resolveTenantPlan(tenantId: string) {
-  const sub = await TenantSubscription.findOne({ tenantId }).lean();
-  if (sub && ['active', 'trialing'].includes(sub.status)) {
-    return normalizePlan(sub.plan);
-  }
-  const tenant = await Tenant.findOne({ subdomain: tenantId }).lean();
-  return normalizePlan(tenant?.metadata?.plan as string | undefined);
+  return resolveEffectivePlan(tenantId);
 }
 
 async function assertMonthlyAutomationRunsAllowed(tenantId: string): Promise<void> {

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import {
   DataListPage,
   SnackbarProvider,
@@ -15,9 +15,10 @@ import { PageLoadingState } from '../../components/common/PageStates';
 import { useAppTenantId } from '../../lib/app-layout-user';
 import { getStoredUser } from '../../lib/session';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
-import { GET_USERS } from '../../graphql/queries/users';
+import { GET_USERS, GET_PENDING_USERS, ACTIVATE_USER, SUSPEND_USER } from '../../graphql/queries/users';
 import { type GraphQLUser, toUserTableRow, roleIcon, userStatusBadge } from '../../lib/user-display';
 import { downloadCsv, exportUsersCsv } from '../../lib/export-csv';
+import { CACHE_FIRST } from '../../lib/apollo-policies';
 
 interface Props {
   tenant: string;
@@ -58,7 +59,20 @@ function OrganizationUsersContent({ tenant }: Props) {
   const { data, loading, error } = useQuery(GET_USERS, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: CACHE_FIRST,
+  });
+  const { data: pendingData, refetch: refetchPending } = useQuery(GET_PENDING_USERS, {
+    variables: { tenantId: queryTenantId },
+    skip: !queryTenantId,
+  });
+  const [activateUser] = useMutation(ACTIVATE_USER, {
+    refetchQueries: [
+      { query: GET_USERS, variables: { tenantId: queryTenantId } },
+      { query: GET_PENDING_USERS, variables: { tenantId: queryTenantId } },
+    ],
+  });
+  const [suspendUser] = useMutation(SUSPEND_USER, {
+    refetchQueries: [{ query: GET_PENDING_USERS, variables: { tenantId: queryTenantId } }],
   });
 
   useEffect(() => {
@@ -73,7 +87,7 @@ function OrganizationUsersContent({ tenant }: Props) {
       { id: 'all', label: 'All', count: allUsers.length },
       { id: 'active', label: 'Active', count: allUsers.filter((u) => u.status === 'ACTIVE').length },
       { id: 'pending', label: 'Pending', count: allUsers.filter((u) => u.status === 'PENDING').length },
-      { id: 'requests', label: 'Requests', count: 0 },
+      { id: 'requests', label: 'Requests', count: (pendingData?.getPendingUsers ?? []).length },
     ],
     [allUsers],
   );
@@ -82,7 +96,18 @@ function OrganizationUsersContent({ tenant }: Props) {
     let rows = allUsers;
     if (activeTab === 'active') rows = rows.filter((u) => u.status === 'ACTIVE');
     else if (activeTab === 'pending') rows = rows.filter((u) => u.status === 'PENDING');
-    else if (activeTab === 'requests') rows = [];
+    else if (activeTab === 'requests') {
+      rows = (pendingData?.getPendingUsers ?? []).map((u) => ({
+        id: u.id,
+        name: `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || u.email,
+        email: u.email,
+        status: u.status,
+        statusLabel: u.status,
+        role: 'USER',
+        roleLabel: 'Member',
+        joinedAt: u.createdAt,
+      }));
+    }
 
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -116,6 +141,14 @@ function OrganizationUsersContent({ tenant }: Props) {
     else setSelected(filtered.map((u) => u.id));
   };
 
+  const handleApprove = async (userId: string) => {
+    await activateUser({ variables: { userId } });
+    await refetchPending();
+  };
+  const handleReject = async (userId: string) => {
+    await suspendUser({ variables: { userId, reason: 'Registration rejected' } });
+    await refetchPending();
+  };
   const handleExport = () => {
     const rows = (selected.length ? filtered.filter((u) => selected.includes(u.id)) : filtered).map((u) => ({
       name: u.name,
@@ -166,7 +199,7 @@ function OrganizationUsersContent({ tenant }: Props) {
       >
         {error && allUsers.length === 0 ? (
           <EmptyState title="Could not load users" description={error.message} />
-        ) : activeTab === 'requests' ? (
+        ) : activeTab === 'requests' && filtered.length === 0 ? (
           <EmptyState
             title="No access requests"
             description="Permission requests from users will appear here for review."
@@ -194,6 +227,7 @@ function OrganizationUsersContent({ tenant }: Props) {
                   <th>Status</th>
                   <th>Role</th>
                   <th>Group</th>
+                  {activeTab === 'requests' && <th>Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -223,6 +257,24 @@ function OrganizationUsersContent({ tenant }: Props) {
                       {user.roleLabel}
                     </td>
                     <td className="text-secondary text-sm">—</td>
+                    {activeTab === 'requests' && (
+                      <td className="space-x-2">
+                        <button
+                          type="button"
+                          className="ios-btn-primary text-xs py-1 px-2"
+                          onClick={() => void handleApprove(user.id)}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          className="ios-btn-secondary text-xs py-1 px-2"
+                          onClick={() => void handleReject(user.id)}
+                        >
+                          Reject
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

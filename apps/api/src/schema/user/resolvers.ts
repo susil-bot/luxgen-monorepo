@@ -1,11 +1,47 @@
+import { GraphQLError } from 'graphql';
+import { UserRole } from '@luxgen/db';
 import { userService } from '../../services/userService';
 import { activityEventService, actorFromContext } from '../../services/activityEventService';
 import type { GraphQLContext } from '../../context';
+import { scopedTenantId } from '../../graphql/tenantScope';
+
+const STAFF_ROLES = new Set<UserRole>([UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.INSTRUCTOR]);
+
+function contextUserId(context: GraphQLContext): string {
+  return context.user?._id?.toString?.() ?? '';
+}
+
+function assertStaff(context: GraphQLContext): void {
+  if (!context.user) {
+    throw new GraphQLError('Authentication required', { extensions: { code: 'UNAUTHENTICATED' } });
+  }
+  if (!STAFF_ROLES.has(context.user.role)) {
+    throw new GraphQLError('Staff access required', { extensions: { code: 'FORBIDDEN' } });
+  }
+}
+
+function assertCanReadUser(context: GraphQLContext, userId: string): void {
+  if (!context.user) {
+    throw new GraphQLError('Authentication required', { extensions: { code: 'UNAUTHENTICATED' } });
+  }
+  if (contextUserId(context) === userId) return;
+  if (STAFF_ROLES.has(context.user.role)) return;
+  throw new GraphQLError('Not authorized to view this user', { extensions: { code: 'FORBIDDEN' } });
+}
 
 export const userResolvers = {
   Query: {
-    user: (_: unknown, { id }: { id: string }) => userService.getUserById(id),
-    users: (_: unknown, { tenantId }: { tenantId: string }) => userService.getUsersByTenant(tenantId),
+    user: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
+      assertCanReadUser(ctx, id);
+      if (!ctx.tenantId) throw new Error('Tenant context required');
+      return userService.getUserById(id, scopedTenantId(ctx, ctx.tenantId));
+    },
+    users: (_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) => {
+      assertStaff(ctx);
+      return userService.getUsersByTenant(scopedTenantId(ctx, tenantId));
+    },
+    customers: (_: unknown, { tenantId, search }: { tenantId: string; search?: string }, ctx: GraphQLContext) =>
+      userService.getCustomersByTenant(scopedTenantId(ctx, tenantId), search),
     currentUser: (_: unknown, __: unknown, context: GraphQLContext) => context.user ?? null,
   },
   Mutation: {
@@ -38,7 +74,10 @@ export const userResolvers = {
       return user;
     },
 
-    deleteUser: (_: unknown, { id }: { id: string }) => userService.deleteUser(id),
+    deleteUser: (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
+      if (!context.tenantId) throw new Error('Tenant context required');
+      return userService.deleteUser(id, context.tenantId);
+    },
 
     login: (_: unknown, { input }: { input: { email: string; password: string } }, ctx: GraphQLContext) =>
       userService.login({ ...input, req: ctx.req }),

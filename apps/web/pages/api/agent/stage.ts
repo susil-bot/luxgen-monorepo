@@ -1,7 +1,11 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { loadSession, discardSession, discardGitSession, getGitStatus } from '@luxgen/agent';
+import { loadSession, discardSession, discardGitSession, getGitStatus, ensureSessionHydrated } from '@luxgen/agent';
+import { requireAgentAuth } from '../../../lib/agent-auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  const auth = requireAgentAuth(req, res);
+  if (!auth) return;
+
   const { sessionId } = req.query as { sessionId: string };
 
   if (!sessionId) {
@@ -10,6 +14,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 
   if (req.method === 'GET') {
+    await ensureSessionHydrated(sessionId);
     res.status(200).json(loadSession(sessionId));
     return;
   }

@@ -1,15 +1,6 @@
-export enum UserRole {
-  ADMIN = 'ADMIN',
-  INSTRUCTOR = 'INSTRUCTOR',
-  STUDENT = 'STUDENT',
-}
+export { UserRole, UserStatus } from '@luxgen/db';
 
-export enum UserStatus {
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  PENDING = 'PENDING',
-  SUSPENDED = 'SUSPENDED',
-}
+import type { UserRole, UserStatus } from '@luxgen/db';
 
 export interface TenantSummary {
   id: string;

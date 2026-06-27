@@ -4,11 +4,11 @@ Global admin page layout for LuxGen’s recurring multi-column patterns (Shopify
 
 ## Variants
 
-| Variant | Columns | Used by |
-|---------|---------|---------|
+| Variant      | Columns                     | Used by                    |
+| ------------ | --------------------------- | -------------------------- |
 | `main-aside` | Main + sticky right sidebar | Product edit, Order detail |
-| `nav-main` | Left nav + main | Settings (`SettingsShell`) |
-| `triple` | Left + main + right | Developer AI Studio |
+| `nav-main`   | Left nav + main             | Settings (`SettingsShell`) |
+| `triple`     | Left + main + right         | Developer AI Studio        |
 
 ## Usage
 
@@ -29,7 +29,7 @@ import { SplitPageLayout, SplitPageSection } from '@luxgen/ui';
       <SplitPageSection title="Customer">…</SplitPageSection>
     </>
   }
-/>
+/>;
 ```
 
 ## Related components

@@ -42,12 +42,13 @@ Key component classes: .surface, .ios-card, .ios-large-title, .ios-btn-primary,
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import type { UserMenu } from '@luxgen/ui';
 import { SnackbarProvider, useSnackbar, AppLayout, getDefaultUser, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
 
 const PageContent: React.FC = () => {
   const router = useRouter();
   const { showSuccess, showError } = useSnackbar();
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<UserMenu | null>(null);
 
   useEffect(() => {
     const data = localStorage.getItem('user');

@@ -1,0 +1,11 @@
+const s = new Map<string, { id: string; title: string; body: string; read: boolean; createdAt: Date }[]>();
+export const inAppNotificationsService = {
+  list(id: string) {
+    return s.get(id) ?? [];
+  },
+  markRead(id: string, nid: string) {
+    const n = (s.get(id) ?? []).map((x) => (x.id === nid ? { ...x, read: true } : x));
+    s.set(id, n);
+    return n.find((x) => x.id === nid) ?? null;
+  },
+};

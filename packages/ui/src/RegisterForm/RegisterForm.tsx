@@ -3,8 +3,9 @@ import { Card } from '../Card';
 import { Form } from '../Form';
 import { Heading } from '../Heading';
 import { Text } from '../Text';
-import { Button } from '../Button';
 import { withSSR } from '../ssr';
+import { isValidEmail, passwordMeetsMinimum, passwordErrorMessage } from '../validation';
+import { SocialLoginButtons } from '../SocialLoginButtons/SocialLoginButtons';
 
 export interface RegisterFormData {
   firstName: string;
@@ -12,12 +13,12 @@ export interface RegisterFormData {
   email: string;
   password: string;
   confirmPassword: string;
-  role: string;
+  role: 'USER' | 'STUDENT';
   agreeToTerms: boolean;
 }
 
 export interface RegisterFormProps {
-  tenantTheme?: any;
+  tenantTheme?: import('../types').TenantTheme;
   onSubmit?: (data: RegisterFormData) => Promise<void> | void;
   onSocialLogin?: (provider: 'google' | 'linkedin' | 'github') => Promise<void> | void;
   onLogin?: () => void;
@@ -41,7 +42,6 @@ export interface RegisterFormProps {
   loginText?: string;
   loginLinkText?: string;
   socialLoginText?: string;
-  [key: string]: any;
 }
 
 const defaultTheme = {
@@ -90,6 +90,29 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
   });
   const [errors, setErrors] = useState<Partial<RegisterFormData>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const registrationStep = !formData.firstName.trim() || !formData.lastName.trim() || !formData.email.trim() ? 1 : 2;
+  const validateField = (name: keyof RegisterFormData) => {
+    const fieldErrors: Partial<RegisterFormData> = {};
+    if (name === 'firstName' && !formData.firstName.trim()) fieldErrors.firstName = 'First name is required';
+    if (name === 'lastName' && !formData.lastName.trim()) fieldErrors.lastName = 'Last name is required';
+    if (name === 'email') {
+      if (!formData.email.trim()) fieldErrors.email = 'Email is required';
+      else if (!isValidEmail(formData.email)) fieldErrors.email = 'Please enter a valid email address';
+    }
+    if (name === 'password') {
+      if (!formData.password) fieldErrors.password = 'Password is required';
+      else if (!passwordMeetsMinimum(formData.password)) fieldErrors.password = passwordErrorMessage();
+    }
+    if (name === 'confirmPassword') {
+      if (!formData.confirmPassword) fieldErrors.confirmPassword = 'Please confirm your password';
+      else if (formData.password !== formData.confirmPassword) fieldErrors.confirmPassword = 'Passwords do not match';
+    }
+    setErrors((prev) => {
+      const next = { ...prev, ...fieldErrors };
+      if (!fieldErrors[name]) delete next[name];
+      return next;
+    });
+  };
 
   // Clear errors when form data changes
   useEffect(() => {
@@ -138,15 +161,15 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
     // Email validation
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+    } else if (!isValidEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
 
     // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+    } else if (!passwordMeetsMinimum(formData.password)) {
+      newErrors.password = passwordErrorMessage();
     }
 
     // Confirm password validation
@@ -252,7 +275,21 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
         <Heading level={1} text={title} className="text-3xl font-bold mb-2 text-gray-900" />
         <Text text={subtitle} className="text-lg text-gray-600" />
       </div>
-
+      <div className="mb-6" role="progressbar" aria-valuemin={1} aria-valuemax={2} aria-valuenow={registrationStep}>
+        <div className="flex gap-2 mb-2">
+          <div
+            className="flex-1 h-1 rounded-full"
+            style={{ backgroundColor: registrationStep >= 1 ? 'var(--color-blue)' : 'var(--color-fill-tertiary)' }}
+          />
+          <div
+            className="flex-1 h-1 rounded-full"
+            style={{ backgroundColor: registrationStep >= 2 ? 'var(--color-blue)' : 'var(--color-fill-tertiary)' }}
+          />
+        </div>
+        <p className="text-xs text-secondary text-center">
+          Step {registrationStep} of 2 — {registrationStep === 1 ? 'Your details' : 'Secure your account'}
+        </p>
+      </div>
       {/* Error/Success Messages */}
       {error && (
         <div className="mb-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg">
@@ -281,6 +318,8 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
               placeholder="Enter your first name"
               value={formData.firstName}
               onChange={handleInputChange}
+              onBlur={() => validateField('firstName')}
+              aria-invalid={Boolean(errors.firstName)}
               disabled={loading || isSubmitting}
               className={`w-full px-4 py-3 bg-white/90 border rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 ${
                 errors.firstName ? 'border-red-500' : 'border-gray-300'
@@ -301,6 +340,8 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
               placeholder="Enter your last name"
               value={formData.lastName}
               onChange={handleInputChange}
+              onBlur={() => validateField('lastName')}
+              aria-invalid={Boolean(errors.lastName)}
               disabled={loading || isSubmitting}
               className={`w-full px-4 py-3 bg-white/90 border rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 ${
                 errors.lastName ? 'border-red-500' : 'border-gray-300'
@@ -323,6 +364,8 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
             placeholder="Enter your email"
             value={formData.email}
             onChange={handleInputChange}
+            onBlur={() => validateField('email')}
+            aria-invalid={Boolean(errors.email)}
             disabled={loading || isSubmitting}
             className={`w-full px-4 py-3 bg-white/90 border rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 ${
               errors.email ? 'border-red-500' : 'border-gray-300'
@@ -350,8 +393,7 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
           >
             <option value="">Select a role</option>
             <option value="USER">User</option>
-            <option value="ADMIN">Admin</option>
-            <option value="SUPER_ADMIN">Super Admin</option>
+            <option value="STUDENT">Student</option>
           </select>
           {errors.role && <p className="mt-1 text-sm text-red-400">{errors.role}</p>}
         </div>
@@ -369,6 +411,8 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
               placeholder="Enter your password"
               value={formData.password}
               onChange={handleInputChange}
+              onBlur={() => validateField('password')}
+              aria-invalid={Boolean(errors.password)}
               disabled={loading || isSubmitting}
               className={`w-full px-4 py-3 bg-white/90 border rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 ${
                 errors.password ? 'border-red-500' : 'border-gray-300'
@@ -389,6 +433,8 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
               placeholder="Confirm your password"
               value={formData.confirmPassword}
               onChange={handleInputChange}
+              onBlur={() => validateField('confirmPassword')}
+              aria-invalid={Boolean(errors.confirmPassword)}
               disabled={loading || isSubmitting}
               className={`w-full px-4 py-3 bg-white/90 border rounded-lg text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 ${
                 errors.confirmPassword ? 'border-red-500' : 'border-gray-300'
@@ -421,7 +467,7 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
         <button
           type="submit"
           disabled={isDisabled}
-          className="w-full bg-green-600 hover:bg-green-700 disabled:bg-green-600/50 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
+          className="w-full bg-[var(--color-green)] hover:bg-green-700 disabled:bg-[var(--color-green)]/50 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 disabled:scale-100 disabled:cursor-not-allowed"
         >
           {loading || isSubmitting ? (
             <div className="flex items-center justify-center">
@@ -433,32 +479,13 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
           )}
         </button>
 
-        {/* Social Login */}
-        {showSocialLogin && socialProviders.length > 0 && (
-          <div className="mt-8">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-white text-gray-500">{socialLoginText}</span>
-              </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {socialProviders.map((provider) => (
-                <button
-                  key={provider}
-                  type="button"
-                  onClick={() => handleSocialLogin(provider)}
-                  disabled={loading || isSubmitting}
-                  className="w-full inline-flex justify-center py-3 px-4 border border-gray-300 rounded-lg bg-white text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {getSocialProviderIcon(provider)}
-                </button>
-              ))}
-            </div>
-          </div>
+        {showSocialLogin && (
+          <SocialLoginButtons
+            providers={socialProviders}
+            disabled={loading || isSubmitting}
+            heading={socialLoginText}
+            onSocialLogin={handleSocialLogin}
+          />
         )}
 
         {/* Login Link */}

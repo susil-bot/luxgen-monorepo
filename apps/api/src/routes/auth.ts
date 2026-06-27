@@ -1,95 +1,104 @@
 import { Router, Request, Response } from 'express';
 import crypto from 'crypto';
-import { User } from '@luxgen/db';
+import { User, IUser } from '@luxgen/db';
 import { UserRole } from '@luxgen/auth';
-import { verifyPassword } from '@luxgen/auth';
-import { generateToken } from '../utils/jwt';
-import { validateLogin, validateRegister } from '../middleware/validation';
+import { hashPassword } from '@luxgen/auth';
+import {
+  validateLogin,
+  validateRegister,
+  validateForgotPassword,
+  validateResetPassword,
+  validateVerifyEmail,
+  validateResendVerification,
+} from '../middleware/validation';
 import { loginRateLimitMiddleware } from '../middleware/loginRateLimit';
 import { isAccountActive, ACCOUNT_DEACTIVATED_MESSAGE } from '../utils/accountStatus';
+import { AuthServiceError, buildAuthRestPayload, userService } from '../services/userService';
 import { UserRegistrationService } from '../services/userRegistrationService';
 import { requireRole, canInviteUsers, logRoleAccess } from '../middleware/roleManagement';
 import { sendTransactionalEmail } from '../utils/email';
 import { logger } from '../utils/logger';
+import { getWebUrl } from '@luxgen/config';
+import { generateToken } from '../utils/jwt';
+import {
+  REFRESH_COOKIE_NAME,
+  setRefreshCookie,
+  clearRefreshCookie,
+  verifyRefreshToken,
+  type RefreshTokenPayload,
+} from '../utils/refreshToken';
 
 const router = Router();
+
+const PASSWORD_RESET_TTL_MS = 60 * 60 * 1000;
+const EMAIL_VERIFICATION_TTL_MS = 24 * 60 * 60 * 1000;
+
+function hashResetToken(token: string): string {
+  return crypto.createHash('sha256').update(token).digest('hex');
+}
+
+async function issueEmailVerification(user: IUser): Promise<void> {
+  const rawToken = crypto.randomBytes(32).toString('hex');
+  user.emailVerificationToken = hashResetToken(rawToken);
+  user.emailVerificationExpires = new Date(Date.now() + EMAIL_VERIFICATION_TTL_MS);
+  user.emailVerified = false;
+  await user.save();
+  const verifyUrl = `${getWebUrl()}/verify-email?token=${encodeURIComponent(rawToken)}`;
+  await sendTransactionalEmail({
+    to: user.email,
+    subject: 'Verify your LuxGen email',
+    body: [
+      `Hello ${user.firstName},`,
+      '',
+      'Please verify your email address:',
+      verifyUrl,
+      '',
+      'This link expires in 24 hours.',
+    ].join('\n'),
+  });
+}
+
+const PASSWORD_RESET_SENT_MESSAGE = 'If an account exists with that email, a password reset link has been sent.';
+
+function refreshPayloadFromUser(user: IUser): RefreshTokenPayload {
+  const tenant = user.tenant as { _id?: { toString(): string } } | undefined;
+  const id = user._id?.toString();
+  if (!id) {
+    throw new Error('User id is required for refresh token');
+  }
+  return {
+    id,
+    email: user.email,
+    tenant: tenant?._id?.toString(),
+    role: user.role,
+  };
+}
 
 // Login endpoint
 router.post('/login', loginRateLimitMiddleware, validateLogin, async (req: Request, res: Response) => {
   try {
     const { email, password, tenant } = req.body;
+    const { token, user } = await userService.login({
+      email,
+      password,
+      tenantId: tenant,
+    });
+    setRefreshCookie(res, refreshPayloadFromUser(user));
 
-    // Find user by email
-    const user = await User.findOne({
-      email: email.toLowerCase().trim(),
-      ...(tenant && { tenant }), // Include tenant filter if provided
-    }).populate('tenant');
-
-    if (!user) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password',
-        errors: {
-          email: 'Invalid email or password',
-          password: 'Invalid email or password',
-        },
-      });
-    }
-
-    // Verify password
-    const isPasswordValid = await verifyPassword(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        success: false,
-        message: 'Invalid email or password',
-        errors: {
-          email: 'Invalid email or password',
-          password: 'Invalid email or password',
-        },
-      });
-    }
-
-    if (!isAccountActive(user)) {
-      return res.status(403).json({
-        success: false,
-        message: ACCOUNT_DEACTIVATED_MESSAGE,
-      });
-    }
-
-    // Generate JWT token with tenant-specific key
-    const token = generateToken(
-      {
-        id: user._id.toString(),
-        email: user.email,
-        tenant: (user.tenant as any)._id?.toString(),
-        role: user.role,
-      },
-      (user.tenant as any)._id?.toString(),
-    );
-
-    // Return success response
     res.json({
       success: true,
       message: 'Login successful',
-      data: {
-        token,
-        user: {
-          id: user._id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          tenant: {
-            id: (user.tenant as any)._id,
-            name: (user.tenant as any).name,
-            subdomain: (user.tenant as any).subdomain,
-          },
-        },
-        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-      },
+      data: buildAuthRestPayload(token, user),
     });
   } catch (error) {
-    console.error('Login error:', error);
+    if (error instanceof AuthServiceError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+        ...(error.errors ? { errors: error.errors } : {}),
+      });
+    }
+    logger.error('Login error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -104,7 +113,6 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
   try {
     const { email, password, firstName, lastName, role } = req.body;
 
-    // Get tenant from request (set by middleware)
     const tenantId = req.tenantId;
     if (!tenantId) {
       return res.status(400).json({
@@ -116,8 +124,7 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
       });
     }
 
-    // Use the registration service
-    const registrationResult = await UserRegistrationService.registerUser({
+    const { token, user } = await userService.register({
       email,
       password,
       firstName,
@@ -125,59 +132,73 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
       role: role || UserRole.USER,
       tenantId,
     });
-
-    if (!registrationResult.success) {
-      return res.status(400).json({
-        success: false,
-        message: registrationResult.message,
-        errors: registrationResult.errors,
-      });
+    try {
+      await issueEmailVerification(user);
+    } catch (emailError) {
+      logger.error('Failed to send verification email:', emailError);
     }
+    setRefreshCookie(res, refreshPayloadFromUser(user));
 
-    const newUser = registrationResult.user!;
-    await newUser.populate('tenant');
-
-    // Generate JWT token with tenant-specific key
-    const token = generateToken(
-      {
-        id: newUser._id.toString(),
-        email: newUser.email,
-        tenant: (newUser.tenant as any)._id?.toString(),
-        role: newUser.role,
-      },
-      (newUser.tenant as any)._id?.toString(),
-    );
-
-    // Return success response
     res.status(201).json({
       success: true,
       message: 'Registration successful',
-      data: {
-        token,
-        user: {
-          id: newUser._id,
-          email: newUser.email,
-          firstName: newUser.firstName,
-          lastName: newUser.lastName,
-          role: newUser.role,
-          status: newUser.status,
-          tenant: {
-            id: (newUser.tenant as any)._id,
-            name: (newUser.tenant as any).name,
-            subdomain: (newUser.tenant as any).subdomain,
-          },
-        },
-        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-      },
+      data: buildAuthRestPayload(token, user, true),
     });
   } catch (error) {
-    console.error('Registration error:', error);
+    if (error instanceof AuthServiceError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+        ...(error.errors ? { errors: error.errors } : {}),
+      });
+    }
+    logger.error('Registration error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
       error:
         process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
+  }
+});
+
+router.post('/verify-email', validateVerifyEmail, async (req: Request, res: Response) => {
+  try {
+    const { token } = req.body;
+    const hashed = hashResetToken(String(token).trim());
+    const user = await User.findOne({
+      emailVerificationToken: hashed,
+      emailVerificationExpires: { $gt: new Date() },
+    }).select('+emailVerificationToken +emailVerificationExpires');
+    if (!user) return res.status(400).json({ success: false, message: 'Invalid or expired verification token' });
+    user.emailVerified = true;
+    user.emailVerificationToken = undefined;
+    user.emailVerificationExpires = undefined;
+    await user.save();
+    res.json({ success: true, message: 'Email verified successfully' });
+  } catch (error) {
+    logger.error('Verify email error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
+});
+
+router.post('/resend-verification', validateResendVerification, async (req: Request, res: Response) => {
+  try {
+    const { email, tenant } = req.body;
+    const user = await User.findOne({ email: email.toLowerCase().trim(), ...(tenant && { tenant }) }).select(
+      '+emailVerificationToken +emailVerificationExpires',
+    );
+    if (user && isAccountActive(user) && !user.emailVerified) {
+      try {
+        await issueEmailVerification(user);
+      } catch (e) {
+        logger.error('Resend verification email failed:', e);
+      }
+    }
+    res.json({ success: true, message: 'If an unverified account exists, a verification email has been sent.' });
+  } catch (error) {
+    logger.error('Resend verification error:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
 
@@ -215,7 +236,7 @@ router.get('/me', async (req: Request, res: Response) => {
       },
     });
   } catch (error) {
-    console.error('Get user error:', error);
+    logger.error('Get user error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -225,12 +246,172 @@ router.get('/me', async (req: Request, res: Response) => {
   }
 });
 
-// Logout endpoint (client-side token removal)
+// Refresh access token using httpOnly refresh cookie
+router.post('/refresh', async (req: Request, res: Response) => {
+  try {
+    const refreshToken = req.cookies?.[REFRESH_COOKIE_NAME];
+    if (!refreshToken) {
+      return res.status(401).json({
+        success: false,
+        message: 'Refresh token required',
+      });
+    }
+
+    const payload = verifyRefreshToken(refreshToken);
+    if (!payload) {
+      clearRefreshCookie(res);
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid or expired refresh token',
+      });
+    }
+
+    const user = await User.findById(payload.id).populate('tenant');
+    if (!user) {
+      clearRefreshCookie(res);
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid refresh token',
+      });
+    }
+
+    if (!isAccountActive(user)) {
+      clearRefreshCookie(res);
+      return res.status(403).json({
+        success: false,
+        message: ACCOUNT_DEACTIVATED_MESSAGE,
+      });
+    }
+
+    const tokenPayload = refreshPayloadFromUser(user);
+    const token = generateToken(tokenPayload, tokenPayload.tenant);
+    setRefreshCookie(res, tokenPayload);
+
+    res.json({
+      success: true,
+      message: 'Token refreshed',
+      data: {
+        token,
+        expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+      },
+    });
+  } catch (error) {
+    logger.error('Token refresh error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error:
+        process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
+    });
+  }
+});
+
+// Logout endpoint — clears httpOnly refresh cookie
 router.post('/logout', (req: Request, res: Response) => {
+  clearRefreshCookie(res);
   res.json({
     success: true,
     message: 'Logout successful',
   });
+});
+
+// Forgot password — issues a crypto reset token (email stub via sendTransactionalEmail)
+router.post('/forgot-password', validateForgotPassword, async (req: Request, res: Response) => {
+  try {
+    const { email, tenant } = req.body;
+
+    const user = await User.findOne({
+      email: email.toLowerCase().trim(),
+      ...(tenant && { tenant }),
+    }).select('+passwordResetToken +passwordResetExpires');
+
+    if (user && isAccountActive(user)) {
+      const rawToken = crypto.randomBytes(32).toString('hex');
+      user.passwordResetToken = hashResetToken(rawToken);
+      user.passwordResetExpires = new Date(Date.now() + PASSWORD_RESET_TTL_MS);
+      await user.save();
+
+      const resetUrl = `${getWebUrl()}/reset-password?token=${encodeURIComponent(rawToken)}`;
+
+      try {
+        await sendTransactionalEmail({
+          to: user.email,
+          subject: 'Reset your LuxGen password',
+          body: [
+            `Hello ${user.firstName},`,
+            '',
+            'We received a request to reset your LuxGen password.',
+            '',
+            `Reset your password using this link (valid for 1 hour):`,
+            resetUrl,
+            '',
+            'If you did not request this, you can ignore this email.',
+          ].join('\n'),
+        });
+      } catch (emailError) {
+        logger.error('Failed to send password reset email:', emailError);
+      }
+    }
+
+    res.json({
+      success: true,
+      message: PASSWORD_RESET_SENT_MESSAGE,
+    });
+  } catch (error) {
+    logger.error('Forgot password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error:
+        process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
+    });
+  }
+});
+
+// Reset password — consumes token and sets a new password
+router.post('/reset-password', validateResetPassword, async (req: Request, res: Response) => {
+  try {
+    const { token, password } = req.body;
+    const hashedToken = hashResetToken(token.trim());
+
+    const user = await User.findOne({
+      passwordResetToken: hashedToken,
+      passwordResetExpires: { $gt: new Date() },
+    }).select('+passwordResetToken +passwordResetExpires');
+
+    if (!user) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid or expired reset token',
+        errors: { token: 'Invalid or expired reset token' },
+      });
+    }
+
+    if (!isAccountActive(user)) {
+      return res.status(403).json({
+        success: false,
+        message: ACCOUNT_DEACTIVATED_MESSAGE,
+      });
+    }
+
+    user.password = await hashPassword(password);
+    user.passwordResetToken = undefined;
+    user.passwordResetExpires = undefined;
+    await user.save();
+
+    res.json({
+      success: true,
+      message: 'Password reset successful. You can now sign in with your new password.',
+    });
+  } catch (error) {
+    logger.error('Reset password error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error:
+        process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
+    });
+  }
 });
 
 // Invite user endpoint
@@ -306,7 +487,7 @@ router.post('/invite', canInviteUsers, logRoleAccess('user invitation'), async (
       },
     });
   } catch (error) {
-    console.error('User invitation error:', error);
+    logger.error('User invitation error:', error);
     res.status(500).json({
       success: false,
       message: 'Internal server error',
@@ -358,7 +539,7 @@ router.put(
         },
       });
     } catch (error) {
-      console.error('Role update error:', error);
+      logger.error('Role update error:', error);
       res.status(500).json({
         success: false,
         message: 'Internal server error',
@@ -408,7 +589,7 @@ router.put(
         },
       });
     } catch (error) {
-      console.error('User activation error:', error);
+      logger.error('User activation error:', error);
       res.status(500).json({
         success: false,
         message: 'Internal server error',

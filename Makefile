@@ -5,11 +5,11 @@
 
 .DEFAULT_GOAL := help
 .PHONY: help setup dev dev-infra dev-full dev-docker dev-stack-web dev-stack-admin dev-stack-mobile dev-stack-api \
-        dev-web dev-api staging prod clean clean-all \
+        dev-clean-web dev-web dev-api staging prod clean clean-all \
         logs logs-api logs-web logs-ollama \
         agent-start agent-stop agent-status \
         agent-pull agent-pull-mistral agent-pull-qwen \
-        build build-api build-web \
+        build build-api build-web build-mcp mcp-smoke \
         db-seed db-reset lint test
 
 # ─── Colors ──────────────────────────────────────────────────────────────────
@@ -58,6 +58,12 @@ dev-api: ## Run only the API locally
 # ─── Role-based dev stacks (shared API + Mongo) ───────────────────────────────
 dev-stack-web: ## Web/learner dev: Mongo + API + Next.js (see skills/dev-workflows)
 	@bash scripts/dev-stack.sh web
+
+dev-clean-web: ## Kill :3000/:4000, wipe apps/web/.next, restart web stack
+	@echo "$(GREEN)► Cleaning web dev stack (ports + .next)...$(RESET)"
+	@for port in 3000 4000; do lsof -ti :$$port 2>/dev/null | xargs kill -9 2>/dev/null || true; done
+	@rm -rf apps/web/.next
+	@$(MAKE) dev-stack-web
 
 dev-stack-admin: ## Admin/commerce dev: Mongo + API + Next.js (admin routes)
 	@bash scripts/dev-stack.sh admin
@@ -153,6 +159,18 @@ build-web: ## Build web app only
 
 build-api: ## Build API only
 	@npx turbo run build --filter=@luxgen/api
+
+build-mcp: ## Build MCP server (packages/mcp-core + apps/mcp-server)
+	@npm run build:mcp
+
+mcp-smoke: ## Smoke test MCP GraphQL tools (requires LUXGEN_* env vars)
+	@bash scripts/mcp-smoke.sh
+
+mcp-http-smoke: ## Smoke test MCP HTTP /health (MCP_HTTP_URL optional)
+	@bash scripts/mcp-http-smoke.sh
+
+dev-mcp-http: ## Run MCP HTTP server on :3100 (requires API)
+	@MCP_TRANSPORT=http MCP_HTTP_PORT=3100 npm run dev:mcp
 
 # ─── Database ─────────────────────────────────────────────────────────────────
 db-seed: ## Seed the database with dev data (force — idempotent upsert)

@@ -9,6 +9,7 @@ export interface SessionUser {
   firstName: string;
   lastName: string;
   role: string;
+  avatar?: string;
   tenant: {
     id: string;
     name: string;
@@ -31,6 +32,38 @@ export const AUTH_STORAGE_KEYS = {
   /** Bumped on login/logout — cross-tab session sync via storage events */
   sessionEpoch: 'authSessionEpoch',
 } as const;
+
+/** Cookie names mirrored from localStorage for SSR layout user (UI-09). */
+export const SSR_AUTH_COOKIE_NAMES = {
+  token: 'authToken',
+  layoutUser: 'layoutUser',
+} as const;
+
+function cookieMaxAgeSeconds(token: string): number {
+  const expiresAt = getTokenExpiresAt(token);
+  if (!expiresAt) return 60 * 60 * 24 * 7;
+  return Math.max(60, Math.floor((expiresAt - Date.now()) / 1000));
+}
+
+function setSessionCookies(token: string, user: SessionUser): void {
+  const maxAge = cookieMaxAgeSeconds(token);
+  const base = `path=/; SameSite=Lax; max-age=${maxAge}`;
+  const layoutUser = JSON.stringify({
+    name: `${user.firstName} ${user.lastName}`.trim() || user.email,
+    email: user.email,
+    role: user.role,
+    tenant: user.tenant.subdomain,
+    avatarUrl: user.avatar,
+  });
+  document.cookie = `${SSR_AUTH_COOKIE_NAMES.token}=${encodeURIComponent(token)}; ${base}`;
+  document.cookie = `${SSR_AUTH_COOKIE_NAMES.layoutUser}=${encodeURIComponent(layoutUser)}; ${base}`;
+}
+
+function clearSessionCookies(): void {
+  const base = 'path=/; max-age=0';
+  document.cookie = `${SSR_AUTH_COOKIE_NAMES.token}=; ${base}`;
+  document.cookie = `${SSR_AUTH_COOKIE_NAMES.layoutUser}=; ${base}`;
+}
 
 interface JwtPayload {
   exp?: number;
@@ -96,6 +129,21 @@ export function persistSession(token: string, user: SessionUser): void {
   } else {
     localStorage.removeItem(AUTH_STORAGE_KEYS.expiresAt);
   }
+
+  // Keep @luxgen/ui UserProvider in sync (reads luxgen_user)
+  localStorage.setItem(
+    'luxgen_user',
+    JSON.stringify({
+      name: `${user.firstName} ${user.lastName}`.trim() || user.email,
+      email: user.email,
+      role: user.role,
+      tenant: user.tenant,
+      avatar: user.avatar,
+    }),
+  );
+
+  setSessionCookies(token, user);
+
   notifyAuthSessionChange();
 }
 
@@ -130,6 +178,7 @@ export function clearStoredSession(): void {
   });
   // Legacy UI cache — must stay in sync with canonical session keys
   localStorage.removeItem('luxgen_user');
+  clearSessionCookies();
   localStorage.setItem(AUTH_STORAGE_KEYS.sessionEpoch, String(Date.now()));
   notifyAuthSessionChange();
 }
@@ -142,3 +191,9 @@ export function getMsUntilExpiry(): number | null {
   if (!expiresAt) return null;
   return Math.max(0, expiresAt - Date.now());
 }
+
+/**
+ * Canonical client auth persistence (UI-190).
+ * `@luxgen/ui` UserContext reads the same keys via `getSessionUserAsUserMenu()` in userService.
+ */
+export const CANONICAL_SESSION_DOC = 'apps/web/lib/session.ts' as const;

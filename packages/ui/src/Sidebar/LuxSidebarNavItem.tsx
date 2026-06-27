@@ -10,13 +10,7 @@ function NavChevron({ open }: { open: boolean }) {
       fill="none"
       aria-hidden
     >
-      <path
-        d="M6 4l4 4-4 4"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
+      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   );
 }
@@ -47,7 +41,7 @@ export function LuxSidebarNavItem({
   isItemActive,
 }: LuxSidebarNavItemProps) {
   const hasChildren = Boolean(item.children?.length);
-  const isExpanded = isExpandedProp || (isActive && hasChildren);
+  const isExpanded = isExpandedProp;
 
   const handleClick = () => {
     if (item.disabled) return;

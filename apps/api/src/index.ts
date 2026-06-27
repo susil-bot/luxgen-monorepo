@@ -1,12 +1,12 @@
-import { config } from 'dotenv';
+import './load-env';
 import { getApiUrl, getGraphqlUrl } from '@luxgen/config';
 import { createAppServer } from './app';
 import { connectDB } from './db/connect';
 import { seedDatabaseIfEmpty } from './db/seed';
 import { ensureDemoStorefrontCourses } from './db/storefrontSeed';
+import { ensureDemoStorefrontBundles } from './services/storefrontService';
 import { startTimelineRedisBridge } from './lib/timelineRedisBridge';
-
-config();
+import { tenantKeyManager } from './utils/tenantKeys';
 
 const REQUIRED_ENV = ['JWT_SECRET', 'MONGODB_URI'] as const;
 for (const key of REQUIRED_ENV) {
@@ -23,10 +23,14 @@ async function startServer() {
     await connectDB();
     console.log('✅ Connected to MongoDB');
 
+    await tenantKeyManager.hydrateFromDatabase();
+    console.log('✅ Tenant signing keys loaded from database');
+
     const autoSeed = process.env.SEED_IF_EMPTY !== 'false' && process.env.NODE_ENV !== 'production';
     if (autoSeed) {
       await seedDatabaseIfEmpty();
       await ensureDemoStorefrontCourses();
+      await ensureDemoStorefrontBundles();
     }
 
     const httpServer = await createAppServer();

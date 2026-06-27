@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import mongoose, { Schema, model, Document } from 'mongoose';
 
 export interface TenantBranding {
   logo?: string;
@@ -29,6 +29,11 @@ export interface TenantSecurity {
   };
 }
 
+export interface TenantOnboarding {
+  completedSteps: string[];
+  dismissed: boolean;
+}
+
 export interface TenantConfig {
   features: {
     analytics: boolean;
@@ -47,6 +52,29 @@ export interface TenantConfig {
     paymentProvider?: string;
     analyticsProvider?: string;
   };
+  regional?: {
+    contactEmail?: string;
+    timezone?: string;
+    currency?: string;
+  };
+  storefront?: {
+    landingEnabled: boolean;
+    slug?: string;
+    routes: {
+      landing: string;
+      courses: string;
+      programs: string;
+      login: string;
+      register: string;
+    };
+    content?: Record<string, unknown>;
+    theme?: {
+      accentColor?: string;
+      warmAccentColor?: string;
+      heroImage?: string;
+      layout?: 'classic' | 'split';
+    };
+  };
 }
 
 export interface ITenant extends Document {
@@ -58,9 +86,9 @@ export interface ITenant extends Document {
     branding: TenantBranding;
     security: TenantSecurity;
     config: TenantConfig;
+    onboarding?: TenantOnboarding;
   };
   metadata: {
-    plan: 'free' | 'starter' | 'pro' | 'business' | 'enterprise';
     createdAt: Date;
     lastActive: Date;
     createdBy: Schema.Types.ObjectId;
@@ -167,6 +195,10 @@ const tenantSchema = new Schema<ITenant>(
           },
         },
       },
+      onboarding: {
+        completedSteps: { type: [String], default: [] },
+        dismissed: { type: Boolean, default: false },
+      },
       config: {
         features: {
           analytics: {
@@ -209,14 +241,34 @@ const tenantSchema = new Schema<ITenant>(
           paymentProvider: String,
           analyticsProvider: String,
         },
+        regional: {
+          contactEmail: String,
+          timezone: String,
+          currency: String,
+        },
+        storefront: {
+          landingEnabled: {
+            type: Boolean,
+            default: false,
+          },
+          slug: {
+            type: String,
+            default: 'mentors',
+            match: [/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens'],
+          },
+          routes: {
+            landing: { type: String, default: '/store/mentors' },
+            courses: { type: String, default: '/learn' },
+            programs: { type: String, default: '/store/product' },
+            login: { type: String, default: '/login' },
+            register: { type: String, default: '/register' },
+          },
+          content: { type: Schema.Types.Mixed },
+          theme: { type: Schema.Types.Mixed },
+        },
       },
     },
     metadata: {
-      plan: {
-        type: String,
-        enum: ['free', 'starter', 'pro', 'business', 'enterprise'],
-        default: 'free',
-      },
       createdAt: {
         type: Date,
         default: Date.now,
@@ -240,6 +292,5 @@ const tenantSchema = new Schema<ITenant>(
 tenantSchema.index({ subdomain: 1 });
 tenantSchema.index({ domain: 1 });
 tenantSchema.index({ status: 1 });
-tenantSchema.index({ 'metadata.plan': 1 });
-
-export const Tenant = model<ITenant>('Tenant', tenantSchema);
+export const Tenant =
+  (mongoose.models.Tenant as mongoose.Model<ITenant>) || model<ITenant>('Tenant', tenantSchema);

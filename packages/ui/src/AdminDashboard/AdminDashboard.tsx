@@ -139,6 +139,8 @@ export interface AdminDashboardProps extends BaseComponentProps {
     autoPlay?: boolean;
     interval?: number;
   };
+  /** When set, replaces the built-in banner carousel (e.g. next/image in apps/web). */
+  bannerSlot?: React.ReactNode;
   stats?: {
     totalCourses: number;
     activeStudents: number;
@@ -275,6 +277,7 @@ const AdminDashboardComponent: React.FC<AdminDashboardProps> = ({
   subtitle,
   currentTenant,
   bannerCarousel,
+  bannerSlot,
   stats = {
     totalCourses: 0,
     activeStudents: 0,
@@ -344,14 +347,20 @@ const AdminDashboardComponent: React.FC<AdminDashboardProps> = ({
         </div>
 
         {/* Banner Carousel */}
-        {bannerCarousel && bannerCarousel.banners && bannerCarousel.banners.length > 0 && (
-          <div className="mb-8">
-            <BannerCarousel
-              banners={bannerCarousel.banners}
-              autoPlay={bannerCarousel.autoPlay}
-              interval={bannerCarousel.interval}
-            />
-          </div>
+        {bannerSlot ? (
+          <div className="mb-8">{bannerSlot}</div>
+        ) : (
+          bannerCarousel &&
+          bannerCarousel.banners &&
+          bannerCarousel.banners.length > 0 && (
+            <div className="mb-8">
+              <BannerCarousel
+                banners={bannerCarousel.banners}
+                autoPlay={bannerCarousel.autoPlay}
+                interval={bannerCarousel.interval}
+              />
+            </div>
+          )
         )}
 
         {/* Stats Cards */}

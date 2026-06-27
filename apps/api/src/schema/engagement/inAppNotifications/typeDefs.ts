@@ -1,0 +1,1 @@
+export const InAppNotificationsTypeDefs = `type InAppNotification{id:ID!title:String!body:String!read:Boolean!createdAt:Date!} extend type Query{inAppNotifications:[InAppNotification!]!} extend type Mutation{markNotificationRead(id:ID!):InAppNotification}`;

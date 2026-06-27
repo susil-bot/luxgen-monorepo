@@ -1,7 +1,11 @@
 import { useEffect, useState } from 'react';
 import { SettingsShell } from '../../components/settings/SettingsShell';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
-import { fetchNotificationTemplates, type NotificationTemplateSummary } from '../../lib/tenant-api';
+import {
+  fetchNotificationTemplates,
+  patchNotificationTemplate,
+  type NotificationTemplateSummary,
+} from '../../lib/tenant-api';
 
 interface Props {
   tenant: string;
@@ -20,6 +24,10 @@ export default function SettingsNotificationsPage({ tenant }: Props) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editSubject, setEditSubject] = useState('');
+  const [editBody, setEditBody] = useState('');
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -42,7 +50,11 @@ export default function SettingsNotificationsPage({ tenant }: Props) {
     <SettingsShell tenant={tenant} activeSection="notifications" title="Notifications" subtitle="Email templates">
       <div className="ios-card overflow-hidden">
         {loading && <p className="p-4 text-secondary text-sm">Loading templates…</p>}
-        {error && <p className="p-4 text-sm" style={{ color: 'var(--color-red)' }}>{error}</p>}
+        {error && (
+          <p className="p-4 text-sm" style={{ color: 'var(--color-red)' }}>
+            {error}
+          </p>
+        )}
         {!loading && !error && (
           <ul className="divide-y" style={{ borderColor: 'var(--color-separator)' }}>
             {templates.map((t) => {
@@ -56,9 +68,7 @@ export default function SettingsNotificationsPage({ tenant }: Props) {
                   >
                     <div>
                       <span className="text-primary font-medium">{t.label}</span>
-                      <p className="text-xs text-tertiary mt-0.5">
-                        {CATEGORY_LABELS[t.category] ?? t.category}
-                      </p>
+                      <p className="text-xs text-tertiary mt-0.5">{CATEGORY_LABELS[t.category] ?? t.category}</p>
                     </div>
                     <span className={`badge ${t.status === 'live' ? 'badge-green' : 'badge-orange'} capitalize`}>
                       {t.status}
@@ -72,6 +82,49 @@ export default function SettingsNotificationsPage({ tenant }: Props) {
                       <pre className="text-xs text-secondary whitespace-pre-wrap bg-[var(--color-fill-quaternary)] rounded-lg p-3">
                         {t.bodyPreview}
                       </pre>
+                      {editingId === t.id ? (
+                        <div className="space-y-3 pt-2">
+                          <input
+                            className="ios-input w-full text-sm"
+                            value={editSubject}
+                            onChange={(e) => setEditSubject(e.target.value)}
+                          />
+                          <textarea
+                            className="ios-input w-full text-sm min-h-[120px]"
+                            value={editBody}
+                            onChange={(e) => setEditBody(e.target.value)}
+                          />
+                          <button
+                            type="button"
+                            className="ios-btn-primary text-sm"
+                            disabled={saving}
+                            onClick={async () => {
+                              setSaving(true);
+                              try {
+                                await patchNotificationTemplate(t.id, { subject: editSubject, body: editBody });
+                                setTemplates(await fetchNotificationTemplates());
+                                setEditingId(null);
+                              } finally {
+                                setSaving(false);
+                              }
+                            }}
+                          >
+                            Save
+                          </button>
+                        </div>
+                      ) : (
+                        <button
+                          type="button"
+                          className="ios-btn-secondary text-sm mt-2"
+                          onClick={() => {
+                            setEditingId(t.id);
+                            setEditSubject(t.subject);
+                            setEditBody(t.bodyPreview);
+                          }}
+                        >
+                          Edit
+                        </button>
+                      )}
                     </div>
                   )}
                 </li>

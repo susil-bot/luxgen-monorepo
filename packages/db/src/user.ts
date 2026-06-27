@@ -57,8 +57,16 @@ export interface IUser extends Document {
   marketingEmail?: boolean;
   marketingSms?: boolean;
   marketingWhatsapp?: boolean;
+  /** Public avatar image URL or data URL */
+  avatar?: string;
   /** Expo push tokens registered from mobile devices */
   pushTokens?: string[];
+  /** SHA-256 hash of password reset token */
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
+  emailVerified?: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
   isActive: boolean;
   metadata: IUserMetadata;
   createdAt: Date;
@@ -126,9 +134,34 @@ const userSchema = new Schema<IUser>(
       type: Boolean,
       default: false,
     },
+    avatar: {
+      type: String,
+      default: '',
+      trim: true,
+    },
     pushTokens: {
       type: [String],
       default: [],
+    },
+    passwordResetToken: {
+      type: String,
+      select: false,
+    },
+    passwordResetExpires: {
+      type: Date,
+      select: false,
+    },
+    emailVerified: {
+      type: Boolean,
+      default: false,
+    },
+    emailVerificationToken: {
+      type: String,
+      select: false,
+    },
+    emailVerificationExpires: {
+      type: Date,
+      select: false,
     },
     isActive: {
       type: Boolean,

@@ -1,9 +1,11 @@
 import { courseService } from '../../services/courseService';
 import { activityEventService, actorFromContext } from '../../services/activityEventService';
 import { enrollmentService } from '../../services/enrollmentService';
-import { emitAutomationEvent } from '@luxgen/agent';
+import { automationService } from '../../services/automationService';
 import { CourseStatus } from '@luxgen/db';
 import type { GraphQLContext } from '../../context';
+import { scopedTenantId } from '../../graphql/tenantScope';
+import type { CourseCommerceFields } from '../../utils/productMeta';
 
 function publishedCoursesOnly<T extends { status: string }>(courses: T[], context: GraphQLContext): T[] {
   if (context.user) return courses;
@@ -11,6 +13,9 @@ function publishedCoursesOnly<T extends { status: string }>(courses: T[], contex
 }
 
 export const courseResolvers = {
+  Course: {
+    commerce: (parent: { commerce?: CourseCommerceFields | null }) => parent.commerce ?? { currency: 'usd' },
+  },
   Query: {
     course: async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
       const course = await courseService.getCourseById(id);
@@ -21,7 +26,8 @@ export const courseResolvers = {
       return course;
     },
     courses: async (_: unknown, { tenantId }: { tenantId: string }, context: GraphQLContext) => {
-      const courses = await courseService.getCoursesByTenant(tenantId);
+      const scoped = scopedTenantId(context, tenantId);
+      const courses = await courseService.getCoursesByTenant(scoped);
       return publishedCoursesOnly(courses, context);
     },
     coursesByInstructor: async (_: unknown, { instructorId }: { instructorId: string }) => {
@@ -91,18 +97,20 @@ export const courseResolvers = {
         student?.email ?? 'customer',
         actor,
       );
-      void emitAutomationEvent({
-        tenantId,
-        triggerType: 'USER_ENROLLED',
-        payload: {
-          courseId,
-          studentId,
-          userId: studentId,
-          orderId: `${courseId}:${studentId}`,
-          customerEmail: student?.email,
-        },
-        source: 'lms',
-      }).catch(() => undefined);
+      void automationService
+        .triggerAutomations(
+          tenantId,
+          'USER_ENROLLED',
+          {
+            courseId,
+            studentId,
+            userId: studentId,
+            orderId: `${courseId}:${studentId}`,
+            customerEmail: student?.email,
+          },
+          'lms',
+        )
+        .catch(() => undefined);
       void import('../../services/pushNotificationService').then(({ pushNotificationService }) =>
         pushNotificationService.sendEnrollmentConfirmation(studentId, course.title),
       );

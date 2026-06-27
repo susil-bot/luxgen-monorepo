@@ -1,0 +1,12 @@
+import type { GraphQLContext } from '../../../context';
+import { scopedTenantId } from '../../../graphql/tenantScope';
+import { userActivityFeedService } from '../../../services/userActivityFeedService';
+export const UserActivityFeedResolvers = {
+  Query: {
+    userActivityFeed: async (
+      _: unknown,
+      { tenantId, limit }: { tenantId: string; limit?: number },
+      ctx: GraphQLContext,
+    ) => userActivityFeedService.list(scopedTenantId(ctx, tenantId), limit ?? 20),
+  },
+};

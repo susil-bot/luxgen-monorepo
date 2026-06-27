@@ -1,32 +1,17 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { hasFeature, getRequiredPlan, normalizePlan, type BillingFeature, type PlanTier } from '@luxgen/billing';
-import { extractBearerToken } from '@luxgen/agent';
+import { hasFeature, getRequiredPlan, type BillingFeature, type PlanTier } from '@luxgen/billing';
+import { resolveTenantBillingSnapshot } from './tenant-billing';
+import { ensureDbConnection } from './ensure-db';
 
 export interface TenantBillingSnapshot {
   plan: PlanTier;
   featureFlags: Record<string, boolean>;
 }
 
-import { getApiUrl } from '@luxgen/config';
-
-export async function fetchTenantBilling(tenantId: string, authToken?: string): Promise<TenantBillingSnapshot> {
-  const apiUrl = getApiUrl();
-  const headers: Record<string, string> = { 'x-tenant': tenantId };
-  if (authToken) {
-    headers.Authorization = `Bearer ${authToken}`;
-  }
+export async function fetchTenantBilling(tenantId: string): Promise<TenantBillingSnapshot> {
   try {
-    const res = await fetch(`${apiUrl}/api/billing/plan?tenant=${encodeURIComponent(tenantId)}`, {
-      headers,
-    });
-    if (!res.ok) {
-      return { plan: 'free', featureFlags: {} };
-    }
-    const data = await res.json();
-    return {
-      plan: normalizePlan(data.plan),
-      featureFlags: data.featureFlags ?? {},
-    };
+    await ensureDbConnection();
+    return await resolveTenantBillingSnapshot(tenantId);
   } catch {
     return { plan: 'free', featureFlags: {} };
   }
@@ -36,10 +21,9 @@ export async function requirePlanFeature(
   tenantId: string,
   feature: BillingFeature,
   res: NextApiResponse,
-  req?: NextApiRequest,
+  _req?: NextApiRequest,
 ): Promise<PlanTier | null> {
-  const authToken = req ? extractBearerToken(req) : undefined;
-  const billing = await fetchTenantBilling(tenantId, authToken);
+  const billing = await fetchTenantBilling(tenantId);
   if (!hasFeature(billing.plan, feature)) {
     res.status(403).json({
       error: 'Plan upgrade required',

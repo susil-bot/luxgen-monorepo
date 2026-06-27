@@ -1,11 +1,10 @@
 import { useState } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useMutation } from '@apollo/client';
 import {
   AppLayout,
-  getDefaultLogo,
-  getDefaultSidebarSections,
   SnackbarProvider,
   useSnackbar,
   ProductEditForm,
@@ -15,11 +14,11 @@ import {
   buildCourseUpdateInput,
   type ProductEditMeta,
   type ProductSeo,
-  type ProductStatus,
-} from '@luxgen/ui';
+  type ProductStatus } from '@luxgen/ui';
 import { createHandleUserAction } from '../../lib/user-actions';
-import { useLayoutUser, useAppTenantId } from '../../lib/app-layout-user';
+import { useLayoutUser } from '../../lib/app-layout-user';
 import { getStoredUser } from '../../lib/session';
+import { useTenantScope } from '../../lib/use-tenant-scope';
 import { CREATE_COURSE, UPDATE_COURSE } from '../../graphql/queries/courses';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
@@ -29,12 +28,13 @@ interface Props {
 }
 
 function CreateProductContent({ tenant }: Props) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const layoutUser = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
   const headerProps = useAppLayoutHeader();
   const { showSuccess, showError } = useSnackbar();
-  const tenantId = useAppTenantId();
+  const { queryTenantId } = useTenantScope(tenant);
   const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
 
   const [title, setTitle] = useState('');
@@ -62,7 +62,7 @@ function CreateProductContent({ tenant }: Props) {
     }
 
     const instructorId = sessionUser?.id;
-    const tid = tenantId ?? sessionUser?.tenant.id ?? tenant;
+    const tid = queryTenantId;
     if (!instructorId || !tid) {
       showError('Sign in required');
       return;
@@ -72,9 +72,7 @@ function CreateProductContent({ tenant }: Props) {
     try {
       const { data } = await createCourse({
         variables: {
-          input: buildCourseCreateInput({ title, bodyHtml, seo, meta }, instructorId, tid),
-        },
-      });
+          input: buildCourseCreateInput({ title, bodyHtml, seo, meta }, instructorId, tid) } });
 
       const id = data?.createCourse?.id as string | undefined;
       if (!id) {
@@ -86,9 +84,7 @@ function CreateProductContent({ tenant }: Props) {
         await updateCourse({
           variables: {
             id,
-            input: buildCourseUpdateInput({ title, bodyHtml, seo, meta, status }),
-          },
-        });
+            input: buildCourseUpdateInput({ title, bodyHtml, seo, meta, status }) } });
       }
 
       showSuccess('Product created');
@@ -109,9 +105,9 @@ function CreateProductContent({ tenant }: Props) {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive
@@ -146,5 +142,3 @@ export default function CreateProductPage(props: Props) {
     </SnackbarProvider>
   );
 }
-
-export const getServerSideProps = getTenantPageProps;

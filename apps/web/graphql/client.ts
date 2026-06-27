@@ -5,11 +5,11 @@ import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
 import { createClient } from 'graphql-ws';
 import { getMainDefinition } from '@apollo/client/utilities';
 
-import { buildLoginRedirect } from '../lib/auth-routes';
+import { buildLoginRedirect, isAuthPage } from '../lib/auth-routes';
 import { getClientGraphqlUrl, getClientGraphqlWsUrl } from '../lib/urls';
 import { AUTH_STORAGE_KEYS, clearStoredSession, getStoredUser, isStoredSessionExpired } from '../lib/session';
 import { resolveAuthRedirectReason } from '../lib/session-guard';
-import { getHostTenantSubdomain, isSessionTenantMismatch } from '../lib/tenant-auth';
+import { isSessionTenantMismatch, resolveRequestTenant } from '../lib/tenant-auth';
 
 const httpLink = createHttpLink({
   uri: getClientGraphqlUrl(),
@@ -24,10 +24,9 @@ function createWsLink(): GraphQLWsLink | null {
       url: getClientGraphqlWsUrl(),
       connectionParams: () => {
         const token = localStorage.getItem(AUTH_STORAGE_KEYS.token);
-        const tenant = localStorage.getItem(AUTH_STORAGE_KEYS.tenant);
         return {
           authorization: token ? `Bearer ${token}` : '',
-          'x-tenant': tenant || getHostTenantSubdomain() || '',
+          'x-tenant': resolveRequestTenant(),
         };
       },
     }),
@@ -47,11 +46,16 @@ const splitLink =
     httpLink,
   );
 
+function redirectToLogin(reason: Parameters<typeof buildLoginRedirect>[1]): void {
+  const returnPath = `${window.location.pathname}${window.location.search}`;
+  if (isAuthPage(window.location.pathname)) return;
+  window.location.href = buildLoginRedirect(returnPath, reason);
+}
+
 const authLink = setContext((_, { headers }) => {
   if (typeof window === 'undefined') return { headers };
 
   const token = localStorage.getItem(AUTH_STORAGE_KEYS.token);
-  const tenant = localStorage.getItem(AUTH_STORAGE_KEYS.tenant);
 
   if (token && isStoredSessionExpired()) {
     clearStoredSession();
@@ -60,28 +64,30 @@ const authLink = setContext((_, { headers }) => {
 
   if (token && isSessionTenantMismatch(getStoredUser())) {
     clearStoredSession();
-    // Redirect immediately rather than silently dropping auth and letting the
-    // next request fail with a generic UNAUTHENTICATED error.
-    if (typeof window !== 'undefined') {
-      const returnPath = `${window.location.pathname}${window.location.search}`;
-      window.location.href = buildLoginRedirect(returnPath, 'tenant_mismatch');
-    }
+    redirectToLogin('tenant_mismatch');
     return { headers };
   }
-
-  const hostTenant = getHostTenantSubdomain();
 
   return {
     headers: {
       ...headers,
       authorization: token ? `Bearer ${token}` : '',
-      'x-tenant': tenant || hostTenant,
+      'x-tenant': resolveRequestTenant(),
     },
   };
 });
 
-const errorLink = onError(({ graphQLErrors, networkError }) => {
+const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
   if (typeof window === 'undefined') return;
+
+  if (graphQLErrors?.some((e) => e.extensions?.code === 'PLAN_UPGRADE_REQUIRED')) {
+    return;
+  }
+
+  const opName = operation.operationName;
+  if (opName === 'Login' || opName === 'Register') {
+    return;
+  }
 
   const statusCode =
     networkError && 'statusCode' in networkError ? (networkError as { statusCode?: number }).statusCode : undefined;
@@ -90,8 +96,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (!reason) return;
 
   clearStoredSession();
-  const returnPath = `${window.location.pathname}${window.location.search}`;
-  window.location.href = buildLoginRedirect(returnPath, reason);
+  redirectToLogin(reason);
 });
 
 export const client = new ApolloClient({

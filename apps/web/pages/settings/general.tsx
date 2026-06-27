@@ -95,7 +95,12 @@ function GeneralContent({ tenant }: Props) {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="ios-form-group">
                 <label htmlFor="timezone">Timezone</label>
-                <select id="timezone" className="ios-input" value={timezone} onChange={(e) => setTimezone(e.target.value)}>
+                <select
+                  id="timezone"
+                  className="ios-input"
+                  value={timezone}
+                  onChange={(e) => setTimezone(e.target.value)}
+                >
                   <option value="America/New_York">Eastern (US)</option>
                   <option value="America/Los_Angeles">Pacific (US)</option>
                   <option value="Europe/London">London</option>
@@ -104,7 +109,12 @@ function GeneralContent({ tenant }: Props) {
               </div>
               <div className="ios-form-group">
                 <label htmlFor="currency">Currency</label>
-                <select id="currency" className="ios-input" value={currency} onChange={(e) => setCurrency(e.target.value)}>
+                <select
+                  id="currency"
+                  className="ios-input"
+                  value={currency}
+                  onChange={(e) => setCurrency(e.target.value)}
+                >
                   <option value="USD">USD</option>
                   <option value="EUR">EUR</option>
                   <option value="GBP">GBP</option>

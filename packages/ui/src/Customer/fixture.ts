@@ -1,4 +1,4 @@
-import type { CustomerDetail, CustomerRow } from './fetcher';
+import type { CustomerRow } from './fetcher';
 import { buildCustomerDetail } from './fetcher';
 
 const sample: CustomerRow = {
@@ -16,4 +16,11 @@ const sample: CustomerRow = {
 export const customerFixtures = {
   listRows: [sample],
   detail: buildCustomerDetail(sample, []),
+  default: {
+    customers: [sample],
+    activeTab: 'all' as const,
+    onTabChange: () => undefined,
+    search: '',
+    onSearchChange: () => undefined,
+  },
 };

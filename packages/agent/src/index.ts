@@ -1,5 +1,5 @@
 // Types
-export type { AgentMessage, ToolUse, StagedFile, AgentSession, ApplyResult } from './types/session';
+export type { AgentMessage, ToolUse, StagedFile, AgentSession, ApplyResult, SessionChatMessage } from './types/session';
 
 export type { AgentEventType, AgentEvent, ChatMessage, RunAgentLoopOptions, RunAgentLoopResult } from './types/events';
 
@@ -22,9 +22,13 @@ export {
   getStagingDir,
   getWorktreesDir,
   getWorktreePath,
+  getMergeWorktreePath,
   getAgentBranchName,
   sanitizeSessionId,
   ALLOWED_PATHS,
+  ALLOWED_COMMANDS,
+  isAllowedCommand,
+  isFetchUrlAllowed,
   isPathAllowed,
   SENSITIVE_FILE_PATTERNS,
   isSensitiveFile,
@@ -48,9 +52,14 @@ export {
   getSessionPath,
   loadSession,
   saveSession,
+  saveSessionMessages,
   stageFile,
   applySession,
   discardSession,
+  pruneOldSessions,
+  pruneOldWorktrees,
+  ensureSessionHydrated,
+  clearSessionCache,
   getWorkspaceRoot,
   isGitWorktreeActive,
 } from './changeset/session-store';
@@ -102,12 +111,20 @@ export {
   syncSessionToMongo,
   appendAuditEntry,
   getTaskFromMongo,
+  sessionFromMongoDoc,
+  listTasksFromMongo,
   getAuditLog,
   updateTaskValidation,
 } from './persistence/mongo';
 
 // Auth
-export { isAuthRequired, resolveAgentAuth, bindSessionAuth, extractBearerToken } from './auth/context';
+export {
+  isAuthRequired,
+  resolveAgentAuth,
+  bindSessionAuth,
+  bindSessionAuthAsync,
+  extractBearerToken,
+} from './auth/context';
 export type { TaskStatus, TaskMode, AgentAuthContext, HeadlessTaskJob, AuditAction } from './types/task';
 
 // Queue
@@ -118,10 +135,21 @@ export {
   connectQueue,
   disconnectQueue,
   isQueueEnabled,
+  acquireTenantStreamSlot,
+  releaseTenantStreamSlot,
+  isAgentMessageRateLimited,
+  resetAgentRateLimitFallback,
+  listDeadLetterJobs,
+  handleJobFailure,
+  requeueHeadlessTask,
+  moveJobToDeadLetter,
+  MAX_CONCURRENT_STREAMS_PER_TENANT,
+  MAX_AGENT_MESSAGES_PER_MINUTE,
 } from './queue/redis-queue';
 export { processHeadlessJob, runWorkerLoop, shutdownWorker } from './queue/worker';
 
 // Automation bridge
-export { emitAutomationEvent, emitAgentAutomationEvent } from './automation/bridge';
+export { emitAutomationEvent, emitAgentAutomationEvent, emitCommerceAutomationEvent } from './automation/bridge';
+export type { CommerceAutomationEventKind } from './automation/bridge';
 export { AUTOMATION_EVENTS_CHANNEL, AUTOMATION_SCHEMA_DOC, AGENT_TRIGGER_TYPES } from './automation/events';
 export type { AutomationEventPayload } from './automation/events';

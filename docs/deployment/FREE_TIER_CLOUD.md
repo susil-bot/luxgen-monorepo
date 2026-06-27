@@ -6,15 +6,15 @@
 
 ## Recommended $0 stack
 
-| Layer | Service | Free tier limits | Role |
-|-------|---------|------------------|------|
-| **Web** | [Vercel](https://vercel.com) Hobby | 100 GB bandwidth, serverless | `apps/web` (Next.js) |
-| **API** | [Render](https://render.com) Free | 750 hrs/mo, spins down after 15 min idle | `apps/api` (GraphQL) |
-| **Database** | [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) M0 | 512 MB storage | `@luxgen/db` |
-| **Redis** | [Upstash](https://upstash.com) | 256 MB, 10k cmds/day | Optional — agent queue |
-| **Cron** | [cron-job.org](https://cron-job.org) | Free schedules | Listing reminder job |
-| **Email** | Console / Resend free tier | 100 emails/day on Resend | Listing notifications |
-| **Payments** | Stripe Test mode | Free | Billing + listings |
+| Layer        | Service                                                 | Free tier limits                         | Role                   |
+| ------------ | ------------------------------------------------------- | ---------------------------------------- | ---------------------- |
+| **Web**      | [Vercel](https://vercel.com) Hobby                      | 100 GB bandwidth, serverless             | `apps/web` (Next.js)   |
+| **API**      | [Render](https://render.com) Free                       | 750 hrs/mo, spins down after 15 min idle | `apps/api` (GraphQL)   |
+| **Database** | [MongoDB Atlas](https://www.mongodb.com/cloud/atlas) M0 | 512 MB storage                           | `@luxgen/db`           |
+| **Redis**    | [Upstash](https://upstash.com)                          | 256 MB, 10k cmds/day                     | Optional — agent queue |
+| **Cron**     | [cron-job.org](https://cron-job.org)                    | Free schedules                           | Listing reminder job   |
+| **Email**    | Console / Resend free tier                              | 100 emails/day on Resend                 | Listing notifications  |
+| **Payments** | Stripe Test mode                                        | Free                                     | Billing + listings     |
 
 **Estimated monthly cost: $0** (domains optional ~$12/yr).
 
@@ -73,11 +73,11 @@ Skip if you disable agent-worker and don't need Redis-backed queues.
 ### Option B — Manual Docker service
 
 1. **New Web Service** → connect GitHub repo.
-2. **Environment:** Docker  
-3. **Dockerfile path:** `apps/api/Dockerfile`  
-4. **Docker context:** `.` (repo root — required for monorepo packages)  
-5. **Build command:** (Docker handles via Dockerfile)  
-6. **Health check path:** `/health`  
+2. **Environment:** Docker
+3. **Dockerfile path:** `apps/api/Dockerfile`
+4. **Docker context:** `.` (repo root — required for monorepo packages)
+5. **Build command:** (Docker handles via Dockerfile)
+6. **Health check path:** `/health`
 7. **Port:** `4000`
 
 **Important env vars on Render:**
@@ -158,22 +158,22 @@ Use Stripe **test mode** for free development.
 
 ## Step 7 — Custom domain (optional)
 
-| Service | Action |
-|---------|--------|
-| Vercel | Add domain → DNS CNAME to Vercel |
-| Render | Add custom domain on API service |
+| Service                 | Action                                                                 |
+| ----------------------- | ---------------------------------------------------------------------- |
+| Vercel                  | Add domain → DNS CNAME to Vercel                                       |
+| Render                  | Add custom domain on API service                                       |
 | Multi-tenant subdomains | Wildcard DNS `*.yourdomain.com` → Vercel; configure in `middleware.ts` |
 
 ---
 
 ## What does NOT run on free tier
 
-| Feature | Why | Workaround |
-|---------|-----|------------|
+| Feature                   | Why                                     | Workaround                                      |
+| ------------------------- | --------------------------------------- | ----------------------------------------------- |
 | **Agent Studio (Ollama)** | LLM needs GPU/RAM; Vercel is serverless | Use locally; Enterprise gate stays off in cloud |
-| **agent-worker** | Needs always-on process + Redis | Skip on free tier |
-| **Prometheus/Grafana** | docker-compose.prod only | Use host dashboards or skip |
-| **Zero cold starts** | Render free spins down | UptimeRobot ping or paid tier |
+| **agent-worker**          | Needs always-on process + Redis         | Skip on free tier                               |
+| **Prometheus/Grafana**    | docker-compose.prod only                | Use host dashboards or skip                     |
+| **Zero cold starts**      | Render free spins down                  | UptimeRobot ping or paid tier                   |
 
 Set `BILLING_DEV_MODE=false` and rely on Stripe test keys for billing demos.
 
@@ -213,15 +213,15 @@ fly deploy
 - [ ] Cron job returns 200 for listing reminders
 - [ ] CORS: web can call API (no browser CORS errors)
 
-Full validation: [CHECKLIST.md](../../CHECKLIST.md)
+Full validation: [technical/operations/CHECKLIST.md](../technical/operations/CHECKLIST.md)
 
 ---
 
 ## Upgrading from free tier
 
-| When | Move to |
-|------|---------|
-| Cold starts hurt UX | Render Starter ($7/mo) or Fly paid |
+| When                | Move to                             |
+| ------------------- | ----------------------------------- |
+| Cold starts hurt UX | Render Starter ($7/mo) or Fly paid  |
 | Need Agent in cloud | GPU VPS or OpenAI API + code change |
-| Production Stripe | Live keys + dedicated webhook |
-| High traffic | Vercel Pro, Atlas M10+, Redis paid |
+| Production Stripe   | Live keys + dedicated webhook       |
+| High traffic        | Vercel Pro, Atlas M10+, Redis paid  |

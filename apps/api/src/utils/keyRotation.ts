@@ -1,4 +1,4 @@
-import { tenantKeyManager } from './tenantKeys';
+import { tenantKeyManager, gracePeriodExpiresAt } from './tenantKeys';
 import { verifyToken } from './jwt';
 
 export interface KeyRotationResult {
@@ -9,11 +9,11 @@ export interface KeyRotationResult {
 }
 
 /**
- * Rotate keys for a specific tenant
+ * Rotate the active signing key for a tenant. The previous key remains valid
+ * during the grace period so existing JWTs keep working until they expire.
  */
 export const rotateTenantKey = async (tenantId: string, newKey: string): Promise<KeyRotationResult> => {
   try {
-    // Validate that the tenant exists
     if (!tenantKeyManager.hasTenantKey(tenantId)) {
       return {
         success: false,
@@ -21,21 +21,16 @@ export const rotateTenantKey = async (tenantId: string, newKey: string): Promise
       };
     }
 
-    // Store the old key temporarily for token migration
     const oldKey = tenantKeyManager.getTenantKey(tenantId);
+    const expiresAt = gracePeriodExpiresAt();
 
-    // Add the new key with a timestamp suffix
-    const newKeyId = `${tenantId}_${Date.now()}`;
-    tenantKeyManager.addTenantKey(newKeyId, newKey);
-
-    // Keep the old key for a grace period
-    const gracePeriodKeyId = `${tenantId}_old_${Date.now()}`;
-    tenantKeyManager.addTenantKey(gracePeriodKeyId, oldKey);
+    await tenantKeyManager.addGraceKey(tenantId, oldKey, expiresAt);
+    await tenantKeyManager.setActiveKey(tenantId, newKey);
 
     return {
       success: true,
       message: `Key rotated successfully for tenant ${tenantId}`,
-      newKeyId,
+      newKeyId: tenantId,
     };
   } catch (error) {
     return {
@@ -45,23 +40,12 @@ export const rotateTenantKey = async (tenantId: string, newKey: string): Promise
   }
 };
 
-/**
- * Generate a new random key for a tenant
- */
-export const generateNewTenantKey = (length: number = 64): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-};
+export { generateNewTenantKey } from './tenantKeys';
 
 /**
  * Validate a tenant key
  */
 export const validateTenantKey = (key: string): boolean => {
-  // Basic validation - at least 32 characters
   return Boolean(key && key.length >= 32);
 };
 
@@ -83,20 +67,14 @@ export const getTenantKeyInfo = (tenantId: string) => {
 /**
  * Revoke all keys for a tenant (emergency)
  */
-export const revokeTenantKeys = (tenantId: string): KeyRotationResult => {
+export const revokeTenantKeys = async (tenantId: string): Promise<KeyRotationResult> => {
   try {
-    // Remove all keys for this tenant
-    const availableTenants = tenantKeyManager.getAvailableTenants();
-    const tenantKeys = availableTenants.filter((key) => key.startsWith(tenantId));
-
-    tenantKeys.forEach((key) => {
-      tenantKeyManager.removeTenantKey(key);
-    });
+    const affectedKeys = await tenantKeyManager.revokeTenantKeys(tenantId);
 
     return {
       success: true,
       message: `All keys revoked for tenant ${tenantId}`,
-      affectedTokens: 0, // Would need to track active tokens
+      affectedTokens: affectedKeys,
     };
   } catch (error) {
     return {
@@ -111,10 +89,8 @@ export const revokeTenantKeys = (tenantId: string): KeyRotationResult => {
  */
 export const testTokenWithKeys = (token: string, tenantId: string): boolean => {
   try {
-    // Try with current tenant key
-    const _currentKey = tenantKeyManager.getTenantKey(tenantId);
     const decoded = verifyToken(token);
-    return !!decoded;
+    return !!decoded && decoded.tenant === tenantId;
   } catch {
     return false;
   }

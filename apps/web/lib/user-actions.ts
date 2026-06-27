@@ -1,5 +1,5 @@
 import type { NextRouter } from 'next/router';
-import { client } from '../graphql/client';
+import { safeClearApolloStore } from '../graphql/safe-apollo-store';
 import { buildLogoutRedirect } from './auth-routes';
 import { clearStoredSession } from './session';
 
@@ -25,7 +25,7 @@ export function performLogout(options: LogoutOptions = {}): void {
   clearStoredSession();
 
   if (resetApolloCache) {
-    void client.clearStore();
+    void safeClearApolloStore();
   }
 
   if (router) {
@@ -49,9 +49,11 @@ export function createHandleUserAction(router: Pick<NextRouter, 'push'>) {
       case 'settings':
         void router.push('/settings');
         break;
-      case 'logout':
+      case 'logout': {
+        if (typeof window !== 'undefined' && !window.confirm('Sign out of LuxGen?')) return;
         performLogout({ router });
         break;
+      }
     }
   };
 }

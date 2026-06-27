@@ -33,7 +33,7 @@
 
 ## Page template
 
-Always use Standard Page Template from [CODEBASE.md](../../CODEBASE.md):
+Always use Standard Page Template from [CODEBASE.md](../../docs/technical/development/CODEBASE.md):
 
 - `AppLayout` + `getDefaultSidebarSections()`
 - `SnackbarProvider` wrapper

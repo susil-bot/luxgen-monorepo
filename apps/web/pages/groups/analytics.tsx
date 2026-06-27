@@ -1,77 +1,63 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
 import { useQuery } from '@apollo/client';
-import { SnackbarProvider, AppLayout, getDefaultUser, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { SnackbarProvider, AppLayout } from '@luxgen/ui';
 import { PlanGate } from '../../components/billing/PlanGate';
 import { GET_TENANT_BILLING } from '../../graphql/queries/billing';
 import { normalizePlan } from '@luxgen/billing';
+import { GET_GROUP_ANALYTICS } from '../../graphql/queries/analytics';
+import { useAppTenantId, useLayoutUser } from '../../lib/app-layout-user';
+import { isMongoObjectId } from '../../lib/mongo-id';
 
 const GroupAnalyticsPageContent: React.FC = () => {
   const router = useRouter();
   const tenant = (router.query.tenant as string) || 'demo';
-  const [user, setUser] = useState<any>(null);
+  const layoutUser = useLayoutUser();
+  const { sidebarSections, logo } = useAppShellConfig();
 
   const { data: billingData } = useQuery(GET_TENANT_BILLING, {
     variables: { tenantId: tenant },
     errorPolicy: 'ignore',
-    skip: !tenant,
-  });
+    skip: !tenant });
   const tenantPlan = normalizePlan(billingData?.tenantBilling?.plan?.toLowerCase?.() ?? 'free');
-
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser({
-          name: `${parsedUser.firstName} ${parsedUser.lastName}`,
-          email: parsedUser.email,
-          role: parsedUser.role,
-          tenant: parsedUser.tenant,
-        });
-      } catch {
-        setUser(getDefaultUser());
-      }
-    } else {
-      setUser(getDefaultUser());
-    }
-  }, []);
 
   const handleUserAction = createHandleUserAction(router);
   const headerProps = useAppLayoutHeader();
 
+  const tenantId = useAppTenantId();
+  const { data: groupAnalyticsData } = useQuery(GET_GROUP_ANALYTICS, {
+    variables: { tenantId },
+    skip: !isMongoObjectId(tenantId) });
+  const groupStats = groupAnalyticsData?.groupAnalytics;
   const stats = [
     {
       label: 'Total Groups',
-      value: '12',
+      value: String(groupStats?.totalGroups ?? 0),
       delta: '+2 from last month',
       color: 'var(--color-blue)',
-      badge: 'badge-blue',
-    },
+      badge: 'badge-blue' },
     {
       label: 'Active Users',
-      value: '156',
+      value: String(groupStats?.totalMembers ?? 0),
       delta: '+12 from last week',
       color: 'var(--color-green)',
-      badge: 'badge-green',
-    },
+      badge: 'badge-green' },
     {
       label: 'Engagement Rate',
       value: '87%',
       delta: '+5% from last month',
       color: 'var(--color-purple)',
-      badge: 'badge-purple',
-    },
+      badge: 'badge-purple' },
     {
       label: 'Growth Rate',
       value: '23%',
       delta: '+3% from last quarter',
       color: 'var(--color-orange)',
-      badge: 'badge-orange',
-    },
+      badge: 'badge-orange' },
   ];
 
   const topGroups = [
@@ -88,11 +74,11 @@ const GroupAnalyticsPageContent: React.FC = () => {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
-        user={user}
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
         onUserAction={handleUserAction}
         {...headerProps}
-        logo={getDefaultLogo()}
+        logo={logo}
         sidebarCollapsible={true}
         sidebarDefaultCollapsed={false}
         responsive={true}
@@ -110,8 +96,7 @@ const GroupAnalyticsPageContent: React.FC = () => {
                 className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
                 style={{
                   backgroundColor: 'var(--color-fill-secondary)',
-                  color: 'var(--color-label-primary)',
-                }}
+                  color: 'var(--color-label-primary)' }}
               >
                 Back to Groups
               </button>
@@ -166,8 +151,7 @@ const GroupAnalyticsPageContent: React.FC = () => {
                           className="h-full rounded-full transition-all duration-500"
                           style={{
                             width: `${group.score}%`,
-                            backgroundColor: 'var(--color-green)',
-                          }}
+                            backgroundColor: 'var(--color-green)' }}
                         />
                       </div>
                     </div>

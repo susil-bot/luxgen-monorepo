@@ -14,6 +14,8 @@ interface RegisterPageProps {
   tenant: string;
 }
 
+const SOCIAL_LOGIN_ENABLED = process.env.NEXT_PUBLIC_SOCIAL_LOGIN_ENABLED === 'true';
+
 const RegisterPageContent: React.FC<RegisterPageProps> = ({ tenant }) => {
   const router = useRouter();
   const { showSuccess, showError, showInfo } = useSnackbar();
@@ -42,14 +44,8 @@ const RegisterPageContent: React.FC<RegisterPageProps> = ({ tenant }) => {
         const { token, user } = result.data.register;
 
         persistSession(token, user);
-
-        const roleDisplayName = 'Student';
-        showSuccess(`Registration successful! Welcome ${data.firstName} ${data.lastName} as ${roleDisplayName}`);
-
-        // Redirect after a short delay
-        setTimeout(() => {
-          router.push('/login');
-        }, 1500);
+        showSuccess('Registration successful! Check your email to verify your account.');
+        setTimeout(() => router.push('/verify-email'), 1200);
       }
     } catch (error: any) {
       console.error('Registration error:', error);
@@ -96,12 +92,13 @@ const RegisterPageContent: React.FC<RegisterPageProps> = ({ tenant }) => {
               <div className="order-2 md:order-1">
                 <RegisterForm
                   onSubmit={handleRegister}
-                  onSocialLogin={handleSocialLogin}
+                  onSocialLogin={SOCIAL_LOGIN_ENABLED ? handleSocialLogin : undefined}
                   onSignIn={handleLogin}
                   loading={loading}
                   title="Create Account"
                   subtitle="Sign up for your account to get started"
-                  socialProviders={['google', 'linkedin', 'github']}
+                  showSocialLogin={SOCIAL_LOGIN_ENABLED}
+                  socialProviders={SOCIAL_LOGIN_ENABLED ? ['google', 'linkedin', 'github'] : []}
                   className=""
                 />
               </div>

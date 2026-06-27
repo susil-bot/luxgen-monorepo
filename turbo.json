@@ -18,6 +18,9 @@
     },
     "clean": {
       "cache": false
+    },
+    "test:auto": {
+      "dependsOn": ["^build"]
     }
   }
 }

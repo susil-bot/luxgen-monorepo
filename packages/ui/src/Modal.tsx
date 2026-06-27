@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -6,9 +6,11 @@ export interface ModalProps {
   title?: string;
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  loading?: boolean;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md' }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md', loading = false }) => {
+  const panelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!isOpen) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -38,6 +40,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
       />
 
       <div
+        ref={panelRef}
         className={`relative w-full ${sizeClasses[size]} rounded-xl shadow-xl`}
         style={{
           background: 'var(--color-bg-primary)',
@@ -45,14 +48,18 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
         }}
       >
         {title && (
-          <div
-            className="px-5 pt-5 pb-3"
-            style={{ borderBottom: '1px solid var(--color-separator)' }}
-          >
+          <div className="px-5 pt-5 pb-3" style={{ borderBottom: '1px solid var(--color-separator)' }}>
             <h3 className="text-lg font-semibold text-primary">{title}</h3>
           </div>
         )}
-        <div className="px-5 py-4">{children}</div>
+        <div className="px-5 py-4 relative">
+          {loading ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-bg-primary/80 z-10 rounded-b-xl" aria-busy="true">
+              <span className="text-secondary text-sm">Loading…</span>
+            </div>
+          ) : null}
+          {children}
+        </div>
       </div>
     </div>
   );

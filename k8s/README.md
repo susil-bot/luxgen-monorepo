@@ -1,5 +1,7 @@
 # LuxGen Kubernetes Infrastructure
 
+> **Parent:** [Technical docs](../docs/technical/README.md) · **Related:** [deployment/DOCKER.md](../docs/deployment/DOCKER.md)
+
 This directory contains Kubernetes manifests for deploying the LuxGen monorepo to a Kubernetes cluster.
 
 ## Architecture Overview
@@ -60,7 +62,7 @@ Create a `.env.production` file in the root directory:
 
 ```bash
 # .env.production
-MONGODB_URI=mongodb://admin:YOUR_SECURE_PASSWORD@mongodb-service:27017/luxgen?authSource=admin
+MONGODB_URI=mongodb://admin:YOUR_SECURE_PASSWORD@mongodb-service:27017/luxgen?authSource=admin&replicaSet=rs0
 JWT_SECRET=YOUR_JWT_SECRET_MIN_32_CHARS_CHANGE_IN_PRODUCTION
 JWT_EXPIRES_IN=7d
 SEED_IF_EMPTY=true
@@ -122,9 +124,19 @@ CMD ["node", "dist/index.js"]
 # Make deploy script executable
 chmod +x k8s/deploy.sh
 
-# Run deployment
+# Run deployment (validates required keys in .env.production)
 ./k8s/deploy.sh
 ```
+
+#### CI / non-interactive deploy
+
+`deploy.sh` uses `set -euo pipefail` and never prompts. For pipelines where secrets are provisioned separately (Sealed Secrets, External Secrets, or a prior `kubectl create secret` step):
+
+```bash
+LUXGEN_SECRETS_ALREADY_EXIST=true ./k8s/deploy.sh
+```
+
+For local deploys, `.env.production` must include every key listed in `k8s/secret.yaml.example` (non-empty). The script exits before `kubectl apply` if any required key is missing.
 
 Or deploy manually:
 
@@ -194,6 +206,12 @@ kubectl logs -f deployment/agent-worker -n luxgen
 
 # MongoDB logs
 kubectl logs -f statefulset/mongodb -n luxgen
+
+# MongoDB replica set status
+kubectl exec -it mongodb-0 -n luxgen -- mongosh -u admin -p --eval 'rs.status()'
+
+# MongoDB on-disk backups (daily CronJob at 02:00 UTC, 7-day retention)
+kubectl get cronjob mongodb-backup -n luxgen
 
 # Redis logs
 kubectl logs -f statefulset/redis -n luxgen

@@ -1,4 +1,6 @@
+import { resolveEffectivePlan } from '@luxgen/db';
 import { Request, Response, NextFunction } from 'express';
+import { isDevLocalOrigin } from '@luxgen/config';
 import { getRedisClient } from '../lib/redis';
 
 // Strip CR/LF to prevent HTTP header injection
@@ -26,7 +28,7 @@ function sanitizeFontFamily(value: string): string {
   return 'sans-serif';
 }
 
-export const tenantHeadersMiddleware = (req: Request, res: Response, next: NextFunction) => {
+export const tenantHeadersMiddleware = async (req: Request, res: Response, next: NextFunction) => {
   try {
     if (!req.tenant) return next();
 
@@ -37,7 +39,8 @@ export const tenantHeadersMiddleware = (req: Request, res: Response, next: NextF
     res.set('X-Tenant-Name', sanitizeHeader(tenant.name));
     res.set('X-Tenant-Subdomain', sanitizeHeader(tenant.subdomain));
     res.set('X-Tenant-Status', sanitizeHeader(tenant.status));
-    res.set('X-Tenant-Plan', sanitizeHeader(tenant.metadata.plan));
+    const effectivePlan = await resolveEffectivePlan(tenant.subdomain);
+    res.set('X-Tenant-Plan', sanitizeHeader(effectivePlan));
 
     res.set('X-Tenant-Primary-Color', sanitizeHeader(sanitizeCssColor(branding.primaryColor)));
     res.set('X-Tenant-Secondary-Color', sanitizeHeader(sanitizeCssColor(branding.secondaryColor)));
@@ -68,7 +71,7 @@ export const tenantHeadersMiddleware = (req: Request, res: Response, next: NextF
 
     if (security.corsOrigins.length > 0) {
       const origin = req.get('Origin');
-      if (origin && security.corsOrigins.includes(origin)) {
+      if (origin && (security.corsOrigins.includes(origin) || isDevLocalOrigin(origin))) {
         res.set('Access-Control-Allow-Origin', origin);
       }
     }

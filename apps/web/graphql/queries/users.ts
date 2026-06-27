@@ -23,6 +23,24 @@ export const GET_USER = gql`
   }
 `;
 
+export const GET_CUSTOMERS = gql`
+  query GetCustomers($tenantId: ID!, $search: String) {
+    customers(tenantId: $tenantId, search: $search) {
+      id
+      email
+      firstName
+      lastName
+      role
+      status
+      isActive
+      phone
+      marketingEmail
+      staffNotes
+      createdAt
+    }
+  }
+`;
+
 export const GET_USERS = gql`
   query GetUsers($tenantId: ID!) {
     users(tenantId: $tenantId) {
@@ -96,5 +114,34 @@ export const UPDATE_CUSTOMER_NOTES = gql`
 export const DELETE_USER = gql`
   mutation DeleteUser($id: ID!) {
     deleteUser(id: $id)
+  }
+`;
+
+export const GET_PENDING_USERS = gql`
+  query GetPendingUsers($tenantId: ID!) {
+    getPendingUsers(tenantId: $tenantId) {
+      id
+      email
+      firstName
+      lastName
+      status
+      createdAt
+    }
+  }
+`;
+export const ACTIVATE_USER = gql`
+  mutation ActivateUser($userId: ID!) {
+    activateUser(userId: $userId) {
+      success
+      message
+    }
+  }
+`;
+export const SUSPEND_USER = gql`
+  mutation SuspendUser($userId: ID!, $reason: String) {
+    suspendUser(userId: $userId, reason: $reason) {
+      success
+      message
+    }
   }
 `;

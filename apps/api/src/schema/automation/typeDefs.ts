@@ -6,6 +6,10 @@ export const automationTypeDefs = `
     CERTIFICATE_ISSUED
     SCHEDULE
     WEBHOOK
+    ORDER_CREATED
+    ORDER_DRAFTED
+    ORDER_UPDATED
+    PAYMENT_SENT
     CODE_CHANGE_STAGED
     CODE_CHANGE_COMMITTED
     CODE_CHANGE_MERGED
@@ -22,6 +26,7 @@ export const automationTypeDefs = `
     NOTIFY_SLACK
     TAG_USER
     RUN_AGENT_TASK
+    UPDATE_ORDER_FIELDS
   }
 
   enum AutomationRunStatus {
@@ -44,6 +49,7 @@ export const automationTypeDefs = `
     triggerType: AutomationTriggerType!
     triggerLabel: String!
     actions: [AutomationAction!]!
+    flowDefinition: JSON
     runCount: Int!
     lastRunAt: Date
     createdAt: Date!
@@ -81,6 +87,7 @@ export const automationTypeDefs = `
     triggerLabel: String!
     actions: [AutomationActionInput!]!
     enabled: Boolean
+    flowDefinition: JSON
   }
 
   input UpdateAutomationInput {
@@ -89,6 +96,7 @@ export const automationTypeDefs = `
     triggerLabel: String
     actions: [AutomationActionInput!]
     enabled: Boolean
+    flowDefinition: JSON
   }
 
   input RunAgentTaskInput {
@@ -98,7 +106,7 @@ export const automationTypeDefs = `
   }
 
   extend type Query {
-    automations(tenantId: String!): [Automation!]!
+    automations(tenantId: String!, limit: Int, offset: Int): [Automation!]!
     automation(id: ID!): Automation
     automationRuns(tenantId: String!, limit: Int): [AutomationRun!]!
     automationSchema: JSON!

@@ -1,24 +1,22 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useAppShellConfig } from '../../../lib/app-shell-config';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import {
   AppLayout,
-  getDefaultLogo,
-  getDefaultSidebarSections,
   CustomerDetailView,
   buildCustomerDetailFromUser,
   SnackbarProvider,
   useSnackbar,
-  type CustomerDetail,
-} from '@luxgen/ui';
+  type CustomerDetail } from '@luxgen/ui';
 import { PageLoadingState } from '../../../components/common/PageStates';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../../lib/app-layout-user';
 import { getStoredUser } from '../../../lib/session';
 import { GET_COURSES } from '../../../graphql/queries/courses';
-import { GET_USER, GET_USERS } from '../../../graphql/queries/users';
+import { GET_USER, GET_USERS, DELETE_USER } from '../../../graphql/queries/users';
 import { GET_ENROLLMENTS } from '../../../graphql/queries/enrollment';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
@@ -28,12 +26,27 @@ import { useCustomerProfile } from '../../../lib/use-customer-profile';
 import { applyProfilePatch, marketingPatch } from '../../../lib/customer-profile';
 import { isMongoObjectId } from '../../../lib/mongo-id';
 import { isLearnerRole } from '../../../lib/user-roles';
+import { CACHE_FIRST, CACHE_AND_NETWORK } from '../../../lib/apollo-policies';
+
+/** GraphQL user shape for customer detail pages (UI-94). */
+interface GraphqlUserRecord {
+  id: string;
+  email: string;
+  firstName?: string;
+  lastName?: string;
+  role: string;
+  staffNotes?: string;
+  marketingEmail?: boolean;
+  marketingSms?: boolean;
+  marketingWhatsapp?: boolean;
+}
 
 interface Props {
   tenant: string;
 }
 
 function AdminCustomerDetailContent({ tenant }: Props) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
@@ -41,33 +54,34 @@ function AdminCustomerDetailContent({ tenant }: Props) {
   const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
   const queryTenantId = tenantId ?? sessionUser?.tenant.id;
   const headerProps = useAppLayoutHeader();
-  const { showError } = useSnackbar();
+  const { showError, showSuccess } = useSnackbar();
   const [localCustomer, setLocalCustomer] = useState<CustomerDetail | null>(null);
+  const [deletingCustomer, setDeletingCustomer] = useState(false);
 
   const customerId = typeof router.query.id === 'string' ? router.query.id : '';
 
-  const { data: userData, loading: userLoading } = useQuery(GET_USER, {
+  const { data: userData, loading: userLoading } = useQuery<{ user?: GraphqlUserRecord }>(GET_USER, {
     variables: { id: customerId },
     skip: !customerId,
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: CACHE_FIRST,
   });
 
   const { data: coursesData, loading: coursesLoading } = useQuery(GET_COURSES, {
     variables: { tenantId: queryTenantId },
     skip: !isMongoObjectId(queryTenantId),
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: CACHE_FIRST,
   });
 
   const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
     variables: { tenantId: queryTenantId },
     skip: !isMongoObjectId(queryTenantId),
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: CACHE_FIRST,
   });
 
   const { data: enrollmentsData } = useQuery(GET_ENROLLMENTS, {
     variables: { tenantId: queryTenantId },
     skip: !isMongoObjectId(queryTenantId),
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: CACHE_AND_NETWORK,
   });
 
   const learners = useMemo(
@@ -138,19 +152,41 @@ function AdminCustomerDetailContent({ tenant }: Props) {
   const {
     notes: customerNotes,
     onNotesChange: onCustomerNotesChange,
-    savingNotes: savingCustomerNotes,
-  } = useCustomerNotes(customerId, timelineTenantId, customer?.notes ?? '');
+    savingNotes: savingCustomerNotes } = useCustomerNotes(customerId, timelineTenantId, customer?.notes ?? '');
+
+  const [deleteUser] = useMutation(DELETE_USER);
+
+  const handleDeleteCustomer = useCallback(async () => {
+    if (!customerId) return;
+    const confirmed = window.confirm(
+      'Delete this customer permanently? This cannot be undone. Customers with active orders cannot be deleted.',
+    );
+    if (!confirmed) return;
+
+    setDeletingCustomer(true);
+    try {
+      await deleteUser({ variables: { id: customerId } });
+      showSuccess('Customer deleted');
+      void router.push('/admin/customers');
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to delete customer');
+    } finally {
+      setDeletingCustomer(false);
+    }
+  }, [customerId, deleteUser, router, showError, showSuccess]);
 
   return (
     <>
       <Head>
-        <title>{customer ? `${customer.name} — Customers` : 'Customer'} — {tenant}</title>
+        <title>
+          {customer ? `${customer.name} — Customers` : 'Customer'} — {tenant}
+        </title>
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive
@@ -168,9 +204,9 @@ function AdminCustomerDetailContent({ tenant }: Props) {
           <CustomerDetailView
             customer={displayCustomer}
             editHref={`/admin/customers/${customerId}/edit`}
-            onCreateOrder={() =>
-              void router.push(`/orders/create?customerId=${encodeURIComponent(customerId)}`)
-            }
+            onCreateOrder={() => void router.push(`/orders/create?customerId=${encodeURIComponent(customerId)}`)}
+            onDeleteCustomer={() => void handleDeleteCustomer()}
+            deletingCustomer={deletingCustomer}
             onMarketingChange={onMarketingChange}
             savingMarketing={savingMarketing}
             timeline={timeline}
@@ -191,5 +227,3 @@ export default function AdminCustomerDetailPage(props: Props) {
     </SnackbarProvider>
   );
 }
-
-export const getServerSideProps = getTenantPageProps;

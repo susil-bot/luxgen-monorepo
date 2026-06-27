@@ -22,7 +22,7 @@ export const generateToken = (payload: JwtPayload, tenantId?: string): string =>
   const secret = tenantKeyManager.getTenantKey(keyId);
 
   return jwt.sign(payload, secret, {
-    expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as any,
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
     header: {
       alg: 'HS256',
       typ: 'JWT',
@@ -44,10 +44,15 @@ export const verifyToken = (token: string): JwtPayload | null => {
       return jwt.verify(token, secret) as JwtPayload;
     }
 
-    // Match generateToken: getTenantKey(kid) falls back to JWT_SECRET when kid is not
-    // in the env key store (e.g. kid = tenant Mongo id in dev).
-    const secret = tenantKeyManager.getTenantKey(header.kid);
-    return jwt.verify(token, secret) as JwtPayload;
+    const secrets = tenantKeyManager.getSigningSecretsForKid(header.kid);
+    for (const secret of secrets) {
+      try {
+        return jwt.verify(token, secret) as JwtPayload;
+      } catch {
+        // try next grace key
+      }
+    }
+    return null;
   } catch (error) {
     console.error('Token verification error:', error);
     return null;

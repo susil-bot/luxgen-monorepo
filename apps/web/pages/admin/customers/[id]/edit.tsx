@@ -3,12 +3,7 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMutation, useQuery } from '@apollo/client';
-import {
-  AppLayout,
-  CustomerEditForm,
-  SnackbarProvider,
-  useSnackbar,
-} from '@luxgen/ui';
+import { AppLayout, CustomerEditForm, SnackbarProvider, useSnackbar } from '@luxgen/ui';
 import { PageLoadingState } from '../../../../components/common/PageStates';
 import { GET_USER, UPDATE_USER, UPDATE_CUSTOMER_NOTES } from '../../../../graphql/queries/users';
 import { getTenantPageProps } from '../../../../lib/tenant-page-props';
@@ -106,7 +101,7 @@ function EditCustomerContent({ tenant }: Props) {
 
   if (!user || !isLearnerRole(user.role)) {
     return (
-      <AppLayout {...appLayoutProps}>
+      <AppLayout responsive {...appLayoutProps}>
         <div className="max-w-2xl mx-auto px-4 py-16 text-center">
           <p className="text-secondary">Customer not found</p>
           <Link href="/admin/customers" className="ios-btn-primary mt-4 inline-block">
@@ -125,7 +120,7 @@ function EditCustomerContent({ tenant }: Props) {
         </title>
       </Head>
 
-      <AppLayout {...appLayoutProps}>
+      <AppLayout responsive {...appLayoutProps}>
         <CustomerEditForm
           firstName={firstName}
           lastName={lastName}

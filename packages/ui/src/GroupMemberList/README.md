@@ -1,0 +1,23 @@
+# GroupMemberList
+
+LuxGen UI component. See `GroupMemberList.tsx` for props and usage.
+
+## Structure
+
+| File                      | Purpose                         |
+| ------------------------- | ------------------------------- |
+| `GroupMemberList.tsx`     | Main component                  |
+| `fetcher.ts`              | Data fetching / SSR helpers     |
+| `fixture.ts`              | Test fixtures and mock data     |
+| `GroupMemberList.spec.ts` | Unit tests                      |
+| `styles.ts`               | Styled components and CSS-in-JS |
+| `translations.ts`         | i18n strings                    |
+| `index.ts`                | Public exports                  |
+
+## Usage
+
+```tsx
+import { GroupMemberList } from '@luxgen/ui';
+
+<GroupMemberList />;
+```

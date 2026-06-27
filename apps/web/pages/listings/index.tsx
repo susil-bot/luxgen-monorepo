@@ -1,7 +1,9 @@
 import Head from 'next/head';
+import { useAppShellConfig } from '../../lib/app-shell-config';
+import { useLayoutUser } from '../../lib/app-layout-user';
 import Link from 'next/link';
 import { useQuery } from '@apollo/client';
-import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo } from '@luxgen/ui';
+import { AppLayout } from '@luxgen/ui';
 import { GET_PUBLISHED_LISTINGS } from '../../graphql/queries/listings';
 
 interface Props {
@@ -9,10 +11,11 @@ interface Props {
 }
 
 export default function ListingsDirectoryPage({ tenant }: Props) {
+  const layoutUser = useLayoutUser();
+  const { sidebarSections, logo } = useAppShellConfig();
   const { data, loading } = useQuery(GET_PUBLISHED_LISTINGS, {
     variables: { tenantId: tenant },
-    errorPolicy: 'ignore',
-  });
+    errorPolicy: 'ignore' });
 
   const listings = data?.publishedListings ?? [];
 
@@ -21,7 +24,12 @@ export default function ListingsDirectoryPage({ tenant }: Props) {
       <Head>
         <title>Business Listings — {tenant}</title>
       </Head>
-      <AppLayout sidebarSections={getDefaultSidebarSections()} user={getDefaultUser()} logo={getDefaultLogo()}>
+      <AppLayout
+        responsive
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
+        logo={logo}
+      >
         <div className="max-w-4xl mx-auto px-4 py-8">
           <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -56,5 +64,4 @@ export default function ListingsDirectoryPage({ tenant }: Props) {
 }
 
 export const getServerSideProps = async (ctx: { query: { tenant?: string } }) => ({
-  props: { tenant: ctx.query.tenant || 'demo' },
-});
+  props: { tenant: ctx.query.tenant || 'demo' } });

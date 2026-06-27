@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, ReactNode } from 'react';
-import { getTenantDomain } from '@luxgen/config';
+import { getTenantConfig } from '../config/centralized-tenants';
 import { ThemeProvider } from '../context/ThemeContext';
 import { UserProvider } from '../context/UserContext';
 import { TenantConfig } from '../services/tenantService';
@@ -20,39 +20,6 @@ interface GlobalProviderProps {
 }
 
 export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children, defaultTenant = 'demo', initialTenant }) => {
-  // Create a stable fallback config
-  const createFallbackConfig = (tenantId: string): TenantConfig => ({
-    id: tenantId,
-    name: `${tenantId.charAt(0).toUpperCase() + tenantId.slice(1)} Company`,
-    subdomain: tenantId,
-    domain: getTenantDomain(tenantId),
-    status: 'active',
-    theme: {
-      colors: {
-        primary: '#3B82F6',
-        secondary: '#10B981',
-        background: '#F8FAFC',
-        text: '#1F2937',
-      },
-      fonts: {
-        primary: 'Inter',
-        secondary: 'Inter',
-      },
-    },
-    branding: {
-      logo: {
-        text: `${tenantId.charAt(0).toUpperCase() + tenantId.slice(1)} Company`,
-        image: null,
-      },
-      favicon: null,
-    },
-    features: [],
-    limits: {},
-    plan: 'free',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  });
-
   // Detect tenant from URL (synchronous)
   const detectTenantFromUrl = (): string => {
     if (typeof window === 'undefined') {
@@ -92,12 +59,12 @@ export const GlobalProvider: React.FC<GlobalProviderProps> = ({ children, defaul
 
   // Initialize with detected tenant immediately (memoized to prevent re-detection)
   const [currentTenant, setCurrentTenant] = useState<string>(() => getInitialTenant());
-  const [tenantConfig, setTenantConfig] = useState<TenantConfig>(() => createFallbackConfig(getInitialTenant()));
+  const [tenantConfig, setTenantConfig] = useState<TenantConfig>(() => getTenantConfig(getInitialTenant()));
   const [isInitialized] = useState(true);
 
   const setTenant = (tenantId: string) => {
     setCurrentTenant(tenantId);
-    setTenantConfig(createFallbackConfig(tenantId));
+    setTenantConfig(getTenantConfig(tenantId));
   };
 
   const contextValue: GlobalContextType = {

@@ -26,7 +26,7 @@ luxgen-monorepo/
 └── scripts/           Tenant selection, init scripts
 ```
 
-Full map: [REPO_STRUCTURE.md](../../REPO_STRUCTURE.md)
+Full map: [technical/development/REPO_STRUCTURE.md](../technical/development/REPO_STRUCTURE.md)
 
 ---
 
@@ -66,11 +66,11 @@ npm run build:demo
 
 ## Web (`apps/web`)
 
-| Setting | Value |
-|---------|-------|
-| Output | Next.js `standalone` (see `next.config.js`) |
-| Docker | `apps/web/Dockerfile` — context must be **repo root** |
-| Vercel root | `apps/web` with install/build from monorepo root |
+| Setting     | Value                                                 |
+| ----------- | ----------------------------------------------------- |
+| Output      | Next.js `standalone` (see `next.config.js`)           |
+| Docker      | `apps/web/Dockerfile` — context must be **repo root** |
+| Vercel root | `apps/web` with install/build from monorepo root      |
 
 **Build-time env (Vercel):** `NEXT_PUBLIC_*` vars must be set before build.
 
@@ -80,12 +80,12 @@ npm run build:demo
 
 ## API (`apps/api`)
 
-| Setting | Value |
-|---------|-------|
-| Build | `tsc` → `dist/` locally; **Docker uses `tsx`** for production until TS debt cleared |
-| Start | `node dist/index.js` local; `npx tsx src/index.ts` in Docker |
-| Docker | `apps/api/Dockerfile` — context **repo root** |
-| Health | `GET /health` |
+| Setting | Value                                                                               |
+| ------- | ----------------------------------------------------------------------------------- |
+| Build   | `tsc` → `dist/` locally; **Docker uses `tsx`** for production until TS debt cleared |
+| Start   | `node dist/index.js` local; `npx tsx src/index.ts` in Docker                        |
+| Docker  | `apps/api/Dockerfile` — context **repo root**                                       |
+| Health  | `GET /health`                                                                       |
 
 Dockerfile runs `turbo run build --filter=@luxgen/api` which compiles API + dependency packages.
 
@@ -93,14 +93,14 @@ Dockerfile runs `turbo run build --filter=@luxgen/api` which compiles API + depe
 
 ## Common platform mistakes
 
-| Mistake | Fix |
-|---------|-----|
-| Build from `apps/web` only without root `npm install` | Install at repo root; filter turbo build |
-| Docker context = `apps/api` | Set context to `.` (monorepo root) |
-| Missing `NEXT_PUBLIC_GRAPHQL_URL` at build | Add in Vercel env before deploy |
-| API can't find `@luxgen/db` | Ensure full workspace copied in Docker builder stage |
-| API can't `tsc` (pre-existing TS errors) | Docker uses `tsx` runtime — see `apps/api/Dockerfile` |
-| Web rewrites fail in prod | Set `API_URL` to public API URL (not localhost) |
+| Mistake                                               | Fix                                                   |
+| ----------------------------------------------------- | ----------------------------------------------------- |
+| Build from `apps/web` only without root `npm install` | Install at repo root; filter turbo build              |
+| Docker context = `apps/api`                           | Set context to `.` (monorepo root)                    |
+| Missing `NEXT_PUBLIC_GRAPHQL_URL` at build            | Add in Vercel env before deploy                       |
+| API can't find `@luxgen/db`                           | Ensure full workspace copied in Docker builder stage  |
+| API can't `tsc` (pre-existing TS errors)              | Docker uses `tsx` runtime — see `apps/api/Dockerfile` |
+| Web rewrites fail in prod                             | Set `API_URL` to public API URL (not localhost)       |
 
 ---
 
@@ -109,8 +109,11 @@ Dockerfile runs `turbo run build --filter=@luxgen/api` which compiles API + depe
 See [`.github/workflows/ci.yml`](../../.github/workflows/ci.yml):
 
 - **Lint** job — `npm run lint`
+- **Format** job — `npm run format`
 - **Build** job — `scripts/validate-build.sh` (same as Husky **pre-push**)
 - **Test** job — `npm run test`
+
+AI PR reviews run separately in [`.github/workflows/presubmit.yml`](../../.github/workflows/presubmit.yml) — see [PRESUBMIT_AI_REVIEW.md](./PRESUBMIT_AI_REVIEW.md).
 
 Local **pre-commit** runs `lint-staged` (ESLint on staged files).
 
@@ -123,13 +126,13 @@ npm run validate:build  # build only
 
 ## Docker images
 
-| Dockerfile | Purpose |
-|------------|---------|
-| `apps/api/Dockerfile` | Production API (use this on Render) |
-| `apps/web/Dockerfile` | Production web standalone |
-| `apps/api/Dockerfile.dev` | Local dev hot-reload |
-| `apps/web/Dockerfile.dev` | Local dev hot-reload |
-| `Dockerfile` (root) | Legacy combined image — prefer split deploy |
+| Dockerfile                | Purpose                                     |
+| ------------------------- | ------------------------------------------- |
+| `apps/api/Dockerfile`     | Production API (use this on Render)         |
+| `apps/web/Dockerfile`     | Production web standalone                   |
+| `apps/api/Dockerfile.dev` | Local dev hot-reload                        |
+| `apps/web/Dockerfile.dev` | Local dev hot-reload                        |
+| `Dockerfile` (root)       | Legacy combined image — prefer split deploy |
 
 ---
 

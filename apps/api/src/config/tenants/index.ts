@@ -4,6 +4,7 @@
  */
 
 import { ITenant } from '@luxgen/db';
+import { type PlanTier } from '@luxgen/billing';
 import { getTenantDomain, getTenantWebOrigin } from '@luxgen/config';
 
 const ideaVibesDevDomain = getTenantDomain('idea-vibes');
@@ -22,6 +23,16 @@ import { ideaVibesBrandIdentity } from './idea-vibes/brand-identity';
 /**
  * Load complete tenant configuration
  */
+
+const INITIAL_SUBSCRIPTION_PLAN_BY_SUBDOMAIN: Record<string, PlanTier> = {
+  demo: 'pro',
+  'idea-vibes': 'enterprise',
+};
+
+export function getInitialSubscriptionPlan(subdomain: string): PlanTier {
+  return INITIAL_SUBSCRIPTION_PLAN_BY_SUBDOMAIN[subdomain] ?? 'free';
+}
+
 export const loadTenantConfig = (subdomain: string): Partial<ITenant> => {
   switch (subdomain) {
     case 'demo':
@@ -76,16 +87,15 @@ const loadDemoTenantConfig = (): Partial<ITenant> => ({
         maxApiCalls: demoFeaturesConfig.limits.apiCalls.max,
       },
       integrations: {
-        emailProvider: demoFeaturesConfig.platform.analytics.provider,
+        emailProvider: 'sendgrid',
         analyticsProvider: demoFeaturesConfig.platform.analytics.provider,
       },
     },
   },
   metadata: {
-    plan: 'pro',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null as any,
+    createdBy: '000000000000000000000001',
   },
 });
 
@@ -145,10 +155,9 @@ const loadIdeaVibesTenantConfig = (): Partial<ITenant> => ({
     },
   },
   metadata: {
-    plan: 'enterprise',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null as any,
+    createdBy: '000000000000000000000001',
   },
 });
 
@@ -201,10 +210,9 @@ const loadDefaultTenantConfig = (): Partial<ITenant> => ({
     },
   },
   metadata: {
-    plan: 'free',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null as any,
+    createdBy: '000000000000000000000001',
   },
 });
 

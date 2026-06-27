@@ -12,15 +12,7 @@ export interface CreateCustomerModalProps {
   onCreated?: (customerId: string) => void;
 }
 
-function FormField({
-  id,
-  label,
-  children,
-}: {
-  id: string;
-  label: string;
-  children: React.ReactNode;
-}) {
+function FormField({ id, label, children }: { id: string; label: string; children: React.ReactNode }) {
   return (
     <div className="space-y-1.5">
       <label htmlFor={id} className="text-sm font-medium text-secondary block">

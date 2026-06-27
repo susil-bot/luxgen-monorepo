@@ -1,60 +1,71 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useQuery } from '@apollo/client';
 import {
   AppLayout,
-  getDefaultLogo,
-  getDefaultSidebarSections,
   OrderListView,
-  buildOrdersFromEnrollments,
   filterOrdersByTab,
   SnackbarProvider,
   type OrderFilterTab,
+  type OrderPaymentStatus,
+  type OrderFulfillmentStatus,
+  type OrderRow,
 } from '@luxgen/ui';
-import { PageLoadingState } from '../../components/common/PageStates';
+import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
-import { useLayoutUser, useAppTenantId } from '../../lib/app-layout-user';
-import { getStoredUser } from '../../lib/session';
-import { GET_COURSES } from '../../graphql/queries/courses';
-import { GET_USERS } from '../../graphql/queries/users';
-import { GET_ENROLLMENTS } from '../../graphql/queries/enrollment';
+import { useLayoutUser } from '../../lib/app-layout-user';
+import { useTenantScope } from '../../lib/use-tenant-scope';
+import { GET_ORDER_ROWS } from '../../graphql/queries/orders';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
-import { isMongoObjectId } from '../../lib/mongo-id';
+import { CACHE_FIRST } from '../../lib/apollo-policies';
 
 interface OrdersPageProps {
   tenant: string;
 }
 
+function mapApiOrderRow(row: {
+  id: string;
+  subjectId: string;
+  courseId: string;
+  studentId: string;
+  orderNumber: string;
+  date: string;
+  customerId: string;
+  customerName: string;
+  customerEmail: string;
+  paymentStatus: string;
+  fulfillmentStatus: string;
+  total: string;
+  itemCount: number;
+  courseTitle: string;
+  archived: boolean;
+}): OrderRow {
+  return {
+    ...row,
+    date: String(row.date),
+    paymentStatus: row.paymentStatus as OrderPaymentStatus,
+    fulfillmentStatus: row.fulfillmentStatus as OrderFulfillmentStatus,
+  };
+}
+
 function OrdersPageContent({ tenant }: OrdersPageProps) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
-  const tenantId = useAppTenantId();
-  const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
-  const queryTenantId = tenantId ?? sessionUser?.tenant.id ?? tenant;
+  const { queryTenantId } = useTenantScope(tenant);
   const headerProps = useAppLayoutHeader();
 
   const [search, setSearch] = useState('');
   const [activeTab, setActiveTab] = useState<OrderFilterTab>('all');
 
-  const { data: coursesData, loading: coursesLoading } = useQuery(GET_COURSES, {
+  const { data, loading } = useQuery(GET_ORDER_ROWS, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
-    variables: { tenantId: queryTenantId },
-    skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network',
-  });
-
-  const { data: enrollmentsData, loading: enrollmentsLoading } = useQuery(GET_ENROLLMENTS, {
-    variables: { tenantId: queryTenantId },
-    skip: !isMongoObjectId(queryTenantId),
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: CACHE_FIRST,
   });
 
   useEffect(() => {
@@ -63,13 +74,8 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
   }, [router.query.search]);
 
   const allOrders = useMemo(
-    () =>
-      buildOrdersFromEnrollments(
-        coursesData?.courses,
-        usersData?.users,
-        enrollmentsData?.enrollments,
-      ),
-    [coursesData, usersData, enrollmentsData],
+    () => (data?.orderRows ?? []).map(mapApiOrderRow),
+    [data?.orderRows],
   );
 
   const tabCounts = useMemo(
@@ -100,7 +106,9 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
     return rows;
   }, [allOrders, activeTab, search]);
 
-  const loading = (coursesLoading || usersLoading || enrollmentsLoading) && allOrders.length === 0;
+  if (loading && allOrders.length === 0) {
+    return <PageLoadingState label="Loading orders…" />;
+  }
 
   return (
     <>
@@ -109,15 +117,24 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        responsive
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
-        responsive
       >
-        {loading ? (
-          <PageLoadingState label="Loading orders…" />
+        {allOrders.length === 0 ? (
+          <PageEmptyState
+            icon="📦"
+            title="No orders yet"
+            subtitle="Enrollments and purchases will appear here."
+            action={
+              <button type="button" className="ios-btn-primary mt-4" onClick={() => router.push('/orders/create')}>
+                Create order
+              </button>
+            }
+          />
         ) : (
           <OrderListView
             orders={orders}
@@ -126,7 +143,7 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
             search={search}
             onSearchChange={setSearch}
             tabCounts={tabCounts}
-            onCreateOrder={() => void router.push('/orders/create')}
+            onCreateOrder={() => router.push('/orders/create')}
           />
         )}
       </AppLayout>

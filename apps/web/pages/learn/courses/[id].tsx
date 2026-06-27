@@ -98,7 +98,10 @@ export default function LearnCourseDetailPage({ tenantSubdomain }: Props) {
               </section>
             )}
 
-            <section className="ios-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <section
+              className="ios-card p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 md:static fixed bottom-0 left-0 right-0 z-30 md:relative rounded-none md:rounded-2xl border-t md:border shadow-lg md:shadow-none px-4 py-4 md:p-5"
+              style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+            >
               <div>
                 <p className="font-semibold text-primary">
                   {isEnrolled || success ? 'You are enrolled' : 'Ready to start?'}
@@ -122,6 +125,27 @@ export default function LearnCourseDetailPage({ tenantSubdomain }: Props) {
                 <span className="text-sm text-secondary">Not open for enrollment</span>
               )}
             </section>
+
+            {(isEnrolled || success) && (
+              <section className="ios-card p-5 space-y-4 lux-course-player">
+                <h2 className="font-semibold">Course player</h2>
+                <div
+                  className="aspect-video rounded-lg flex items-center justify-center"
+                  style={{ background: 'var(--color-fill-tertiary)' }}
+                >
+                  <span className="text-secondary text-sm">Video player placeholder</span>
+                </div>
+                <ul className="space-y-2">
+                  {['Introduction', 'Lesson 1', 'Lesson 2', 'Lesson 3'].map((lesson, i) => (
+                    <li key={lesson} className="flex items-center gap-2 text-sm">
+                      <input type="checkbox" disabled readOnly />
+                      <span>{lesson}</span>
+                      {i === 0 ? <span className="badge badge-blue text-xs">Current</span> : null}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
 
             {enrollError && (
               <p className="text-sm" style={{ color: 'var(--color-red)' }}>

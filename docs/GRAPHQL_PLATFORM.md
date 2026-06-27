@@ -6,47 +6,50 @@
 
 ## Endpoint
 
-| Environment | URL |
-|-------------|-----|
-| Local | `http://localhost:4000/graphql` |
-| Web proxy | `/api/graphql` → API |
+| Environment | URL                             |
+| ----------- | ------------------------------- |
+| Local       | `http://localhost:4000/graphql` |
+| Web proxy   | `/api/graphql` → API            |
 
 ## Required headers (all clients)
 
-| Header | Purpose |
-|--------|---------|
-| `Authorization: Bearer <jwt>` | User identity |
-| `x-tenant` | Tenant subdomain (`demo`, `idea-vibes`) |
+| Header                        | Purpose                                                                            |
+| ----------------------------- | ---------------------------------------------------------------------------------- |
+| `Authorization: Bearer <jwt>` | User identity                                                                      |
+| `x-tenant`                    | Tenant **subdomain** from browser host (`demo`, `idea-vibes`) — not `localStorage` |
 
 Mobile must store JWT securely (Keychain / Keystore) and send the same headers as web Apollo client.
+
+> **Do not** set `x-tenant` from `localStorage.currentTenant` — it can be stale after subdomain navigation. Web uses `resolveRequestTenant()` in `apps/web/lib/tenant-auth.ts` (host-based).
 
 ---
 
 ## Client setup
 
-### Web (existing)
+### Web (canonical — `apps/web/graphql/client.ts`)
 
 ```typescript
-// apps/web/graphql/client.ts
-import { ApolloClient, InMemoryCache, createHttpLink } from '@apollo/client';
-import { setContext } from '@apollo/client/link/context';
-
-const httpLink = createHttpLink({
-  uri: process.env.NEXT_PUBLIC_GRAPHQL_URL || 'http://localhost:4000/graphql',
-});
+import { resolveRequestTenant } from '../lib/tenant-auth';
 
 const authLink = setContext((_, { headers }) => ({
   headers: {
     ...headers,
-    authorization: localStorage.getItem('authToken') ? `Bearer ${localStorage.getItem('authToken')}` : '',
-    'x-tenant': localStorage.getItem('currentTenant') || 'demo',
+    authorization: token ? `Bearer ${token}` : '',
+    'x-tenant': resolveRequestTenant(), // demo.localhost → demo
   },
 }));
 
-export const client = new ApolloClient({
-  link: authLink.concat(httpLink),
-  cache: new InMemoryCache(),
+// Browser URI: same-origin proxy (avoids CORS)
+const httpLink = createHttpLink({
+  uri: getClientGraphqlUrl(), // → /api/graphql
 });
+```
+
+For GraphQL **variables**, use `useTenantScope()` (`apps/web/lib/use-tenant-scope.ts`):
+
+```typescript
+const { queryTenantId, subdomain, mongoId } = useTenantScope(pageTenantProp);
+// queryTenantId = session mongo id ?? subdomain — pass to tenantId: variables
 ```
 
 ### Mobile (recommended — Expo + Apollo)
@@ -63,7 +66,7 @@ const httpLink = createHttpLink({
 
 const authLink = setContext(async (_, { headers }) => {
   const token = await SecureStore.getItemAsync('authToken');
-  const tenant = await SecureStore.getItemAsync('tenant') || 'demo';
+  const tenant = (await SecureStore.getItemAsync('tenant')) || 'demo';
   return {
     headers: {
       ...headers,
@@ -83,16 +86,16 @@ export const apolloClient = new ApolloClient({
 
 ## Domain coverage map
 
-| Domain | GraphQL | Web page | Mobile (planned) |
-|--------|---------|----------|------------------|
-| Auth | `login`, `register` | `/login` | Auth stack |
-| Dashboard | `dashboardData` | `/dashboard` | Home tab |
-| Courses | `courses`, `course` | `/courses` | Courses tab |
-| Groups | `groups`, `group` | `/groups` | — |
-| Users | `users` | `/users` | — |
+| Domain          | GraphQL                         | Web page       | Mobile (planned)   |
+| --------------- | ------------------------------- | -------------- | ------------------ |
+| Auth            | `login`, `register`             | `/login`       | Auth stack         |
+| Dashboard       | `dashboardData`                 | `/dashboard`   | Home tab           |
+| Courses         | `courses`, `course`             | `/courses`     | Courses tab        |
+| Groups          | `groups`, `group`               | `/groups`      | —                  |
+| Users           | `users`                         | `/users`       | —                  |
 | **Automations** | `automations`, `automationRuns` | `/automations` | — (admin web only) |
-| **Agent tasks** | `agentTask`, `runAgentTask` | `/agent` | — |
-| Learner | `learnerDashboard` *(future)* | `/customers` | Primary mobile UX |
+| **Agent tasks** | `agentTask`, `runAgentTask`     | `/agent`       | —                  |
+| Learner         | `learnerDashboard`              | `/customers`   | Primary mobile UX  |
 
 ---
 
@@ -101,45 +104,60 @@ export const apolloClient = new ApolloClient({
 ```graphql
 query Automations($tenantId: String!) {
   automations(tenantId: $tenantId) {
-    id name enabled triggerType triggerLabel
-    actions { type label config }
-    runCount lastRunAt createdAt
+    id
+    name
+    enabled
+    triggerType
+    triggerLabel
+    actions {
+      type
+      label
+      config
+    }
+    runCount
+    lastRunAt
+    createdAt
   }
 }
 
 mutation ToggleAutomation($id: ID!, $enabled: Boolean!) {
-  toggleAutomation(id: $id, enabled: $enabled) { id enabled }
+  toggleAutomation(id: $id, enabled: $enabled) {
+    id
+    enabled
+  }
 }
 
 mutation RunAgentTask($input: RunAgentTaskInput!) {
   runAgentTask(input: $input) {
-    sessionId status jobId
+    sessionId
+    status
+    jobId
   }
 }
 ```
 
 ### Agent ↔ Automation trigger types
 
-| Trigger | When fired |
-|---------|------------|
-| `COURSE_COMPLETED` | Learner completes course |
-| `USER_ENROLLED` | User enrolled |
-| `CODE_CHANGE_STAGED` | Agent staged files |
-| `CODE_CHANGE_COMMITTED` | Agent committed branch |
-| `CODE_CHANGE_MERGED` | Agent merged to base |
-| `CODE_CHANGE_FAILED` | Agent/validation failed |
-| `SCHEDULE` | Cron (future) |
-| `WEBHOOK` | External POST |
+| Trigger                 | When fired               |
+| ----------------------- | ------------------------ |
+| `COURSE_COMPLETED`      | Learner completes course |
+| `USER_ENROLLED`         | User enrolled            |
+| `CODE_CHANGE_STAGED`    | Agent staged files       |
+| `CODE_CHANGE_COMMITTED` | Agent committed branch   |
+| `CODE_CHANGE_MERGED`    | Agent merged to base     |
+| `CODE_CHANGE_FAILED`    | Agent/validation failed  |
+| `SCHEDULE`              | Cron (future)            |
+| `WEBHOOK`               | External POST            |
 
 ### Action types
 
-| Action | Config |
-|--------|--------|
-| `SEND_EMAIL` | `{ templateId, to }` |
+| Action           | Config                           |
+| ---------------- | -------------------------------- |
+| `SEND_EMAIL`     | `{ templateId, to }`             |
 | `RUN_AGENT_TASK` | `{ prompt, skill?, autoMerge? }` |
-| `NOTIFY_SLACK` | `{ channel, message }` |
-| `CALL_WEBHOOK` | `{ url, method }` |
-| `TAG_USER` | `{ tag }` |
+| `NOTIFY_SLACK`   | `{ channel, message }`           |
+| `CALL_WEBHOOK`   | `{ url, method }`                |
+| `TAG_USER`       | `{ tag }`                        |
 
 ---
 
@@ -161,4 +179,4 @@ Agent chat uses **SSE** at `/api/agent/chat` (streaming). Status, tasks, audit, 
 
 ---
 
-*See `docs/BUSINESS_STRATEGY_2026.md` for product positioning and monetization.*
+_See `docs/BUSINESS_STRATEGY_2026.md` for product positioning and monetization._

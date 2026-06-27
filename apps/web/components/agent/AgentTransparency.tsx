@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import type { AgentSession, StagedFile } from '../../lib/agent';
+import { diffLines } from 'diff';
+import type { AgentSession, StagedFile } from '../../../../packages/agent/src/types/session';
+import type { ValidationCheckName } from '../../../../packages/agent/src/types/validation';
 import ValidationReport from './ValidationReport';
 
 interface AgentTransparencyProps {
@@ -29,7 +31,7 @@ interface GitStatus {
 
 interface ValidationState {
   passed: boolean | null;
-  checks: Array<{ name: string; scope: string; passed: boolean; output: string; durationMs: number }>;
+  checks: Array<{ name: ValidationCheckName; scope: string; passed: boolean; output: string; durationMs: number }>;
   ranAt: number | null;
 }
 
@@ -37,59 +39,38 @@ function computeDiff(
   original: string,
   modified: string,
 ): Array<{ type: 'same' | 'add' | 'remove'; text: string; lineNum: number }> {
-  const oldLines = (original || '').split('\n');
-  const newLines = (modified || '').split('\n');
   const result: Array<{ type: 'same' | 'add' | 'remove'; text: string; lineNum: number }> = [];
+  const changes = diffLines(original || '', modified || '');
+  let oldLine = 1;
+  let newLine = 1;
 
-  // Simple LCS-based diff (myers algorithm approximation)
-  let oi = 0,
-    ni = 0;
-  while (oi < oldLines.length || ni < newLines.length) {
-    if (oi >= oldLines.length) {
-      result.push({ type: 'add', text: newLines[ni], lineNum: ni + 1 });
-      ni++;
-    } else if (ni >= newLines.length) {
-      result.push({ type: 'remove', text: oldLines[oi], lineNum: oi + 1 });
-      oi++;
-    } else if (oldLines[oi] === newLines[ni]) {
-      result.push({ type: 'same', text: newLines[ni], lineNum: ni + 1 });
-      oi++;
-      ni++;
-    } else {
-      // Look ahead to find next match
-      let found = false;
-      for (let lookahead = 1; lookahead <= 8; lookahead++) {
-        if (ni + lookahead < newLines.length && oldLines[oi] === newLines[ni + lookahead]) {
-          for (let k = 0; k < lookahead; k++) {
-            result.push({ type: 'add', text: newLines[ni + k], lineNum: ni + k + 1 });
-          }
-          ni += lookahead;
-          found = true;
-          break;
-        }
-        if (oi + lookahead < oldLines.length && oldLines[oi + lookahead] === newLines[ni]) {
-          for (let k = 0; k < lookahead; k++) {
-            result.push({ type: 'remove', text: oldLines[oi + k], lineNum: oi + k + 1 });
-          }
-          oi += lookahead;
-          found = true;
-          break;
-        }
-      }
-      if (!found) {
-        result.push({ type: 'remove', text: oldLines[oi], lineNum: oi + 1 });
-        result.push({ type: 'add', text: newLines[ni], lineNum: ni + 1 });
-        oi++;
-        ni++;
+  for (const part of changes) {
+    const lines = part.value.replace(/\n$/, '').split('\n');
+    const isTrailingNewlineOnly = part.value === '\n';
+    const effectiveLines = isTrailingNewlineOnly ? [''] : lines;
+
+    for (const text of effectiveLines) {
+      if (part.removed) {
+        result.push({ type: 'remove', text, lineNum: oldLine });
+        oldLine++;
+      } else if (part.added) {
+        result.push({ type: 'add', text, lineNum: newLine });
+        newLine++;
+      } else {
+        result.push({ type: 'same', text, lineNum: newLine });
+        oldLine++;
+        newLine++;
       }
     }
   }
+
   return result;
 }
 
-function DiffViewer({ file }: { file: StagedFile }) {
-  const diff =
-    file.type === 'new'
+function DiffViewer({ file }: { file: StagedFile & { pendingDelete?: boolean } }) {
+  const diff = file.pendingDelete
+    ? (file.originalContent || '').split('\n').map((text, i) => ({ type: 'remove' as const, text, lineNum: i + 1 }))
+    : file.type === 'new'
       ? file.content.split('\n').map((text, i) => ({ type: 'add' as const, text, lineNum: i + 1 }))
       : computeDiff(file.originalContent || '', file.content);
 
@@ -110,8 +91,14 @@ function DiffViewer({ file }: { file: StagedFile }) {
           <p className="text-xs text-secondary mt-0.5">{file.description}</p>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <span className={`badge ${file.type === 'new' ? 'badge-green' : 'badge-blue'}`}>
-            {file.type === 'new' ? 'NEW' : 'MODIFIED'}
+          <span
+            className={`badge ${(file as StagedFile & { pendingDelete?: boolean }).pendingDelete ? 'badge-red' : file.type === 'new' ? 'badge-green' : 'badge-blue'}`}
+          >
+            {(file as StagedFile & { pendingDelete?: boolean }).pendingDelete
+              ? 'DELETE'
+              : file.type === 'new'
+                ? 'NEW'
+                : 'MODIFIED'}
           </span>
           <span className="text-xs font-medium" style={{ color: 'var(--color-green)' }}>
             +{stats.added}
@@ -131,9 +118,9 @@ function DiffViewer({ file }: { file: StagedFile }) {
             style={{
               backgroundColor:
                 line.type === 'add'
-                  ? 'rgba(52,199,89,0.12)'
+                  ? 'var(--color-green-subtle)'
                   : line.type === 'remove'
-                    ? 'rgba(255,59,48,0.10)'
+                    ? 'var(--color-red-subtle)'
                     : 'transparent',
             }}
           >
@@ -187,7 +174,8 @@ export default function AgentTransparency({
   const [validating, setValidating] = useState(false);
   const [selectedPath, setSelectedPath] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
-  const [_loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   const loadSession = useCallback(async () => {
     setLoading(true);
@@ -204,11 +192,12 @@ export default function AgentTransparency({
       setGitStatus(git);
       if (val && val.ranAt) setValidation(val);
       const paths = Object.keys(data.files || {});
-      if (paths.length > 0 && !selectedPath) setSelectedPath(paths[0]);
+      // Only auto-select first file if nothing is currently selected.
+      setSelectedPath((prev) => (prev ? prev : (paths[0] ?? null)));
     } finally {
       setLoading(false);
     }
-  }, [sessionId, selectedPath]);
+  }, [sessionId]);
 
   useEffect(() => {
     loadSession();
@@ -230,7 +219,15 @@ export default function AgentTransparency({
   }, [sessionId]);
 
   const handleApplyAll = async () => {
+    if (validation?.passed === false) {
+      const proceed = window.confirm(
+        'Validation failed for one or more checks. Apply staged changes to the filesystem anyway?',
+      );
+      if (!proceed) return;
+    }
+
     setApplying(true);
+    setActionError(null);
     try {
       const res = await fetch('/api/agent/apply', {
         method: 'POST',
@@ -238,6 +235,16 @@ export default function AgentTransparency({
         body: JSON.stringify({ sessionId }),
       });
       const data = await res.json();
+      if (!res.ok) {
+        if (data.blocked && data.conflicts?.length) {
+          setActionError(
+            `Apply blocked — ${data.conflicts.length} file(s) changed on disk since staging: ${data.conflicts.join(', ')}`,
+          );
+        } else {
+          setActionError(data.error || 'Apply failed');
+        }
+        return;
+      }
       onApplied(data.applied || []);
       setSession((prev) => (prev ? { ...prev, files: {} } : prev));
       setSelectedPath(null);
@@ -249,6 +256,7 @@ export default function AgentTransparency({
 
   const handleCommit = async () => {
     setApplying(true);
+    setActionError(null);
     try {
       const res = await fetch('/api/agent/commit', {
         method: 'POST',
@@ -256,11 +264,14 @@ export default function AgentTransparency({
         body: JSON.stringify({ sessionId }),
       });
       const data = await res.json();
-      if (data.committed) {
-        onCommitted?.({ branch: data.branch, commitSha: data.commitSha });
-        setSession((prev) => (prev ? { ...prev, files: {} } : prev));
-        setSelectedPath(null);
+      if (!res.ok || !data.committed) {
+        setActionError(data.error || 'Commit failed — check validation results.');
+        await loadSession();
+        return;
       }
+      onCommitted?.({ branch: data.branch, commitSha: data.commitSha });
+      setSession((prev) => (prev ? { ...prev, files: {} } : prev));
+      setSelectedPath(null);
       await loadSession();
     } finally {
       setApplying(false);
@@ -269,6 +280,7 @@ export default function AgentTransparency({
 
   const handleMerge = async () => {
     setApplying(true);
+    setActionError(null);
     try {
       const res = await fetch('/api/agent/merge', {
         method: 'POST',
@@ -276,9 +288,16 @@ export default function AgentTransparency({
         body: JSON.stringify({ sessionId }),
       });
       const data = await res.json();
-      if (data.merged) {
-        onMerged?.();
+      if (!res.ok || !data.merged) {
+        setActionError(
+          data.errors?.join('; ') ||
+            data.error ||
+            `Merge failed${data.conflicts?.length ? ' — conflicts detected' : ''}`,
+        );
+        await loadSession();
+        return;
       }
+      onMerged?.();
       await loadSession();
     } finally {
       setApplying(false);
@@ -287,12 +306,17 @@ export default function AgentTransparency({
 
   const handleCreatePr = async () => {
     setApplying(true);
+    setActionError(null);
     try {
-      await fetch('/api/agent/pr', {
+      const res = await fetch('/api/agent/pr', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ sessionId }),
       });
+      const data = await res.json();
+      if (!res.ok || !data.created) {
+        setActionError(data.error || 'Failed to create pull request');
+      }
       await loadSession();
     } finally {
       setApplying(false);
@@ -314,6 +338,35 @@ export default function AgentTransparency({
 
   return (
     <div className="flex flex-col h-full" style={{ backgroundColor: 'var(--color-bg-primary)' }}>
+      {loading && (
+        <div
+          className="px-4 py-2 border-b text-xs text-secondary flex items-center gap-2 flex-shrink-0"
+          style={{ borderColor: 'var(--color-separator)' }}
+        >
+          <div className="w-3 h-3 border border-current rounded-full border-t-transparent animate-spin" />
+          Loading session…
+        </div>
+      )}
+      {actionError && (
+        <div
+          className="px-4 py-2 border-b flex items-center gap-2 flex-shrink-0"
+          style={{
+            borderColor: 'color-mix(in srgb, var(--color-red) 20%, transparent)',
+            backgroundColor: 'var(--color-red-subtle)',
+          }}
+        >
+          <span className="text-xs" style={{ color: 'var(--color-red)' }}>
+            ⚠ {actionError}
+          </span>
+          <button
+            className="ml-auto text-xs underline"
+            style={{ color: 'var(--color-red)' }}
+            onClick={() => setActionError(null)}
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
       {gitActive && gitStatus?.session && (
         <div
           className="px-4 py-2 border-b flex items-center gap-2 flex-shrink-0 text-xs"
@@ -440,10 +493,10 @@ export default function AgentTransparency({
           </p>
         </div>
       ) : (
-        <div className="flex flex-1 min-h-0">
+        <div className="flex flex-col lg:flex-row flex-1 min-h-0">
           {/* File tree */}
           <div
-            className="w-56 flex-shrink-0 border-r overflow-y-auto"
+            className="w-full lg:w-56 flex-shrink-0 border-b lg:border-b-0 lg:border-r overflow-y-auto max-h-48 lg:max-h-none"
             style={{ borderColor: 'var(--color-separator)', backgroundColor: 'var(--color-bg-secondary)' }}
           >
             <div className="px-3 py-2">
@@ -461,7 +514,13 @@ export default function AgentTransparency({
                   <div className="flex items-center gap-2">
                     <span
                       className="w-1.5 h-1.5 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: file.type === 'new' ? 'var(--color-green)' : 'var(--color-blue)' }}
+                      style={{
+                        backgroundColor: (file as StagedFile & { pendingDelete?: boolean }).pendingDelete
+                          ? 'var(--color-red)'
+                          : file.type === 'new'
+                            ? 'var(--color-green)'
+                            : 'var(--color-blue)',
+                      }}
                     />
                     <span className="text-xs font-mono truncate">{file.path.split('/').pop()}</span>
                   </div>

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { BaseComponentProps, TenantTheme } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
@@ -7,7 +7,12 @@ import { AdminDashboard } from '../AdminDashboard';
 import { useNavigation } from '../context/NavigationContext';
 import { getDefaultSidebarSections, getDefaultNavItems, getDefaultLogo } from '../Layout/DefaultNavigation';
 import { getAdminDashboardLayoutStyles, adminDashboardLayoutCSS } from './styles';
+import type { DashboardActionHandler } from '../AdminDashboard/dashboard-actions';
 
+/**
+ * Tenant admin analytics shell — KPIs, retention, surveys, permission requests.
+ * Use `UserDashboardLayout` for learner-facing progress dashboards (UI-158).
+ */
 export interface AdminDashboardLayoutProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
   currentTenant?: {
@@ -34,6 +39,7 @@ export interface AdminDashboardLayoutProps extends BaseComponentProps {
     autoPlay?: boolean;
     interval?: number;
   };
+  bannerSlot?: React.ReactNode;
   dashboardData?: {
     title?: string;
     subtitle?: string;
@@ -86,6 +92,8 @@ export interface AdminDashboardLayoutProps extends BaseComponentProps {
   };
   variant?: 'default' | 'compact' | 'detailed';
   loading?: boolean;
+  /** Optional slot above dashboard content (e.g. onboarding checklist) */
+  onboardingSlot?: React.ReactNode;
   onUserAction?: (action: 'profile' | 'settings' | 'logout') => void;
   pathname?: string;
   onNavigate?: (href: string) => void;
@@ -184,6 +192,7 @@ export interface AdminDashboardLayoutProps extends BaseComponentProps {
     status: 'pending' | 'approved' | 'denied';
     avatarColor?: string;
   }) => void;
+  onDashboardAction?: DashboardActionHandler;
 }
 
 const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
@@ -191,9 +200,11 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
   currentTenant,
   user,
   bannerCarousel,
+  bannerSlot,
   dashboardData = {},
   variant = 'default',
   loading = false,
+  onboardingSlot,
   onUserAction,
   pathname,
   onNavigate,
@@ -222,12 +233,111 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
   onPermissionApprove,
   onPermissionDeny,
   onPermissionViewDetails,
+  onDashboardAction,
   className = '',
   style,
   ...props
 }) => {
   const navigation = useNavigation();
   const { styles, adminDashboardLayoutClasses } = getAdminDashboardLayoutStyles(tenantTheme, variant);
+
+  const retentionHandler = useMemo(
+    () =>
+      onRetentionPointClick ??
+      (onDashboardAction
+        ? (point: { date: string; value: number; label?: string }) =>
+            onDashboardAction({ type: 'retention_click', ...point })
+        : undefined),
+    [onRetentionPointClick, onDashboardAction],
+  );
+
+  const engagementHandler = useMemo(
+    () =>
+      onEngagementSegmentClick ??
+      (onDashboardAction
+        ? (segment: { id: string; label: string; value: number }) =>
+            onDashboardAction({ type: 'engagement_click', segmentId: segment.id, label: segment.label, value: segment.value })
+        : undefined),
+    [onEngagementSegmentClick, onDashboardAction],
+  );
+
+  const trendsHandler = useMemo(
+    () =>
+      onTrendsPointClick ??
+      (onDashboardAction
+        ? (point: { label: string; interactions: number; completions: number }) =>
+            onDashboardAction({ type: 'trend_click', ...point })
+        : undefined),
+    [onTrendsPointClick, onDashboardAction],
+  );
+
+  const activityHandler = useMemo(
+    () =>
+      onActivityClick ??
+      (onDashboardAction
+        ? (activity: { id: string }) => onDashboardAction({ type: 'activity_click', activityId: activity.id })
+        : undefined),
+    [onActivityClick, onDashboardAction],
+  );
+
+  const surveyViewHandler = useMemo(
+    () =>
+      onSurveyView ??
+      (onDashboardAction
+        ? (survey: { id: string }) => onDashboardAction({ type: 'view_survey', surveyId: survey.id })
+        : undefined),
+    [onSurveyView, onDashboardAction],
+  );
+
+  const surveyEditHandler = useMemo(
+    () =>
+      onSurveyEdit ??
+      (onDashboardAction
+        ? (survey: { id: string }) => onDashboardAction({ type: 'edit_survey', surveyId: survey.id })
+        : undefined),
+    [onSurveyEdit, onDashboardAction],
+  );
+
+  const surveyShareHandler = useMemo(
+    () =>
+      onSurveyShare ??
+      (onDashboardAction
+        ? (survey: { id: string }) => onDashboardAction({ type: 'share_survey', surveyId: survey.id })
+        : undefined),
+    [onSurveyShare, onDashboardAction],
+  );
+
+  const permissionApproveHandler = useMemo(
+    () =>
+      onPermissionApprove ??
+      (onDashboardAction
+        ? (request: { id: string }) => onDashboardAction({ type: 'approve_request', requestId: request.id })
+        : undefined),
+    [onPermissionApprove, onDashboardAction],
+  );
+
+  const permissionDenyHandler = useMemo(
+    () =>
+      onPermissionDeny ??
+      (onDashboardAction
+        ? (request: { id: string }) => onDashboardAction({ type: 'deny_request', requestId: request.id })
+        : undefined),
+    [onPermissionDeny, onDashboardAction],
+  );
+
+  const permissionDetailsHandler = useMemo(
+    () =>
+      onPermissionViewDetails ??
+      (onDashboardAction
+        ? (request: { id: string; user: { name: string }; permission: string }) =>
+            onDashboardAction({
+              type: 'view_details',
+              entityId: request.id,
+              entityType: 'permission_request',
+            })
+        : undefined),
+    [onPermissionViewDetails, onDashboardAction],
+  );
 
   const sidebarSections = getDefaultSidebarSections();
   const navItems = getDefaultNavItems();
@@ -266,12 +376,14 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
           tabletBreakpoint={tabletBreakpoint}
           desktopBreakpoint={desktopBreakpoint}
         >
+          {onboardingSlot}
           <AdminDashboard
             tenantTheme={tenantTheme}
             title={dashboardData.title || 'Admin Dashboard'}
             subtitle={dashboardData.subtitle}
             currentTenant={currentTenant}
             bannerCarousel={bannerCarousel}
+            bannerSlot={bannerSlot}
             stats={dashboardData.stats}
             retentionData={dashboardData.retentionData}
             engagementData={dashboardData.engagementData}
@@ -282,16 +394,16 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
             quickActions={dashboardData.quickActions}
             variant={variant}
             loading={loading}
-            onRetentionPointClick={onRetentionPointClick}
-            onEngagementSegmentClick={onEngagementSegmentClick}
-            onTrendsPointClick={onTrendsPointClick}
-            onActivityClick={onActivityClick}
-            onSurveyView={onSurveyView}
-            onSurveyEdit={onSurveyEdit}
-            onSurveyShare={onSurveyShare}
-            onPermissionApprove={onPermissionApprove}
-            onPermissionDeny={onPermissionDeny}
-            onPermissionViewDetails={onPermissionViewDetails}
+            onRetentionPointClick={retentionHandler}
+            onEngagementSegmentClick={engagementHandler}
+            onTrendsPointClick={trendsHandler}
+            onActivityClick={activityHandler}
+            onSurveyView={surveyViewHandler}
+            onSurveyEdit={surveyEditHandler}
+            onSurveyShare={surveyShareHandler}
+            onPermissionApprove={permissionApproveHandler}
+            onPermissionDeny={permissionDenyHandler}
+            onPermissionViewDetails={permissionDetailsHandler}
           />
         </AppLayout>
       </div>

@@ -1,15 +1,21 @@
 import { Request, Response, NextFunction } from 'express';
 
+export {
+  validateStorefrontPatchBody,
+  validationErrorsToRecord,
+  landingPathFromSlug,
+  mergeStorefrontPatch,
+} from '@luxgen/storefront';
+
+export type { StorefrontPatchBody, StorefrontRouteKey, ValidationError } from '@luxgen/storefront';
+
+import type { ValidationError } from '@luxgen/storefront';
+
 // Email validation regex
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Password validation
 const PASSWORD_MIN_LENGTH = 6;
-
-export interface ValidationError {
-  field: string;
-  message: string;
-}
 
 export const validateEmail = (email: string): string | null => {
   if (!email) return 'Email is required';
@@ -55,6 +61,76 @@ export const validateLogin = (req: Request, res: Response, next: NextFunction) =
 
   next();
 };
+
+export const validateForgotPassword = (req: Request, res: Response, next: NextFunction) => {
+  const { email } = req.body;
+  const errors: ValidationError[] = [];
+
+  const emailError = validateEmail(email);
+  if (emailError) errors.push({ field: 'email', message: emailError });
+
+  if (errors.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.reduce(
+        (acc, error) => {
+          acc[error.field] = error.message;
+          return acc;
+        },
+        {} as Record<string, string>,
+      ),
+    });
+  }
+
+  next();
+};
+
+export const validateResetPassword = (req: Request, res: Response, next: NextFunction) => {
+  const { token, password } = req.body;
+  const errors: ValidationError[] = [];
+
+  if (!token || typeof token !== 'string' || token.trim().length < 16) {
+    errors.push({ field: 'token', message: 'Valid reset token is required' });
+  }
+
+  const passwordError = validatePassword(password);
+  if (passwordError) errors.push({ field: 'password', message: passwordError });
+
+  if (errors.length > 0) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.reduce(
+        (acc, error) => {
+          acc[error.field] = error.message;
+          return acc;
+        },
+        {} as Record<string, string>,
+      ),
+    });
+  }
+
+  next();
+};
+
+export const validateVerifyEmail = (req: Request, res: Response, next: NextFunction) => {
+  const { token } = req.body;
+  const errors: ValidationError[] = [];
+  if (!token || typeof token !== 'string' || token.trim().length < 16) {
+    errors.push({ field: 'token', message: 'Valid verification token is required' });
+  }
+  if (errors.length) {
+    return res.status(400).json({
+      success: false,
+      message: 'Validation failed',
+      errors: errors.reduce((acc, e) => ({ ...acc, [e.field]: e.message }), {} as Record<string, string>),
+    });
+  }
+  next();
+};
+
+export const validateResendVerification = validateForgotPassword;
 
 export const validateRegister = (req: Request, res: Response, next: NextFunction) => {
   const { email, password, firstName, lastName } = req.body;

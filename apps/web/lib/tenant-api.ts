@@ -15,6 +15,25 @@ export interface TenantRegionalSettings {
   currency?: string;
 }
 
+export interface TenantStorefrontSettingsPayload {
+  landingEnabled: boolean;
+  slug?: string;
+  routes: {
+    landing: string;
+    courses: string;
+    programs: string;
+    login: string;
+    register: string;
+  };
+  content?: Record<string, unknown>;
+  theme?: {
+    accentColor?: string;
+    warmAccentColor?: string;
+    heroImage?: string;
+    layout?: 'classic' | 'split';
+  };
+}
+
 export interface TenantCurrentData {
   id: string;
   name: string;
@@ -70,7 +89,7 @@ export async function fetchTenantCurrent(): Promise<TenantCurrentData> {
 
 export async function fetchTenantConfig(): Promise<{
   branding: TenantBrandingPayload;
-  config: { regional?: TenantRegionalSettings };
+  config: { regional?: TenantRegionalSettings; storefront?: TenantStorefrontSettingsPayload };
 }> {
   const response = await fetch(apiPath('/api/tenant/config'), {
     headers: tenantRequestHeaders(),
@@ -100,9 +119,30 @@ export async function patchTenantGeneral(input: {
   return parseJson(response);
 }
 
+export async function patchNotificationTemplate(templateId: string, input: { subject?: string; body?: string }) {
+  const response = await fetch(apiPath(`/api/notifications/templates/${templateId}`), {
+    method: 'PATCH',
+    headers: tenantRequestHeaders(),
+    body: JSON.stringify(input),
+  });
+  return parseJson(response);
+}
+
 export async function fetchNotificationTemplates(): Promise<NotificationTemplateSummary[]> {
   const response = await fetch(apiPath('/api/notifications/templates'), {
     headers: tenantRequestHeaders(),
   });
   return parseJson(response);
+}
+
+export async function patchTenantStorefront(
+  storefront: TenantStorefrontSettingsPayload,
+): Promise<TenantStorefrontSettingsPayload> {
+  const response = await fetch(apiPath('/api/tenant/storefront'), {
+    method: 'PATCH',
+    headers: tenantRequestHeaders(),
+    body: JSON.stringify(storefront),
+  });
+  const data = await parseJson<{ storefront: TenantStorefrontSettingsPayload }>(response);
+  return data.storefront;
 }

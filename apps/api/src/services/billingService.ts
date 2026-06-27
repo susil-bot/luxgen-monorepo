@@ -8,7 +8,7 @@ import {
   getPlanLimits,
   hasFeature,
 } from '@luxgen/billing';
-import { Tenant, TenantSubscription, type ITenantSubscription } from '@luxgen/db';
+import { TenantSubscription, resolveEffectivePlan, type ITenantSubscription } from '@luxgen/db';
 import { listingSubscriptionService } from './listingSubscriptionService';
 import { enrollmentService } from './enrollmentService';
 import { logger } from '../utils/logger';
@@ -52,37 +52,22 @@ function planFromPriceId(priceId: string): PlanTier | null {
 
 export class BillingService {
   async getEffectivePlan(tenantId: string): Promise<PlanTier> {
-    const sub = await TenantSubscription.findOne({ tenantId });
-    if (sub && ['active', 'trialing'].includes(sub.status)) {
-      return normalizePlan(sub.plan);
-    }
-
-    // tenantId may be a MongoDB ObjectId string or a subdomain — support both
-    const tenant = (await Tenant.findById(tenantId).lean()) ?? (await Tenant.findOne({ subdomain: tenantId }).lean());
-    if (tenant?.metadata?.plan) {
-      return normalizePlan(tenant.metadata.plan);
-    }
-
-    return 'free';
+    return resolveEffectivePlan(tenantId);
   }
 
   async getOrCreateSubscription(tenantId: string): Promise<ITenantSubscription> {
     let sub = await TenantSubscription.findOne({ tenantId });
     if (sub) return sub;
-
-    const tenant = (await Tenant.findById(tenantId).lean()) ?? (await Tenant.findOne({ subdomain: tenantId }).lean());
-    const plan = normalizePlan(tenant?.metadata?.plan);
-
-    sub = await TenantSubscription.create({ tenantId, plan, status: 'active' });
+    sub = await TenantSubscription.create({ tenantId, plan: 'free', status: 'active' });
     return sub;
   }
 
-  async syncTenantPlan(tenantId: string, plan: PlanTier): Promise<void> {
-    await Tenant.updateOne(
-      { subdomain: tenantId },
-      { $set: { 'metadata.plan': plan, 'metadata.lastActive': new Date() } },
+  private async setSubscriptionPlan(tenantId: string, plan: PlanTier): Promise<void> {
+    await TenantSubscription.findOneAndUpdate(
+      { tenantId },
+      { $set: { plan, status: 'active' } },
+      { upsert: true, new: true },
     );
-    await TenantSubscription.findOneAndUpdate({ tenantId }, { $set: { plan } }, { upsert: true, new: true });
   }
 
   async getTenantBilling(tenantId: string) {
@@ -106,6 +91,7 @@ export class BillingService {
       featureFlags: {
         automations: hasFeature(plan, 'automations'),
         analytics: hasFeature(plan, 'analytics'),
+        project: hasFeature(plan, 'project'),
         webhooks: hasFeature(plan, 'webhooks'),
         customDomain: hasFeature(plan, 'customDomain'),
         agentStudio: hasFeature(plan, 'agentStudio'),
@@ -144,7 +130,7 @@ export class BillingService {
 
     if (!stripe || !priceId) {
       if (isBillingDevMode()) {
-        await this.syncTenantPlan(tenantId, plan);
+        await this.setSubscriptionPlan(tenantId, plan);
         logger.info(`[billing-dev] Simulated upgrade ${tenantId} → ${plan}`);
         return { url: successUrl, sessionId: `dev_sim_${Date.now()}` };
       }
@@ -199,7 +185,7 @@ export class BillingService {
     if (!isBillingDevMode()) {
       throw new Error('Dev plan override is disabled. Set BILLING_DEV_MODE=true.');
     }
-    await this.syncTenantPlan(tenantId, plan);
+    await this.setSubscriptionPlan(tenantId, plan);
     logger.info(`[billing-dev] Manual plan set ${tenantId} → ${plan}`);
   }
 
@@ -250,7 +236,7 @@ export class BillingService {
             },
             { upsert: true },
           );
-          await this.syncTenantPlan(tenantId, plan);
+          await this.setSubscriptionPlan(tenantId, plan);
           logger.info(`Checkout completed: ${tenantId} → ${plan}`);
         }
         break;
@@ -281,7 +267,7 @@ export class BillingService {
         );
 
         if (['active', 'trialing'].includes(subscription.status)) {
-          await this.syncTenantPlan(tenantId, plan);
+          await this.setSubscriptionPlan(tenantId, plan);
         }
         break;
       }
@@ -294,7 +280,7 @@ export class BillingService {
           { tenantId },
           { $set: { status: 'canceled', plan: 'free', cancelAtPeriodEnd: false } },
         );
-        await this.syncTenantPlan(tenantId, 'free');
+        await this.setSubscriptionPlan(tenantId, 'free');
         logger.info(`Subscription canceled: ${tenantId} → free`);
         break;
       }

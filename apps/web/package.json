@@ -7,19 +7,29 @@
     "dev:clean": "rm -rf .next && next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test:auto": "vitest run",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:report": "playwright show-report"
   },
   "dependencies": {
     "@apollo/client": "^3.8.0",
     "@luxgen/agent": "*",
     "@luxgen/auth": "*",
+    "@luxgen/automation-flow": "*",
     "@luxgen/billing": "*",
     "@luxgen/config": "*",
     "@luxgen/db": "*",
     "@luxgen/design-tokens": "*",
+    "@luxgen/storefront": "*",
+    "@luxgen/test-harness": "*",
     "@luxgen/ui": "*",
     "@luxgen/utils": "*",
+    "@tanstack/react-virtual": "^3.14.4",
     "buffer": "^6.0.3",
+    "diff": "^7.0.0",
     "graphql": "^16.8.0",
     "graphql-ws": "^5.16.0",
     "next": "^14.0.0",
@@ -27,14 +37,20 @@
     "react-dom": "^18.0.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.49.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@types/diff": "^7.0.2",
     "@types/node": "^20.0.0",
     "@types/react": "^18.0.0",
     "@types/react-dom": "^18.0.0",
     "autoprefixer": "^10.4.21",
     "eslint": "^8.0.0",
     "eslint-config-next": "^14.0.0",
+    "jsdom": "^25.0.1",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^2.1.9"
   }
 }

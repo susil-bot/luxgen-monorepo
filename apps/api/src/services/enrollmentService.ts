@@ -1,6 +1,17 @@
 import Stripe from 'stripe';
-import { Enrollment, EnrollmentPaymentStatus, Course, User, enrollmentSubjectId, type IEnrollment } from '@luxgen/db';
+import {
+  Enrollment,
+  EnrollmentPaymentStatus,
+  EnrollmentLearningStatus,
+  Course,
+  User,
+  enrollmentSubjectId,
+  type IEnrollment,
+} from '@luxgen/db';
+import { emitCommerceAutomationEvent } from '@luxgen/agent';
+import { automationService } from './automationService';
 import { activityEventService } from './activityEventService';
+import { checkoutSessionService } from './checkoutSessionService';
 import { isBillingDevMode, isStripeEnabled } from './billingService';
 import { logger } from '../utils/logger';
 
@@ -18,6 +29,21 @@ export class EnrollmentService {
     return Enrollment.find({ tenant: tenantId }).sort({ enrolledAt: -1 });
   }
 
+  async listDraftByTenant(tenantId: string): Promise<IEnrollment[]> {
+    return Enrollment.find({
+      tenant: tenantId,
+      cancelledAt: null,
+      paymentStatus: EnrollmentPaymentStatus.PENDING,
+      tags: 'draft',
+    }).sort({ enrolledAt: -1 });
+  }
+
+  async listByStudent(tenantId: string, studentId: string): Promise<IEnrollment[]> {
+    return Enrollment.find({ tenant: tenantId, student: studentId, cancelledAt: null }).sort({
+      enrolledAt: -1,
+    });
+  }
+
   async getByCourseAndStudent(courseId: string, studentId: string): Promise<IEnrollment | null> {
     return Enrollment.findOne({ course: courseId, student: studentId });
   }
@@ -29,6 +55,10 @@ export class EnrollmentService {
         enrollment.cancelledAt = undefined;
         enrollment.enrolledAt = new Date();
         enrollment.paymentStatus = EnrollmentPaymentStatus.PENDING;
+        enrollment.progressPercent = 0;
+        enrollment.learningStatus = EnrollmentLearningStatus.ACTIVE;
+        enrollment.completedAt = undefined;
+        enrollment.lastAccessedAt = undefined;
         await enrollment.save();
       }
       return enrollment;
@@ -40,9 +70,31 @@ export class EnrollmentService {
       student: studentId,
       notes: '',
       paymentStatus: EnrollmentPaymentStatus.PENDING,
+      progressPercent: 0,
+      learningStatus: EnrollmentLearningStatus.ACTIVE,
       enrolledAt: new Date(),
     });
+    void this.emitCommerceOrderEvent(tenantId, 'order_created', courseId, studentId, { orderSource: 'storefront' });
     return enrollment;
+  }
+
+  private async emitCommerceOrderEvent(
+    tenantId: string,
+    kind: 'order_created' | 'order_drafted' | 'payment_sent',
+    courseId: string,
+    studentId: string,
+    extra: Record<string, unknown> = {},
+  ): Promise<void> {
+    const course = await Course.findById(courseId);
+    const student = await User.findById(studentId);
+    void emitCommerceAutomationEvent(tenantId, kind, {
+      courseId,
+      studentId,
+      userId: studentId,
+      courseTitle: course?.title,
+      customerEmail: student?.email,
+      ...extra,
+    }).catch(() => undefined);
   }
 
   async updateOrderNotes(
@@ -121,7 +173,7 @@ export class EnrollmentService {
   async updateOrder(
     courseId: string,
     studentId: string,
-    updates: { notes?: string; paymentStatus?: EnrollmentPaymentStatus },
+    updates: { notes?: string; tags?: string[]; paymentStatus?: EnrollmentPaymentStatus },
     actor?: { id: string; name: string },
   ): Promise<IEnrollment> {
     let enrollment = (await Enrollment.findOne({ course: courseId, student: studentId })) as IEnrollment | null;
@@ -142,6 +194,11 @@ export class EnrollmentService {
         await activityEventService.recordOrderNoteAdded(tenantId, subjectId, updates.notes, actor);
       }
       changes.push('notes');
+    }
+
+    if (updates.tags !== undefined) {
+      enrollment.tags = updates.tags;
+      changes.push('tags');
     }
 
     if (updates.paymentStatus !== undefined && updates.paymentStatus !== enrollment.paymentStatus) {
@@ -213,6 +270,7 @@ export class EnrollmentService {
           paidAt: new Date(),
           ...(stripeSessionId ? { stripeCheckoutSessionId: stripeSessionId } : {}),
         },
+        $pull: { tags: 'draft' },
       },
       { new: true, upsert: true, setDefaultsOnInsert: true },
     );
@@ -228,7 +286,73 @@ export class EnrollmentService {
       stripeSessionId,
     );
 
+    void this.emitCommerceOrderEvent(tenantId, 'payment_sent', courseId, studentId, {
+      paymentStatus: 'paid',
+      stripeSessionId,
+    });
+
     return enrollment;
+  }
+
+  private clampProgress(progressPercent: number): number {
+    return Math.min(100, Math.max(0, Math.round(progressPercent)));
+  }
+
+  private async emitCourseCompletedIfNeeded(enrollment: IEnrollment, wasCompleted: boolean): Promise<void> {
+    if (wasCompleted || enrollment.learningStatus !== EnrollmentLearningStatus.COMPLETED) return;
+
+    const course = await Course.findById(enrollment.course);
+    const student = await User.findById(enrollment.student);
+    const tenantId = enrollment.tenant.toString();
+    const courseId = enrollment.course.toString();
+    const studentId = enrollment.student.toString();
+
+    void automationService
+      .triggerAutomations(
+        tenantId,
+        'COURSE_COMPLETED',
+        {
+          courseId,
+          studentId,
+          userId: studentId,
+          courseTitle: course?.title,
+          customerEmail: student?.email,
+          progressPercent: enrollment.progressPercent,
+        },
+        'lms',
+      )
+      .catch(() => undefined);
+  }
+
+  async updateProgress(courseId: string, studentId: string, progressPercent: number): Promise<IEnrollment> {
+    const enrollment = await Enrollment.findOne({ course: courseId, student: studentId });
+    if (!enrollment) throw new Error('Enrollment not found');
+    if (enrollment.cancelledAt) throw new Error('Enrollment is cancelled');
+
+    const wasCompleted = enrollment.learningStatus === EnrollmentLearningStatus.COMPLETED;
+    const nextProgress = this.clampProgress(progressPercent);
+
+    enrollment.progressPercent = nextProgress;
+    enrollment.lastAccessedAt = new Date();
+
+    if (nextProgress >= 100) {
+      enrollment.progressPercent = 100;
+      enrollment.learningStatus = EnrollmentLearningStatus.COMPLETED;
+      if (!enrollment.completedAt) {
+        enrollment.completedAt = new Date();
+      }
+    } else if (enrollment.learningStatus === EnrollmentLearningStatus.COMPLETED) {
+      enrollment.learningStatus = EnrollmentLearningStatus.ACTIVE;
+      enrollment.completedAt = undefined;
+    }
+
+    await enrollment.save();
+    await this.emitCourseCompletedIfNeeded(enrollment, wasCompleted);
+    return enrollment;
+  }
+
+  async markCourseComplete(courseId: string, studentId: string): Promise<IEnrollment> {
+    return this.updateProgress(courseId, studentId, 100);
   }
 
   async createOrderCheckoutSession(options: {
@@ -244,6 +368,8 @@ export class EnrollmentService {
     const { tenantId, courseId, studentId, amountCents, courseTitle, customerEmail, successUrl, cancelUrl } = options;
 
     await this.ensureEnrollment(tenantId, courseId, studentId);
+
+    void this.emitCommerceOrderEvent(tenantId, 'order_drafted', courseId, studentId, { orderSource: 'storefront' });
 
     const stripe = getStripe();
     if (!stripe) {
@@ -279,6 +405,21 @@ export class EnrollmentService {
     });
 
     if (!session.url) throw new Error('Stripe did not return a checkout URL');
+
+    const expiresAt = typeof session.expires_at === 'number' ? new Date(session.expires_at * 1000) : undefined;
+
+    await checkoutSessionService.recordOpenSession({
+      tenantId,
+      courseId,
+      studentId,
+      stripeSessionId: session.id,
+      amountCents,
+      customerEmail,
+      checkoutUrl: session.url,
+      courseTitle,
+      expiresAt,
+    });
+
     return { url: session.url, sessionId: session.id };
   }
 
@@ -289,6 +430,7 @@ export class EnrollmentService {
     if (!tenantId || !courseId || !studentId) return false;
 
     await this.markPaymentConfirmed(tenantId, courseId, studentId, session.id);
+    await checkoutSessionService.markCompleted(session.id);
     logger.info(`Enrollment payment confirmed: ${courseId}:${studentId}`);
     return true;
   }

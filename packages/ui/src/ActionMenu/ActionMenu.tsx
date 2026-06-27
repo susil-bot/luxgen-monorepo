@@ -1,11 +1,12 @@
-import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 
 export interface ActionMenuItem {
   id: string;
   label: string;
-  onClick?: () => void;
+  onClick?: () => void | Promise<void>;
   disabled?: boolean;
   destructive?: boolean;
+  loading?: boolean;
 }
 
 export interface ActionMenuProps {
@@ -25,8 +26,32 @@ export function ActionMenu({
   className = '',
 }: ActionMenuProps) {
   const [open, setOpen] = useState(false);
+  const [pendingId, setPendingId] = useState<string | null>(null);
+  const [resolvedAlign, setResolvedAlign] = useState<'left' | 'right'>(align);
   const rootRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLUListElement>(null);
   const menuId = useId();
+
+  useLayoutEffect(() => {
+    setResolvedAlign(align);
+  }, [align]);
+
+  useLayoutEffect(() => {
+    if (!open || !rootRef.current) return;
+
+    const margin = 16;
+    const triggerRect = rootRef.current.getBoundingClientRect();
+    const menuWidth = menuRef.current?.offsetWidth ?? 220;
+    const viewportWidth = window.innerWidth;
+
+    let next = align;
+    if (align === 'right') {
+      if (triggerRect.right - menuWidth < margin) next = 'left';
+    } else if (triggerRect.left + menuWidth > viewportWidth - margin) {
+      next = 'right';
+    }
+    setResolvedAlign(next);
+  }, [open, align]);
 
   useEffect(() => {
     if (!open) return;
@@ -59,18 +84,28 @@ export function ActionMenu({
         onClick={() => setOpen((v) => !v)}
       >
         {trigger ?? (
-          <span className="text-base leading-none tracking-widest" aria-hidden>
-            ···
-          </span>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="currentColor"
+            aria-hidden
+            className="opacity-70"
+          >
+            <circle cx="3.5" cy="8" r="1.25" />
+            <circle cx="8" cy="8" r="1.25" />
+            <circle cx="12.5" cy="8" r="1.25" />
+          </svg>
         )}
       </button>
 
       {open && (
         <ul
+          ref={menuRef}
           id={menuId}
           role="menu"
-          className={`absolute z-50 mt-1 min-w-[220px] py-1 rounded-xl shadow-lg ios-card ${
-            align === 'right' ? 'right-0' : 'left-0'
+          className={`absolute z-50 mt-1 min-w-[220px] max-w-[calc(100vw-2rem)] py-1 rounded-xl shadow-lg ios-card ${
+            resolvedAlign === 'right' ? 'right-0' : 'left-0'
           }`}
           style={{ border: '1px solid var(--color-separator)' }}
         >
@@ -79,8 +114,8 @@ export function ActionMenu({
               <button
                 type="button"
                 role="menuitem"
-                disabled={item.disabled}
-                className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                disabled={item.disabled || pendingId === item.id}
+                className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between gap-2 ${
                   item.disabled
                     ? 'text-tertiary cursor-not-allowed'
                     : item.destructive
@@ -88,12 +123,28 @@ export function ActionMenu({
                       : 'text-primary hover:bg-[var(--color-fill-quaternary)]'
                 }`}
                 onClick={() => {
-                  if (item.disabled) return;
-                  setOpen(false);
-                  item.onClick?.();
+                  if (item.disabled || pendingId) return;
+                  void (async () => {
+                    if (!item.onClick) {
+                      setOpen(false);
+                      return;
+                    }
+                    setPendingId(item.id);
+                    try {
+                      await item.onClick();
+                      setOpen(false);
+                    } finally {
+                      setPendingId(null);
+                    }
+                  })();
                 }}
               >
-                {item.label}
+                <span>{item.label}</span>
+                {(item.loading || pendingId === item.id) && (
+                  <span className="text-xs text-tertiary" aria-hidden>
+                    …
+                  </span>
+                )}
               </button>
             </li>
           ))}

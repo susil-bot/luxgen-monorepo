@@ -6,13 +6,16 @@ import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 
 import { schema } from './schema';
 import { context, buildGraphQLContext, type GraphQLContext } from './context';
+import { logger } from './utils/logger';
 import { errorHandler, notFoundHandler } from './utils/errorHandler';
 
 // Middleware
 import { authMiddleware } from './middleware/auth';
+import { mcpApiKeyMiddleware } from './middleware/mcpApiKey';
 import { tenantRoutingMiddleware, tenantAuthMiddleware, tenantSecurityMiddleware } from './middleware/tenantRouting';
 import {
   tenantHeadersMiddleware,
@@ -29,10 +32,10 @@ import tenantConfigRoutes from './routes/tenantConfig';
 import billingRoutes, { stripeWebhookHandler } from './routes/billing';
 import jobsRoutes from './routes/jobs';
 import notificationsRoutes from './routes/notifications';
+import securityRoutes from './routes/security';
+import commerceWebhookRoutes from './routes/commerceWebhook';
 
-import { getCorsOrigins } from '@luxgen/config';
-
-const CORS_ORIGINS = getCorsOrigins();
+import { getCorsOrigins, isDevLocalOrigin } from '@luxgen/config';
 
 const app = express();
 
@@ -41,7 +44,9 @@ app.use(helmet());
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin || CORS_ORIGINS.includes(origin)) return callback(null, true);
+      if (!origin || isDevLocalOrigin(origin) || getCorsOrigins().includes(origin)) {
+        return callback(null, true);
+      }
       callback(new Error('Not allowed by CORS'));
     },
     credentials: true,
@@ -54,6 +59,7 @@ app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), stri
 // ── Body parsing ───────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 // ── Tenant resolution (must run before auth) ───────────────────────────────
 app.use(tenantRoutingMiddleware);
@@ -66,6 +72,7 @@ app.use(tenantRateLimitMiddleware);
 // ── Authentication ─────────────────────────────────────────────────────────
 app.use(tenantAuthMiddleware);
 app.use(authMiddleware);
+app.use(mcpApiKeyMiddleware);
 
 // ── Health check ──────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => {
@@ -80,13 +87,15 @@ app.use('/api/tenant-config', tenantConfigRoutes);
 app.use('/api/billing', billingRoutes);
 app.use('/api/jobs', jobsRoutes);
 app.use('/api/notifications', notificationsRoutes);
+app.use('/api/security', securityRoutes);
+app.use('/api/commerce', commerceWebhookRoutes);
 
 const apolloServer = new ApolloServer({
   schema,
   context,
   introspection: process.env.APOLLO_INTROSPECTION === 'true',
   formatError: (error) => {
-    console.error('GraphQL Error:', error);
+    logger.error('GraphQL Error', { error });
     return { message: error.message, locations: error.locations, path: error.path };
   },
 });

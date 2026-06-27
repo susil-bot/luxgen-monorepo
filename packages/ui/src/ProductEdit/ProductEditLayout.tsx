@@ -8,9 +8,7 @@ export interface ProductEditLayoutProps {
 
 /** @deprecated Use SplitPageLayout directly. Thin wrapper for product edit. */
 export function ProductEditLayout({ header, main, sidebar }: ProductEditLayoutProps) {
-  return (
-    <SplitPageLayout variant="main-aside" header={header} main={main} aside={sidebar} />
-  );
+  return <SplitPageLayout variant="main-aside" header={header} main={main} aside={sidebar} />;
 }
 
 export type { SplitPageLayoutProps };

@@ -1,10 +1,11 @@
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { AppLayout, getDefaultLogo, getDefaultSidebarSections, SplitPageLayout } from '@luxgen/ui';
+import { AppLayout, SplitPageLayout } from '@luxgen/ui';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import { SETTINGS_GROUPS, SETTINGS_SECTIONS, type SettingsSectionId } from '../../lib/settings-sections';
 
 interface SettingsShellProps {
@@ -20,35 +21,63 @@ export function SettingsShell({ tenant, activeSection, title, subtitle, children
   const layoutUser = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
   const headerProps = useAppLayoutHeader();
+  const { sidebarSections, logo } = useAppShellConfig();
+  const resolvedSection = activeSection ?? SETTINGS_SECTIONS.find((s) => router.pathname.startsWith(s.href))?.id;
 
   const settingsNav = (
-    <nav className="ios-card p-3 space-y-4 h-fit">
-      {SETTINGS_GROUPS.map((group) => (
-        <div key={group.title}>
-          <p className="text-xs font-semibold uppercase tracking-wide text-tertiary px-2 mb-1">
-            {group.title}
-          </p>
-          <ul className="space-y-0.5">
-            {group.ids.map((id) => {
-              const section = SETTINGS_SECTIONS.find((s) => s.id === id);
-              if (!section) return null;
-              const active = activeSection === id;
-              return (
-                <li key={id}>
-                  <Link
-                    href={section.href}
-                    className={`nav-item block rounded-lg ${active ? 'active' : ''}`}
-                  >
-                    <span>{section.icon}</span>
-                    <span className="truncate">{section.label}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
-    </nav>
+    <>
+      <div className="md:hidden">
+        <label htmlFor="settings-section-nav" className="sr-only">
+          Settings section
+        </label>
+        <select
+          id="settings-section-nav"
+          className="input-field w-full ios-card"
+          value={resolvedSection ?? ''}
+          onChange={(e) => {
+            const section = SETTINGS_SECTIONS.find((s) => s.id === e.target.value);
+            if (section) void router.push(section.href);
+          }}
+        >
+          {SETTINGS_GROUPS.map((group) => (
+            <optgroup key={group.title} label={group.title}>
+              {group.ids.map((id) => {
+                const section = SETTINGS_SECTIONS.find((s) => s.id === id);
+                if (!section) return null;
+                return (
+                  <option key={id} value={id}>
+                    {section.label}
+                  </option>
+                );
+              })}
+            </optgroup>
+          ))}
+        </select>
+      </div>
+
+      <nav className="hidden md:block ios-card p-3 space-y-4 h-fit">
+        {SETTINGS_GROUPS.map((group) => (
+          <div key={group.title}>
+            <p className="text-xs font-semibold uppercase tracking-wide text-tertiary px-2 mb-1">{group.title}</p>
+            <ul className="space-y-0.5">
+              {group.ids.map((id) => {
+                const section = SETTINGS_SECTIONS.find((s) => s.id === id);
+                if (!section) return null;
+                const active = (resolvedSection ?? activeSection) === id;
+                return (
+                  <li key={id}>
+                    <Link href={section.href} className={`nav-item block rounded-lg ${active ? 'active' : ''}`}>
+                      <span>{section.icon}</span>
+                      <span className="truncate">{section.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </nav>
+    </>
   );
 
   return (
@@ -58,9 +87,9 @@ export function SettingsShell({ tenant, activeSection, title, subtitle, children
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive

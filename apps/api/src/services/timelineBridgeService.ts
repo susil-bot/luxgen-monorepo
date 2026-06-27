@@ -63,8 +63,7 @@ export class TimelineBridgeService {
     const subjects = subjectsFromPayload(params.payload);
     if (subjects.length === 0) return;
 
-    const actionSummary =
-      params.actions?.map((a) => a.label || a.type).join(', ') || 'automation actions';
+    const actionSummary = params.actions?.map((a) => a.label || a.type).join(', ') || 'automation actions';
     const message =
       params.status === 'success'
         ? `${params.automationName} ran (${actionSummary})`

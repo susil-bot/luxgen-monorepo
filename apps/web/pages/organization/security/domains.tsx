@@ -22,6 +22,7 @@ function SecurityPlaceholder({
     <OrganizationShell
       tenant={tenant}
       activeSection="security"
+      securitySectionId={activeId}
       title={title}
       subtitle={description}
       securityNav={<OrganizationSecurityNav activeId={activeId} />}

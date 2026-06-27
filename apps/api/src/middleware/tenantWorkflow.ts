@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { tenantConfigService, TenantConfigUtils, TenantWorkflow } from '@luxgen/shared';
+import { resolveEffectivePlan } from '@luxgen/db';
 
 declare global {
   namespace Express {
@@ -57,7 +58,8 @@ export const tenantWorkflowMiddleware = async (req: Request, res: Response, next
     req.tenantFeatures = tenantWorkflow.features;
     req.tenantLimits = tenantWorkflow.limits;
 
-    applyTenantHeaders(req, res, tenantWorkflow);
+    const effectivePlan = await resolveEffectivePlan(tenantId);
+    applyTenantHeaders(req, res, tenantWorkflow, effectivePlan);
     applyTenantSecurity(req, res, tenantWorkflow);
     applyTenantBranding(req, res, tenantWorkflow);
 
@@ -68,10 +70,10 @@ export const tenantWorkflowMiddleware = async (req: Request, res: Response, next
   }
 };
 
-function applyTenantHeaders(_req: Request, res: Response, workflow: TenantWorkflow): void {
+function applyTenantHeaders(_req: Request, res: Response, workflow: TenantWorkflow, effectivePlan: string): void {
   res.setHeader('X-Tenant-ID', workflow.id);
   res.setHeader('X-Tenant-Name', workflow.name);
-  res.setHeader('X-Tenant-Plan', workflow.metadata.plan);
+  res.setHeader('X-Tenant-Plan', effectivePlan);
   res.setHeader('X-Tenant-Tier', workflow.metadata.tier);
   res.setHeader('X-Tenant-Primary-Color', workflow.branding.colors.primary);
   res.setHeader('X-Tenant-Secondary-Color', workflow.branding.colors.secondary);

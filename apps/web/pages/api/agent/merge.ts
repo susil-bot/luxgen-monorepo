@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { mergeAgentBranch, appendAuditEntry, bindSessionAuth, emitAgentAutomationEvent } from '@luxgen/agent';
+import { mergeAgentBranch, appendAuditEntry, bindSessionAuthAsync, emitAgentAutomationEvent } from '@luxgen/agent';
 import { requireAgentAuth } from '../../../lib/agent-auth';
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
@@ -18,7 +18,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
-  bindSessionAuth(sessionId, auth);
+  await bindSessionAuthAsync(sessionId, auth);
 
   try {
     const result = await mergeAgentBranch(sessionId);

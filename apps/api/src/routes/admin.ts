@@ -40,7 +40,7 @@ router.get('/tenants/:tenantId/keys', requireSuperAdmin, (req: Request, res: Res
   }
 });
 
-router.post('/tenants/:tenantId/keys/generate', requireSuperAdmin, (req: Request, res: Response) => {
+router.post('/tenants/:tenantId/keys/generate', requireSuperAdmin, async (req: Request, res: Response) => {
   try {
     const { tenantId } = req.params;
     const { length = 64 } = req.body;
@@ -50,7 +50,7 @@ router.post('/tenants/:tenantId/keys/generate', requireSuperAdmin, (req: Request
       return res.status(400).json({ success: false, message: 'Generated key is not valid' });
     }
 
-    tenantKeyManager.addTenantKey(tenantId, newKey);
+    await tenantKeyManager.setActiveKey(tenantId, newKey);
     res.json({
       success: true,
       message: `New key generated for tenant ${tenantId}`,
@@ -88,9 +88,9 @@ router.post('/tenants/:tenantId/keys/rotate', requireSuperAdmin, async (req: Req
   }
 });
 
-router.delete('/tenants/:tenantId/keys', requireSuperAdmin, (req: Request, res: Response) => {
+router.delete('/tenants/:tenantId/keys', requireSuperAdmin, async (req: Request, res: Response) => {
   try {
-    const result = revokeTenantKeys(req.params.tenantId);
+    const result = await revokeTenantKeys(req.params.tenantId);
     if (!result.success) {
       return res.status(400).json({ success: false, message: result.message });
     }
@@ -105,9 +105,9 @@ router.delete('/tenants/:tenantId/keys', requireSuperAdmin, (req: Request, res: 
   }
 });
 
-router.post('/keys/reload', requireSuperAdmin, (_req: Request, res: Response) => {
+router.post('/keys/reload', requireSuperAdmin, async (_req: Request, res: Response) => {
   try {
-    tenantKeyManager.reloadKeys();
+    await tenantKeyManager.reloadKeys();
     const availableTenants = tenantKeyManager.getAvailableTenants();
     res.json({
       success: true,

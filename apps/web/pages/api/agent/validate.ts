@@ -3,7 +3,7 @@ import {
   runValidationPipeline,
   getSessionValidation,
   appendAuditEntry,
-  bindSessionAuth,
+  bindSessionAuthAsync,
   updateTaskValidation,
 } from '@luxgen/agent';
 import { requireAgentAuth } from '../../../lib/agent-auth';
@@ -12,6 +12,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const { sessionId } = req.query as { sessionId?: string };
 
   if (req.method === 'GET') {
+    const getAuth = requireAgentAuth(req, res);
+    if (!getAuth) return;
     if (!sessionId) {
       res.status(400).json({ error: 'Missing sessionId' });
       return;
@@ -36,7 +38,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
-  bindSessionAuth(id, auth);
+  await bindSessionAuthAsync(id, auth);
 
   try {
     const result = await runValidationPipeline(id);

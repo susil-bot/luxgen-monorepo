@@ -1,5 +1,40 @@
 import { gql } from '@apollo/client';
 
+export const GET_DRAFT_ENROLLMENTS = gql`
+  query GetDraftEnrollments($tenantId: ID!) {
+    draftEnrollments(tenantId: $tenantId) {
+      id
+      courseId
+      studentId
+      notes
+      tags
+      paymentStatus
+      progressPercent
+      learningStatus
+      enrolledAt
+    }
+  }
+`;
+
+export const GET_ABANDONED_CHECKOUTS = gql`
+  query GetAbandonedCheckouts($tenantId: ID!) {
+    abandonedCheckouts(tenantId: $tenantId) {
+      id
+      courseId
+      studentId
+      stripeSessionId
+      amountCents
+      currency
+      status
+      customerEmail
+      checkoutUrl
+      courseTitle
+      createdAt
+      abandonedAt
+    }
+  }
+`;
+
 export const GET_ENROLLMENTS = gql`
   query GetEnrollments($tenantId: ID!) {
     enrollments(tenantId: $tenantId) {
@@ -7,7 +42,12 @@ export const GET_ENROLLMENTS = gql`
       courseId
       studentId
       notes
+      tags
       paymentStatus
+      progressPercent
+      learningStatus
+      lastAccessedAt
+      completedAt
       enrolledAt
     }
   }
@@ -20,6 +60,7 @@ export const GET_ENROLLMENT_BY_ID = gql`
       courseId
       studentId
       notes
+      tags
       paymentStatus
       paidAt
       cancelledAt
@@ -35,10 +76,56 @@ export const GET_ENROLLMENT = gql`
       courseId
       studentId
       notes
+      tags
       paymentStatus
+      progressPercent
+      learningStatus
+      lastAccessedAt
+      completedAt
       paidAt
       cancelledAt
       enrolledAt
+    }
+  }
+`;
+
+export const GET_STUDENT_ENROLLMENTS = gql`
+  query GetStudentEnrollments($tenantId: ID!, $studentId: ID!) {
+    studentEnrollments(tenantId: $tenantId, studentId: $studentId) {
+      id
+      courseId
+      studentId
+      progressPercent
+      learningStatus
+      lastAccessedAt
+      completedAt
+      enrolledAt
+    }
+  }
+`;
+
+export const UPDATE_ENROLLMENT_PROGRESS = gql`
+  mutation UpdateEnrollmentProgress($input: UpdateEnrollmentProgressInput!) {
+    updateEnrollmentProgress(input: $input) {
+      id
+      courseId
+      studentId
+      progressPercent
+      learningStatus
+      lastAccessedAt
+      completedAt
+    }
+  }
+`;
+
+export const MARK_COURSE_COMPLETE = gql`
+  mutation MarkCourseComplete($courseId: ID!) {
+    markCourseComplete(courseId: $courseId) {
+      id
+      courseId
+      progressPercent
+      learningStatus
+      completedAt
     }
   }
 `;
@@ -48,6 +135,7 @@ export const UPDATE_ORDER_NOTES = gql`
     updateOrderNotes(input: $input) {
       id
       notes
+      tags
       paymentStatus
     }
   }
@@ -58,6 +146,7 @@ export const UPDATE_ORDER = gql`
     updateOrder(input: $input) {
       id
       notes
+      tags
       paymentStatus
       paidAt
       cancelledAt
@@ -110,5 +199,11 @@ export const CONFIRM_ORDER_PAYMENT_DEV = gql`
       paymentStatus
       paidAt
     }
+  }
+`;
+
+export const SEND_CHECKOUT_RECOVERY = gql`
+  mutation SendCheckoutRecoveryEmail($tenantId: ID!, $checkoutSessionId: ID!) {
+    sendCheckoutRecoveryEmail(tenantId: $tenantId, checkoutSessionId: $checkoutSessionId)
   }
 `;

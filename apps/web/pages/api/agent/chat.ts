@@ -1,11 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import {
   runAgentLoop,
-  pingOllama,
   findAvailableModel,
   ensureGitSession,
-  bindSessionAuth,
+  bindSessionAuthAsync,
   appendAuditEntry,
+  acquireTenantStreamSlot,
+  releaseTenantStreamSlot,
+  isAgentMessageRateLimited,
+  saveSessionMessages,
 } from '@luxgen/agent';
 import { requireAgentStudio } from '../../../lib/agent-auth';
 import { getOllamaUrl } from '@luxgen/config';
@@ -13,6 +16,7 @@ import { getOllamaUrl } from '@luxgen/config';
 type EventType = 'text' | 'tool_start' | 'tool_result' | 'file_staged' | 'error' | 'done' | 'heartbeat';
 
 function sendEvent(res: NextApiResponse, type: EventType, data: Record<string, unknown> = {}) {
+  if (res.writableEnded) return;
   res.write(`data: ${JSON.stringify({ type, ...data })}\n\n`);
   (res as NextApiResponse & { flush?: () => void }).flush?.();
 }
@@ -52,80 +56,119 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   const auth = await requireAgentStudio(req, res);
   if (!auth) return;
 
-  bindSessionAuth(sessionId, auth, { mode: 'interactive' });
-  await appendAuditEntry({
-    sessionId,
-    tenantId: auth.tenantId,
-    userId: auth.userId,
-    action: 'run_started',
-    details: { mode: 'interactive' },
-  }).catch(() => {});
-
-  const reachable = await pingOllama(OLLAMA_HOST);
-  if (!reachable) {
-    res.status(503).json({ error: `Ollama not reachable at ${OLLAMA_HOST}. Run: docker compose up ollama` });
+  if (await isAgentMessageRateLimited(auth.userId)) {
+    res.status(429).json({
+      error: 'Too many agent messages. Please wait a minute before sending more.',
+    });
     return;
   }
 
-  const requestedModelVal = requestedModel || DEFAULT_MODEL;
-  const available = await findAvailableModel(OLLAMA_HOST, requestedModelVal);
-  if (!available) {
-    res.status(503).json({ error: 'No Ollama models available. Pull a model first.' });
+  const streamSlotAcquired = await acquireTenantStreamSlot(auth.tenantId);
+  if (!streamSlotAcquired) {
+    res.status(429).json({
+      error: 'Too many concurrent agent sessions for this tenant. Try again when a session finishes.',
+    });
     return;
   }
-
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache, no-transform');
-  res.setHeader('Connection', 'keep-alive');
-  res.setHeader('X-Accel-Buffering', 'no');
-  res.status(200);
-  res.flushHeaders();
-
-  let isCancelled = false;
-
-  const heartbeatInterval = setInterval(() => {
-    if (isCancelled) {
-      clearInterval(heartbeatInterval);
-      return;
-    }
-    sendEvent(res, 'heartbeat', { ts: Date.now() });
-  }, 15_000);
-
-  req.on('close', () => {
-    isCancelled = true;
-    clearInterval(heartbeatInterval);
-  });
-
-  const connectionTimer = setTimeout(() => {
-    if (!isCancelled) {
-      isCancelled = true;
-      sendEvent(res, 'error', { message: 'Connection timed out after 2 minutes.' });
-      res.end();
-    }
-  }, 120_000);
 
   try {
-    await ensureGitSession(sessionId);
-
-    await runAgentLoop({
+    await bindSessionAuthAsync(sessionId, auth, { mode: 'interactive' });
+    await appendAuditEntry({
       sessionId,
-      messages,
-      ollamaHost: OLLAMA_HOST,
-      model: requestedModelVal,
-      temperature: requestedTemp,
-      maxTokens: requestedMaxTokens,
-      toolFilter,
-      systemPrompt: requestedSystem,
-      shouldCancel: () => isCancelled,
-      onEvent: (event) => {
-        if (isCancelled && event.type !== 'done') return;
-        const { type, ...rest } = event;
-        sendEvent(res, type as EventType, rest);
-      },
+      tenantId: auth.tenantId,
+      userId: auth.userId,
+      action: 'run_started',
+      details: { mode: 'interactive' },
+    }).catch(() => {});
+
+    const requestedModelVal = requestedModel || DEFAULT_MODEL;
+    const available = await findAvailableModel(OLLAMA_HOST, requestedModelVal);
+    if (!available) {
+      res.status(503).json({
+        error: `Ollama not reachable or no models available at ${OLLAMA_HOST}. Run: docker compose up ollama`,
+      });
+      return;
+    }
+
+    res.setHeader('Content-Type', 'text/event-stream');
+    res.setHeader('Cache-Control', 'no-cache, no-transform');
+    res.setHeader('Connection', 'keep-alive');
+    res.setHeader('X-Accel-Buffering', 'no');
+    res.status(200);
+    res.flushHeaders();
+
+    let isCancelled = false;
+    let responseEnded = false;
+
+    const endResponse = () => {
+      if (responseEnded || res.writableEnded) return;
+      responseEnded = true;
+      res.end();
+    };
+
+    const heartbeatInterval = setInterval(() => {
+      if (isCancelled) {
+        clearInterval(heartbeatInterval);
+        return;
+      }
+      sendEvent(res, 'heartbeat', { ts: Date.now() });
+    }, 15_000);
+
+    req.on('close', () => {
+      isCancelled = true;
+      clearInterval(heartbeatInterval);
+      endResponse();
     });
+
+    const connectionTimer = setTimeout(() => {
+      if (!isCancelled) {
+        isCancelled = true;
+        sendEvent(res, 'error', { message: 'Connection timed out after 2 minutes.' });
+        endResponse();
+      }
+    }, 120_000);
+
+    try {
+      await ensureGitSession(sessionId);
+
+      let assistantText = '';
+
+      await runAgentLoop({
+        sessionId,
+        messages,
+        ollamaHost: OLLAMA_HOST,
+        model: available.model,
+        modelResolved: true,
+        preferredModel: requestedModelVal,
+        modelFromFallback: available.fromFallback,
+        temperature: requestedTemp,
+        maxTokens: requestedMaxTokens,
+        toolFilter,
+        systemPrompt: requestedSystem,
+        shouldCancel: () => isCancelled,
+        onEvent: (event) => {
+          if (isCancelled && event.type !== 'done') return;
+          if (event.type === 'text' && typeof event.content === 'string') {
+            assistantText += event.content;
+          }
+          const { type, ...rest } = event;
+          sendEvent(res, type as EventType, rest);
+        },
+      });
+
+      if (!isCancelled && assistantText.trim()) {
+        const lastUser = [...messages].reverse().find((m) => m.role === 'user');
+        const turns: Array<{ role: 'user' | 'assistant'; content: string }> = [];
+        if (lastUser) turns.push(lastUser);
+        turns.push({ role: 'assistant', content: assistantText });
+        saveSessionMessages(sessionId, turns);
+      }
+    } finally {
+      clearInterval(heartbeatInterval);
+      clearTimeout(connectionTimer);
+      endResponse();
+    }
   } finally {
-    clearInterval(heartbeatInterval);
-    clearTimeout(connectionTimer);
-    res.end();
+    await releaseTenantStreamSlot(auth.tenantId);
   }
 }

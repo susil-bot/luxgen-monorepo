@@ -52,8 +52,8 @@ async function paginate<T extends { _id: unknown }>(
   return {
     edges,
     pageInfo: {
-      hasNextPage: args.before ? hasCursor : hasMore,
-      hasPreviousPage: args.after ? hasCursor : hasMore,
+      hasNextPage: (args.before ?? args.last) ? hasCursor : hasMore,
+      hasPreviousPage: (args.before ?? args.last) ? hasMore : Boolean(args.after),
       startCursor: edges[0]?.cursor ?? null,
       endCursor: edges[edges.length - 1]?.cursor ?? null,
     },
@@ -125,7 +125,7 @@ export class GroupService {
     },
   ) {
     const tenantId = requireTenantId(context);
-    const baseQuery: FilterQuery<IGroup> = { tenant: tenantId, isActive: true };
+    const baseQuery: FilterQuery<IGroup> = { tenant: tenantId };
 
     if (args.search) {
       baseQuery.$or = [
@@ -133,7 +133,11 @@ export class GroupService {
         { description: { $regex: args.search, $options: 'i' } },
       ];
     }
-    if (args.isActive !== undefined) baseQuery.isActive = args.isActive;
+    if (args.isActive !== undefined) {
+      baseQuery.isActive = args.isActive;
+    } else {
+      baseQuery.isActive = true;
+    }
     if (args.createdBy) baseQuery.createdBy = args.createdBy;
 
     return paginate(Group, baseQuery, args, mapGroup as any);
@@ -259,9 +263,14 @@ export class GroupService {
           { _id: new Types.ObjectId(id), tenant: tenantId },
           { session },
         ).lean<IGroup>();
-        if (!deleted) throw new GraphQLError('Group not found', { extensions: { code: 'NOT_FOUND' } });
+        if (!deleted) throw new Error('Group not found');
         await GroupMember.deleteMany({ groupId: id }, { session });
       });
+    } catch (err) {
+      if (err instanceof Error && err.message === 'Group not found') {
+        throw new GraphQLError('Group not found', { extensions: { code: 'NOT_FOUND' } });
+      }
+      throw err;
     } finally {
       await session.endSession();
     }

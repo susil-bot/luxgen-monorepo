@@ -1,4 +1,4 @@
-import { User, IUser } from '@luxgen/db';
+import { User, IUser, Enrollment } from '@luxgen/db';
 import { verifyPassword } from '@luxgen/auth';
 import { generateToken } from '../utils/jwt';
 import { logger } from '../utils/logger';
@@ -6,6 +6,40 @@ import { isAccountActive, ACCOUNT_DEACTIVATED_MESSAGE } from '../utils/accountSt
 import { checkLoginRateLimit } from '../middleware/loginRateLimit';
 import type { Request } from 'express';
 import { UserRegistrationService, UserRegistrationData } from './userRegistrationService';
+
+export class AuthServiceError extends Error {
+  constructor(
+    message: string,
+    public statusCode: number = 400,
+    public errors?: Record<string, string>,
+  ) {
+    super(message);
+    this.name = 'AuthServiceError';
+  }
+}
+
+type PopulatedTenant = { _id?: unknown; name?: string; subdomain?: string };
+
+export function buildAuthRestPayload(token: string, user: IUser, includeStatus = false) {
+  const tenant = user.tenant as PopulatedTenant;
+  return {
+    token,
+    user: {
+      id: user._id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      ...(includeStatus ? { status: user.status } : {}),
+      tenant: {
+        id: tenant._id,
+        name: tenant.name,
+        subdomain: tenant.subdomain,
+      },
+    },
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  };
+}
 
 export interface LoginInput {
   email: string;
@@ -28,11 +62,14 @@ export interface UpdateUserInput {
   marketingEmail?: boolean;
   marketingSms?: boolean;
   marketingWhatsapp?: boolean;
+  avatar?: string;
 }
 
 export class UserService {
-  async getUserById(id: string): Promise<IUser | null> {
-    return User.findById(id).populate('tenant');
+  async getUserById(id: string, tenantId?: string): Promise<IUser | null> {
+    const filter: { _id: string; tenant?: string } = { _id: id };
+    if (tenantId) filter.tenant = tenantId;
+    return User.findOne(filter).populate('tenant');
   }
 
   async getUsersByTenant(tenantId: string): Promise<IUser[]> {
@@ -42,7 +79,7 @@ export class UserService {
   async createUser(input: UserRegistrationData): Promise<IUser> {
     const result = await UserRegistrationService.registerUser(input);
     if (!result.success || !result.user) {
-      throw new Error(result.message);
+      throw new AuthServiceError(result.message, 400, result.errors);
     }
     return result.user;
   }
@@ -53,8 +90,32 @@ export class UserService {
     return user;
   }
 
-  async deleteUser(id: string): Promise<boolean> {
-    const result = await User.findByIdAndDelete(id);
+  async getCustomersByTenant(tenantId: string, search?: string): Promise<IUser[]> {
+    const query: Record<string, unknown> = {
+      tenant: tenantId,
+      role: { $in: ['STUDENT', 'USER'] },
+    };
+    if (search?.trim()) {
+      const pattern = new RegExp(search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      query.$or = [{ email: pattern }, { firstName: pattern }, { lastName: pattern }];
+    }
+    return User.find(query).populate('tenant').sort({ createdAt: -1 });
+  }
+
+  async deleteUser(id: string, tenantId: string): Promise<boolean> {
+    const user = await User.findOne({ _id: id, tenant: tenantId });
+    if (!user) throw new Error('User not found');
+
+    const activeOrders = await Enrollment.countDocuments({
+      tenant: tenantId,
+      student: id,
+      cancelledAt: null,
+    });
+    if (activeOrders > 0) {
+      throw new Error(`Cannot delete customer with ${activeOrders} active order(s). Cancel or complete orders first.`);
+    }
+
+    const result = await User.findOneAndDelete({ _id: id, tenant: tenantId });
     return !!result;
   }
 
@@ -72,13 +133,23 @@ export class UserService {
     if (inputTenantId) query.tenant = inputTenantId;
 
     const user = await User.findOne(query).populate('tenant');
-    if (!user) throw new Error('Invalid email or password');
+    if (!user) {
+      throw new AuthServiceError('Invalid email or password', 401, {
+        email: 'Invalid email or password',
+        password: 'Invalid email or password',
+      });
+    }
 
     const isValid = await verifyPassword(password, user.password);
-    if (!isValid) throw new Error('Invalid email or password');
+    if (!isValid) {
+      throw new AuthServiceError('Invalid email or password', 401, {
+        email: 'Invalid email or password',
+        password: 'Invalid email or password',
+      });
+    }
 
     if (!isAccountActive(user)) {
-      throw new Error(ACCOUNT_DEACTIVATED_MESSAGE);
+      throw new AuthServiceError(ACCOUNT_DEACTIVATED_MESSAGE, 403);
     }
 
     const tenantId = (user.tenant as any)?._id?.toString();
@@ -107,6 +178,7 @@ export class UserService {
     }
 
     const user = await this.createUser(registration);
+    await user.populate('tenant');
 
     const tenantId = (user.tenant as any)?._id?.toString();
     if (!tenantId) throw new Error('User has no associated tenant');

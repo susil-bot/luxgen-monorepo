@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useAppShellConfig } from '../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { createHandleUserAction } from '../lib/user-actions';
@@ -6,44 +6,21 @@ import {
   NotFound,
   AssetManagerProvider,
   useAssetManager,
-  AppLayout,
-  getDefaultUser,
-  getDefaultLogo,
-  getDefaultSidebarSections,
-} from '@luxgen/ui';
+  AppLayout } from '@luxgen/ui';
 import { getBrandAssetsForTenant } from '@luxgen/ui/src/Assets/DefaultBrandAssets';
+import { useLayoutUser } from '../lib/app-layout-user';
+import { useAppLayoutHeader } from '../lib/app-layout-header';
 
 const NotFoundPageContent: React.FC = () => {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
+  const layoutUser = useLayoutUser();
+  const headerProps = useAppLayoutHeader();
   const { getBrandAssets } = useAssetManager();
-  const [user, setUser] = useState<any>(null);
 
-  // Get tenant from subdomain or default to 'demo'
   const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
   const tenantId = hostname.includes('idea-vibes') ? 'idea-vibes' : hostname.includes('demo') ? 'demo' : 'default';
-
   const _brandAssets = getBrandAssets(tenantId);
-
-  // Load user data
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser({
-          name: `${parsedUser.firstName} ${parsedUser.lastName}`,
-          email: parsedUser.email,
-          role: parsedUser.role,
-          tenant: parsedUser.tenant,
-        });
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        setUser(getDefaultUser());
-      }
-    } else {
-      setUser(getDefaultUser());
-    }
-  }, []);
 
   const handleGoHome = () => {
     router.push('/');
@@ -77,8 +54,9 @@ const NotFoundPageContent: React.FC = () => {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
-        user={user}
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
+        {...headerProps}
         onUserAction={handleUserAction}
         onSearch={handleSearch}
         onNotificationClick={handleNotificationClick}
@@ -86,7 +64,7 @@ const NotFoundPageContent: React.FC = () => {
         showNotifications={true}
         notificationCount={0}
         searchPlaceholder="Search for pages, groups, or users..."
-        logo={getDefaultLogo()}
+        logo={logo}
         sidebarCollapsible={true}
         sidebarDefaultCollapsed={false}
         responsive={true}
@@ -118,6 +96,9 @@ const NotFoundPageContent: React.FC = () => {
                 <button type="button" onClick={() => router.push('/analytics')} className="ios-btn-secondary">
                   Analytics
                 </button>
+                <button type="button" onClick={() => router.push('/login')} className="ios-btn-primary">
+                  Sign in
+                </button>
               </div>
             </div>
           }
@@ -128,10 +109,7 @@ const NotFoundPageContent: React.FC = () => {
 };
 
 export default function Custom404() {
-  // Get tenant from subdomain or default to 'demo'
-  const hostname = typeof window !== 'undefined' ? window.location.hostname : '';
-  const tenantId = hostname.includes('idea-vibes') ? 'idea-vibes' : hostname.includes('demo') ? 'demo' : 'default';
-
+  const tenantId = 'default';
   const brandAssets = getBrandAssetsForTenant(tenantId);
 
   return (

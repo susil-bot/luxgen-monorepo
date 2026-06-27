@@ -2,9 +2,7 @@ import type { AuthRedirectReason } from './auth-notices';
 import { AUTH_STORAGE_KEYS, clearStoredSession, getStoredUser, isStoredSessionExpired } from './session';
 import { isSessionTenantMismatch } from './tenant-auth';
 
-export type SessionValidation =
-  | { ok: true }
-  | { ok: false; reason: AuthRedirectReason };
+export type SessionValidation = { ok: true } | { ok: false; reason: AuthRedirectReason };
 
 /**
  * Validate browser session for protected routes.
@@ -41,9 +39,7 @@ export function resolveAuthRedirectReason(
 ): AuthRedirectReason | null {
   const messages = graphQLErrors?.map((e) => e.message ?? '') ?? [];
 
-  if (
-    messages.some((m) => /not valid for this tenant|tenant mismatch|token tenant mismatch/i.test(m))
-  ) {
+  if (messages.some((m) => /token tenant mismatch|not valid for this tenant/i.test(m))) {
     return 'tenant_mismatch';
   }
 
@@ -55,10 +51,7 @@ export function resolveAuthRedirectReason(
     return 'session_expired';
   }
 
-  if (
-    graphQLErrors?.some((e) => e.extensions?.code === 'FORBIDDEN') ||
-    networkStatusCode === 403
-  ) {
+  if (graphQLErrors?.some((e) => e.extensions?.code === 'FORBIDDEN') || networkStatusCode === 403) {
     return 'unauthorized';
   }
 

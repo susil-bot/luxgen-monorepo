@@ -3,6 +3,10 @@ import { LISTING_EMAIL_TEMPLATES, type ListingEmailTemplate } from '../notificat
 import { getTenantContext } from '../middleware/tenantRouting';
 
 const router = Router();
+const templateOverrides = new Map();
+function overrideKey(tenantId, templateId) {
+  return `${tenantId}:${templateId}`;
+}
 
 const TEMPLATE_META: Record<
   ListingEmailTemplate,
@@ -60,13 +64,16 @@ router.get('/templates', async (req: Request, res: Response) => {
 
     const templates = Object.values(LISTING_EMAIL_TEMPLATES).map((def) => {
       const meta = TEMPLATE_META[def.id];
+      const override = templateOverrides.get(overrideKey(tenantContext.tenantId, def.id));
+      const subject = override?.subject ?? def.subject(ctx);
+      const body = override?.body ?? def.body(ctx);
       return {
         id: def.id,
         label: meta.label,
         category: meta.category,
         status: meta.status,
-        subject: def.subject(ctx),
-        bodyPreview: def.body(ctx).split('\n').slice(0, 4).join('\n'),
+        subject,
+        bodyPreview: body.split('\n').slice(0, 4).join('\n'),
       };
     });
 
@@ -81,4 +88,12 @@ router.get('/templates', async (req: Request, res: Response) => {
   }
 });
 
+router.patch('/templates/:id', async (req, res) => {
+  const tenantContext = getTenantContext(req);
+  if (!tenantContext) return res.status(404).json({ success: false, message: 'No tenant context' });
+  const { id } = req.params;
+  const { subject, body } = req.body;
+  templateOverrides.set(overrideKey(tenantContext.tenantId, id), { subject, body });
+  res.json({ success: true, data: { id, subject, body } });
+});
 export default router;

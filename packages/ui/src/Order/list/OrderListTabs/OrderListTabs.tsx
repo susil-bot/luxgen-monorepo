@@ -21,16 +21,10 @@ export function OrderListTabs({ activeTab, onTabChange, counts }: OrderListTabsP
             className={`px-3 py-2 text-sm font-medium rounded-t-lg transition-colors ${
               isActive ? 'text-primary bg-raised' : 'text-secondary hover:text-primary'
             }`}
-            style={
-              isActive
-                ? { borderBottom: '2px solid var(--color-blue)', marginBottom: -1 }
-                : undefined
-            }
+            style={isActive ? { borderBottom: '2px solid var(--color-blue)', marginBottom: -1 } : undefined}
           >
             {tab.label}
-            {count != null && count > 0 && (
-              <span className="ml-1.5 text-xs text-tertiary">({count})</span>
-            )}
+            {count != null && count > 0 && <span className="ml-1.5 text-xs text-tertiary">({count})</span>}
           </button>
         );
       })}

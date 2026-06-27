@@ -1,33 +1,31 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useAppShellConfig } from '../../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useQuery } from '@apollo/client';
 import {
   AppLayout,
-  getDefaultLogo,
-  getDefaultSidebarSections,
   CustomerListView,
   buildCustomersFromUsers,
   filterCustomersByTab,
   SnackbarProvider,
-  type CustomerFilterTab,
-} from '@luxgen/ui';
+  type CustomerFilterTab } from '@luxgen/ui';
 import { PageLoadingState } from '../../../components/common/PageStates';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../../lib/app-layout-user';
 import { getStoredUser } from '../../../lib/session';
 import { GET_COURSES } from '../../../graphql/queries/courses';
-import { GET_USERS } from '../../../graphql/queries/users';
+import { GET_CUSTOMERS } from '../../../graphql/queries/users';
 import { GET_ENROLLMENTS } from '../../../graphql/queries/enrollment';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
-import { isLearnerRole } from '../../../lib/user-roles';
 
 interface Props {
   tenant: string;
 }
 
 function AdminCustomersPageContent({ tenant }: Props) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
@@ -42,20 +40,17 @@ function AdminCustomersPageContent({ tenant }: Props) {
   const { data: coursesData, loading: coursesLoading } = useQuery(GET_COURSES, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
-  const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
-    variables: { tenantId: queryTenantId },
+  const { data: customersData, loading: customersLoading } = useQuery(GET_CUSTOMERS, {
+    variables: { tenantId: queryTenantId, search: search.trim() || undefined },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const { data: enrollmentsData } = useQuery(GET_ENROLLMENTS, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   useEffect(() => {
     const q = router.query.search;
@@ -63,9 +58,8 @@ function AdminCustomersPageContent({ tenant }: Props) {
   }, [router.query.search]);
 
   const allCustomers = useMemo(() => {
-    const learners = (usersData?.users ?? []).filter((u: { role: string }) => isLearnerRole(u.role));
-    return buildCustomersFromUsers(learners, coursesData?.courses, enrollmentsData?.enrollments);
-  }, [coursesData, usersData, enrollmentsData]);
+    return buildCustomersFromUsers(customersData?.customers ?? [], coursesData?.courses, enrollmentsData?.enrollments);
+  }, [coursesData, customersData, enrollmentsData]);
 
   const customers = useMemo(() => {
     let rows = filterCustomersByTab(allCustomers, activeTab);
@@ -73,15 +67,13 @@ function AdminCustomersPageContent({ tenant }: Props) {
       const q = search.toLowerCase();
       rows = rows.filter(
         (c) =>
-          c.name.toLowerCase().includes(q) ||
-          c.email.toLowerCase().includes(q) ||
-          c.rfmGroup.toLowerCase().includes(q),
+          c.name.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.rfmGroup.toLowerCase().includes(q),
       );
     }
     return rows;
   }, [allCustomers, activeTab, search]);
 
-  const loading = (coursesLoading || usersLoading) && allCustomers.length === 0;
+  const loading = (coursesLoading || customersLoading) && allCustomers.length === 0;
 
   return (
     <>
@@ -90,9 +82,9 @@ function AdminCustomersPageContent({ tenant }: Props) {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive
@@ -121,5 +113,3 @@ export default function AdminCustomersPage(props: Props) {
     </SnackbarProvider>
   );
 }
-
-export const getServerSideProps = getTenantPageProps;

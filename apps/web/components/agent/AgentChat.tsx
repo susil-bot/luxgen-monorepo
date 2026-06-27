@@ -12,7 +12,7 @@ export interface ChatMessage {
 export interface ToolEvent {
   id: string;
   name: string;
-  input: Record<string, any>;
+  input: Record<string, unknown>;
   result?: string;
   status: 'running' | 'done';
 }
@@ -35,7 +35,13 @@ const TOOL_ICONS: Record<string, string> = {
   read_file: '📄',
   list_files: '📁',
   write_file: '✏️',
+  delete_file: '🗑️',
   search_code: '🔍',
+  read_automation_schema: '⚙️',
+  rename_file: '📦',
+  run_command: '▶️',
+  fetch_url: '🌐',
+  read_project_config: '📋',
 };
 
 function ToolBadge({ event }: { event: ToolEvent }) {
@@ -43,21 +49,25 @@ function ToolBadge({ event }: { event: ToolEvent }) {
   const label =
     event.name === 'write_file'
       ? `Staging ${event.input.path?.split('/').pop()}`
-      : event.name === 'read_file'
-        ? `Reading ${event.input.path?.split('/').pop()}`
-        : event.name === 'list_files'
-          ? `Listing ${event.input.path}`
-          : event.name === 'search_code'
-            ? `Searching "${event.input.query}"`
-            : event.name;
+      : event.name === 'delete_file'
+        ? `Deleting ${event.input.path?.split('/').pop()}`
+        : event.name === 'read_file'
+          ? `Reading ${event.input.path?.split('/').pop()}`
+          : event.name === 'list_files'
+            ? `Listing ${event.input.path}`
+            : event.name === 'search_code'
+              ? `Searching "${event.input.query}"`
+              : event.name === 'read_automation_schema'
+                ? 'Reading automation schema'
+                : event.name;
 
   return (
     <div
       className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium my-1 animate-fade-in"
       style={{
-        backgroundColor: event.status === 'running' ? 'rgba(0,122,255,0.1)' : 'var(--color-fill-quaternary)',
+        backgroundColor: event.status === 'running' ? 'var(--color-blue-subtle)' : 'var(--color-fill-quaternary)',
         color: event.status === 'running' ? 'var(--color-blue)' : 'var(--color-label-secondary)',
-        border: `1px solid ${event.status === 'running' ? 'rgba(0,122,255,0.2)' : 'var(--color-separator)'}`,
+        border: `1px solid ${event.status === 'running' ? 'var(--color-blue-subtle-border)' : 'var(--color-separator)'}`,
       }}
     >
       <span>{icon}</span>
@@ -143,6 +153,7 @@ export default function AgentChat({
   systemPrompt,
   layout = 'default',
 }: AgentChatProps) {
+  const [streamError, setStreamError] = useState<string | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
@@ -150,23 +161,62 @@ export default function AgentChat({
   const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
+    if (!isStreaming) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') abortRef.current?.abort();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [isStreaming]);
+
+  useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // Welcome message
+  // Load persisted messages or show welcome
   useEffect(() => {
-    setMessages([
-      {
-        id: 'welcome',
-        role: 'assistant',
-        content:
-          layout === 'sidekick'
-            ? "Hi! I'm your LuxGen assistant.\n\nAsk about customers, orders, products, or describe a feature you want to build — I'll read the codebase and stage changes for your review."
-            : "👋 Hi! I'm LuxGen Dev Agent.\n\nDescribe what you want to build — a new page, a feature, a component, or a backend endpoint. I'll read the codebase, write the code, and show you exactly what I'm going to change before anything is applied.",
-        timestamp: Date.now(),
-      },
-    ]);
-  }, [layout]);
+    let cancelled = false;
+
+    const welcome: ChatMessage = {
+      id: 'welcome',
+      role: 'assistant',
+      content:
+        layout === 'sidekick'
+          ? "Hi! I'm your LuxGen assistant.\n\nAsk about customers, orders, products, or describe a feature you want to build — I'll read the codebase and stage changes for your review."
+          : "👋 Hi! I'm LuxGen Dev Agent.\n\nDescribe what you want to build — a new page, a feature, a component, or a backend endpoint. I'll read the codebase, write the code, and show you exactly what I'm going to change before anything is applied.",
+      timestamp: Date.now(),
+    };
+
+    const load = async () => {
+      try {
+        const res = await fetch(`/api/agent/stage?sessionId=${encodeURIComponent(sessionId)}`);
+        if (!res.ok) throw new Error('load failed');
+        const session = await res.json();
+        if (cancelled) return;
+        if (session.messages?.length) {
+          setMessages(
+            session.messages.map(
+              (m: { role: 'user' | 'assistant'; content: string; timestamp: number }, i: number) => ({
+                id: `loaded-${m.timestamp}-${i}`,
+                role: m.role,
+                content: m.content,
+                timestamp: m.timestamp,
+              }),
+            ),
+          );
+        } else {
+          setMessages([welcome]);
+        }
+      } catch {
+        if (!cancelled) setMessages([welcome]);
+      }
+    };
+
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [sessionId, layout]);
 
   const sendMessage = useCallback(async () => {
     const text = input.trim();
@@ -215,6 +265,7 @@ export default function AgentChat({
       });
 
       if (!response.ok) {
+        setStreamError('Connection lost — try sending again.');
         const err = await response.json();
         setMessages((prev) =>
           prev.map((m) => (m.id === assistantMsg.id ? { ...m, content: `Error: ${err.error}` } : m)),
@@ -301,6 +352,25 @@ export default function AgentChat({
 
   return (
     <div className={isSidekick ? 'lux-sidekick-chat' : 'flex flex-col h-full'}>
+      {streamError && (
+        <div
+          role="alert"
+          className="mx-4 mt-2 p-3 text-sm rounded-lg flex items-center justify-between gap-3"
+          style={{ background: 'rgba(255,59,48,0.12)', color: 'var(--color-red)' }}
+        >
+          <span>{streamError}</span>
+          <button
+            type="button"
+            className="ios-btn-secondary text-xs py-1 px-2"
+            onClick={() => {
+              setStreamError(null);
+              void sendMessage();
+            }}
+          >
+            Reconnect
+          </button>
+        </div>
+      )}
       {/* Messages */}
       <div className={isSidekick ? 'lux-sidekick-messages' : 'flex-1 overflow-y-auto px-4 py-4'}>
         {messages.map((msg) => (
@@ -345,9 +415,8 @@ export default function AgentChat({
               onKeyDown={handleKeyDown}
               placeholder="Describe what you want to build… (Enter to send, Shift+Enter for new line)"
               rows={2}
-              className="flex-1 resize-none input-field"
+              className="flex-1 resize-none input-field min-h-14 max-h-24 sm:max-h-40"
               disabled={isStreaming}
-              style={{ minHeight: '56px', maxHeight: '160px' }}
             />
             <button
               onClick={sendMessage}

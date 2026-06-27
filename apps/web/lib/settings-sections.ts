@@ -2,6 +2,7 @@
 
 export type SettingsSectionId =
   | 'general'
+  | 'storefront'
   | 'staff'
   | 'payments'
   | 'checkout'
@@ -35,6 +36,14 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     href: '/settings/general',
     status: 'partial',
     icon: '🏪',
+  },
+  {
+    id: 'storefront',
+    label: 'Storefront',
+    description: 'Trainer landing page and public routes',
+    href: '/settings/storefront',
+    status: 'implemented',
+    icon: '🛍️',
   },
   {
     id: 'staff',
@@ -151,7 +160,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
 ];
 
 export const SETTINGS_GROUPS = [
-  { title: 'Store', ids: ['general', 'branding', 'domains'] as SettingsSectionId[] },
+  { title: 'Store', ids: ['general', 'storefront', 'branding', 'domains'] as SettingsSectionId[] },
   { title: 'Team & access', ids: ['staff', 'security'] as SettingsSectionId[] },
   { title: 'Commerce', ids: ['payments', 'billing', 'checkout', 'shipping', 'taxes'] as SettingsSectionId[] },
   { title: 'Customers & comms', ids: ['customers', 'notifications', 'policies', 'languages'] as SettingsSectionId[] },

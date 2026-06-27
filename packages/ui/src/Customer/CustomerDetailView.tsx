@@ -1,5 +1,6 @@
 import type { CustomerDetail } from './fetcher';
 import type { TimelineActivityProps } from '../Timeline';
+import type { ActionMenuItem } from '../ActionMenu';
 import { EntityFormPageLayout } from '../SplitPageLayout/EntityFormPageLayout';
 import { CustomerDetailHeader } from './CustomerDetailHeader';
 import { CustomerStatsBar } from './CustomerStatsBar';
@@ -17,6 +18,8 @@ export interface CustomerDetailViewProps {
   customer: CustomerDetail;
   onCreateOrder?: () => void;
   editHref?: string;
+  onDeleteCustomer?: () => void;
+  deletingCustomer?: boolean;
   onMarketingChange?: (channel: 'email' | 'sms' | 'whatsapp', subscribed: boolean) => void;
   savingMarketing?: boolean;
   timeline?: TimelineActivityProps;
@@ -34,6 +37,8 @@ export function CustomerDetailView({
   customer,
   onCreateOrder,
   editHref,
+  onDeleteCustomer,
+  deletingCustomer,
   onMarketingChange,
   savingMarketing,
   timeline,
@@ -41,13 +46,26 @@ export function CustomerDetailView({
   onCustomerNotesChange,
   savingCustomerNotes,
 }: CustomerDetailViewProps) {
+  const menuItems: ActionMenuItem[] =
+    onDeleteCustomer != null
+      ? [
+          {
+            id: 'delete',
+            label: 'Delete customer',
+            onClick: onDeleteCustomer,
+            disabled: deletingCustomer,
+            destructive: true,
+          },
+        ]
+      : [];
+
   return (
     <EntityFormPageLayout
       variant="main-aside"
       className="w-full min-h-0"
       header={
         <>
-          <CustomerDetailHeader customer={customer} editHref={editHref} />
+          <CustomerDetailHeader customer={customer} editHref={editHref} menuItems={menuItems} />
           <CustomerStatsBar customer={customer} />
         </>
       }
@@ -61,11 +79,7 @@ export function CustomerDetailView({
       aside={
         <>
           <CustomerContactSection customer={customer} />
-          <MarketingSection
-            customer={customer}
-            onMarketingChange={onMarketingChange}
-            saving={savingMarketing}
-          />
+          <MarketingSection customer={customer} onMarketingChange={onMarketingChange} saving={savingMarketing} />
           <TaxDetailsSection />
           <StoreCreditSection customer={customer} />
           <CustomerTagsSection customer={customer} />

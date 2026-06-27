@@ -1,8 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import { applySession, bindSessionAuth } from '@luxgen/agent';
+import { applySession, bindSessionAuthAsync } from '@luxgen/agent';
 import { requireAgentAuth } from '../../../lib/agent-auth';
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
     res.status(405).json({ error: 'Method not allowed' });
     return;
@@ -17,12 +17,24 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
     return;
   }
 
-  bindSessionAuth(sessionId, auth);
+  await bindSessionAuthAsync(sessionId, auth);
 
   try {
     const result = applySession(sessionId);
+
+    if (result.blocked) {
+      res.status(409).json({
+        ...result,
+        blocked: true,
+        hasConflicts: true,
+        error: `${result.conflicts.length} file(s) changed on disk since staging. Apply blocked to protect your edits.`,
+      });
+      return;
+    }
+
     res.status(200).json({
       ...result,
+      blocked: false,
       hasConflicts: result.conflicts.length > 0,
       conflictWarning:
         result.conflicts.length > 0

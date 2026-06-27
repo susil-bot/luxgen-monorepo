@@ -7,6 +7,10 @@ export type AutomationTriggerType =
   | 'CERTIFICATE_ISSUED'
   | 'SCHEDULE'
   | 'WEBHOOK'
+  | 'ORDER_CREATED'
+  | 'ORDER_DRAFTED'
+  | 'ORDER_UPDATED'
+  | 'PAYMENT_SENT'
   | 'CODE_CHANGE_STAGED'
   | 'CODE_CHANGE_COMMITTED'
   | 'CODE_CHANGE_MERGED'
@@ -21,7 +25,8 @@ export type AutomationActionType =
   | 'CALL_WEBHOOK'
   | 'NOTIFY_SLACK'
   | 'TAG_USER'
-  | 'RUN_AGENT_TASK';
+  | 'RUN_AGENT_TASK'
+  | 'UPDATE_ORDER_FIELDS';
 
 export interface IAutomationAction {
   type: AutomationActionType;
@@ -36,6 +41,8 @@ export interface IAutomation extends Document {
   triggerType: AutomationTriggerType;
   triggerLabel: string;
   actions: IAutomationAction[];
+  /** Tower flow document (@luxgen/automation-flow v1) */
+  flowDefinition?: Record<string, unknown>;
   runCount: number;
   lastRunAt?: Date;
   createdAt: Date;
@@ -70,6 +77,7 @@ const automationActionSchema = new Schema<IAutomationAction>(
         'NOTIFY_SLACK',
         'TAG_USER',
         'RUN_AGENT_TASK',
+        'UPDATE_ORDER_FIELDS',
       ],
       required: true,
     },
@@ -93,6 +101,10 @@ const automationSchema = new Schema<IAutomation>(
         'CERTIFICATE_ISSUED',
         'SCHEDULE',
         'WEBHOOK',
+        'ORDER_CREATED',
+        'ORDER_DRAFTED',
+        'ORDER_UPDATED',
+        'PAYMENT_SENT',
         'CODE_CHANGE_STAGED',
         'CODE_CHANGE_COMMITTED',
         'CODE_CHANGE_MERGED',
@@ -102,6 +114,7 @@ const automationSchema = new Schema<IAutomation>(
     },
     triggerLabel: { type: String, required: true },
     actions: { type: [automationActionSchema], default: [] },
+    flowDefinition: { type: Schema.Types.Mixed },
     runCount: { type: Number, default: 0 },
     lastRunAt: { type: Date },
   },

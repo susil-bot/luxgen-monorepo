@@ -9,8 +9,12 @@ export interface Tenant {
 }
 
 export const getTenantFromHost = (host: string): string => {
-  const subdomain = host.split('.')[0];
-  return subdomain === 'www' || subdomain === 'localhost' ? 'default' : subdomain;
+  const hostname = host.split(':')[0];
+  const subdomain = hostname.split('.')[0];
+  if (subdomain === 'www' || subdomain === 'localhost' || subdomain === '127.0.0.1') {
+    return 'default';
+  }
+  return subdomain;
 };
 
 export const getTenantFromUrl = (url: string): string => {

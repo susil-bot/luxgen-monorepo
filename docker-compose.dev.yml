@@ -1,15 +1,8 @@
-# ─────────────────────────────────────────────────────────────────────────────
-# LuxGen Development Overrides
+# LuxGen — Development overrides (hot reload, seed-on-first-boot)
+# Docs: docs/technical/development/QUICK_START.md · docs/deployment/DOCKER.md
 # Usage: make dev-docker   OR   npm run dev:docker
-#
-# Full stack with hot reload + persistent volumes:
-#   - mongodb_data / redis_data survive `docker compose down`
-#   - API auto-seeds on first boot only (SEED_IF_EMPTY + empty volume)
-#   - Re-run: make dev-docker (no manual seed unless you `make db-reset`)
-# ─────────────────────────────────────────────────────────────────────────────
 
 services:
-
   # ── API — dev override (hot reload via ts-node-dev) ───────────────────────
   api:
     build:
@@ -17,33 +10,33 @@ services:
       dockerfile: apps/api/Dockerfile.dev
     environment:
       NODE_ENV: development
-      DEBUG: "luxgen:*"
+      DEBUG: 'luxgen:*'
       LOG_LEVEL: debug
       PORT: 4000
       MONGODB_URI: mongodb://admin:password123@mongodb:27017/luxgen_dev?authSource=admin
       REDIS_URL: redis://redis:6379
       JWT_SECRET: dev-jwt-secret-change-in-production-min-32-chars
       JWT_EXPIRES_IN: 7d
-      SEED_IF_EMPTY: "true"
+      SEED_IF_EMPTY: 'true'
       TENANT_DEMO_KEY: demo-tenant-signing-key-dev-32chars-min
       TENANT_IDEA-VIBES_KEY: idea-vibes-signing-key-dev-32chars-min
       CORS_ORIGIN: http://localhost:3000
-      APOLLO_INTROSPECTION: "true"
+      APOLLO_INTROSPECTION: 'true'
     volumes:
       - .:/app
       - /app/node_modules
       - /app/apps/api/node_modules
-    command: ["sh", "scripts/docker/api-dev-entrypoint.sh"]
+    command: ['sh', 'scripts/docker/api-dev-entrypoint.sh']
     ports:
-      - "4000:4000"
-      - "9229:9229"
+      - '4000:4000'
+      - '9229:9229'
     depends_on:
       mongodb:
         condition: service_healthy
       redis:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
       interval: 15s
       timeout: 10s
       retries: 12
@@ -56,7 +49,7 @@ services:
       dockerfile: apps/web/Dockerfile.dev
     environment:
       NODE_ENV: development
-      NEXT_TELEMETRY_DISABLED: "1"
+      NEXT_TELEMETRY_DISABLED: '1'
       NEXT_PUBLIC_API_URL: http://localhost:4000
       NEXT_PUBLIC_GRAPHQL_URL: http://localhost:4000/graphql
       NEXT_PUBLIC_APP_URL: http://localhost:3000
@@ -69,14 +62,14 @@ services:
       - /app/node_modules
       - /app/apps/web/.next
       - /app/apps/web/node_modules
-    command: ["sh", "scripts/docker/web-dev-entrypoint.sh"]
+    command: ['sh', 'scripts/docker/web-dev-entrypoint.sh']
     ports:
-      - "3000:3000"
+      - '3000:3000'
     depends_on:
       api:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
       interval: 30s
       timeout: 10s
       retries: 5
@@ -88,7 +81,7 @@ services:
     container_name: luxgen-mongo-express
     restart: unless-stopped
     ports:
-      - "8081:8081"
+      - '8081:8081'
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: admin
       ME_CONFIG_MONGODB_ADMINPASSWORD: password123
@@ -105,7 +98,7 @@ services:
     container_name: luxgen-redis-commander
     restart: unless-stopped
     ports:
-      - "8082:8081"
+      - '8082:8081'
     environment:
       REDIS_HOSTS: local:redis:6379
     depends_on:

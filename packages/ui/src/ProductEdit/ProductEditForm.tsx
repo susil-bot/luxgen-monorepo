@@ -69,9 +69,7 @@ export function ProductEditForm({
           backLabel={ProductEditTranslations.en.backToProducts}
           title={title || ProductEditTranslations.en.untitledProduct}
           badges={
-            <span className={`badge ${statusBadgeClass(status)} flex-shrink-0`}>
-              {statusDisplayLabel(status)}
-            </span>
+            <span className={`badge ${statusBadgeClass(status)} flex-shrink-0`}>{statusDisplayLabel(status)}</span>
           }
           actions={
             <>
@@ -79,7 +77,9 @@ export function ProductEditForm({
                 {ProductEditTranslations.en.moreActions}
               </button>
               <button type="button" className="ios-btn-primary text-sm" disabled={saving} onClick={onSave}>
-                {saving ? (savingLabel ?? ProductEditTranslations.en.saving) : (saveLabel ?? ProductEditTranslations.en.save)}
+                {saving
+                  ? (savingLabel ?? ProductEditTranslations.en.saving)
+                  : (saveLabel ?? ProductEditTranslations.en.save)}
               </button>
             </>
           }
@@ -100,12 +100,7 @@ export function ProductEditForm({
           <DeliverySection />
           <VariantsSection />
           <MetafieldsSection />
-          <SearchListingSection
-            seo={seo}
-            productTitle={title}
-            tenant={tenant}
-            onSeoChange={onSeoChange}
-          />
+          <SearchListingSection seo={seo} productTitle={title} tenant={tenant} onSeoChange={onSeoChange} />
           {timeline && (
             <ProductTimelineSection
               events={timeline.events}

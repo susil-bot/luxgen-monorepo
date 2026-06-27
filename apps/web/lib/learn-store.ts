@@ -18,6 +18,9 @@ export function learnStoreServerProps(context: GetServerSidePropsContext) {
   };
 }
 
+/** Alias for GPT commerce store pages */
+export const storeServerProps = learnStoreServerProps;
+
 export interface LearnCourse {
   id: string;
   title: string;
@@ -30,6 +33,7 @@ export interface LearnCourse {
     firstName: string;
     lastName: string;
   };
+  students?: { id: string }[];
 }
 
 export function filterPublishedCourses(courses: LearnCourse[]): LearnCourse[] {

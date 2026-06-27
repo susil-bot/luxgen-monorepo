@@ -11,7 +11,7 @@ module.exports = {
     '**/?(*.)+(spec|test).jsx',
   ],
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
     '^.+\\.(js|jsx)$': 'babel-jest',
   },
   collectCoverageFrom: [
@@ -25,9 +25,4 @@ module.exports = {
   coverageReporters: ['text', 'lcov', 'html'],
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   testTimeout: 10000,
-  globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.json',
-    },
-  },
 };

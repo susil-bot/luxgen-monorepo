@@ -1,11 +1,13 @@
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import authRoutes from '../routes/auth';
 import { UserRegistrationService } from '../services/userRegistrationService';
 import { sendTransactionalEmail } from '../utils/email';
 import { User, UserRole, UserStatus } from '@luxgen/db';
 import { generateToken } from '../utils/jwt';
+import * as refreshToken from '../utils/refreshToken';
 
 // Mock dependencies
 jest.mock('../services/userRegistrationService');
@@ -18,6 +20,7 @@ describe('Auth Routes', () => {
 
   beforeEach(() => {
     app = express();
+    app.use(cookieParser());
     app.use(express.json());
     app.use('/auth', authRoutes);
     jest.clearAllMocks();
@@ -406,6 +409,60 @@ describe('Auth Routes', () => {
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
       expect(response.body.message).toBe('Authentication required');
+    });
+  });
+
+  describe('POST /auth/refresh', () => {
+    it('should issue a new access token when refresh cookie is valid', async () => {
+      const mockUser = {
+        _id: { toString: () => 'user123' },
+        email: 'test@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        role: UserRole.USER,
+        tenant: {
+          _id: { toString: () => 'tenant123' },
+          name: 'Test Tenant',
+          subdomain: 'test',
+        },
+      };
+
+      jest.spyOn(refreshToken, 'verifyRefreshToken').mockReturnValue({
+        id: 'user123',
+        email: 'test@example.com',
+        tenant: 'tenant123',
+        role: UserRole.USER,
+      });
+      (User.findById as jest.Mock).mockReturnValue({
+        populate: jest.fn().mockResolvedValue(mockUser),
+      });
+      (generateToken as jest.Mock).mockReturnValue('new-access-token');
+
+      const response = await request(app).post('/auth/refresh').set('Cookie', 'luxgen_refresh=valid-refresh-token');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('Token refreshed');
+      expect(response.body.data.token).toBe('new-access-token');
+      expect(generateToken).toHaveBeenCalled();
+    });
+
+    it('should return 401 when refresh cookie is missing', async () => {
+      const response = await request(app).post('/auth/refresh');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe('Refresh token required');
+    });
+
+    it('should return 401 when refresh token is invalid', async () => {
+      jest.spyOn(refreshToken, 'verifyRefreshToken').mockReturnValue(null);
+
+      const response = await request(app).post('/auth/refresh').set('Cookie', 'luxgen_refresh=invalid-token');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe('Invalid or expired refresh token');
     });
   });
 

@@ -18,8 +18,7 @@ import { GET_USERS } from '../../../graphql/queries/users';
 import { GET_ENROLLMENTS } from '../../../graphql/queries/enrollment';
 import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useCommercePageShell } from '../../../lib/commerce-page-shell';
-import { useAppTenantId } from '../../../lib/app-layout-user';
-import { getStoredUser } from '../../../lib/session';
+import { useTenantScope } from '../../../lib/use-tenant-scope';
 import { useOrderEnrollment } from '../../../lib/use-order-enrollment';
 import { useOrderActions } from '../../../lib/use-order-actions';
 import { isMongoObjectId } from '../../../lib/mongo-id';
@@ -32,9 +31,7 @@ function EditOrderContent({ tenant }: Props) {
   const router = useRouter();
   const { appLayoutProps } = useCommercePageShell();
   const { showSuccess, showError } = useSnackbar();
-  const tenantId = useAppTenantId();
-  const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
-  const queryTenantId = tenantId ?? sessionUser?.tenant.id ?? tenant;
+  const { queryTenantId } = useTenantScope(tenant);
 
   const orderId = typeof router.query.id === 'string' ? router.query.id : '';
 
@@ -98,7 +95,7 @@ function EditOrderContent({ tenant }: Props) {
         </title>
       </Head>
 
-      <AppLayout {...appLayoutProps}>
+      <AppLayout responsive {...appLayoutProps}>
         {loading ? (
           <PageLoadingState label="Loading order…" />
         ) : !order ? (

@@ -1,20 +1,20 @@
 # Skill: AI Studio / Agent Platform
 
 **Domain:** Agent chat, git worktree pipeline, validation, headless worker, `runAgentTask`.  
-**Docs:** [AGENT_STUDIO.md](../../AGENT_STUDIO.md), [AGENT_STUDIO_ARCHITECTURE.md](../../docs/AGENT_STUDIO_ARCHITECTURE.md)
+**Docs:** [docs/technical/agent/AGENT_STUDIO.md](../../docs/technical/agent/AGENT_STUDIO.md), [AGENT_STUDIO_ARCHITECTURE.md](../../docs/AGENT_STUDIO_ARCHITECTURE.md)
 
 ---
 
 ## Key paths
 
-| Layer | Path |
-|-------|------|
-| Package | `packages/agent/` |
-| Web SSE | `apps/web/pages/api/agent/*` |
-| UI | `apps/web/pages/agent.tsx`, `components/agent/` |
-| Worker | `apps/agent-worker/` |
-| GraphQL | `runAgentTask` in `schema/automation/` |
-| Audit | `packages/db/src/agent-task.ts`, `agent-audit.ts` |
+| Layer   | Path                                              |
+| ------- | ------------------------------------------------- |
+| Package | `packages/agent/`                                 |
+| Web SSE | `apps/web/pages/api/agent/*`                      |
+| UI      | `apps/web/pages/agent.tsx`, `components/agent/`   |
+| Worker  | `apps/agent-worker/`                              |
+| GraphQL | `runAgentTask` in `schema/automation/`            |
+| Audit   | `packages/db/src/agent-task.ts`, `agent-audit.ts` |
 
 ---
 
@@ -52,12 +52,12 @@ User chat → /api/agent/chat (SSE) → @luxgen/agent orchestrator → Ollama
 
 ## Common tasks
 
-| Task | Where |
-|------|-------|
-| New tool for LLM | `packages/agent/src/tools/` or web `lib/agent.ts` (legacy) |
-| Stricter validation | Agent validation pipeline in `@luxgen/agent` |
-| Queue long jobs | Redis + `apps/agent-worker` |
-| Post-merge automation | Emit `CODE_CHANGE_MERGED` in merge handler |
+| Task                  | Where                                                      |
+| --------------------- | ---------------------------------------------------------- |
+| New tool for LLM      | `packages/agent/src/tools/` or web `lib/agent.ts` (legacy) |
+| Stricter validation   | Agent validation pipeline in `@luxgen/agent`               |
+| Queue long jobs       | Redis + `apps/agent-worker`                                |
+| Post-merge automation | Emit `CODE_CHANGE_MERGED` in merge handler                 |
 
 ---
 
@@ -66,7 +66,7 @@ User chat → /api/agent/chat (SSE) → @luxgen/agent orchestrator → Ollama
 ```
 OLLAMA_HOST=http://localhost:11434
 OLLAMA_MODEL=mistral:latest
-# Git worktree vars — see AGENT_STUDIO.md
+# Git worktree vars — see docs/technical/agent/AGENT_STUDIO.md
 ```
 
 ---

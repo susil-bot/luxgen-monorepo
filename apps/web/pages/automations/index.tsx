@@ -1,15 +1,18 @@
 import { useState, useMemo, useEffect } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
+import { useLayoutUser } from '../../lib/app-layout-user';
+import { useRouter } from 'next/router';
+import { createHandleUserAction } from '../../lib/user-actions';
 import Head from 'next/head';
 import { useQuery, useMutation } from '@apollo/client';
-import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo } from '@luxgen/ui';
+import { AppLayout } from '@luxgen/ui';
 import {
   GET_AUTOMATIONS,
   GET_AUTOMATION_RUNS,
   TOGGLE_AUTOMATION,
   CREATE_AUTOMATION,
   UPDATE_AUTOMATION,
-  DELETE_AUTOMATION,
-} from '../../graphql/queries/automations';
+  DELETE_AUTOMATION } from '../../graphql/queries/automations';
 import { PlanGate } from '../../components/billing/PlanGate';
 import { GET_TENANT_BILLING } from '../../graphql/queries/billing';
 import { normalizePlan } from '@luxgen/billing';
@@ -21,8 +24,9 @@ import {
   formatRelativeTime,
   formatRunTimestamp,
   type UiTriggerType,
-  type UiActionType,
-} from '../../lib/automation-map';
+  type UiActionType } from '../../lib/automation-map';
+import { getTenantPageProps } from '../../lib/tenant-page-props';
+import { useTenantScope } from '../../lib/use-tenant-scope';
 
 interface Props {
   tenant: string;
@@ -63,8 +67,7 @@ const TRIGGERS: { type: TriggerType; label: string; emoji: string; desc: string 
     type: 'code_change_committed',
     label: 'Code Change Committed',
     emoji: '✔️',
-    desc: 'When an agent commit lands on branch',
-  },
+    desc: 'When an agent commit lands on branch' },
   { type: 'code_change_merged', label: 'Code Change Merged', emoji: '🔀', desc: 'When agent branch merges to main' },
   { type: 'code_change_failed', label: 'Code Change Failed', emoji: '⚠️', desc: 'When validation or agent run fails' },
 ];
@@ -88,26 +91,31 @@ interface BuilderState {
 }
 
 export default function AutomationsPage({ tenant }: Props) {
+  const layoutUser = useLayoutUser();
+  const { sidebarSections, logo } = useAppShellConfig();
+  const router = useRouter();
+  const { queryTenantId, subdomain } = useTenantScope(tenant);
   const [automations, setAutomations] = useState<Automation[]>([]);
   const [runHistory, setRunHistory] = useState<AutomationRun[]>([]);
 
   const { data: billingData } = useQuery(GET_TENANT_BILLING, {
-    variables: { tenantId: tenant },
-    errorPolicy: 'ignore',
-  });
+    variables: { tenantId: queryTenantId },
+    skip: !queryTenantId,
+    errorPolicy: 'ignore' });
   const tenantPlan = normalizePlan(billingData?.tenantBilling?.plan?.toLowerCase?.() ?? 'free');
 
   const { data: gqlData, refetch: refetchAutomations } = useQuery(GET_AUTOMATIONS, {
-    variables: { tenantId: tenant },
+    variables: { tenantId: queryTenantId },
+    skip: !queryTenantId,
     errorPolicy: 'ignore',
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
+  const automationsReady = gqlData?.automations != null;
   const { data: runsData, refetch: refetchRuns } = useQuery(GET_AUTOMATION_RUNS, {
-    variables: { tenantId: tenant, limit: 10 },
+    variables: { tenantId: queryTenantId, limit: 10 },
+    skip: !queryTenantId || !automationsReady,
     errorPolicy: 'ignore',
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const [toggleMutation] = useMutation(TOGGLE_AUTOMATION);
   const [createMutation] = useMutation(CREATE_AUTOMATION);
@@ -138,8 +146,7 @@ export default function AutomationsPage({ tenant }: Props) {
           actions: a.actions.map((x) => ({ type: actionFromGql(x.type), label: x.label })),
           runCount: a.runCount,
           lastRunAt: formatRelativeTime(a.lastRunAt),
-          createdAt: formatRelativeTime(a.createdAt) ?? 'Recently',
-        }),
+          createdAt: formatRelativeTime(a.createdAt) ?? 'Recently' }),
       ),
     );
   }, [gqlData]);
@@ -161,8 +168,7 @@ export default function AutomationsPage({ tenant }: Props) {
           triggeredAt: formatRunTimestamp(r.triggeredAt),
           status: r.status,
           durationMs: r.durationMs,
-          error: r.error,
-        }),
+          error: r.error }),
       ),
     );
   }, [runsData]);
@@ -170,6 +176,8 @@ export default function AutomationsPage({ tenant }: Props) {
   const [builderOpen, setBuilderOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkConfirm, setBulkConfirm] = useState<'pause-filtered' | 'delete-selected' | null>(null);
   const [builder, setBuilder] = useState<BuilderState>({ name: '', trigger: null, actions: [] });
 
   const filtered = useMemo(() => {
@@ -203,8 +211,7 @@ export default function AutomationsPage({ tenant }: Props) {
         enabled: false,
         runCount: 0,
         lastRunAt: null,
-        createdAt: 'Just now',
-      },
+        createdAt: 'Just now' },
     ]);
   };
 
@@ -219,6 +226,44 @@ export default function AutomationsPage({ tenant }: Props) {
     }
     setAutomations((prev) => prev.filter((a) => a.id !== id));
     setDeleteId(null);
+  };
+
+  const toggleSelected = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const pauseFilteredAutomations = async () => {
+    const targets = filtered.filter((a) => a.enabled);
+    if (!targets.length) {
+      setBulkConfirm(null);
+      return;
+    }
+    for (const auto of targets) {
+      await toggleEnabled(auto.id);
+    }
+    setBulkConfirm(null);
+  };
+
+  const deleteSelectedAutomations = async () => {
+    const ids = [...selectedIds];
+    for (const id of ids) {
+      if (graphqlReady) {
+        try {
+          await deleteMutation({ variables: { id } });
+        } catch {
+          continue;
+        }
+      }
+      setAutomations((prev) => prev.filter((a) => a.id !== id));
+    }
+    if (graphqlReady) await refetchAutomations();
+    setSelectedIds(new Set());
+    setBulkConfirm(null);
   };
 
   const openBuilder = (id?: string) => {
@@ -243,8 +288,7 @@ export default function AutomationsPage({ tenant }: Props) {
     if (graphqlReady) {
       const gqlActions = actionMetas.map((a) => ({
         type: actionToGql(a.type),
-        label: a.label,
-      }));
+        label: a.label }));
       try {
         if (editingId) {
           await updateMutation({
@@ -254,23 +298,17 @@ export default function AutomationsPage({ tenant }: Props) {
                 name: builder.name,
                 triggerType: triggerToGql(builder.trigger!),
                 triggerLabel: triggerMeta.label,
-                actions: gqlActions,
-              },
-            },
-          });
+                actions: gqlActions } } });
         } else {
           await createMutation({
             variables: {
               input: {
-                tenantId: tenant,
+                tenantId: queryTenantId,
                 name: builder.name,
                 triggerType: triggerToGql(builder.trigger!),
                 triggerLabel: triggerMeta.label,
                 actions: gqlActions,
-                enabled: false,
-              },
-            },
-          });
+                enabled: false } } });
         }
         await refetchAutomations();
         await refetchRuns();
@@ -285,8 +323,7 @@ export default function AutomationsPage({ tenant }: Props) {
                 ...a,
                 name: builder.name,
                 trigger: { type: builder.trigger!, label: triggerMeta.label },
-                actions: actionMetas,
-              }
+                actions: actionMetas }
             : a,
         ),
       );
@@ -301,8 +338,7 @@ export default function AutomationsPage({ tenant }: Props) {
           actions: actionMetas,
           runCount: 0,
           lastRunAt: null,
-          createdAt: 'Just now',
-        },
+          createdAt: 'Just now' },
       ]);
     }
     setBuilderOpen(false);
@@ -320,24 +356,24 @@ export default function AutomationsPage({ tenant }: Props) {
   const counts = {
     all: automations.length,
     active: automations.filter((a) => a.enabled).length,
-    paused: automations.filter((a) => !a.enabled).length,
-  };
+    paused: automations.filter((a) => !a.enabled).length };
 
   return (
     <>
       <Head>
-        <title>Automations — {tenant.charAt(0).toUpperCase() + tenant.slice(1)}</title>
+        <title>Automations — {subdomain.charAt(0).toUpperCase() + subdomain.slice(1)}</title>
       </Head>
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
-        user={getDefaultUser()}
-        logo={getDefaultLogo()}
-        onUserAction={() => {}}
+        responsive
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
+        logo={logo}
+        onUserAction={createHandleUserAction(router)}
         showSearch
         showNotifications
         notificationCount={0}
       >
-        <PlanGate feature="automations" currentPlan={tenantPlan} tenant={tenant}>
+        <PlanGate feature="automations" currentPlan={tenantPlan} tenant={subdomain}>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
             {/* Header */}
             <div className="lux-automations-header">
@@ -349,7 +385,7 @@ export default function AutomationsPage({ tenant }: Props) {
                   Build trigger-action workflows without writing code.
                 </p>
                 <a
-                  href={`/marketplace?tenant=${encodeURIComponent(tenant)}`}
+                  href={`/marketplace?tenant=${encodeURIComponent(subdomain)}`}
                   style={{ fontSize: 13, color: 'var(--color-blue)', marginTop: 6, display: 'inline-block' }}
                 >
                   Browse marketplace templates →
@@ -375,6 +411,28 @@ export default function AutomationsPage({ tenant }: Props) {
               ))}
             </div>
 
+            {filtered.length > 0 && (
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, alignItems: 'center' }}>
+                <button
+                  type="button"
+                  className="ios-btn-secondary"
+                  disabled={!filtered.some((a) => a.enabled)}
+                  onClick={() => setBulkConfirm('pause-filtered')}
+                >
+                  Pause all in tab ({filtered.filter((a) => a.enabled).length})
+                </button>
+                <button
+                  type="button"
+                  className="ios-btn-secondary"
+                  disabled={selectedIds.size === 0}
+                  onClick={() => setBulkConfirm('delete-selected')}
+                  style={{ color: 'var(--color-red)' }}
+                >
+                  Delete selected ({selectedIds.size})
+                </button>
+              </div>
+            )}
+
             {/* Automations grid */}
             {filtered.length === 0 ? (
               <div className="ios-empty-state">
@@ -388,6 +446,14 @@ export default function AutomationsPage({ tenant }: Props) {
               <div className="lux-automation-grid">
                 {filtered.map((auto) => (
                   <div key={auto.id} className="lux-automation-card">
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.has(auto.id)}
+                        onChange={() => toggleSelected(auto.id)}
+                        aria-label={`Select ${auto.name}`}
+                      />
+                    </div>
                     {/* Header row */}
                     <div className="lux-automation-header-row">
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
@@ -415,8 +481,7 @@ export default function AutomationsPage({ tenant }: Props) {
                             inset: 0,
                             background: auto.enabled ? 'var(--color-green)' : 'var(--color-fill-secondary)',
                             borderRadius: 24,
-                            transition: 'background var(--transition-fast)',
-                          }}
+                            transition: 'background var(--transition-fast)' }}
                         />
                         <span
                           style={{
@@ -428,8 +493,7 @@ export default function AutomationsPage({ tenant }: Props) {
                             background: '#fff',
                             borderRadius: '50%',
                             boxShadow: '0 1px 4px rgba(0,0,0,0.2)',
-                            transition: 'left var(--transition-fast)',
-                          }}
+                            transition: 'left var(--transition-fast)' }}
                         />
                       </label>
                     </div>
@@ -476,8 +540,7 @@ export default function AutomationsPage({ tenant }: Props) {
                   padding: '20px 24px 16px',
                   fontWeight: 600,
                   fontSize: 16,
-                  color: 'var(--color-label-primary)',
-                }}
+                  color: 'var(--color-label-primary)' }}
               >
                 Recent Runs
               </div>
@@ -549,8 +612,7 @@ export default function AutomationsPage({ tenant }: Props) {
                     flexDirection: 'column',
                     gap: 20,
                     overflowY: 'auto',
-                    flex: 1,
-                  }}
+                    flex: 1 }}
                 >
                   {/* Name */}
                   <div>
@@ -560,8 +622,7 @@ export default function AutomationsPage({ tenant }: Props) {
                         fontWeight: 600,
                         fontSize: 14,
                         marginBottom: 8,
-                        color: 'var(--color-label-primary)',
-                      }}
+                        color: 'var(--color-label-primary)' }}
                     >
                       Name
                     </label>
@@ -579,8 +640,7 @@ export default function AutomationsPage({ tenant }: Props) {
                         background: 'var(--color-bg-primary)',
                         color: 'var(--color-label-primary)',
                         fontSize: 14,
-                        fontFamily: 'inherit',
-                      }}
+                        fontFamily: 'inherit' }}
                     />
                   </div>
 
@@ -592,8 +652,7 @@ export default function AutomationsPage({ tenant }: Props) {
                         fontWeight: 600,
                         fontSize: 14,
                         marginBottom: 10,
-                        color: 'var(--color-label-primary)',
-                      }}
+                        color: 'var(--color-label-primary)' }}
                     >
                       When this happens… (Trigger)
                     </label>
@@ -624,8 +683,7 @@ export default function AutomationsPage({ tenant }: Props) {
                         fontWeight: 600,
                         fontSize: 14,
                         marginBottom: 10,
-                        color: 'var(--color-label-primary)',
-                      }}
+                        color: 'var(--color-label-primary)' }}
                     >
                       Do this… (Actions)
                     </label>
@@ -646,8 +704,7 @@ export default function AutomationsPage({ tenant }: Props) {
                                   borderRadius: 'var(--radius-sm)',
                                   padding: '2px 8px',
                                   fontSize: 12,
-                                  color: 'var(--color-label-secondary)',
-                                }}
+                                  color: 'var(--color-label-secondary)' }}
                               >
                                 Step {idx + 1}
                               </span>
@@ -674,8 +731,7 @@ export default function AutomationsPage({ tenant }: Props) {
                                   background: 'var(--color-bg-secondary)',
                                   color: 'var(--color-label-primary)',
                                   fontSize: 13,
-                                  fontFamily: 'inherit',
-                                }}
+                                  fontFamily: 'inherit' }}
                               />
                             </div>
                           </div>
@@ -720,6 +776,39 @@ export default function AutomationsPage({ tenant }: Props) {
             </div>
           )}
 
+          {/* Bulk confirmation (UI-125) */}
+          {bulkConfirm && (
+            <div className="lux-step-builder-modal" onClick={() => setBulkConfirm(null)}>
+              <div className="lux-step-builder-sheet" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
+                <div style={{ padding: '24px' }}>
+                  <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, textAlign: 'center' }}>
+                    {bulkConfirm === 'pause-filtered' ? 'Pause automations?' : 'Delete selected automations?'}
+                  </h3>
+                  <p style={{ margin: '0 0 20px', fontSize: 14, color: 'var(--color-label-secondary)', textAlign: 'center' }}>
+                    {bulkConfirm === 'pause-filtered'
+                      ? `This will pause ${filtered.filter((a) => a.enabled).length} active automation(s) in the current tab.`
+                      : `This will permanently delete ${selectedIds.size} automation(s) and their run history.`}
+                  </p>
+                  <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>
+                    <button className="ios-btn-secondary" type="button" onClick={() => setBulkConfirm(null)}>
+                      Cancel
+                    </button>
+                    <button
+                      className="ios-btn-primary"
+                      type="button"
+                      style={bulkConfirm === 'delete-selected' ? { background: 'var(--color-red)' } : undefined}
+                      onClick={() =>
+                        void (bulkConfirm === 'pause-filtered' ? pauseFilteredAutomations() : deleteSelectedAutomations())
+                      }
+                    >
+                      {bulkConfirm === 'pause-filtered' ? 'Pause all' : 'Delete'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Delete confirmation */}
           {deleteId && (
             <div className="lux-step-builder-modal" onClick={() => setDeleteId(null)}>
@@ -732,8 +821,7 @@ export default function AutomationsPage({ tenant }: Props) {
                       fontSize: 18,
                       fontWeight: 700,
                       textAlign: 'center',
-                      color: 'var(--color-label-primary)',
-                    }}
+                      color: 'var(--color-label-primary)' }}
                   >
                     Delete Automation?
                   </h3>
@@ -742,8 +830,7 @@ export default function AutomationsPage({ tenant }: Props) {
                       margin: '0 0 20px',
                       fontSize: 14,
                       color: 'var(--color-label-secondary)',
-                      textAlign: 'center',
-                    }}
+                      textAlign: 'center' }}
                   >
                     This will permanently delete the automation and its run history.
                   </p>
@@ -769,6 +856,4 @@ export default function AutomationsPage({ tenant }: Props) {
   );
 }
 
-export const getServerSideProps = async (ctx: any) => ({
-  props: { tenant: ctx.query.tenant || 'demo' },
-});
+export const getServerSideProps = getTenantPageProps;

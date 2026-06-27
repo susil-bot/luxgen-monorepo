@@ -1,0 +1,24 @@
+{
+  "name": "@luxgen/mcp-core",
+  "version": "1.0.0",
+  "private": true,
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist",
+    "test:auto": "vitest run"
+  },
+  "dependencies": {
+    "@luxgen/automation-flow": "*",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "express": "^4.21.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0",
+    "vitest": "^2.1.9"
+  }
+}

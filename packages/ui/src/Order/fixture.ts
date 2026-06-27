@@ -26,4 +26,11 @@ export const orderFixtures = {
     title: 'Introduction to Product Design',
     status: 'PUBLISHED',
   }) satisfies OrderDetail,
+  default: {
+    orders: [sampleOrder],
+    activeTab: 'all' as const,
+    onTabChange: () => undefined,
+    search: '',
+    onSearchChange: () => undefined,
+  },
 };

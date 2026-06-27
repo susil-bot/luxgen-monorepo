@@ -115,7 +115,10 @@ export function parseProductDescription(raw: string | null | undefined): {
   }
 
   const bodyHtml = text.slice(0, idx);
-  const jsonPart = text.slice(idx + SEO_MARKER.length).replace(/\n-->$/, '').trim();
+  const jsonPart = text
+    .slice(idx + SEO_MARKER.length)
+    .replace(/\n-->$/, '')
+    .trim();
 
   try {
     return { bodyHtml, seo: { ...DEFAULT_SEO, ...JSON.parse(jsonPart) } as ProductSeo };
@@ -142,7 +145,10 @@ export function parseProductMeta(raw: string | null | undefined): {
   }
 
   const contentWithoutMeta = text.slice(0, idx);
-  const jsonPart = text.slice(idx + META_MARKER.length).replace(/\n-->$/, '').trim();
+  const jsonPart = text
+    .slice(idx + META_MARKER.length)
+    .replace(/\n-->$/, '')
+    .trim();
 
   try {
     return {
@@ -176,11 +182,7 @@ export function parseProductEditRecord(raw: string | null | undefined): {
   return { bodyHtml, seo, meta };
 }
 
-export function serializeProductEditRecord(
-  bodyHtml: string,
-  seo: ProductSeo,
-  meta: ProductEditMeta,
-): string {
+export function serializeProductEditRecord(bodyHtml: string, seo: ProductSeo, meta: ProductEditMeta): string {
   return appendProductMeta(serializeProductDescription(bodyHtml, seo), meta);
 }
 
@@ -204,7 +206,9 @@ export function mapCourseToProductEditState(course: CourseProductSource): Produc
   };
 }
 
-export function buildCourseUpdateInput(state: Pick<ProductEditFormState, 'title' | 'bodyHtml' | 'seo' | 'meta' | 'status'>): {
+export function buildCourseUpdateInput(
+  state: Pick<ProductEditFormState, 'title' | 'bodyHtml' | 'seo' | 'meta' | 'status'>,
+): {
   title: string;
   description: string;
   status: ProductStatus;

@@ -16,10 +16,7 @@ export function CustomerBlocksSection({
     <div className="space-y-3">
       <h2 className="text-sm font-semibold text-primary">Blocks</h2>
       <div className="ios-card p-0 overflow-hidden">
-        <div
-          className="flex items-center gap-2 px-4 py-3 border-b"
-          style={{ borderColor: 'var(--color-separator)' }}
-        >
+        <div className="flex items-center gap-2 px-4 py-3 border-b" style={{ borderColor: 'var(--color-separator)' }}>
           <span
             className="flex-shrink-0 w-7 h-7 rounded-md flex items-center justify-center text-sm"
             style={{ background: 'var(--color-fill-quaternary)' }}

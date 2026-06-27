@@ -1,71 +1,77 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useQuery } from '@apollo/client';
-import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo } from '@luxgen/ui';
+import { AppLayout } from '@luxgen/ui';
 import { TenantBanner } from '../../components/tenant/TenantBanner';
 import { PlanGate } from '../../components/billing/PlanGate';
 import { GET_TENANT_BILLING } from '../../graphql/queries/billing';
 import { normalizePlan } from '@luxgen/billing';
+import { GET_COURSE_ANALYTICS } from '../../graphql/queries/analytics';
+import { useAppTenantId, useLayoutUser } from '../../lib/app-layout-user';
+import { isMongoObjectId } from '../../lib/mongo-id';
+import { getTenantPageProps } from '../../lib/tenant-page-props';
 
 interface CourseAnalyticsPageProps {
   tenant: string;
 }
 
 export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps) {
+  const layoutUser = useLayoutUser();
+  const { sidebarSections, logo } = useAppShellConfig();
+  const [days, setDays] = useState(30);
   const router = useRouter();
-  const [user, setUser] = useState<any>(null);
-  const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'learner'>('learner');
+  const userRole = (layoutUser?.role?.toLowerCase() as 'admin' | 'instructor' | 'learner' | undefined) ?? 'learner';
 
   const { data: billingData } = useQuery(GET_TENANT_BILLING, {
     variables: { tenantId: tenant },
-    errorPolicy: 'ignore',
-  });
+    errorPolicy: 'ignore' });
+  const tenantId = useAppTenantId();
+  const { data: analyticsQueryData } = useQuery(GET_COURSE_ANALYTICS, {
+    variables: { tenantId, days },
+    skip: !isMongoObjectId(tenantId) });
+  const liveAnalytics = analyticsQueryData?.courseAnalytics;
   const tenantPlan = normalizePlan(billingData?.tenantBilling?.plan?.toLowerCase?.() ?? 'free');
 
   // Mock analytics data
-  const [analyticsData] = useState({
-    totalCourses: 24,
-    totalEnrollments: 3456,
-    activeStudents: 2134,
-    completionRate: 78,
-    averageRating: 4.6,
-    revenue: 45680,
-    topCourses: [
-      { id: '1', title: 'Advanced React Development', enrollments: 456, rating: 4.8, completionRate: 85 },
-      { id: '2', title: 'TypeScript Fundamentals', enrollments: 389, rating: 4.7, completionRate: 82 },
-      { id: '3', title: 'Node.js Backend Development', enrollments: 342, rating: 4.6, completionRate: 79 },
-      { id: '4', title: 'UI/UX Design Principles', enrollments: 298, rating: 4.9, completionRate: 88 },
-    ],
-    enrollmentTrends: [
-      { month: 'Jan', enrollments: 245 },
-      { month: 'Feb', enrollments: 312 },
-      { month: 'Mar', enrollments: 289 },
-      { month: 'Apr', enrollments: 367 },
-      { month: 'May', enrollments: 423 },
-      { month: 'Jun', enrollments: 398 },
-    ],
-  });
-
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const parsed = JSON.parse(userData);
-        setUser({
-          name: `${parsed.firstName} ${parsed.lastName}`,
-          email: parsed.email,
-          role: parsed.role,
-        });
-        setUserRole(parsed.role as 'admin' | 'instructor' | 'learner');
-      } catch {
-        setUser(getDefaultUser());
-      }
-    } else {
-      setUser(getDefaultUser());
-    }
-  }, []);
+  const analyticsData = liveAnalytics
+    ? {
+        totalCourses: liveAnalytics.totalCourses,
+        totalEnrollments: liveAnalytics.totalEnrollments,
+        activeStudents: liveAnalytics.activeStudents,
+        completionRate: liveAnalytics.completionRate,
+        averageRating: liveAnalytics.averageRating,
+        revenue: Math.round((liveAnalytics.revenueCents ?? 0) / 100),
+        topCourses: liveAnalytics.topCourses.map((c) => ({
+          id: c.id,
+          title: c.title,
+          enrollments: c.enrollments,
+          rating: 0,
+          completionRate: c.completionRate })),
+        enrollmentTrends: liveAnalytics.enrollmentTrends.map((t) => ({ month: t.label, enrollments: t.enrollments })) }
+    : {
+        totalCourses: 24,
+        totalEnrollments: 3456,
+        activeStudents: 2134,
+        completionRate: 78,
+        averageRating: 4.6,
+        revenue: 45680,
+        topCourses: [
+          { id: '1', title: 'Advanced React Development', enrollments: 456, rating: 4.8, completionRate: 85 },
+          { id: '2', title: 'TypeScript Fundamentals', enrollments: 389, rating: 4.7, completionRate: 82 },
+          { id: '3', title: 'Node.js Backend Development', enrollments: 342, rating: 4.6, completionRate: 79 },
+          { id: '4', title: 'UI/UX Design Principles', enrollments: 298, rating: 4.9, completionRate: 88 },
+        ],
+        enrollmentTrends: [
+          { month: 'Jan', enrollments: 245 },
+          { month: 'Feb', enrollments: 312 },
+          { month: 'Mar', enrollments: 289 },
+          { month: 'Apr', enrollments: 367 },
+          { month: 'May', enrollments: 423 },
+          { month: 'Jun', enrollments: 398 },
+        ] };
 
   const handleUserAction = createHandleUserAction(router);
 
@@ -76,10 +82,10 @@ export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
-        user={user}
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
         onUserAction={handleUserAction}
-        logo={getDefaultLogo()}
+        logo={logo}
         sidebarCollapsible
         responsive
       >
@@ -88,6 +94,18 @@ export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps
 
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {/* Header */}
+            <div className="mb-4 flex gap-2">
+              {[7, 30, 90].map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  className={d === days ? 'ios-btn-primary' : 'ios-btn-secondary'}
+                  onClick={() => setDays(d)}
+                >
+                  {d}d
+                </button>
+              ))}
+            </div>
             <div className="mb-8">
               <h1 className="ios-large-title mb-1">Course Analytics</h1>
               <p className="text-secondary text-sm">Performance metrics and insights across all courses</p>
@@ -152,8 +170,7 @@ export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps
                           className="h-full rounded-full"
                           style={{
                             width: `${(trend.enrollments / 500) * 100}%`,
-                            backgroundColor: 'var(--color-blue)',
-                          }}
+                            backgroundColor: 'var(--color-blue)' }}
                         />
                       </div>
                       <span className="text-xs font-medium text-primary w-12 text-right">{trend.enrollments}</span>
@@ -219,11 +236,4 @@ export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps
   );
 }
 
-export const getServerSideProps = async (context: any) => {
-  const { tenant } = context.query;
-  return {
-    props: {
-      tenant: tenant || 'demo',
-    },
-  };
-};
+export const getServerSideProps = getTenantPageProps;

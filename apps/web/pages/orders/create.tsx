@@ -5,11 +5,10 @@ import { useApolloClient, useMutation, useQuery } from '@apollo/client';
 import { AppLayout, OrderCreateForm, SnackbarProvider, useSnackbar } from '@luxgen/ui';
 import { ENROLL_STUDENT, GET_COURSES } from '../../graphql/queries/courses';
 import { GET_USERS } from '../../graphql/queries/users';
-import { GET_ENROLLMENT } from '../../graphql/queries/enrollment';
+import { GET_ENROLLMENT, UPDATE_ORDER } from '../../graphql/queries/enrollment';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useCommercePageShell } from '../../lib/commerce-page-shell';
-import { useAppTenantId } from '../../lib/app-layout-user';
-import { getStoredUser } from '../../lib/session';
+import { useTenantScope } from '../../lib/use-tenant-scope';
 import { isLearnerRole } from '../../lib/user-roles';
 
 interface Props {
@@ -21,9 +20,7 @@ function CreateOrderContent({ tenant }: Props) {
   const client = useApolloClient();
   const { appLayoutProps } = useCommercePageShell();
   const { showSuccess, showError } = useSnackbar();
-  const tenantId = useAppTenantId();
-  const sessionUser = typeof window !== 'undefined' ? getStoredUser() : null;
-  const queryTenantId = tenantId ?? sessionUser?.tenant.id ?? tenant;
+  const { queryTenantId } = useTenantScope(tenant);
 
   const lockStudentId = typeof router.query.customerId === 'string' ? router.query.customerId : undefined;
 
@@ -80,6 +77,8 @@ function CreateOrderContent({ tenant }: Props) {
     refetchQueries: [{ query: GET_COURSES, variables: { tenantId: queryTenantId } }],
   });
 
+  const [updateOrder] = useMutation(UPDATE_ORDER);
+
   const handleSave = async () => {
     if (!studentId || !courseId) {
       showError('Select a customer and course.');
@@ -89,6 +88,11 @@ function CreateOrderContent({ tenant }: Props) {
     setSaving(true);
     try {
       await enrollStudent({ variables: { courseId, studentId } });
+      await updateOrder({
+        variables: {
+          input: { courseId, studentId, tags: ['draft'] },
+        },
+      });
       const { data: enrollmentData } = await client.query({
         query: GET_ENROLLMENT,
         variables: { courseId, studentId },
@@ -114,7 +118,7 @@ function CreateOrderContent({ tenant }: Props) {
         <title>Create order — {tenant}</title>
       </Head>
 
-      <AppLayout {...appLayoutProps}>
+      <AppLayout responsive {...appLayoutProps}>
         <OrderCreateForm
           students={students}
           courses={courses}

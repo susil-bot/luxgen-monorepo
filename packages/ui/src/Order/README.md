@@ -5,12 +5,7 @@ Shopify Admin–style orders list and order detail for LuxGen enrollments.
 ## Usage
 
 ```tsx
-import {
-  OrderListView,
-  OrderDetailView,
-  buildOrdersFromEnrollments,
-  findOrderDetail,
-} from '@luxgen/ui';
+import { OrderListView, OrderDetailView, buildOrdersFromEnrollments, findOrderDetail } from '@luxgen/ui';
 ```
 
 ## Structure

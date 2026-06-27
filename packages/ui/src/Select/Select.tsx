@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { BaseComponentProps, TenantTheme, BaseFormProps, SelectOption } from '../types';
+import React, { useState, useRef } from 'react';
+import { BaseComponentProps, TenantTheme, SelectOption } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
-export interface SelectProps extends BaseComponentProps, BaseFormProps {
+export interface SelectProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
   options: SelectOption[];
+  value?: string | number | Array<string | number>;
+  onChange?: (value: string | number | Array<string | number>) => void;
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
@@ -36,13 +38,36 @@ const SelectComponent: React.FC<SelectProps> = ({
   ...props
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropup, setDropup] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const DROPDOWN_MAX_HEIGHT = 200;
+
+  const toggleOpen = () => {
+    if (disabled) return;
+
+    if (!isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      setDropup(spaceBelow < DROPDOWN_MAX_HEIGHT && spaceAbove > spaceBelow);
+    }
+
+    setIsOpen((open) => !open);
+  };
 
   const filteredOptions = searchable
     ? options.filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
     : options;
 
-  const selectedOptions = multi ? (Array.isArray(value) ? value : []) : value ? [value] : [];
+  const selectedOptions: Array<string | number> = multi
+    ? Array.isArray(value)
+      ? value
+      : []
+    : value !== undefined && value !== null && !Array.isArray(value)
+      ? [value]
+      : [];
 
   const handleSelect = (option: SelectOption) => {
     if (disabled || option.disabled) return;
@@ -78,10 +103,10 @@ const SelectComponent: React.FC<SelectProps> = ({
         </label>
       )}
 
-      <div className="select-container">
+      <div className="select-container" ref={containerRef}>
         <div
           className={`select-trigger ${error ? 'error' : ''} ${disabled ? 'disabled' : ''}`}
-          onClick={() => !disabled && setIsOpen(!isOpen)}
+          onClick={toggleOpen}
           {...props}
         >
           <div className="select-value">
@@ -123,12 +148,22 @@ const SelectComponent: React.FC<SelectProps> = ({
                 ×
               </button>
             )}
-            <span className="select-arrow">▼</span>
+            <span className="select-arrow" aria-hidden>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M2.5 4.5L6 8L9.5 4.5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
           </div>
         </div>
 
         {isOpen && (
-          <div className="select-dropdown">
+          <div className={`select-dropdown${dropup ? ' select-dropdown--dropup' : ''}`}>
             {searchable && (
               <div className="select-search">
                 <input

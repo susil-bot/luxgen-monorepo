@@ -1,0 +1,255 @@
+import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
+import { useMutation, useQuery } from '@apollo/client';
+
+import {
+  CREATE_PROJECT_ITEM,
+  DELETE_PROJECT_ITEM,
+  GET_PROJECT_ITEMS,
+  MOVE_PROJECT_ITEM,
+  UPDATE_PROJECT_ITEM,
+} from '../../graphql/queries/project';
+import {
+  dateInputToIso,
+  itemFromGql,
+  iterationToGql,
+  type UiProjectItem,
+  type UiProjectPriority,
+} from '../../lib/project-map';
+import type { ProjectIterationScope, ProjectPriority, ProjectStatus } from '../../lib/project-types';
+import { AUTH_SESSION_CHANGE_EVENT } from '../../lib/session';
+import { validateClientSession } from '../../lib/session-guard';
+import { useTenantScope } from '../../lib/use-tenant-scope';
+
+interface ProjectContextValue {
+  tenant: string;
+  items: UiProjectItem[];
+  loading: boolean;
+  error?: string;
+  filterQuery: string;
+  setFilterQuery: (q: string) => void;
+  addItem: (partial: {
+    title: string;
+    status: ProjectStatus;
+    iteration: ProjectIterationScope;
+    priority?: ProjectPriority;
+    assignee?: string;
+    startDate?: string;
+    endDate?: string;
+    estimate?: number;
+    description?: string;
+    labels?: string[];
+  }) => Promise<void>;
+  updateItem: (
+    id: string,
+    patch: {
+      title?: string;
+      status?: ProjectStatus;
+      iteration?: ProjectIterationScope;
+      priority?: ProjectPriority;
+      assignee?: string;
+      startDate?: string;
+      endDate?: string;
+      estimate?: number;
+      description?: string;
+      labels?: string[];
+    },
+  ) => Promise<void>;
+  moveItem: (id: string, status: ProjectStatus) => Promise<void>;
+  deleteItem: (id: string) => Promise<void>;
+  itemsForIteration: (iteration: ProjectIterationScope) => UiProjectItem[];
+  filteredItems: UiProjectItem[];
+  refetch: () => void;
+}
+
+const ProjectContext = createContext<ProjectContextValue | null>(null);
+
+export function ProjectProvider({ tenant, children }: { tenant: string; children: ReactNode }) {
+  const [filterQuery, setFilterQuery] = useState('');
+  const [sessionReady, setSessionReady] = useState(false);
+  const { queryTenantId } = useTenantScope(tenant);
+
+  useEffect(() => {
+    const refresh = () => setSessionReady(validateClientSession().ok);
+    refresh();
+    window.addEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+    return () => window.removeEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+  }, []);
+
+  const { data, loading, error, refetch } = useQuery(GET_PROJECT_ITEMS, {
+    variables: {
+      tenantId: queryTenantId,
+      search: filterQuery.trim() || undefined,
+    },
+    fetchPolicy: 'cache-and-network',
+    skip: !queryTenantId || !sessionReady,
+  });
+
+  const [createItem] = useMutation(CREATE_PROJECT_ITEM);
+  const [updateItemMutation] = useMutation(UPDATE_PROJECT_ITEM);
+  const [moveItemMutation] = useMutation(MOVE_PROJECT_ITEM);
+  const [deleteItemMutation] = useMutation(DELETE_PROJECT_ITEM);
+
+  const items = useMemo(
+    () => (data?.projectItems ?? []).map((raw: Parameters<typeof itemFromGql>[0]) => itemFromGql(raw)),
+    [data],
+  );
+
+  const filteredItems = items;
+
+  const itemsForIteration = useCallback(
+    (iteration: ProjectIterationScope) => filteredItems.filter((item) => item.iteration === iteration),
+    [filteredItems],
+  );
+
+  const addItem = useCallback(
+    async (partial: {
+      title: string;
+      status: ProjectStatus;
+      iteration: ProjectIterationScope;
+      priority?: ProjectPriority;
+      assignee?: string;
+      startDate?: string;
+      endDate?: string;
+      estimate?: number;
+      description?: string;
+      labels?: string[];
+    }) => {
+      await createItem({
+        variables: {
+          input: {
+            tenantId: queryTenantId,
+            title: partial.title,
+            description: partial.description,
+            status: partial.status,
+            iteration: iterationToGql(partial.iteration),
+            priority: partial.priority ?? 'P2',
+            assigneeName: partial.assignee,
+            startDate: dateInputToIso(partial.startDate),
+            endDate: dateInputToIso(partial.endDate),
+            estimate: partial.estimate,
+            labels: partial.labels ?? [],
+          },
+        },
+      });
+      await refetch();
+    },
+    [createItem, queryTenantId, refetch],
+  );
+
+  const updateItem = useCallback(
+    async (
+      id: string,
+      patch: {
+        title?: string;
+        status?: ProjectStatus;
+        iteration?: ProjectIterationScope;
+        priority?: ProjectPriority;
+        assignee?: string;
+        startDate?: string;
+        endDate?: string;
+        estimate?: number;
+        description?: string;
+        labels?: string[];
+      },
+    ) => {
+      await updateItemMutation({
+        variables: {
+          id,
+          tenantId: queryTenantId,
+          input: {
+            title: patch.title,
+            description: patch.description,
+            status: patch.status,
+            iteration: patch.iteration ? iterationToGql(patch.iteration) : undefined,
+            priority: patch.priority,
+            assigneeName: patch.assignee,
+            startDate: patch.startDate ? dateInputToIso(patch.startDate) : undefined,
+            endDate: patch.endDate ? dateInputToIso(patch.endDate) : undefined,
+            estimate: patch.estimate,
+            labels: patch.labels,
+          },
+        },
+      });
+      await refetch();
+    },
+    [updateItemMutation, queryTenantId, refetch],
+  );
+
+  const moveItem = useCallback(
+    async (id: string, status: ProjectStatus) => {
+      try {
+        const { data: result } = await moveItemMutation({
+          variables: { id, tenantId: queryTenantId, status },
+        });
+        if (!result?.moveProjectItem) {
+          throw new Error('Move failed — item not found or plan gate blocked save');
+        }
+        await refetch();
+      } catch (err) {
+        console.error('moveProjectItem failed:', err);
+        throw err;
+      }
+    },
+    [moveItemMutation, queryTenantId, refetch],
+  );
+
+  const deleteItem = useCallback(
+    async (id: string) => {
+      await deleteItemMutation({
+        variables: { id, tenantId: queryTenantId },
+      });
+      await refetch();
+    },
+    [deleteItemMutation, queryTenantId, refetch],
+  );
+
+  const value = useMemo(
+    () => ({
+      tenant,
+      items,
+      loading: loading || !sessionReady,
+      error:
+        error?.graphQLErrors?.[0]?.extensions?.code === 'PLAN_UPGRADE_REQUIRED'
+          ? 'Project boards require a Pro plan or higher.'
+          : error?.message,
+      filterQuery,
+      setFilterQuery,
+      addItem,
+      updateItem,
+      moveItem,
+      deleteItem,
+      itemsForIteration,
+      filteredItems,
+      refetch: () => {
+        void refetch();
+      },
+    }),
+    [
+      tenant,
+      items,
+      loading,
+      sessionReady,
+      error,
+      filterQuery,
+      addItem,
+      updateItem,
+      moveItem,
+      deleteItem,
+      itemsForIteration,
+      filteredItems,
+      refetch,
+    ],
+  );
+
+  return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>;
+}
+
+export function useProject(): ProjectContextValue {
+  const ctx = useContext(ProjectContext);
+  if (!ctx) throw new Error('useProject must be used within ProjectProvider');
+  return ctx;
+}
+
+export function priorityRank(p: UiProjectPriority): number {
+  return { P0: 0, P1: 1, P2: 2, P3: 3 }[p];
+}

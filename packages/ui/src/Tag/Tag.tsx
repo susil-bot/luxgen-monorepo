@@ -1,0 +1,17 @@
+import { Chip } from '../Chip/Chip';
+import { Badge } from '../Badge/Badge';
+export function Tag({
+  label,
+  variant = 'chip',
+  className = '',
+}: {
+  label: string;
+  variant?: 'chip' | 'badge';
+  className?: string;
+}) {
+  return variant === 'badge' ? (
+    <Badge label={label} className={className} />
+  ) : (
+    <Chip label={label} className={className} />
+  );
+}

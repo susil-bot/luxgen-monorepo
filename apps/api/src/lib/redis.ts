@@ -19,8 +19,8 @@ export function getRedisClient(): Redis | null {
       enableOfflineQueue: false,
       retryStrategy: () => null,
     });
-    _client.on('error', () => {
-      // Non-fatal: callers fall back to in-memory
+    _client.on('error', (err) => {
+      console.error('[redis] connection error:', err?.message ?? err);
     });
   }
   return _client;

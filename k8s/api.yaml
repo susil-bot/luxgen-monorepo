@@ -1,3 +1,6 @@
+# LuxGen — Kubernetes manifest
+# Docs: k8s/README.md · docs/technical/README.md
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -23,6 +26,7 @@ spec:
           ports:
             - containerPort: 4000
               name: http
+          # Secrets (MONGODB_URI, JWT_SECRET, …) via secretRef only — no per-key secretKeyRef duplicates.
           envFrom:
             - configMapRef:
                 name: luxgen-config

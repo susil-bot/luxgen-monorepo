@@ -46,9 +46,20 @@ const CarouselComponent: React.FC<CarouselProps> = ({
   const [isTransitioning, setIsTransitioning] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const touchStartX = useRef<number | null>(null);
 
   const totalSlides = items.length;
   const maxIndex = Math.max(0, totalSlides - slidesToShow);
+
+  if (totalSlides === 0) {
+    return (
+      <div className={`carousel carousel--empty ${className}`} style={style} {...props}>
+        <div className="carousel-empty-state ios-card p-6 text-center text-secondary">
+          No items to display
+        </div>
+      </div>
+    );
+  }
 
   const goToSlide = (index: number) => {
     if (isTransitioning) return;
@@ -75,6 +86,12 @@ const CarouselComponent: React.FC<CarouselProps> = ({
       goToSlide(Math.max(currentIndex - slidesToScroll, 0));
     }
   };
+  const onKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'ArrowLeft') prevSlide();
+    if (e.key === 'ArrowRight') nextSlide();
+    if (e.key === 'Home') goToSlide(0);
+    if (e.key === 'End') goToSlide(totalSlides - 1);
+  };
 
   const startAutoPlay = () => {
     if (autoPlay && totalSlides > 1) {
@@ -94,6 +111,20 @@ const CarouselComponent: React.FC<CarouselProps> = ({
     return () => stopAutoPlay();
   }, [currentIndex, autoPlay, autoPlayInterval]);
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0].clientX;
+    stopAutoPlay();
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current == null) return;
+    const dx = e.changedTouches[0].clientX - touchStartX.current;
+    if (dx > 50) prevSlide();
+    if (dx < -50) nextSlide();
+    touchStartX.current = null;
+    if (autoPlay) startAutoPlay();
+  };
+
   const handleItemClick = (item: CarouselItem, index: number) => {
     onItemClick?.(item, index);
   };
@@ -110,7 +141,7 @@ const CarouselComponent: React.FC<CarouselProps> = ({
     const offset = (index - currentIndex) * 100;
     return {
       transform: `translateX(${offset}%)`,
-      transition: isTransitioning ? 'transform 0.3s ease' : 'none',
+      transition: isTransitioning ? 'var(--transition-base, transform 0.25s ease)' : 'none',
     };
   };
 
@@ -123,10 +154,14 @@ const CarouselComponent: React.FC<CarouselProps> = ({
   return (
     <div
       ref={carouselRef}
+      tabIndex={0}
+      onKeyDown={onKeyDown}
       className={`carousel ${className}`}
       style={styles}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       {...props}
     >
       {/* Main carousel container */}
@@ -220,7 +255,7 @@ const CarouselComponent: React.FC<CarouselProps> = ({
                     : tenantTheme.colors.border,
                 margin: '0 0.25rem',
                 cursor: 'pointer',
-                transition: 'background-color 0.2s ease',
+                transition: 'background-color var(--transition-fast, 120ms ease)',
               }}
             />
           ))}
@@ -244,7 +279,7 @@ const CarouselComponent: React.FC<CarouselProps> = ({
                 cursor: 'pointer',
                 margin: '0 0.25rem',
                 overflow: 'hidden',
-                transition: 'border-color 0.2s ease',
+                transition: 'border-color var(--transition-fast, 120ms ease)',
               }}
             >
               {item.content}

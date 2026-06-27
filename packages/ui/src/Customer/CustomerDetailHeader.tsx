@@ -1,10 +1,12 @@
 import type { CustomerDetail } from './fetcher';
 import { CustomerTranslations } from './translations';
+import { ActionMenu, type ActionMenuItem } from '../ActionMenu';
 
 export interface CustomerDetailHeaderProps {
   customer: CustomerDetail;
   backHref?: string;
   editHref?: string;
+  menuItems?: ActionMenuItem[];
 }
 
 function customerInitials(name: string): string {
@@ -18,6 +20,7 @@ export function CustomerDetailHeader({
   customer,
   backHref = '/admin/customers',
   editHref,
+  menuItems = [],
 }: CustomerDetailHeaderProps) {
   const t = CustomerTranslations.en;
   const initials = customerInitials(customer.name);
@@ -48,9 +51,13 @@ export function CustomerDetailHeader({
             Edit
           </a>
         )}
-        <button type="button" className="ios-btn-secondary text-sm" disabled>
-          {t.moreActions}
-        </button>
+        {menuItems.length > 0 ? (
+          <ActionMenu items={menuItems} triggerLabel={t.moreActions} />
+        ) : (
+          <button type="button" className="ios-btn-secondary text-sm" disabled>
+            {t.moreActions}
+          </button>
+        )}
       </div>
     </div>
   );

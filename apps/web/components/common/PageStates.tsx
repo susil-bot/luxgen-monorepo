@@ -1,3 +1,6 @@
+import React from 'react';
+import { NotFound } from '@luxgen/ui';
+
 interface PageLoadingStateProps {
   label?: string;
   fullScreen?: boolean;
@@ -20,16 +23,24 @@ interface PageEmptyStateProps {
   action?: React.ReactNode;
 }
 
-/** iOS empty / error placeholder for pages with no data */
+/** Empty state — wraps @luxgen/ui NotFound for consistency (UI-189). */
 export function PageEmptyState({ icon = '📭', title, subtitle, action }: PageEmptyStateProps) {
   return (
-    <div className="ios-empty-state">
-      <span className="empty-icon" aria-hidden="true">
-        {icon}
-      </span>
-      <p className="empty-title">{title}</p>
-      {subtitle && <p className="empty-subtitle">{subtitle}</p>}
-      {action}
-    </div>
+    <NotFound
+      title={title}
+      description={subtitle}
+      variant="detailed"
+      showIllustration={false}
+      showSearch={false}
+      showNavigation={false}
+      customActions={
+        <div className="flex flex-col items-center gap-3">
+          <span className="text-4xl" aria-hidden>
+            {icon}
+          </span>
+          {action}
+        </div>
+      }
+    />
   );
 }

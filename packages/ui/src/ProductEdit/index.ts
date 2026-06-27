@@ -19,13 +19,7 @@ export {
   statusBadgeClass,
   statusDisplayLabel,
 } from './fetcher';
-export type {
-  ProductEditMeta,
-  ProductSeo,
-  ProductStatus,
-  ProductEditFormState,
-  CourseProductSource,
-} from './fetcher';
+export type { ProductEditMeta, ProductSeo, ProductStatus, ProductEditFormState, CourseProductSource } from './fetcher';
 
 export { productEditFixtures } from './fixture';
 export { productEditStyles } from './styles';

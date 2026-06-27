@@ -28,6 +28,7 @@ export interface NavBarProps {
   searchPlaceholder?: string;
   showNotifications?: boolean;
   notificationCount?: number;
+  notificationsLoading?: boolean;
   onNotificationClick?: () => void;
   /** Shopify Sidekick-style AI Studio trigger (replaces notifications when true). */
   showAIStudio?: boolean;
@@ -55,6 +56,7 @@ const NavBarComponent: React.FC<NavBarProps> = ({
   searchPlaceholder = 'Search',
   showNotifications = false,
   notificationCount = 0,
+  notificationsLoading = false,
   onNotificationClick,
   showAIStudio = true,
   onAIStudioClick,
@@ -69,6 +71,7 @@ const NavBarComponent: React.FC<NavBarProps> = ({
 }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isTenantMenuOpen, setIsTenantMenuOpen] = useState(false);
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
   const tenantMenuRef = useRef<HTMLDivElement>(null);
   const aiStudio = useAIStudioOptional();
@@ -101,6 +104,7 @@ const NavBarComponent: React.FC<NavBarProps> = ({
 
   return (
     <nav
+      aria-label="Main navigation"
       className={`glass border-b ${className}`}
       style={{
         borderColor: 'var(--color-separator)',
@@ -109,7 +113,7 @@ const NavBarComponent: React.FC<NavBarProps> = ({
         left: 0,
         right: 0,
         zIndex: 50,
-        height: '56px',
+        height: 'var(--lux-navbar-height, var(--lux-header-height, 56px))',
       }}
       {...props}
     >
@@ -190,11 +194,29 @@ const NavBarComponent: React.FC<NavBarProps> = ({
           )}
         </div>
 
-        {/* Search Bar — visible at all breakpoints */}
         {showSearch && (
-          <div className="flex-1 min-w-0 max-w-md mx-2 sm:mx-4">
-            <SearchBar placeholder={searchPlaceholder} onSearch={handleSearch} size="sm" />
-          </div>
+          <>
+            <button
+              type="button"
+              className="sm:hidden p-2"
+              aria-label="Search"
+              onClick={() => setMobileSearchOpen((v) => !v)}
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
+              </svg>
+            </button>
+            <div
+              className={`${mobileSearchOpen ? 'fixed inset-x-0 top-14 z-50 px-4 py-2 bg-[var(--color-bg-primary)] sm:static sm:flex-1 sm:min-w-0 sm:max-w-md sm:mx-4' : 'hidden sm:block sm:flex-1 sm:min-w-0 sm:max-w-md sm:mx-2 sm:mx-4'}`}
+            >
+              <SearchBar placeholder={searchPlaceholder} onSearch={handleSearch} size="sm" />
+            </div>
+          </>
         )}
 
         {/* Right Section */}
@@ -259,6 +281,7 @@ const NavBarComponent: React.FC<NavBarProps> = ({
           {/* Legacy notifications bell */}
           {showNotifications && (
             <button
+              aria-busy={notificationsLoading}
               type="button"
               onClick={onNotificationClick}
               className="relative p-2 rounded-lg transition-colors"
@@ -267,14 +290,21 @@ const NavBarComponent: React.FC<NavBarProps> = ({
               onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-fill-quaternary)')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+              {notificationsLoading ? (
+                <span
+                  className="w-5 h-5 block rounded-full animate-pulse"
+                  style={{ backgroundColor: 'var(--color-fill-tertiary)' }}
                 />
-              </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"
+                  />
+                </svg>
+              )}
               {notificationCount > 0 && (
                 <span
                   className="absolute top-1 right-1 w-2 h-2 rounded-full"
@@ -349,15 +379,28 @@ const NavBarComponent: React.FC<NavBarProps> = ({
               )}
             </div>
           ) : (
-            <div className="flex items-center gap-2">
-              <a href="/login" className="ios-btn-secondary text-sm px-3 py-1.5 hidden sm:inline-flex">
+            <div className="flex items-center gap-2" role="group" aria-label="Account actions">
+              <a
+                href="/login"
+                tabIndex={0}
+                className="ios-btn-secondary text-sm px-4 py-2 font-semibold hidden sm:inline-flex ring-2 ring-transparent focus-visible:ring-[var(--color-blue)]"
+              >
                 Login
               </a>
-              <a href="/register" className="ios-btn-primary text-sm px-3 py-1.5 hidden sm:inline-flex">
+              <a
+                href="/register"
+                tabIndex={0}
+                className="ios-btn-primary text-sm px-4 py-2 font-semibold hidden sm:inline-flex ring-2 ring-transparent focus-visible:ring-[var(--color-blue)]"
+              >
                 Sign Up
               </a>
-              <a href="/login" className="ios-btn-primary text-sm px-3 py-1.5 sm:hidden" aria-label="Login">
-                Login
+              <a
+                href="/register"
+                tabIndex={0}
+                className="ios-btn-primary text-sm px-4 py-2 sm:hidden"
+                aria-label="Sign up"
+              >
+                Sign Up
               </a>
             </div>
           )}

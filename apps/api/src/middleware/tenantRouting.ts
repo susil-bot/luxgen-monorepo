@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
-import { Tenant, ITenant } from '@luxgen/db';
+import { isDevLocalOrigin } from '@luxgen/config';
+import { Tenant, ITenant, resolveEffectivePlan } from '@luxgen/db';
 import { verifyToken, getTenantFromToken } from '../utils/jwt';
 import { renderTenantNotFound } from '../utils/tenantNotFound';
 import { getRedisClient } from '../lib/redis';
@@ -162,7 +163,8 @@ export const tenantRoutingMiddleware = async (req: Request, res: Response, next:
     res.set('X-Tenant-ID', tenantId!);
     res.set('X-Tenant-Name', tenant.name);
     res.set('X-Tenant-Subdomain', tenant.subdomain);
-    res.set('X-Tenant-Plan', tenant.metadata.plan);
+    const effectivePlan = await resolveEffectivePlan(tenant.subdomain);
+    res.set('X-Tenant-Plan', effectivePlan);
 
     next();
   } catch {
@@ -203,7 +205,12 @@ export const tenantSecurityMiddleware = async (req: Request, res: Response, next
     const { security } = req.tenant.settings;
     const origin = req.get('origin');
 
-    if (origin && security.corsOrigins.length > 0 && !security.corsOrigins.includes(origin)) {
+    if (
+      origin &&
+      security.corsOrigins.length > 0 &&
+      !security.corsOrigins.includes(origin) &&
+      !isDevLocalOrigin(origin)
+    ) {
       return res
         .status(403)
         .json({ success: false, message: 'CORS policy violation', error: 'Origin not allowed for this tenant' });

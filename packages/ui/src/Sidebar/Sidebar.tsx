@@ -48,15 +48,13 @@ export interface SidebarProps {
   };
   onUserAction?: (action: 'profile' | 'settings' | 'logout') => void;
   className?: string;
-  variant?: 'default' | 'compact' | 'minimal';
-  position?: 'fixed' | 'sticky' | 'static';
-  width?: 'narrow' | 'normal' | 'wide';
   showUserSection?: boolean;
   showLogo?: boolean;
   collapsible?: boolean;
   defaultCollapsed?: boolean;
   onToggle?: (collapsed: boolean) => void;
   onItemClick?: (item: SidebarItem) => void;
+  /** @deprecated Prefer `onNavigate` — item clicks route via href when provided (UI-162). */
   pathname?: string;
   onNavigate?: (href: string) => void;
 }
@@ -87,12 +85,35 @@ const SidebarComponent: React.FC<SidebarProps> = ({
   const effectiveNavigate = onNavigate ?? navigation.onNavigate;
 
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const onChange = () => {
+      if (mq.matches) {
+        setIsCollapsed(true);
+        setMobileOpen(false);
+      }
+    };
+    onChange();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(() => {
+    const initial = new Set<string>();
+    sections.forEach((section) => {
+      if (!section.defaultCollapsed && section.collapsible !== false) {
+        initial.add(section.id);
+      }
+    });
+    return initial;
+  });
 
   const navSections = useMemo(() => sections as unknown as NavSection[], [sections]);
   const { activeItemId, expandedByUrl } = useSidebarActive(navSections, effectivePathname);
   const urlDrivenActive = Boolean(effectivePathname);
+
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(() => new Set(expandedByUrl));
 
   const { tenantConfig } = useGlobalContext();
   const { user: dynamicUser } = useUser();
@@ -102,16 +123,6 @@ const SidebarComponent: React.FC<SidebarProps> = ({
     ('src' in tenantLogoRaw && tenantLogoRaw.src) || ('image' in tenantLogoRaw && tenantLogoRaw.image) || undefined;
   const logoHref = 'href' in tenantLogoRaw ? tenantLogoRaw.href : '/';
   const currentUser = dynamicUser || user;
-
-  useEffect(() => {
-    const initialExpanded = new Set<string>();
-    sections.forEach((section) => {
-      if (!section.defaultCollapsed && section.collapsible !== false) {
-        initialExpanded.add(section.id);
-      }
-    });
-    setExpandedSections(initialExpanded);
-  }, [sections]);
 
   useEffect(() => {
     setExpandedItems((prev) => {
@@ -161,12 +172,16 @@ const SidebarComponent: React.FC<SidebarProps> = ({
   );
 
   const handleItemClick = (item: SidebarItem) => {
-    onItemClick?.(item);
+    if (item.disabled) return;
     if (item.onClick) {
       item.onClick();
-    } else if (item.href) {
-      navigateTo(item.href, item.external);
+      return;
     }
+    if (item.href && effectiveNavigate) {
+      effectiveNavigate(item.href);
+      return;
+    }
+    onItemClick?.(item);
   };
 
   const isItemActive = useCallback(
@@ -236,7 +251,7 @@ const SidebarComponent: React.FC<SidebarProps> = ({
           </div>
         )}
 
-        <nav className="lux-sidebar-nav" aria-label="Main navigation">
+        <nav className="lux-sidebar-nav" aria-label="Main navigation" /* UI-178 */>
           {sections.map((section, sectionIndex) => (
             <div key={section.id} className="lux-sidebar-section">
               {section.separator && sectionIndex > 0 ? <div className="lux-separator" /> : null}

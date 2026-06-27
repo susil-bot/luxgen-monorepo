@@ -56,7 +56,9 @@ export async function syncSessionToMongo(session: AgentSession): Promise<void> {
       files: session.files,
       git: session.git,
       validation: session.validation,
+      messages: session.messages,
       metadata: {
+        model: session.metadata?.model,
         updatedAt: new Date(session.updatedAt),
         createdAt: new Date(session.createdAt),
       },
@@ -141,6 +143,80 @@ export async function getTaskFromMongo(sessionId: string): Promise<Record<string
   if (!(await ensureMongoConnection())) return null;
   const doc = await AgentTask.findOne({ sessionId }).lean();
   return doc as Record<string, unknown> | null;
+}
+
+/** Convert Mongo AgentTask document to in-memory AgentSession. */
+export async function sessionFromMongoDoc(sessionId: string): Promise<AgentSession | null> {
+  const doc = await getTaskFromMongo(sessionId);
+  if (!doc) return null;
+
+  const meta = (doc.metadata as Record<string, unknown>) || {};
+  const createdAt = meta.createdAt ? new Date(meta.createdAt as string | Date).getTime() : Date.now();
+  const updatedAt = meta.updatedAt ? new Date(meta.updatedAt as string | Date).getTime() : Date.now();
+
+  return {
+    id: sessionId,
+    tenantId: doc.tenantId as string | undefined,
+    userId: doc.userId as string | undefined,
+    mode: doc.mode as AgentSession['mode'],
+    status: doc.status as AgentSession['status'],
+    prompt: doc.prompt as string | undefined,
+    files: (doc.files as AgentSession['files']) || {},
+    git: doc.git as AgentSession['git'],
+    validation: doc.validation as AgentSession['validation'],
+    messages: doc.messages as AgentSession['messages'],
+    metadata: { model: meta.model as string | undefined },
+    createdAt,
+    updatedAt,
+  };
+}
+
+export async function listTasksFromMongo(params: {
+  tenantId: string;
+  status?: string;
+  limit?: number;
+  cursor?: string;
+}): Promise<{ tasks: Array<Record<string, unknown>>; nextCursor: string | null; total: number }> {
+  if (!(await ensureMongoConnection())) {
+    return { tasks: [], nextCursor: null, total: 0 };
+  }
+
+  const limit = Math.min(Math.max(params.limit ?? 20, 1), 50);
+  const filter: Record<string, unknown> = { tenantId: params.tenantId };
+  if (params.status) filter.status = params.status;
+
+  const total = await AgentTask.countDocuments(filter);
+
+  let queryFilter: Record<string, unknown> = { ...filter };
+
+  if (params.cursor) {
+    const cursorDoc = await AgentTask.findOne({ sessionId: params.cursor, tenantId: params.tenantId }).lean();
+    if (cursorDoc?.metadata?.updatedAt) {
+      queryFilter = {
+        ...filter,
+        $or: [
+          { 'metadata.updatedAt': { $lt: cursorDoc.metadata.updatedAt } },
+          {
+            'metadata.updatedAt': cursorDoc.metadata.updatedAt,
+            sessionId: { $lt: params.cursor },
+          },
+        ],
+      };
+    }
+  }
+
+  const docs = await AgentTask.find(queryFilter)
+    .sort({ 'metadata.updatedAt': -1, sessionId: -1 })
+    .limit(limit + 1)
+    .lean();
+
+  let nextCursor: string | null = null;
+  if (docs.length > limit) {
+    docs.pop();
+    nextCursor = (docs[docs.length - 1] as { sessionId?: string })?.sessionId ?? null;
+  }
+
+  return { tasks: docs as Array<Record<string, unknown>>, nextCursor, total };
 }
 
 export async function getAuditLog(sessionId: string, limit = 50): Promise<Array<Record<string, unknown>>> {
