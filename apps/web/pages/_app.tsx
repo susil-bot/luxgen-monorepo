@@ -13,7 +13,8 @@ import { SuperAdminTenantSwitchProvider } from '../components/layout/SuperAdminT
 import { GlobalNotificationHost } from '../lib/global-notifications';
 import { AIStudioSidekickPanel } from '../components/agent/AIStudioSidekickPanel';
 import { DefaultPageHead } from '../components/seo/PageHead';
-import { LayoutUserProvider, type LayoutUser } from '../lib/app-layout-user';
+import { LayoutUserProvider } from '../lib/layout-user-context';
+import type { LayoutUser } from '../lib/layout-user-shared';
 import { inter } from '../lib/fonts';
 import '../styles/globals.css';
 import '../../../packages/ui/src/Sidebar/sidebar.css';

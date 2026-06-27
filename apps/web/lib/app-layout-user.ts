@@ -2,28 +2,12 @@ import { useEffect, useState } from 'react';
 import {
   AUTH_SESSION_CHANGE_EVENT,
   getStoredUser,
-  type SessionUser,
 } from './session';
 import { getCurrentTenant } from './tenant';
+import type { LayoutUser } from './layout-user-shared';
 
-export interface LayoutUser {
-  name: string;
-  email: string;
-  role: string;
-  tenant: string;
-  avatarUrl?: string;
-}
-
-/** Map persisted session user to AppLayout user prop */
-export function sessionToLayoutUser(session: SessionUser): LayoutUser {
-  return {
-    name: `${session.firstName} ${session.lastName}`.trim(),
-    email: session.email,
-    role: session.role,
-    tenant: session.tenant.subdomain,
-    avatarUrl: session.avatar,
-  };
-}
+export type { LayoutUser } from './layout-user-shared';
+export { sessionToLayoutUser } from './layout-user-shared';
 
 /** Client-side tenant subdomain for GraphQL / headers */
 export function useAppTenant(): string {

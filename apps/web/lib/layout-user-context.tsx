@@ -5,7 +5,7 @@ import {
   getStoredUser,
   isStoredSessionExpired,
 } from './session';
-import { sessionToLayoutUser, type LayoutUser } from './app-layout-user';
+import { sessionToLayoutUser, type LayoutUser } from './layout-user-shared';
 
 function resolveLayoutUser(): LayoutUser | null {
   if (typeof window === 'undefined') return null;

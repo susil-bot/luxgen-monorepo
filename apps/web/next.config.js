@@ -24,7 +24,7 @@ const nextConfig = {
     ],
   },
   /** Prevent bundling server-only packages into RSC/API server compilation issues */
-  serverExternalPackages: ['@luxgen/agent', 'ioredis', 'mongodb'],
+  serverExternalPackages: ['@luxgen/agent', '@luxgen/db', 'ioredis', 'mongodb'],
   /** Allow _next assets when browsing via tenant subdomains (demo.localhost:3000) */
   allowedDevOrigins: devAllowedOrigins(),
   env: {
@@ -32,6 +32,7 @@ const nextConfig = {
   },
   transpilePackages: [
     '@luxgen/ui',
+    '@luxgen/auth',
     '@luxgen/agent',
     '@luxgen/design-tokens',
     '@luxgen/storefront',

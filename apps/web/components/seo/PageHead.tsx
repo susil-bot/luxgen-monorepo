@@ -39,6 +39,7 @@ export function PageHead({
 
   return (
     <Head>
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
       <title>{fullTitle}</title>
       <meta name="description" content={description} />
       {robots === 'noindex' ? <meta name="robots" content="noindex,nofollow" /> : null}

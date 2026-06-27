@@ -1,6 +1,19 @@
-import { UserRole, UserStatus } from '@luxgen/db';
+/** Canonical role enum — keep in sync with @luxgen/db UserRole (do not import db here; avoids Mongoose in web bundle). */
+export enum UserRole {
+  SUPER_ADMIN = 'SUPER_ADMIN',
+  ADMIN = 'ADMIN',
+  INSTRUCTOR = 'INSTRUCTOR',
+  STUDENT = 'STUDENT',
+  /** @deprecated Use STUDENT — legacy seed alias */
+  USER = 'USER',
+}
 
-export { UserRole, UserStatus };
+export enum UserStatus {
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  PENDING = 'PENDING',
+  SUSPENDED = 'SUSPENDED',
+}
 
 const ROLE_RANK: Record<UserRole, number> = {
   [UserRole.SUPER_ADMIN]: 5,

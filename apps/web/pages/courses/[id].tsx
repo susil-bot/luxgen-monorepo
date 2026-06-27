@@ -29,6 +29,7 @@ export default function CoursePage({ tenant }: { tenant: string }) {
     variables: { id: courseId },
     skip: !courseId,
     fetchPolicy: CACHE_FIRST,
+  });
   const node = data?.course;
   const course = node ? mapCourseToOverview(node) : null;
   if (!courseId || (loading && !course)) return <PageLoadingState label="Loading course…" />;
