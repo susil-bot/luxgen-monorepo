@@ -178,7 +178,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
                     fontSize: '1rem',
                     color: tenantTheme.colors.textSecondary,
                     transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                    transition: 'transform 0.2s ease',
+                    transition: 'transform var(--transition-fast, 120ms ease)',
                     order: iconPosition === 'left' ? -1 : 1,
                     marginLeft: iconPosition === 'left' ? 0 : '0.5rem',
                     marginRight: iconPosition === 'right' ? 0 : '0.5rem',
@@ -194,7 +194,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
               style={{
                 maxHeight: isOpen ? '1000px' : '0',
                 overflow: 'hidden',
-                transition: 'max-height 0.3s ease',
+                transition: 'max-height var(--transition-slow, 350ms ease)',
                 backgroundColor: tenantTheme.colors.background,
               }}
             >
