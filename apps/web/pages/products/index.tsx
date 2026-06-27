@@ -200,7 +200,9 @@ function ProductsPage({ tenant }: ProductsPageProps) {
             selectedSortOption={sortId}
             sortDirection={sortId.endsWith('-asc') ? 'asc' : 'desc'}
             onSortOptionChange={handleSortChange}
-            onSortDirectionChange={(dir) => setSortId((s) => (dir === 'asc' ? s.replace('-desc', '-asc') : s.replace('-asc', '-desc')))}
+            onSortDirectionChange={(dir) =>
+              setSortId((s) => (dir === 'asc' ? s.replace('-desc', '-asc') : s.replace('-asc', '-desc')))
+            }
           >
             {/* Bulk action bar */}
             {selected.length > 0 && (

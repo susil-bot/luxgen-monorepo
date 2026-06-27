@@ -1,2 +1,13 @@
-import type{GraphQLContext}from'../../../context';import{scopedTenantId}from'../../../graphql/tenantScope';import{checkoutSessionStatusService}from'../../../services/checkoutSessionStatusService';
-export const CheckoutSessionStatusResolvers={Query:{checkoutSessionStatus:async(_:unknown,{tenantId,courseId}:{tenantId:string;courseId:string},ctx:GraphQLContext)=>checkoutSessionStatusService.active(scopedTenantId(ctx,tenantId),ctx.user?._id?.toString?.()??'',courseId)}};
+import type { GraphQLContext } from '../../../context';
+import { scopedTenantId } from '../../../graphql/tenantScope';
+import { checkoutSessionStatusService } from '../../../services/checkoutSessionStatusService';
+export const CheckoutSessionStatusResolvers = {
+  Query: {
+    checkoutSessionStatus: async (
+      _: unknown,
+      { tenantId, courseId }: { tenantId: string; courseId: string },
+      ctx: GraphQLContext,
+    ) =>
+      checkoutSessionStatusService.active(scopedTenantId(ctx, tenantId), ctx.user?._id?.toString?.() ?? '', courseId),
+  },
+};

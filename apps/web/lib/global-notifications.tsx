@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { NotificationPanel } from '../components/notifications/NotificationBell';
 
 export const TOGGLE_NOTIFICATIONS_EVENT = 'luxgen-toggle-notifications';

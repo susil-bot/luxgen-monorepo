@@ -1,1 +1,12 @@
-const s=new Map<string,{items:{productId:string;qty:number}[];updatedAt:Date}>();export const cartSessionService={get(id:string){const v=s.get(id)??{items:[],updatedAt:new Date()};return{sessionId:id,...v};},upsert(id:string,items:{productId:string;qty:number}[]){const v={items,updatedAt:new Date()};s.set(id,v);return{sessionId:id,...v};}};
+const s = new Map<string, { items: { productId: string; qty: number }[]; updatedAt: Date }>();
+export const cartSessionService = {
+  get(id: string) {
+    const v = s.get(id) ?? { items: [], updatedAt: new Date() };
+    return { sessionId: id, ...v };
+  },
+  upsert(id: string, items: { productId: string; qty: number }[]) {
+    const v = { items, updatedAt: new Date() };
+    s.set(id, v);
+    return { sessionId: id, ...v };
+  },
+};

@@ -22,7 +22,6 @@ import { projectTypeDefs } from './project/typeDefs';
 import { mcpTypeDefs } from './mcp/typeDefs';
 import { learnerTypeDefs } from './learner/typeDefs';
 import { analyticsTypeDefs } from './analytics/typeDefs';
-import { IssueLearnerCertificateTypeDefs } from './engagement/issueLearnerCertificate/typeDefs';
 import { certificateTypeDefs } from './certificate/typeDefs';
 
 // Import resolvers
@@ -43,7 +42,6 @@ import { projectResolvers } from './project/resolvers';
 import { mcpResolvers } from './mcp/resolvers';
 import { learnerResolvers } from './learner/resolvers';
 import { analyticsResolvers } from './analytics/resolvers';
-import { IssueLearnerCertificateResolvers } from './engagement/issueLearnerCertificate/resolvers';
 import { certificateResolvers } from './certificate/resolvers';
 import { EnrollmentStatusSummaryTypeDefs } from './engagement/enrollmentStatusSummary/typeDefs';
 import { EnrollmentStatusSummaryResolvers } from './engagement/enrollmentStatusSummary/resolvers';

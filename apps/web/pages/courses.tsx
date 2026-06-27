@@ -94,8 +94,12 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
                 subtitle="Create your first course or browse the learn catalog."
                 action={
                   <div className="flex flex-wrap justify-center gap-2 mt-4">
-                    <Link href="/courses/create" className="ios-btn-primary text-sm">Create course</Link>
-                    <Link href="/learn" className="ios-btn-secondary text-sm">Browse catalog</Link>
+                    <Link href="/courses/create" className="ios-btn-primary text-sm">
+                      Create course
+                    </Link>
+                    <Link href="/learn" className="ios-btn-secondary text-sm">
+                      Browse catalog
+                    </Link>
                   </div>
                 }
               />

@@ -1,4 +1,3 @@
-import React, { useState, useEffect } from 'react';
 import { useAppShellConfig } from '../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -94,8 +93,12 @@ const NotFoundPageContent: React.FC = () => {
                 <button type="button" onClick={() => router.push('/users')} className="ios-btn-secondary">
                   Users
                 </button>
-                <button type="button" onClick={() => router.push('/analytics')} className="ios-btn-secondary">Analytics</button>
-                <button type="button" onClick={() => router.push('/login')} className="ios-btn-primary">Sign in</button>
+                <button type="button" onClick={() => router.push('/analytics')} className="ios-btn-secondary">
+                  Analytics
+                </button>
+                <button type="button" onClick={() => router.push('/login')} className="ios-btn-primary">
+                  Sign in
+                </button>
               </div>
             </div>
           }

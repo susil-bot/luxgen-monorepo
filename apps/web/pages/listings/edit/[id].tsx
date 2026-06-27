@@ -104,19 +104,40 @@ function EditListingContent({ tenant }: Props) {
             <div className="ios-card p-6 mt-4 space-y-4">
               <div className="ios-form-group">
                 <label htmlFor="businessName">Business name</label>
-                <input id="businessName" className="ios-input" value={businessName} onChange={(e) => setBusinessName(e.target.value)} />
+                <input
+                  id="businessName"
+                  className="ios-input"
+                  value={businessName}
+                  onChange={(e) => setBusinessName(e.target.value)}
+                />
               </div>
               <div className="ios-form-group">
                 <label htmlFor="description">Description</label>
-                <textarea id="description" className="ios-input" rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
+                <textarea
+                  id="description"
+                  className="ios-input"
+                  rows={4}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
               </div>
               <div className="ios-form-group">
                 <label htmlFor="category">Category</label>
-                <input id="category" className="ios-input" value={category} onChange={(e) => setCategory(e.target.value)} />
+                <input
+                  id="category"
+                  className="ios-input"
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                />
               </div>
               <div className="ios-form-group">
                 <label htmlFor="website">Website</label>
-                <input id="website" className="ios-input" value={website} onChange={(e) => setWebsite(e.target.value)} />
+                <input
+                  id="website"
+                  className="ios-input"
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                />
               </div>
               <div className="ios-form-group">
                 <label htmlFor="phone">Phone</label>
@@ -124,7 +145,12 @@ function EditListingContent({ tenant }: Props) {
               </div>
               <div className="ios-form-group">
                 <label htmlFor="address">Address</label>
-                <input id="address" className="ios-input" value={address} onChange={(e) => setAddress(e.target.value)} />
+                <input
+                  id="address"
+                  className="ios-input"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
+                />
               </div>
               <button type="button" className="ios-btn-primary" disabled={saving} onClick={() => void handleSave()}>
                 {saving ? 'Saving…' : 'Save changes'}

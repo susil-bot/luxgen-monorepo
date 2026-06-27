@@ -322,7 +322,10 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
       {/* Main Content Area + optional Sidekick column */}
       <div className="flex flex-1 min-w-0">
         <div className="flex flex-col flex-1 min-w-0">
-          <a href="#main-content" className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--color-bg-secondary)] focus:text-[var(--color-label-primary)]">
+          <a
+            href="#main-content"
+            className="sr-only focus:not-sr-only focus:absolute focus:z-[100] focus:top-2 focus:left-2 focus:px-4 focus:py-2 focus:rounded-lg focus:bg-[var(--color-bg-secondary)] focus:text-[var(--color-label-primary)]"
+          >
             Skip to content
           </a>
           {/* NavBar - Always rendered */}

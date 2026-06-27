@@ -44,7 +44,18 @@ async function issueEmailVerification(user: IUser): Promise<void> {
   user.emailVerified = false;
   await user.save();
   const verifyUrl = `${getWebUrl()}/verify-email?token=${encodeURIComponent(rawToken)}`;
-  await sendTransactionalEmail({ to: user.email, subject: 'Verify your LuxGen email', body: [`Hello ${user.firstName},`, '', 'Please verify your email address:', verifyUrl, '', 'This link expires in 24 hours.'].join('\n') });
+  await sendTransactionalEmail({
+    to: user.email,
+    subject: 'Verify your LuxGen email',
+    body: [
+      `Hello ${user.firstName},`,
+      '',
+      'Please verify your email address:',
+      verifyUrl,
+      '',
+      'This link expires in 24 hours.',
+    ].join('\n'),
+  });
 }
 
 const PASSWORD_RESET_SENT_MESSAGE = 'If an account exists with that email, a password reset link has been sent.';
@@ -151,12 +162,14 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
   }
 });
 
-
 router.post('/verify-email', validateVerifyEmail, async (req: Request, res: Response) => {
   try {
     const { token } = req.body;
     const hashed = hashResetToken(String(token).trim());
-    const user = await User.findOne({ emailVerificationToken: hashed, emailVerificationExpires: { $gt: new Date() } }).select('+emailVerificationToken +emailVerificationExpires');
+    const user = await User.findOne({
+      emailVerificationToken: hashed,
+      emailVerificationExpires: { $gt: new Date() },
+    }).select('+emailVerificationToken +emailVerificationExpires');
     if (!user) return res.status(400).json({ success: false, message: 'Invalid or expired verification token' });
     user.emailVerified = true;
     user.emailVerificationToken = undefined;
@@ -172,9 +185,15 @@ router.post('/verify-email', validateVerifyEmail, async (req: Request, res: Resp
 router.post('/resend-verification', validateResendVerification, async (req: Request, res: Response) => {
   try {
     const { email, tenant } = req.body;
-    const user = await User.findOne({ email: email.toLowerCase().trim(), ...(tenant && { tenant }) }).select('+emailVerificationToken +emailVerificationExpires');
+    const user = await User.findOne({ email: email.toLowerCase().trim(), ...(tenant && { tenant }) }).select(
+      '+emailVerificationToken +emailVerificationExpires',
+    );
     if (user && isAccountActive(user) && !user.emailVerified) {
-      try { await issueEmailVerification(user); } catch (e) { logger.error('Resend verification email failed:', e); }
+      try {
+        await issueEmailVerification(user);
+      } catch (e) {
+        logger.error('Resend verification email failed:', e);
+      }
     }
     res.json({ success: true, message: 'If an unverified account exists, a verification email has been sent.' });
   } catch (error) {
@@ -182,7 +201,6 @@ router.post('/resend-verification', validateResendVerification, async (req: Requ
     res.status(500).json({ success: false, message: 'Internal server error' });
   }
 });
-
 
 // Get current user endpoint
 router.get('/me', async (req: Request, res: Response) => {

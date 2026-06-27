@@ -107,7 +107,11 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
       if (!formData.confirmPassword) fieldErrors.confirmPassword = 'Please confirm your password';
       else if (formData.password !== formData.confirmPassword) fieldErrors.confirmPassword = 'Passwords do not match';
     }
-    setErrors((prev) => { const next = { ...prev, ...fieldErrors }; if (!fieldErrors[name]) delete next[name]; return next; });
+    setErrors((prev) => {
+      const next = { ...prev, ...fieldErrors };
+      if (!fieldErrors[name]) delete next[name];
+      return next;
+    });
   };
 
   // Clear errors when form data changes
@@ -273,10 +277,18 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
       </div>
       <div className="mb-6" role="progressbar" aria-valuemin={1} aria-valuemax={2} aria-valuenow={registrationStep}>
         <div className="flex gap-2 mb-2">
-          <div className="flex-1 h-1 rounded-full" style={{ backgroundColor: registrationStep >= 1 ? 'var(--color-blue)' : 'var(--color-fill-tertiary)' }} />
-          <div className="flex-1 h-1 rounded-full" style={{ backgroundColor: registrationStep >= 2 ? 'var(--color-blue)' : 'var(--color-fill-tertiary)' }} />
+          <div
+            className="flex-1 h-1 rounded-full"
+            style={{ backgroundColor: registrationStep >= 1 ? 'var(--color-blue)' : 'var(--color-fill-tertiary)' }}
+          />
+          <div
+            className="flex-1 h-1 rounded-full"
+            style={{ backgroundColor: registrationStep >= 2 ? 'var(--color-blue)' : 'var(--color-fill-tertiary)' }}
+          />
         </div>
-        <p className="text-xs text-secondary text-center">Step {registrationStep} of 2 — {registrationStep === 1 ? 'Your details' : 'Secure your account'}</p>
+        <p className="text-xs text-secondary text-center">
+          Step {registrationStep} of 2 — {registrationStep === 1 ? 'Your details' : 'Secure your account'}
+        </p>
       </div>
       {/* Error/Success Messages */}
       {error && (

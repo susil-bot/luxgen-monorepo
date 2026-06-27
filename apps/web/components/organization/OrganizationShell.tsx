@@ -6,7 +6,13 @@ import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
 import { useAppShellConfig } from '../../lib/app-shell-config';
-import { ORGANIZATION_SECTIONS, buildOrganizationBreadcrumbs, type OrganizationBreadcrumb, type OrganizationSectionId, type OrganizationSecuritySectionId } from '../../lib/organization-sections';
+import {
+  ORGANIZATION_SECTIONS,
+  buildOrganizationBreadcrumbs,
+  type OrganizationBreadcrumb,
+  type OrganizationSectionId,
+  type OrganizationSecuritySectionId,
+} from '../../lib/organization-sections';
 
 interface OrganizationShellProps {
   tenant: string;
@@ -41,8 +47,7 @@ export function OrganizationShell({
   const { sidebarSections, logo } = useAppShellConfig();
 
   const displayName = tenantDisplayName ?? tenant.charAt(0).toUpperCase() + tenant.slice(1);
-  const breadcrumbTrail =
-    breadcrumbs ?? buildOrganizationBreadcrumbs(activeSection, securitySectionId);
+  const breadcrumbTrail = breadcrumbs ?? buildOrganizationBreadcrumbs(activeSection, securitySectionId);
 
   const orgNav = (
     <nav className="ios-card p-3 space-y-1 h-fit">
@@ -88,7 +93,11 @@ export function OrganizationShell({
                 <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1 text-sm text-secondary mb-2">
                   {breadcrumbTrail.map((item, index) => (
                     <span key={`${item.label}-${index}`} className="flex items-center gap-1">
-                      {index > 0 ? <span aria-hidden className="text-tertiary">/</span> : null}
+                      {index > 0 ? (
+                        <span aria-hidden className="text-tertiary">
+                          /
+                        </span>
+                      ) : null}
                       {item.href ? (
                         <Link href={item.href} className="ios-btn-plain px-0 py-0 min-h-0 text-sm">
                           {item.label}

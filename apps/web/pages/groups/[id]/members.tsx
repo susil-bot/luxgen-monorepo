@@ -121,9 +121,23 @@ const GroupMembersPageContent: React.FC = () => {
             </div>
           </div>
 
-          <form className="ios-card p-4 mb-4 flex flex-col sm:flex-row gap-2" onSubmit={(e) => { e.preventDefault(); showSuccess('Invitation sent — member will receive an email shortly.'); }}>
-            <input type="email" required placeholder="colleague@company.com" className="input-field flex-1" aria-label="Invite email" />
-            <button type="submit" className="ios-btn-primary text-sm">Invite member</button>
+          <form
+            className="ios-card p-4 mb-4 flex flex-col sm:flex-row gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              showSuccess('Invitation sent — member will receive an email shortly.');
+            }}
+          >
+            <input
+              type="email"
+              required
+              placeholder="colleague@company.com"
+              className="input-field flex-1"
+              aria-label="Invite email"
+            />
+            <button type="submit" className="ios-btn-primary text-sm">
+              Invite member
+            </button>
           </form>
           <GroupMemberList members={members} onRemoveMember={() => void refetchMembers()} />
         </div>

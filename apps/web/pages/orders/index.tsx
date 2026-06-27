@@ -125,7 +125,16 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
         {...headerProps}
       >
         {allOrders.length === 0 ? (
-          <PageEmptyState icon="📦" title="No orders yet" subtitle="Enrollments will appear here as orders." />
+          <PageEmptyState
+            icon="📦"
+            title="No orders yet"
+            subtitle="Enrollments and purchases will appear here."
+            action={
+              <button type="button" className="ios-btn-primary mt-4" onClick={() => router.push('/orders/create')}>
+                Create order
+              </button>
+            }
+          />
         ) : (
           <OrderListView
             orders={orders}

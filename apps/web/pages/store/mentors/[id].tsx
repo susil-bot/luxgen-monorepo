@@ -41,9 +41,7 @@ export default function MentorProfilePage({ tenantSubdomain, mentorId }: MentorP
   const { catalog, loading: catalogLoading } = useStorefrontCatalog(tenantSubdomain);
 
   const mentor = catalog.instructors.find((i) => i.id === mentorId);
-  const mentorCourses = catalog.all.filter(
-    (c) => c.instructorName?.toLowerCase() === mentor?.name.toLowerCase(),
-  );
+  const mentorCourses = catalog.all.filter((c) => c.instructorName?.toLowerCase() === mentor?.name.toLowerCase());
 
   if (!mounted || tenantLoading || catalogLoading) {
     return <PageLoadingState label="Loading mentor…" />;
@@ -65,7 +63,9 @@ export default function MentorProfilePage({ tenantSubdomain, mentorId }: MentorP
   return (
     <>
       <Head>
-        <title>{mentor.name} — {tenantName}</title>
+        <title>
+          {mentor.name} — {tenantName}
+        </title>
         <meta name="description" content={`Courses and mentorship from ${mentor.name} on ${tenantName}.`} />
       </Head>
       <div className={styles.page}>

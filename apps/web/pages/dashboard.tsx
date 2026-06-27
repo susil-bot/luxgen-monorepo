@@ -76,7 +76,9 @@ export default function Dashboard({ tenant }: DashboardProps) {
       {!dashboardData?.getDashboardData && (
         <div className="max-w-3xl mx-auto px-4 py-3 text-center">
           <p className="text-sm text-secondary">No KPI data yet. Create a course to populate your dashboard.</p>
-          <button type="button" className="ios-btn-primary text-sm mt-2" onClick={() => router.push('/courses/create')}>Create course</button>
+          <button type="button" className="ios-btn-primary text-sm mt-2" onClick={() => router.push('/courses/create')}>
+            Create course
+          </button>
         </div>
       )}
       <AdminDashboardLayout

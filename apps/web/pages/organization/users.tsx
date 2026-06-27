@@ -61,9 +61,19 @@ function OrganizationUsersContent({ tenant }: Props) {
     skip: !queryTenantId,
     fetchPolicy: CACHE_FIRST,
   });
-  const { data: pendingData, refetch: refetchPending } = useQuery(GET_PENDING_USERS, { variables: { tenantId: queryTenantId }, skip: !queryTenantId });
-  const [activateUser] = useMutation(ACTIVATE_USER, { refetchQueries: [{ query: GET_USERS, variables: { tenantId: queryTenantId } }, { query: GET_PENDING_USERS, variables: { tenantId: queryTenantId } }] });
-  const [suspendUser] = useMutation(SUSPEND_USER, { refetchQueries: [{ query: GET_PENDING_USERS, variables: { tenantId: queryTenantId } }] });
+  const { data: pendingData, refetch: refetchPending } = useQuery(GET_PENDING_USERS, {
+    variables: { tenantId: queryTenantId },
+    skip: !queryTenantId,
+  });
+  const [activateUser] = useMutation(ACTIVATE_USER, {
+    refetchQueries: [
+      { query: GET_USERS, variables: { tenantId: queryTenantId } },
+      { query: GET_PENDING_USERS, variables: { tenantId: queryTenantId } },
+    ],
+  });
+  const [suspendUser] = useMutation(SUSPEND_USER, {
+    refetchQueries: [{ query: GET_PENDING_USERS, variables: { tenantId: queryTenantId } }],
+  });
 
   useEffect(() => {
     const q = router.query.search;
@@ -86,7 +96,18 @@ function OrganizationUsersContent({ tenant }: Props) {
     let rows = allUsers;
     if (activeTab === 'active') rows = rows.filter((u) => u.status === 'ACTIVE');
     else if (activeTab === 'pending') rows = rows.filter((u) => u.status === 'PENDING');
-    else if (activeTab === 'requests') { rows = (pendingData?.getPendingUsers ?? []).map((u) => ({ id: u.id, name: `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || u.email, email: u.email, status: u.status, statusLabel: u.status, role: 'USER', roleLabel: 'Member', joinedAt: u.createdAt })); }
+    else if (activeTab === 'requests') {
+      rows = (pendingData?.getPendingUsers ?? []).map((u) => ({
+        id: u.id,
+        name: `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || u.email,
+        email: u.email,
+        status: u.status,
+        statusLabel: u.status,
+        role: 'USER',
+        roleLabel: 'Member',
+        joinedAt: u.createdAt,
+      }));
+    }
 
     if (search.trim()) {
       const q = search.toLowerCase();
@@ -120,8 +141,14 @@ function OrganizationUsersContent({ tenant }: Props) {
     else setSelected(filtered.map((u) => u.id));
   };
 
-  const handleApprove = async (userId: string) => { await activateUser({ variables: { userId } }); await refetchPending(); };
-  const handleReject = async (userId: string) => { await suspendUser({ variables: { userId, reason: 'Registration rejected' } }); await refetchPending(); };
+  const handleApprove = async (userId: string) => {
+    await activateUser({ variables: { userId } });
+    await refetchPending();
+  };
+  const handleReject = async (userId: string) => {
+    await suspendUser({ variables: { userId, reason: 'Registration rejected' } });
+    await refetchPending();
+  };
   const handleExport = () => {
     const rows = (selected.length ? filtered.filter((u) => selected.includes(u.id)) : filtered).map((u) => ({
       name: u.name,
@@ -172,7 +199,7 @@ function OrganizationUsersContent({ tenant }: Props) {
       >
         {error && allUsers.length === 0 ? (
           <EmptyState title="Could not load users" description={error.message} />
-         ) : activeTab === 'requests' && filtered.length === 0 ? (
+        ) : activeTab === 'requests' && filtered.length === 0 ? (
           <EmptyState
             title="No access requests"
             description="Permission requests from users will appear here for review."
@@ -199,7 +226,8 @@ function OrganizationUsersContent({ tenant }: Props) {
                   <th>User</th>
                   <th>Status</th>
                   <th>Role</th>
-                  <th>Group</th>{activeTab === 'requests' && <th>Actions</th>}
+                  <th>Group</th>
+                  {activeTab === 'requests' && <th>Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -228,7 +256,26 @@ function OrganizationUsersContent({ tenant }: Props) {
                       <span className="mr-1">{roleIcon(user.role)}</span>
                       {user.roleLabel}
                     </td>
-                    <td className="text-secondary text-sm">—</td>{activeTab === "requests" && (<td className="space-x-2"><button type="button" className="ios-btn-primary text-xs py-1 px-2" onClick={() => void handleApprove(user.id)}>Approve</button><button type="button" className="ios-btn-secondary text-xs py-1 px-2" onClick={() => void handleReject(user.id)}>Reject</button></td>)}</tr>
+                    <td className="text-secondary text-sm">—</td>
+                    {activeTab === 'requests' && (
+                      <td className="space-x-2">
+                        <button
+                          type="button"
+                          className="ios-btn-primary text-xs py-1 px-2"
+                          onClick={() => void handleApprove(user.id)}
+                        >
+                          Approve
+                        </button>
+                        <button
+                          type="button"
+                          className="ios-btn-secondary text-xs py-1 px-2"
+                          onClick={() => void handleReject(user.id)}
+                        >
+                          Reject
+                        </button>
+                      </td>
+                    )}
+                  </tr>
                 ))}
               </tbody>
             </table>
