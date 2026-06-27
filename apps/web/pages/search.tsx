@@ -1,13 +1,12 @@
 import { useRouter } from 'next/router';
 import { useQuery } from '@apollo/client';
 import { AppLayout } from '@luxgen/ui';
-import { useAppShellConfig } from '../../lib/app-shell-config';
-import { useLayoutUser } from '../../lib/app-layout-user';
-import { PageHead } from '../../components/seo/PageHead';
-import { PageEmptyState } from '../../components/common/PageStates';
-import { GET_COURSES } from '../../graphql/queries/courses';
-import { GET_USERS } from '../../graphql/queries/users';
-import { useAppTenantId } from '../../lib/app-layout-user';
+import { useAppShellConfig } from '../lib/app-shell-config';
+import { useLayoutUser, useAppTenantId } from '../lib/app-layout-user';
+import { PageHead } from '../components/seo/PageHead';
+import { PageEmptyState } from '../components/common/PageStates';
+import { GET_COURSES } from '../graphql/queries/courses';
+import { GET_USERS } from '../graphql/queries/users';
 
 export default function SearchPage() {
   const router = useRouter();

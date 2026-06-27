@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { useQuery } from '@apollo/client';
 import { getDefaultSidebarSections, type SidebarSection } from '@luxgen/ui';
-import { UserRole, hasRoleAtLeast } from '@luxgen/auth';
 import { GET_TENANT_BILLING } from '../graphql/queries/billing';
 import { useLayoutUser, useAppTenantId } from './app-layout-user';
+import { isAdminOrAbove, isStaffOrAbove } from './user-roles';
 
 type SidebarItem = SidebarSection['items'][number];
 
@@ -14,21 +14,22 @@ interface BillingFlags {
   agentStudio?: boolean;
 }
 
-function parseRole(role?: string): UserRole | null {
+function parseRole(role?: string): string | null {
   if (!role) return null;
   const normalized = role.toUpperCase().replace(/\s+/g, '_');
-  return (Object.values(UserRole) as string[]).includes(normalized) ? (normalized as UserRole) : null;
+  const allowed = ['SUPER_ADMIN', 'ADMIN', 'INSTRUCTOR', 'STUDENT', 'USER'];
+  return allowed.includes(normalized) ? normalized : null;
 }
 
-function staffOrAbove(role: UserRole | null): boolean {
-  return role !== null && hasRoleAtLeast(role, UserRole.INSTRUCTOR);
+function staffOrAbove(role: string | null): boolean {
+  return role !== null && isStaffOrAbove(role);
 }
 
-function adminOrAbove(role: UserRole | null): boolean {
-  return role !== null && hasRoleAtLeast(role, UserRole.ADMIN);
+function adminOrAbove(role: string | null): boolean {
+  return role !== null && isAdminOrAbove(role);
 }
 
-function filterItem(item: SidebarItem, role: UserRole | null, flags: BillingFlags, guest: boolean): boolean {
+function filterItem(item: SidebarItem, role: string | null, flags: BillingFlags, guest: boolean): boolean {
   if (guest) {
     return ['dashboard', 'listings-directory', 'my-listings', 'profile', 'settings'].includes(item.id);
   }
@@ -56,7 +57,7 @@ function filterItem(item: SidebarItem, role: UserRole | null, flags: BillingFlag
   }
 }
 
-function filterItems(items: SidebarItem[], role: UserRole | null, flags: BillingFlags, guest: boolean): SidebarItem[] {
+function filterItems(items: SidebarItem[], role: string | null, flags: BillingFlags, guest: boolean): SidebarItem[] {
   return items
     .map((item) => {
       if (!filterItem(item, role, flags, guest)) return null;
@@ -68,7 +69,7 @@ function filterItems(items: SidebarItem[], role: UserRole | null, flags: Billing
     .filter((item): item is SidebarItem => item !== null);
 }
 
-function filterSection(section: SidebarSection, role: UserRole | null, flags: BillingFlags, guest: boolean): SidebarSection | null {
+function filterSection(section: SidebarSection, role: string | null, flags: BillingFlags, guest: boolean): SidebarSection | null {
   if (guest && !['listings', 'settings', 'navigation'].includes(section.id)) {
     return null;
   }
