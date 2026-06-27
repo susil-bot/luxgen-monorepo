@@ -51,6 +51,16 @@ const CarouselComponent: React.FC<CarouselProps> = ({
   const totalSlides = items.length;
   const maxIndex = Math.max(0, totalSlides - slidesToShow);
 
+  if (totalSlides === 0) {
+    return (
+      <div className={`carousel carousel--empty ${className}`} style={style} {...props}>
+        <div className="carousel-empty-state ios-card p-6 text-center text-secondary">
+          No items to display
+        </div>
+      </div>
+    );
+  }
+
   const goToSlide = (index: number) => {
     if (isTransitioning) return;
 

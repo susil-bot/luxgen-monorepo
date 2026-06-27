@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Arrow } from '../Arrow';
 
+/** @deprecated Prefer `Carousel` with banner styling — consolidation tracked as UI-110. */
 export interface BannerSlide {
   id: string;
   title: string;

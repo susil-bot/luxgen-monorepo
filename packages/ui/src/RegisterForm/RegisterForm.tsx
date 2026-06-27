@@ -4,6 +4,7 @@ import { Form } from '../Form';
 import { Heading } from '../Heading';
 import { Text } from '../Text';
 import { withSSR } from '../ssr';
+import { isValidEmail, passwordMeetsMinimum, passwordErrorMessage } from '../validation';
 
 export interface RegisterFormData {
   firstName: string;
@@ -95,11 +96,11 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
     if (name === 'lastName' && !formData.lastName.trim()) fieldErrors.lastName = 'Last name is required';
     if (name === 'email') {
       if (!formData.email.trim()) fieldErrors.email = 'Email is required';
-      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) fieldErrors.email = 'Please enter a valid email address';
+      else if (!isValidEmail(formData.email)) fieldErrors.email = 'Please enter a valid email address';
     }
     if (name === 'password') {
       if (!formData.password) fieldErrors.password = 'Password is required';
-      else if (formData.password.length < 8) fieldErrors.password = 'Password must be at least 8 characters';
+      else if (!passwordMeetsMinimum(formData.password)) fieldErrors.password = passwordErrorMessage();
     }
     if (name === 'confirmPassword') {
       if (!formData.confirmPassword) fieldErrors.confirmPassword = 'Please confirm your password';
@@ -155,15 +156,15 @@ const RegisterFormComponent: React.FC<RegisterFormProps> = ({
     // Email validation
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+    } else if (!isValidEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
 
     // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters';
+    } else if (!passwordMeetsMinimum(formData.password)) {
+      newErrors.password = passwordErrorMessage();
     }
 
     // Confirm password validation

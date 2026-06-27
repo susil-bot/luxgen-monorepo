@@ -3,9 +3,10 @@ import { useEffect, useId, useLayoutEffect, useRef, useState, type ReactNode } f
 export interface ActionMenuItem {
   id: string;
   label: string;
-  onClick?: () => void;
+  onClick?: () => void | Promise<void>;
   disabled?: boolean;
   destructive?: boolean;
+  loading?: boolean;
 }
 
 export interface ActionMenuProps {
@@ -25,6 +26,7 @@ export function ActionMenu({
   className = '',
 }: ActionMenuProps) {
   const [open, setOpen] = useState(false);
+  const [pendingId, setPendingId] = useState<string | null>(null);
   const [resolvedAlign, setResolvedAlign] = useState<'left' | 'right'>(align);
   const rootRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLUListElement>(null);
@@ -112,8 +114,8 @@ export function ActionMenu({
               <button
                 type="button"
                 role="menuitem"
-                disabled={item.disabled}
-                className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${
+                disabled={item.disabled || pendingId === item.id}
+                className={`w-full text-left px-4 py-2.5 text-sm transition-colors flex items-center justify-between gap-2 ${
                   item.disabled
                     ? 'text-tertiary cursor-not-allowed'
                     : item.destructive
@@ -121,12 +123,28 @@ export function ActionMenu({
                       : 'text-primary hover:bg-[var(--color-fill-quaternary)]'
                 }`}
                 onClick={() => {
-                  if (item.disabled) return;
-                  setOpen(false);
-                  item.onClick?.();
+                  if (item.disabled || pendingId) return;
+                  void (async () => {
+                    if (!item.onClick) {
+                      setOpen(false);
+                      return;
+                    }
+                    setPendingId(item.id);
+                    try {
+                      await item.onClick();
+                      setOpen(false);
+                    } finally {
+                      setPendingId(null);
+                    }
+                  })();
                 }}
               >
-                {item.label}
+                <span>{item.label}</span>
+                {(item.loading || pendingId === item.id) && (
+                  <span className="text-xs text-tertiary" aria-hidden>
+                    …
+                  </span>
+                )}
               </button>
             </li>
           ))}

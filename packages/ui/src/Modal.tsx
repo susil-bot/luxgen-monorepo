@@ -6,9 +6,10 @@ export interface ModalProps {
   title?: string;
   children: React.ReactNode;
   size?: 'sm' | 'md' | 'lg' | 'xl';
+  loading?: boolean;
 }
 
-export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md' }) => {
+export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, size = 'md', loading = false }) => {
   const panelRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (!isOpen) return;
@@ -51,7 +52,14 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
             <h3 className="text-lg font-semibold text-primary">{title}</h3>
           </div>
         )}
-        <div className="px-5 py-4">{children}</div>
+        <div className="px-5 py-4 relative">
+          {loading ? (
+            <div className="absolute inset-0 flex items-center justify-center bg-bg-primary/80 z-10 rounded-b-xl" aria-busy="true">
+              <span className="text-secondary text-sm">Loading…</span>
+            </div>
+          ) : null}
+          {children}
+        </div>
       </div>
     </div>
   );

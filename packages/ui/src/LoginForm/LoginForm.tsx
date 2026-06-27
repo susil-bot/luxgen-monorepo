@@ -6,6 +6,7 @@ import { Card } from '../Card';
 import { Form } from '../Form';
 import { Text } from '../Text';
 import { Heading } from '../Heading';
+import { isValidEmail, passwordMeetsMinimum, passwordErrorMessage } from '../validation';
 
 export interface LoginFormData {
   email: string;
@@ -121,15 +122,15 @@ const LoginFormComponent: React.FC<LoginFormProps> = ({
     // Email validation
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+    } else if (!isValidEmail(formData.email)) {
       newErrors.email = 'Please enter a valid email address';
     }
 
     // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      newErrors.password = 'Password must be at least 6 characters';
+    } else if (!passwordMeetsMinimum(formData.password)) {
+      newErrors.password = passwordErrorMessage();
     }
 
     setErrors(newErrors);

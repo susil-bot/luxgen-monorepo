@@ -21,6 +21,7 @@ export interface CardProps extends BaseComponentProps {
   image?: string;
   imageAlt?: string;
   imagePosition?: 'top' | 'bottom' | 'left' | 'right';
+  loading?: boolean;
 }
 
 const CardComponent: React.FC<CardProps> = ({
@@ -43,8 +44,20 @@ const CardComponent: React.FC<CardProps> = ({
   image,
   imageAlt = '',
   imagePosition = 'top',
+  loading = false,
   ...props
 }) => {
+  if (loading) {
+    return (
+      <div
+        className={`card card--loading animate-pulse ${className}`}
+        style={{ ...style, minHeight: '12rem', background: 'var(--color-fill-tertiary)', borderRadius: '0.5rem' }}
+        aria-busy="true"
+        {...props}
+      />
+    );
+  }
+
   const getVariantStyles = () => {
     const variantStyles = {
       default: {

@@ -33,6 +33,38 @@ export const AUTH_STORAGE_KEYS = {
   sessionEpoch: 'authSessionEpoch',
 } as const;
 
+/** Cookie names mirrored from localStorage for SSR layout user (UI-09). */
+export const SSR_AUTH_COOKIE_NAMES = {
+  token: 'authToken',
+  layoutUser: 'layoutUser',
+} as const;
+
+function cookieMaxAgeSeconds(token: string): number {
+  const expiresAt = getTokenExpiresAt(token);
+  if (!expiresAt) return 60 * 60 * 24 * 7;
+  return Math.max(60, Math.floor((expiresAt - Date.now()) / 1000));
+}
+
+function setSessionCookies(token: string, user: SessionUser): void {
+  const maxAge = cookieMaxAgeSeconds(token);
+  const base = `path=/; SameSite=Lax; max-age=${maxAge}`;
+  const layoutUser = JSON.stringify({
+    name: `${user.firstName} ${user.lastName}`.trim() || user.email,
+    email: user.email,
+    role: user.role,
+    tenant: user.tenant.subdomain,
+    avatarUrl: user.avatar,
+  });
+  document.cookie = `${SSR_AUTH_COOKIE_NAMES.token}=${encodeURIComponent(token)}; ${base}`;
+  document.cookie = `${SSR_AUTH_COOKIE_NAMES.layoutUser}=${encodeURIComponent(layoutUser)}; ${base}`;
+}
+
+function clearSessionCookies(): void {
+  const base = 'path=/; max-age=0';
+  document.cookie = `${SSR_AUTH_COOKIE_NAMES.token}=; ${base}`;
+  document.cookie = `${SSR_AUTH_COOKIE_NAMES.layoutUser}=; ${base}`;
+}
+
 interface JwtPayload {
   exp?: number;
   iat?: number;
@@ -110,6 +142,8 @@ export function persistSession(token: string, user: SessionUser): void {
     }),
   );
 
+  setSessionCookies(token, user);
+
   notifyAuthSessionChange();
 }
 
@@ -144,6 +178,7 @@ export function clearStoredSession(): void {
   });
   // Legacy UI cache — must stay in sync with canonical session keys
   localStorage.removeItem('luxgen_user');
+  clearSessionCookies();
   localStorage.setItem(AUTH_STORAGE_KEYS.sessionEpoch, String(Date.now()));
   notifyAuthSessionChange();
 }

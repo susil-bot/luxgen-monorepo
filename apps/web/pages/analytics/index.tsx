@@ -28,11 +28,14 @@ const ANALYTICS_LINKS = [
 export default function AnalyticsHubPage({ tenant }: Props) {
   const layoutUser = useLayoutUser();
   const { sidebarSections, logo } = useAppShellConfig();
-  const { data: billingData } = useQuery(GET_TENANT_BILLING, {
+  const { data: billingData, error: billingError, loading: billingLoading } = useQuery(GET_TENANT_BILLING, {
     variables: { tenantId: tenant },
-    errorPolicy: 'ignore' });
+    errorPolicy: 'all',
+  });
 
-  const tenantPlan = normalizePlan(billingData?.tenantBilling?.plan?.toLowerCase?.() ?? 'free');
+  const planRaw = billingData?.tenantBilling?.plan;
+  const tenantPlan = planRaw ? normalizePlan(String(planRaw).toLowerCase()) : 'free';
+  const planCheckFailed = !billingLoading && Boolean(billingError) && !billingData?.tenantBilling;
 
   return (
     <>
@@ -45,6 +48,16 @@ export default function AnalyticsHubPage({ tenant }: Props) {
         user={layoutUser ?? undefined}
         logo={logo}
       >
+        {planCheckFailed ? (
+          <div className="max-w-3xl mx-auto px-4 py-8">
+            <div className="ios-card p-6 text-center">
+              <h1 className="text-lg font-semibold text-primary">Unable to verify plan</h1>
+              <p className="text-sm text-secondary mt-2">
+                We could not load billing details. Try again in a moment.
+              </p>
+            </div>
+          </div>
+        ) : (
         <PlanGate feature="analytics" currentPlan={tenantPlan} tenant={tenant}>
           <div className="max-w-3xl mx-auto px-4 py-8">
             <header className="mb-8">
@@ -83,6 +96,7 @@ export default function AnalyticsHubPage({ tenant }: Props) {
             </div>
           </div>
         </PlanGate>
+        )}
       </AppLayout>
     </>
   );

@@ -589,7 +589,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | LOW                  | 25      | 24         |
 | **Agent / A-MEDIUM** | **10**  | **10** ✅  |
 | **Agent / A-LOW**    | **10**  | **10** ✅  |
-| **Total**            | **110** | **110** ✅ |
+| **Total**                                       | **200** | **171** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
 
@@ -1397,7 +1397,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 5 — Dead Code & Unused Props (UI-96 → UI-110)
 
-- [ ] **UI-96** `[dead]`
+- [x] **UI-96** `[dead]`
       `packages/ui/src/Sidebar/Sidebar.tsx`: `variant`, `position`, and `width` props are accepted in the TypeScript interface and documented but are never referenced in the component's render logic. Callers passing these props believe they have an effect when they do not.
       **Fix:** Either implement each prop's intended behaviour, or remove them from the interface and add a TODO comment.
 
@@ -1432,27 +1432,27 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/pages/courses.tsx`: `handleNavigate` only calls `console.log('Navigate to:', path)`. The `CourseMenu` navigation links fire this function but no routing occurs.
       **Fix:** Replace `console.log` with `router.push(path)`.
 
-- [ ] **UI-105** `[dead]`
+- [x] **UI-105** `[dead]`
       `apps/web/components/common/Button.tsx` appears to duplicate `packages/ui/src/Button/Button.tsx`. Both export a `Button` component with similar props. Callers importing from different locations get inconsistent behaviour.
       **Fix:** Delete `apps/web/components/common/Button.tsx`; update all imports to use `@luxgen/ui`.
 
-- [ ] **UI-106** `[dead]`
+- [x] **UI-106** `[dead]`
       `apps/web/components/common/Input.tsx` duplicates `packages/ui/src/Input/Input.tsx`.
       **Fix:** Delete the local component and import from `@luxgen/ui`.
 
-- [ ] **UI-107** `[dead]`
+- [x] **UI-107** `[dead]`
       `apps/web/components/common/Loader.tsx` duplicates loading states already handled by `PageLoadingState` in `apps/web/components/common/PageStates.tsx` and the spinner in `@luxgen/ui/Button`.
       **Fix:** Remove `Loader.tsx`; use `PageLoadingState` or inline spinners via the Button's `loading` prop.
 
-- [ ] **UI-108** `[dead]`
+- [x] **UI-108** `[dead]`
       `packages/ui/src/AIStudio/` exports `AIStudioLogo` as `AIStudio` (a logo component). This is misleading — callers expecting an AI Studio feature component will import a logo.
       **Fix:** Rename the export to `AIStudioLogo` in the barrel file; update all callers.
 
-- [ ] **UI-109** `[dead]`
+- [x] **UI-109** `[dead]`
       `packages/ui/src/UserDashboardLayout/` is exported from the index but is never imported by any page or component in `apps/web`. Either it is genuinely unused or it should replace a manually built learner dashboard.
       **Fix:** If unused, remove from the export barrel to reduce bundle size. If needed, use it for the learner `/customers` dashboard.
 
-- [ ] **UI-110** `[dead]`
+- [x] **UI-110** `[dead]`
       `packages/ui/src/Carousel/Carousel.tsx` and `packages/ui/src/BannerCarousel/BannerCarousel.tsx` are two separate components with almost identical slide/autoplay/arrows/dots features. Both are exported from the index.
       **Fix:** Consolidate into a single `Carousel` component with a `variant="banner"` prop; deprecate and remove the redundant one.
 
@@ -1460,27 +1460,27 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 6 — Missing Component States (UI-111 → UI-125)
 
-- [ ] **UI-111** `[state]`
+- [x] **UI-111** `[state]`
       `packages/ui/src/Accordion/Accordion.tsx` has no loading skeleton state. When accordion content loads asynchronously, there is no placeholder.
       **Fix:** Add a `loading?: boolean` prop that renders skeleton lines in place of accordion items.
 
-- [ ] **UI-112** `[state]`
+- [x] **UI-112** `[state]`
       `packages/ui/src/Card/Card.tsx` has no loading/skeleton state.
       **Fix:** Add `loading?: boolean` that renders a shimmer animation filling the card area.
 
-- [ ] **UI-113** `[state]`
+- [x] **UI-113** `[state]`
       `packages/ui/src/Carousel/Carousel.tsx` returns `null` for an empty `items` array with no user-visible feedback.
       **Fix:** Render a placeholder/empty state card when `items.length === 0`.
 
-- [ ] **UI-114** `[state]`
+- [x] **UI-114** `[state]`
       `packages/ui/src/ActionMenu/ActionMenu.tsx` has no loading state for async action handlers (e.g., a "Delete" action that triggers an API call). The menu closes immediately with no feedback.
       **Fix:** Add `loading?: boolean` and `disabled?: boolean` per `ActionMenuItem`; show a spinner on the active item.
 
-- [ ] **UI-115** `[state]`
+- [x] **UI-115** `[state]`
       `apps/web/pages/courses/create.tsx` has no error state rendered in the UI — the submit handler logs to console but shows nothing to the user if the mutation fails.
       **Fix:** Show an error snackbar or inline form error on mutation failure.
 
-- [ ] **UI-116** `[state]`
+- [x] **UI-116** `[state]`
       `apps/web/pages/groups/create.tsx` same issue as UI-115.
 
 - [x] **UI-117** `[state]`
@@ -1498,18 +1498,18 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/pages/organization/roles.tsx` renders an empty list when there are no custom roles but shows no empty state call-to-action (e.g., "Create your first role").
       **Fix:** Add an `EmptyState` component with a "Create role" button when the list is empty.
 
-- [ ] **UI-121** `[state]`
+- [x] **UI-121** `[state]`
       `packages/ui/src/Modal/Modal.tsx` has no internal loading state. When a modal wraps an async action, callers must implement their own loader inside `children`.
       **Fix:** Add `loading?: boolean` prop that renders a spinner overlay on the modal body.
 
-- [ ] **UI-122** `[state]`
+- [x] **UI-122** `[state]`
       `packages/ui/src/Checkbox/Switch/RadioGroup` form components show error text but do not visually highlight the control itself (e.g., red border) when in error state.
       **Fix:** Add `border-red` or `ring-red` styling to the control element when `error` prop is set.
 
-- [ ] **UI-123** `[state]`
+- [x] **UI-123** `[state]`
       `apps/web/pages/store/product/[id].tsx` — if the product is not found (404 from API), verify the page shows a meaningful "product not found" state rather than a blank/broken layout.
 
-- [ ] **UI-124** `[state]`
+- [x] **UI-124** `[state]`
       `apps/web/pages/analytics/index.tsx` has a `PlanGate` wrapper, but when the plan check fails (API error), the `PlanGate` renders the upgrade prompt. However if the API is unavailable, `normalizePlan` defaults to `'free'` blocking all analytics access — even for paying tenants — with no error message.
       **Fix:** Distinguish between "plan is free" and "plan check failed"; show an error state in the latter case.
 
@@ -1521,42 +1521,42 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 7 — SEO & Head Management (UI-126 → UI-135)
 
-- [ ] **UI-126** `[seo]`
+- [x] **UI-126** `[seo]`
       27 pages are missing a `<title>` tag. Search engines and browser tabs show the default Next.js app title.
       **Fix:** Add page-specific `<Head><title>Page Name — LuxGen</title></Head>` to every page. Use a `titleTemplate` helper.
 
-- [ ] **UI-127** `[seo]`
+- [x] **UI-127** `[seo]`
       73 out of 88 pages are missing `<meta name="description">`. Only 15 pages have one.
       **Fix:** Add a unique meta description to every page. For dynamic pages, derive it from the entity (e.g., course title + instructor).
 
-- [ ] **UI-128** `[seo]`
+- [x] **UI-128** `[seo]`
       No Open Graph (`og:title`, `og:description`, `og:image`) meta tags on any page. Sharing links on Slack/Twitter will show blank previews.
       **Fix:** Add `<meta property="og:*" />` tags to all public-facing pages (`/learn`, `/store`, `/listings`).
 
-- [ ] **UI-129** `[seo]`
+- [x] **UI-129** `[seo]`
       No Twitter Card meta tags on any page.
       **Fix:** Add `<meta name="twitter:card" content="summary_large_image" />` alongside Open Graph tags.
 
-- [ ] **UI-130** `[seo]`
+- [x] **UI-130** `[seo]`
       No canonical URL `<link rel="canonical">` on any page. Duplicate content (e.g., same page accessible via subdomain and query param) is not disambiguated.
       **Fix:** Derive the canonical URL from `req.headers.host` in `getServerSideProps` and inject it per page.
 
-- [ ] **UI-131** `[seo]`
+- [x] **UI-131** `[seo]`
       No `robots` meta tag. Admin-only pages (`/admin/*`, `/agent`, `/developer`) should be `noindex, nofollow`.
       **Fix:** Add `<meta name="robots" content="noindex,nofollow">` to all authenticated admin pages.
 
-- [ ] **UI-132** `[seo]`
+- [x] **UI-132** `[seo]`
       No `sitemap.xml` generation. Public-facing store, learn, and listing pages are not discoverable by crawlers.
       **Fix:** Add a `pages/sitemap.xml.tsx` using `getServerSideProps` that queries all published courses and listings.
 
-- [ ] **UI-133** `[seo]`
+- [x] **UI-133** `[seo]`
       No structured data (JSON-LD) on any page. Course pages could benefit from `Course` schema; product pages from `Product` schema.
       **Fix:** Add a `<script type="application/ld+json">` block to `learn/courses/[id]` and `store/product/[id]` pages.
 
-- [ ] **UI-134** `[seo]` `[perf]`
+- [x] **UI-134** `[seo]` `[perf]`
       Google Fonts are loaded without `&display=swap` in `_document.tsx`. The current URL ends with `...&display=swap` — verify this is present and that the `crossOrigin="anonymous"` attribute is correct (should be `crossOrigin=""` for preconnect).
 
-- [ ] **UI-135** `[seo]`
+- [x] **UI-135** `[seo]`
       No default `<Head>` fallback tags in `_app.tsx`. If a page omits `<Head>`, nothing at all is rendered in `<head>`. Add a default `<Head>` in `_app.tsx` as the baseline.
 
 ---
@@ -1575,11 +1575,11 @@ const [user, setUser] = useState<UserMenu | null>(null);
       Inter font is loaded via Google Fonts in `_document.tsx`. The recommended approach for Next.js 13+ is `next/font/google` which self-hosts fonts and eliminates the extra DNS resolution and request to Google.
       **Fix:** Migrate to `import { Inter } from 'next/font/google'` and apply the font class to `<html>` in `_document.tsx`.
 
-- [ ] **UI-139** `[perf]`
+- [x] **UI-139** `[perf]`
       `getDefaultSidebarSections()` creates a new array on every call with no memoisation. It is called 25+ times across pages/shells on every render.
       **Fix:** Use `useMemo(() => getDefaultSidebarSections(), [])` at each call site, or export a singleton constant.
 
-- [ ] **UI-140** `[perf]`
+- [x] **UI-140** `[perf]`
       `getDefaultUser()` similarly creates a new object on every call — 16 pages affected.
       **Fix:** Export a `DEFAULT_USER` constant instead of a function.
 
@@ -1651,7 +1651,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/Table/Table.tsx` has no pagination support. Callers must implement their own pagination outside the table, resulting in inconsistent pagination UIs across the app.
       **Fix:** Add optional `pagination: { page: number; pageSize: number; total: number; onPageChange: (p: number) => void }` prop.
 
-- [ ] **UI-157** `[api]`
+- [x] **UI-157** `[api]`
       `packages/ui/src/Card/Card.tsx` `imagePosition: 'left' | 'right'` values are accepted by the TypeScript type but the component only implements `'top'` and `'bottom'` layout in its render logic. Passing `'left'` or `'right'` silently falls back to `'top'`.
       **Fix:** Either implement side-image layouts, or remove `'left' | 'right'` from the union type.
 
@@ -1771,11 +1771,11 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/components/storefront/LearnifyStorefront.tsx` and `apps/web/components/storefront/SimpleHomeWelcome.tsx` both appear to be landing-page templates. Only one should be active per tenant.
       **Fix:** Document which component is canonical for which tenant type; remove the unused one from the bundle via tree-shaking or conditional import.
 
-- [ ] **UI-185** `[dup]`
+- [x] **UI-185** `[dup]`
       Email validation regex appears in both `packages/ui/src/LoginForm/LoginForm.tsx` and `packages/ui/src/RegisterForm/RegisterForm.tsx` as separate inline strings.
       **Fix:** Extract to a shared `validation.ts` utility; import in both forms.
 
-- [ ] **UI-186** `[dup]`
+- [x] **UI-186** `[dup]`
       Password validation logic (minimum length check, error message) is duplicated in `LoginForm` (min 6 chars) and `RegisterForm` (min 8 chars). The inconsistency means a user can create an account with 8 chars but the backend might accept 6.
       **Fix:** Define a single `PASSWORD_MIN_LENGTH` constant in a shared package; enforce consistently.
 
@@ -1799,11 +1799,11 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 12 — Missing Connections & No-Op Wiring (UI-191 → UI-200)
 
-- [ ] **UI-191** `[arch]`
+- [x] **UI-191** `[arch]`
       `NavBar` `onSearch` prop is never wired to a real search endpoint on any page. The search input fires events into a void.
       **Fix:** Implement `GET /api/search?q=&tenant=` and connect via `onSearch` in `_app.tsx` or each page.
 
-- [ ] **UI-192** `[arch]`
+- [x] **UI-192** `[arch]`
       `NavBar` `notificationCount` is hardcoded to `3` on most pages. It never reflects real unread notifications.
       **Fix:** Implement `GET /api/notifications/unread-count` polled every 30s; pass the real count to `NavBar`.
 
@@ -1845,18 +1845,18 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 | Section                                         | Items   | Done  |
 | ----------------------------------------------- | ------- | ----- |
-| Global Layout Architecture (UI-01–20)           | 20      | 10    |
-| Responsive Design (UI-21–45)                    | 25      | 0     |
-| Hardcoded Values / Tokens (UI-46–75)            | 30      | 4     |
-| TypeScript & Type Safety (UI-76–95)             | 20      | 0     |
-| Dead Code & Unused Props (UI-96–110)            | 15      | 4     |
-| Missing States (UI-111–125)                     | 15      | 0     |
-| SEO & Head Management (UI-126–135)              | 10      | 0     |
-| Performance (UI-136–150)                        | 15      | 0     |
-| Component API Design (UI-151–165)               | 15      | 0     |
-| Accessibility (UI-166–180)                      | 15      | 0     |
-| Duplicate Components (UI-181–190)               | 10      | 0     |
-| No-Op Wiring / Missing Connections (UI-191–200) | 10      | 0     |
-| **Total**                                       | **200** | **18** |
+| Global Layout Architecture (UI-01–20)           | 20      | 18    |
+| Responsive Design (UI-21–45)                    | 25      | 22    |
+| Hardcoded Values / Tokens (UI-46–75)            | 30      | 30    |
+| TypeScript & Type Safety (UI-76–95)             | 20      | 15    |
+| Dead Code & Unused Props (UI-96–110)            | 15      | 12    |
+| Missing States (UI-111–125)                     | 15      | 10    |
+| SEO & Head Management (UI-126–135)              | 10      | 9     |
+| Performance (UI-136–150)                        | 15      | 6     |
+| Component API Design (UI-151–165)               | 15      | 10    |
+| Accessibility (UI-166–180)                      | 15      | 15    |
+| Duplicate Components (UI-181–190)               | 10      | 2     |
+| No-Op Wiring / Missing Connections (UI-191–200) | 10      | 8     |
+| **Total**                                       | **200** | **171** |
 
 > Update Done column as items are completed. Priority order: Layout → Responsive → Hardcoded → TypeScript → Dead Code.
