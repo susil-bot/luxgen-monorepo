@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { BaseComponentProps, TenantTheme, BaseFormProps, SelectOption } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
@@ -38,6 +38,22 @@ const SelectComponent: React.FC<SelectProps> = ({
   const [isOpen, setIsOpen] = useState(false);
   const [dropup, setDropup] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const DROPDOWN_MAX_HEIGHT = 200;
+
+  const toggleOpen = () => {
+    if (disabled) return;
+
+    if (!isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      setDropup(spaceBelow < DROPDOWN_MAX_HEIGHT && spaceAbove > spaceBelow);
+    }
+
+    setIsOpen((open) => !open);
+  };
 
   const filteredOptions = searchable
     ? options.filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -79,10 +95,10 @@ const SelectComponent: React.FC<SelectProps> = ({
         </label>
       )}
 
-      <div className="select-container">
+      <div className="select-container" ref={containerRef}>
         <div
           className={`select-trigger ${error ? 'error' : ''} ${disabled ? 'disabled' : ''}`}
-          onClick={() => !disabled && setIsOpen(!isOpen)}
+          onClick={toggleOpen}
           {...props}
         >
           <div className="select-value">
@@ -129,7 +145,7 @@ const SelectComponent: React.FC<SelectProps> = ({
         </div>
 
         {isOpen && (
-          <div className="select-dropdown">
+          <div className={`select-dropdown${dropup ? ' select-dropdown--dropup' : ''}`}>
             {searchable && (
               <div className="select-search">
                 <input
