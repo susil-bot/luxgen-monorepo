@@ -48,7 +48,10 @@ function BrandingContent({ tenant }: Props) {
 
   const handleFaviconFile = (file: File | null) => {
     if (!file) return;
-    if (file.size > 500_000) { showError('Favicon must be 500 KB or less'); return; }
+    if (file.size > 500_000) {
+      showError('Favicon must be 500 KB or less');
+      return;
+    }
     const reader = new FileReader();
     reader.onload = () => setFaviconPreview(String(reader.result ?? ''));
     reader.readAsDataURL(file);
@@ -82,7 +85,12 @@ function BrandingContent({ tenant }: Props) {
           <>
             <div className="ios-form-group">
               <label htmlFor="faviconUpload">Favicon (PNG/SVG, max 500 KB)</label>
-              <input id="faviconUpload" type="file" accept="image/png,image/svg+xml,image/x-icon" onChange={(e) => handleFaviconFile(e.target.files?.[0] ?? null)} />
+              <input
+                id="faviconUpload"
+                type="file"
+                accept="image/png,image/svg+xml,image/x-icon"
+                onChange={(e) => handleFaviconFile(e.target.files?.[0] ?? null)}
+              />
               {faviconPreview && <img src={faviconPreview} alt="" className="mt-2 h-8 w-8" />}
             </div>
             <div className="ios-form-group">

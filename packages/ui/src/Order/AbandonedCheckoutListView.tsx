@@ -23,7 +23,13 @@ const AbandonedIcon = () => (
   </svg>
 );
 
-export function AbandonedCheckoutListView({ checkouts, search, onSearchChange, onSendRecovery, sendingId }: AbandonedCheckoutListViewProps) {
+export function AbandonedCheckoutListView({
+  checkouts,
+  search,
+  onSearchChange,
+  onSendRecovery,
+  sendingId,
+}: AbandonedCheckoutListViewProps) {
   const t = OrderTranslations.en;
 
   const filtered = useMemo(() => {
@@ -80,12 +86,25 @@ export function AbandonedCheckoutListView({ checkouts, search, onSearchChange, o
                     <td className="text-right font-medium">{row.amount}</td>
                     <td className="text-right space-x-2">
                       {onSendRecovery && (
-                        <button type="button" className="ios-btn-secondary text-xs py-1 px-2" disabled={sendingId === row.id} onClick={() => onSendRecovery(row.id)}>
+                        <button
+                          type="button"
+                          className="ios-btn-secondary text-xs py-1 px-2"
+                          disabled={sendingId === row.id}
+                          onClick={() => onSendRecovery(row.id)}
+                        >
                           {sendingId === row.id ? 'Sending…' : 'Send recovery email'}
                         </button>
                       )}
                       {row.checkoutUrl ? (
-                        <a href={row.checkoutUrl} target="_blank" rel="noopener noreferrer" className="text-sm" style={{ color: 'var(--color-blue)' }}>Open checkout</a>
+                        <a
+                          href={row.checkoutUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm"
+                          style={{ color: 'var(--color-blue)' }}
+                        >
+                          Open checkout
+                        </a>
                       ) : null}
                     </td>
                   </tr>

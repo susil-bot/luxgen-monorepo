@@ -18,13 +18,12 @@ export function StorefrontNavBar({ logoText, logoHref, subtitle }: StorefrontNav
   const handleUserAction = createHandleUserAction(router);
 
   return (
-    <header className="sticky top-0 z-30 border-b border-separator backdrop-blur-md" style={{ backgroundColor: 'var(--color-bg-secondary)' }}>
+    <header
+      className="sticky top-0 z-30 border-b border-separator backdrop-blur-md"
+      style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+    >
       <NavBar
-        user={
-          layoutUser
-            ? { name: layoutUser.name, email: layoutUser.email, role: layoutUser.role }
-            : undefined
-        }
+        user={layoutUser ? { name: layoutUser.name, email: layoutUser.email, role: layoutUser.role } : undefined}
         logo={{ text: logoText, href: logoHref }}
         onUserAction={handleUserAction}
         showSearch={false}
@@ -33,9 +32,7 @@ export function StorefrontNavBar({ logoText, logoHref, subtitle }: StorefrontNav
         position="static"
         className="border-0"
       />
-      {subtitle ? (
-        <p className="px-4 pb-2 text-xs text-secondary -mt-1 max-w-6xl mx-auto">{subtitle}</p>
-      ) : null}
+      {subtitle ? <p className="px-4 pb-2 text-xs text-secondary -mt-1 max-w-6xl mx-auto">{subtitle}</p> : null}
     </header>
   );
 }

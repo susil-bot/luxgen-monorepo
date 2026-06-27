@@ -32,7 +32,10 @@ function StoreProductDetailContent({ tenantSubdomain }: Props) {
   const product = data?.storefrontProduct;
   const returnPath = `/store/product/${productId}`;
   const { enroll, loading: enrolling, success } = useLearnEnroll({ courseId: productId, returnPath });
-  const handleBuy = async () => { await enroll(); showSuccess('Added to cart — enrollment started'); };
+  const handleBuy = async () => {
+    await enroll();
+    showSuccess('Added to cart — enrollment started');
+  };
 
   return (
     <>

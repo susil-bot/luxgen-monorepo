@@ -116,7 +116,11 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
             icon="📦"
             title="No orders yet"
             subtitle="Enrollments and purchases will appear here."
-            action={<button type="button" className="ios-btn-primary mt-4" onClick={() => router.push('/orders/create')}>Create order</button>}
+            action={
+              <button type="button" className="ios-btn-primary mt-4" onClick={() => router.push('/orders/create')}>
+                Create order
+              </button>
+            }
           />
         ) : (
           <div className="overflow-x-auto -mx-4 px-4">
