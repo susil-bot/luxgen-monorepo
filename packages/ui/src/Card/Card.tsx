@@ -77,15 +77,15 @@ const CardComponent: React.FC<CardProps> = ({
     const sizeStyles = {
       small: {
         fontSize: '0.875rem',
-        minHeight: '8rem',
+        minHeight: '8em',
       },
       medium: {
         fontSize: '1rem',
-        minHeight: '10rem',
+        minHeight: '10em',
       },
       large: {
         fontSize: '1.125rem',
-        minHeight: '12rem',
+        minHeight: '12em',
       },
     };
 

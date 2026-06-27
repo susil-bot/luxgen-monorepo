@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { LogoutProps } from './types';
 import { getLogoutStyles } from './styles';
 
+const LOGOUT_SPIN_DURATION = '2s'; // matches --animation-spin in globals.css
+
 export const Logout: React.FC<LogoutProps> = ({
   onLogout,
   onCancel,
@@ -98,13 +100,13 @@ export const Logout: React.FC<LogoutProps> = ({
                 >
                   <animate
                     attributeName="stroke-dasharray"
-                    dur="2s"
+                    dur={LOGOUT_SPIN_DURATION}
                     values="0 31.416;15.708 15.708;0 31.416"
                     repeatCount="indefinite"
                   />
                   <animate
                     attributeName="stroke-dashoffset"
-                    dur="2s"
+                    dur={LOGOUT_SPIN_DURATION}
                     values="0;-15.708;-31.416"
                     repeatCount="indefinite"
                   />

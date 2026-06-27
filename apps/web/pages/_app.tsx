@@ -14,6 +14,7 @@ import { GlobalNotificationHost } from '../lib/global-notifications';
 import { AIStudioSidekickPanel } from '../components/agent/AIStudioSidekickPanel';
 import '../styles/globals.css';
 import '../../../packages/ui/src/Sidebar/sidebar.css';
+import '../../../packages/ui/src/Kicker/kicker.css';
 
 function WebNavigationProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
