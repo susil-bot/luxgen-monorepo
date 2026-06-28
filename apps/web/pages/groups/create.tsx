@@ -19,7 +19,8 @@ const CreateGroupPageContent: React.FC = () => {
     name: '',
     description: '',
     maxUsers: '',
-    isPublic: false });
+    isPublic: false,
+  });
 
   const handleUserAction = createHandleUserAction(router);
   const headerProps = useAppLayoutHeader();
@@ -28,7 +29,8 @@ const CreateGroupPageContent: React.FC = () => {
     const { name, value, type } = e.target;
     setFormData((prev) => ({
       ...prev,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value }));
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,7 +43,11 @@ const CreateGroupPageContent: React.FC = () => {
             description: formData.description,
             settings: {
               maxMembers: formData.maxUsers ? Number(formData.maxUsers) : undefined,
-              allowSelfJoin: formData.isPublic } } } });
+              allowSelfJoin: formData.isPublic,
+            },
+          },
+        },
+      });
       showSuccess('Group created successfully!');
       const newId = data?.createGroup?.id;
       void router.push(newId ? `/groups/${newId}` : '/groups');
@@ -59,14 +65,16 @@ const CreateGroupPageContent: React.FC = () => {
     fontSize: '14px',
     color: 'var(--color-label-primary)',
     outline: 'none',
-    fontFamily: 'inherit' };
+    fontFamily: 'inherit',
+  };
 
   const labelStyle: React.CSSProperties = {
     display: 'block',
     fontSize: '13px',
     fontWeight: 500,
     color: 'var(--color-label-secondary)',
-    marginBottom: '6px' };
+    marginBottom: '6px',
+  };
 
   return (
     <>
@@ -97,7 +105,8 @@ const CreateGroupPageContent: React.FC = () => {
               className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
               style={{
                 backgroundColor: 'var(--color-fill-secondary)',
-                color: 'var(--color-label-primary)' }}
+                color: 'var(--color-label-primary)',
+              }}
             >
               Cancel
             </button>
@@ -166,7 +175,8 @@ const CreateGroupPageContent: React.FC = () => {
                   className="px-5 py-2.5 rounded-xl text-sm font-medium transition-all"
                   style={{
                     backgroundColor: 'var(--color-fill-secondary)',
-                    color: 'var(--color-label-primary)' }}
+                    color: 'var(--color-label-primary)',
+                  }}
                 >
                   Cancel
                 </button>

@@ -2,11 +2,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { useAppShellConfig } from '../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import {
-  SnackbarProvider,
-  useSnackbar,
-  AppLayout,
-} from '@luxgen/ui';
+import { SnackbarProvider, useSnackbar, AppLayout } from '@luxgen/ui';
 import { createHandleUserAction } from '../lib/user-actions';
 import { useLayoutUser } from '../lib/app-layout-user';
 import AgentChat from '../components/agent/AgentChat';
@@ -34,7 +30,8 @@ function AgentStudioContent() {
     fetch('/api/agent/git', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId }) }).catch(() => {});
+      body: JSON.stringify({ sessionId }),
+    }).catch(() => {});
   }, [sessionId]);
 
   useEffect(() => {
@@ -132,7 +129,8 @@ function AgentStudioContent() {
             className="flex items-center justify-between px-4 py-2.5 border-b flex-shrink-0"
             style={{
               borderColor: 'var(--color-separator)',
-              backgroundColor: 'var(--color-bg-secondary)' }}
+              backgroundColor: 'var(--color-bg-secondary)',
+            }}
           >
             <div className="flex items-center gap-3">
               <div
@@ -215,7 +213,8 @@ function AgentStudioContent() {
               className="flex-shrink-0 cursor-col-resize flex items-center justify-center transition-colors"
               style={{
                 width: '4px',
-                backgroundColor: isDragging ? 'var(--color-blue)' : 'var(--color-separator)' }}
+                backgroundColor: isDragging ? 'var(--color-blue)' : 'var(--color-separator)',
+              }}
               onMouseDown={handleDividerMouseDown}
             >
               <div

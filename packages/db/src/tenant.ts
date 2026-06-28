@@ -292,5 +292,4 @@ const tenantSchema = new Schema<ITenant>(
 tenantSchema.index({ subdomain: 1 });
 tenantSchema.index({ domain: 1 });
 tenantSchema.index({ status: 1 });
-export const Tenant =
-  (mongoose.models.Tenant as mongoose.Model<ITenant>) || model<ITenant>('Tenant', tenantSchema);
+export const Tenant = (mongoose.models.Tenant as mongoose.Model<ITenant>) || model<ITenant>('Tenant', tenantSchema);

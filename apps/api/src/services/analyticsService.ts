@@ -44,17 +44,38 @@ export const analyticsService = {
       .sort((a, b) => b.enrollments - a.enrollments)
       .slice(0, 5);
 
-    // Real enrollment trends via MongoDB aggregation (last 12 months)
+    // Rolling last 12 calendar months (year-aware buckets)
+    const windowStart = new Date();
+    windowStart.setDate(1);
+    windowStart.setHours(0, 0, 0, 0);
+    windowStart.setMonth(windowStart.getMonth() - 11);
+
     const trendRaw = await Enrollment.aggregate([
-      { $match: { tenant: tenantOid } },
-      { $group: { _id: { $month: '$enrolledAt' }, enrollments: { $sum: 1 } } },
-      { $sort: { _id: 1 } },
+      { $match: { tenant: tenantOid, enrolledAt: { $gte: windowStart } } },
+      {
+        $group: {
+          _id: { year: { $year: '$enrolledAt' }, month: { $month: '$enrolledAt' } },
+          enrollments: { $sum: 1 },
+        },
+      },
+      { $sort: { '_id.year': 1, '_id.month': 1 } },
     ]);
-    const trendMap = new Map(trendRaw.map((r: { _id: number; enrollments: number }) => [r._id, r.enrollments]));
-    const enrollmentTrends = MONTH_LABELS.map((label, i) => ({
-      label,
-      enrollments: trendMap.get(i + 1) ?? 0,
-    }));
+
+    const trendMap = new Map(
+      trendRaw.map((r: { _id: { year: number; month: number }; enrollments: number }) => [
+        `${r._id.year}-${r._id.month}`,
+        r.enrollments,
+      ]),
+    );
+
+    const enrollmentTrends = Array.from({ length: 12 }, (_, i) => {
+      const bucket = new Date(windowStart.getFullYear(), windowStart.getMonth() + i, 1);
+      const key = `${bucket.getFullYear()}-${bucket.getMonth() + 1}`;
+      return {
+        label: MONTH_LABELS[bucket.getMonth()],
+        enrollments: trendMap.get(key) ?? 0,
+      };
+    });
 
     return {
       totalCourses: courses.length,

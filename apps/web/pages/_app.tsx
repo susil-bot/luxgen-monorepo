@@ -43,41 +43,41 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <div className={inter.className}>
-    <ApolloProvider client={client}>
-      <ThemeProvider>
-        <GlobalProvider initialTenant={pageProps.tenant || 'demo'}>
-          <TenantThemeBridge />
-          <RouteProgressBar />
-          <DefaultPageHead />
-          <AIStudioProvider>
-            <WebNavigationProvider>
-              <LayoutUserProvider initialUser={layoutUser}>
-                <SuperAdminTenantSwitchProvider>
-                  <GlobalNotificationHost>
-                  <SessionMonitor />
-                  <SessionSync />
-                  <AIStudioPanelSlot>
-                    <AIStudioSidekickPanel />
-                  </AIStudioPanelSlot>
-                  <a
-                    href="#main-content"
-                    className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:px-3 focus:py-2"
-                  >
-                    Skip to main content
-                  </a>
-                  <AuthGuard>
-                    <ErrorBoundary>
-                      <Component {...pageProps} />
-                    </ErrorBoundary>
-                  </AuthGuard>
-                  </GlobalNotificationHost>
-                </SuperAdminTenantSwitchProvider>
-              </LayoutUserProvider>
-            </WebNavigationProvider>
-          </AIStudioProvider>
-        </GlobalProvider>
-      </ThemeProvider>
-    </ApolloProvider>
+      <ApolloProvider client={client}>
+        <ThemeProvider>
+          <GlobalProvider initialTenant={pageProps.tenant || 'demo'}>
+            <TenantThemeBridge />
+            <RouteProgressBar />
+            <DefaultPageHead />
+            <AIStudioProvider>
+              <WebNavigationProvider>
+                <LayoutUserProvider initialUser={layoutUser}>
+                  <SuperAdminTenantSwitchProvider>
+                    <GlobalNotificationHost>
+                      <SessionMonitor />
+                      <SessionSync />
+                      <AIStudioPanelSlot>
+                        <AIStudioSidekickPanel />
+                      </AIStudioPanelSlot>
+                      <a
+                        href="#main-content"
+                        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:px-3 focus:py-2"
+                      >
+                        Skip to main content
+                      </a>
+                      <AuthGuard>
+                        <ErrorBoundary>
+                          <Component {...pageProps} />
+                        </ErrorBoundary>
+                      </AuthGuard>
+                    </GlobalNotificationHost>
+                  </SuperAdminTenantSwitchProvider>
+                </LayoutUserProvider>
+              </WebNavigationProvider>
+            </AIStudioProvider>
+          </GlobalProvider>
+        </ThemeProvider>
+      </ApolloProvider>
     </div>
   );
 }

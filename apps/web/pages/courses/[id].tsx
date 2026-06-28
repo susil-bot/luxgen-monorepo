@@ -3,12 +3,7 @@ import { useAppShellConfig } from '../../lib/app-shell-config';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useQuery } from '@apollo/client';
-import {
-  AppLayout,
-  TenantDebug,
-  CourseDetailMenu,
-  CourseOverview,
-  CourseAnalytics } from '@luxgen/ui';
+import { AppLayout, TenantDebug, CourseDetailMenu, CourseOverview, CourseAnalytics } from '@luxgen/ui';
 import { TenantBanner } from '../../components/tenant/TenantBanner';
 import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
@@ -71,7 +66,8 @@ export default function CoursePage({ tenant }: { tenant: string }) {
                 totalEnrollments: node?.students?.length ?? 0,
                 completionRate: 0,
                 averageRating: 0,
-                engagementScore: 0 }}
+                engagementScore: 0,
+              }}
             />
           )}
           <CourseDetailMenu

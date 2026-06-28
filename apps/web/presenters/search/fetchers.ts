@@ -25,9 +25,6 @@ export async function fetchSearchData(tenantId: string): Promise<{
   courses: SearchCoursesResponse;
   users: SearchUsersResponse;
 }> {
-  const [courses, users] = await Promise.all([
-    fetchSearchCourses(tenantId),
-    fetchSearchUsers(tenantId),
-  ]);
+  const [courses, users] = await Promise.all([fetchSearchCourses(tenantId), fetchSearchUsers(tenantId)]);
   return { courses, users };
 }

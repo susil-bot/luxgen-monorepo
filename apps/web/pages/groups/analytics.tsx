@@ -22,7 +22,8 @@ const GroupAnalyticsPageContent: React.FC = () => {
   const { data: billingData } = useQuery(GET_TENANT_BILLING, {
     variables: { tenantId: tenant },
     errorPolicy: 'ignore',
-    skip: !tenant });
+    skip: !tenant,
+  });
   const tenantPlan = normalizePlan(billingData?.tenantBilling?.plan?.toLowerCase?.() ?? 'free');
 
   const handleUserAction = createHandleUserAction(router);
@@ -31,7 +32,8 @@ const GroupAnalyticsPageContent: React.FC = () => {
   const tenantId = useAppTenantId();
   const { data: groupAnalyticsData } = useQuery(GET_GROUP_ANALYTICS, {
     variables: { tenantId },
-    skip: !isMongoObjectId(tenantId) });
+    skip: !isMongoObjectId(tenantId),
+  });
   const groupStats = groupAnalyticsData?.groupAnalytics;
   const stats = [
     {
@@ -39,25 +41,29 @@ const GroupAnalyticsPageContent: React.FC = () => {
       value: String(groupStats?.totalGroups ?? 0),
       delta: '+2 from last month',
       color: 'var(--color-blue)',
-      badge: 'badge-blue' },
+      badge: 'badge-blue',
+    },
     {
       label: 'Active Users',
       value: String(groupStats?.totalMembers ?? 0),
       delta: '+12 from last week',
       color: 'var(--color-green)',
-      badge: 'badge-green' },
+      badge: 'badge-green',
+    },
     {
       label: 'Engagement Rate',
       value: '87%',
       delta: '+5% from last month',
       color: 'var(--color-purple)',
-      badge: 'badge-purple' },
+      badge: 'badge-purple',
+    },
     {
       label: 'Growth Rate',
       value: '23%',
       delta: '+3% from last quarter',
       color: 'var(--color-orange)',
-      badge: 'badge-orange' },
+      badge: 'badge-orange',
+    },
   ];
 
   const topGroups = [
@@ -96,7 +102,8 @@ const GroupAnalyticsPageContent: React.FC = () => {
                 className="px-4 py-2 rounded-xl text-sm font-medium transition-all"
                 style={{
                   backgroundColor: 'var(--color-fill-secondary)',
-                  color: 'var(--color-label-primary)' }}
+                  color: 'var(--color-label-primary)',
+                }}
               >
                 Back to Groups
               </button>
@@ -151,7 +158,8 @@ const GroupAnalyticsPageContent: React.FC = () => {
                           className="h-full rounded-full transition-all duration-500"
                           style={{
                             width: `${group.score}%`,
-                            backgroundColor: 'var(--color-green)' }}
+                            backgroundColor: 'var(--color-green)',
+                          }}
                         />
                       </div>
                     </div>

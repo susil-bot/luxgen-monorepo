@@ -26,8 +26,7 @@ const FooterComponent: React.FC<FooterProps> = ({
   companyName = 'LuxGen',
   ...props
 }) => {
-  const resolvedCopyright =
-    copyright ?? `© ${new Date().getFullYear()} ${companyName}. All rights reserved.`;
+  const resolvedCopyright = copyright ?? `© ${new Date().getFullYear()} ${companyName}. All rights reserved.`;
   const styles = {
     ...style,
     backgroundColor: tenantTheme.colors.surface,

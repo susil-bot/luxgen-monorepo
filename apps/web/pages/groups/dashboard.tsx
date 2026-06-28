@@ -34,7 +34,8 @@ const GroupDashboardPageContent: React.FC = () => {
 
   const { data, loading, error } = useQuery(GET_GROUPS, {
     variables: { first: 100, isActive: undefined },
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const allGroups: GroupNode[] = data?.groups?.edges?.map((edge: { node: GroupNode }) => edge.node) ?? [];
   const groups = useMemo(() => filterGroupsBySearch(allGroups, search), [allGroups, search]);
@@ -168,7 +169,8 @@ const GroupDashboardPageContent: React.FC = () => {
                       className="p-4 rounded-xl w-full text-left transition-opacity hover:opacity-80"
                       style={{
                         border: '1.5px dashed var(--color-separator)',
-                        backgroundColor: 'var(--color-fill-quaternary)' }}
+                        backgroundColor: 'var(--color-fill-quaternary)',
+                      }}
                     >
                       <p className="text-sm font-medium text-primary">{action.label}</p>
                       <p className="text-sm text-secondary mt-1">{action.sub}</p>

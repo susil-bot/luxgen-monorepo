@@ -96,6 +96,14 @@ export const enrollmentResolvers = {
     },
     enrollments: async (_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) => {
       const scoped = scopedTenantId(ctx, tenantId);
+      const userId = ctx.user?._id?.toString?.() ?? ctx.user?.id;
+      const role = ctx.user?.role as UserRole | undefined;
+
+      if (userId && role && !STAFF_ROLES.has(role)) {
+        const docs = await enrollmentService.listByStudent(scoped, userId);
+        return docs.map(mapEnrollment);
+      }
+
       const docs = await enrollmentService.listByTenant(scoped);
       return docs.map(mapEnrollment);
     },

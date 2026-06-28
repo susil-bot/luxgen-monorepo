@@ -2,13 +2,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import {
-  AppLayout,
-  TenantDebug,
-  CourseMenu,
-  CourseOverview,
-  CourseAnalytics,
-} from '@luxgen/ui';
+import { AppLayout, TenantDebug, CourseMenu, CourseOverview, CourseAnalytics } from '@luxgen/ui';
 import { TenantBanner } from '../components/tenant/TenantBanner';
 import { getTenantPageProps } from '../lib/tenant-page-props';
 import { PageLoadingState, PageEmptyState } from '../components/common/PageStates';

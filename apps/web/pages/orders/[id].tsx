@@ -13,7 +13,8 @@ import {
   isStandardOrderId,
   parseLegacyOrderId,
   SnackbarProvider,
-  useSnackbar } from '@luxgen/ui';
+  useSnackbar,
+} from '@luxgen/ui';
 import { PageLoadingState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
@@ -51,27 +52,32 @@ function OrderDetailPageContent({ tenant }: Props) {
   const { data: legacyEnrollmentData } = useQuery(GET_ENROLLMENT, {
     variables: { courseId: legacyCourseId, studentId: legacyStudentId },
     skip: !legacyCourseId || !legacyStudentId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const { data: enrollmentByIdData } = useQuery(GET_ENROLLMENT_BY_ID, {
     variables: { id: orderId },
     skip: !isStandardOrderId(orderId),
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const { data: coursesData, loading: coursesLoading } = useQuery(GET_COURSES, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const { data: enrollmentsData, loading: enrollmentsLoading } = useQuery(GET_ENROLLMENTS, {
     variables: { tenantId: queryTenantId },
     skip: !isMongoObjectId(queryTenantId),
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const baseOrder = useMemo(() => {
     const orders = buildOrdersFromEnrollments(coursesData?.courses, usersData?.users, enrollmentsData?.enrollments);
@@ -83,7 +89,8 @@ function OrderDetailPageContent({ tenant }: Props) {
     notes,
     onNotesChange,
     savingNotes,
-    timelineSubjectId } = useOrderEnrollment(baseOrder, queryTenantId);
+    timelineSubjectId,
+  } = useOrderEnrollment(baseOrder, queryTenantId);
 
   const order = orderWithEnrollment ?? baseOrder;
   const loading =
@@ -213,3 +220,5 @@ export default function OrderDetailPage(props: Props) {
     </SnackbarProvider>
   );
 }
+
+export const getServerSideProps = getTenantPageProps;

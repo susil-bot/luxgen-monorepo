@@ -27,11 +27,13 @@ export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps
 
   const { data: billingData } = useQuery(GET_TENANT_BILLING, {
     variables: { tenantId: tenant },
-    errorPolicy: 'ignore' });
+    errorPolicy: 'ignore',
+  });
   const tenantId = useAppTenantId();
   const { data: analyticsQueryData } = useQuery(GET_COURSE_ANALYTICS, {
     variables: { tenantId, days },
-    skip: !isMongoObjectId(tenantId) });
+    skip: !isMongoObjectId(tenantId),
+  });
   const liveAnalytics = analyticsQueryData?.courseAnalytics;
   const tenantPlan = normalizePlan(billingData?.tenantBilling?.plan?.toLowerCase?.() ?? 'free');
 
@@ -49,8 +51,10 @@ export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps
           title: c.title,
           enrollments: c.enrollments,
           rating: 0,
-          completionRate: c.completionRate })),
-        enrollmentTrends: liveAnalytics.enrollmentTrends.map((t) => ({ month: t.label, enrollments: t.enrollments })) }
+          completionRate: c.completionRate,
+        })),
+        enrollmentTrends: liveAnalytics.enrollmentTrends.map((t) => ({ month: t.label, enrollments: t.enrollments })),
+      }
     : {
         totalCourses: 24,
         totalEnrollments: 3456,
@@ -71,7 +75,8 @@ export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps
           { month: 'Apr', enrollments: 367 },
           { month: 'May', enrollments: 423 },
           { month: 'Jun', enrollments: 398 },
-        ] };
+        ],
+      };
 
   const handleUserAction = createHandleUserAction(router);
 
@@ -170,7 +175,8 @@ export default function CourseAnalyticsPage({ tenant }: CourseAnalyticsPageProps
                           className="h-full rounded-full"
                           style={{
                             width: `${(trend.enrollments / 500) * 100}%`,
-                            backgroundColor: 'var(--color-blue)' }}
+                            backgroundColor: 'var(--color-blue)',
+                          }}
                         />
                       </div>
                       <span className="text-xs font-medium text-primary w-12 text-right">{trend.enrollments}</span>

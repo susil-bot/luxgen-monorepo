@@ -54,7 +54,10 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, children, 
         )}
         <div className="px-5 py-4 relative">
           {loading ? (
-            <div className="absolute inset-0 flex items-center justify-center bg-bg-primary/80 z-10 rounded-b-xl" aria-busy="true">
+            <div
+              className="absolute inset-0 flex items-center justify-center bg-bg-primary/80 z-10 rounded-b-xl"
+              aria-busy="true"
+            >
               <span className="text-secondary text-sm">Loading…</span>
             </div>
           ) : null}

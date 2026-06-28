@@ -8,7 +8,8 @@ import {
   GET_LISTINGS_FOR_REVIEW,
   APPROVE_LISTING,
   REJECT_LISTING,
-  REQUEST_LISTING_INFO } from '../../../graphql/queries/listings';
+  REQUEST_LISTING_INFO,
+} from '../../../graphql/queries/listings';
 
 interface Props {
   tenant: string;
@@ -20,7 +21,8 @@ export default function AdminListingsPage({ tenant }: Props) {
   const [notes, setNotes] = useState<Record<string, string>>({});
   const { data, refetch } = useQuery(GET_LISTINGS_FOR_REVIEW, {
     variables: { tenantId: tenant },
-    errorPolicy: 'ignore' });
+    errorPolicy: 'ignore',
+  });
 
   const [approve] = useMutation(APPROVE_LISTING);
   const [reject] = useMutation(REJECT_LISTING);
@@ -38,12 +40,7 @@ export default function AdminListingsPage({ tenant }: Props) {
       <Head>
         <title>Review listings — {tenant}</title>
       </Head>
-      <AppLayout
-        responsive
-        sidebarSections={sidebarSections}
-        user={layoutUser ?? undefined}
-        logo={logo}
-      >
+      <AppLayout responsive sidebarSections={sidebarSections} user={layoutUser ?? undefined} logo={logo}>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <h1 className="ios-large-title mb-2">Editorial review</h1>
           <p className="text-sm text-secondary mb-6">
@@ -120,4 +117,5 @@ export default function AdminListingsPage({ tenant }: Props) {
 }
 
 export const getServerSideProps = async (ctx: { query: { tenant?: string } }) => ({
-  props: { tenant: ctx.query.tenant || 'demo' } });
+  props: { tenant: ctx.query.tenant || 'demo' },
+});

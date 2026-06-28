@@ -15,7 +15,8 @@ export default function ListingsDirectoryPage({ tenant }: Props) {
   const { sidebarSections, logo } = useAppShellConfig();
   const { data, loading } = useQuery(GET_PUBLISHED_LISTINGS, {
     variables: { tenantId: tenant },
-    errorPolicy: 'ignore' });
+    errorPolicy: 'ignore',
+  });
 
   const listings = data?.publishedListings ?? [];
 
@@ -24,12 +25,7 @@ export default function ListingsDirectoryPage({ tenant }: Props) {
       <Head>
         <title>Business Listings — {tenant}</title>
       </Head>
-      <AppLayout
-        responsive
-        sidebarSections={sidebarSections}
-        user={layoutUser ?? undefined}
-        logo={logo}
-      >
+      <AppLayout responsive sidebarSections={sidebarSections} user={layoutUser ?? undefined} logo={logo}>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -64,4 +60,5 @@ export default function ListingsDirectoryPage({ tenant }: Props) {
 }
 
 export const getServerSideProps = async (ctx: { query: { tenant?: string } }) => ({
-  props: { tenant: ctx.query.tenant || 'demo' } });
+  props: { tenant: ctx.query.tenant || 'demo' },
+});

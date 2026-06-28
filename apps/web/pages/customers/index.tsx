@@ -99,12 +99,14 @@ function CustomersContent({ tenant }: Props) {
   const { data, loading, error } = useQuery(GET_LEARNER_DASHBOARD, {
     variables: { tenantId, studentId },
     skip: !isMongoObjectId(tenantId) || !studentId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const { data: catalogData } = useQuery(GET_STOREFRONT_PRODUCTS, {
     variables: { tenantId },
     skip: !isMongoObjectId(tenantId),
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const dashboard = data?.learnerDashboard;
   const enrolledCourses = dashboard?.courses ?? [];
@@ -313,7 +315,8 @@ function CustomersContent({ tenant }: Props) {
                             fontWeight: 600,
                             fontSize: 15,
                             color: 'var(--color-label-primary)',
-                            lineHeight: 1.4 }}
+                            lineHeight: 1.4,
+                          }}
                         >
                           {course.courseTitle}
                         </div>
@@ -396,7 +399,8 @@ function CustomersContent({ tenant }: Props) {
                             fontWeight: 600,
                             fontSize: 15,
                             color: 'var(--color-label-primary)',
-                            lineHeight: 1.4 }}
+                            lineHeight: 1.4,
+                          }}
                         >
                           {product.title}
                         </div>
@@ -430,3 +434,5 @@ export default function CustomersPage(props: Props) {
     </SnackbarProvider>
   );
 }
+
+export const getServerSideProps = getTenantPageProps;

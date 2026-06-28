@@ -256,7 +256,12 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
       onEngagementSegmentClick ??
       (onDashboardAction
         ? (segment: { id: string; label: string; value: number }) =>
-            onDashboardAction({ type: 'engagement_click', segmentId: segment.id, label: segment.label, value: segment.value })
+            onDashboardAction({
+              type: 'engagement_click',
+              segmentId: segment.id,
+              label: segment.label,
+              value: segment.value,
+            })
         : undefined),
     [onEngagementSegmentClick, onDashboardAction],
   );

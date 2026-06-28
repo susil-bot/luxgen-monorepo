@@ -1,10 +1,5 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
-import {
-  AUTH_SESSION_CHANGE_EVENT,
-  AUTH_STORAGE_KEYS,
-  getStoredUser,
-  isStoredSessionExpired,
-} from './session';
+import { AUTH_SESSION_CHANGE_EVENT, AUTH_STORAGE_KEYS, getStoredUser, isStoredSessionExpired } from './session';
 import { sessionToLayoutUser, type LayoutUser } from './layout-user-shared';
 
 function resolveLayoutUser(): LayoutUser | null {

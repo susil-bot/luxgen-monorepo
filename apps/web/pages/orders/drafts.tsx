@@ -3,11 +3,7 @@ import { useAppShellConfig } from '../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useQuery } from '@apollo/client';
-import {
-  AppLayout,
-  OrderListView,
-  buildOrdersFromEnrollmentList,
-  SnackbarProvider } from '@luxgen/ui';
+import { AppLayout, OrderListView, buildOrdersFromEnrollmentList, SnackbarProvider } from '@luxgen/ui';
 import { PageLoadingState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
@@ -35,17 +31,20 @@ function OrdersDraftsContent({ tenant }: Props) {
   const { data: draftData, loading: draftLoading } = useQuery(GET_DRAFT_ENROLLMENTS, {
     variables: { tenantId: queryTenantId },
     skip: !isMongoObjectId(queryTenantId),
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const { data: coursesData, loading: coursesLoading } = useQuery(GET_COURSES, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const orders = useMemo(
     () => buildOrdersFromEnrollmentList(draftData?.draftEnrollments, coursesData?.courses, usersData?.users),
@@ -91,3 +90,5 @@ export default function OrdersDraftsPage(props: Props) {
     </SnackbarProvider>
   );
 }
+
+export const getServerSideProps = getTenantPageProps;

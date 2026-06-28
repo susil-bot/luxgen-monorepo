@@ -54,9 +54,7 @@ const CarouselComponent: React.FC<CarouselProps> = ({
   if (totalSlides === 0) {
     return (
       <div className={`carousel carousel--empty ${className}`} style={style} {...props}>
-        <div className="carousel-empty-state ios-card p-6 text-center text-secondary">
-          No items to display
-        </div>
+        <div className="carousel-empty-state ios-card p-6 text-center text-secondary">No items to display</div>
       </div>
     );
   }

@@ -42,12 +42,14 @@ function CustomerSegmentationContent({ tenant }: Props) {
   const { data: segmentData, loading: segmentsLoading } = useQuery(GET_CUSTOMER_SEGMENTS, {
     variables: { tenantId },
     skip: !isMongoObjectId(tenantId),
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const { data: membersData, loading: membersLoading } = useQuery(GET_CUSTOMERS_IN_SEGMENT, {
     variables: { tenantId, segment: selectedSegment },
     skip: !isMongoObjectId(tenantId),
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const segments = segmentData?.customerSegments ?? [];
   const members = membersData?.customersInSegment ?? [];
@@ -162,3 +164,5 @@ export default function CustomerSegmentationPage(props: Props) {
     </SnackbarProvider>
   );
 }
+
+export const getServerSideProps = getTenantPageProps;
