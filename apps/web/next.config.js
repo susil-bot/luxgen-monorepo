@@ -90,6 +90,8 @@ const nextConfig = {
       { source: '/api/tenant/:path*', destination: `${resolvedApiUrl}/api/tenant/:path*` },
       { source: '/api/notifications/:path*', destination: `${resolvedApiUrl}/api/notifications/:path*` },
       { source: '/api/security/:path*', destination: `${resolvedApiUrl}/api/security/:path*` },
+      { source: '/api/billing/:path*', destination: `${resolvedApiUrl}/api/billing/:path*` },
+      { source: '/api/tenant-config/:path*', destination: `${resolvedApiUrl}/api/tenant-config/:path*` },
     ];
   },
   async headers() {
