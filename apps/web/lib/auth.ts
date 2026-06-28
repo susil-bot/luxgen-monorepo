@@ -58,7 +58,9 @@ export const getCurrentUser = async (): Promise<User | null> => {
     });
 
     if (response.ok) {
-      return await response.json();
+      const result = await response.json();
+      // Backend wraps response: { success: true, data: { ...user } }
+      return result.data ?? result;
     }
   } catch (error) {
     console.error('Failed to get current user:', error);
