@@ -1,7 +1,9 @@
 import { Router, Request, Response } from 'express';
 import { Tenant, TenantSubscription, resolveEffectivePlan } from '@luxgen/db';
+import { UserRole } from '@luxgen/auth';
 import { getTenantConfig, validateTenantConfig, getInitialSubscriptionPlan } from '../config/tenants';
 import { getTenantContext } from '../middleware/tenantRouting';
+import { requireRole } from '../middleware/roleManagement';
 import { validateStorefrontPatchBody, validationErrorsToRecord, mergeStorefrontPatch } from '../middleware/validation';
 
 const router = Router();
@@ -87,7 +89,7 @@ router.get('/config', async (req: Request, res: Response) => {
 /**
  * Update tenant branding
  */
-router.patch('/branding', async (req: Request, res: Response) => {
+router.patch('/branding', requireRole(UserRole.ADMIN), async (req: Request, res: Response) => {
   try {
     const tenantContext = getTenantContext(req);
 
@@ -147,7 +149,7 @@ router.patch('/branding', async (req: Request, res: Response) => {
 /**
  * Update tenant general / regional settings
  */
-router.patch('/general', async (req: Request, res: Response) => {
+router.patch('/general', requireRole(UserRole.ADMIN), async (req: Request, res: Response) => {
   try {
     const tenantContext = getTenantContext(req);
 
@@ -206,7 +208,7 @@ router.patch('/general', async (req: Request, res: Response) => {
 /**
  * Update tenant security settings
  */
-router.patch('/security', async (req: Request, res: Response) => {
+router.patch('/security', requireRole(UserRole.ADMIN), async (req: Request, res: Response) => {
   try {
     const tenantContext = getTenantContext(req);
 
@@ -266,7 +268,7 @@ router.patch('/security', async (req: Request, res: Response) => {
 /**
  * Get tenant statistics
  */
-router.get('/stats', async (req: Request, res: Response) => {
+router.get('/stats', requireRole(UserRole.ADMIN), async (req: Request, res: Response) => {
   try {
     const tenantContext = getTenantContext(req);
 
@@ -315,7 +317,7 @@ router.get('/stats', async (req: Request, res: Response) => {
 /**
  * Initialize tenant with default configuration
  */
-router.post('/init', async (req: Request, res: Response) => {
+router.post('/init', requireRole(UserRole.SUPER_ADMIN), async (req: Request, res: Response) => {
   try {
     const { subdomain } = req.body;
 
@@ -385,7 +387,7 @@ router.post('/init', async (req: Request, res: Response) => {
 /**
  * Update public storefront landing (trainer/mentor marketplace home)
  */
-router.patch('/storefront', async (req: Request, res: Response) => {
+router.patch('/storefront', requireRole(UserRole.ADMIN), async (req: Request, res: Response) => {
   try {
     const tenantContext = getTenantContext(req);
 
