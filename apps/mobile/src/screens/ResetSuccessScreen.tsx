@@ -1,10 +1,11 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useTheme } from '../theme/ThemeContext';
 import Image15 from '../assets/images/image 15.svg';
+import { useTheme } from '../theme/ThemeContext';
+import type { LearnerNavigation } from '../../lib/learner-navigation';
 
 type Props = {
-  navigation: any;
+  navigation: LearnerNavigation;
 };
 
 export default function ResetSuccessScreen({ navigation }: Props) {
@@ -14,12 +15,12 @@ export default function ResetSuccessScreen({ navigation }: Props) {
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <Image15 width={220} height={220} />
       <Text style={[styles.title, { color: theme.text }]}>It's All Set</Text>
-      <Text style={[styles.subtitle, { color: theme.subtext }]}>Your password already updated.</Text>
+      <Text style={[styles.subtitle, { color: theme.subtext }]}>Your password has been updated.</Text>
       <TouchableOpacity
         style={[styles.button, { backgroundColor: theme.btnPrimary }]}
-        onPress={() => navigation.navigate('Home')}
+        onPress={() => navigation.navigate('SignIn')}
       >
-        <Text style={[styles.buttonText, { color: theme.btnPrimaryText }]}>Bsck to Home</Text>
+        <Text style={[styles.buttonText, { color: theme.btnPrimaryText }]}>Back to Sign in</Text>
       </TouchableOpacity>
     </View>
   );

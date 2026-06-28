@@ -17,7 +17,8 @@ const CATEGORY_LABELS: Record<string, string> = {
   ENGAGEMENT: 'Engagement',
   RETENTION: 'Retention',
   AGENT_OPS: 'Agent ops',
-  INTEGRATIONS: 'Integrations' };
+  INTEGRATIONS: 'Integrations',
+};
 
 export default function MarketplacePage({ tenant }: Props) {
   const layoutUser = useLayoutUser();
@@ -25,7 +26,8 @@ export default function MarketplacePage({ tenant }: Props) {
   const [installing, setInstalling] = useState<string | null>(null);
 
   const { data, refetch } = useQuery(GET_AUTOMATION_TEMPLATES, {
-    errorPolicy: 'ignore' });
+    errorPolicy: 'ignore',
+  });
 
   const [installTemplate] = useMutation(INSTALL_AUTOMATION_TEMPLATE);
 
@@ -35,7 +37,8 @@ export default function MarketplacePage({ tenant }: Props) {
     setInstalling(slug);
     try {
       await installTemplate({
-        variables: { tenantId: tenant, slug, nameOverride: name } });
+        variables: { tenantId: tenant, slug, nameOverride: name },
+      });
       await refetch();
       window.location.href = `/automations?tenant=${encodeURIComponent(tenant)}&installed=${slug}`;
     } catch (e) {
@@ -51,12 +54,7 @@ export default function MarketplacePage({ tenant }: Props) {
       <Head>
         <title>Automation Marketplace — {tenant}</title>
       </Head>
-      <AppLayout
-        responsive
-        sidebarSections={sidebarSections}
-        user={layoutUser ?? undefined}
-        logo={logo}
-      >
+      <AppLayout responsive sidebarSections={sidebarSections} user={layoutUser ?? undefined} logo={logo}>
         <div className="max-w-5xl mx-auto px-4 py-8">
           <header className="mb-8">
             <h1 className="text-2xl font-bold" style={{ color: 'var(--color-text-primary)' }}>
@@ -93,7 +91,8 @@ export default function MarketplacePage({ tenant }: Props) {
                   className="rounded-xl border p-5 flex flex-col"
                   style={{
                     background: 'var(--color-bg-secondary)',
-                    borderColor: t.featured ? 'var(--color-accent)' : 'var(--color-border)' }}
+                    borderColor: t.featured ? 'var(--color-accent)' : 'var(--color-border)',
+                  }}
                 >
                   <div className="flex items-start justify-between gap-2 mb-2">
                     <h2 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
@@ -137,4 +136,5 @@ export default function MarketplacePage({ tenant }: Props) {
 }
 
 export const getServerSideProps = async (ctx: { query: { tenant?: string } }) => ({
-  props: { tenant: ctx.query.tenant || 'demo' } });
+  props: { tenant: ctx.query.tenant || 'demo' },
+});

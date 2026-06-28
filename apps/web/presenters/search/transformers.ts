@@ -70,9 +70,7 @@ export function transformSearchResults(
   users: SearchUserRaw[],
 ): SearchViewModel {
   const trimmed = query.trim();
-  const courseHits = filterByQuery(courses, trimmed, courseSearchText).map((c) =>
-    transformSearchCourseHit(c, tenant),
-  );
+  const courseHits = filterByQuery(courses, trimmed, courseSearchText).map((c) => transformSearchCourseHit(c, tenant));
   const userHits = filterByQuery(users, trimmed, userSearchText).map(transformSearchUserHit);
 
   return {

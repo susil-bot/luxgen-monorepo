@@ -24,21 +24,25 @@ export type UiTriggerType = (typeof TRIGGER_TYPES)[number];
 /** Derived from @luxgen/automation-flow catalog (UI-95). */
 export type UiActionType = (typeof ACTION_TYPES)[number];
 
-const TRIGGER_TO_GQL = Object.fromEntries(
-  TRIGGER_TYPES.map((ui) => [ui, ui.toUpperCase()]),
-) as Record<UiTriggerType, string>;
+const TRIGGER_TO_GQL = Object.fromEntries(TRIGGER_TYPES.map((ui) => [ui, ui.toUpperCase()])) as Record<
+  UiTriggerType,
+  string
+>;
 
-const TRIGGER_FROM_GQL = Object.fromEntries(
-  Object.entries(TRIGGER_TO_GQL).map(([ui, gql]) => [gql, ui]),
-) as Record<string, UiTriggerType>;
+const TRIGGER_FROM_GQL = Object.fromEntries(Object.entries(TRIGGER_TO_GQL).map(([ui, gql]) => [gql, ui])) as Record<
+  string,
+  UiTriggerType
+>;
 
-const ACTION_TO_GQL = Object.fromEntries(
-  ACTION_TYPES.map((ui) => [ui, ui.toUpperCase()]),
-) as Record<UiActionType, string>;
+const ACTION_TO_GQL = Object.fromEntries(ACTION_TYPES.map((ui) => [ui, ui.toUpperCase()])) as Record<
+  UiActionType,
+  string
+>;
 
-const ACTION_FROM_GQL = Object.fromEntries(
-  Object.entries(ACTION_TO_GQL).map(([ui, gql]) => [gql, ui]),
-) as Record<string, UiActionType>;
+const ACTION_FROM_GQL = Object.fromEntries(Object.entries(ACTION_TO_GQL).map(([ui, gql]) => [gql, ui])) as Record<
+  string,
+  UiActionType
+>;
 
 export function triggerToGql(type: UiTriggerType): string {
   return TRIGGER_TO_GQL[type] ?? type.toUpperCase();

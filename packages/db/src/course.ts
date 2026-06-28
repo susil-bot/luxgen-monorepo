@@ -80,4 +80,8 @@ const courseSchema = new Schema<ICourse>(
   },
 );
 
+courseSchema.index({ tenant: 1, status: 1 });
+courseSchema.index({ tenant: 1 });
+courseSchema.index({ instructor: 1 });
+
 export const Course = model<ICourse>('Course', courseSchema);

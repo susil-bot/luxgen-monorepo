@@ -237,7 +237,10 @@ export const getDefaultDashboardData = (_tenant: string): DashboardData => ({
 /**
  * Transform GraphQL dashboard data to component format
  */
-export const transformDashboardData = (graphqlData: Record<string, unknown>, tenant: string): TransformedDashboardData => {
+export const transformDashboardData = (
+  graphqlData: Record<string, unknown>,
+  tenant: string,
+): TransformedDashboardData => {
   const data: DashboardData =
     (graphqlData?.getDashboardData as DashboardData | undefined) ?? getDefaultDashboardData(tenant);
 

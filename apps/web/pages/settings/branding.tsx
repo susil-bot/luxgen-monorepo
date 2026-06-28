@@ -93,7 +93,14 @@ function BrandingContent({ tenant }: Props) {
                 onChange={(e) => handleFaviconFile(e.target.files?.[0] ?? null)}
               />
               {faviconPreview && (
-                <OptimizedImage src={faviconPreview} alt="" width={32} height={32} unoptimized className="mt-2 h-8 w-8" />
+                <OptimizedImage
+                  src={faviconPreview}
+                  alt=""
+                  width={32}
+                  height={32}
+                  unoptimized
+                  className="mt-2 h-8 w-8"
+                />
               )}
             </div>
             <div className="ios-form-group">

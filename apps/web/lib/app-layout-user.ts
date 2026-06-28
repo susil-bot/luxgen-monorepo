@@ -1,10 +1,6 @@
 import { useEffect, useState } from 'react';
-import {
-  AUTH_SESSION_CHANGE_EVENT,
-  getStoredUser,
-} from './session';
+import { AUTH_SESSION_CHANGE_EVENT, getStoredUser } from './session';
 import { getCurrentTenant } from './tenant';
-import type { LayoutUser } from './layout-user-shared';
 
 export type { LayoutUser } from './layout-user-shared';
 export { sessionToLayoutUser } from './layout-user-shared';

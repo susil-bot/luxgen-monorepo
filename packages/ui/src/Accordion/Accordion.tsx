@@ -130,7 +130,11 @@ const AccordionComponent: React.FC<AccordionProps> = ({
     return (
       <div className={`accordion accordion--loading ${className}`} style={styles} aria-busy="true" {...props}>
         {[0, 1, 2].map((i) => (
-          <div key={i} className="accordion-skeleton ios-card p-4 mb-2 animate-pulse h-12 rounded-lg" style={{ background: 'var(--color-fill-tertiary)' }} />
+          <div
+            key={i}
+            className="accordion-skeleton ios-card p-4 mb-2 animate-pulse h-12 rounded-lg"
+            style={{ background: 'var(--color-fill-tertiary)' }}
+          />
         ))}
       </div>
     );

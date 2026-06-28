@@ -22,18 +22,22 @@ const GroupMembersPageContent: React.FC = () => {
   const {
     data: groupData,
     loading: groupLoading,
-    error: groupError } = useQuery(GET_GROUP, {
+    error: groupError,
+  } = useQuery(GET_GROUP, {
     variables: { id: groupId },
     skip: !groupId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const {
     data: membersData,
     loading: membersLoading,
-    refetch: refetchMembers } = useQuery(GET_GROUP_MEMBERS, {
+    refetch: refetchMembers,
+  } = useQuery(GET_GROUP_MEMBERS, {
     variables: { groupId, first: 100 },
     skip: !groupId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const group = groupData?.group;
   const members =
@@ -47,7 +51,8 @@ const GroupMembersPageContent: React.FC = () => {
         };
       }) => ({
         ...edge.node,
-        permissions: [] as string[] }),
+        permissions: [] as string[],
+      }),
     ) ?? [];
 
   const loading = groupLoading || membersLoading;

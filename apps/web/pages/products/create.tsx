@@ -14,7 +14,8 @@ import {
   buildCourseUpdateInput,
   type ProductEditMeta,
   type ProductSeo,
-  type ProductStatus } from '@luxgen/ui';
+  type ProductStatus,
+} from '@luxgen/ui';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import { getStoredUser } from '../../lib/session';
@@ -72,7 +73,9 @@ function CreateProductContent({ tenant }: Props) {
     try {
       const { data } = await createCourse({
         variables: {
-          input: buildCourseCreateInput({ title, bodyHtml, seo, meta }, instructorId, tid) } });
+          input: buildCourseCreateInput({ title, bodyHtml, seo, meta }, instructorId, tid),
+        },
+      });
 
       const id = data?.createCourse?.id as string | undefined;
       if (!id) {
@@ -84,7 +87,9 @@ function CreateProductContent({ tenant }: Props) {
         await updateCourse({
           variables: {
             id,
-            input: buildCourseUpdateInput({ title, bodyHtml, seo, meta, status }) } });
+            input: buildCourseUpdateInput({ title, bodyHtml, seo, meta, status }),
+          },
+        });
       }
 
       showSuccess('Product created');
@@ -142,3 +147,5 @@ export default function CreateProductPage(props: Props) {
     </SnackbarProvider>
   );
 }
+
+export const getServerSideProps = getTenantPageProps;

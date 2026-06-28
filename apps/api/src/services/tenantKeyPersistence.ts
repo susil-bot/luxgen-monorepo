@@ -13,7 +13,9 @@ export async function loadActiveAndGraceKeys(): Promise<PersistedSigningKey[]> {
   const rows = await TenantSigningKey.find({
     status: { $in: ['active', 'grace'] },
     $or: [{ expiresAt: { $exists: false } }, { expiresAt: null }, { expiresAt: { $gt: now } }],
-  }).lean();
+  })
+    .select('+secret')
+    .lean();
 
   return rows.map((row) => ({
     tenantId: row.tenantId,

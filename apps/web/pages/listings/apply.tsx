@@ -22,7 +22,8 @@ export default function ApplyListingPage({ tenant }: Props) {
     description: '',
     category: '',
     website: '',
-    phone: '' });
+    phone: '',
+  });
 
   const [createDraft] = useMutation(CREATE_LISTING_DRAFT);
   const [submitListing] = useMutation(SUBMIT_LISTING);
@@ -37,7 +38,9 @@ export default function ApplyListingPage({ tenant }: Props) {
     }
     const { data } = await createDraft({
       variables: {
-        input: { tenantId: tenant, ...form } } });
+        input: { tenantId: tenant, ...form },
+      },
+    });
     const id = data?.createListingDraft?.id;
     if (!id) return;
 
@@ -50,12 +53,7 @@ export default function ApplyListingPage({ tenant }: Props) {
       <Head>
         <title>Apply for listing — {tenant}</title>
       </Head>
-      <AppLayout
-        responsive
-        sidebarSections={sidebarSections}
-        user={layoutUser ?? undefined}
-        logo={logo}
-      >
+      <AppLayout responsive sidebarSections={sidebarSections} user={layoutUser ?? undefined} logo={logo}>
         <div className="max-w-lg mx-auto px-4 py-8">
           <h1 className="ios-large-title mb-2">List your business</h1>
           <p className="text-sm text-secondary mb-6">
@@ -101,4 +99,5 @@ export default function ApplyListingPage({ tenant }: Props) {
 }
 
 export const getServerSideProps = async (ctx: { query: { tenant?: string } }) => ({
-  props: { tenant: ctx.query.tenant || 'demo' } });
+  props: { tenant: ctx.query.tenant || 'demo' },
+});

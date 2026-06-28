@@ -10,7 +10,8 @@ import {
   buildCustomerDetailFromUser,
   SnackbarProvider,
   useSnackbar,
-  type CustomerDetail } from '@luxgen/ui';
+  type CustomerDetail,
+} from '@luxgen/ui';
 import { PageLoadingState } from '../../../components/common/PageStates';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../../lib/app-layout-user';
@@ -152,7 +153,8 @@ function AdminCustomerDetailContent({ tenant }: Props) {
   const {
     notes: customerNotes,
     onNotesChange: onCustomerNotesChange,
-    savingNotes: savingCustomerNotes } = useCustomerNotes(customerId, timelineTenantId, customer?.notes ?? '');
+    savingNotes: savingCustomerNotes,
+  } = useCustomerNotes(customerId, timelineTenantId, customer?.notes ?? '');
 
   const [deleteUser] = useMutation(DELETE_USER);
 
@@ -227,3 +229,5 @@ export default function AdminCustomerDetailPage(props: Props) {
     </SnackbarProvider>
   );
 }
+
+export const getServerSideProps = getTenantPageProps;

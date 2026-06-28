@@ -2,11 +2,7 @@ import { useState } from 'react';
 import { useAppShellConfig } from '../lib/app-shell-config';
 import { useLayoutUser } from '../lib/app-layout-user';
 import Head from 'next/head';
-import {
-  AppLayout,
-  TenantDebug,
-  BannerCarousel,
-  Arrow } from '@luxgen/ui';
+import { AppLayout, TenantDebug, BannerCarousel, Arrow } from '@luxgen/ui';
 import { TenantBanner } from '../components/tenant/TenantBanner';
 import { getTenantPageProps } from '../lib/tenant-page-props';
 
@@ -28,7 +24,8 @@ export default function BannerDemo({ tenant }: BannerDemoProps) {
       ctaText: 'Get Started',
       ctaHref: '/courses',
       backgroundColor: '#4A70F7',
-      ctaColor: '#F78C4A' },
+      ctaColor: '#F78C4A',
+    },
     {
       id: '2',
       title: 'Master React Development',
@@ -36,7 +33,8 @@ export default function BannerDemo({ tenant }: BannerDemoProps) {
       ctaText: 'Enroll Now',
       ctaHref: '/courses/react',
       backgroundColor: '#10B981',
-      ctaColor: '#F59E0B' },
+      ctaColor: '#F59E0B',
+    },
     {
       id: '3',
       title: 'TypeScript Fundamentals',
@@ -45,7 +43,8 @@ export default function BannerDemo({ tenant }: BannerDemoProps) {
       ctaText: 'Learn More',
       ctaHref: '/courses/typescript',
       backgroundColor: '#8B5CF6',
-      ctaColor: '#EC4899' },
+      ctaColor: '#EC4899',
+    },
   ];
 
   const handleSlideChange = (index: number) => {
@@ -167,4 +166,4 @@ export default function BannerDemo({ tenant }: BannerDemoProps) {
   );
 }
 
-import { getTenantPageProps } from '../lib/tenant-page-props';
+export const getServerSideProps = getTenantPageProps;

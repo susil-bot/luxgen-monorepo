@@ -22,12 +22,14 @@ const GroupDetailsPageContent: React.FC = () => {
   const { data, loading, error } = useQuery(GET_GROUP, {
     variables: { id: groupId },
     skip: !groupId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const { data: membersData } = useQuery(GET_GROUP_MEMBERS, {
     variables: { groupId, first: 10 },
     skip: !groupId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const group = data?.group;
   const members =

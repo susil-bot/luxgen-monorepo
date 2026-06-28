@@ -69,7 +69,12 @@ function filterItems(items: SidebarItem[], role: string | null, flags: BillingFl
     .filter((item): item is SidebarItem => item !== null);
 }
 
-function filterSection(section: SidebarSection, role: string | null, flags: BillingFlags, guest: boolean): SidebarSection | null {
+function filterSection(
+  section: SidebarSection,
+  role: string | null,
+  flags: BillingFlags,
+  guest: boolean,
+): SidebarSection | null {
   if (guest && !['listings', 'settings', 'navigation'].includes(section.id)) {
     return null;
   }

@@ -2,11 +2,7 @@ import { useAppShellConfig } from '../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { createHandleUserAction } from '../lib/user-actions';
-import {
-  NotFound,
-  AssetManagerProvider,
-  useAssetManager,
-  AppLayout } from '@luxgen/ui';
+import { NotFound, AssetManagerProvider, useAssetManager, AppLayout } from '@luxgen/ui';
 import { getBrandAssetsForTenant } from '@luxgen/ui/src/Assets/DefaultBrandAssets';
 import { useLayoutUser } from '../lib/app-layout-user';
 import { useAppLayoutHeader } from '../lib/app-layout-header';

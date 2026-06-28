@@ -33,9 +33,7 @@ export function PageHead({
   const fullTitle = title.includes(SITE_NAME) ? title : `${title} — ${SITE_NAME}`;
   const canonicalUrl =
     canonical ??
-    (typeof window !== 'undefined'
-      ? buildCanonical(router.asPath.split('?')[0], window.location.host)
-      : undefined);
+    (typeof window !== 'undefined' ? buildCanonical(router.asPath.split('?')[0], window.location.host) : undefined);
 
   return (
     <Head>
@@ -82,10 +80,11 @@ const ROUTE_TITLES: Record<string, { title: string; robots?: 'noindex' }> = {
 export function DefaultPageHead() {
   const router = useRouter();
   const base = router.pathname.replace(/\[.*?\]/g, '').replace(/\/$/, '') || '/';
-  const config = ROUTE_TITLES[base] ?? ROUTE_TITLES[router.pathname] ?? {
-    title: base.split('/').filter(Boolean).pop()?.replace(/-/g, ' ') ?? 'LuxGen',
-    robots: router.pathname.startsWith('/admin') ? 'noindex' as const : undefined,
-  };
+  const config = ROUTE_TITLES[base] ??
+    ROUTE_TITLES[router.pathname] ?? {
+      title: base.split('/').filter(Boolean).pop()?.replace(/-/g, ' ') ?? 'LuxGen',
+      robots: router.pathname.startsWith('/admin') ? ('noindex' as const) : undefined,
+    };
 
   const robots =
     config.robots ??
@@ -95,10 +94,5 @@ export function DefaultPageHead() {
       ? 'noindex'
       : 'index');
 
-  return (
-    <PageHead
-      title={config.title.charAt(0).toUpperCase() + config.title.slice(1)}
-      robots={robots}
-    />
-  );
+  return <PageHead title={config.title.charAt(0).toUpperCase() + config.title.slice(1)} robots={robots} />;
 }

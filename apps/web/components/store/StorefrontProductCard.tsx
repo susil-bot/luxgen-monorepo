@@ -12,7 +12,14 @@ interface StorefrontProductCardProps {
   currency: string;
 }
 
-export function StorefrontProductCard({ id, title, description, category, priceCents, currency }: StorefrontProductCardProps) {
+export function StorefrontProductCard({
+  id,
+  title,
+  description,
+  category,
+  priceCents,
+  currency,
+}: StorefrontProductCardProps) {
   const cleanDesc = description.replace(/<!--[\s\S]*?-->/g, '').trim();
 
   return (

@@ -73,10 +73,7 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
     if (typeof q === 'string') setSearch(q);
   }, [router.query.search]);
 
-  const allOrders = useMemo(
-    () => (data?.orderRows ?? []).map(mapApiOrderRow),
-    [data?.orderRows],
-  );
+  const allOrders = useMemo(() => (data?.orderRows ?? []).map(mapApiOrderRow), [data?.orderRows]);
 
   const tabCounts = useMemo(
     () => ({

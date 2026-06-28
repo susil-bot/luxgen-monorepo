@@ -17,7 +17,7 @@ const tenantSigningKeySchema = new Schema<ITenantSigningKey>(
   {
     tenantId: { type: String, required: true, index: true },
     keyId: { type: String, required: true, unique: true },
-    secret: { type: String, required: true },
+    secret: { type: String, required: true, select: false },
     status: { type: String, enum: ['active', 'grace', 'revoked'], required: true },
     expiresAt: { type: Date },
     revokedAt: { type: Date },

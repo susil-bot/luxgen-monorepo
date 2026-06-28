@@ -3,12 +3,7 @@ import { useAppShellConfig } from '../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useMutation, useQuery } from '@apollo/client';
-import {
-  AppLayout,
-  SnackbarProvider,
-  useSnackbar,
-  DataListPage,
-  EmptyState } from '@luxgen/ui';
+import { AppLayout, SnackbarProvider, useSnackbar, DataListPage, EmptyState } from '@luxgen/ui';
 import type { DataListTab, FilterChipData, SortOption } from '@luxgen/ui';
 import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
@@ -20,7 +15,8 @@ import {
   formatProductDate,
   statusBadgeClass,
   type GraphQLCourseProduct,
-  type ProductStatus } from '../../lib/product-display';
+  type ProductStatus,
+} from '../../lib/product-display';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
 
@@ -75,7 +71,8 @@ function ProductsPage({ tenant }: ProductsPageProps) {
   const { data, loading, error, refetch } = useQuery(GET_COURSES, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-first' });
+    fetchPolicy: 'cache-first',
+  });
 
   const [updateCourse] = useMutation(UPDATE_COURSE);
 
@@ -135,7 +132,8 @@ function ProductsPage({ tenant }: ProductsPageProps) {
     const all = raw.map(courseToProductRow);
     return PRODUCT_TABS.map((tab) => ({
       ...tab,
-      count: tab.id === 'ALL' ? all.length : all.filter((p) => p.status === tab.id).length }));
+      count: tab.id === 'ALL' ? all.length : all.filter((p) => p.status === tab.id).length,
+    }));
   }, [data]);
 
   const toggleAll = () => {

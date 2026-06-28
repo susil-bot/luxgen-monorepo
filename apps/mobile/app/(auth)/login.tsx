@@ -10,8 +10,8 @@ import { useTenant } from '../../hooks/useTenant';
 export default function LoginScreen() {
   const { login, loading } = useAuth();
   const { subdomain, tenantName, setTenant } = useTenant();
-  const [email, setEmail] = useState('alex.thompson@demo.com');
-  const [password, setPassword] = useState('password123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [tenantInput, setTenantInput] = useState(subdomain);
 
   useEffect(() => {

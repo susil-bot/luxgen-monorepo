@@ -63,7 +63,8 @@ function AgentTasksContent({ tenant }: Props) {
         if (cursor) params.set('cursor', cursor);
 
         const res = await fetch(`/api/agent/tasks/list?${params}`, {
-          headers: token ? { Authorization: `Bearer ${token}` } : {} });
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+        });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Failed to load tasks');
 
@@ -199,3 +200,5 @@ export default function AgentTasksPage(props: Props) {
     </SnackbarProvider>
   );
 }
+
+export const getServerSideProps = getTenantPageProps;

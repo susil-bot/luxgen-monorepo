@@ -16,13 +16,13 @@ presenters/
 
 ## Layer rules
 
-| File | Responsibility |
-|------|----------------|
-| `queries.ts` | GraphQL only — fragments from `_shared/queries` |
-| `fetchers.ts` | Call Apollo `client.query` / `fetcher()` |
-| `transformers.ts` | Shape data for UI (no React, no fetch) |
-| `client.entry.ts` | `useQuery` + `useMemo` → view model |
-| `index.ts` | What pages import |
+| File              | Responsibility                                  |
+| ----------------- | ----------------------------------------------- |
+| `queries.ts`      | GraphQL only — fragments from `_shared/queries` |
+| `fetchers.ts`     | Call Apollo `client.query` / `fetcher()`        |
+| `transformers.ts` | Shape data for UI (no React, no fetch)          |
+| `client.entry.ts` | `useQuery` + `useMemo` → view model             |
+| `index.ts`        | What pages import                               |
 
 ## Query + fragment pattern
 

@@ -14,7 +14,8 @@ import {
   buildCourseUpdateInput,
   type ProductEditMeta,
   type ProductSeo,
-  type ProductStatus } from '@luxgen/ui';
+  type ProductStatus,
+} from '@luxgen/ui';
 import { PageLoadingState } from '../../../components/common/PageStates';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import { useLayoutUser } from '../../../lib/app-layout-user';
@@ -48,7 +49,8 @@ function EditProductContent({ tenant }: Props) {
 
   const { data, loading, error } = useQuery(GET_COURSE, {
     variables: { id: courseId },
-    skip: !courseId });
+    skip: !courseId,
+  });
 
   const [updateCourse] = useMutation(UPDATE_COURSE);
 
@@ -90,7 +92,9 @@ function EditProductContent({ tenant }: Props) {
       await updateCourse({
         variables: {
           id: courseId,
-          input: buildCourseUpdateInput({ title, bodyHtml, seo, meta, status }) } });
+          input: buildCourseUpdateInput({ title, bodyHtml, seo, meta, status }),
+        },
+      });
       showSuccess('Product saved');
     } catch (err) {
       showError(err instanceof Error ? err.message : 'Save failed');
@@ -165,3 +169,5 @@ export default function EditProductPage(props: Props) {
     </SnackbarProvider>
   );
 }
+
+export const getServerSideProps = getTenantPageProps;

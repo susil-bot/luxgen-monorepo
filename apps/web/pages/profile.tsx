@@ -100,7 +100,9 @@ function ProfileContent({ tenant }: ProfilePageProps) {
       await updateUser({
         variables: {
           id: session.id,
-          input: { firstName: firstName.trim(), lastName: lastName.trim() } } });
+          input: { firstName: firstName.trim(), lastName: lastName.trim() },
+        },
+      });
       updateStoredUser({ firstName: firstName.trim(), lastName: lastName.trim() });
       showSuccess('Your profile changes were saved successfully.');
     } catch (err: unknown) {
@@ -228,3 +230,5 @@ export default function ProfilePage(props: ProfilePageProps) {
     </SnackbarProvider>
   );
 }
+
+export const getServerSideProps = getTenantPageProps;

@@ -17,11 +17,7 @@ export interface UseSearchPresenterResult {
 /**
  * Client entry for /search — queries + transform in one hook.
  */
-export function useSearchPresenter({
-  query,
-  tenantId,
-  tenant,
-}: UseSearchPresenterOptions): UseSearchPresenterResult {
+export function useSearchPresenter({ query, tenantId, tenant }: UseSearchPresenterOptions): UseSearchPresenterResult {
   const enabled = Boolean(query.trim() && tenantId);
 
   const { data: coursesData, loading: coursesLoading } = useQuery(GET_SEARCH_COURSES, {
@@ -37,13 +33,7 @@ export function useSearchPresenter({
   });
 
   const viewModel = useMemo(
-    () =>
-      transformSearchResults(
-        query,
-        tenant,
-        coursesData?.courses ?? [],
-        usersData?.users ?? [],
-      ),
+    () => transformSearchResults(query, tenant, coursesData?.courses ?? [], usersData?.users ?? []),
     [query, tenant, coursesData?.courses, usersData?.users],
   );
 

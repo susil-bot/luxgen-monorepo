@@ -51,7 +51,9 @@ export function DashboardBanner({ banners, autoPlay = true, interval = 5000 }: D
         <h2 className="text-3xl font-bold mb-2">{current.title}</h2>
         <p className="text-lg opacity-90 mb-4 max-w-2xl">{current.description}</p>
         {current.buttonText ? (
-          <span className="inline-flex w-fit bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold">{current.buttonText}</span>
+          <span className="inline-flex w-fit bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold">
+            {current.buttonText}
+          </span>
         ) : null}
       </div>
     </div>

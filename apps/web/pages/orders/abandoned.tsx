@@ -3,11 +3,7 @@ import { useAppShellConfig } from '../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useMutation, useQuery } from '@apollo/client';
-import {
-  AppLayout,
-  AbandonedCheckoutListView,
-  buildAbandonedCheckoutRows,
-  SnackbarProvider } from '@luxgen/ui';
+import { AppLayout, AbandonedCheckoutListView, buildAbandonedCheckoutRows, SnackbarProvider } from '@luxgen/ui';
 import { PageLoadingState } from '../../components/common/PageStates';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
@@ -36,12 +32,14 @@ function OrdersAbandonedContent({ tenant }: Props) {
   const { data: checkoutData, loading: checkoutLoading } = useQuery(GET_ABANDONED_CHECKOUTS, {
     variables: { tenantId: queryTenantId },
     skip: !isMongoObjectId(queryTenantId),
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const { data: usersData, loading: usersLoading } = useQuery(GET_USERS, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const checkouts = useMemo(
     () => buildAbandonedCheckoutRows(checkoutData?.abandonedCheckouts, usersData?.users),
@@ -91,3 +89,5 @@ export default function OrdersAbandonedPage(props: Props) {
     </SnackbarProvider>
   );
 }
+
+export const getServerSideProps = getTenantPageProps;

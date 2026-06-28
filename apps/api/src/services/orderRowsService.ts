@@ -61,7 +61,12 @@ export async function listOrderRows(tenantId: string): Promise<ApiOrderRow[]> {
 
   for (const course of courses) {
     const courseId = course._id.toString();
-    const students = (course.students ?? []) as Array<{ _id: { toString(): string }; firstName?: string; lastName?: string; email: string }>;
+    const students = (course.students ?? []) as Array<{
+      _id: { toString(): string };
+      firstName?: string;
+      lastName?: string;
+      email: string;
+    }>;
     for (const student of students) {
       const studentId = student._id.toString();
       const user = userMap.get(studentId) ?? student;

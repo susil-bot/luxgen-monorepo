@@ -9,7 +9,8 @@ import {
   buildCustomersFromUsers,
   filterCustomersByTab,
   SnackbarProvider,
-  type CustomerFilterTab } from '@luxgen/ui';
+  type CustomerFilterTab,
+} from '@luxgen/ui';
 import { PageLoadingState } from '../../../components/common/PageStates';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../../lib/app-layout-user';
@@ -40,17 +41,20 @@ function AdminCustomersPageContent({ tenant }: Props) {
   const { data: coursesData, loading: coursesLoading } = useQuery(GET_COURSES, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const { data: customersData, loading: customersLoading } = useQuery(GET_CUSTOMERS, {
     variables: { tenantId: queryTenantId, search: search.trim() || undefined },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   const { data: enrollmentsData } = useQuery(GET_ENROLLMENTS, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network' });
+    fetchPolicy: 'cache-and-network',
+  });
 
   useEffect(() => {
     const q = router.query.search;
@@ -113,3 +117,5 @@ export default function AdminCustomersPage(props: Props) {
     </SnackbarProvider>
   );
 }
+
+export const getServerSideProps = getTenantPageProps;
