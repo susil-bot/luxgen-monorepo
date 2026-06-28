@@ -149,51 +149,7 @@ export const arrowClasses = {
   path: 'arrow-path',
 };
 
-// CSS styles for additional hover effects and animations
-export const arrowCSS = `
-  .arrow-button {
-    transition: all 0.2s ease;
-    outline: none;
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-  }
-  
-  .arrow-button:hover:not(:disabled) {
-    transform: scale(1.05);
-  }
-  
-  .arrow-button:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-  }
-  
-  .arrow-button:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
-  }
-  
-  .arrow-icon {
-    transition: transform 0.2s ease;
-    width: 100%;
-    height: 100%;
-  }
-
-  .arrow-path {
-    stroke: currentColor;
-    stroke-width: 2;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    fill: none;
-  }
-  
-  .arrow-button:hover .arrow-icon {
-    transform: scale(1.1);
-  }
-`;
+// Hover/focus rules live in ./arrow.css (imported once from Arrow.tsx or _app.tsx).
 
 // Utility functions for common arrow configurations
 export const getArrowConfig = (
@@ -206,7 +162,6 @@ export const getArrowConfig = (
   return {
     styles: getArrowStyles(direction, size, variant, disabled, tenantTheme),
     classes: arrowClasses,
-    css: arrowCSS,
   };
 };
 

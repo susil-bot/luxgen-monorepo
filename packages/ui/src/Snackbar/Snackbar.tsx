@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { withSSR } from '../ssr';
 
+const SNACKBAR_EXIT_MS = 200; // matches --transition-base
+
 export type SnackbarType = 'success' | 'error' | 'warning' | 'info';
 
 export interface SnackbarProps {
@@ -77,7 +79,7 @@ const SnackbarComponent: React.FC<SnackbarProps> = ({
     setTimeout(() => {
       setIsVisible(false);
       onClose?.();
-    }, 300); // Animation duration
+    }, SNACKBAR_EXIT_MS);
   }, [onClose]);
 
   const getTypeStyles = () => {
@@ -191,14 +193,20 @@ const SnackbarComponent: React.FC<SnackbarProps> = ({
   const positionStyles = getPositionStyles();
 
   return (
-    <div role="alert" aria-live="polite" className={`fixed z-50 max-w-sm w-full ${positionStyles} ${className}`} {...props}>
+    <div
+      role="alert"
+      aria-live="polite"
+      className={`fixed z-50 max-w-sm w-full ${positionStyles} ${className}`}
+      {...props}
+    >
       <div
         className={`
           ${styles.bg} ${styles.border} ${styles.text}
           border rounded-lg shadow-lg p-4
-          transform transition-all duration-300 ease-in-out
+          transform ease-in-out
           ${isExiting ? 'opacity-0 scale-95 translate-y-2' : 'opacity-100 scale-100 translate-y-0'}
         `}
+        style={{ transition: `all var(--transition-base, 200ms ease-in-out)` }}
       >
         <div className="flex items-start">
           <div className={`flex-shrink-0 ${styles.icon}`}>{getIcon()}</div>

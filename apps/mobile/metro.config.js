@@ -6,6 +6,11 @@ const workspaceRoot = path.resolve(projectRoot, '../..');
 
 const config = getDefaultConfig(projectRoot);
 
+config.transformer = {
+  ...config.transformer,
+  babelTransformerPath: require.resolve('react-native-svg-transformer'),
+};
+
 config.watchFolders = [workspaceRoot];
 
 config.resolver.nodeModulesPaths = [
@@ -19,5 +24,8 @@ config.resolver.extraNodeModules = {
   '@luxgen/types': path.resolve(workspaceRoot, 'packages/types/src'),
   '@luxgen/native-ui': path.resolve(workspaceRoot, 'packages/native-ui/src'),
 };
+
+config.resolver.assetExts = config.resolver.assetExts.filter((ext) => ext !== 'svg');
+config.resolver.sourceExts = [...config.resolver.sourceExts, 'svg'];
 
 module.exports = config;

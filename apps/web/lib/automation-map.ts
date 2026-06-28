@@ -1,65 +1,47 @@
-/** Map between GraphQL SCREAMING_SNAKE enums and automations page snake_case types. */
+import { FLOW_COMPOUND_CATALOG } from '@luxgen/automation-flow';
 
-/** Canonical types should mirror @luxgen/automation-flow */
-export type UiTriggerType =
-  | 'course_completed'
-  | 'user_enrolled'
-  | 'group_joined'
-  | 'certificate_issued'
-  | 'schedule'
-  | 'webhook'
-  | 'code_change_staged'
-  | 'code_change_committed'
-  | 'code_change_merged'
-  | 'code_change_failed';
+function gqlToSnake(gql: string): string {
+  return gql.toLowerCase();
+}
 
-/** Canonical types should mirror @luxgen/automation-flow */
-export type UiActionType =
-  | 'send_email'
-  | 'add_to_group'
-  | 'remove_from_group'
-  | 'enroll_in_course'
-  | 'issue_certificate'
-  | 'call_webhook'
-  | 'notify_slack'
-  | 'tag_user'
-  | 'run_agent_task';
+function collectLegacyTypes(kind: 'trigger' | 'action'): string[] {
+  const key = kind === 'trigger' ? 'legacyTriggerType' : 'legacyActionType';
+  const values = new Set<string>();
+  for (const compound of FLOW_COMPOUND_CATALOG) {
+    if (compound.kind !== kind) continue;
+    const legacy = compound[key as keyof typeof compound];
+    if (typeof legacy === 'string') values.add(gqlToSnake(legacy));
+  }
+  return [...values].sort();
+}
 
-const TRIGGER_TO_GQL: Record<UiTriggerType, string> = {
-  course_completed: 'COURSE_COMPLETED',
-  user_enrolled: 'USER_ENROLLED',
-  group_joined: 'GROUP_JOINED',
-  certificate_issued: 'CERTIFICATE_ISSUED',
-  schedule: 'SCHEDULE',
-  webhook: 'WEBHOOK',
-  code_change_staged: 'CODE_CHANGE_STAGED',
-  code_change_committed: 'CODE_CHANGE_COMMITTED',
-  code_change_merged: 'CODE_CHANGE_MERGED',
-  code_change_failed: 'CODE_CHANGE_FAILED',
-};
+const TRIGGER_TYPES = collectLegacyTypes('trigger') as readonly string[];
+const ACTION_TYPES = collectLegacyTypes('action') as readonly string[];
 
-const TRIGGER_FROM_GQL: Record<string, UiTriggerType> = Object.fromEntries(
-  Object.entries(TRIGGER_TO_GQL).map(([ui, gql]) => [gql, ui as UiTriggerType]),
-);
+/** Derived from @luxgen/automation-flow catalog (UI-95). */
+export type UiTriggerType = (typeof TRIGGER_TYPES)[number];
 
-const ACTION_TO_GQL: Record<UiActionType, string> = {
-  send_email: 'SEND_EMAIL',
-  add_to_group: 'ADD_TO_GROUP',
-  remove_from_group: 'REMOVE_FROM_GROUP',
-  enroll_in_course: 'ENROLL_IN_COURSE',
-  issue_certificate: 'ISSUE_CERTIFICATE',
-  call_webhook: 'CALL_WEBHOOK',
-  notify_slack: 'NOTIFY_SLACK',
-  tag_user: 'TAG_USER',
-  run_agent_task: 'RUN_AGENT_TASK',
-};
+/** Derived from @luxgen/automation-flow catalog (UI-95). */
+export type UiActionType = (typeof ACTION_TYPES)[number];
 
-const ACTION_FROM_GQL: Record<string, UiActionType> = Object.fromEntries(
-  Object.entries(ACTION_TO_GQL).map(([ui, gql]) => [gql, ui as UiActionType]),
-);
+const TRIGGER_TO_GQL = Object.fromEntries(
+  TRIGGER_TYPES.map((ui) => [ui, ui.toUpperCase()]),
+) as Record<UiTriggerType, string>;
+
+const TRIGGER_FROM_GQL = Object.fromEntries(
+  Object.entries(TRIGGER_TO_GQL).map(([ui, gql]) => [gql, ui]),
+) as Record<string, UiTriggerType>;
+
+const ACTION_TO_GQL = Object.fromEntries(
+  ACTION_TYPES.map((ui) => [ui, ui.toUpperCase()]),
+) as Record<UiActionType, string>;
+
+const ACTION_FROM_GQL = Object.fromEntries(
+  Object.entries(ACTION_TO_GQL).map(([ui, gql]) => [gql, ui]),
+) as Record<string, UiActionType>;
 
 export function triggerToGql(type: UiTriggerType): string {
-  return TRIGGER_TO_GQL[type];
+  return TRIGGER_TO_GQL[type] ?? type.toUpperCase();
 }
 
 export function triggerFromGql(type: string): UiTriggerType {
@@ -67,7 +49,7 @@ export function triggerFromGql(type: string): UiTriggerType {
 }
 
 export function actionToGql(type: UiActionType): string {
-  return ACTION_TO_GQL[type];
+  return ACTION_TO_GQL[type] ?? type.toUpperCase();
 }
 
 export function actionFromGql(type: string): UiActionType {

@@ -65,9 +65,9 @@ function ToolBadge({ event }: { event: ToolEvent }) {
     <div
       className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium my-1 animate-fade-in"
       style={{
-        backgroundColor: event.status === 'running' ? 'rgba(0,122,255,0.1)' : 'var(--color-fill-quaternary)',
+        backgroundColor: event.status === 'running' ? 'var(--color-blue-subtle)' : 'var(--color-fill-quaternary)',
         color: event.status === 'running' ? 'var(--color-blue)' : 'var(--color-label-secondary)',
-        border: `1px solid ${event.status === 'running' ? 'rgba(0,122,255,0.2)' : 'var(--color-separator)'}`,
+        border: `1px solid ${event.status === 'running' ? 'var(--color-blue-subtle-border)' : 'var(--color-separator)'}`,
       }}
     >
       <span>{icon}</span>
@@ -353,9 +353,22 @@ export default function AgentChat({
   return (
     <div className={isSidekick ? 'lux-sidekick-chat' : 'flex flex-col h-full'}>
       {streamError && (
-        <div role="alert" className="mx-4 mt-2 p-3 text-sm rounded-lg flex items-center justify-between gap-3" style={{ background: 'rgba(255,59,48,0.12)', color: 'var(--color-red)' }}>
+        <div
+          role="alert"
+          className="mx-4 mt-2 p-3 text-sm rounded-lg flex items-center justify-between gap-3"
+          style={{ background: 'rgba(255,59,48,0.12)', color: 'var(--color-red)' }}
+        >
           <span>{streamError}</span>
-          <button type="button" className="ios-btn-secondary text-xs py-1 px-2" onClick={() => { setStreamError(null); void sendMessage(); }}>Reconnect</button>
+          <button
+            type="button"
+            className="ios-btn-secondary text-xs py-1 px-2"
+            onClick={() => {
+              setStreamError(null);
+              void sendMessage();
+            }}
+          >
+            Reconnect
+          </button>
         </div>
       )}
       {/* Messages */}
@@ -402,9 +415,8 @@ export default function AgentChat({
               onKeyDown={handleKeyDown}
               placeholder="Describe what you want to build… (Enter to send, Shift+Enter for new line)"
               rows={2}
-              className="flex-1 resize-none input-field"
+              className="flex-1 resize-none input-field min-h-14 max-h-24 sm:max-h-40"
               disabled={isStreaming}
-              style={{ minHeight: '56px', maxHeight: 'min(40vh, 160px)' }}
             />
             <button
               onClick={sendMessage}

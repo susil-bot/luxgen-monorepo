@@ -1,17 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useAppShellConfig } from '../../../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import { useQuery } from '@apollo/client';
 import {
   AppLayout,
-  getDefaultLogo,
-  getDefaultSidebarSections,
   CustomerListView,
   buildCustomersFromUsers,
   filterCustomersByTab,
   SnackbarProvider,
-  type CustomerFilterTab,
-} from '@luxgen/ui';
+  type CustomerFilterTab } from '@luxgen/ui';
 import { PageLoadingState } from '../../../components/common/PageStates';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../../lib/app-layout-user';
@@ -27,6 +25,7 @@ interface Props {
 }
 
 function AdminCustomersPageContent({ tenant }: Props) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
@@ -41,20 +40,17 @@ function AdminCustomersPageContent({ tenant }: Props) {
   const { data: coursesData, loading: coursesLoading } = useQuery(GET_COURSES, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const { data: customersData, loading: customersLoading } = useQuery(GET_CUSTOMERS, {
     variables: { tenantId: queryTenantId, search: search.trim() || undefined },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const { data: enrollmentsData } = useQuery(GET_ENROLLMENTS, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   useEffect(() => {
     const q = router.query.search;
@@ -86,9 +82,9 @@ function AdminCustomersPageContent({ tenant }: Props) {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive
@@ -117,5 +113,3 @@ export default function AdminCustomersPage(props: Props) {
     </SnackbarProvider>
   );
 }
-
-export const getServerSideProps = getTenantPageProps;

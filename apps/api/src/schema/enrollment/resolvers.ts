@@ -1,6 +1,7 @@
 import { EnrollmentPaymentStatus, EnrollmentLearningStatus, UserRole } from '@luxgen/db';
 import { enrollmentService } from '../../services/enrollmentService';
 import { checkoutSessionService } from '../../services/checkoutSessionService';
+import { listOrderRows } from '../../services/orderRowsService';
 import { courseService } from '../../services/courseService';
 import { actorFromContext } from '../../services/activityEventService';
 import { isBillingDevMode } from '../../services/billingService';
@@ -118,9 +119,17 @@ export const enrollmentResolvers = {
       const docs = await checkoutSessionService.listAbandoned(scoped);
       return docs.map(mapAbandonedCheckout);
     },
+    orderRows: async (_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) => {
+      const scoped = scopedTenantId(ctx, tenantId);
+      return listOrderRows(scoped);
+    },
   },
   Mutation: {
-    sendCheckoutRecoveryEmail: async (_: unknown, { tenantId, checkoutSessionId }: { tenantId: string; checkoutSessionId: string }, ctx: GraphQLContext) => {
+    sendCheckoutRecoveryEmail: async (
+      _: unknown,
+      { tenantId, checkoutSessionId }: { tenantId: string; checkoutSessionId: string },
+      ctx: GraphQLContext,
+    ) => {
       const scoped = scopedTenantId(ctx, tenantId);
       return checkoutSessionService.sendRecoveryEmail(scoped, checkoutSessionId);
     },

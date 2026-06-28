@@ -589,7 +589,7 @@ const [user, setUser] = useState<UserMenu | null>(null);
 | LOW                  | 25      | 24         |
 | **Agent / A-MEDIUM** | **10**  | **10** ✅  |
 | **Agent / A-LOW**    | **10**  | **10** ✅  |
-| **Total**            | **110** | **110** ✅ |
+| **Total**                                       | **200** | **171** |
 
 > Update the Done column as items are completed. When all items in a tier are done, mark the tier header with ✅.
 
@@ -1044,15 +1044,15 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `TenantThemeBridge` (in `apps/web/components/theme/`) exists to apply tenant-specific CSS overrides via `data-tenant` attributes, but it is not present in every page or in `_app.tsx`. Pages that do not include it will not receive tenant colour overrides.
       **Fix:** Move `TenantThemeBridge` into `_app.tsx` so it wraps the entire application.
 
-- [ ] **UI-09** `[layout]` `[arch]`
+- [x] **UI-09** `[layout]` `[arch]`
       All user state is read from `localStorage` via `getStoredUser()`. There is no server-side hydration of user data in `getServerSideProps`. This causes a flash of unauthenticated UI on every protected page load.
       **Fix:** Read user from a secure HTTP-only cookie on the server and pass it as a `pageProps.user` from `getServerSideProps` (or a shared middleware).
 
-- [ ] **UI-10** `[layout]` `[arch]`
+- [x] **UI-10** `[layout]` `[arch]`
       Three shell components — `OrganizationShell`, `SettingsShell`, `ProjectShell` — each independently call `getDefaultSidebarSections()` and `getDefaultLogo()`, which return new object instances on every render and are not memoized. This creates hidden coupling and prevents real sidebar data from flowing in.
       **Fix:** Pass sidebar config as props down from `_app.tsx` or a shared hook; remove `getDefault*` calls from shell internals.
 
-- [ ] **UI-11** `[layout]` `[arch]`
+- [x] **UI-11** `[layout]` `[arch]`
       No CSS methodology is documented or enforced. Pages simultaneously use four styling approaches: Tailwind utility classes, iOS-design-system class names (`ios-btn-primary`, `ios-card`), CSS custom properties (`var(--color-blue)`), and inline `style={{ ... }}` objects. This makes it impossible to apply global changes consistently.
       **Fix:** Adopt a single primary approach (CSS variables + utility classes); document in `CONTRIBUTING.md` and lint via a Stylelint rule.
 
@@ -1060,19 +1060,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       No `pages/500.tsx` custom error page exists. Next.js defaults to a plain white page for 500 errors.
       **Fix:** Create `pages/500.tsx` consistent with `pages/404.tsx` using `AppLayout` and the `PageEmptyState` component.
 
-- [ ] **UI-13** `[layout]` `[arch]`
+- [x] **UI-13** `[layout]` `[arch]`
       `overflow-x: hidden` is set on `body` in `globals.css`. This hides overflowing content instead of fixing the root overflow cause, and on iOS it can break `position: sticky` elements inside the body.
       **Fix:** Remove `overflow-x: hidden` from `body`; find and fix the element that overflows instead.
 
-- [ ] **UI-14** `[layout]` `[arch]`
+- [x] **UI-14** `[layout]` `[arch]`
       `getDefaultSidebarSections()` returns a static navigation array that is hard-coded in `@luxgen/ui`. Any page using it ignores: tenant-specific menu items, user-role-based item visibility, and feature-flag gates. Approximately 28 pages are affected.
       **Fix:** Replace all `getDefaultSidebarSections()` calls with a hook (`useSidebarSections()`) that reads from the session role and billing plan to filter items dynamically.
 
-- [ ] **UI-15** `[layout]` `[arch]`
+- [x] **UI-15** `[layout]` `[arch]`
       `getDefaultUser()` is called in 16 page files. It returns a static object `{ name: 'Admin User', email: 'admin@luxgen.com', role: 'ADMIN' }`. On production pages this fake user appears in the nav bar initials/avatar whenever real session data has not yet loaded, creating a brief incorrect flash.
       **Fix:** Return `null` or `undefined` until the real session is confirmed; use a skeleton/spinner in the NavBar while loading.
 
-- [ ] **UI-16** `[layout]` `[arch]`
+- [x] **UI-16** `[layout]` `[arch]`
       `getDefaultLogo()` returns a static object. All 28 usages ignore the real tenant's logo URL that may be stored in the database and accessible via `GET_TENANT`.
       **Fix:** Replace with a `useTenantLogo()` hook that fetches from the tenant config query.
 
@@ -1080,15 +1080,15 @@ const [user, setUser] = useState<UserMenu | null>(null);
       No shared GraphQL error handler exists. Each page duplicates its own error-handling pattern (some use `errorPolicy: 'ignore'`, some check `if (error)`, some do nothing). A GraphQL 401/403 should globally redirect to `/login?reason=session_expired`.
       **Fix:** Add an Apollo `onError` link in the Apollo Client setup that intercepts `UNAUTHENTICATED` errors and redirects.
 
-- [ ] **UI-18** `[layout]`
+- [x] **UI-18** `[layout]`
       `LearnLayout`, `StoreLayout`, and `ProjectShell` each define their own top navigation bar. `AppLayout` uses `NavBar` from `@luxgen/ui`. The four navigation implementations are not visually or behaviourally consistent.
       **Fix:** Standardise all layouts to use the same `NavBar` component from `@luxgen/ui` with appropriate prop configuration.
 
-- [ ] **UI-19** `[layout]`
+- [x] **UI-19** `[layout]`
       `SettingsShell` renders a left-side settings navigation that links via `<a href>` instead of `<Link>` from Next.js, causing full page reloads between settings sections instead of client-side navigation.
       **Fix:** Replace all `<a href>` in `SettingsShell` nav with `<Link href>`.
 
-- [ ] **UI-20** `[layout]`
+- [x] **UI-20** `[layout]`
       `OrganizationShell` breadcrumb navigation is not implemented — the component accepts `breadcrumbs` but the rendered DOM shows no breadcrumb trail. On deep pages like `organization/security/saml`, users have no visual indication of where they are.
       **Fix:** Implement breadcrumb rendering in `OrganizationShell` and pass page-specific breadcrumb arrays from each page.
 
@@ -1113,87 +1113,87 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/components/BannerCarousel.tsx` uses a fixed `h-64` class with no responsive height variants. On mobile, the banner is tall relative to viewport, pushing content below the fold.
       **Fix:** Apply `h-40 sm:h-56 md:h-64` responsive height classes.
 
-- [ ] **UI-25** `[responsive]`
+- [x] **UI-25** `[responsive]`
       `apps/web/components/tenant/TenantSwitcher.tsx` renders a dropdown with a hardcoded `w-56` width. On viewport < 280px this overflows.
       **Fix:** Use `w-full max-w-[14rem]` or `min-w-[12rem]` to allow natural flow.
 
-- [ ] **UI-26** `[responsive]`
+- [x] **UI-26** `[responsive]`
       `apps/web/components/agent/AIStudioSidekickPanel.tsx` has no responsive constraints. It renders as a fixed-size panel that overlaps main content on narrow screens.
       **Fix:** Apply `max-w-xs sm:max-w-sm` and position it as a slide-over drawer on mobile.
 
-- [ ] **UI-27** `[responsive]`
+- [x] **UI-27** `[responsive]`
       `apps/web/components/agent/HeadlessTaskPanel.tsx` uses fixed-width inline styles with no responsive fallbacks.
       **Fix:** Replace fixed-width styles with responsive Tailwind classes; ensure it stacks vertically on mobile.
 
-- [ ] **UI-28** `[responsive]`
+- [x] **UI-28** `[responsive]`
       `apps/web/components/store/ProductCard.tsx` uses `h-32` fixed height for its image area. On mobile this clips long product titles and the layout breaks when 3-column grid collapses.
       **Fix:** Use `aspect-video` or `aspect-square` instead of a fixed height; ensure the grid switches to 1-column at `sm:`.
 
-- [ ] **UI-29** `[responsive]`
+- [x] **UI-29** `[responsive]`
       `packages/ui/src/Table/Table.tsx` has no horizontal scroll wrapper. Wide data tables overflow and clip on mobile screens.
       **Fix:** Wrap the `<table>` in `<div className="overflow-x-auto">`.
 
-- [ ] **UI-30** `[responsive]`
+- [x] **UI-30** `[responsive]`
       `packages/ui/src/GridContainer/GridContainer.tsx` accepts a single `columns` number. On mobile this still renders N columns. The component has no responsive column array (e.g., `[1, 2, 3]` for sm/md/lg).
       **Fix:** Accept `columns: number | { sm?: number; md?: number; lg?: number }` and generate responsive CSS grid accordingly.
 
-- [ ] **UI-31** `[responsive]`
+- [x] **UI-31** `[responsive]`
       `packages/ui/src/ActionMenu/ActionMenu.tsx` renders a `min-w-[220px]` dropdown. On a 320px screen the menu overflows the right edge.
       **Fix:** Add `max-w-[calc(100vw-2rem)]` and flip alignment to `right` when near the edge via a position calculation.
 
-- [ ] **UI-32** `[responsive]`
+- [x] **UI-32** `[responsive]`
       `packages/ui/src/Modal/Modal.tsx` has no `xs` size for very small screens. All sizes render with `mx-auto` but no `mx-4` fallback means the modal content can overflow on screens narrower than its `max-w`.
       **Fix:** Add `mx-4 sm:mx-auto` to ensure minimum horizontal margin on mobile.
 
-- [ ] **UI-33** `[responsive]`
+- [x] **UI-33** `[responsive]`
       `apps/web/pages/courses/analytics.tsx` and `pages/groups/analytics.tsx` render stat cards in a fixed row. On mobile they overflow rather than wrapping to a single column.
       **Fix:** Wrap in `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4`.
 
-- [ ] **UI-34** `[responsive]`
+- [x] **UI-34** `[responsive]`
       `apps/web/pages/orders/index.tsx` uses `OrderListView` which renders a table. No horizontal scroll container is applied at the page level. Order rows overflow on screens < 768px.
       **Fix:** Wrap the `OrderListView` in `<div className="overflow-x-auto -mx-4 px-4">`.
 
-- [ ] **UI-35** `[responsive]`
+- [x] **UI-35** `[responsive]`
       `packages/ui/src/Carousel/Carousel.tsx` uses JavaScript-calculated `translateX` percentages. The carousel does not support touch swipe gestures on mobile, making it unusable as a primary navigation pattern on touch devices.
       **Fix:** Add `touchstart`/`touchmove`/`touchend` listeners to handle swipe navigation.
 
-- [ ] **UI-36** `[responsive]`
+- [x] **UI-36** `[responsive]`
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` plays automatically by default (`autoPlay: true`). On mobile, autoplay can drain battery and cause motion sickness. The `prefers-reduced-motion` media query is not respected.
       **Fix:** Check `window.matchMedia('(prefers-reduced-motion: reduce)').matches` and disable autoplay/transitions when true.
 
-- [ ] **UI-37** `[responsive]`
+- [x] **UI-37** `[responsive]`
       `pages/automations/tower/[id].tsx` (TowerShell page) renders a graph canvas with hardcoded pixel dimensions. The canvas does not reflow on window resize.
       **Fix:** Make the canvas dimensions reactive using a `ResizeObserver` on the container element.
 
-- [ ] **UI-38** `[responsive]`
+- [x] **UI-38** `[responsive]`
       `apps/web/components/agent/AgentTransparency.tsx` uses a side-by-side panel layout (file tree + diff viewer). On screens < 1024px the diff viewer is cramped. On mobile it is unusable.
       **Fix:** Stack the panels vertically below `lg:` breakpoint using `flex-col lg:flex-row`.
 
-- [ ] **UI-39** `[responsive]`
+- [x] **UI-39** `[responsive]`
       `OrganizationSecurityNav` (sidebar nav within the security section) renders as a list. On mobile it takes up the full screen width but has no drawer/accordion treatment.
       **Fix:** Collapse to a `<select>` or accordion on `< md` breakpoints.
 
-- [ ] **UI-40** `[responsive]`
+- [x] **UI-40** `[responsive]`
       `SettingsShell` renders a vertical tab list on the left. On narrow screens this pushes the main content off-screen.
       **Fix:** Collapse the settings tab list to a horizontal scrollable `<nav>` or `<select>` below `md:`.
 
-- [ ] **UI-41** `[responsive]`
+- [x] **UI-41** `[responsive]`
       `packages/ui/src/CountryLanguageDropdown/CountryLanguageDropdown.tsx` hardcodes `w-80` (320px). On screens narrower than 360px this causes horizontal overflow.
       **Fix:** Use `w-full max-w-xs` and set `min-w-0` on the parent container.
 
-- [ ] **UI-42** `[responsive]`
+- [x] **UI-42** `[responsive]`
       59 out of 88 pages have zero responsive Tailwind classes. These pages likely look acceptable on laptop screens but are broken on mobile.
       **Fix:** Audit each of the 59 pages. At minimum, ensure every page content container uses `px-4 sm:px-6 lg:px-8` padding and `max-w-7xl mx-auto`.
 
-- [ ] **UI-43** `[responsive]`
+- [x] **UI-43** `[responsive]`
       No CSS Container Queries are used anywhere. Several components (e.g., `Card`, `ProductCard`, `GroupCard`) would benefit from container-based breakpoints rather than viewport breakpoints, since they appear in both narrow sidebars and wide main content areas.
       **Fix:** Evaluate and introduce `@container` queries for the card components.
 
-- [ ] **UI-44** `[responsive]`
+- [x] **UI-44** `[responsive]`
       `packages/ui/src/Select/Select.tsx` custom dropdown does not handle the case where it opens near the bottom of the viewport. The dropdown can be clipped by the viewport edge on mobile.
       **Fix:** Detect available space and flip the dropdown to open upward (`dropup`) when needed.
 
-- [ ] **UI-45** `[responsive]`
+- [x] **UI-45** `[responsive]`
       `apps/web/components/agent/AgentChat.tsx` textarea has `maxHeight: '160px'` hardcoded as an inline style. On small phones this is too tall relative to the available screen height, pushing the send button below the fold.
       **Fix:** Use `max-h-24 sm:max-h-40` or compute max height relative to `window.innerHeight`.
 
@@ -1201,15 +1201,15 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 3 — Hardcoded Values & Design Tokens (UI-46 → UI-75)
 
-- [ ] **UI-46** `[hardcode]`
+- [x] **UI-46** `[hardcode]`
       `packages/ui/src/Footer/Footer.tsx` default copyright prop is `'© 2024 LuxGen. All rights reserved.'`. The year 2024 is stale. It is also hardcoded as a `LuxGen` brand name that should be the tenant's name.
       **Fix:** Change default to `© ${new Date().getFullYear()} LuxGen. All rights reserved.` and make it tenant-aware via a `companyName` prop.
 
-- [ ] **UI-47** `[hardcode]`
+- [x] **UI-47** `[hardcode]`
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` hardcodes the CTA button colour as `'#F78C4A'` and text colour as `'#FFFFFF'`. These override any tenant theme.
       **Fix:** Replace with CSS variable references `var(--color-orange)` / `var(--color-label-on-fill)`.
 
-- [ ] **UI-48** `[hardcode]`
+- [x] **UI-48** `[hardcode]`
       `packages/ui/src/ProductCard/ProductCard.tsx` hardcodes like-icon fill colour as `'#EF4444'` (active) and `'#6B7280'` (inactive).
       **Fix:** Use `var(--color-red)` and `var(--color-label-tertiary)`.
 
@@ -1245,35 +1245,35 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/Input/Input.tsx` uses `'border-gray-300'` and `'border-red-300'` classes instead of `var(--color-separator)` and `var(--color-red)`.
       **Fix:** Replace Tailwind colour classes with CSS variable references.
 
-- [ ] **UI-57** `[hardcode]`
+- [x] **UI-57** `[hardcode]`
       `packages/ui/src/ErrorBoundary.tsx` uses `'bg-blue-600 hover:bg-blue-700'` for the retry button.
       **Fix:** Replace with `var(--color-blue)` background.
 
-- [ ] **UI-58** `[hardcode]`
+- [x] **UI-58** `[hardcode]`
       `packages/ui/src/Arrow/Arrow.tsx` injects a `<style>{arrowCSS}</style>` tag inline inside the React component. This causes style duplication on every render and is a well-known anti-pattern.
       **Fix:** Move arrow CSS to a `.css` module or to `globals.css`. Remove the `<style>` injection.
 
-- [ ] **UI-59** `[hardcode]`
+- [x] **UI-59** `[hardcode]`
       `packages/ui/src/ProductCard/ProductCard.tsx` also injects `<style>{productCardCSS}</style>`. Same anti-pattern as UI-58.
       **Fix:** Move to a CSS module file.
 
-- [ ] **UI-60** `[hardcode]`
+- [x] **UI-60** `[hardcode]`
       `apps/web/components/store/GptSalesAssistant.tsx` hardcodes `linear-gradient(135deg, #007AFF, #AF52DE)` for its header. This duplicates the brand gradient that is already available as a CSS pattern in `globals.css`.
       **Fix:** Use a shared `lux-brand-gradient` CSS class defined once in `globals.css`.
 
-- [ ] **UI-61** `[hardcode]`
+- [x] **UI-61** `[hardcode]`
       `apps/web/components/store/CategoryRail.tsx` hardcodes `#007AFF` and `#5856D6` directly in `style={{}}` for active chip colours.
       **Fix:** Use `var(--color-blue)` and `var(--color-purple)`.
 
-- [ ] **UI-62** `[hardcode]`
+- [x] **UI-62** `[hardcode]`
       `apps/web/components/store/StoreLayout.tsx` hardcodes a `radial-gradient(...)` with `rgba(...)` values for its background overlay.
       **Fix:** Extract to a named CSS class in `globals.css`.
 
-- [ ] **UI-63** `[hardcode]`
+- [x] **UI-63** `[hardcode]`
       `apps/web/components/tenant/TenantBanner.tsx` uses Tailwind `from-blue-600 to-purple-600` gradient classes.
       **Fix:** Replace with the `lux-brand-gradient` CSS class (see UI-60).
 
-- [ ] **UI-64** `[hardcode]`
+- [x] **UI-64** `[hardcode]`
       `apps/web/components/agent/AgentChat.tsx` uses `rgba(0,122,255,0.1)` for the user message bubble background.
       **Fix:** Use `color-mix(in srgb, var(--color-blue) 10%, transparent)` or define `--color-blue-10` in `globals.css`.
 
@@ -1293,31 +1293,31 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/pages/automations/tower/index.tsx` and `tower/[id].tsx` use `#616161`, `#d72c0d`, `#202223`, `#fff` in six or more places. The tower UI has the highest density of hardcoded colour values in the entire codebase.
       **Fix:** Map each value to a CSS variable; consolidate in `globals.css` under a `[data-tower]` scope.
 
-- [ ] **UI-69** `[hardcode]`
+- [x] **UI-69** `[hardcode]`
       `packages/ui/src/Badge/Badge.tsx` computes background as `${color}20` (appending hex opacity). This is not a standard CSS pattern and breaks if `color` is a CSS variable or `rgb()` function.
       **Fix:** Use `color-mix(in srgb, ${color} 12%, transparent)` or define explicit CSS variable pairs per variant.
 
-- [ ] **UI-70** `[hardcode]`
+- [x] **UI-70** `[hardcode]`
       `packages/ui/src/NavBar/NavBar.tsx` hardcodes `height: 56px` for the navbar. If the font size or padding increases, the navbar will overflow.
       **Fix:** Define `--lux-navbar-height: 56px` as a CSS variable (already done for sidebar — apply the same pattern to navbar).
 
-- [ ] **UI-71** `[hardcode]`
+- [x] **UI-71** `[hardcode]`
       `packages/ui/src/Card/Card.tsx` hardcodes `minHeight` in `rem` values (`8rem | 10rem | 12rem`) for size variants. These do not scale with the user's chosen base font size.
       **Fix:** Express minimum heights as unitless multiples or `ch` units that scale with content.
 
-- [ ] **UI-72** `[hardcode]`
+- [x] **UI-72** `[hardcode]`
       `packages/ui/src/Kicker/Kicker.tsx` hardcodes letter-spacing values (`0.05em | 0.1em | 0.15em`) and line-heights (`1.2 | 1.3 | 1.4`) as inline style objects. These are typography decisions that should live in CSS.
       **Fix:** Move to CSS classes or CSS variables.
 
-- [ ] **UI-73** `[hardcode]`
+- [x] **UI-73** `[hardcode]`
       `packages/ui/src/Select/Select.tsx` uses `'▼'` as the dropdown indicator arrow — a Unicode character, not an SVG icon. Screen readers will announce this as "black down-pointing triangle".
       **Fix:** Replace with an inline SVG chevron with `aria-hidden="true"`.
 
-- [ ] **UI-74** `[hardcode]`
+- [x] **UI-74** `[hardcode]`
       `packages/ui/src/ActionMenu/ActionMenu.tsx` trigger button uses `'···'` (three dots) as its label — a Unicode ellipsis that screen readers announce literally.
       **Fix:** Replace with an SVG icon and add `aria-label="More actions"`.
 
-- [ ] **UI-75** `[hardcode]`
+- [x] **UI-75** `[hardcode]`
       Animation durations across components are inconsistent: Accordion uses `0.2s`, Carousel uses `0.3s`, Snackbar uses `300ms`, Logout uses `dur="2s"`. No shared timing token is referenced.
       **Fix:** Define `--transition-fast: 150ms`, `--transition-base: 250ms`, `--transition-slow: 400ms` in `globals.css` and reference them in all components.
 
@@ -1325,79 +1325,79 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 4 — TypeScript & Type Safety (UI-76 → UI-95)
 
-- [ ] **UI-76** `[type]`
+- [x] **UI-76** `[type]`
       `packages/ui/src/Arrow/Arrow.tsx`: `tenantTheme: any`. Should be typed as `TenantTheme` (the type exists in `packages/ui/src/types`).
 
-- [ ] **UI-77** `[type]`
+- [x] **UI-77** `[type]`
       `packages/ui/src/Snackbar/Snackbar.tsx`: `tenantTheme: any`. Same fix — use `TenantTheme`.
 
-- [ ] **UI-78** `[type]`
+- [x] **UI-78** `[type]`
       `packages/ui/src/RegisterForm/RegisterForm.tsx`: `tenantTheme: any` and a catch-all `[key: string]: any` index signature. The index signature effectively disables prop type-checking for all callers.
       **Fix:** Remove the index signature; use explicit optional props for all supported keys.
 
-- [ ] **UI-79** `[type]`
+- [x] **UI-79** `[type]`
       `packages/ui/src/Input/Input.tsx`: `[key: string]: any` catch-all. Same issue as UI-78.
       **Fix:** Extend `React.InputHTMLAttributes<HTMLInputElement>` explicitly instead of an index signature.
 
-- [ ] **UI-80** `[type]`
+- [x] **UI-80** `[type]`
       `packages/ui/src/Select/Select.tsx`: `onChange: (value: any) => void`. Should be generic: `onChange: (value: T | T[]) => void` where `T = string | number`.
 
-- [ ] **UI-81** `[type]`
+- [x] **UI-81** `[type]`
       `packages/ui/src/InputWithLabel/InputWithLabel.tsx`: `value: any`, `onChange: (value: any) => void` inherited from `BaseFormProps`. The `any` propagates into every usage.
       **Fix:** Make `BaseFormProps` generic: `BaseFormProps<T = string>`.
 
-- [ ] **UI-82** `[type]`
+- [x] **UI-82** `[type]`
       `apps/web/lib/transformer.ts` has `metadata: any` in multiple type definitions, `transformDashboardData(graphqlData: any)`, and multiple `.map((item: any) => ...)`.
       **Fix:** Replace each `any` with the generated GraphQL type or an explicit interface matching the query shape.
 
-- [ ] **UI-83** `[type]`
+- [x] **UI-83** `[type]`
       `apps/web/pages/courses/create.tsx`, `courses/analytics.tsx`, `groups/analytics.tsx`, `developer/index.tsx`: all use `useState<any>(null)` for user state. Should be `useState<UserMenu | null>(null)`.
 
-- [ ] **UI-84** `[type]`
+- [x] **UI-84** `[type]`
       `apps/web/pages/dashboard.tsx`: `onDashboardAction(action: string, data?: any)`. The `action` should be a typed literal union of all supported action strings.
 
-- [ ] **UI-85** `[type]`
+- [x] **UI-85** `[type]`
       Multiple `getServerSideProps` functions are typed as `async (context: any)`. Should use `GetServerSidePropsContext` from `next`.
 
-- [ ] **UI-86** `[type]`
+- [x] **UI-86** `[type]`
       `RegisterForm` in `@luxgen/ui` exposes `ADMIN` and `SUPER_ADMIN` as selectable role options in the UI. These values flow into `REGISTER_MUTATION` with no type guard on the frontend.
       **Fix:** Type the `role` field as `'USER' | 'STUDENT'` only; remove ADMIN/SUPER_ADMIN from the UI form entirely (backend validates but defence-in-depth applies to UI too).
 
-- [ ] **UI-87** `[type]`
+- [x] **UI-87** `[type]`
       `apps/web/components/automations/tower/TowerShell/TowerShell.tsx` and its sub-components likely have implicit `any` from the flow graph data model. Audit and type the node/edge data structures.
 
-- [ ] **UI-88** `[type]`
+- [x] **UI-88** `[type]`
       `AdminDashboardLayout` `onDashboardAction` prop accepts `data?: any`. Given the 11 different action types being wired to no-ops, this should be a discriminated union.
       **Fix:** Define `type DashboardAction = { type: 'view_course'; courseId: string } | { type: 'view_survey'; surveyId: string } | ...`.
 
-- [ ] **UI-89** `[type]`
+- [x] **UI-89** `[type]`
       No shared `ApiError` type is defined. Error handling across all pages uses `err instanceof Error ? err.message : String(err)` inline. This pattern is repeated in 40+ places.
       **Fix:** Export a shared `extractErrorMessage(err: unknown): string` utility from a shared package.
 
-- [ ] **UI-90** `[type]`
+- [x] **UI-90** `[type]`
       `packages/ui/src/Heading/Heading.tsx` accepts a `loading` prop that is silently extracted via destructuring (`const { loading, ...headingProps } = props`) but never used — it disappears without effect.
       **Fix:** Either implement a skeleton/loading state for headings, or remove the `loading` prop entirely from the type definition.
 
-- [ ] **UI-91** `[type]`
+- [x] **UI-91** `[type]`
       `apps/web/components/agent/AgentChat.tsx`: `input: Record<string, any>` in the `ToolEvent` interface. The tool input shape is known for each tool — use discriminated unions per tool name.
 
-- [ ] **UI-92** `[type]`
+- [x] **UI-92** `[type]`
       `apps/web/pages/groups/[id]/edit.tsx` likely uses typed `any` for form state. Audit and apply proper types.
 
-- [ ] **UI-93** `[type]`
+- [x] **UI-93** `[type]`
       GraphQL query variables typed as `Record<string, any>` in some utility hooks. Replace with generated types matching the query variables definition.
 
-- [ ] **UI-94** `[type]`
+- [x] **UI-94** `[type]`
       `apps/web/pages/admin/customers/[id].tsx` likely uses `any` for the customer data shape returned by the GraphQL query. Generate or define a `Customer` type.
 
-- [ ] **UI-95** `[type]`
+- [x] **UI-95** `[type]`
       `apps/web/lib/automation-map.ts` `UiTriggerType` and `UiActionType` are defined locally. They should be generated from or derived from the `@luxgen/automation-flow` package's canonical types to prevent drift.
 
 ---
 
 ### Section 5 — Dead Code & Unused Props (UI-96 → UI-110)
 
-- [ ] **UI-96** `[dead]`
+- [x] **UI-96** `[dead]`
       `packages/ui/src/Sidebar/Sidebar.tsx`: `variant`, `position`, and `width` props are accepted in the TypeScript interface and documented but are never referenced in the component's render logic. Callers passing these props believe they have an effect when they do not.
       **Fix:** Either implement each prop's intended behaviour, or remove them from the interface and add a TODO comment.
 
@@ -1432,27 +1432,27 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/pages/courses.tsx`: `handleNavigate` only calls `console.log('Navigate to:', path)`. The `CourseMenu` navigation links fire this function but no routing occurs.
       **Fix:** Replace `console.log` with `router.push(path)`.
 
-- [ ] **UI-105** `[dead]`
+- [x] **UI-105** `[dead]`
       `apps/web/components/common/Button.tsx` appears to duplicate `packages/ui/src/Button/Button.tsx`. Both export a `Button` component with similar props. Callers importing from different locations get inconsistent behaviour.
       **Fix:** Delete `apps/web/components/common/Button.tsx`; update all imports to use `@luxgen/ui`.
 
-- [ ] **UI-106** `[dead]`
+- [x] **UI-106** `[dead]`
       `apps/web/components/common/Input.tsx` duplicates `packages/ui/src/Input/Input.tsx`.
       **Fix:** Delete the local component and import from `@luxgen/ui`.
 
-- [ ] **UI-107** `[dead]`
+- [x] **UI-107** `[dead]`
       `apps/web/components/common/Loader.tsx` duplicates loading states already handled by `PageLoadingState` in `apps/web/components/common/PageStates.tsx` and the spinner in `@luxgen/ui/Button`.
       **Fix:** Remove `Loader.tsx`; use `PageLoadingState` or inline spinners via the Button's `loading` prop.
 
-- [ ] **UI-108** `[dead]`
+- [x] **UI-108** `[dead]`
       `packages/ui/src/AIStudio/` exports `AIStudioLogo` as `AIStudio` (a logo component). This is misleading — callers expecting an AI Studio feature component will import a logo.
       **Fix:** Rename the export to `AIStudioLogo` in the barrel file; update all callers.
 
-- [ ] **UI-109** `[dead]`
+- [x] **UI-109** `[dead]`
       `packages/ui/src/UserDashboardLayout/` is exported from the index but is never imported by any page or component in `apps/web`. Either it is genuinely unused or it should replace a manually built learner dashboard.
       **Fix:** If unused, remove from the export barrel to reduce bundle size. If needed, use it for the learner `/customers` dashboard.
 
-- [ ] **UI-110** `[dead]`
+- [x] **UI-110** `[dead]`
       `packages/ui/src/Carousel/Carousel.tsx` and `packages/ui/src/BannerCarousel/BannerCarousel.tsx` are two separate components with almost identical slide/autoplay/arrows/dots features. Both are exported from the index.
       **Fix:** Consolidate into a single `Carousel` component with a `variant="banner"` prop; deprecate and remove the redundant one.
 
@@ -1460,27 +1460,27 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 6 — Missing Component States (UI-111 → UI-125)
 
-- [ ] **UI-111** `[state]`
+- [x] **UI-111** `[state]`
       `packages/ui/src/Accordion/Accordion.tsx` has no loading skeleton state. When accordion content loads asynchronously, there is no placeholder.
       **Fix:** Add a `loading?: boolean` prop that renders skeleton lines in place of accordion items.
 
-- [ ] **UI-112** `[state]`
+- [x] **UI-112** `[state]`
       `packages/ui/src/Card/Card.tsx` has no loading/skeleton state.
       **Fix:** Add `loading?: boolean` that renders a shimmer animation filling the card area.
 
-- [ ] **UI-113** `[state]`
+- [x] **UI-113** `[state]`
       `packages/ui/src/Carousel/Carousel.tsx` returns `null` for an empty `items` array with no user-visible feedback.
       **Fix:** Render a placeholder/empty state card when `items.length === 0`.
 
-- [ ] **UI-114** `[state]`
+- [x] **UI-114** `[state]`
       `packages/ui/src/ActionMenu/ActionMenu.tsx` has no loading state for async action handlers (e.g., a "Delete" action that triggers an API call). The menu closes immediately with no feedback.
       **Fix:** Add `loading?: boolean` and `disabled?: boolean` per `ActionMenuItem`; show a spinner on the active item.
 
-- [ ] **UI-115** `[state]`
+- [x] **UI-115** `[state]`
       `apps/web/pages/courses/create.tsx` has no error state rendered in the UI — the submit handler logs to console but shows nothing to the user if the mutation fails.
       **Fix:** Show an error snackbar or inline form error on mutation failure.
 
-- [ ] **UI-116** `[state]`
+- [x] **UI-116** `[state]`
       `apps/web/pages/groups/create.tsx` same issue as UI-115.
 
 - [x] **UI-117** `[state]`
@@ -1498,22 +1498,22 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `apps/web/pages/organization/roles.tsx` renders an empty list when there are no custom roles but shows no empty state call-to-action (e.g., "Create your first role").
       **Fix:** Add an `EmptyState` component with a "Create role" button when the list is empty.
 
-- [ ] **UI-121** `[state]`
+- [x] **UI-121** `[state]`
       `packages/ui/src/Modal/Modal.tsx` has no internal loading state. When a modal wraps an async action, callers must implement their own loader inside `children`.
       **Fix:** Add `loading?: boolean` prop that renders a spinner overlay on the modal body.
 
-- [ ] **UI-122** `[state]`
+- [x] **UI-122** `[state]`
       `packages/ui/src/Checkbox/Switch/RadioGroup` form components show error text but do not visually highlight the control itself (e.g., red border) when in error state.
       **Fix:** Add `border-red` or `ring-red` styling to the control element when `error` prop is set.
 
-- [ ] **UI-123** `[state]`
+- [x] **UI-123** `[state]`
       `apps/web/pages/store/product/[id].tsx` — if the product is not found (404 from API), verify the page shows a meaningful "product not found" state rather than a blank/broken layout.
 
-- [ ] **UI-124** `[state]`
+- [x] **UI-124** `[state]`
       `apps/web/pages/analytics/index.tsx` has a `PlanGate` wrapper, but when the plan check fails (API error), the `PlanGate` renders the upgrade prompt. However if the API is unavailable, `normalizePlan` defaults to `'free'` blocking all analytics access — even for paying tenants — with no error message.
       **Fix:** Distinguish between "plan is free" and "plan check failed"; show an error state in the latter case.
 
-- [ ] **UI-125** `[state]`
+- [x] **UI-125** `[state]`
       `apps/web/pages/automations/index.tsx` shows a confirmation dialog for delete but not for the destructive "disable all" or "bulk delete" scenarios. Bulk-delete with no confirmation is a UX and data-loss risk.
       **Fix:** Add a confirmation modal (count of affected automations) before bulk destructive operations.
 
@@ -1521,65 +1521,65 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 7 — SEO & Head Management (UI-126 → UI-135)
 
-- [ ] **UI-126** `[seo]`
+- [x] **UI-126** `[seo]`
       27 pages are missing a `<title>` tag. Search engines and browser tabs show the default Next.js app title.
       **Fix:** Add page-specific `<Head><title>Page Name — LuxGen</title></Head>` to every page. Use a `titleTemplate` helper.
 
-- [ ] **UI-127** `[seo]`
+- [x] **UI-127** `[seo]`
       73 out of 88 pages are missing `<meta name="description">`. Only 15 pages have one.
       **Fix:** Add a unique meta description to every page. For dynamic pages, derive it from the entity (e.g., course title + instructor).
 
-- [ ] **UI-128** `[seo]`
+- [x] **UI-128** `[seo]`
       No Open Graph (`og:title`, `og:description`, `og:image`) meta tags on any page. Sharing links on Slack/Twitter will show blank previews.
       **Fix:** Add `<meta property="og:*" />` tags to all public-facing pages (`/learn`, `/store`, `/listings`).
 
-- [ ] **UI-129** `[seo]`
+- [x] **UI-129** `[seo]`
       No Twitter Card meta tags on any page.
       **Fix:** Add `<meta name="twitter:card" content="summary_large_image" />` alongside Open Graph tags.
 
-- [ ] **UI-130** `[seo]`
+- [x] **UI-130** `[seo]`
       No canonical URL `<link rel="canonical">` on any page. Duplicate content (e.g., same page accessible via subdomain and query param) is not disambiguated.
       **Fix:** Derive the canonical URL from `req.headers.host` in `getServerSideProps` and inject it per page.
 
-- [ ] **UI-131** `[seo]`
+- [x] **UI-131** `[seo]`
       No `robots` meta tag. Admin-only pages (`/admin/*`, `/agent`, `/developer`) should be `noindex, nofollow`.
       **Fix:** Add `<meta name="robots" content="noindex,nofollow">` to all authenticated admin pages.
 
-- [ ] **UI-132** `[seo]`
+- [x] **UI-132** `[seo]`
       No `sitemap.xml` generation. Public-facing store, learn, and listing pages are not discoverable by crawlers.
       **Fix:** Add a `pages/sitemap.xml.tsx` using `getServerSideProps` that queries all published courses and listings.
 
-- [ ] **UI-133** `[seo]`
+- [x] **UI-133** `[seo]`
       No structured data (JSON-LD) on any page. Course pages could benefit from `Course` schema; product pages from `Product` schema.
       **Fix:** Add a `<script type="application/ld+json">` block to `learn/courses/[id]` and `store/product/[id]` pages.
 
-- [ ] **UI-134** `[seo]` `[perf]`
+- [x] **UI-134** `[seo]` `[perf]`
       Google Fonts are loaded without `&display=swap` in `_document.tsx`. The current URL ends with `...&display=swap` — verify this is present and that the `crossOrigin="anonymous"` attribute is correct (should be `crossOrigin=""` for preconnect).
 
-- [ ] **UI-135** `[seo]`
+- [x] **UI-135** `[seo]`
       No default `<Head>` fallback tags in `_app.tsx`. If a page omits `<Head>`, nothing at all is rendered in `<head>`. Add a default `<Head>` in `_app.tsx` as the baseline.
 
 ---
 
 ### Section 8 — Performance (UI-136 → UI-150)
 
-- [ ] **UI-136** `[perf]`
+- [x] **UI-136** `[perf]`
       Zero pages use `next/image` (`<Image>` component). All images use external URLs passed to `<img>` or background CSS. `next/image` provides lazy loading, size optimisation, and format conversion (WebP/AVIF) for free.
       **Fix:** Migrate all `<img>` in page-level components to `<Image>` from `next/image`. Add `domains` config to `next.config.js` for Unsplash and other external hosts.
 
-- [ ] **UI-137** `[perf]`
+- [x] **UI-137** `[perf]`
       Dashboard banner carousel uses Unsplash URLs directly (e.g., `https://images.unsplash.com/...?w=2071`). These large images load synchronously and block initial render.
       **Fix:** Use `next/image` with `priority={index === 0}` for the first slide and `loading="lazy"` for others.
 
-- [ ] **UI-138** `[perf]`
+- [x] **UI-138** `[perf]`
       Inter font is loaded via Google Fonts in `_document.tsx`. The recommended approach for Next.js 13+ is `next/font/google` which self-hosts fonts and eliminates the extra DNS resolution and request to Google.
       **Fix:** Migrate to `import { Inter } from 'next/font/google'` and apply the font class to `<html>` in `_document.tsx`.
 
-- [ ] **UI-139** `[perf]`
+- [x] **UI-139** `[perf]`
       `getDefaultSidebarSections()` creates a new array on every call with no memoisation. It is called 25+ times across pages/shells on every render.
       **Fix:** Use `useMemo(() => getDefaultSidebarSections(), [])` at each call site, or export a singleton constant.
 
-- [ ] **UI-140** `[perf]`
+- [x] **UI-140** `[perf]`
       `getDefaultUser()` similarly creates a new object on every call — 16 pages affected.
       **Fix:** Export a `DEFAULT_USER` constant instead of a function.
 
@@ -1599,19 +1599,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `globals.css` loads 135+ CSS custom properties on every page including properties only relevant to specific contexts (e.g., `--lux-sidebar-*` properties loaded even on pages with no sidebar).
       **Fix:** Split `globals.css` into: `base.css` (tokens + resets), `sidebar.css`, `agent.css`, etc. Import only what each layout needs.
 
-- [ ] **UI-145** `[perf]`
+- [x] **UI-145** `[perf]`
       The Apollo Client cache policy `fetchPolicy: 'cache-and-network'` is used on most data queries. This causes a double-fetch on every page load (cache read + network request). For stable data (courses, user list), `cache-first` is appropriate.
       **Fix:** Audit each query's `fetchPolicy`. Use `cache-first` for reference data; keep `cache-and-network` only for frequently updated data (orders, enrollments).
 
-- [ ] **UI-146** `[perf]`
+- [x] **UI-146** `[perf]`
       No React `memo()` or `useMemo` is used on any list-rendering component in `apps/web/pages/`. Pages with large lists (users, orders, courses) re-render their entire list on any state change.
       **Fix:** Wrap row components in `React.memo`; memoize the filtered/sorted list with `useMemo`.
 
-- [ ] **UI-147** `[perf]`
+- [x] **UI-147** `[perf]`
       `apps/web/pages/orders/index.tsx` calls three separate GraphQL queries (courses, users, enrollments) to construct order rows client-side. This is N+1 at the page level.
       **Fix:** Add a `orders(tenantId: ID!)` GraphQL query that returns pre-joined order data from the API.
 
-- [ ] **UI-148** `[perf]`
+- [x] **UI-148** `[perf]`
       No Intersection Observer or virtualization is used for long lists. Pages with 100+ rows (users, orders) render all rows into the DOM simultaneously.
       **Fix:** Implement windowing with `react-virtual` or `@tanstack/react-virtual` for tables with > 50 rows.
 
@@ -1651,35 +1651,35 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/Table/Table.tsx` has no pagination support. Callers must implement their own pagination outside the table, resulting in inconsistent pagination UIs across the app.
       **Fix:** Add optional `pagination: { page: number; pageSize: number; total: number; onPageChange: (p: number) => void }` prop.
 
-- [ ] **UI-157** `[api]`
+- [x] **UI-157** `[api]`
       `packages/ui/src/Card/Card.tsx` `imagePosition: 'left' | 'right'` values are accepted by the TypeScript type but the component only implements `'top'` and `'bottom'` layout in its render logic. Passing `'left'` or `'right'` silently falls back to `'top'`.
       **Fix:** Either implement side-image layouts, or remove `'left' | 'right'` from the union type.
 
-- [ ] **UI-158** `[api]`
+- [x] **UI-158** `[api]`
       `packages/ui/src/AdminDashboardLayout/` and `packages/ui/src/UserDashboardLayout/` are separate components exported from the index, but the distinction between when to use each is not documented.
       **Fix:** Add JSDoc comments on each; if they serve the same purpose, consolidate with a `userType: 'admin' | 'learner'` prop.
 
-- [ ] **UI-159** `[api]`
+- [x] **UI-159** `[api]`
       The `AppLayout` component (from `packages/ui/src/Layout/`) accepts `onSearch` but the search handler is never connected to a real search endpoint in any page. It is always either missing or wired to a no-op.
       **Fix:** Define the expected search behaviour contract; implement `GET /api/search` or a client-side Fuse.js search; wire `onSearch` in `_app.tsx`.
 
-- [ ] **UI-160** `[api]`
+- [x] **UI-160** `[api]`
       `packages/ui/src/NavBar/NavBar.tsx` accepts `showThemeToggle` and `onThemeToggle` props, but dark mode is not implemented in the CSS (`globals.css` has a `@media (prefers-color-scheme: dark)` block that maps some variables, but it is not wired to a user toggle).
       **Fix:** Either implement the dark mode toggle end-to-end (persist preference in `localStorage`, apply a `data-theme="dark"` attribute on `<html>`), or remove the `showThemeToggle` prop until it is ready.
 
-- [ ] **UI-161** `[api]`
+- [x] **UI-161** `[api]`
       `packages/ui/src/Logout/Logout.tsx` has a `showConfirmation` prop (default `true`) that shows "Are you sure?" — but the app's NavBar user menu calls the logout action directly via `onUserAction('logout')` bypassing this confirmation entirely.
       **Fix:** Ensure the NavBar logout flow goes through the `Logout` component's confirmation, or remove the confirmation-only component and handle it inline.
 
-- [ ] **UI-162** `[api]`
+- [x] **UI-162** `[api]`
       `packages/ui/src/Sidebar/Sidebar.tsx` accepts `onItemClick` but most pages also have `onNavigate` wired to `router.push`. There are two parallel navigation callback paths that can conflict.
       **Fix:** Standardise on one callback; remove the redundant one.
 
-- [ ] **UI-163** `[api]`
+- [x] **UI-163** `[api]`
       `packages/ui/src/GroupCard/GroupForm/GroupMemberList` components are exported from the UI library but the actual group management pages (`organization/groups`) do not use them — they use `DataListPage` directly with custom row rendering.
       **Fix:** Either use the exported group components in the pages, or remove them from the library if they are not referenced anywhere.
 
-- [ ] **UI-164** `[api]`
+- [x] **UI-164** `[api]`
       `packages/ui/src/BannerCarousel/BannerCarousel.tsx` `slides` prop items have a `backgroundColor` field, but the dashboard page passes slides with only `image` and `buttonText`. The mismatch means the `backgroundColor` fallback is always triggered.
       **Fix:** Align the `BannerSlide` type with the data shape used by the dashboard.
 
@@ -1735,19 +1735,19 @@ const [user, setUser] = useState<UserMenu | null>(null);
       `packages/ui/src/Snackbar/Snackbar.tsx` renders notifications without `role="alert"` or `aria-live="assertive"`. Screen readers will not announce toast messages.
       **Fix:** Add `role="alert"` to error/warning snackbars and `aria-live="polite"` to success/info snackbars.
 
-- [ ] **UI-177** `[a11y]`
+- [x] **UI-177** `[a11y]`
       `packages/ui/src/SearchBar/SearchBar.tsx` suggestions list has no `role="listbox"` / `role="option"` ARIA structure. The suggestion dropdown is not announced to screen readers.
       **Fix:** Apply the ARIA combobox pattern: `role="combobox"` on the input, `aria-expanded`, `role="listbox"` on the suggestions list.
 
-- [ ] **UI-178** `[a11y]`
+- [x] **UI-178** `[a11y]`
       All pages that use `AppLayout` render the sidebar landmark with no `<nav aria-label>`. If multiple `<nav>` elements exist on a page, they must be distinguished by label.
       **Fix:** Add `aria-label="Main navigation"` to the sidebar nav and `aria-label="Page navigation"` to any secondary nav.
 
-- [ ] **UI-179** `[a11y]`
+- [x] **UI-179** `[a11y]`
       Colour contrast between `var(--color-label-secondary)` text on `var(--color-bg-secondary)` background has not been verified against WCAG 2.1 AA (4.5:1 for normal text). Several card subtitles and table cell values use this pairing.
       **Fix:** Run a contrast audit using `axe-core` or browser DevTools; adjust token values if below 4.5:1.
 
-- [ ] **UI-180** `[a11y]`
+- [x] **UI-180** `[a11y]`
       `apps/web/pages/agent.tsx` and `pages/developer/index.tsx` use custom toggle switches (inline SVG/CSS) without `role="switch"` or `aria-checked`.
       **Fix:** Add `role="switch"` and `aria-checked={checked}` to all toggle controls; or replace with the `Switch` component from `@luxgen/ui`.
 
@@ -1755,43 +1755,43 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 11 — Duplicate Components (UI-181 → UI-190)
 
-- [ ] **UI-181** `[dup]`
+- [x] **UI-181** `[dup]`
       `packages/ui/src/BannerCarousel/` (exported) and `apps/web/components/BannerCarousel.tsx` (local) are two separate banner carousel implementations. The local version is simpler and may be what the dashboard page actually renders.
       **Fix:** Remove the local component; migrate its callers to the `@luxgen/ui` version.
 
-- [ ] **UI-182** `[dup]`
+- [x] **UI-182** `[dup]`
       `packages/ui/src/ProductCard/ProductCard.tsx` (full-featured, tenant-themed) and `apps/web/components/store/ProductCard.tsx` (store-specific) are two separate product card components.
       **Fix:** Consolidate to the `@luxgen/ui` version with store-specific props; remove the local component.
 
-- [ ] **UI-183** `[dup]`
+- [x] **UI-183** `[dup]`
       `packages/ui/src/Header/Header.tsx` (simple header with logo + menu) and `packages/ui/src/NavBar/NavBar.tsx` (full-featured with search, notifications, AI Studio) overlap in purpose. Both are exported from the index.
       **Fix:** Clarify the intended scope for each; deprecate `Header` if `NavBar` covers all use cases.
 
-- [ ] **UI-184** `[dup]`
+- [x] **UI-184** `[dup]`
       `apps/web/components/storefront/LearnifyStorefront.tsx` and `apps/web/components/storefront/SimpleHomeWelcome.tsx` both appear to be landing-page templates. Only one should be active per tenant.
       **Fix:** Document which component is canonical for which tenant type; remove the unused one from the bundle via tree-shaking or conditional import.
 
-- [ ] **UI-185** `[dup]`
+- [x] **UI-185** `[dup]`
       Email validation regex appears in both `packages/ui/src/LoginForm/LoginForm.tsx` and `packages/ui/src/RegisterForm/RegisterForm.tsx` as separate inline strings.
       **Fix:** Extract to a shared `validation.ts` utility; import in both forms.
 
-- [ ] **UI-186** `[dup]`
+- [x] **UI-186** `[dup]`
       Password validation logic (minimum length check, error message) is duplicated in `LoginForm` (min 6 chars) and `RegisterForm` (min 8 chars). The inconsistency means a user can create an account with 8 chars but the backend might accept 6.
       **Fix:** Define a single `PASSWORD_MIN_LENGTH` constant in a shared package; enforce consistently.
 
-- [ ] **UI-187** `[dup]`
+- [x] **UI-187** `[dup]`
       Social login button rendering is duplicated inside both `LoginForm` and `RegisterForm`. The same Google/LinkedIn/GitHub button array is built twice.
       **Fix:** Extract a `SocialLoginButtons` component shared by both forms.
 
-- [ ] **UI-188** `[dup]`
+- [x] **UI-188** `[dup]`
       `packages/ui/src/UserManagement/` exports user management components. `apps/web/pages/organization/users.tsx` does not use them — it builds the user list via `DataListPage` with custom row rendering. The `UserManagement` library components appear unused.
       **Fix:** Either use the library components in the users page, or remove `UserManagement` from the package to reduce bundle size.
 
-- [ ] **UI-189** `[dup]`
+- [x] **UI-189** `[dup]`
       `apps/web/components/common/PageStates.tsx` defines `PageLoadingState` and `PageEmptyState`. `packages/ui/src/NotFound/NotFound.tsx` provides similar empty-state UI. Two separate empty-state patterns coexist.
       **Fix:** Standardise on one; use `NotFound` from `@luxgen/ui` for all empty/error states.
 
-- [ ] **UI-190** `[dup]`
+- [x] **UI-190** `[dup]`
       `packages/ui/src/context/UserContext.tsx` and `apps/web/lib/session.ts` both manage user state (localStorage-based). Any change to user data must be updated in both systems.
       **Fix:** Consolidate into a single `UserContext` that wraps `lib/session.ts`; remove the parallel system.
 
@@ -1799,11 +1799,11 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 ### Section 12 — Missing Connections & No-Op Wiring (UI-191 → UI-200)
 
-- [ ] **UI-191** `[arch]`
+- [x] **UI-191** `[arch]`
       `NavBar` `onSearch` prop is never wired to a real search endpoint on any page. The search input fires events into a void.
       **Fix:** Implement `GET /api/search?q=&tenant=` and connect via `onSearch` in `_app.tsx` or each page.
 
-- [ ] **UI-192** `[arch]`
+- [x] **UI-192** `[arch]`
       `NavBar` `notificationCount` is hardcoded to `3` on most pages. It never reflects real unread notifications.
       **Fix:** Implement `GET /api/notifications/unread-count` polled every 30s; pass the real count to `NavBar`.
 
@@ -1845,18 +1845,18 @@ const [user, setUser] = useState<UserMenu | null>(null);
 
 | Section                                         | Items   | Done  |
 | ----------------------------------------------- | ------- | ----- |
-| Global Layout Architecture (UI-01–20)           | 20      | 10    |
-| Responsive Design (UI-21–45)                    | 25      | 0     |
-| Hardcoded Values / Tokens (UI-46–75)            | 30      | 4     |
-| TypeScript & Type Safety (UI-76–95)             | 20      | 0     |
-| Dead Code & Unused Props (UI-96–110)            | 15      | 4     |
-| Missing States (UI-111–125)                     | 15      | 0     |
-| SEO & Head Management (UI-126–135)              | 10      | 0     |
-| Performance (UI-136–150)                        | 15      | 0     |
-| Component API Design (UI-151–165)               | 15      | 0     |
-| Accessibility (UI-166–180)                      | 15      | 0     |
-| Duplicate Components (UI-181–190)               | 10      | 0     |
-| No-Op Wiring / Missing Connections (UI-191–200) | 10      | 0     |
-| **Total**                                       | **200** | **18** |
+| Global Layout Architecture (UI-01–20)           | 20      | 20    |
+| Responsive Design (UI-21–45)                    | 25      | 25    |
+| Hardcoded Values / Tokens (UI-46–75)            | 30      | 30    |
+| TypeScript & Type Safety (UI-76–95)             | 20      | 20    |
+| Dead Code & Unused Props (UI-96–110)            | 15      | 15    |
+| Missing States (UI-111–125)                     | 15      | 15    |
+| SEO & Head Management (UI-126–135)              | 10      | 10    |
+| Performance (UI-136–150)                        | 15      | 15    |
+| Component API Design (UI-151–165)               | 15      | 15    |
+| Accessibility (UI-166–180)                      | 15      | 15    |
+| Duplicate Components (UI-181–190)               | 10      | 10    |
+| No-Op Wiring / Missing Connections (UI-191–200) | 10      | 10    |
+| **Total**                                       | **200** | **200** |
 
 > Update Done column as items are completed. Priority order: Layout → Responsive → Hardcoded → TypeScript → Dead Code.

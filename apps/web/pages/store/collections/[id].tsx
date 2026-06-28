@@ -3,7 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useQuery } from '@apollo/client';
 
-import { ProductCard } from '../../../components/store/ProductCard';
+import { StorefrontProductCard } from '../../../components/store/StorefrontProductCard';
 import { StoreLayout } from '../../../components/store/StoreLayout';
 import { PageLoadingState } from '../../../components/common/PageStates';
 import { GET_STOREFRONT_COLLECTION, GET_STOREFRONT_PRODUCTS } from '../../../graphql/queries/storefront';
@@ -64,7 +64,7 @@ export default function StoreCollectionDetailPage({ tenantSubdomain }: Props) {
 
             <section>
               <h2 className="text-sm font-semibold uppercase tracking-wider text-secondary mb-4">In this collection</h2>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {products.map(
                   (product: {
                     id: string;
@@ -74,7 +74,7 @@ export default function StoreCollectionDetailPage({ tenantSubdomain }: Props) {
                     priceCents: number;
                     currency: string;
                   }) => (
-                    <ProductCard key={product.id} {...product} />
+                    <StorefrontProductCard key={product.id} {...product} />
                   ),
                 )}
               </div>

@@ -1,10 +1,11 @@
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { AppLayout, getDefaultSidebarSections, getDefaultLogo } from '@luxgen/ui';
+import { AppLayout } from '@luxgen/ui';
 import type { ReactNode } from 'react';
 
 import { useAppLayoutHeader } from '../../../../lib/app-layout-header';
 import { useLayoutUser } from '../../../../lib/app-layout-user';
+import { useAppShellConfig } from '../../../../lib/app-shell-config';
 import { createHandleUserAction } from '../../../../lib/user-actions';
 import styles from './styles';
 
@@ -27,13 +28,15 @@ export function TowerShell({ activeSubNav, title, lead, primaryAction, children 
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
   const headerProps = useAppLayoutHeader();
+  const { sidebarSections, logo } = useAppShellConfig();
 
   return (
     <AppLayout
-      sidebarSections={getDefaultSidebarSections()}
+      sidebarSections={sidebarSections}
       user={layoutUser ?? undefined}
-      logo={getDefaultLogo()}
+      logo={logo}
       onUserAction={handleUserAction}
+      contentMaxWidth={false}
       {...headerProps}
     >
       <div className={styles.shell}>

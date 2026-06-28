@@ -1,1 +1,1 @@
-export const IssueLearnerCertificateTypeDefs=`extend type Mutation{issueLearnerCertificate(courseId:ID!,studentId:ID):Certificate!}`;
+export const IssueLearnerCertificateTypeDefs = `extend type Mutation{issueLearnerCertificate(courseId:ID!,studentId:ID):Certificate!}`;

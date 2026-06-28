@@ -51,6 +51,8 @@ export * from './Form';
 export * from './InputWithLabel';
 export * from './LoginForm';
 export * from './RegisterForm';
+export { SocialLoginButtons } from './SocialLoginButtons/SocialLoginButtons';
+export type { SocialProvider } from './SocialLoginButtons/types';
 export * from './RegisterVisual';
 
 // Search and Navigation Components
@@ -77,6 +79,7 @@ export * from './Table';
 
 // Dashboard Components
 export * from './AdminDashboard';
+export type { DashboardAction, DashboardActionHandler } from './AdminDashboard/dashboard-actions';
 export * from './UserDashboard';
 
 // Dashboard Layout Components
@@ -94,7 +97,7 @@ export * from './PermissionRequest';
 // Notification Components
 export * from './Snackbar';
 
-// Group Management Components
+// Group Management Components (UI-163: pages use DataListPage — kept for embeds)
 export * from './GroupCard';
 export * from './GroupForm';
 export * from './GroupMemberList';

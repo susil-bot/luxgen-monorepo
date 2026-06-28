@@ -60,10 +60,10 @@ export const DEFAULT_LANGUAGES: Language[] = [
 ];
 
 const CountryLanguageDropdownComponent: React.FC<CountryLanguageDropdownProps> = ({
-  countries = defaultCountries,
-  languages = defaultLanguages,
-  selectedCountry = defaultCountries[1], // Default to UK
-  selectedLanguage = defaultLanguages[0], // Default to English
+  countries = DEFAULT_COUNTRIES,
+  languages = DEFAULT_LANGUAGES,
+  selectedCountry = DEFAULT_COUNTRIES[1], // Default to UK
+  selectedLanguage = DEFAULT_LANGUAGES[0], // Default to English
   onCountryChange,
   onLanguageChange,
   className = '',
@@ -142,13 +142,13 @@ const CountryLanguageDropdownComponent: React.FC<CountryLanguageDropdownProps> =
   };
 
   return (
-    <div className={`relative ${className}`} ref={dropdownRef} {...props}>
+    <div className={`relative min-w-0 w-full max-w-xs ${className}`} ref={dropdownRef} {...props}>
       {/* Trigger Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         disabled={disabled}
         className={`
-          flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200
+          w-full flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200
           ${getVariantStyles()}
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer hover:shadow-sm'}
           focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20

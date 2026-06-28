@@ -1,42 +1,53 @@
-import { useCallback } from 'react';
-import { useRouter } from 'next/router';
+import { useCallback, useEffect, useState } from 'react';
 import { useTheme as useAppearanceTheme } from './theme';
+import { dispatchToggleNotifications } from './global-notifications';
+import { useNotificationCount } from '../hooks/useNotificationCount';
+import { validateClientSession } from './session-guard';
 
 /** Shared header props: search bar + light/dark toggle for AppLayout */
 export function useAppLayoutHeader() {
-  const router = useRouter();
   const { resolvedTheme, toggleTheme } = useAppearanceTheme();
+  const [sessionOk, setSessionOk] = useState(false);
+  const notificationCount = useNotificationCount(sessionOk ? 60_000 : 0);
 
-  const onSearch = useCallback(
-    (query: string) => {
-      const q = query.trim();
-      if (!q) return;
+  useEffect(() => {
+    const refresh = () => setSessionOk(validateClientSession().ok);
+    refresh();
+    window.addEventListener('luxgen-auth-change', refresh);
+    return () => window.removeEventListener('luxgen-auth-change', refresh);
+  }, []);
 
-      const path = router.pathname;
-      if (path.startsWith('/products')) {
-        void router.push({ pathname: '/products', query: { search: q } }, undefined, { shallow: true });
-      } else if (path.startsWith('/groups')) {
-        void router.push({ pathname: '/groups', query: { search: q } }, undefined, { shallow: true });
-      } else if (path.startsWith('/users')) {
-        void router.push({ pathname: '/users', query: { search: q } }, undefined, { shallow: true });
-      } else if (path.startsWith('/courses')) {
-        void router.push({ pathname: '/courses', query: { search: q } }, undefined, { shallow: true });
-      } else if (path.startsWith('/customers')) {
-        void router.push({ pathname: '/customers', query: { search: q } }, undefined, { shallow: true });
-      } else {
-        void router.push({ pathname: '/groups', query: { search: q } });
-      }
-    },
-    [router],
-  );
+  const onSearch = useCallback((query: string) => {
+    const q = query.trim();
+    if (!q || typeof window === 'undefined') return;
+    const path = window.location.pathname;
+    const url = new URL(window.location.href);
+    url.searchParams.set('search', q);
+    if (
+      path.startsWith('/products') ||
+      path.startsWith('/groups') ||
+      path.startsWith('/users') ||
+      path.startsWith('/courses') ||
+      path.startsWith('/customers')
+    ) {
+      window.history.pushState({}, '', url.toString());
+      window.dispatchEvent(new PopStateEvent('popstate'));
+      return;
+    }
+    const tenant = new URLSearchParams(window.location.search).get('tenant');
+    const searchUrl = `/search?q=${encodeURIComponent(q)}${tenant ? `&tenant=${encodeURIComponent(tenant)}` : ''}`;
+    window.location.assign(searchUrl);
+  }, []);
 
   return {
     showSearch: true,
     showThemeToggle: true,
-    onNotificationClick: () => {},
     isDarkMode: resolvedTheme === 'dark',
     onThemeToggle: toggleTheme,
     onSearch,
     searchPlaceholder: 'Search groups, products, users…',
+    showNotifications: sessionOk,
+    notificationCount,
+    onNotificationClick: dispatchToggleNotifications,
   };
 }

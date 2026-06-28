@@ -80,6 +80,8 @@
     --transition-base: 200ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
     --transition-slow: 350ms cubic-bezier(0.25, 0.46, 0.45, 0.94);
     --transition-spring: 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
+    --animation-spin: 2s;
+    --lux-navbar-height: 56px;
   }
 
   /* ── Dark Mode: True macOS Dark ───────────────────────────────────────── */
@@ -149,7 +151,12 @@
     background-color: var(--color-bg-primary);
     color: var(--color-label-primary);
     min-height: 100vh;
-    overflow-x: hidden;
+  }
+
+  #__next {
+    max-width: 100%;
+    min-height: 100vh;
+    overflow-x: clip;
   }
 
   html.route-loading::after {
@@ -978,6 +985,52 @@ html.dark [data-tenant='demo'] {
     border: 1px solid var(--color-separator);
   }
 
+  /* UI-42: shared page content constraint (also applied via AppLayout when contentMaxWidth) */
+  .lux-page-content {
+    width: 100%;
+    min-width: 0;
+    max-width: 80rem;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  /* UI-43: container queries — cards adapt in narrow sidebars/columns */
+  .lux-card-container {
+    container-type: inline-size;
+    container-name: lux-card;
+  }
+
+  @container lux-card (max-width: 320px) {
+    .lux-card-adaptive .lux-group-card-header {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+    }
+
+    .lux-card-adaptive .lux-group-card-stats {
+      grid-template-columns: 1fr;
+    }
+
+    .lux-card-adaptive .lux-group-card-actions {
+      flex-direction: column;
+      align-items: stretch;
+      gap: 0.5rem;
+    }
+
+    .lux-card-adaptive .card-adaptive-body {
+      flex-direction: column !important;
+    }
+
+    .lux-card-adaptive .card-adaptive-image-side {
+      width: 100% !important;
+      height: auto !important;
+    }
+
+    .lux-card-adaptive .lux-store-product-title {
+      -webkit-line-clamp: 2;
+    }
+  }
+
   .admin-list-page .ios-card {
     background-color: var(--color-bg-primary);
     border: 1px solid var(--color-separator);
@@ -1213,6 +1266,41 @@ html.dark [data-tenant='demo'] {
   flex-direction: column;
   justify-content: space-between;
   gap: 16px;
+}
+
+/* UI-60/63: shared brand gradient for store + tenant surfaces */
+.lux-brand-gradient {
+  background: linear-gradient(135deg, var(--color-blue), var(--color-purple));
+}
+
+.lux-brand-gradient-text {
+  color: var(--color-label-on-fill);
+}
+
+.lux-brand-gradient-muted {
+  color: color-mix(in srgb, var(--color-label-on-fill) 75%, transparent);
+}
+
+.lux-store-assistant-shell {
+  background: linear-gradient(
+    160deg,
+    color-mix(in srgb, var(--color-blue) 8%, transparent),
+    color-mix(in srgb, var(--color-purple) 6%, transparent)
+  );
+  border: 1px solid color-mix(in srgb, var(--color-blue) 20%, transparent);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
+}
+
+.lux-store-bg-overlay {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, color-mix(in srgb, var(--color-blue) 25%, transparent), transparent),
+    radial-gradient(ellipse 60% 40% at 100% 50%, color-mix(in srgb, var(--color-purple) 12%, transparent), transparent);
+}
+
+.lux-category-chip-active {
+  background: linear-gradient(135deg, var(--color-blue), var(--color-indigo));
+  color: var(--color-label-on-fill);
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--color-blue) 35%, transparent);
 }
 .lux-streak-badge {
   display: inline-flex;
@@ -1847,6 +1935,37 @@ html.dark [data-tenant='demo'] {
   border-left: 1px solid var(--color-separator);
   background: var(--color-bg-primary);
   overflow: hidden;
+}
+
+.lux-sidekick-panel {
+  width: min(calc(100vw - 2rem), 20rem);
+  max-width: 20rem;
+}
+
+@media (min-width: 640px) {
+  .lux-sidekick-panel {
+    width: 24rem;
+    max-width: 24rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .lux-sidekick-panel {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    box-shadow: var(--shadow-xl);
+  }
+}
+
+@media (min-width: 768px) {
+  .lux-sidekick-panel {
+    position: relative;
+    width: var(--lux-sidekick-width, 400px);
+    max-width: var(--lux-sidekick-width, 400px);
+  }
 }
 .lux-sidekick-header {
   display: flex;
@@ -2853,6 +2972,8 @@ html.dark [data-tenant='demo'] {
 }
 
 :root {
+  --color-blue-subtle: color-mix(in srgb, var(--color-blue) 10%, transparent);
+  --color-blue-subtle-border: color-mix(in srgb, var(--color-blue) 20%, transparent);
   --color-green-subtle: color-mix(in srgb, var(--color-green) 12%, transparent);
   --color-red-subtle: color-mix(in srgb, var(--color-red) 10%, transparent);
 }

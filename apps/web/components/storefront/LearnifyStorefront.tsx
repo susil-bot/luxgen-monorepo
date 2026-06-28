@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 import { PageLoadingState } from '../common/PageStates';
+import { OptimizedImage } from '../media/OptimizedImage';
 import { resolveNavHref, storefrontThemeCssVars } from '../../lib/storefront-profile';
 import { applyLearnTenantTheme } from '../../lib/learn-theme';
 import { useStorefrontCatalog } from '../../hooks/useStorefrontCatalog';
@@ -62,8 +63,13 @@ export function LearnifyStorefront({ tenantSubdomain }: LearnifyStorefrontProps)
         <div className={`${styles.container} ${styles.headerInner}`}>
           <Link href={routes.landing} className={styles.logo}>
             {branding.logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={branding.logoUrl} alt={branding.logoAlt ?? tenantName} className={styles.logoImage} />
+              <OptimizedImage
+                src={branding.logoUrl}
+                alt={branding.logoAlt ?? tenantName}
+                width={140}
+                height={40}
+                className={styles.logoImage}
+              />
             ) : (
               tenantName
             )}
@@ -231,13 +237,17 @@ export function LearnifyStorefront({ tenantSubdomain }: LearnifyStorefrontProps)
           ) : (
             <div className={styles.instructorGrid}>
               {instructors.map((instructor) => (
-                <div key={instructor.id} className={styles.instructorCard}>
+                <Link
+                  key={instructor.id}
+                  href={`/store/mentors/${encodeURIComponent(instructor.id)}`}
+                  className={styles.instructorCard}
+                >
                   <div className={styles.avatar}>{initials(instructor.name)}</div>
                   <p className={styles.instructorName}>{instructor.name}</p>
                   <p className={styles.instructorRole}>
                     {instructor.role} · {instructor.courseCount} courses
                   </p>
-                </div>
+                </Link>
               ))}
             </div>
           )}

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Arrow } from '../Arrow';
 
+/** @deprecated Prefer `Carousel` with banner styling — consolidation tracked as UI-110. */
 export interface BannerSlide {
   id: string;
   title: string;
@@ -11,9 +12,12 @@ export interface BannerSlide {
   ctaHref?: string;
   ctaOnClick?: () => void;
   backgroundImage?: string;
+  /** Alias used by dashboard page data (UI-164) */
+  image?: string;
   backgroundColor?: string;
   textColor?: string;
   ctaColor?: string;
+  renderBackground?: () => React.ReactNode;
 }
 
 export interface BannerCarouselProps {
@@ -47,7 +51,10 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
     const resume = () => setIsPlaying(autoPlay);
     el.addEventListener('focusin', pause);
     el.addEventListener('focusout', resume);
-    return () => { el.removeEventListener('focusin', pause); el.removeEventListener('focusout', resume); };
+    return () => {
+      el.removeEventListener('focusin', pause);
+      el.removeEventListener('focusout', resume);
+    };
   }, [autoPlay]);
   useEffect(() => {
     if (!isPlaying || slides.length <= 1) return;
@@ -97,12 +104,16 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
       <div
         className="relative w-full h-64 md:h-80 lg:h-96 flex items-center"
         style={{
-          backgroundColor: currentSlideData.backgroundColor || '#4A70F7',
-          backgroundImage: currentSlideData.backgroundImage ? `url(${currentSlideData.backgroundImage})` : undefined,
+          backgroundColor: currentSlideData.backgroundColor || 'var(--color-blue)',
+          backgroundImage:
+            !currentSlideData.renderBackground && (currentSlideData.backgroundImage || currentSlideData.image)
+              ? `url(${currentSlideData.backgroundImage || currentSlideData.image})`
+              : undefined,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
+        {currentSlideData.renderBackground?.()}
         {/* Background Pattern Overlay */}
         <div className="absolute inset-0 opacity-10">
           <svg className="w-full h-full" viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -118,7 +129,7 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
             {currentSlideData.date && (
               <div
                 className="text-sm md:text-base mb-2 opacity-80"
-                style={{ color: currentSlideData.textColor || '#E5E7EB' }}
+                style={{ color: currentSlideData.textColor || 'var(--color-label-secondary)' }}
               >
                 {currentSlideData.date}
               </div>
@@ -146,7 +157,7 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
             {currentSlideData.description && (
               <p
                 className="text-sm md:text-base mb-6 opacity-90 max-w-2xl"
-                style={{ color: currentSlideData.textColor || '#E5E7EB' }}
+                style={{ color: currentSlideData.textColor || 'var(--color-label-secondary)' }}
               >
                 {currentSlideData.description}
               </p>

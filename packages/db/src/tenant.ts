@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import mongoose, { Schema, model, Document } from 'mongoose';
 
 export interface TenantBranding {
   logo?: string;
@@ -27,6 +27,11 @@ export interface TenantSecurity {
     requireNumbers: boolean;
     requireSymbols: boolean;
   };
+}
+
+export interface TenantOnboarding {
+  completedSteps: string[];
+  dismissed: boolean;
 }
 
 export interface TenantConfig {
@@ -81,6 +86,7 @@ export interface ITenant extends Document {
     branding: TenantBranding;
     security: TenantSecurity;
     config: TenantConfig;
+    onboarding?: TenantOnboarding;
   };
   metadata: {
     createdAt: Date;
@@ -189,6 +195,10 @@ const tenantSchema = new Schema<ITenant>(
           },
         },
       },
+      onboarding: {
+        completedSteps: { type: [String], default: [] },
+        dismissed: { type: Boolean, default: false },
+      },
       config: {
         features: {
           analytics: {
@@ -282,4 +292,5 @@ const tenantSchema = new Schema<ITenant>(
 tenantSchema.index({ subdomain: 1 });
 tenantSchema.index({ domain: 1 });
 tenantSchema.index({ status: 1 });
-export const Tenant = model<ITenant>('Tenant', tenantSchema);
+export const Tenant =
+  (mongoose.models.Tenant as mongoose.Model<ITenant>) || model<ITenant>('Tenant', tenantSchema);

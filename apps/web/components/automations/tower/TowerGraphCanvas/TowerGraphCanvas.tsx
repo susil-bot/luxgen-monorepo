@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import type { FlowEdgeLabel, FlowGraphStepView, FlowNodeKind } from '../../../../lib/automation-flow';
 import { FlowConnector } from '../FlowConnector';
 import styles from './styles';
@@ -107,8 +108,21 @@ function TowerGraphStep({
 }
 
 export function TowerGraphCanvas({ roots, selectedStepId, onSelectStep, onAddStep }: TowerGraphCanvasProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+
+    const observer = new ResizeObserver(([entry]) => {
+      el.style.setProperty('--tower-canvas-width', `${entry.contentRect.width}px`);
+    });
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <div className={styles.flowColumn}>
+    <div ref={containerRef} className={styles.flowColumn}>
       {roots.map((step) => (
         <TowerGraphStep
           key={step.id}

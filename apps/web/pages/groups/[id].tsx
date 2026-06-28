@@ -1,14 +1,16 @@
 import { useRouter } from 'next/router';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import { createHandleUserAction } from '../../lib/user-actions';
 import Head from 'next/head';
 import { useQuery, useMutation } from '@apollo/client';
-import { SnackbarProvider, useSnackbar, AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { SnackbarProvider, useSnackbar, AppLayout } from '@luxgen/ui';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
 import { GET_GROUP, GET_GROUP_MEMBERS, DELETE_GROUP } from '../../graphql/queries/groups';
 import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
 
 const GroupDetailsPageContent: React.FC = () => {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const { id } = router.query;
   const groupId = typeof id === 'string' ? id : '';
@@ -20,14 +22,12 @@ const GroupDetailsPageContent: React.FC = () => {
   const { data, loading, error } = useQuery(GET_GROUP, {
     variables: { id: groupId },
     skip: !groupId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const { data: membersData } = useQuery(GET_GROUP_MEMBERS, {
     variables: { groupId, first: 10 },
     skip: !groupId,
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const group = data?.group;
   const members =
@@ -96,11 +96,11 @@ const GroupDetailsPageContent: React.FC = () => {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={user ?? undefined}
         onUserAction={handleUserAction}
         {...headerProps}
-        logo={getDefaultLogo()}
+        logo={logo}
         sidebarCollapsible={true}
         sidebarDefaultCollapsed={false}
         responsive={true}

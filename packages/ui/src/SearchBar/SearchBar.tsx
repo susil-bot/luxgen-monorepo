@@ -132,6 +132,7 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
             </div>
           )}
           <input
+            role="combobox"
             ref={inputRef}
             type="text"
             value={searchQuery}

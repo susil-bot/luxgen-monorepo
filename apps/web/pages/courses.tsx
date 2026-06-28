@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import {
   AppLayout,
-  getDefaultSidebarSections,
-  getDefaultUser,
-  getDefaultLogo,
   TenantDebug,
   CourseMenu,
   CourseOverview,
   CourseAnalytics,
 } from '@luxgen/ui';
 import { TenantBanner } from '../components/tenant/TenantBanner';
-import { PageLoadingState } from '../components/common/PageStates';
+import { getTenantPageProps } from '../lib/tenant-page-props';
+import { PageLoadingState, PageEmptyState } from '../components/common/PageStates';
+import { useLayoutUser } from '../lib/app-layout-user';
+import { useAppShellConfig } from '../lib/app-shell-config';
 import { createHandleUserAction } from '../lib/user-actions';
 
 interface CoursesPageProps {
@@ -21,11 +22,12 @@ interface CoursesPageProps {
 
 export default function CoursesPage({ tenant }: CoursesPageProps) {
   const router = useRouter();
+  const layoutUser = useLayoutUser();
+  const { sidebarSections, logo } = useAppShellConfig();
   const handleUserAction = createHandleUserAction(router);
   const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'learner' | 'user'>('learner');
   const [loading, setLoading] = useState(true);
 
-  // Mock course data
   const [sampleCourse] = useState({
     id: 'course-1',
     title: 'Advanced React Development',
@@ -37,6 +39,7 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
     enrolledCount: 1250,
     thumbnail: '/images/course-thumbnail.jpg',
   });
+  const [catalogCourses] = useState<unknown[]>([]);
 
   const [analyticsMetrics] = useState({
     totalEnrollments: 1250,
@@ -46,7 +49,6 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
   });
 
   useEffect(() => {
-    // Simulate role detection
     const role = tenant === 'demo' ? 'admin' : 'learner';
     setUserRole(role);
     setLoading(false);
@@ -54,7 +56,6 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
 
   const handleNavigate = (path: string) => {
     void router.push(path);
-    // Implement navigation logic
   };
 
   if (loading) {
@@ -68,9 +69,9 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
-        user={getDefaultUser()}
-        logo={getDefaultLogo()}
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
+        logo={logo}
         onUserAction={handleUserAction}
         showSearch={true}
         showNotifications={true}
@@ -86,15 +87,29 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
             <p className="mt-1 text-secondary text-sm">Browse and manage learning content</p>
           </div>
           <div className="space-y-8">
-            {/* Course Overview */}
+            {catalogCourses.length === 0 && (
+              <PageEmptyState
+                icon="📚"
+                title="No courses yet"
+                subtitle="Create your first course or browse the learn catalog."
+                action={
+                  <div className="flex flex-wrap justify-center gap-2 mt-4">
+                    <Link href="/courses/create" className="ios-btn-primary text-sm">
+                      Create course
+                    </Link>
+                    <Link href="/learn" className="ios-btn-secondary text-sm">
+                      Browse catalog
+                    </Link>
+                  </div>
+                }
+              />
+            )}
             <CourseOverview course={sampleCourse} userRole={userRole} enrollmentStatus="enrolled" />
 
-            {/* Course Analytics (Admin/Instructor only) */}
             {(userRole === 'admin' || userRole === 'instructor') && (
               <CourseAnalytics courseId={sampleCourse.id} userRole={userRole} metrics={analyticsMetrics} />
             )}
 
-            {/* Course Menu */}
             <CourseMenu userRole={userRole} courseId={sampleCourse.id} onNavigate={handleNavigate} />
           </div>
         </div>
@@ -105,29 +120,4 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
   );
 }
 
-export const getServerSideProps = async (context: any) => {
-  const host = context.req.headers.host;
-  let tenant = 'demo'; // Default tenant
-
-  // Extract tenant from subdomain
-  if (host && host.includes('.')) {
-    const parts = host.split('.');
-    if (parts.length > 1) {
-      const subdomain = parts[0];
-      if (subdomain !== 'www' && subdomain !== 'localhost' && subdomain !== '127.0.0.1') {
-        tenant = subdomain;
-      }
-    }
-  }
-
-  // Check query parameter as fallback
-  if (context.query.tenant) {
-    tenant = context.query.tenant;
-  }
-
-  return {
-    props: {
-      tenant,
-    },
-  };
-};
+export const getServerSideProps = getTenantPageProps;

@@ -1,15 +1,24 @@
 import { useState, useEffect } from 'react';
+import { useAppShellConfig } from '../../../lib/app-shell-config';
 import { useRouter } from 'next/router';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import Head from 'next/head';
 import { useQuery, useMutation } from '@apollo/client';
-import { SnackbarProvider, useSnackbar, AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { SnackbarProvider, useSnackbar, AppLayout } from '@luxgen/ui';
 import { useLayoutUser } from '../../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
 import { GET_GROUP, UPDATE_GROUP } from '../../../graphql/queries/groups';
+import { CACHE_FIRST } from '../../../lib/apollo-policies';
 import { PageLoadingState, PageEmptyState } from '../../../components/common/PageStates';
 
+interface GroupEditFormState {
+  name: string;
+  description: string;
+  maxUsers: number;
+}
+
 const EditGroupPageContent: React.FC = () => {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const { id } = router.query;
   const groupId = typeof id === 'string' ? id : '';
@@ -18,14 +27,16 @@ const EditGroupPageContent: React.FC = () => {
   const handleUserAction = createHandleUserAction(router);
   const headerProps = useAppLayoutHeader();
 
-  const [name, setName] = useState('');
-  const [description, setDescription] = useState('');
-  const [maxUsers, setMaxUsers] = useState(10);
+  const [formData, setFormData] = useState<GroupEditFormState>({
+    name: '',
+    description: '',
+    maxUsers: 10,
+  });
 
   const { data, loading, error } = useQuery(GET_GROUP, {
     variables: { id: groupId },
     skip: !groupId,
-    fetchPolicy: 'cache-and-network',
+    fetchPolicy: CACHE_FIRST,
   });
 
   const [updateGroup, { loading: isSaving }] = useMutation(UPDATE_GROUP);
@@ -33,10 +44,21 @@ const EditGroupPageContent: React.FC = () => {
   useEffect(() => {
     const group = data?.group;
     if (!group) return;
-    setName(group.name);
-    setDescription(group.description ?? '');
-    setMaxUsers(group.settings?.maxMembers ?? 10);
+    setFormData({
+      name: group.name,
+      description: group.description ?? '',
+      maxUsers: group.settings?.maxMembers ?? 10,
+    });
   }, [data]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    const checked = (e.target as HTMLInputElement).checked;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : name === 'maxUsers' ? Number(value) : value,
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -45,9 +67,9 @@ const EditGroupPageContent: React.FC = () => {
         variables: {
           input: {
             id: groupId,
-            name,
-            description,
-            settings: { maxMembers: maxUsers },
+            name: formData.name,
+            description: formData.description,
+            settings: { maxMembers: formData.maxUsers },
           },
         },
       });
@@ -80,16 +102,16 @@ const EditGroupPageContent: React.FC = () => {
   return (
     <>
       <Head>
-        <title>Edit {name} - LuxGen</title>
-        <meta name="description" content={`Edit ${name} group settings`} />
+        <title>Edit {formData.name} - LuxGen</title>
+        <meta name="description" content={`Edit ${formData.name} group settings`} />
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={user ?? undefined}
         onUserAction={handleUserAction}
         {...headerProps}
-        logo={getDefaultLogo()}
+        logo={logo}
         sidebarCollapsible={true}
         sidebarDefaultCollapsed={false}
         responsive={true}
@@ -115,8 +137,8 @@ const EditGroupPageContent: React.FC = () => {
                 <input
                   id="name"
                   name="name"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  value={formData.name}
+                  onChange={handleInputChange}
                   required
                   className="ios-input"
                   placeholder="Enter group name"
@@ -130,8 +152,8 @@ const EditGroupPageContent: React.FC = () => {
                 <textarea
                   id="description"
                   name="description"
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
+                  value={formData.description}
+                  onChange={handleInputChange}
                   rows={4}
                   className="ios-input min-h-[100px]"
                   placeholder="Describe the purpose of this group"
@@ -155,40 +177,6 @@ const EditGroupPageContent: React.FC = () => {
                   <option value={50}>50 users</option>
                   <option value={100}>100 users</option>
                 </select>
-              </div>
-
-              <div className="ios-form-group">
-                <label htmlFor="status" className="text-sm text-secondary">
-                  Status
-                </label>
-                <select
-                  id="status"
-                  name="status"
-                  value={formData.status}
-                  onChange={handleInputChange}
-                  className="ios-input"
-                >
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                  <option value="Pending">Pending</option>
-                  <option value="Archived">Archived</option>
-                </select>
-              </div>
-
-              {/* Public Group */}
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="isPublic"
-                  name="isPublic"
-                  checked={formData.isPublic}
-                  onChange={handleInputChange}
-                  className="h-4 w-4"
-                  style={{ accentColor: 'var(--color-blue)' }}
-                />
-                <label htmlFor="isPublic" className="ml-2 text-sm text-secondary">
-                  Make this group public (visible to all users)
-                </label>
               </div>
 
               <div className="flex justify-end gap-3 pt-6" style={{ borderTop: '1px solid var(--color-separator)' }}>

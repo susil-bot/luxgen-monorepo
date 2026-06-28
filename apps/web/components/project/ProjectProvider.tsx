@@ -177,10 +177,18 @@ export function ProjectProvider({ tenant, children }: { tenant: string; children
 
   const moveItem = useCallback(
     async (id: string, status: ProjectStatus) => {
-      await moveItemMutation({
-        variables: { id, tenantId: queryTenantId, status },
-      });
-      await refetch();
+      try {
+        const { data: result } = await moveItemMutation({
+          variables: { id, tenantId: queryTenantId, status },
+        });
+        if (!result?.moveProjectItem) {
+          throw new Error('Move failed — item not found or plan gate blocked save');
+        }
+        await refetch();
+      } catch (err) {
+        console.error('moveProjectItem failed:', err);
+        throw err;
+      }
     },
     [moveItemMutation, queryTenantId, refetch],
   );

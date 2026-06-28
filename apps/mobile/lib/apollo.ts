@@ -4,14 +4,15 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { persistCache } from 'apollo3-cache-persist';
 
 import { API } from '../constants/api';
-import { getTenantSubdomain, getToken } from './auth';
+import { getToken } from './auth';
+import { resolveRequestTenant } from './tenant-auth';
 
 let client: ApolloClient<NormalizedCacheObject> | null = null;
 
 async function buildAuthLink() {
   return setContext(async (_, { headers }) => {
     const token = await getToken();
-    const tenant = (await getTenantSubdomain()) ?? API.defaultTenant;
+    const tenant = await resolveRequestTenant();
 
     return {
       headers: {

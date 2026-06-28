@@ -1,7 +1,8 @@
 import Head from 'next/head';
+import { useAppShellConfig } from '../../lib/app-shell-config';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import { AppLayout, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { AppLayout } from '@luxgen/ui';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import { useAppLayoutHeader } from '../../lib/app-layout-header';
@@ -13,6 +14,7 @@ interface SettingsIndexProps {
 }
 
 export default function SettingsIndexPage({ tenant }: SettingsIndexProps) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const layoutUser = useLayoutUser();
   const handleUserAction = createHandleUserAction(router);
@@ -25,9 +27,9 @@ export default function SettingsIndexPage({ tenant }: SettingsIndexProps) {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive

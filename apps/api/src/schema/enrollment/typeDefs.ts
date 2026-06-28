@@ -98,6 +98,25 @@ export const enrollmentTypeDefs = `
     studentEnrollments(tenantId: ID!, studentId: ID!): [Enrollment!]!
     draftEnrollments(tenantId: ID!): [Enrollment!]!
     abandonedCheckouts(tenantId: ID!): [AbandonedCheckout!]!
+    orderRows(tenantId: ID!): [OrderRow!]!
+  }
+
+  type OrderRow {
+    id: ID!
+    subjectId: ID!
+    courseId: ID!
+    studentId: ID!
+    orderNumber: String!
+    date: Date!
+    customerId: ID!
+    customerName: String!
+    customerEmail: String!
+    paymentStatus: String!
+    fulfillmentStatus: String!
+    total: String!
+    itemCount: Int!
+    courseTitle: String!
+    archived: Boolean!
   }
 
   extend type Mutation {

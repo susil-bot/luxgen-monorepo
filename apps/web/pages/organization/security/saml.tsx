@@ -11,6 +11,7 @@ export default function OrganizationSecuritySamlPage({ tenant }: Props) {
     <OrganizationShell
       tenant={tenant}
       activeSection="security"
+      securitySectionId="saml"
       title="SAML configuration"
       subtitle="Manage single sign-on authentication through your identity provider"
       securityNav={<OrganizationSecurityNav activeId="saml" />}

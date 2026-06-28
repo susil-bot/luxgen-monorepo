@@ -11,7 +11,7 @@ interface JwtPayload {
   exp?: number;
 }
 
-// Tenant-aware: reads kid from JWT header → TENANT_<KID>_KEY → JWT_SECRET fallback
+// Tenant-aware verification: reads kid from JWT header, falls back to JWT_SECRET
 const verifyJwtToken = (token: string): JwtPayload | null => {
   try {
     const decoded = jwt.decode(token, { complete: true });

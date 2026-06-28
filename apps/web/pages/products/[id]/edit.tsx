@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react';
+import { useAppShellConfig } from '../../../lib/app-shell-config';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useMutation, useQuery } from '@apollo/client';
 import {
   AppLayout,
-  getDefaultLogo,
-  getDefaultSidebarSections,
   SnackbarProvider,
   useSnackbar,
   ProductEditForm,
@@ -15,8 +14,7 @@ import {
   buildCourseUpdateInput,
   type ProductEditMeta,
   type ProductSeo,
-  type ProductStatus,
-} from '@luxgen/ui';
+  type ProductStatus } from '@luxgen/ui';
 import { PageLoadingState } from '../../../components/common/PageStates';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import { useLayoutUser } from '../../../lib/app-layout-user';
@@ -31,6 +29,7 @@ interface Props {
 }
 
 function EditProductContent({ tenant }: Props) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const { id } = router.query;
   const courseId = typeof id === 'string' ? id : '';
@@ -49,8 +48,7 @@ function EditProductContent({ tenant }: Props) {
 
   const { data, loading, error } = useQuery(GET_COURSE, {
     variables: { id: courseId },
-    skip: !courseId,
-  });
+    skip: !courseId });
 
   const [updateCourse] = useMutation(UPDATE_COURSE);
 
@@ -92,9 +90,7 @@ function EditProductContent({ tenant }: Props) {
       await updateCourse({
         variables: {
           id: courseId,
-          input: buildCourseUpdateInput({ title, bodyHtml, seo, meta, status }),
-        },
-      });
+          input: buildCourseUpdateInput({ title, bodyHtml, seo, meta, status }) } });
       showSuccess('Product saved');
     } catch (err) {
       showError(err instanceof Error ? err.message : 'Save failed');
@@ -133,9 +129,9 @@ function EditProductContent({ tenant }: Props) {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive
@@ -169,5 +165,3 @@ export default function EditProductPage(props: Props) {
     </SnackbarProvider>
   );
 }
-
-export const getServerSideProps = getTenantPageProps;

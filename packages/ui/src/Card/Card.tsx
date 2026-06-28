@@ -21,6 +21,7 @@ export interface CardProps extends BaseComponentProps {
   image?: string;
   imageAlt?: string;
   imagePosition?: 'top' | 'bottom' | 'left' | 'right';
+  loading?: boolean;
 }
 
 const CardComponent: React.FC<CardProps> = ({
@@ -43,8 +44,20 @@ const CardComponent: React.FC<CardProps> = ({
   image,
   imageAlt = '',
   imagePosition = 'top',
+  loading = false,
   ...props
 }) => {
+  if (loading) {
+    return (
+      <div
+        className={`card card--loading animate-pulse ${className}`}
+        style={{ ...style, minHeight: '12rem', background: 'var(--color-fill-tertiary)', borderRadius: '0.5rem' }}
+        aria-busy="true"
+        {...props}
+      />
+    );
+  }
+
   const getVariantStyles = () => {
     const variantStyles = {
       default: {
@@ -77,15 +90,15 @@ const CardComponent: React.FC<CardProps> = ({
     const sizeStyles = {
       small: {
         fontSize: '0.875rem',
-        minHeight: '8rem',
+        minHeight: '8em',
       },
       medium: {
         fontSize: '1rem',
-        minHeight: '10rem',
+        minHeight: '10em',
       },
       large: {
         fontSize: '1.125rem',
-        minHeight: '12rem',
+        minHeight: '12em',
       },
     };
 
@@ -154,6 +167,7 @@ const CardComponent: React.FC<CardProps> = ({
           objectFit: 'cover',
           order: imagePosition === 'bottom' || imagePosition === 'right' ? 1 : 0,
         }}
+        className={imagePosition === 'left' || imagePosition === 'right' ? 'card-adaptive-image-side' : undefined}
       />
     );
   };
@@ -243,7 +257,7 @@ const CardComponent: React.FC<CardProps> = ({
 
   return (
     <div
-      className={`card card-${variant} card-${size} ${clickable ? 'card-clickable' : ''} ${hover ? 'card-hover' : ''} ${className}`}
+      className={`card card-${variant} card-${size} lux-card-container lux-card-adaptive ${clickable ? 'card-clickable' : ''} ${hover ? 'card-hover' : ''} ${className}`}
       style={styles as React.CSSProperties}
       onClick={handleClick}
       {...props}
@@ -251,7 +265,10 @@ const CardComponent: React.FC<CardProps> = ({
       {image && imagePosition === 'top' && renderImage()}
       {image && imagePosition === 'left' && renderImage()}
 
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' } as React.CSSProperties}>
+      <div
+        className="card-adaptive-body"
+        style={{ flex: 1, display: 'flex', flexDirection: 'column' } as React.CSSProperties}
+      >
         {renderHeader()}
 
         <div

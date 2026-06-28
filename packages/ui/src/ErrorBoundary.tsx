@@ -41,10 +41,19 @@ export class ErrorBoundary extends Component<Props, State> {
       }
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div
+          className="min-h-screen flex items-center justify-center"
+          style={{ backgroundColor: 'var(--color-bg-secondary)' }}
+        >
           <div className="text-center p-8">
             <div className="mb-4">
-              <svg className="mx-auto h-12 w-12 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg
+                className="mx-auto h-12 w-12"
+                style={{ color: 'var(--color-red)' }}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -53,20 +62,34 @@ export class ErrorBoundary extends Component<Props, State> {
                 />
               </svg>
             </div>
-            <h2 className="text-lg font-semibold text-gray-900 mb-2">Something went wrong</h2>
-            <p className="text-gray-600 mb-4">
+            <h2 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-label-primary)' }}>
+              Something went wrong
+            </h2>
+            <p className="mb-4" style={{ color: 'var(--color-label-secondary)' }}>
               We're sorry, but something unexpected happened. Please try refreshing the page.
             </p>
             <button
               onClick={() => window.location.reload()}
-              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+              className="px-4 py-2 rounded-md transition-colors text-white"
+              style={{ backgroundColor: 'var(--color-blue)' }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.opacity = '0.9';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.opacity = '1';
+              }}
             >
               Refresh Page
             </button>
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className="mt-4 text-left">
-                <summary className="cursor-pointer text-sm text-gray-500">Error Details (Development)</summary>
-                <pre className="mt-2 text-xs text-red-600 bg-red-50 p-2 rounded overflow-auto">
+                <summary className="cursor-pointer text-sm" style={{ color: 'var(--color-label-tertiary)' }}>
+                  Error Details (Development)
+                </summary>
+                <pre
+                  className="mt-2 text-xs p-2 rounded overflow-auto"
+                  style={{ color: 'var(--color-red)', backgroundColor: 'var(--color-fill-quaternary)' }}
+                >
                   {this.state.error.stack}
                 </pre>
               </details>

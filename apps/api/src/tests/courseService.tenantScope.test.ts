@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
 
-jest.mock('@luxgen/db', () => ({ Course: { find: jest.fn(), findOne: jest.fn(), findOneAndUpdate: jest.fn(), findOneAndDelete: jest.fn() } }));
+jest.mock('@luxgen/db', () => ({
+  Course: { find: jest.fn(), findOne: jest.fn(), findOneAndUpdate: jest.fn(), findOneAndDelete: jest.fn() },
+}));
 
 import { Course } from '@luxgen/db';
 import { courseService } from '../services/courseService';

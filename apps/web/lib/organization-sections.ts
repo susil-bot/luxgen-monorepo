@@ -20,6 +20,11 @@ export interface OrganizationSecuritySection {
   status: 'live' | 'partial' | 'planned';
 }
 
+export interface OrganizationBreadcrumb {
+  label: string;
+  href?: string;
+}
+
 export const ORGANIZATION_SECTIONS: OrganizationSection[] = [
   {
     id: 'users',
@@ -102,3 +107,26 @@ export const ORGANIZATION_SECURITY_SECTIONS: OrganizationSecuritySection[] = [
     status: 'partial',
   },
 ];
+
+/** Default breadcrumb trail for OrganizationShell (UI-20). */
+export function buildOrganizationBreadcrumbs(
+  activeSection: OrganizationSectionId,
+  securitySectionId?: OrganizationSecuritySectionId,
+): OrganizationBreadcrumb[] {
+  const section = ORGANIZATION_SECTIONS.find((s) => s.id === activeSection);
+  const crumbs: OrganizationBreadcrumb[] = [{ label: 'Organization', href: '/organization/users' }];
+
+  if (!section) return crumbs;
+
+  if (activeSection === 'security' && securitySectionId) {
+    const securitySection = ORGANIZATION_SECURITY_SECTIONS.find((s) => s.id === securitySectionId);
+    crumbs.push({ label: section.label, href: section.href });
+    if (securitySection) {
+      crumbs.push({ label: securitySection.label });
+    }
+    return crumbs;
+  }
+
+  crumbs.push({ label: section.label });
+  return crumbs;
+}

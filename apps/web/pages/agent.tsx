@@ -1,23 +1,22 @@
 import React, { useState, useCallback, useEffect } from 'react';
+import { useAppShellConfig } from '../lib/app-shell-config';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import {
   SnackbarProvider,
   useSnackbar,
   AppLayout,
-  getDefaultUser,
-  getDefaultLogo,
-  getDefaultSidebarSections,
-  type UserMenu,
 } from '@luxgen/ui';
 import { createHandleUserAction } from '../lib/user-actions';
+import { useLayoutUser } from '../lib/app-layout-user';
 import AgentChat from '../components/agent/AgentChat';
 import AgentTransparency from '../components/agent/AgentTransparency';
 
 function AgentStudioContent() {
   const router = useRouter();
   const { showSuccess, showError: _showError, showInfo } = useSnackbar();
-  const [user, setUser] = useState<UserMenu | null>(null);
+  const layoutUser = useLayoutUser();
+  const { sidebarSections, logo } = useAppShellConfig();
   const [sessionId, setSessionId] = useState<string>('');
   const [transparencyRefresh, setTransparencyRefresh] = useState(0);
   const [appliedCount, setAppliedCount] = useState(0);
@@ -35,23 +34,10 @@ function AgentStudioContent() {
     fetch('/api/agent/git', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ sessionId }),
-    }).catch(() => {});
+      body: JSON.stringify({ sessionId }) }).catch(() => {});
   }, [sessionId]);
 
   useEffect(() => {
-    const data = localStorage.getItem('user');
-    if (data) {
-      try {
-        const p = JSON.parse(data);
-        setUser({ name: `${p.firstName} ${p.lastName}`, email: p.email, role: p.role });
-      } catch {
-        setUser(getDefaultUser());
-      }
-    } else {
-      setUser(getDefaultUser());
-    }
-
     fetch('/api/agent/health')
       .then((r) => r.json())
       .then((d) => {
@@ -132,12 +118,13 @@ function AgentStudioContent() {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
-        user={user ?? undefined}
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
         onUserAction={handleUserAction}
-        logo={getDefaultLogo()}
+        logo={logo}
         sidebarCollapsible
         responsive
+        contentMaxWidth={false}
       >
         <div className="flex flex-col h-full" style={{ height: 'calc(100vh - 64px)' }}>
           {/* Top bar */}
@@ -145,8 +132,7 @@ function AgentStudioContent() {
             className="flex items-center justify-between px-4 py-2.5 border-b flex-shrink-0"
             style={{
               borderColor: 'var(--color-separator)',
-              backgroundColor: 'var(--color-bg-secondary)',
-            }}
+              backgroundColor: 'var(--color-bg-secondary)' }}
           >
             <div className="flex items-center gap-3">
               <div
@@ -229,8 +215,7 @@ function AgentStudioContent() {
               className="flex-shrink-0 cursor-col-resize flex items-center justify-center transition-colors"
               style={{
                 width: '4px',
-                backgroundColor: isDragging ? 'var(--color-blue)' : 'var(--color-separator)',
-              }}
+                backgroundColor: isDragging ? 'var(--color-blue)' : 'var(--color-separator)' }}
               onMouseDown={handleDividerMouseDown}
             >
               <div

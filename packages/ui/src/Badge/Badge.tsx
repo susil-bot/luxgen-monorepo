@@ -45,16 +45,13 @@ const BadgeComponent: React.FC<BadgeProps> = ({
   };
 
   const getVariantBackground = () => {
-    const variantBackgrounds = {
-      primary: `${tenantTheme.colors.primary}20`,
-      secondary: `${tenantTheme.colors.textSecondary}20`,
-      success: `${tenantTheme.colors.success}20`,
-      error: `${tenantTheme.colors.error}20`,
-      warning: `${tenantTheme.colors.warning}20`,
-      info: `${tenantTheme.colors.info}20`,
-    };
+    const color = getVariantColor();
+    return `color-mix(in srgb, ${color} 12%, transparent)`;
+  };
 
-    return variantBackgrounds[variant];
+  const getVariantBorder = () => {
+    const color = getVariantColor();
+    return `color-mix(in srgb, ${color} 25%, transparent)`;
   };
 
   const getSizeStyles = () => {
@@ -102,7 +99,7 @@ const BadgeComponent: React.FC<BadgeProps> = ({
     fontWeight: '500',
     color: getVariantColor(),
     backgroundColor: getVariantBackground(),
-    border: `1px solid ${getVariantColor()}40`,
+    border: `1px solid ${getVariantBorder()}`,
     borderRadius,
     ...sizeStyles,
     ...(maxWidth && { maxWidth }),

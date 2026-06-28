@@ -1,9 +1,10 @@
 import { useState } from 'react';
+import { useAppShellConfig } from '../../../lib/app-shell-config';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useQuery } from '@apollo/client';
-import { AppLayout, getDefaultLogo, getDefaultSidebarSections, SnackbarProvider } from '@luxgen/ui';
+import { AppLayout, SnackbarProvider } from '@luxgen/ui';
 import { PageLoadingState } from '../../../components/common/PageStates';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import { useLayoutUser, useAppTenantId } from '../../../lib/app-layout-user';
@@ -30,6 +31,7 @@ function formatMoney(cents: number): string {
 }
 
 function CustomerSegmentationContent({ tenant }: Props) {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
   const handleUserAction = createHandleUserAction(router);
   const layoutUser = useLayoutUser();
@@ -40,14 +42,12 @@ function CustomerSegmentationContent({ tenant }: Props) {
   const { data: segmentData, loading: segmentsLoading } = useQuery(GET_CUSTOMER_SEGMENTS, {
     variables: { tenantId },
     skip: !isMongoObjectId(tenantId),
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const { data: membersData, loading: membersLoading } = useQuery(GET_CUSTOMERS_IN_SEGMENT, {
     variables: { tenantId, segment: selectedSegment },
     skip: !isMongoObjectId(tenantId),
-    fetchPolicy: 'cache-and-network',
-  });
+    fetchPolicy: 'cache-and-network' });
 
   const segments = segmentData?.customerSegments ?? [];
   const members = membersData?.customersInSegment ?? [];
@@ -59,9 +59,9 @@ function CustomerSegmentationContent({ tenant }: Props) {
         <title>Segmentation — Customers — {tenant}</title>
       </Head>
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
+        sidebarSections={sidebarSections}
         user={layoutUser ?? undefined}
-        logo={getDefaultLogo()}
+        logo={logo}
         onUserAction={handleUserAction}
         {...headerProps}
         responsive
@@ -162,5 +162,3 @@ export default function CustomerSegmentationPage(props: Props) {
     </SnackbarProvider>
   );
 }
-
-export const getServerSideProps = getTenantPageProps;

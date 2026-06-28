@@ -116,9 +116,11 @@ export const selectStyles = {
     }
 
     .select-arrow {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
       color: var(--color-text-secondary);
-      font-size: 0.75rem;
-      transition: transform 0.2s ease;
+      transition: transform var(--transition-fast, 120ms ease);
     }
 
     .select-dropdown {
@@ -133,6 +135,12 @@ export const selectStyles = {
       z-index: 1000;
       max-height: 200px;
       overflow-y: auto;
+    }
+
+    .select-dropdown--dropup {
+      top: auto;
+      bottom: 100%;
+      margin-bottom: 0.25rem;
     }
 
     .select-search {

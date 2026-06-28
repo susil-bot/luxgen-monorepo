@@ -20,6 +20,26 @@ export const LOGIN_MUTATION = gql`
   }
 `;
 
+export const REGISTER_MUTATION = gql`
+  mutation Register($input: CreateUserInput!) {
+    register(input: $input) {
+      token
+      user {
+        id
+        email
+        firstName
+        lastName
+        role
+        tenant {
+          id
+          name
+          subdomain
+        }
+      }
+    }
+  }
+`;
+
 export const GET_CURRENT_USER = gql`
   query GetCurrentUser {
     currentUser {
