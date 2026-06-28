@@ -2,13 +2,20 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import Image27Svg from '../assets/images/image27.svg';
 import { useTheme } from '../theme/ThemeContext';
+import { skillLevelFromPercent } from '../data/skill-assessment';
+import type { LearnerNavigation } from '../../lib/learner-navigation';
 
 type Props = {
-  navigation: any;
+  navigation: LearnerNavigation;
+  correct?: number;
+  total?: number;
+  percent?: number;
 };
 
-export default function CongratulationsScreen({ navigation }: Props) {
+export default function CongratulationsScreen({ navigation, correct, total, percent }: Props) {
   const theme = useTheme();
+  const scored = typeof percent === 'number' && !Number.isNaN(percent);
+  const level = skillLevelFromPercent(scored ? percent : 70);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -17,12 +24,15 @@ export default function CongratulationsScreen({ navigation }: Props) {
 
         <Image27Svg width={200} height={200} style={styles.image} />
 
-        <Text style={[styles.levelText, { color: theme.text }]}>You are in the Intermediate level</Text>
+        {scored && typeof correct === 'number' && typeof total === 'number' ? (
+          <Text style={[styles.scoreText, { color: theme.btnPrimary }]}>
+            You scored {correct}/{total} ({percent}%)
+          </Text>
+        ) : null}
 
-        <Text style={[styles.descriptionText, { color: theme.text }]}>
-          We assume that you have a good basic knowledge about coding so you just have to upgrade your skills into
-          advance
-        </Text>
+        <Text style={[styles.levelText, { color: theme.text }]}>You are at {level.title}</Text>
+
+        <Text style={[styles.descriptionText, { color: theme.text }]}>{level.description}</Text>
       </View>
 
       <TouchableOpacity
@@ -58,6 +68,12 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     marginBottom: 30,
+  },
+  scoreText: {
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 12,
+    textAlign: 'center',
   },
   levelText: {
     fontSize: 20,
