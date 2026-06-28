@@ -3,6 +3,7 @@ import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Activi
 import { useTheme } from '../theme/ThemeContext';
 import { useAuth } from '../../hooks/useAuth';
 import { useTenant } from '../../hooks/useTenant';
+import { showSocialLoginUnavailable } from '../../lib/social-auth';
 import type { LearnerNavigation } from '../../lib/learner-navigation';
 
 type Props = {
@@ -129,11 +130,17 @@ export default function SignUpFormScreen({ navigation }: Props) {
 
       {/* Social + Signup Buttons */}
       <View style={styles.buttons}>
-        <TouchableOpacity style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}>
+        <TouchableOpacity
+          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
+          onPress={() => showSocialLoginUnavailable('google')}
+        >
           <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Google</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}>
+        <TouchableOpacity
+          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
+          onPress={() => showSocialLoginUnavailable('apple')}
+        >
           <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Apple</Text>
         </TouchableOpacity>
 

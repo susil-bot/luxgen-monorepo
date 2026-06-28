@@ -2,9 +2,11 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import Image5 from '../assets/images/image 5.svg';
 import { useTheme } from '../theme/ThemeContext';
+import { showSocialLoginUnavailable } from '../../lib/social-auth';
+import type { LearnerNavigation } from '../../lib/learner-navigation';
 
 type Props = {
-  navigation: any;
+  navigation: LearnerNavigation;
 };
 
 export default function SignUpScreen({ navigation }: Props) {
@@ -21,15 +23,24 @@ export default function SignUpScreen({ navigation }: Props) {
       <Text style={[styles.subHeader, { color: theme.subtext }]}>Log in before you start learning</Text>
 
       <View style={styles.socialButtons}>
-        <TouchableOpacity style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}>
+        <TouchableOpacity
+          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
+          onPress={() => showSocialLoginUnavailable('google')}
+        >
           <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Google</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}>
+        <TouchableOpacity
+          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
+          onPress={() => showSocialLoginUnavailable('apple')}
+        >
           <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Apple</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}>
+        <TouchableOpacity
+          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
+          onPress={() => showSocialLoginUnavailable('facebook')}
+        >
           <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Facebook</Text>
         </TouchableOpacity>
       </View>
