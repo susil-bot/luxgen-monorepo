@@ -11,10 +11,14 @@ interface JwtPayload {
   exp?: number;
 }
 
-// Token verification function
+// Tenant-aware: reads kid from JWT header → TENANT_<KID>_KEY → JWT_SECRET fallback
 const verifyJwtToken = (token: string): JwtPayload | null => {
   try {
-    return jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+    const decoded = jwt.decode(token, { complete: true });
+    const kid = (decoded?.header as { kid?: string })?.kid;
+    const tenantKey = kid ? process.env[`TENANT_${kid.toUpperCase()}_KEY`] : undefined;
+    const secret = tenantKey || process.env.JWT_SECRET!;
+    return jwt.verify(token, secret) as JwtPayload;
   } catch {
     return null;
   }

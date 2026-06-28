@@ -91,6 +91,10 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3000
+      # API_URL: server-side (SSR/API routes/rewrites) → Docker service name
+      API_URL: http://api:4000
+      GRAPHQL_URL: http://api:4000/graphql
+      # NEXT_PUBLIC_*: baked into browser bundle → must use host-visible address
       NEXT_PUBLIC_API_URL: http://localhost:4000
       NEXT_PUBLIC_GRAPHQL_URL: http://localhost:4000/graphql
       NEXT_PUBLIC_APP_URL: http://localhost:3000

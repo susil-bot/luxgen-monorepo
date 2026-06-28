@@ -4,7 +4,7 @@ export const URL_DEFAULTS = {
   API: 'http://localhost:4000',
   GRAPHQL: 'http://localhost:4000/graphql',
   OLLAMA: 'http://localhost:11434',
-  MONGODB: 'mongodb://localhost:27017/luxgen',
+  MONGODB: 'mongodb://localhost:27017/luxgen_dev',
   REDIS: 'redis://localhost:6379',
   APP_DOMAIN: 'localhost',
   WEB_PORT: '3000',
