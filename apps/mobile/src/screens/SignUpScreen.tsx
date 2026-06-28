@@ -1,0 +1,139 @@
+import React from 'react';
+import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import Image5 from '../assets/images/image 5.svg';
+import { useTheme } from '../theme/ThemeContext';
+
+type Props = {
+  navigation: any;
+};
+
+export default function SignUpScreen({ navigation }: Props) {
+  const theme = useTheme();
+
+  return (
+    <ScrollView
+      contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}
+      showsVerticalScrollIndicator={false}
+    >
+      <Image5 width={160} height={160} style={styles.image} />
+
+      <Text style={[styles.header, { color: theme.text }]}>Let's Get Started</Text>
+      <Text style={[styles.subHeader, { color: theme.subtext }]}>Log in before you start learning</Text>
+
+      <View style={styles.socialButtons}>
+        <TouchableOpacity style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}>
+          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Google</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}>
+          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Apple</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}>
+          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Facebook</Text>
+        </TouchableOpacity>
+      </View>
+
+      <TouchableOpacity
+        style={[styles.signUpBtn, { backgroundColor: theme.btnPrimary }]}
+        onPress={() => navigation.navigate('SignUpForm')}
+      >
+        <Text style={[styles.signUpTxt, { color: theme.btnPrimaryText }]}>Sign up</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        style={[styles.signInBtn, { borderColor: theme.btnPrimary }]}
+        onPress={() => navigation.navigate('SignIn')}
+      >
+        <Text style={[styles.signInTxt, { color: theme.btnPrimary }]}>Sign in</Text>
+      </TouchableOpacity>
+
+      <View style={styles.footer}>
+        <TouchableOpacity>
+          <Text style={[styles.footerLink, { color: theme.subtext }]}>Privacy Policy</Text>
+        </TouchableOpacity>
+        <Text style={[styles.footerDot, { color: theme.subtext }]}>{'   •   '}</Text>
+        <TouchableOpacity>
+          <Text style={[styles.footerLink, { color: theme.subtext }]}>Terms of Service</Text>
+        </TouchableOpacity>
+      </View>
+    </ScrollView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingBottom: 32,
+  },
+  image: {
+    marginBottom: 32,
+  },
+  header: {
+    fontSize: 26,
+    fontWeight: '700',
+    textAlign: 'center',
+    marginBottom: 8,
+  },
+  subHeader: {
+    fontSize: 15,
+    textAlign: 'center',
+    marginBottom: 36,
+  },
+  socialButtons: {
+    width: '100%',
+    gap: 14,
+    marginBottom: 20,
+  },
+  socialBtn: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 50,
+    borderWidth: 1,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+  },
+  socialTxt: {
+    fontSize: 15,
+    fontWeight: '500',
+  },
+  signUpBtn: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 50,
+    alignItems: 'center',
+    marginBottom: 14,
+  },
+  signUpTxt: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  signInBtn: {
+    width: '100%',
+    paddingVertical: 14,
+    borderRadius: 50,
+    borderWidth: 1,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    marginBottom: 40,
+  },
+  signInTxt: {
+    fontSize: 15,
+    fontWeight: '600',
+  },
+  footer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginTop: 'auto',
+  },
+  footerLink: {
+    fontSize: 13,
+    textDecorationLine: 'underline',
+  },
+  footerDot: {
+    fontSize: 13,
+  },
+});

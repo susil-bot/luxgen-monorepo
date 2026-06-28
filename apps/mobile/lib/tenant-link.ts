@@ -27,3 +27,16 @@ export function parseTenantFromUrl(url: string): string | null {
 export function buildTenantLoginLink(tenantSubdomain: string): string {
   return Linking.createURL('login', { queryParams: { tenant: tenantSubdomain } });
 }
+
+export function parseResetTokenFromUrl(url: string): string | null {
+  const parsed = Linking.parse(url);
+  const tokenParam = parsed.queryParams?.token;
+  if (typeof tokenParam === 'string' && tokenParam.trim()) {
+    return tokenParam.trim();
+  }
+  return null;
+}
+
+export function buildResetPasswordLink(token: string): string {
+  return Linking.createURL('reset-password', { queryParams: { token } });
+}
