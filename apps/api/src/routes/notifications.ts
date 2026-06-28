@@ -1,6 +1,8 @@
 import { Router, Request, Response } from 'express';
 import { LISTING_EMAIL_TEMPLATES, type ListingEmailTemplate } from '../notifications/listing-templates';
 import { getTenantContext } from '../middleware/tenantRouting';
+import { UserRole } from '@luxgen/auth';
+import { requireRole } from '../middleware/roleManagement';
 
 const router = Router();
 const templateOverrides = new Map();
@@ -45,7 +47,7 @@ const sampleContext = {
 /**
  * List email notification templates for the current tenant
  */
-router.get('/templates', async (req: Request, res: Response) => {
+router.get('/templates', requireRole(UserRole.ADMIN), async (req: Request, res: Response) => {
   try {
     const tenantContext = getTenantContext(req);
 
@@ -88,7 +90,7 @@ router.get('/templates', async (req: Request, res: Response) => {
   }
 });
 
-router.patch('/templates/:id', async (req, res) => {
+router.patch('/templates/:id', requireRole(UserRole.ADMIN), async (req, res) => {
   const tenantContext = getTenantContext(req);
   if (!tenantContext) return res.status(404).json({ success: false, message: 'No tenant context' });
   const { id } = req.params;
