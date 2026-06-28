@@ -1,19 +1,28 @@
-import { Course, Enrollment, EnrollmentLearningStatus, Group, GroupMember } from '@luxgen/db';
+import mongoose from 'mongoose';
+import { Course, Enrollment, EnrollmentLearningStatus, EnrollmentPaymentStatus, Group, GroupMember } from '@luxgen/db';
 import { resolveProductPriceCents } from '../utils/productMeta';
+
+const MONTH_LABELS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
 export const analyticsService = {
   async getCourseAnalytics(tenantId: string, _days = 90) {
-    const allEnrollments = await Enrollment.find({ tenant: tenantId }).lean();
-    const courses = await Course.find({ tenant: tenantId }).lean();
+    const tenantOid = new mongoose.Types.ObjectId(tenantId);
+    const allEnrollments = await Enrollment.find({ tenant: tenantOid }).lean();
+    const courses = await Course.find({ tenant: tenantOid }).lean();
     const completed = allEnrollments.filter((e) => e.learningStatus === EnrollmentLearningStatus.COMPLETED);
     const activeStudentIds = new Set(
       allEnrollments.filter((e) => e.learningStatus === EnrollmentLearningStatus.ACTIVE).map((e) => String(e.student)),
     );
+
+    // Revenue: only count paid enrollments
     let revenueCents = 0;
     const courseMap = new Map(courses.map((c) => [String(c._id), c]));
     for (const e of allEnrollments) {
+      if (e.paymentStatus !== EnrollmentPaymentStatus.PAID) continue;
       const course = courseMap.get(String(e.course));
       if (course) revenueCents += resolveProductPriceCents(course);
     }
+
     const byCourse = new Map<string, typeof allEnrollments>();
     for (const e of allEnrollments) {
       const k = String(e.course);
@@ -34,6 +43,19 @@ export const analyticsService = {
       })
       .sort((a, b) => b.enrollments - a.enrollments)
       .slice(0, 5);
+
+    // Real enrollment trends via MongoDB aggregation (last 12 months)
+    const trendRaw = await Enrollment.aggregate([
+      { $match: { tenant: tenantOid } },
+      { $group: { _id: { $month: '$enrolledAt' }, enrollments: { $sum: 1 } } },
+      { $sort: { _id: 1 } },
+    ]);
+    const trendMap = new Map(trendRaw.map((r: { _id: number; enrollments: number }) => [r._id, r.enrollments]));
+    const enrollmentTrends = MONTH_LABELS.map((label, i) => ({
+      label,
+      enrollments: trendMap.get(i + 1) ?? 0,
+    }));
+
     return {
       totalCourses: courses.length,
       totalEnrollments: allEnrollments.length,
@@ -42,11 +64,7 @@ export const analyticsService = {
       averageRating: 0,
       revenueCents,
       topCourses,
-      enrollmentTrends: [
-        { label: 'Jan', enrollments: 0 },
-        { label: 'Feb', enrollments: 0 },
-        { label: 'Mar', enrollments: 0 },
-      ],
+      enrollmentTrends,
     };
   },
   async getGroupAnalytics(tenantId: string) {

@@ -132,7 +132,7 @@ export class UserService {
     const query: Record<string, unknown> = { email: email.toLowerCase().trim() };
     if (inputTenantId) query.tenant = inputTenantId;
 
-    const user = await User.findOne(query).populate('tenant');
+    const user = await User.findOne(query).select('+password').populate('tenant');
     if (!user) {
       throw new AuthServiceError('Invalid email or password', 401, {
         email: 'Invalid email or password',

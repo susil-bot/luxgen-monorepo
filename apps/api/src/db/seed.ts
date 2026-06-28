@@ -447,7 +447,7 @@ const createSampleUsers = async (tenants: any[]) => {
   const allUsers = [...demoUsers, ...ideaVibesUsers, ...acmeUsers];
 
   for (const userData of allUsers) {
-    const existingUser = await User.findOne({ email: userData.email });
+    const existingUser = await User.findOne({ email: userData.email }).select('+password');
     const hashedPassword = await hashPassword(userData.password);
 
     if (!existingUser) {
@@ -462,7 +462,7 @@ const createSampleUsers = async (tenants: any[]) => {
         `Created user: ${user.firstName} ${user.lastName} (${user.email}) - Role: ${user.role} - Tenant: ${user.tenant}`,
       );
     } else {
-      if (!existingUser.password.startsWith('$2')) {
+      if (!existingUser.password?.startsWith('$2')) {
         existingUser.password = hashedPassword;
         existingUser.status = 'ACTIVE' as IUser['status'];
         await existingUser.save();

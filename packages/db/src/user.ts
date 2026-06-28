@@ -86,6 +86,7 @@ const userSchema = new Schema<IUser>(
       type: String,
       required: true,
       minlength: 6,
+      select: false,
     },
     firstName: {
       type: String,
@@ -253,5 +254,9 @@ const userSchema = new Schema<IUser>(
     timestamps: true,
   },
 );
+
+userSchema.index({ tenant: 1, email: 1 });
+userSchema.index({ tenant: 1, role: 1 });
+userSchema.index({ tenant: 1, status: 1 });
 
 export const User = model<IUser>('User', userSchema);

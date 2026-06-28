@@ -62,6 +62,9 @@ const enrollmentSchema = new Schema<IEnrollment>(
 );
 
 enrollmentSchema.index({ course: 1, student: 1 }, { unique: true });
+enrollmentSchema.index({ tenant: 1, student: 1 });
+enrollmentSchema.index({ tenant: 1, paymentStatus: 1 });
+enrollmentSchema.index({ stripeCheckoutSessionId: 1 }, { sparse: true });
 
 export const Enrollment = model<IEnrollment>('Enrollment', enrollmentSchema);
 
