@@ -7,6 +7,9 @@ const serverOnly = (name: string): never => {
 };
 
 export const SYSTEM_PROMPT = '';
+/** Safe for client pages that only need tool metadata (e.g. developer hub). */
+export const AGENT_TOOLS: Array<{ name: string; description: string }> = [];
+export const AGENT_TOOLS_OPENAI: unknown[] = [];
 export const extractBearerToken = () => serverOnly('extractBearerToken');
 export const isAuthRequired = () => serverOnly('isAuthRequired');
 export const resolveAgentAuth = () => serverOnly('resolveAgentAuth');

@@ -23,8 +23,6 @@ const nextConfig = {
       { protocol: 'https', hostname: '**.amazonaws.com' },
     ],
   },
-  /** Prevent bundling server-only packages into RSC/API server compilation issues */
-  serverExternalPackages: ['@luxgen/agent', '@luxgen/db', 'ioredis', 'mongodb'],
   /** Allow _next assets when browsing via tenant subdomains (demo.localhost:3000) */
   allowedDevOrigins: devAllowedOrigins(),
   env: {
@@ -40,6 +38,22 @@ const nextConfig = {
   ],
   experimental: {
     externalDir: true,
+    /**
+     * Prevent bundling server-only packages into RSC/API server compilation.
+     * NOTE: this is `serverExternalPackages` (top-level, stable) in Next.js 15+.
+     * This repo is pinned to Next.js ^14.0.0 (currently 14.2.33), where the
+     * top-level key is silently dropped ("Invalid next.config.js options
+     * detected: Unrecognized key(s) in object: 'serverExternalPackages'"),
+     * which meant ioredis (pulled in by @luxgen/agent) was NOT externalized
+     * and webpack tried to bundle it, failing on `node:diagnostics_channel`
+     * ("UnhandledSchemeError ... Reading from node:diagnostics_channel").
+     * Use the Next 14 experimental key instead; migrate back to the
+     * top-level `serverExternalPackages` when this repo upgrades to Next 15.
+     *
+     * Do not list `@luxgen/agent` here — it must stay in transpilePackages
+     * (Next 14 forbids both). Externalize ioredis via this list + webpack.
+     */
+    serverComponentsExternalPackages: ['ioredis', 'mongodb', '@luxgen/db'],
   },
   typescript: {
     ignoreBuildErrors: true,
@@ -48,11 +62,39 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   webpack: (config, { isServer, webpack }) => {
-    // @luxgen/agent pulls ioredis → Node built-ins; never ship to the browser bundle
+    // ioredis imports `node:diagnostics_channel`; webpack throws UnhandledSchemeError
+    // unless the `node:` prefix is stripped (Node builtins resolve without it).
+    config.plugins.push(
+      new webpack.NormalModuleReplacementPlugin(/^node:/, (resource) => {
+        resource.request = resource.request.replace(/^node:/, '');
+      }),
+    );
+
+    // Keep ioredis out of the webpack graph (agent stays transpiled/bundled).
+    const externalizer = ({ request }, callback) => {
+      if (typeof request !== 'string') return callback();
+      if (request === 'ioredis' || request.startsWith('node:')) {
+        return callback(null, isServer ? `commonjs ${request}` : 'var {}');
+      }
+      if (isServer && (request === 'mongodb' || request === 'mongoose' || request === '@luxgen/db')) {
+        return callback(null, `commonjs ${request}`);
+      }
+      callback();
+    };
+    if (Array.isArray(config.externals)) {
+      config.externals.push(externalizer);
+    } else if (config.externals) {
+      config.externals = [config.externals, externalizer];
+    } else {
+      config.externals = [externalizer];
+    }
+
     if (!isServer) {
+      // Never ship @luxgen/agent barrel (ioredis) to the browser
       config.resolve.alias = {
         ...config.resolve.alias,
         '@luxgen/agent': path.resolve(__dirname, 'lib/agent-client-stub.ts'),
+        ioredis: false,
       };
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -62,6 +104,7 @@ const nextConfig = {
         tls: false,
         fs: false,
         child_process: false,
+        ioredis: false,
       };
       config.plugins.push(
         new webpack.ProvidePlugin({

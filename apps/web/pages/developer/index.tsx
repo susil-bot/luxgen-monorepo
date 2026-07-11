@@ -5,7 +5,7 @@ import { useRouter } from 'next/router';
 import { SnackbarProvider, useSnackbar, AppLayout } from '@luxgen/ui';
 import AgentChat from '../../components/agent/AgentChat';
 import AgentTransparency from '../../components/agent/AgentTransparency';
-import { AGENT_TOOLS } from '@luxgen/agent';
+import { AGENT_TOOLS } from '../../../../packages/agent/src/tools/definitions';
 import { SYSTEM_PROMPT } from '../../lib/agent-system-prompt';
 import { createHandleUserAction } from '../../lib/user-actions';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
