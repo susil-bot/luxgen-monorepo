@@ -2,6 +2,7 @@ import { useRouter } from 'expo-router';
 
 /** Maps legacy AppNavigator screen names → Expo Router paths */
 export const LEARNER_ROUTES = {
+  Splash: '/(learner)/splash',
   Home: '/(learner)/home',
   Onboarding: '/(learner)/onboarding',
   SignUp: '/(learner)/sign-up',
@@ -19,6 +20,7 @@ export type LearnerScreenName = keyof typeof LEARNER_ROUTES;
 
 export type LearnerNavigation = {
   navigate: (name: LearnerScreenName | string, params?: Record<string, string>) => void;
+  replace: (name: LearnerScreenName | string, params?: Record<string, string>) => void;
   goBack: () => void;
 };
 
@@ -26,20 +28,24 @@ export type LearnerNavigation = {
 export function useLearnerNavigation(): LearnerNavigation {
   const router = useRouter();
 
+  const goTo = (method: 'push' | 'replace', name: LearnerScreenName | string, params?: Record<string, string>) => {
+    const path = LEARNER_ROUTES[name as LearnerScreenName];
+    const href = path ?? (name as `/${string}`);
+    if (method === 'replace') {
+      router.replace({ pathname: href, params });
+      return;
+    }
+    router.push({ pathname: href, params });
+  };
+
   return {
-    navigate: (name, params) => {
-      const path = LEARNER_ROUTES[name as LearnerScreenName];
-      if (path) {
-        router.push({ pathname: path, params });
-        return;
-      }
-      router.push({ pathname: name as `/${string}`, params });
-    },
+    navigate: (name, params) => goTo('push', name, params),
+    replace: (name, params) => goTo('replace', name, params),
     goBack: () => {
       if (router.canGoBack()) {
         router.back();
       } else {
-        router.replace('/(learner)/onboarding');
+        router.replace('/(learner)/sign-up');
       }
     },
   };

@@ -52,7 +52,7 @@ export default function ResetPasswordScreen({ navigation, resetToken = '' }: Pro
         showsVerticalScrollIndicator={false}
       >
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={[styles.backArrow, { color: theme.text }]}>{'←'}</Text>
+          <Text style={[styles.backArrow, { color: theme.text }]}>{'<'}</Text>
         </TouchableOpacity>
 
         <Text style={[styles.heading, { color: theme.text }]}>Reset Your Password</Text>

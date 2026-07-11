@@ -3,10 +3,14 @@ import Constants from 'expo-constants';
 
 import { API, AUTH_KEYS } from '../constants/api';
 
-/** Map bare localhost / www to demo — matches web `tenant-auth.ts` */
+/** Map bare localhost / www / LAN IPs to demo — matches web `tenant-auth.ts` */
 export function normalizeTenantSubdomain(subdomain: string | undefined | null): string {
   const raw = (subdomain ?? '').trim().toLowerCase();
   if (!raw || raw === 'default' || raw === 'www' || raw === 'localhost' || raw === '127.0.0.1') {
+    return 'demo';
+  }
+  // Stale AsyncStorage from Expo `exp://192.168.x.x` being misread as a tenant
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(raw) || raw.includes(':')) {
     return 'demo';
   }
   return raw;
@@ -28,7 +32,12 @@ export function getBuildTimeTenantSlug(): string | null {
 export async function getActiveTenantSubdomain(): Promise<string> {
   const stored = await AsyncStorage.getItem(AUTH_KEYS.activeTenant);
   if (stored?.trim()) {
-    return normalizeTenantSubdomain(stored);
+    const normalized = normalizeTenantSubdomain(stored);
+    // Persist correction if Expo LAN IP (or similar) was previously saved as tenant
+    if (normalized !== stored.trim().toLowerCase()) {
+      await AsyncStorage.setItem(AUTH_KEYS.activeTenant, normalized);
+    }
+    return normalized;
   }
 
   const buildSlug = getBuildTimeTenantSlug();

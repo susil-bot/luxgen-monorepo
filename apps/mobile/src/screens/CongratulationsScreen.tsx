@@ -1,14 +1,27 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
 import Image27Svg from '../assets/images/image27.svg';
 import { useTheme } from '../theme/ThemeContext';
+import { useAuth } from '../../hooks/useAuth';
+import { DASHBOARD_ROUTE, markSkillCheckCompleted } from '../../lib/skill-check';
+import type { LearnerNavigation } from '../../lib/learner-navigation';
 
 type Props = {
-  navigation: any;
+  navigation: LearnerNavigation;
 };
 
-export default function CongratulationsScreen({ navigation }: Props) {
+export default function CongratulationsScreen({ navigation: _navigation }: Props) {
   const theme = useTheme();
+  const router = useRouter();
+  const { user } = useAuth();
+
+  const handleFinish = async () => {
+    if (user?.id) {
+      await markSkillCheckCompleted(user.id);
+    }
+    router.replace(DASHBOARD_ROUTE);
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -27,9 +40,9 @@ export default function CongratulationsScreen({ navigation }: Props) {
 
       <TouchableOpacity
         style={[styles.button, { backgroundColor: theme.btnPrimary }]}
-        onPress={() => navigation.navigate('Home')}
+        onPress={() => void handleFinish()}
       >
-        <Text style={[styles.buttonText, { color: theme.btnPrimaryText }]}>Finish</Text>
+        <Text style={[styles.buttonText, { color: theme.btnPrimaryText }]}>Go to Dashboard</Text>
       </TouchableOpacity>
     </View>
   );

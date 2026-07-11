@@ -3,9 +3,10 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import ProgressBar from '../components/ProgressBar';
 import QuestionCard from '../components/QuestionCard';
 import { useTheme } from '../theme/ThemeContext';
+import type { LearnerNavigation } from '../../lib/learner-navigation';
 
 type Props = {
-  navigation: any;
+  navigation: LearnerNavigation;
 };
 
 type Question = {
@@ -86,7 +87,7 @@ export default function QuestionProgressScreen({ navigation }: Props) {
     }
 
     if (isLastQuestion) {
-      navigation.navigate('Congratulations');
+      navigation.replace('Congratulations');
       return;
     }
 
@@ -98,7 +99,7 @@ export default function QuestionProgressScreen({ navigation }: Props) {
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.topRow}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={[styles.backText, { color: theme.text }]}>Back</Text>
+          <Text style={[styles.backArrow, { color: theme.text }]}>{'<'}</Text>
         </TouchableOpacity>
 
         <View style={styles.progressWrapper}>
@@ -136,10 +137,13 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     alignSelf: 'flex-start',
+    paddingVertical: 4,
+    paddingRight: 12,
   },
-  backText: {
-    fontSize: 16,
-    fontWeight: '600',
+  backArrow: {
+    fontSize: 28,
+    fontWeight: '300',
+    lineHeight: 32,
   },
   topRow: {
     flexDirection: 'row',

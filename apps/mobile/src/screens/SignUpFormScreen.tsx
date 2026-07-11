@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
+import { AuthLoadingModal } from '../components/AuthLoadingModal';
+import { SocialAuthButton } from '../components/SocialAuthButton';
 import { useAuth } from '../../hooks/useAuth';
 import { useTenant } from '../../hooks/useTenant';
 import type { LearnerNavigation } from '../../lib/learner-navigation';
@@ -30,6 +32,7 @@ export default function SignUpFormScreen({ navigation }: Props) {
   const [showPassword, setShowPassword] = useState(false);
   const [agreed, setAgreed] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   const handleSignUp = async () => {
     if (!tenantId) {
@@ -37,6 +40,7 @@ export default function SignUpFormScreen({ navigation }: Props) {
       return;
     }
     setError(null);
+    setSubmitting(true);
     const { firstName, lastName } = nameFromEmail(email.trim());
     try {
       await register({
@@ -49,115 +53,113 @@ export default function SignUpFormScreen({ navigation }: Props) {
       });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign up failed');
+    } finally {
+      setSubmitting(false);
     }
   };
 
+  const showLoading = submitting || loading;
+
   return (
-    <ScrollView
-      contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}
-      showsVerticalScrollIndicator={false}
-      keyboardShouldPersistTaps="handled"
-    >
-      {/* Back Button */}
-      <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-        <Text style={[styles.backArrow, { color: theme.text }]}>{'←'}</Text>
-      </TouchableOpacity>
+    <>
+      <ScrollView
+        contentContainerStyle={[styles.container, { backgroundColor: theme.background }]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* Back Button */}
+        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
+          <Text style={[styles.backArrow, { color: theme.text }]}>{'<'}</Text>
+        </TouchableOpacity>
 
-      {/* Heading */}
-      <Text style={[styles.heading, { color: theme.text }]}>Join Codu Now!</Text>
-      <Text style={[styles.subHeading, { color: theme.subtext }]}>Join now to be a pro at coding</Text>
+        {/* Heading */}
+        <Text style={[styles.heading, { color: theme.text }]}>Join Codu Now!</Text>
+        <Text style={[styles.subHeading, { color: theme.subtext }]}>Join now to be a pro at coding</Text>
 
-      {/* Form */}
-      <View style={styles.form}>
-        <Text style={[styles.label, { color: theme.text }]}>Email</Text>
-        <TextInput
-          style={[styles.input, { borderColor: '#d0d0d0', color: theme.text, backgroundColor: theme.background }]}
-          placeholder="Enter your email"
-          placeholderTextColor={theme.subtext}
-          value={email}
-          onChangeText={setEmail}
-          keyboardType="email-address"
-          autoCapitalize="none"
-        />
-
-        <Text style={[styles.label, { color: theme.text }]}>Password</Text>
-        <View style={[styles.passwordRow, { borderColor: '#d0d0d0', backgroundColor: theme.background }]}>
+        {/* Form */}
+        <View style={styles.form}>
+          <Text style={[styles.label, { color: theme.text }]}>Email</Text>
           <TextInput
-            style={[styles.passwordInput, { color: theme.text }]}
-            placeholder="Password"
+            style={[styles.input, { borderColor: '#d0d0d0', color: theme.text, backgroundColor: theme.background }]}
+            placeholder="Enter your email"
             placeholderTextColor={theme.subtext}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry={!showPassword}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
-          <TouchableOpacity onPress={() => setShowPassword((p) => !p)}>
-            <Text style={[styles.toggleTxt, { color: theme.subtext }]}>{showPassword ? 'Hide' : 'Show'}</Text>
+
+          <Text style={[styles.label, { color: theme.text }]}>Password</Text>
+          <View style={[styles.passwordRow, { borderColor: '#d0d0d0', backgroundColor: theme.background }]}>
+            <TextInput
+              style={[styles.passwordInput, { color: theme.text }]}
+              placeholder="Password"
+              placeholderTextColor={theme.subtext}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!showPassword}
+            />
+            <TouchableOpacity onPress={() => setShowPassword((p) => !p)}>
+              <Text style={[styles.toggleTxt, { color: theme.subtext }]}>{showPassword ? 'Hide' : 'Show'}</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Checkbox */}
+          <TouchableOpacity style={styles.checkboxRow} onPress={() => setAgreed((a) => !a)}>
+            <View
+              style={[
+                styles.checkbox,
+                { borderColor: theme.btnPrimary, backgroundColor: agreed ? theme.btnPrimary : 'transparent' },
+              ]}
+            >
+              {agreed && <Text style={styles.checkmark}>✓</Text>}
+            </View>
+            <Text style={[styles.checkboxTxt, { color: theme.subtext }]}>
+              I Agree to Codu.id{' '}
+              <Text style={{ color: theme.btnPrimary, textDecorationLine: 'underline' }}>Term and Condition</Text>
+            </Text>
           </TouchableOpacity>
         </View>
 
-        {/* Checkbox */}
-        <TouchableOpacity style={styles.checkboxRow} onPress={() => setAgreed((a) => !a)}>
-          <View
+        {/* Already have account */}
+        <View style={styles.signinRow}>
+          <Text style={[styles.signinTxt, { color: theme.subtext }]}>Already have an Account? </Text>
+          <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
+            <Text style={[styles.signinLink, { color: theme.btnPrimary }]}>Sign in</Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* Divider */}
+        <View style={styles.dividerRow}>
+          <View style={[styles.dividerLine, { backgroundColor: '#d0d0d0' }]} />
+          <Text style={[styles.dividerTxt, { color: theme.subtext }]}>or</Text>
+          <View style={[styles.dividerLine, { backgroundColor: '#d0d0d0' }]} />
+        </View>
+
+        {/* Social + Signup Buttons */}
+        <View style={styles.buttons}>
+          <SocialAuthButton provider="google" />
+          <SocialAuthButton provider="apple" />
+
+          <TouchableOpacity
             style={[
-              styles.checkbox,
-              { borderColor: theme.btnPrimary, backgroundColor: agreed ? theme.btnPrimary : 'transparent' },
+              styles.signupBtn,
+              {
+                backgroundColor: theme.btnPrimary,
+                opacity: showLoading || !agreed || !email.trim() || password.length < 8 ? 0.6 : 1,
+              },
             ]}
+            disabled={showLoading || !agreed || !email.trim() || password.length < 8}
+            onPress={handleSignUp}
           >
-            {agreed && <Text style={styles.checkmark}>✓</Text>}
-          </View>
-          <Text style={[styles.checkboxTxt, { color: theme.subtext }]}>
-            I Agree to Codu.id{' '}
-            <Text style={{ color: theme.btnPrimary, textDecorationLine: 'underline' }}>Term and Condition</Text>
-          </Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Already have account */}
-      <View style={styles.signinRow}>
-        <Text style={[styles.signinTxt, { color: theme.subtext }]}>Already have an Account? </Text>
-        <TouchableOpacity onPress={() => navigation.navigate('SignIn')}>
-          <Text style={[styles.signinLink, { color: theme.btnPrimary }]}>Sign in</Text>
-        </TouchableOpacity>
-      </View>
-
-      {/* Divider */}
-      <View style={styles.dividerRow}>
-        <View style={[styles.dividerLine, { backgroundColor: '#d0d0d0' }]} />
-        <Text style={[styles.dividerTxt, { color: theme.subtext }]}>or</Text>
-        <View style={[styles.dividerLine, { backgroundColor: '#d0d0d0' }]} />
-      </View>
-
-      {/* Social + Signup Buttons */}
-      <View style={styles.buttons}>
-        <TouchableOpacity style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}>
-          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Google</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}>
-          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Apple</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[
-            styles.signupBtn,
-            {
-              backgroundColor: theme.btnPrimary,
-              opacity: loading || !agreed || !email.trim() || password.length < 8 ? 0.6 : 1,
-            },
-          ]}
-          disabled={loading || !agreed || !email.trim() || password.length < 8}
-          onPress={handleSignUp}
-        >
-          {loading ? (
-            <ActivityIndicator color={theme.btnPrimaryText} />
-          ) : (
             <Text style={[styles.signupTxt, { color: theme.btnPrimaryText }]}>Sign up</Text>
-          )}
-        </TouchableOpacity>
+          </TouchableOpacity>
 
-        {error ? <Text style={styles.errorTxt}>{error}</Text> : null}
-      </View>
-    </ScrollView>
+          {error ? <Text style={styles.errorTxt}>{error}</Text> : null}
+        </View>
+      </ScrollView>
+      <AuthLoadingModal visible={showLoading} variant="sign-up" />
+    </>
   );
 }
 
@@ -268,18 +270,6 @@ const styles = StyleSheet.create({
   buttons: {
     width: '100%',
     gap: 14,
-  },
-  socialBtn: {
-    width: '100%',
-    paddingVertical: 14,
-    borderRadius: 50,
-    borderWidth: 1,
-    backgroundColor: '#ffffff',
-    alignItems: 'center',
-  },
-  socialTxt: {
-    fontSize: 15,
-    fontWeight: '500',
   },
   signupBtn: {
     width: '100%',

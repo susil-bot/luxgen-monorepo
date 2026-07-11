@@ -46,7 +46,7 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
         showsVerticalScrollIndicator={false}
       >
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={[styles.backArrow, { color: theme.text }]}>{'←'}</Text>
+          <Text style={[styles.backArrow, { color: theme.text }]}>{'<'}</Text>
         </TouchableOpacity>
 
         <Text style={[styles.heading, { color: theme.text }]}>Forgot Your Password?</Text>

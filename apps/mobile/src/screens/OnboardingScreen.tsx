@@ -4,6 +4,8 @@ import Icon1 from '../assets/images/icon1.svg';
 import Icon2 from '../assets/images/icon2.svg';
 import Icon3 from '../assets/images/icon3.svg';
 import { useTheme } from '../theme/ThemeContext';
+import { markLearnerOnboardingSeen } from '../../lib/guest-flow';
+import type { LearnerNavigation } from '../../lib/learner-navigation';
 
 const { width } = Dimensions.get('window');
 
@@ -32,7 +34,7 @@ const slides = [
 ];
 
 type Props = {
-  navigation: any;
+  navigation: LearnerNavigation;
 };
 
 export default function OnboardingScreen({ navigation }: Props) {
@@ -40,21 +42,18 @@ export default function OnboardingScreen({ navigation }: Props) {
   const scrollRef = useRef<ScrollView>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  const goToSignUp = async () => {
+    await markLearnerOnboardingSeen();
+    navigation.replace('SignUp');
+  };
+
   const goToNext = () => {
     const next = currentIndex + 1;
     scrollRef.current?.scrollTo({ x: next * width, animated: true });
     setCurrentIndex(next);
   };
 
-  const handleSkip = () => {
-    navigation.navigate('SignUp');
-  };
-
-  const handleContinue = () => {
-    navigation.navigate('SignUp');
-  };
-
-  const onScroll = (e: any) => {
+  const onScroll = (e: { nativeEvent: { contentOffset: { x: number } } }) => {
     const index = Math.round(e.nativeEvent.contentOffset.x / width);
     setCurrentIndex(index);
   };
@@ -97,13 +96,16 @@ export default function OnboardingScreen({ navigation }: Props) {
         {isLast ? (
           <TouchableOpacity
             style={[styles.continueBtn, { backgroundColor: theme.btnPrimary }]}
-            onPress={handleContinue}
+            onPress={() => void goToSignUp()}
           >
             <Text style={[styles.continueTxt, { color: theme.btnPrimaryText }]}>Continue</Text>
           </TouchableOpacity>
         ) : (
           <>
-            <TouchableOpacity style={[styles.skipBtn, { borderColor: theme.skipBorder }]} onPress={handleSkip}>
+            <TouchableOpacity
+              style={[styles.skipBtn, { borderColor: theme.skipBorder }]}
+              onPress={() => void goToSignUp()}
+            >
               <Text style={[styles.skipTxt, { color: theme.skipText }]}>Skip</Text>
             </TouchableOpacity>
             <TouchableOpacity style={[styles.nextBtn, { backgroundColor: theme.btnPrimary }]} onPress={goToNext}>
@@ -151,9 +153,6 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     marginHorizontal: 4,
   },
-  dotActive: {
-    width: 20,
-  },
   buttons: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -165,10 +164,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 42,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#007AFF',
   },
   skipTxt: {
-    color: '#007AFF',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -176,10 +173,8 @@ const styles = StyleSheet.create({
     paddingVertical: 14,
     paddingHorizontal: 42,
     borderRadius: 20,
-    backgroundColor: '#007AFF',
   },
   nextTxt: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
@@ -187,11 +182,9 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingVertical: 14,
     borderRadius: 20,
-    backgroundColor: '#007AFF',
     alignItems: 'center',
   },
   continueTxt: {
-    color: '#fff',
     fontSize: 16,
     fontWeight: '600',
   },
