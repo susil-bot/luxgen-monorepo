@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { AuthLoadingModal } from '../components/AuthLoadingModal';
+import { BackButton } from '../components/BackButton';
 import { SocialAuthButton } from '../components/SocialAuthButton';
 import { useAuth } from '../../hooks/useAuth';
 import { useTenant } from '../../hooks/useTenant';
@@ -68,10 +69,7 @@ export default function SignUpFormScreen({ navigation }: Props) {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Back Button */}
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={[styles.backArrow, { color: theme.text }]}>{'<'}</Text>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} style={styles.backBtn} />
 
         {/* Heading */}
         <Text style={[styles.heading, { color: theme.text }]}>Join Codu Now!</Text>
@@ -177,10 +175,6 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     marginBottom: 24,
-    alignSelf: 'flex-start',
-  },
-  backArrow: {
-    fontSize: 24,
   },
   heading: {
     fontSize: 26,

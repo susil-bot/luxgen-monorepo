@@ -7,6 +7,7 @@ import { Button, Card, Screen } from '@luxgen/native-ui';
 import type { Course } from '@luxgen/types';
 import { CourseStatus } from '@luxgen/types';
 
+import { BackButton } from '../../src/components/BackButton';
 import { GET_COURSE, GET_ENROLLMENT } from '../../graphql/queries';
 import { useCourseEnroll } from '../../hooks/useCourseEnroll';
 
@@ -49,7 +50,7 @@ export default function CourseDetailScreen() {
 
   return (
     <Screen title={course?.title ?? 'Course'} subtitle={instructor ? `With ${instructor}` : undefined} scroll>
-      <Button title="<" variant="plain" onPress={() => router.back()} style={styles.back} />
+      <BackButton onPress={() => router.back()} style={styles.back} />
 
       {loading && <Text style={styles.muted}>Loading…</Text>}
       {error && <Text style={styles.error}>{error.message}</Text>}
