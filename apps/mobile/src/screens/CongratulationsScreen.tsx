@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { useRouter } from 'expo-router';
 import Image27Svg from '../assets/images/image27.svg';
 import { useTheme } from '../theme/ThemeContext';
 import { skillLevelFromPercent } from '../data/skill-assessment';
@@ -37,9 +38,9 @@ export default function CongratulationsScreen({ navigation, correct, total, perc
 
       <TouchableOpacity
         style={[styles.button, { backgroundColor: theme.btnPrimary }]}
-        onPress={() => navigation.navigate('Home')}
+        onPress={() => void handleFinish()}
       >
-        <Text style={[styles.buttonText, { color: theme.btnPrimaryText }]}>Finish</Text>
+        <Text style={[styles.buttonText, { color: theme.btnPrimaryText }]}>Go to Dashboard</Text>
       </TouchableOpacity>
     </View>
   );

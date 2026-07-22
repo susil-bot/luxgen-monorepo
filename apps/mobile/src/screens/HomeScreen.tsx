@@ -1,18 +1,21 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
+import { useAuth } from '../../hooks/useAuth';
+import type { LearnerNavigation } from '../../lib/learner-navigation';
 
 type Props = {
-  navigation: any;
+  navigation: LearnerNavigation;
 };
 
 export default function HomeScreen({ navigation }: Props) {
   const theme = useTheme();
+  const { logout } = useAuth();
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <TouchableOpacity style={styles.backBtn} onPress={() => navigation.navigate('Onboarding')}>
-        <Text style={[styles.backText, { color: theme.text }]}>Back</Text>
+      <TouchableOpacity style={styles.signOutBtn} onPress={() => void logout()}>
+        <Text style={[styles.signOutTxt, { color: theme.subtext }]}>Sign out</Text>
       </TouchableOpacity>
 
       <View style={styles.content}>
@@ -41,12 +44,13 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
     justifyContent: 'space-between',
   },
-  backBtn: {
-    alignSelf: 'flex-start',
+  signOutBtn: {
+    alignSelf: 'flex-end',
+    paddingVertical: 4,
   },
-  backText: {
-    fontSize: 16,
-    fontWeight: '600',
+  signOutTxt: {
+    fontSize: 14,
+    fontWeight: '500',
   },
   content: {
     alignItems: 'center',

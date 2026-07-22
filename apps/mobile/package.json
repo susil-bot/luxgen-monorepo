@@ -12,7 +12,7 @@
     "test:phase3": "bash ../../scripts/verify-phase3-flow.sh"
   },
   "dependencies": {
-    "@apollo/client": "^3.8.0",
+    "@apollo/client": "~3.14.1",
     "@luxgen/billing": "*",
     "@luxgen/design-tokens": "*",
     "@luxgen/native-ui": "*",

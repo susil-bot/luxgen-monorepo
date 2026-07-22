@@ -49,7 +49,7 @@ export default function CourseDetailScreen() {
 
   return (
     <Screen title={course?.title ?? 'Course'} subtitle={instructor ? `With ${instructor}` : undefined} scroll>
-      <Button title="← Back" variant="plain" onPress={() => router.back()} style={styles.back} />
+      <Button title="<" variant="plain" onPress={() => router.back()} style={styles.back} />
 
       {loading && <Text style={styles.muted}>Loading…</Text>}
       {error && <Text style={styles.error}>{error.message}</Text>}

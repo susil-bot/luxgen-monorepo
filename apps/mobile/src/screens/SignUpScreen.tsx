@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
 import Image5 from '../assets/images/image 5.svg';
+import { SocialAuthButton } from '../components/SocialAuthButton';
 import { useTheme } from '../theme/ThemeContext';
 import { showSocialLoginUnavailable } from '../../lib/social-auth';
 import type { LearnerNavigation } from '../../lib/learner-navigation';
@@ -99,18 +100,6 @@ const styles = StyleSheet.create({
     gap: 14,
     marginBottom: 20,
   },
-  socialBtn: {
-    width: '100%',
-    paddingVertical: 14,
-    borderRadius: 50,
-    borderWidth: 1,
-    backgroundColor: '#ffffff',
-    alignItems: 'center',
-  },
-  socialTxt: {
-    fontSize: 15,
-    fontWeight: '500',
-  },
   signUpBtn: {
     width: '100%',
     paddingVertical: 14,
@@ -126,10 +115,9 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingVertical: 14,
     borderRadius: 50,
-    borderWidth: 1,
-    backgroundColor: '#ffffff',
+    borderWidth: 1.5,
     alignItems: 'center',
-    marginBottom: 40,
+    marginBottom: 28,
   },
   signInTxt: {
     fontSize: 15,
@@ -138,13 +126,11 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginTop: 'auto',
   },
   footerLink: {
-    fontSize: 13,
-    textDecorationLine: 'underline',
+    fontSize: 12,
   },
   footerDot: {
-    fontSize: 13,
+    fontSize: 12,
   },
 });

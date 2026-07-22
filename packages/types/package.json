@@ -10,9 +10,6 @@
     "dev": "tsc --watch",
     "clean": "rm -rf dist"
   },
-  "dependencies": {
-    "@luxgen/db": "*"
-  },
   "devDependencies": {
     "typescript": "^5.0.0"
   }

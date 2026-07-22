@@ -53,7 +53,7 @@ export default function QuestionProgressScreen({ navigation }: Props) {
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.topRow}>
         <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={[styles.backText, { color: theme.text }]}>Back</Text>
+          <Text style={[styles.backArrow, { color: theme.text }]}>{'<'}</Text>
         </TouchableOpacity>
 
         <View style={styles.progressWrapper}>
@@ -91,10 +91,13 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     alignSelf: 'flex-start',
+    paddingVertical: 4,
+    paddingRight: 12,
   },
-  backText: {
-    fontSize: 16,
-    fontWeight: '600',
+  backArrow: {
+    fontSize: 28,
+    fontWeight: '300',
+    lineHeight: 32,
   },
   topRow: {
     flexDirection: 'row',
