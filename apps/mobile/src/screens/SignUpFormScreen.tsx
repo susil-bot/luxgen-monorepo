@@ -5,6 +5,7 @@ import { AuthLoadingModal } from '../components/AuthLoadingModal';
 import { SocialAuthButton } from '../components/SocialAuthButton';
 import { useAuth } from '../../hooks/useAuth';
 import { useTenant } from '../../hooks/useTenant';
+import { showSocialLoginUnavailable } from '../../lib/social-auth';
 import type { LearnerNavigation } from '../../lib/learner-navigation';
 
 type Props = {
@@ -129,17 +130,21 @@ export default function SignUpFormScreen({ navigation }: Props) {
           </TouchableOpacity>
         </View>
 
-        {/* Divider */}
-        <View style={styles.dividerRow}>
-          <View style={[styles.dividerLine, { backgroundColor: '#d0d0d0' }]} />
-          <Text style={[styles.dividerTxt, { color: theme.subtext }]}>or</Text>
-          <View style={[styles.dividerLine, { backgroundColor: '#d0d0d0' }]} />
-        </View>
+      {/* Social + Signup Buttons */}
+      <View style={styles.buttons}>
+        <TouchableOpacity
+          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
+          onPress={() => showSocialLoginUnavailable('google')}
+        >
+          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Google</Text>
+        </TouchableOpacity>
 
-        {/* Social + Signup Buttons */}
-        <View style={styles.buttons}>
-          <SocialAuthButton provider="google" />
-          <SocialAuthButton provider="apple" />
+        <TouchableOpacity
+          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
+          onPress={() => showSocialLoginUnavailable('apple')}
+        >
+          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Apple</Text>
+        </TouchableOpacity>
 
           <TouchableOpacity
             style={[

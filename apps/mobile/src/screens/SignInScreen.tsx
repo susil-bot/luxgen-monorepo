@@ -5,6 +5,7 @@ import { AuthLoadingModal } from '../components/AuthLoadingModal';
 import { SocialAuthButton } from '../components/SocialAuthButton';
 import { useAuth } from '../../hooks/useAuth';
 import { useTenant } from '../../hooks/useTenant';
+import { showSocialLoginUnavailable } from '../../lib/social-auth';
 import type { LearnerNavigation } from '../../lib/learner-navigation';
 
 type Props = {
@@ -84,37 +85,28 @@ export default function SignInScreen({ navigation }: Props) {
             </TouchableOpacity>
           </View>
 
-          {/* Remember me + Forgot password */}
-          <View style={styles.rememberRow}>
-            <TouchableOpacity style={styles.checkboxRow} onPress={() => setRemember((r) => !r)}>
-              <View
-                style={[
-                  styles.checkbox,
-                  { borderColor: theme.btnPrimary, backgroundColor: remember ? theme.btnPrimary : 'transparent' },
-                ]}
-              >
-                {remember && <Text style={styles.checkmark}>✓</Text>}
-              </View>
-              <Text style={[styles.rememberTxt, { color: theme.subtext }]}>Remember me</Text>
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => navigation.navigate('ForgotPassword')}>
-              <Text style={[styles.forgotTxt, { color: theme.btnPrimary }]}>Forgot password</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
+      {/* Buttons */}
+      <View style={styles.buttons}>
+        <TouchableOpacity
+          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
+          onPress={() => showSocialLoginUnavailable('google')}
+        >
+          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Google</Text>
+        </TouchableOpacity>
 
-        {/* Divider */}
-        <View style={styles.dividerRow}>
-          <View style={[styles.dividerLine, { backgroundColor: '#d0d0d0' }]} />
-          <Text style={[styles.dividerTxt, { color: theme.subtext }]}>or</Text>
-          <View style={[styles.dividerLine, { backgroundColor: '#d0d0d0' }]} />
-        </View>
+        <TouchableOpacity
+          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
+          onPress={() => showSocialLoginUnavailable('apple')}
+        >
+          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Apple</Text>
+        </TouchableOpacity>
 
-        {/* Buttons */}
-        <View style={styles.buttons}>
-          <SocialAuthButton provider="google" />
-          <SocialAuthButton provider="apple" />
-          <SocialAuthButton provider="facebook" />
+        <TouchableOpacity
+          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
+          onPress={() => showSocialLoginUnavailable('facebook')}
+        >
+          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Facebook</Text>
+        </TouchableOpacity>
 
           {error ? <Text style={[styles.errorTxt, { color: '#c62828' }]}>{error}</Text> : null}
 
