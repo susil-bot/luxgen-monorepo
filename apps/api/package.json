@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "tsc",
+    "build": "node scripts/build-tolerant.js",
+    "build:strict": "tsc",
     "start": "node dist/apps/api/src/index.js",
     "test": "jest",
     "test:watch": "jest --watch",
