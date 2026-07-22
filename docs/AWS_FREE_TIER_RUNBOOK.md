@@ -103,11 +103,14 @@ Confirm the subscription via the email AWS sends you — alarms are silent until
 | `/luxgen/prod/CORS_ORIGIN` | String | `https://<YOURDOMAIN>` |
 | `/luxgen/prod/API_PORT` | String | `4000` |
 | `/luxgen/prod/NEXT_PUBLIC_GRAPHQL_URL` | String | `https://<YOURDOMAIN>/api/graphql` |
-| `/luxgen/prod/NEXT_PUBLIC_APP_URL` | String | `https://<YOURDOMAIN>` |
+| `/luxgen/prod/NEXT_PUBLIC_BASE_URL` | String | `https://<YOURDOMAIN>` |
+| `/luxgen/prod/APOLLO_INTROSPECTION` | String | `false` |
 
 Leave the KMS key as the default `aws/ssm` (no separate key to create — it's the free managed key).
 
-**`NEXT_PUBLIC_GRAPHQL_URL` is the one the frontend code actually reads** (`apps/web/graphql/client.ts`) — not `NEXT_PUBLIC_API_URL`, which was in earlier drafts of this table but isn't referenced anywhere in the app. It's also the one value on this list that behaves differently from the rest: Next.js inlines `NEXT_PUBLIC_*` variables into the browser bundle at **build time**, so having it in Parameter Store only helps if step 14's deploy script also passes it to `docker compose build` as a build arg — pulling it into the container's runtime environment alone (like every other row in this table) has no effect on an already-built page. See the updated step 14 below.
+**`NEXT_PUBLIC_GRAPHQL_URL` and `NEXT_PUBLIC_BASE_URL` are build-time, not runtime.** Next.js inlines every `NEXT_PUBLIC_*` variable into the browser bundle at **build time** — having them in Parameter Store only helps if step 14's deploy also passes them to `docker compose build` as build args (it does — see the updated step 14 below); pulling them into the container's runtime environment alone, like every other row in this table, has no effect on an already-built page. `NEXT_PUBLIC_GRAPHQL_URL` is read by `apps/web/graphql/client.ts`; `NEXT_PUBLIC_BASE_URL` by `apps/web/lib/tenant.ts` (builds tenant-subdomain links for the tenant switcher).
+
+Every other row in this table is a normal runtime container env var, read fresh on each container start — rotating one just needs a container restart, not a rebuild.
 
 ---
 
@@ -298,9 +301,10 @@ cd /opt/luxgen
 # pull config from Parameter Store into a .env file. Compose auto-loads a
 # file literally named .env in this directory for ${VAR} substitution -
 # that's what feeds both the runtime `environment:` blocks AND the
-# `build.args:` blocks (TENANT, NEXT_PUBLIC_GRAPHQL_URL, NEXT_PUBLIC_APP_URL)
-# in docker-compose.prod.yml, so NEXT_PUBLIC_GRAPHQL_URL gets baked into the
-# Next.js build correctly in this one step - no separate build-arg command needed.
+# `build.args:` blocks (TENANT, NEXT_PUBLIC_GRAPHQL_URL, NEXT_PUBLIC_BASE_URL)
+# in docker-compose.prod.yml, so NEXT_PUBLIC_GRAPHQL_URL / NEXT_PUBLIC_BASE_URL
+# get baked into the Next.js build correctly in this one step - no separate
+# build-arg command needed.
 aws ssm get-parameters-by-path --path /luxgen/prod --with-decryption --recursive \
   --query "Parameters[*].[Name,Value]" --output text \
   | sed 's|/luxgen/prod/||' | awk '{print $1"="$2}' > .env
@@ -311,7 +315,44 @@ docker-compose -f docker-compose.yml -f docker-compose.prod.yml \
   up -d --build mongodb redis api web nginx
 ```
 
-Sanity-check after it's up: `curl -f http://localhost:4000/health` should return the API's JSON health payload, not a Next.js page — if it returns HTML, the `api` service is still running the wrong process (see the architecture review's critical-bugs list).
+Sanity-check after it's up:
+```bash
+# API is actually the API, not a second web server - should return JSON,
+# not an HTML page (if HTML, api is still running the wrong process)
+curl -f http://localhost:4000/health
+# web app responds
+curl -f http://localhost:3000
+# GraphQL endpoint exists (expect a GraphQL error about a missing query, not a 404)
+curl -s http://localhost:4000/graphql -H 'Content-Type: application/json' -d '{"query":"{__typename}"}'
+# all containers healthy, not just running
+docker-compose -f docker-compose.yml -f docker-compose.prod.yml ps
+```
+
+---
+
+## Step 14a — Updating an env var after the first deploy
+Same SSM path as step 6, whether you're changing a value or adding a new one.
+
+```bash
+# 1. Update (or create) the parameter
+aws ssm put-parameter --name /luxgen/prod/CORS_ORIGIN \
+  --value "https://app.<YOURDOMAIN>" --type String --overwrite
+
+# 2. On the instance (Session Manager), regenerate .env the same way as step 14
+cd /opt/luxgen
+aws ssm get-parameters-by-path --path /luxgen/prod --with-decryption --recursive \
+  --query "Parameters[*].[Name,Value]" --output text \
+  | sed 's|/luxgen/prod/||' | awk '{print $1"="$2}' > .env
+```
+
+Then apply it — which command depends on **what kind of variable it was**, and getting this wrong is the most common way a config change silently doesn't take effect:
+
+| Variable changed | Command | Why |
+|---|---|---|
+| Anything **except** `NEXT_PUBLIC_GRAPHQL_URL` / `NEXT_PUBLIC_BASE_URL` / `TENANT` (e.g. `JWT_SECRET`, `CORS_ORIGIN`, `MONGO_ROOT_PASSWORD`) | `docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-build api` (swap `api` for `web`, `mongodb`, etc. as needed) | Plain runtime env var, read fresh from the container's environment on start — a restart is enough. |
+| `NEXT_PUBLIC_GRAPHQL_URL`, `NEXT_PUBLIC_BASE_URL`, or `TENANT` | `docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build api web` | Baked into the compiled JS at **build time** (see step 6's note) — a restart alone reuses the old image and changes nothing. Both `api` and `web` share one image, so rebuild both even though only `web`'s bundle actually uses these values. |
+
+After either kind of change, re-run the sanity checks from step 14 to confirm.
 
 ---
 

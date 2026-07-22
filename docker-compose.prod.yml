@@ -64,7 +64,7 @@ services:
       args:
         TENANT: ${TENANT:-demo}
         NEXT_PUBLIC_GRAPHQL_URL: ${NEXT_PUBLIC_GRAPHQL_URL}
-        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL}
     # Without this override, the container inherits the image's default
     # CMD (node apps/web/server.js) and runs a second copy of the Next.js
     # web app instead of the Express/Apollo API - GraphQL and /api/* would
@@ -86,8 +86,13 @@ services:
       MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/${MONGO_DATABASE}?authSource=admin
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       CORS_ORIGIN: ${CORS_ORIGIN}
       LOG_LEVEL: info
+      # Keep false in production - GraphQL introspection/Playground exposes
+      # your full schema to anyone who can reach /graphql. Only flip to
+      # 'true' temporarily while actively debugging.
+      APOLLO_INTROSPECTION: ${APOLLO_INTROSPECTION:-false}
     depends_on:
       mongodb:
         condition: service_healthy
@@ -115,14 +120,13 @@ services:
       target: runner
       # These get inlined into the browser bundle at build time - setting
       # them under `environment:` below does nothing for a Next.js
-      # standalone build, the page JS is already compiled by then. Note:
-      # the app code only actually reads NEXT_PUBLIC_GRAPHQL_URL today
-      # (apps/web/graphql/client.ts) - NEXT_PUBLIC_API_URL isn't
-      # referenced anywhere, kept here only for forward compatibility.
+      # standalone build, the page JS is already compiled by then. The app
+      # reads NEXT_PUBLIC_GRAPHQL_URL (apps/web/graphql/client.ts) and
+      # NEXT_PUBLIC_BASE_URL (apps/web/lib/tenant.ts, tenant-switcher links).
       args:
         TENANT: ${TENANT:-demo}
         NEXT_PUBLIC_GRAPHQL_URL: ${NEXT_PUBLIC_GRAPHQL_URL}
-        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL}
     container_name: luxgen-web-prod
     restart: unless-stopped
     ports:

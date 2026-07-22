@@ -34,10 +34,16 @@ ARG TENANT=demo
 # time, not at container start - setting these later via docker-compose
 # `environment:` or SSM has no effect on already-built pages. They must be
 # passed as --build-arg when the image is built.
+#
+# NEXT_PUBLIC_BASE_URL, not NEXT_PUBLIC_APP_URL: the only place in the web
+# app that reads a "base URL" env var is lib/tenant.ts's getTenantUrl()
+# (process.env.NEXT_PUBLIC_BASE_URL), used by the tenant switcher to build
+# subdomain links. NEXT_PUBLIC_APP_URL was never actually read anywhere -
+# this was a naming mismatch, not an intentionally-unused placeholder.
 ARG NEXT_PUBLIC_GRAPHQL_URL
-ARG NEXT_PUBLIC_APP_URL
+ARG NEXT_PUBLIC_BASE_URL
 ENV NEXT_PUBLIC_GRAPHQL_URL=${NEXT_PUBLIC_GRAPHQL_URL}
-ENV NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}
+ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
 
 RUN node scripts/select-tenant.js ${TENANT} && npx turbo run build
 
