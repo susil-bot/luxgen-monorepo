@@ -1,13 +1,18 @@
 import { useState } from 'react';
+import { useAppShellConfig } from '../lib/app-shell-config';
+import { useLayoutUser } from '../lib/app-layout-user';
 import Head from 'next/head';
-import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo, TenantDebug, BannerCarousel, Arrow } from '@luxgen/ui';
+import { AppLayout, TenantDebug, BannerCarousel, Arrow } from '@luxgen/ui';
 import { TenantBanner } from '../components/tenant/TenantBanner';
+import { getTenantPageProps } from '../lib/tenant-page-props';
 
 interface BannerDemoProps {
   tenant: string;
 }
 
 export default function BannerDemo({ tenant }: BannerDemoProps) {
+  const layoutUser = useLayoutUser();
+  const { sidebarSections, logo } = useAppShellConfig();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const bannerSlides = [
@@ -19,7 +24,7 @@ export default function BannerDemo({ tenant }: BannerDemoProps) {
       ctaText: 'Get Started',
       ctaHref: '/courses',
       backgroundColor: '#4A70F7',
-      ctaColor: '#F78C4A'
+      ctaColor: '#F78C4A',
     },
     {
       id: '2',
@@ -28,7 +33,7 @@ export default function BannerDemo({ tenant }: BannerDemoProps) {
       ctaText: 'Enroll Now',
       ctaHref: '/courses/react',
       backgroundColor: '#10B981',
-      ctaColor: '#F59E0B'
+      ctaColor: '#F59E0B',
     },
     {
       id: '3',
@@ -38,8 +43,8 @@ export default function BannerDemo({ tenant }: BannerDemoProps) {
       ctaText: 'Learn More',
       ctaHref: '/courses/typescript',
       backgroundColor: '#8B5CF6',
-      ctaColor: '#EC4899'
-    }
+      ctaColor: '#EC4899',
+    },
   ];
 
   const handleSlideChange = (index: number) => {
@@ -56,11 +61,11 @@ export default function BannerDemo({ tenant }: BannerDemoProps) {
       <Head>
         <title>Banner Demo - {tenant.charAt(0).toUpperCase() + tenant.slice(1)}</title>
       </Head>
-      
+
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
-        user={getDefaultUser()}
-        logo={getDefaultLogo()}
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
+        logo={logo}
         onUserAction={(action) => {
           switch (action) {
             case 'profile':
@@ -81,7 +86,7 @@ export default function BannerDemo({ tenant }: BannerDemoProps) {
         responsive={true}
       >
         <TenantBanner tenant={tenant} />
-        
+
         <div className="mt-6 space-y-8">
           {/* Banner Carousel Demo */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
@@ -89,7 +94,7 @@ export default function BannerDemo({ tenant }: BannerDemoProps) {
             <p className="text-gray-600 mb-6">
               Interactive banner carousel with auto-play, navigation controls, and customizable slides.
             </p>
-            
+
             <BannerCarousel
               slides={bannerSlides}
               autoPlay={true}
@@ -100,7 +105,7 @@ export default function BannerDemo({ tenant }: BannerDemoProps) {
               onCtaClick={handleCtaClick}
               className="mb-6"
             />
-            
+
             <div className="text-sm text-gray-500">
               Current slide: {currentSlide + 1} of {bannerSlides.length}
             </div>
@@ -109,10 +114,8 @@ export default function BannerDemo({ tenant }: BannerDemoProps) {
           {/* Arrow Component Demo */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Arrow Component Demo</h2>
-            <p className="text-gray-600 mb-6">
-              Versatile arrow component for navigation controls.
-            </p>
-            
+            <p className="text-gray-600 mb-6">Versatile arrow component for navigation controls.</p>
+
             <div className="space-y-6">
               {/* Direction Examples */}
               <div>
@@ -156,36 +159,11 @@ export default function BannerDemo({ tenant }: BannerDemoProps) {
             </div>
           </div>
         </div>
-        
+
         <TenantDebug />
       </AppLayout>
     </>
   );
 }
 
-export const getServerSideProps = async (context: any) => {
-  const host = context.req.headers.host;
-  let tenant = 'demo'; // Default tenant
-  
-  // Extract tenant from subdomain
-  if (host && host.includes('.')) {
-    const parts = host.split('.');
-    if (parts.length > 1) {
-      const subdomain = parts[0];
-      if (subdomain !== 'www' && subdomain !== 'localhost' && subdomain !== '127.0.0.1') {
-        tenant = subdomain;
-      }
-    }
-  }
-  
-  // Check query parameter as fallback
-  if (context.query.tenant) {
-    tenant = context.query.tenant;
-  }
-  
-  return {
-    props: {
-      tenant
-    }
-  };
-};
+export const getServerSideProps = getTenantPageProps;

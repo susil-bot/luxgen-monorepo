@@ -25,11 +25,7 @@ const PageWrapperComponent: React.FC<PageWrapperProps> = ({
   };
 
   return (
-    <div
-      className={`page-wrapper ${className}`}
-      style={styles}
-      {...props}
-    >
+    <div className={`page-wrapper ${className}`} style={styles} {...props}>
       {children}
     </div>
   );

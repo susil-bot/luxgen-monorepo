@@ -1,37 +1,36 @@
 import { Request, Response } from 'express';
-import { User, IUser } from '@luxgen/db';
+import { IUser, ITenant } from '@luxgen/db';
+import type { AuthErrorCode } from './types/auth';
+import type { VerifiedMcpApiKey } from './services/mcpApiKeyService';
+import { buildGraphQLContext } from './context/buildContext';
 
 export interface GraphQLContext {
   req: Request;
   res: Response;
   user?: IUser;
+  /** Subdomain string — kept for backward compatibility with existing resolvers */
   tenant?: string;
+  /** Full tenant document resolved by tenantRoutingMiddleware (available on HTTP requests) */
+  tenantDoc?: ITenant;
+  /** MongoDB ObjectId string for the resolved tenant */
+  tenantId?: string;
+  authError?: AuthErrorCode;
+  mcpApiKey?: VerifiedMcpApiKey;
 }
 
 export const context = ({ req, res }: { req: Request; res: Response }): GraphQLContext => {
-  // GraphQLContext.tenant is a plain subdomain/identifier string (consumed
-  // as such by dashboard and userRole resolvers, e.g. getDashboardStats(tenantId)).
-  // That's a different shape from req.tenant, which tenantRoutingMiddleware
-  // (middleware/tenantRouting.ts) sets to the full populated ITenant document.
-  // Use req.subdomain - the string form the same middleware already derived -
-  // rather than req.tenant, and fall back to headers / 'demo' as before.
-  let tenant = req.subdomain;
+  const tenantSubdomain = req.subdomain || req.tenant?.subdomain || req.get('x-tenant') || 'demo';
 
-  if (!tenant) {
-    // Check for tenant in headers
-    const tenantHeader = req.get('x-tenant');
-    if (tenantHeader) {
-      tenant = tenantHeader;
-    } else {
-      // Default to demo tenant for GraphQL requests
-      tenant = 'demo';
-    }
-  }
-  
   return {
     req,
     res,
     user: req.user,
-    tenant,
+    tenant: tenantSubdomain,
+    tenantDoc: req.tenant,
+    tenantId: req.tenantId,
+    authError: req.authError,
+    mcpApiKey: req.mcpApiKey,
   };
 };
+
+export { buildGraphQLContext };

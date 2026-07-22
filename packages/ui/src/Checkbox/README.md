@@ -60,19 +60,19 @@ import { Checkbox } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `checked` | `boolean` | - | Checked state |
-| `onChange` | `(checked: boolean) => void` | - | Change handler |
-| `label` | `string` | - | Label text |
-| `disabled` | `boolean` | `false` | Disabled state |
-| `required` | `boolean` | `false` | Required field |
-| `indeterminate` | `boolean` | `false` | Indeterminate state |
-| `helperText` | `string` | - | Helper text |
-| `error` | `string` | - | Error message |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
+| Prop            | Type                         | Default        | Description              |
+| --------------- | ---------------------------- | -------------- | ------------------------ |
+| `tenantTheme`   | `TenantTheme`                | `defaultTheme` | Theme object for styling |
+| `checked`       | `boolean`                    | -              | Checked state            |
+| `onChange`      | `(checked: boolean) => void` | -              | Change handler           |
+| `label`         | `string`                     | -              | Label text               |
+| `disabled`      | `boolean`                    | `false`        | Disabled state           |
+| `required`      | `boolean`                    | `false`        | Required field           |
+| `indeterminate` | `boolean`                    | `false`        | Indeterminate state      |
+| `helperText`    | `string`                     | -              | Helper text              |
+| `error`         | `string`                     | -              | Error message            |
+| `className`     | `string`                     | `''`           | Additional CSS classes   |
+| `style`         | `CSSProperties`              | `{}`           | Inline styles            |
 
 ## SSR Usage
 
@@ -131,44 +131,25 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Checkbox } from '@luxgen/ui';
 
 test('renders with label', () => {
-  render(
-    <Checkbox
-      label="Test checkbox"
-      checked={false}
-      onChange={() => {}}
-    />
-  );
-  
+  render(<Checkbox label="Test checkbox" checked={false} onChange={() => {}} />);
+
   expect(screen.getByText('Test checkbox')).toBeInTheDocument();
   expect(screen.getByRole('checkbox')).toBeInTheDocument();
 });
 
 test('calls onChange when clicked', () => {
   const mockOnChange = jest.fn();
-  render(
-    <Checkbox
-      label="Test checkbox"
-      checked={false}
-      onChange={mockOnChange}
-    />
-  );
-  
+  render(<Checkbox label="Test checkbox" checked={false} onChange={mockOnChange} />);
+
   const checkbox = screen.getByRole('checkbox');
   fireEvent.click(checkbox);
-  
+
   expect(mockOnChange).toHaveBeenCalledWith(true);
 });
 
 test('renders as indeterminate', () => {
-  render(
-    <Checkbox
-      label="Test checkbox"
-      checked={false}
-      onChange={() => {}}
-      indeterminate={true}
-    />
-  );
-  
+  render(<Checkbox label="Test checkbox" checked={false} onChange={() => {}} indeterminate={true} />);
+
   const checkbox = screen.getByRole('checkbox');
   expect(checkbox).toHaveProperty('indeterminate', true);
 });
@@ -177,15 +158,13 @@ test('renders as indeterminate', () => {
 ## Examples
 
 ### Basic Checkbox
+
 ```tsx
-<Checkbox
-  label="I agree to the terms and conditions"
-  checked={agreed}
-  onChange={setAgreed}
-/>
+<Checkbox label="I agree to the terms and conditions" checked={agreed} onChange={setAgreed} />
 ```
 
 ### Checkbox with Validation
+
 ```tsx
 <Checkbox
   label="I have read the privacy policy"
@@ -198,6 +177,7 @@ test('renders as indeterminate', () => {
 ```
 
 ### Indeterminate Checkbox
+
 ```tsx
 <Checkbox
   label="Select all items"
@@ -208,6 +188,7 @@ test('renders as indeterminate', () => {
 ```
 
 ### Checkbox Group
+
 ```tsx
 <div>
   <Checkbox
@@ -216,35 +197,19 @@ test('renders as indeterminate', () => {
     onChange={setAllSelected}
     indeterminate={someSelected && !allSelected}
   />
-  <Checkbox
-    label="Option 1"
-    checked={option1}
-    onChange={setOption1}
-  />
-  <Checkbox
-    label="Option 2"
-    checked={option2}
-    onChange={setOption2}
-  />
+  <Checkbox label="Option 1" checked={option1} onChange={setOption1} />
+  <Checkbox label="Option 2" checked={option2} onChange={setOption2} />
 </div>
 ```
 
 ### Disabled Checkbox
+
 ```tsx
-<Checkbox
-  label="This option is not available"
-  checked={false}
-  onChange={() => {}}
-  disabled
-/>
+<Checkbox label="This option is not available" checked={false} onChange={() => {}} disabled />
 ```
 
 ### Checkbox with Custom Theme
+
 ```tsx
-<Checkbox
-  tenantTheme={customTheme}
-  label="Custom themed checkbox"
-  checked={checked}
-  onChange={setChecked}
-/>
+<Checkbox tenantTheme={customTheme} label="Custom themed checkbox" checked={checked} onChange={setChecked} />
 ```

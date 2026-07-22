@@ -2,11 +2,7 @@ import React from 'react';
 import { BaseComponentProps, TenantTheme } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
-import { 
-  getRecentActivitiesStyles, 
-  recentActivitiesClasses,
-  recentActivitiesCSS 
-} from './styles';
+import { getRecentActivitiesStyles, recentActivitiesClasses, recentActivitiesCSS } from './styles';
 
 export interface Activity {
   id: string;
@@ -49,21 +45,22 @@ const RecentActivitiesComponent: React.FC<RecentActivitiesProps> = ({
 
   const getAvatarColor = (activity: Activity) => {
     if (activity.avatarColor) return activity.avatarColor;
-    
+
     // Generate consistent color based on user name
-    const colors = [
-      '#3B82F6', '#10B981', '#F59E0B', '#EF4444', 
-      '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'
-    ];
+    const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4', '#84CC16', '#F97316'];
     const hash = activity.user.name.split('').reduce((a, b) => {
-      a = ((a << 5) - a) + b.charCodeAt(0);
+      a = (a << 5) - a + b.charCodeAt(0);
       return a & a;
     }, 0);
     return colors[Math.abs(hash) % colors.length];
   };
 
   const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('').toUpperCase();
+    return name
+      .split(' ')
+      .map((n) => n[0])
+      .join('')
+      .toUpperCase();
   };
 
   if (activities.length === 0) {
@@ -102,7 +99,7 @@ const RecentActivitiesComponent: React.FC<RecentActivitiesProps> = ({
                 className={recentActivitiesClasses.activityAvatar}
                 style={{
                   ...styles.activityAvatar,
-                  backgroundColor: getAvatarColor(activity)
+                  backgroundColor: getAvatarColor(activity),
                 }}
               >
                 {activity.user.avatar ? (
@@ -113,7 +110,7 @@ const RecentActivitiesComponent: React.FC<RecentActivitiesProps> = ({
                       width: '100%',
                       height: '100%',
                       borderRadius: '50%',
-                      objectFit: 'cover'
+                      objectFit: 'cover',
                     }}
                   />
                 ) : (
@@ -140,7 +137,7 @@ const RecentActivitiesComponent: React.FC<RecentActivitiesProps> = ({
                   className={recentActivitiesClasses.activityStatus}
                   style={{
                     ...styles.activityStatus,
-                    backgroundColor: activity.status === 'online' ? '#10B981' : '#EF4444'
+                    backgroundColor: activity.status === 'online' ? '#10B981' : '#EF4444',
                   }}
                 />
               )}

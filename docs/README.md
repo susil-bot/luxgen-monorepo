@@ -1,85 +1,52 @@
-# LuxGen Monorepo
+# LuxGen Documentation
 
-A multi-tenant learning management system built with Next.js, GraphQL, and MongoDB.
+> **Start at [INDEX.md](./INDEX.md)** — routes developers, product stakeholders, and AI agents to the right document.
 
-## Architecture
+---
 
+## Hubs
 
-| Layer                               | Responsibility                                                                          | Example Files / Folders                                                            |
-| ----------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| **1. Presentation (UI Layer)**      | Visual components, forms, buttons, pages — tenant-aware UI                              | `/packages/ui/*`, `/features/auth/pages/LoginPage.tsx`                             |
-| **2. View Logic (Container Layer)** | Hooks, state management, orchestrates form actions, calls services                      | `/features/auth/hooks/useLogin.ts`, `/features/auth/containers/LoginContainer.tsx` |
-| **3. Domain / Service Layer**       | Business logic, validations, core service calls                                         | `/features/auth/services/AuthService.ts`                                           |
-| **4. Data Access / API Layer**      | Handles API communication (REST/GraphQL) and data formatting                            | `/lib/api/authApi.ts`, `/lib/graphql/mutations/login.ts`                           |
-| **5. Context / Tenant Layer**       | Provides current tenant context, injects tenant configs (theme, API base URL, branding) | `/context/TenantContext.tsx`, `/providers/TenantProvider.tsx`                      |
-| **6. Infrastructure Layer**         | Backend integration, config, caching, environment setup                                 | `/config/env.ts`, `/lib/httpClient.ts`, `/config/tenantConfig.json`                |
+| Hub                                                                   | Audience                                |
+| --------------------------------------------------------------------- | --------------------------------------- |
+| [INDEX.md](./INDEX.md)                                                | Everyone — audience router              |
+| [technical/README.md](./technical/README.md)                          | Engineers — hierarchical technical docs |
+| [deployment/INDEX.md](./deployment/INDEX.md)                          | DevOps — cloud & Docker                 |
+| [\_meta/DOCUMENTATION_STANDARD.md](./_meta/DOCUMENTATION_STANDARD.md) | Contributors — doc & YAML conventions   |
 
+---
 
-- **Frontend**: Next.js with TypeScript
-- **Backend**: Node.js with Apollo GraphQL Server
-- **Database**: MongoDB
-- **Monorepo**: Turborepo for build orchestration
+## Quick links
 
-## Project Structure
+| Audience                   | Document                                                                                                                    |
+| -------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **New developer**          | [technical/development/QUICK_START.md](./technical/development/QUICK_START.md) → [DEVELOPER_GUIDE.md](./DEVELOPER_GUIDE.md) |
+| **AI coding agent**        | [AI_AGENT_GUIDE.md](./AI_AGENT_GUIDE.md) + [../AGENTS.md](../AGENTS.md)                                                     |
+| **Product / business**     | [BUSINESS_STRATEGY_2026.md](./BUSINESS_STRATEGY_2026.md)                                                                    |
+| **Business ↔ engineering** | [BUSINESS_TECH_TRANSLATION.md](./BUSINESS_TECH_TRANSLATION.md)                                                              |
+| **Feature reference**      | [FEATURE_CATALOG.md](./FEATURE_CATALOG.md)                                                                                  |
+| **Architecture**           | [ARCHITECTURE.md](./ARCHITECTURE.md)                                                                                        |
+| **API (GraphQL + REST)**   | [API_REFERENCE.md](./API_REFERENCE.md)                                                                                      |
+| **Cloud deploy ($0)**      | [deployment/FREE_TIER_CLOUD.md](./deployment/FREE_TIER_CLOUD.md)                                                            |
+| **Repo layout**            | [technical/development/REPO_STRUCTURE.md](./technical/development/REPO_STRUCTURE.md)                                        |
 
-```
-luxgen-monorepo/
-├── apps/
-│   ├── web/               # Next.js frontend
-│   └── api/               # GraphQL API server
-├── packages/
-│   ├── db/                # MongoDB schemas
-│   ├── auth/              # Authentication utilities
-│   ├── core/              # Business logic
-│   ├── ui/                # Shared UI components
-│   ├── utils/             # Common utilities
-│   └── config/            # Shared configuration
-```
+---
 
-## Getting Started
+## Repository entrypoints (outside `docs/`)
 
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+| File                                                                                     | Role                                    |
+| ---------------------------------------------------------------------------------------- | --------------------------------------- |
+| [README.md](../README.md)                                                                | Company overview                        |
+| [technical/development/CODEBASE.md](./technical/development/CODEBASE.md)                 | Repo map — read before code changes     |
+| [AGENTS.md](../AGENTS.md)                                                                | AI agent entrypoint                     |
+| [technical/development/CODING_STANDARDS.md](./technical/development/CODING_STANDARDS.md) | Coding rules                            |
+| [skills/](../skills/)                                                                    | Domain skills for agents and developers |
 
-2. Start development servers:
-   ```bash
-   npm run dev
-   ```
+---
 
-3. Build all packages:
-   ```bash
-   npm run build
-   ```
+## Phase & module docs
 
-## Development
-
-
-# Start development environment
-make dev
-
-# View logs
-make logs
-
-# Run tests
-make test
-
-# Stop environment
-make stop
-
-# Clean up
-make clean
-
-- `npm run dev` - Start all development servers
-- `npm run build` - Build all packages
-- `npm run lint` - Lint all packages
-- `npm run test` - Run tests
-- `npm run clean` - Clean build artifacts
-
-## Multi-tenancy
-
-The system supports multi-tenancy through subdomain routing:
-- `tenant1.luxgen.com` - Tenant 1 dashboard
-- `tenant2.luxgen.com` - Tenant 2 dashboard
-- `admin.luxgen.com` - Admin panel
+- [PHASE_9_BILLING.md](./PHASE_9_BILLING.md) — Stripe, plan gates
+- [PHASE_10_MARKETPLACE.md](./PHASE_10_MARKETPLACE.md) — templates, usage metering
+- [LISTING_SUBSCRIPTION_LIFECYCLE.md](./LISTING_SUBSCRIPTION_LIFECYCLE.md) — business directory
+- [GRAPHQL_PLATFORM.md](./GRAPHQL_PLATFORM.md) — web + mobile API contract
+- [AGENT_STUDIO_ARCHITECTURE.md](./AGENT_STUDIO_ARCHITECTURE.md) — agent + automation platform

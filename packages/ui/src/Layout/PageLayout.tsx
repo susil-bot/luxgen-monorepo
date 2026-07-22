@@ -15,6 +15,7 @@ export interface PageLayoutProps {
   onNotificationClick?: () => void;
   showSearch?: boolean;
   showNotifications?: boolean;
+  showAIStudio?: boolean;
   notificationCount?: number;
   searchPlaceholder?: string;
   logo?: {
@@ -44,7 +45,8 @@ const PageLayoutComponent: React.FC<PageLayoutProps> = ({
   onSearch,
   onNotificationClick,
   showSearch = true,
-  showNotifications = true,
+  showNotifications = false,
+  showAIStudio = true,
   notificationCount = 0,
   searchPlaceholder = 'Search...',
   logo = {
@@ -85,11 +87,11 @@ const PageLayoutComponent: React.FC<PageLayoutProps> = ({
     if (isMobile) {
       return 'flex-col';
     }
-    
+
     if (isTablet) {
       return 'flex-col';
     }
-    
+
     return 'flex-col';
   };
 
@@ -97,11 +99,11 @@ const PageLayoutComponent: React.FC<PageLayoutProps> = ({
     if (isMobile) {
       return 'fixed top-0 left-0 right-0 z-50';
     }
-    
+
     if (isTablet) {
       return 'sticky top-0 z-40';
     }
-    
+
     return 'sticky top-0 z-30';
   };
 
@@ -109,11 +111,11 @@ const PageLayoutComponent: React.FC<PageLayoutProps> = ({
     if (isMobile) {
       return 'w-full pt-16'; // Account for fixed navbar
     }
-    
+
     if (isTablet) {
       return 'w-full pt-16'; // Account for sticky navbar
     }
-    
+
     return 'w-full pt-16'; // Account for sticky navbar
   };
 
@@ -127,6 +129,7 @@ const PageLayoutComponent: React.FC<PageLayoutProps> = ({
         onSearch={onSearch}
         searchPlaceholder={searchPlaceholder}
         showNotifications={showNotifications}
+        showAIStudio={showAIStudio}
         notificationCount={notificationCount}
         onNotificationClick={onNotificationClick}
         logo={logo}
@@ -152,9 +155,7 @@ const PageLayoutComponent: React.FC<PageLayoutProps> = ({
       )}
 
       {/* Main Content */}
-      <main className={getContentStyles()}>
-        {children}
-      </main>
+      <main className={getContentStyles()}>{children}</main>
     </div>
   );
 };

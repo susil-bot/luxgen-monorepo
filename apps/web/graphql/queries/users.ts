@@ -8,11 +8,34 @@ export const GET_USER = gql`
       firstName
       lastName
       role
+      staffNotes
+      phone
+      marketingEmail
+      marketingSms
+      marketingWhatsapp
       tenant {
         id
         name
         subdomain
       }
+      createdAt
+    }
+  }
+`;
+
+export const GET_CUSTOMERS = gql`
+  query GetCustomers($tenantId: ID!, $search: String) {
+    customers(tenantId: $tenantId, search: $search) {
+      id
+      email
+      firstName
+      lastName
+      role
+      status
+      isActive
+      phone
+      marketingEmail
+      staffNotes
       createdAt
     }
   }
@@ -26,6 +49,8 @@ export const GET_USERS = gql`
       firstName
       lastName
       role
+      status
+      isActive
       createdAt
     }
   }
@@ -68,6 +93,20 @@ export const UPDATE_USER = gql`
       firstName
       lastName
       role
+      phone
+      marketingEmail
+      marketingSms
+      marketingWhatsapp
+      staffNotes
+    }
+  }
+`;
+
+export const UPDATE_CUSTOMER_NOTES = gql`
+  mutation UpdateCustomerNotes($input: UpdateCustomerNotesInput!) {
+    updateCustomerNotes(input: $input) {
+      id
+      staffNotes
     }
   }
 `;
@@ -75,5 +114,34 @@ export const UPDATE_USER = gql`
 export const DELETE_USER = gql`
   mutation DeleteUser($id: ID!) {
     deleteUser(id: $id)
+  }
+`;
+
+export const GET_PENDING_USERS = gql`
+  query GetPendingUsers($tenantId: ID!) {
+    getPendingUsers(tenantId: $tenantId) {
+      id
+      email
+      firstName
+      lastName
+      status
+      createdAt
+    }
+  }
+`;
+export const ACTIVATE_USER = gql`
+  mutation ActivateUser($userId: ID!) {
+    activateUser(userId: $userId) {
+      success
+      message
+    }
+  }
+`;
+export const SUSPEND_USER = gql`
+  mutation SuspendUser($userId: ID!, $reason: String) {
+    suspendUser(userId: $userId, reason: $reason) {
+      success
+      message
+    }
   }
 `;

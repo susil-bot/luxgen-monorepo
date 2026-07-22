@@ -14,9 +14,7 @@ export interface KickerData {
   iconPosition: string;
 }
 
-export const fetchKickerData = async (
-  tenantId?: string
-): Promise<KickerData> => {
+export const fetchKickerData = async (tenantId?: string): Promise<KickerData> => {
   return {
     tenantTheme: defaultTheme,
     content: 'Kicker content',
@@ -31,11 +29,9 @@ export const fetchKickerData = async (
   };
 };
 
-export const fetchKickerSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchKickerSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchKickerData(tenantId);
-  
+
   const html = `
     <div 
       class="kicker kicker-${data.variant} kicker-${data.size}" 
@@ -45,7 +41,7 @@ export const fetchKickerSSR = async (
       <span class="kicker-content">${data.content}</span>
     </div>
   `;
-  
+
   const styles = `
     .kicker {
       font-family: var(--font-primary);
@@ -111,6 +107,6 @@ export const fetchKickerSSR = async (
       justify-content: center;
     }
   `;
-  
+
   return { html, styles };
 };

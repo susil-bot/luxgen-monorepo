@@ -7,9 +7,7 @@ export interface FooterData {
   copyright: string;
 }
 
-export const fetchFooterData = async (
-  tenantId?: string
-): Promise<FooterData> => {
+export const fetchFooterData = async (tenantId?: string): Promise<FooterData> => {
   const defaultLinks: FooterLink[] = [
     { label: 'Privacy Policy', href: '/privacy' },
     { label: 'Terms of Service', href: '/terms' },
@@ -24,15 +22,11 @@ export const fetchFooterData = async (
   };
 };
 
-export const fetchFooterSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchFooterSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchFooterData(tenantId);
-  
-  const linksHtml = data.links
-    .map(link => `<a href="${link.href}" class="footer-link">${link.label}</a>`)
-    .join('');
-  
+
+  const linksHtml = data.links.map((link) => `<a href="${link.href}" class="footer-link">${link.label}</a>`).join('');
+
   const html = `
     <footer class="footer" style="background-color: ${data.tenantTheme.colors.surface}; border-top: 1px solid ${data.tenantTheme.colors.border}; color: ${data.tenantTheme.colors.textSecondary}; font-family: ${data.tenantTheme.fonts.primary};">
       <div class="footer-container">
@@ -45,7 +39,7 @@ export const fetchFooterSSR = async (
       </div>
     </footer>
   `;
-  
+
   const styles = `
     .footer {
       margin-top: auto;
@@ -83,6 +77,6 @@ export const fetchFooterSSR = async (
       color: var(--color-text-secondary);
     }
   `;
-  
+
   return { html, styles };
 };

@@ -1,0 +1,61 @@
+---
+description: Client auth session rules — never fabricate users; NavBar Login must show for guests
+alwaysApply: true
+---
+
+# Auth session and NavBar login UI
+
+## Canonical session (apps/web)
+
+| Key | Purpose |
+|-----|---------|
+| `authToken` | JWT from GraphQL login |
+| `currentUser` | `SessionUser` JSON from `persistSession()` |
+| `authTokenExpiresAt` | Client-side expiry check |
+| `authSessionEpoch` | Cross-tab sync via `storage` events |
+
+**Legacy cache:** `luxgen_user` in `@luxgen/ui` — optional display cache only. Never treat it as proof of login.
+
+## Rules (non-negotiable)
+
+1. **Never fabricate users** for unauthenticated, expired, or 401/403 responses. No demo users, no `getDefaultUser()` fallbacks on real pages.
+2. **NavBar / Sidebar guest UI** — pass `user={undefined}` or omit `user` when there is no valid session. NavBar shows Login + Sign Up; Sidebar shows Sign in footer.
+3. **Never use default destructuring** like `user = getDefaultUser()` in layout components — `user={undefined}` still triggers JS default params and hides Login.
+4. **Validate before trusting storage:**
+   - `authToken` present
+   - `!isStoredSessionExpired()`
+   - For UI package: `hasValidAuthSession()` from `userService.ts`
+5. **On logout / 401 / expiry** — clear **all** keys: canonical session + `luxgen_user` via `clearStoredSession()` or `clearAuthSessionStorage()`.
+6. **Hydrate layout user from one helper:**
+   - Pages: `useLayoutUser()` or `transformUserDataFromSession()`
+   - Do **not** use `getDefaultUser()` for `AppLayout` / `AdminDashboardLayout` `user` prop
+
+## Edge cases to test
+
+| Scenario | Expected UI |
+|----------|-------------|
+| No token, public route (`/`, `/listings`) | Login + Sign Up visible |
+| Expired JWT still in localStorage | Session cleared; guest UI or redirect to `/login?reason=session_expired` |
+| Stale `luxgen_user` without `authToken` | Guest UI (not cached name) |
+| `user={undefined}` passed to layout | Guest UI (not John Doe) |
+| Login success | `persistSession()` → NavBar user menu; **stay on dashboard** (no bounce to login) |
+| Logout / cross-tab logout | `luxgen-auth-change` → NavBar back to Login |
+| Wrong tenant token | Redirect `tenant_mismatch`; session cleared |
+| `UserContext` after login | Prefer `currentUser` from storage; **do not** call `clearAuthSessionStorage()` on `/api/users/me` 403 from id vs subdomain mismatch |
+| JWT `tenant` claim | Mongo tenant **id** — never compare directly to subdomain query param |
+| JWT `kid` header | Tenant Mongo id in dev — verify with `getTenantKey(kid)` fallback to `JWT_SECRET`, not `hasTenantKey` reject |
+| Web `JWT_SECRET` | Must match `apps/api` — required for `pages/api/users/me` |
+
+## Files to touch when changing auth UI
+
+- `apps/web/lib/session.ts` — persist / clear
+- `apps/web/lib/app-layout-user.ts` — `useLayoutUser()`
+- `apps/web/lib/transformer.ts` — `transformUserDataFromSession()`
+- `packages/ui/src/services/userService.ts` — `hasValidAuthSession`, `clearAuthSessionStorage`
+- `packages/ui/src/context/UserContext.tsx` — GlobalProvider user state
+- `packages/ui/src/NavBar/NavBar.tsx` — Login vs user menu branch
+- `packages/ui/src/AdminDashboardLayout/` — no `getDefaultUser()` default param
+
+## PR type
+
+Auth/login regressions → **`fix/`** branch, labels: `help wanted`, `bug`, `web`, `ui`, `need-manual-review`

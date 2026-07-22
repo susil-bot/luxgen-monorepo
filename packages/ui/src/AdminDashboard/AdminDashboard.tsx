@@ -8,12 +8,9 @@ import {
   EngagementTrends,
   RecentActivities,
   LastSurvey,
-  PermissionRequest
+  PermissionRequest,
 } from '../index';
-import {
-  getAdminDashboardStyles,
-  adminDashboardCSS
-} from './styles';
+import { getAdminDashboardStyles, adminDashboardCSS } from './styles';
 
 // Simple Banner Carousel Component
 const BannerCarousel: React.FC<{
@@ -34,9 +31,7 @@ const BannerCarousel: React.FC<{
     if (!autoPlay || banners.length <= 1) return;
 
     const timer = setInterval(() => {
-      setCurrentIndex((prevIndex) => 
-        prevIndex === banners.length - 1 ? 0 : prevIndex + 1
-      );
+      setCurrentIndex((prevIndex) => (prevIndex === banners.length - 1 ? 0 : prevIndex + 1));
     }, interval);
 
     return () => clearInterval(timer);
@@ -63,7 +58,7 @@ const BannerCarousel: React.FC<{
   return (
     <div className="relative w-full h-64 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg overflow-hidden">
       {/* Background Image */}
-      <div 
+      <div
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
         style={{ backgroundImage: `url(${currentBanner.image})` }}
       >
@@ -113,9 +108,7 @@ const BannerCarousel: React.FC<{
               key={index}
               onClick={() => goToSlide(index)}
               className={`w-3 h-3 rounded-full transition-all ${
-                index === currentIndex 
-                  ? 'bg-white' 
-                  : 'bg-white bg-opacity-50 hover:bg-opacity-75'
+                index === currentIndex ? 'bg-white' : 'bg-white bg-opacity-50 hover:bg-opacity-75'
               }`}
             />
           ))}
@@ -146,6 +139,8 @@ export interface AdminDashboardProps extends BaseComponentProps {
     autoPlay?: boolean;
     interval?: number;
   };
+  /** When set, replaces the built-in banner carousel (e.g. next/image in apps/web). */
+  bannerSlot?: React.ReactNode;
   stats?: {
     totalCourses: number;
     activeStudents: number;
@@ -195,15 +190,85 @@ export interface AdminDashboardProps extends BaseComponentProps {
   variant?: 'default' | 'compact' | 'detailed';
   loading?: boolean;
   onRetentionPointClick?: (point: { date: string; value: number; label?: string }) => void;
-  onEngagementSegmentClick?: (segment: { id: string; label: string; value: number; color: string; percentage: number }) => void;
+  onEngagementSegmentClick?: (segment: {
+    id: string;
+    label: string;
+    value: number;
+    color: string;
+    percentage: number;
+  }) => void;
   onTrendsPointClick?: (point: { label: string; interactions: number; completions: number }) => void;
-  onActivityClick?: (activity: { id: string; user: { name: string; avatar?: string; initials?: string }; action: string; time: string; status: 'online' | 'offline'; avatarColor?: string }) => void;
-  onSurveyView?: (survey: { id: string; title: string; status: 'active' | 'completed' | 'draft' | 'closed'; progress: number; totalResponses: number; targetResponses?: number; createdAt: string; expiresAt?: string; description?: string }) => void;
-  onSurveyEdit?: (survey: { id: string; title: string; status: 'active' | 'completed' | 'draft' | 'closed'; progress: number; totalResponses: number; targetResponses?: number; createdAt: string; expiresAt?: string; description?: string }) => void;
-  onSurveyShare?: (survey: { id: string; title: string; status: 'active' | 'completed' | 'draft' | 'closed'; progress: number; totalResponses: number; targetResponses?: number; createdAt: string; expiresAt?: string; description?: string }) => void;
-  onPermissionApprove?: (request: { id: string; user: { name: string; email: string; avatar?: string; initials?: string }; permission: string; resource: string; requestedAt: string; reason?: string; status: 'pending' | 'approved' | 'denied'; avatarColor?: string }) => void;
-  onPermissionDeny?: (request: { id: string; user: { name: string; email: string; avatar?: string; initials?: string }; permission: string; resource: string; requestedAt: string; reason?: string; status: 'pending' | 'approved' | 'denied'; avatarColor?: string }) => void;
-  onPermissionViewDetails?: (request: { id: string; user: { name: string; email: string; avatar?: string; initials?: string }; permission: string; resource: string; requestedAt: string; reason?: string; status: 'pending' | 'approved' | 'denied'; avatarColor?: string }) => void;
+  onActivityClick?: (activity: {
+    id: string;
+    user: { name: string; avatar?: string; initials?: string };
+    action: string;
+    time: string;
+    status: 'online' | 'offline';
+    avatarColor?: string;
+  }) => void;
+  onSurveyView?: (survey: {
+    id: string;
+    title: string;
+    status: 'active' | 'completed' | 'draft' | 'closed';
+    progress: number;
+    totalResponses: number;
+    targetResponses?: number;
+    createdAt: string;
+    expiresAt?: string;
+    description?: string;
+  }) => void;
+  onSurveyEdit?: (survey: {
+    id: string;
+    title: string;
+    status: 'active' | 'completed' | 'draft' | 'closed';
+    progress: number;
+    totalResponses: number;
+    targetResponses?: number;
+    createdAt: string;
+    expiresAt?: string;
+    description?: string;
+  }) => void;
+  onSurveyShare?: (survey: {
+    id: string;
+    title: string;
+    status: 'active' | 'completed' | 'draft' | 'closed';
+    progress: number;
+    totalResponses: number;
+    targetResponses?: number;
+    createdAt: string;
+    expiresAt?: string;
+    description?: string;
+  }) => void;
+  onPermissionApprove?: (request: {
+    id: string;
+    user: { name: string; email: string; avatar?: string; initials?: string };
+    permission: string;
+    resource: string;
+    requestedAt: string;
+    reason?: string;
+    status: 'pending' | 'approved' | 'denied';
+    avatarColor?: string;
+  }) => void;
+  onPermissionDeny?: (request: {
+    id: string;
+    user: { name: string; email: string; avatar?: string; initials?: string };
+    permission: string;
+    resource: string;
+    requestedAt: string;
+    reason?: string;
+    status: 'pending' | 'approved' | 'denied';
+    avatarColor?: string;
+  }) => void;
+  onPermissionViewDetails?: (request: {
+    id: string;
+    user: { name: string; email: string; avatar?: string; initials?: string };
+    permission: string;
+    resource: string;
+    requestedAt: string;
+    reason?: string;
+    status: 'pending' | 'approved' | 'denied';
+    avatarColor?: string;
+  }) => void;
 }
 
 const AdminDashboardComponent: React.FC<AdminDashboardProps> = ({
@@ -212,10 +277,11 @@ const AdminDashboardComponent: React.FC<AdminDashboardProps> = ({
   subtitle,
   currentTenant,
   bannerCarousel,
+  bannerSlot,
   stats = {
     totalCourses: 0,
     activeStudents: 0,
-    completionRate: 0
+    completionRate: 0,
   },
   retentionData = [],
   engagementData = [],
@@ -259,7 +325,11 @@ const AdminDashboardComponent: React.FC<AdminDashboardProps> = ({
   return (
     <>
       <style>{adminDashboardCSS}</style>
-      <div className={`${adminDashboardClasses.container} ${className}`} style={{ ...styles.container, ...style }} {...props}>
+      <div
+        className={`${adminDashboardClasses.container} ${className}`}
+        style={{ ...styles.container, ...style }}
+        {...props}
+      >
         {/* Header */}
         <div className={adminDashboardClasses.header} style={styles.header}>
           <div className={adminDashboardClasses.headerContent} style={styles.headerContent}>
@@ -277,14 +347,20 @@ const AdminDashboardComponent: React.FC<AdminDashboardProps> = ({
         </div>
 
         {/* Banner Carousel */}
-        {bannerCarousel && bannerCarousel.banners && bannerCarousel.banners.length > 0 && (
-          <div className="mb-8">
-            <BannerCarousel
-              banners={bannerCarousel.banners}
-              autoPlay={bannerCarousel.autoPlay}
-              interval={bannerCarousel.interval}
-            />
-          </div>
+        {bannerSlot ? (
+          <div className="mb-8">{bannerSlot}</div>
+        ) : (
+          bannerCarousel &&
+          bannerCarousel.banners &&
+          bannerCarousel.banners.length > 0 && (
+            <div className="mb-8">
+              <BannerCarousel
+                banners={bannerCarousel.banners}
+                autoPlay={bannerCarousel.autoPlay}
+                interval={bannerCarousel.interval}
+              />
+            </div>
+          )
         )}
 
         {/* Stats Cards */}
@@ -292,7 +368,12 @@ const AdminDashboardComponent: React.FC<AdminDashboardProps> = ({
           <div className={adminDashboardClasses.statCard} style={styles.statCard}>
             <div className={adminDashboardClasses.statIcon} style={styles.statIcon}>
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
+                />
               </svg>
             </div>
             <div className={adminDashboardClasses.statContent} style={styles.statContent}>
@@ -308,7 +389,12 @@ const AdminDashboardComponent: React.FC<AdminDashboardProps> = ({
           <div className={adminDashboardClasses.statCard} style={styles.statCard}>
             <div className={adminDashboardClasses.statIcon} style={styles.statIcon}>
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
+                />
               </svg>
             </div>
             <div className={adminDashboardClasses.statContent} style={styles.statContent}>
@@ -324,7 +410,12 @@ const AdminDashboardComponent: React.FC<AdminDashboardProps> = ({
           <div className={adminDashboardClasses.statCard} style={styles.statCard}>
             <div className={adminDashboardClasses.statIcon} style={styles.statIcon}>
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
               </svg>
             </div>
             <div className={adminDashboardClasses.statContent} style={styles.statContent}>
@@ -341,7 +432,12 @@ const AdminDashboardComponent: React.FC<AdminDashboardProps> = ({
             <div className={adminDashboardClasses.statCard} style={styles.statCard}>
               <div className={adminDashboardClasses.statIcon} style={styles.statIcon}>
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
+                  />
                 </svg>
               </div>
               <div className={adminDashboardClasses.statContent} style={styles.statContent}>

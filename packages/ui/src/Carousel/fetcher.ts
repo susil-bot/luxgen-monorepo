@@ -19,9 +19,7 @@ export interface CarouselData {
   slidesToScroll: number;
 }
 
-export const fetchCarouselData = async (
-  tenantId?: string
-): Promise<CarouselData> => {
+export const fetchCarouselData = async (tenantId?: string): Promise<CarouselData> => {
   return {
     tenantTheme: defaultTheme,
     items: [
@@ -55,52 +53,74 @@ export const fetchCarouselData = async (
   };
 };
 
-export const fetchCarouselSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchCarouselSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchCarouselData(tenantId);
-  
+
   const html = `
     <div class="carousel" style="font-family: ${data.tenantTheme.fonts.primary}; color: ${data.tenantTheme.colors.text};">
       <div class="carousel-container">
         <div class="carousel-track">
-          ${data.items.map((item, index) => `
+          ${data.items
+            .map(
+              (item, index) => `
             <div class="carousel-slide" style="transform: translateX(${index * 100}%); transition: transform 0.3s ease;">
               ${item.content}
             </div>
-          `).join('')}
+          `,
+            )
+            .join('')}
         </div>
         
-        ${data.showArrows ? `
+        ${
+          data.showArrows
+            ? `
           <button class="carousel-arrow carousel-arrow-prev" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); background: ${data.tenantTheme.colors.background}; border: 1px solid ${data.tenantTheme.colors.border}; border-radius: 50%; width: 3rem; height: 3rem; display: flex; align-items: center; justify-content: center; cursor: pointer; color: ${data.tenantTheme.colors.text}; font-size: 1.25rem; z-index: 2;">
             ‹
           </button>
           <button class="carousel-arrow carousel-arrow-next" style="position: absolute; right: 1rem; top: 50%; transform: translateY(-50%); background: ${data.tenantTheme.colors.background}; border: 1px solid ${data.tenantTheme.colors.border}; border-radius: 50%; width: 3rem; height: 3rem; display: flex; align-items: center; justify-content: center; cursor: pointer; color: ${data.tenantTheme.colors.text}; font-size: 1.25rem; z-index: 2;">
             ›
           </button>
-        ` : ''}
+        `
+            : ''
+        }
       </div>
       
-      ${data.showDots ? `
+      ${
+        data.showDots
+          ? `
         <div class="carousel-dots" style="text-align: center; margin-top: 1rem;">
-          ${data.items.map((_, index) => `
+          ${data.items
+            .map(
+              (_, index) => `
             <button class="carousel-dot ${index === 0 ? 'active' : ''}" style="width: 0.75rem; height: 0.75rem; border-radius: 50%; border: none; background: ${index === 0 ? data.tenantTheme.colors.primary : data.tenantTheme.colors.border}; margin: 0 0.25rem; cursor: pointer; transition: background-color 0.2s ease;"></button>
-          `).join('')}
+          `,
+            )
+            .join('')}
         </div>
-      ` : ''}
+      `
+          : ''
+      }
       
-      ${data.showThumbnails ? `
+      ${
+        data.showThumbnails
+          ? `
         <div class="carousel-thumbnails" style="margin-top: 1rem;">
-          ${data.items.map((item, index) => `
+          ${data.items
+            .map(
+              (item, index) => `
             <button class="carousel-thumbnail ${index === 0 ? 'active' : ''}" style="width: 4rem; height: 3rem; border: 2px solid ${index === 0 ? data.tenantTheme.colors.primary : data.tenantTheme.colors.border}; border-radius: 0.375rem; background: ${data.tenantTheme.colors.background}; cursor: pointer; margin: 0 0.25rem; overflow: hidden; transition: border-color 0.2s ease;">
               ${item.content}
             </button>
-          `).join('')}
+          `,
+            )
+            .join('')}
         </div>
-      ` : ''}
+      `
+          : ''
+      }
     </div>
   `;
-  
+
   const styles = `
     .carousel {
       position: relative;
@@ -221,6 +241,6 @@ export const fetchCarouselSSR = async (
       border-color: var(--color-primary);
     }
   `;
-  
+
   return { html, styles };
 };

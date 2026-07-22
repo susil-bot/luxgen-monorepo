@@ -31,7 +31,7 @@ const getVariantStyles = (variant: 'default' | 'compact' | 'detailed') => {
 export const getUserRetentionStyles = (
   tenantTheme: TenantTheme,
   variant: 'default' | 'compact' | 'detailed',
-  customColor?: string
+  customColor?: string,
 ) => {
   const variantStyles = getVariantStyles(variant);
   const lineColor = customColor || tenantTheme.colors.primary || '#3B82F6';

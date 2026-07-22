@@ -25,21 +25,21 @@ const adminDashboardData = {
   currentTenant: {
     name: 'Ideavibes',
     subdomain: 'ideavibes',
-    logo: '/logos/ideavibes.png'
+    logo: '/logos/ideavibes.png',
   },
   stats: {
     totalCourses: 12,
     activeStudents: 156,
     completionRate: 87,
-    totalUsers: 1200
+    totalUsers: 1200,
   },
   retentionData: [
     { date: 'Jan', value: 400, label: 'January' },
-    { date: 'Feb', value: 450, label: 'February' }
+    { date: 'Feb', value: 450, label: 'February' },
   ],
   engagementData: [
     { id: '1', label: 'Quizzes', value: 30, color: '#3B82F6', percentage: 30 },
-    { id: '2', label: 'Surveys', value: 15, color: '#10B981', percentage: 15 }
+    { id: '2', label: 'Surveys', value: 15, color: '#10B981', percentage: 15 },
   ],
   activitiesData: [
     {
@@ -47,8 +47,8 @@ const adminDashboardData = {
       user: { name: 'John Doe', avatar: '/avatars/john.jpg', initials: 'JD' },
       action: 'Completed React Course',
       time: '2 hours ago',
-      status: 'online'
-    }
+      status: 'online',
+    },
   ],
   surveyData: {
     id: '1',
@@ -58,7 +58,7 @@ const adminDashboardData = {
     totalResponses: 150,
     targetResponses: 200,
     createdAt: '2024-01-15',
-    expiresAt: '2024-02-15'
+    expiresAt: '2024-02-15',
   },
   permissionData: [
     {
@@ -67,13 +67,13 @@ const adminDashboardData = {
       permission: 'admin',
       resource: 'User Management',
       requestedAt: '2024-01-20',
-      status: 'pending'
-    }
+      status: 'pending',
+    },
   ],
   quickActions: [
     { id: '1', label: 'Create Survey', onClick: () => console.log('Create Survey') },
-    { id: '2', label: 'View Reports', onClick: () => console.log('View Reports') }
-  ]
+    { id: '2', label: 'View Reports', onClick: () => console.log('View Reports') },
+  ],
 };
 
 <AdminDashboard
@@ -84,36 +84,36 @@ const adminDashboardData = {
   onActivityClick={(activity) => console.log('Activity clicked:', activity)}
   onSurveyView={(survey) => console.log('Survey view:', survey)}
   onPermissionApprove={(request) => console.log('Permission approved:', request)}
-/>
+/>;
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `title` | `string` | `'Admin Dashboard'` | Main dashboard title |
-| `subtitle` | `string` | - | Dashboard subtitle |
-| `currentTenant` | `object` | - | Current tenant information |
-| `stats` | `object` | - | Statistics data (totalCourses, activeStudents, completionRate, etc.) |
-| `retentionData` | `array` | `[]` | User retention data for charts |
-| `engagementData` | `array` | `[]` | Engagement breakdown data |
-| `trendsData` | `array` | `[]` | Engagement trends data |
-| `activitiesData` | `array` | `[]` | Recent activities data |
-| `surveyData` | `object` | - | Last survey information |
-| `permissionData` | `array` | `[]` | Permission requests data |
-| `quickActions` | `array` | `[]` | Quick action buttons |
-| `variant` | `'default' \| 'compact' \| 'detailed'` | `'default'` | Dashboard layout variant |
-| `loading` | `boolean` | `false` | Show loading state |
-| `onRetentionPointClick` | `function` | - | Callback for retention chart clicks |
-| `onEngagementSegmentClick` | `function` | - | Callback for engagement chart clicks |
-| `onTrendsPointClick` | `function` | - | Callback for trends chart clicks |
-| `onActivityClick` | `function` | - | Callback for activity clicks |
-| `onSurveyView` | `function` | - | Callback for survey view |
-| `onSurveyEdit` | `function` | - | Callback for survey edit |
-| `onSurveyShare` | `function` | - | Callback for survey share |
-| `onPermissionApprove` | `function` | - | Callback for permission approval |
-| `onPermissionDeny` | `function` | - | Callback for permission denial |
-| `onPermissionViewDetails` | `function` | - | Callback for permission details |
+| Prop                       | Type                                   | Default             | Description                                                          |
+| -------------------------- | -------------------------------------- | ------------------- | -------------------------------------------------------------------- |
+| `title`                    | `string`                               | `'Admin Dashboard'` | Main dashboard title                                                 |
+| `subtitle`                 | `string`                               | -                   | Dashboard subtitle                                                   |
+| `currentTenant`            | `object`                               | -                   | Current tenant information                                           |
+| `stats`                    | `object`                               | -                   | Statistics data (totalCourses, activeStudents, completionRate, etc.) |
+| `retentionData`            | `array`                                | `[]`                | User retention data for charts                                       |
+| `engagementData`           | `array`                                | `[]`                | Engagement breakdown data                                            |
+| `trendsData`               | `array`                                | `[]`                | Engagement trends data                                               |
+| `activitiesData`           | `array`                                | `[]`                | Recent activities data                                               |
+| `surveyData`               | `object`                               | -                   | Last survey information                                              |
+| `permissionData`           | `array`                                | `[]`                | Permission requests data                                             |
+| `quickActions`             | `array`                                | `[]`                | Quick action buttons                                                 |
+| `variant`                  | `'default' \| 'compact' \| 'detailed'` | `'default'`         | Dashboard layout variant                                             |
+| `loading`                  | `boolean`                              | `false`             | Show loading state                                                   |
+| `onRetentionPointClick`    | `function`                             | -                   | Callback for retention chart clicks                                  |
+| `onEngagementSegmentClick` | `function`                             | -                   | Callback for engagement chart clicks                                 |
+| `onTrendsPointClick`       | `function`                             | -                   | Callback for trends chart clicks                                     |
+| `onActivityClick`          | `function`                             | -                   | Callback for activity clicks                                         |
+| `onSurveyView`             | `function`                             | -                   | Callback for survey view                                             |
+| `onSurveyEdit`             | `function`                             | -                   | Callback for survey edit                                             |
+| `onSurveyShare`            | `function`                             | -                   | Callback for survey share                                            |
+| `onPermissionApprove`      | `function`                             | -                   | Callback for permission approval                                     |
+| `onPermissionDeny`         | `function`                             | -                   | Callback for permission denial                                       |
+| `onPermissionViewDetails`  | `function`                             | -                   | Callback for permission details                                      |
 
 ## Multi-Tenant Features
 

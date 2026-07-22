@@ -1,1 +1,1 @@
-export const SidebarTranslations = { en: { title: "Sidebar" } };
+export const SidebarTranslations = { en: { title: 'Sidebar' } };

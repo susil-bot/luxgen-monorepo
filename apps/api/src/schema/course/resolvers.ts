@@ -1,32 +1,130 @@
 import { courseService } from '../../services/courseService';
+import { activityEventService, actorFromContext } from '../../services/activityEventService';
+import { enrollmentService } from '../../services/enrollmentService';
+import { automationService } from '../../services/automationService';
+import { CourseStatus } from '@luxgen/db';
+import type { GraphQLContext } from '../../context';
+import { scopedTenantId } from '../../graphql/tenantScope';
+import type { CourseCommerceFields } from '../../utils/productMeta';
+
+function publishedCoursesOnly<T extends { status: string }>(courses: T[], context: GraphQLContext): T[] {
+  if (context.user) return courses;
+  return courses.filter((c) => c.status === CourseStatus.PUBLISHED);
+}
 
 export const courseResolvers = {
+  Course: {
+    commerce: (parent: { commerce?: CourseCommerceFields | null }) => parent.commerce ?? { currency: 'usd' },
+  },
   Query: {
-    course: async (_: any, { id }: { id: string }) => {
-      return await courseService.getCourseById(id);
+    course: async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
+      const course = await courseService.getCourseById(id);
+      if (!course) return null;
+      if (!context.user && course.status !== CourseStatus.PUBLISHED) {
+        return null;
+      }
+      return course;
     },
-    courses: async (_: any, { tenantId }: { tenantId: string }) => {
-      return await courseService.getCoursesByTenant(tenantId);
+    courses: async (_: unknown, { tenantId }: { tenantId: string }, context: GraphQLContext) => {
+      const scoped = scopedTenantId(context, tenantId);
+      const courses = await courseService.getCoursesByTenant(scoped);
+      return publishedCoursesOnly(courses, context);
     },
-    coursesByInstructor: async (_: any, { instructorId }: { instructorId: string }) => {
+    coursesByInstructor: async (_: unknown, { instructorId }: { instructorId: string }) => {
       return await courseService.getCoursesByInstructor(instructorId);
     },
   },
   Mutation: {
-    createCourse: async (_: any, { input }: { input: any }) => {
-      return await courseService.createCourse(input);
+    createCourse: async (_: unknown, { input }: { input: any }, context: GraphQLContext) => {
+      const course = await courseService.createCourse(input);
+      const actor = actorFromContext(context.user);
+      await activityEventService.recordProductCreated(
+        { id: course.id, title: course.title, tenantId: input.tenantId },
+        actor,
+      );
+      return course;
     },
-    updateCourse: async (_: any, { id, input }: { id: string; input: any }) => {
-      return await courseService.updateCourse(id, input);
+    updateCourse: async (_: unknown, { id, input }: { id: string; input: any }, context: GraphQLContext) => {
+      const tenantId = context.tenantId ?? input.tenantId;
+      if (!tenantId) throw new Error('Tenant context required');
+      const existing = await courseService.getCourseById(id);
+      const course = await courseService.updateCourse(id, tenantId, input);
+      const actor = actorFromContext(context.user);
+      const activityTenantId =
+        (course.tenant as { _id?: { toString(): string }; id?: string })?._id?.toString?.() ??
+        (course.tenant as { toString(): string })?.toString?.() ??
+        tenantId;
+
+      if (input.status && existing && input.status !== existing.status) {
+        await activityEventService.recordProductStatusChange(
+          activityTenantId,
+          id,
+          existing.status,
+          input.status,
+          actor,
+        );
+      } else {
+        await activityEventService.recordProductUpdated(activityTenantId, id, 'Product details updated', actor);
+      }
+      return course;
     },
-    deleteCourse: async (_: any, { id }: { id: string }) => {
-      return await courseService.deleteCourse(id);
+    deleteCourse: async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
+      if (!context.tenantId) throw new Error('Tenant context required');
+      return await courseService.deleteCourse(id, context.tenantId);
     },
-    enrollStudent: async (_: any, { courseId, studentId }: { courseId: string; studentId: string }) => {
-      return await courseService.enrollStudent(courseId, studentId);
+    enrollStudent: async (
+      _: unknown,
+      { courseId, studentId }: { courseId: string; studentId: string },
+      context: GraphQLContext,
+    ) => {
+      if (!context.tenantId) throw new Error('Tenant context required');
+      const course = await courseService.enrollStudent(courseId, context.tenantId, studentId);
+      const student = (course.students as any[])?.find((s: { id?: string; _id?: { toString(): string } }) => {
+        const sid = s.id ?? s._id?.toString?.();
+        return sid === studentId;
+      }) as { email?: string } | undefined;
+      const tenantId =
+        (course.tenant as { _id?: { toString(): string }; id?: string })?._id?.toString?.() ??
+        (course.tenant as { toString(): string })?.toString?.() ??
+        '';
+      const actor = actorFromContext(context.user);
+      await enrollmentService.ensureEnrollment(tenantId, courseId, studentId);
+      await activityEventService.recordOrderCreated(
+        tenantId,
+        courseId,
+        studentId,
+        course.title,
+        student?.email ?? 'customer',
+        actor,
+      );
+      void automationService
+        .triggerAutomations(
+          tenantId,
+          'USER_ENROLLED',
+          {
+            courseId,
+            studentId,
+            userId: studentId,
+            orderId: `${courseId}:${studentId}`,
+            customerEmail: student?.email,
+          },
+          'lms',
+        )
+        .catch(() => undefined);
+      void import('../../services/pushNotificationService').then(({ pushNotificationService }) =>
+        pushNotificationService.sendEnrollmentConfirmation(studentId, course.title),
+      );
+      return course;
     },
-    unenrollStudent: async (_: any, { courseId, studentId }: { courseId: string; studentId: string }) => {
-      return await courseService.unenrollStudent(courseId, studentId);
+    unenrollStudent: async (
+      _: unknown,
+      { courseId, studentId }: { courseId: string; studentId: string },
+      context: GraphQLContext,
+    ) => {
+      if (!context.tenantId) throw new Error('Tenant context required');
+      const course = await courseService.unenrollStudent(courseId, context.tenantId, studentId);
+      await enrollmentService.cancelEnrollment(courseId, studentId, actorFromContext(context.user));
+      return course;
     },
   },
 };

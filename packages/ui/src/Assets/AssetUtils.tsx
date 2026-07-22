@@ -88,13 +88,7 @@ export interface AssetIconProps {
   color?: string;
 }
 
-export const AssetIcon: React.FC<AssetIconProps> = ({
-  asset,
-  size = 24,
-  className = '',
-  style = {},
-  color,
-}) => {
+export const AssetIcon: React.FC<AssetIconProps> = ({ asset, size = 24, className = '', style = {}, color }) => {
   const iconStyle = {
     width: typeof size === 'number' ? `${size}px` : size,
     height: typeof size === 'number' ? `${size}px` : size,
@@ -103,22 +97,12 @@ export const AssetIcon: React.FC<AssetIconProps> = ({
   };
 
   if (asset.type === 'icon' && asset.url.endsWith('.svg')) {
-    return (
-      <img
-        src={asset.url}
-        alt={asset.alt || asset.name}
-        className={className}
-        style={iconStyle}
-      />
-    );
+    return <img src={asset.url} alt={asset.alt || asset.name} className={className} style={iconStyle} />;
   }
 
   // For other icon types, you might want to use a different approach
   return (
-    <div
-      className={`flex items-center justify-center ${className}`}
-      style={iconStyle}
-    >
+    <div className={`flex items-center justify-center ${className}`} style={iconStyle}>
       <span className="text-xs text-gray-500">Icon</span>
     </div>
   );
@@ -142,7 +126,7 @@ export const AssetLogo: React.FC<AssetLogoProps> = ({
   showText = true,
 }) => {
   const logoAsset = brandAssets.logo[variant];
-  
+
   if (!logoAsset) {
     return (
       <div
@@ -162,15 +146,9 @@ export const AssetLogo: React.FC<AssetLogoProps> = ({
 
   return (
     <div className={`flex items-center ${className}`} style={logoStyle}>
-      <AssetImage
-        asset={logoAsset}
-        className="object-contain"
-        style={{ width: '100%', height: '100%' }}
-      />
+      <AssetImage asset={logoAsset} className="object-contain" style={{ width: '100%', height: '100%' }} />
       {showText && variant !== 'icon' && brandAssets.logo.primary.name && (
-        <span className="ml-2 font-semibold text-lg">
-          {brandAssets.logo.primary.name}
-        </span>
+        <span className="ml-2 font-semibold text-lg">{brandAssets.logo.primary.name}</span>
       )}
     </div>
   );
@@ -202,10 +180,7 @@ export const AssetBackground: React.FC<AssetBackgroundProps> = ({
   };
 
   return (
-    <div
-      className={`relative ${className}`}
-      style={backgroundStyle}
-    >
+    <div className={`relative ${className}`} style={backgroundStyle}>
       {overlay && (
         <div
           className="absolute inset-0"
@@ -231,7 +206,7 @@ export const getAssetDimensions = (asset: AssetConfig): { width: number; height:
   if (asset.dimensions) {
     return asset.dimensions;
   }
-  
+
   // Default dimensions based on type
   switch (asset.type) {
     case 'icon':
@@ -261,7 +236,7 @@ export const isAssetLoaded = (asset: AssetConfig): Promise<boolean> => {
 };
 
 export const preloadAssets = async (assets: AssetConfig[]): Promise<void> => {
-  const loadPromises = assets.map(asset => isAssetLoaded(asset));
+  const loadPromises = assets.map((asset) => isAssetLoaded(asset));
   await Promise.all(loadPromises);
 };
 

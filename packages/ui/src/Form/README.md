@@ -40,7 +40,7 @@ import { Form } from '@luxgen/ui';
 </Form>
 
 // With file upload
-<Form 
+<Form
   onSubmit={handleSubmit}
   method="POST"
   action="/upload"
@@ -72,17 +72,17 @@ import { Form } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `onSubmit` | `(e: React.FormEvent) => void` | - | Submit handler |
-| `method` | `'GET' | 'POST' | 'PUT' | 'DELETE'` | `'POST'` | HTTP method |
-| `action` | `string` | - | Form action URL |
-| `encType` | `string` | `'application/x-www-form-urlencoded'` | Form encoding type |
-| `noValidate` | `boolean` | `false` | Disable HTML5 validation |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
-| `children` | `ReactNode` | - | Form content |
+| Prop          | Type                           | Default                               | Description              |
+| ------------- | ------------------------------ | ------------------------------------- | ------------------------ | --------- | -------- | ----------- |
+| `tenantTheme` | `TenantTheme`                  | `defaultTheme`                        | Theme object for styling |
+| `onSubmit`    | `(e: React.FormEvent) => void` | -                                     | Submit handler           |
+| `method`      | `'GET'                         | 'POST'                                | 'PUT'                    | 'DELETE'` | `'POST'` | HTTP method |
+| `action`      | `string`                       | -                                     | Form action URL          |
+| `encType`     | `string`                       | `'application/x-www-form-urlencoded'` | Form encoding type       |
+| `noValidate`  | `boolean`                      | `false`                               | Disable HTML5 validation |
+| `className`   | `string`                       | `''`                                  | Additional CSS classes   |
+| `style`       | `CSSProperties`                | `{}`                                  | Inline styles            |
+| `children`    | `ReactNode`                    | -                                     | Form content             |
 
 ## SSR Usage
 
@@ -123,6 +123,7 @@ The component uses CSS custom properties for theming:
 ## Form Methods
 
 ### GET Method
+
 ```tsx
 <Form method="GET" action="/search">
   <div className="form-group">
@@ -136,6 +137,7 @@ The component uses CSS custom properties for theming:
 ```
 
 ### POST Method
+
 ```tsx
 <Form method="POST" action="/submit">
   <div className="form-group">
@@ -149,12 +151,9 @@ The component uses CSS custom properties for theming:
 ```
 
 ### File Upload
+
 ```tsx
-<Form 
-  method="POST"
-  action="/upload"
-  encType="multipart/form-data"
->
+<Form method="POST" action="/upload" encType="multipart/form-data">
   <div className="form-group">
     <label htmlFor="file">Upload File</label>
     <input type="file" id="file" name="file" />
@@ -190,9 +189,9 @@ test('renders with form elements', () => {
       <div className="form-actions">
         <button type="submit">Submit</button>
       </div>
-    </Form>
+    </Form>,
   );
-  
+
   expect(screen.getByRole('form')).toBeInTheDocument();
   expect(screen.getByText('Name')).toBeInTheDocument();
   expect(screen.getByText('Submit')).toBeInTheDocument();
@@ -203,12 +202,12 @@ test('calls onSubmit when form is submitted', () => {
   render(
     <Form onSubmit={mockOnSubmit}>
       <button type="submit">Submit</button>
-    </Form>
+    </Form>,
   );
-  
+
   const form = screen.getByRole('form');
   fireEvent.submit(form);
-  
+
   expect(mockOnSubmit).toHaveBeenCalled();
 });
 ```
@@ -216,6 +215,7 @@ test('calls onSubmit when form is submitted', () => {
 ## Examples
 
 ### Basic Form
+
 ```tsx
 <Form onSubmit={handleSubmit}>
   <div className="form-group">
@@ -233,6 +233,7 @@ test('calls onSubmit when form is submitted', () => {
 ```
 
 ### Form with Validation
+
 ```tsx
 <Form onSubmit={handleSubmit} noValidate={false}>
   <div className="form-group">
@@ -251,13 +252,9 @@ test('calls onSubmit when form is submitted', () => {
 ```
 
 ### Form with File Upload
+
 ```tsx
-<Form 
-  onSubmit={handleSubmit}
-  method="POST"
-  action="/upload"
-  encType="multipart/form-data"
->
+<Form onSubmit={handleSubmit} method="POST" action="/upload" encType="multipart/form-data">
   <div className="form-group">
     <label htmlFor="file">Upload File</label>
     <input type="file" id="file" name="file" />
@@ -269,11 +266,9 @@ test('calls onSubmit when form is submitted', () => {
 ```
 
 ### Form with Custom Theme
+
 ```tsx
-<Form
-  tenantTheme={customTheme}
-  onSubmit={handleSubmit}
->
+<Form tenantTheme={customTheme} onSubmit={handleSubmit}>
   <div className="form-group">
     <label htmlFor="message">Message</label>
     <textarea id="message" name="message" />

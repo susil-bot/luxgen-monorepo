@@ -24,15 +24,15 @@ const activities = [
     user: { name: 'John Doe', initials: 'JD' },
     action: 'Completed survey',
     time: '2 hours ago',
-    status: 'online'
+    status: 'online',
   },
   {
     id: '2',
     user: { name: 'Jane Smith', initials: 'JS' },
     action: 'Started training',
     time: '1 day ago',
-    status: 'offline'
-  }
+    status: 'offline',
+  },
 ];
 
 <RecentActivities
@@ -41,20 +41,20 @@ const activities = [
   maxItems={4}
   showStatus={true}
   onActivityClick={(activity) => console.log('Activity clicked:', activity)}
-/>
+/>;
 ```
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `title` | `string` | `'Recent Activities'` | Component title |
-| `activities` | `Activity[]` | `[]` | Array of activity objects |
-| `maxItems` | `number` | `4` | Maximum number of activities to display |
-| `showStatus` | `boolean` | `true` | Show online/offline status indicators |
-| `variant` | `'default' \| 'compact' \| 'detailed'` | `'default'` | Component variant |
-| `onActivityClick` | `(activity: Activity) => void` | - | Activity click handler |
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
+| Prop              | Type                                   | Default               | Description                             |
+| ----------------- | -------------------------------------- | --------------------- | --------------------------------------- |
+| `title`           | `string`                               | `'Recent Activities'` | Component title                         |
+| `activities`      | `Activity[]`                           | `[]`                  | Array of activity objects               |
+| `maxItems`        | `number`                               | `4`                   | Maximum number of activities to display |
+| `showStatus`      | `boolean`                              | `true`                | Show online/offline status indicators   |
+| `variant`         | `'default' \| 'compact' \| 'detailed'` | `'default'`           | Component variant                       |
+| `onActivityClick` | `(activity: Activity) => void`         | -                     | Activity click handler                  |
+| `tenantTheme`     | `TenantTheme`                          | `defaultTheme`        | Theme object for styling                |
 
 ## Activity Interface
 
@@ -76,12 +76,15 @@ interface Activity {
 ## Variants
 
 ### Default
+
 Standard size with full features and status indicators.
 
 ### Compact
+
 Smaller size optimized for dashboards and sidebars.
 
 ### Detailed
+
 Larger size with enhanced spacing for detailed activity feeds.
 
 ## Examples
@@ -89,12 +92,7 @@ Larger size with enhanced spacing for detailed activity feeds.
 ### Basic Usage
 
 ```tsx
-<RecentActivities
-  title="Recent Activities"
-  activities={activities}
-  maxItems={5}
-  showStatus={true}
-/>
+<RecentActivities title="Recent Activities" activities={activities} maxItems={5} showStatus={true} />
 ```
 
 ### With Custom Styling
@@ -116,13 +114,7 @@ Larger size with enhanced spacing for detailed activity feeds.
 ### Compact Variant
 
 ```tsx
-<RecentActivities
-  title="Activities"
-  activities={activities}
-  maxItems={3}
-  showStatus={false}
-  variant="compact"
-/>
+<RecentActivities title="Activities" activities={activities} maxItems={3} showStatus={false} variant="compact" />
 ```
 
 ### With Custom Avatars
@@ -131,22 +123,22 @@ Larger size with enhanced spacing for detailed activity feeds.
 const activitiesWithAvatars = [
   {
     id: '1',
-    user: { 
-      name: 'John Doe', 
+    user: {
+      name: 'John Doe',
       avatar: '/path/to/avatar.jpg',
-      initials: 'JD' 
+      initials: 'JD',
     },
     action: 'Completed survey',
     time: '2 hours ago',
     status: 'online',
-    avatarColor: '#3B82F6'
-  }
+    avatarColor: '#3B82F6',
+  },
 ];
 
 <RecentActivities
   activities={activitiesWithAvatars}
   onActivityClick={(activity) => console.log('Activity:', activity)}
-/>
+/>;
 ```
 
 ## Avatar Generation
@@ -197,6 +189,7 @@ The component includes comprehensive test coverage:
 - **Edge Cases**: Empty states, error handling, variant testing
 
 Run tests with:
+
 ```bash
 npm test RecentActivities.spec.js
 ```

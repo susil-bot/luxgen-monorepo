@@ -8,9 +8,7 @@ export interface SidebarData {
   collapsed: boolean;
 }
 
-export const fetchSidebarData = async (
-  tenantId?: string
-): Promise<SidebarData> => {
+export const fetchSidebarData = async (tenantId?: string): Promise<SidebarData> => {
   const defaultMenuItems: MenuItem[] = [
     { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
     { id: 'courses', label: 'Courses', href: '/courses' },
@@ -27,20 +25,20 @@ export const fetchSidebarData = async (
   };
 };
 
-export const fetchSidebarSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchSidebarSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchSidebarData(tenantId);
-  
+
   const menuItemsHtml = data.menuItems
-    .map(item => `
+    .map(
+      (item) => `
       <a href="${item.href}" class="sidebar-nav-item" title="${item.label}">
         <span class="sidebar-nav-icon">📊</span>
         <span class="sidebar-nav-label">${item.label}</span>
       </a>
-    `)
+    `,
+    )
     .join('');
-  
+
   const html = `
     <aside class="sidebar" style="background-color: ${data.tenantTheme.colors.surface}; border-right: 1px solid ${data.tenantTheme.colors.border}; color: ${data.tenantTheme.colors.text}; font-family: ${data.tenantTheme.fonts.primary}; width: 16rem;">
       <div class="sidebar-header">
@@ -50,7 +48,7 @@ export const fetchSidebarSSR = async (
       <nav class="sidebar-nav">${menuItemsHtml}</nav>
     </aside>
   `;
-  
+
   const styles = `
     .sidebar {
       height: 100vh;
@@ -98,6 +96,6 @@ export const fetchSidebarSSR = async (
       margin-right: 0.75rem;
     }
   `;
-  
+
   return { html, styles };
 };

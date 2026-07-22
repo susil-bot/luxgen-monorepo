@@ -11,7 +11,7 @@ export const kickerStyles = {
       transition: all 0.2s ease;
     }
   `,
-  
+
   sizes: {
     small: css`
       .kicker-small {
@@ -35,7 +35,7 @@ export const kickerStyles = {
       }
     `,
   },
-  
+
   variants: {
     primary: css`
       .kicker-primary {
@@ -68,7 +68,7 @@ export const kickerStyles = {
       }
     `,
   },
-  
+
   weights: {
     light: css`
       .kicker-light {
@@ -96,7 +96,7 @@ export const kickerStyles = {
       }
     `,
   },
-  
+
   alignments: {
     left: css`
       .kicker-left {
@@ -114,7 +114,7 @@ export const kickerStyles = {
       }
     `,
   },
-  
+
   icon: css`
     .kicker-icon {
       display: flex;
@@ -123,7 +123,7 @@ export const kickerStyles = {
       font-size: 0.875em;
     }
   `,
-  
+
   content: css`
     .kicker-content {
       display: flex;
@@ -131,13 +131,13 @@ export const kickerStyles = {
       justify-content: center;
     }
   `,
-  
+
   uppercase: css`
     .kicker-uppercase {
       text-transform: uppercase;
     }
   `,
-  
+
   underline: css`
     .kicker-underline {
       text-decoration: underline;
@@ -145,20 +145,20 @@ export const kickerStyles = {
       text-underline-offset: 0.25em;
     }
   `,
-  
+
   hover: css`
     .kicker:hover {
       opacity: 0.8;
     }
   `,
-  
+
   focus: css`
     .kicker:focus {
       outline: 2px solid var(--color-primary);
       outline-offset: 2px;
     }
   `,
-  
+
   responsive: css`
     @media (max-width: 768px) {
       .kicker-large {
@@ -167,24 +167,24 @@ export const kickerStyles = {
       }
     }
   `,
-  
+
   darkMode: css`
     @media (prefers-color-scheme: dark) {
       .kicker-primary {
         color: var(--color-primary-light);
       }
-      
+
       .kicker-secondary {
         color: var(--color-text-light);
       }
     }
   `,
-  
+
   animations: css`
     .kicker {
       animation: fadeIn 0.2s ease-in-out;
     }
-    
+
     @keyframes fadeIn {
       from {
         opacity: 0;

@@ -10,9 +10,7 @@ export interface TextAreaData {
   required: boolean;
 }
 
-export const fetchTextAreaData = async (
-  tenantId?: string
-): Promise<TextAreaData> => {
+export const fetchTextAreaData = async (tenantId?: string): Promise<TextAreaData> => {
   return {
     tenantTheme: defaultTheme,
     value: '',
@@ -23,11 +21,9 @@ export const fetchTextAreaData = async (
   };
 };
 
-export const fetchTextAreaSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchTextAreaSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchTextAreaData(tenantId);
-  
+
   const html = `
     <div class="textarea-wrapper">
       <textarea 
@@ -40,7 +36,7 @@ export const fetchTextAreaSSR = async (
       >${data.value}</textarea>
     </div>
   `;
-  
+
   const styles = `
     .textarea-wrapper {
       display: flex;
@@ -99,6 +95,6 @@ export const fetchTextAreaSSR = async (
       margin: 0;
     }
   `;
-  
+
   return { html, styles };
 };

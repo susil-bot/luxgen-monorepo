@@ -60,22 +60,22 @@ import { Carousel } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `items` | `CarouselItem[]` | - | Array of carousel items |
-| `autoPlay` | `boolean` | `false` | Enable automatic slide progression |
-| `autoPlayInterval` | `number` | `3000` | Interval between slides in milliseconds |
-| `showArrows` | `boolean` | `true` | Show navigation arrows |
-| `showDots` | `boolean` | `true` | Show dot indicators |
-| `showThumbnails` | `boolean` | `false` | Show thumbnail navigation |
-| `infinite` | `boolean` | `true` | Enable infinite scrolling |
-| `slidesToShow` | `number` | `1` | Number of slides to display at once |
-| `slidesToScroll` | `number` | `1` | Number of slides to scroll at once |
-| `onSlideChange` | `(index: number) => void` | - | Callback when slide changes |
-| `onItemClick` | `(item: CarouselItem, index: number) => void` | - | Callback when item is clicked |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
+| Prop               | Type                                          | Default        | Description                             |
+| ------------------ | --------------------------------------------- | -------------- | --------------------------------------- |
+| `tenantTheme`      | `TenantTheme`                                 | `defaultTheme` | Theme object for styling                |
+| `items`            | `CarouselItem[]`                              | -              | Array of carousel items                 |
+| `autoPlay`         | `boolean`                                     | `false`        | Enable automatic slide progression      |
+| `autoPlayInterval` | `number`                                      | `3000`         | Interval between slides in milliseconds |
+| `showArrows`       | `boolean`                                     | `true`         | Show navigation arrows                  |
+| `showDots`         | `boolean`                                     | `true`         | Show dot indicators                     |
+| `showThumbnails`   | `boolean`                                     | `false`        | Show thumbnail navigation               |
+| `infinite`         | `boolean`                                     | `true`         | Enable infinite scrolling               |
+| `slidesToShow`     | `number`                                      | `1`            | Number of slides to display at once     |
+| `slidesToScroll`   | `number`                                      | `1`            | Number of slides to scroll at once      |
+| `onSlideChange`    | `(index: number) => void`                     | -              | Callback when slide changes             |
+| `onItemClick`      | `(item: CarouselItem, index: number) => void` | -              | Callback when item is clicked           |
+| `className`        | `string`                                      | `''`           | Additional CSS classes                  |
+| `style`            | `CSSProperties`                               | `{}`           | Inline styles                           |
 
 ## CarouselItem Interface
 
@@ -146,16 +146,19 @@ The component uses CSS custom properties for theming:
 ## Navigation Options
 
 ### Arrow Navigation
+
 - Left/right arrows for slide navigation
 - Disabled state when at boundaries (if not infinite)
 - Hover effects and transitions
 
 ### Dot Navigation
+
 - Clickable dots indicating current position
 - Active state highlighting
 - Responsive positioning
 
 ### Thumbnail Navigation
+
 - Thumbnail previews of slides
 - Click to navigate to specific slide
 - Active state highlighting
@@ -163,11 +166,13 @@ The component uses CSS custom properties for theming:
 ## Autoplay Features
 
 ### Automatic Progression
+
 - Configurable interval between slides
 - Pause on hover/interaction
 - Resume on mouse leave
 
 ### Controls
+
 - Play/pause functionality
 - Stop autoplay option
 - Manual override
@@ -175,11 +180,13 @@ The component uses CSS custom properties for theming:
 ## Touch Support
 
 ### Gestures
+
 - Swipe left/right to navigate
 - Touch and drag support
 - Momentum scrolling
 
 ### Mobile Optimization
+
 - Touch-friendly controls
 - Responsive sizing
 - Gesture recognition
@@ -187,11 +194,13 @@ The component uses CSS custom properties for theming:
 ## Keyboard Navigation
 
 ### Arrow Keys
+
 - Left/right arrow keys for navigation
 - Up/down arrow keys for vertical navigation
 - Tab navigation for accessibility
 
 ### Focus Management
+
 - Keyboard focus indicators
 - Tab order management
 - Screen reader support
@@ -215,9 +224,9 @@ test('renders with items', () => {
     { id: '1', content: <div>Slide 1</div> },
     { id: '2', content: <div>Slide 2</div> },
   ];
-  
+
   render(<Carousel items={items} />);
-  
+
   expect(screen.getByText('Slide 1')).toBeInTheDocument();
 });
 
@@ -226,12 +235,12 @@ test('navigates with arrows', () => {
     { id: '1', content: <div>Slide 1</div> },
     { id: '2', content: <div>Slide 2</div> },
   ];
-  
+
   render(<Carousel items={items} showArrows />);
-  
+
   const nextButton = screen.getByText('›');
   fireEvent.click(nextButton);
-  
+
   expect(screen.getByText('Slide 2')).toBeInTheDocument();
 });
 
@@ -241,12 +250,12 @@ test('calls onSlideChange when slide changes', () => {
     { id: '1', content: <div>Slide 1</div> },
     { id: '2', content: <div>Slide 2</div> },
   ];
-  
+
   render(<Carousel items={items} onSlideChange={onSlideChange} />);
-  
+
   const nextButton = screen.getByText('›');
   fireEvent.click(nextButton);
-  
+
   expect(onSlideChange).toHaveBeenCalledWith(1);
 });
 ```
@@ -254,6 +263,7 @@ test('calls onSlideChange when slide changes', () => {
 ## Examples
 
 ### Basic Carousel
+
 ```tsx
 <Carousel
   items={[
@@ -265,42 +275,31 @@ test('calls onSlideChange when slide changes', () => {
 ```
 
 ### Autoplay Carousel
+
 ```tsx
-<Carousel
-  items={items}
-  autoPlay
-  autoPlayInterval={2000}
-/>
+<Carousel items={items} autoPlay autoPlayInterval={2000} />
 ```
 
 ### Navigation Controls
+
 ```tsx
-<Carousel
-  items={items}
-  showArrows
-  showDots
-  showThumbnails
-/>
+<Carousel items={items} showArrows showDots showThumbnails />
 ```
 
 ### Multiple Slides
+
 ```tsx
-<Carousel
-  items={items}
-  slidesToShow={2}
-  slidesToScroll={1}
-/>
+<Carousel items={items} slidesToShow={2} slidesToScroll={1} />
 ```
 
 ### Custom Themed Carousel
+
 ```tsx
-<Carousel
-  tenantTheme={customTheme}
-  items={items}
-/>
+<Carousel tenantTheme={customTheme} items={items} />
 ```
 
 ### With Callbacks
+
 ```tsx
 <Carousel
   items={items}
@@ -310,6 +309,7 @@ test('calls onSlideChange when slide changes', () => {
 ```
 
 ### Complex Content
+
 ```tsx
 <Carousel
   items={[

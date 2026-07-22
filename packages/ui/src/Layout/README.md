@@ -36,33 +36,33 @@ The component uses the following context hooks:
 
 ## Props
 
-| Property                    | Type                    | Default     | Description                                                                                                                        |
-| --------------------------- | ----------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| children                    | ReactNode               | -           | Required page content to wrap                                                                                                      |
-| tenantTheme                 | TenantTheme             | defaultTheme| Optional tenant-specific theme override                                                                                           |
-| navItems                    | NavItem[]               | []          | Navigation items for the NavBar                                                                                                   |
-| sidebarSections             | SidebarSection[]        | []          | Sidebar sections and items                                                                                                         |
-| menuItems                   | MenuItem[]              | []          | Menu items for additional navigation                                                                                              |
-| user                        | UserMenu                | -           | User information for user menu                                                                                                     |
-| onUserAction                | Function                | -           | Callback for user actions (profile, settings, logout)                                                                             |
-| onSearch                    | Function                | -           | Callback for search functionality                                                                                                  |
-| onNotificationClick        | Function                | -           | Callback for notification interactions                                                                                             |
-| showSearch                  | Boolean                 | true        | Show search bar in NavBar                                                                                                          |
-| showNotifications           | Boolean                 | true        | Show notifications in NavBar                                                                                                       |
-| notificationCount           | Number                  | 0           | Number of notifications to display                                                                                                 |
-| searchPlaceholder           | String                  | 'Search...' | Placeholder text for search input                                                                                                  |
-| logo                        | Object                  | -           | Logo configuration (src, alt, text, href)                                                                                         |
-| className                   | String                  | ''          | Additional CSS classes                                                                                                             |
-| menuPosition                | String                  | 'top'       | Position of menu layer ('top', 'bottom', 'left', 'right')                                                                         |
-| menuVariant                 | String                  | 'default'   | Menu variant ('default', 'compact', 'minimal')                                                                                   |
-| menuCollapsible             | Boolean                 | true        | Allow menu to be collapsed                                                                                                         |
-| menuDefaultCollapsed        | Boolean                 | false       | Start with menu collapsed                                                                                                          |
-| sidebarCollapsible          | Boolean                 | true        | Allow sidebar to be collapsed                                                                                                     |
-| sidebarDefaultCollapsed     | Boolean                 | false       | Start with sidebar collapsed                                                                                                       |
-| responsive                  | Boolean                 | true        | Enable responsive behavior                                                                                                         |
-| mobileBreakpoint            | Number                  | 640         | Mobile breakpoint in pixels                                                                                                        |
-| tabletBreakpoint            | Number                  | 768         | Tablet breakpoint in pixels                                                                                                        |
-| desktopBreakpoint           | Number                  | 1024        | Desktop breakpoint in pixels                                                                                                       |
+| Property                | Type             | Default      | Description                                               |
+| ----------------------- | ---------------- | ------------ | --------------------------------------------------------- |
+| children                | ReactNode        | -            | Required page content to wrap                             |
+| tenantTheme             | TenantTheme      | defaultTheme | Optional tenant-specific theme override                   |
+| navItems                | NavItem[]        | []           | Navigation items for the NavBar                           |
+| sidebarSections         | SidebarSection[] | []           | Sidebar sections and items                                |
+| menuItems               | MenuItem[]       | []           | Menu items for additional navigation                      |
+| user                    | UserMenu         | -            | User information for user menu                            |
+| onUserAction            | Function         | -            | Callback for user actions (profile, settings, logout)     |
+| onSearch                | Function         | -            | Callback for search functionality                         |
+| onNotificationClick     | Function         | -            | Callback for notification interactions                    |
+| showSearch              | Boolean          | true         | Show search bar in NavBar                                 |
+| showNotifications       | Boolean          | true         | Show notifications in NavBar                              |
+| notificationCount       | Number           | 0            | Number of notifications to display                        |
+| searchPlaceholder       | String           | 'Search...'  | Placeholder text for search input                         |
+| logo                    | Object           | -            | Logo configuration (src, alt, text, href)                 |
+| className               | String           | ''           | Additional CSS classes                                    |
+| menuPosition            | String           | 'top'        | Position of menu layer ('top', 'bottom', 'left', 'right') |
+| menuVariant             | String           | 'default'    | Menu variant ('default', 'compact', 'minimal')            |
+| menuCollapsible         | Boolean          | true         | Allow menu to be collapsed                                |
+| menuDefaultCollapsed    | Boolean          | false        | Start with menu collapsed                                 |
+| sidebarCollapsible      | Boolean          | true         | Allow sidebar to be collapsed                             |
+| sidebarDefaultCollapsed | Boolean          | false        | Start with sidebar collapsed                              |
+| responsive              | Boolean          | true         | Enable responsive behavior                                |
+| mobileBreakpoint        | Number           | 640          | Mobile breakpoint in pixels                               |
+| tabletBreakpoint        | Number           | 768          | Tablet breakpoint in pixels                               |
+| desktopBreakpoint       | Number           | 1024         | Desktop breakpoint in pixels                              |
 
 ## Component Usage
 
@@ -86,20 +86,19 @@ import { AppLayout, GlobalProvider, ThemeProvider } from '@luxgen/ui';
       <p>Your page content goes here</p>
     </AppLayout>
   </ThemeProvider>
-</GlobalProvider>
+</GlobalProvider>;
 ```
-
-
 
 <AppLayout
-  navItems={navItems}
-  sidebarSections={sidebarSections}
-  user={user}
-  onUserAction={handleUserAction}
->
-  {content}
-</AppLayout>
-```
+navItems={navItems}
+sidebarSections={sidebarSections}
+user={user}
+onUserAction={handleUserAction}
+
+> {content}
+> </AppLayout>
+
+````
 
 ### With Search and Notifications
 
@@ -114,7 +113,7 @@ import { AppLayout, GlobalProvider, ThemeProvider } from '@luxgen/ui';
 >
   {content}
 </AppLayout>
-```
+````
 
 ## Accessibility
 
@@ -123,9 +122,7 @@ import { AppLayout, GlobalProvider, ThemeProvider } from '@luxgen/ui';
 The main content includes a skip link for keyboard and screen reader users:
 
 ```html
-<main id="main-content" tabIndex="-1">
-  {children}
-</main>
+<main id="main-content" tabIndex="-1">{children}</main>
 ```
 
 The skip link allows users to jump directly to the main content, bypassing navigation elements.
@@ -204,7 +201,7 @@ const handleCustomAction = () => {
   // Your custom logic
   trackLayoutEvent('custom_action', {
     action: 'button_click',
-    target: 'custom_button'
+    target: 'custom_button',
   });
 };
 ```
@@ -233,7 +230,7 @@ The component shows loading states:
 ### Breakpoints
 
 - **Mobile**: < 640px
-- **Tablet**: 640px - 1023px  
+- **Tablet**: 640px - 1023px
 - **Desktop**: ≥ 1024px
 
 ### Responsive Behavior
@@ -250,11 +247,11 @@ The component uses CSS custom properties for theming:
 
 ```css
 :root {
-  --color-primary: #3B82F6;
-  --color-secondary: #1E40AF;
-  --color-background: #F8FAFC;
-  --color-surface: #FFFFFF;
-  --color-text: #1F2937;
+  --color-primary: #3b82f6;
+  --color-secondary: #1e40af;
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-text: #1f2937;
   /* ... more properties */
 }
 ```
@@ -290,7 +287,7 @@ import { TenantDebug } from '@luxgen/ui';
 <AppLayout>
   {content}
   <TenantDebug />
-</AppLayout>
+</AppLayout>;
 ```
 
 ### Console Logging
@@ -308,12 +305,7 @@ The component provides detailed console logging:
 
 ```jsx
 import React from 'react';
-import { 
-  AppLayout, 
-  GlobalProvider, 
-  ThemeProvider,
-  TenantDebug 
-} from '@luxgen/ui';
+import { AppLayout, GlobalProvider, ThemeProvider, TenantDebug } from '@luxgen/ui';
 
 const MyPage = () => {
   const handleUserAction = (action) => {
@@ -330,15 +322,15 @@ const MyPage = () => {
       title: 'Main',
       items: [
         { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
-        { id: 'users', label: 'Users', href: '/users' }
-      ]
-    }
+        { id: 'users', label: 'Users', href: '/users' },
+      ],
+    },
   ];
 
   const user = {
     name: 'John Doe',
     email: 'john@example.com',
-    role: 'Admin'
+    role: 'Admin',
   };
 
   return (

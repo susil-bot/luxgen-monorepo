@@ -1,0 +1,8 @@
+import type { GraphQLContext } from '../../../context';
+import { courseProgressPercentService } from '../../../services/courseProgressPercentService';
+export const CourseProgressPercentResolvers = {
+  Query: {
+    courseProgressPercent: async (_: unknown, { courseId }: { courseId: string }, ctx: GraphQLContext) =>
+      courseProgressPercentService.get(courseId, ctx.user?._id?.toString?.() ?? ''),
+  },
+};

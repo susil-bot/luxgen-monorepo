@@ -1,68 +1,40 @@
 import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
 import { useEffect } from 'react';
-import { useGlobalContext } from '@luxgen/ui';
-import { Header } from '../components/layout/Header';
-import { Footer } from '../components/layout/Footer';
+
+import { SimpleHomeWelcome } from '../components/storefront/SimpleHomeWelcome';
+import { PageLoadingState } from '../components/common/PageStates';
+import { learnStoreServerProps } from '../lib/learn-store';
+import { useClientMounted } from '../lib/use-client-mounted';
+import { isStoredSessionExpired } from '../lib/session';
 
 interface HomeProps {
-  tenant: string | null;
+  tenantSubdomain: string;
 }
 
-export default function Home({ tenant }: HomeProps) {
+function hasActiveSession(): boolean {
+  if (typeof window === 'undefined') return false;
+  return Boolean(localStorage.getItem('authToken')) && !isStoredSessionExpired();
+}
+
+export default function Home({ tenantSubdomain }: HomeProps) {
   const router = useRouter();
-  const { isInitialized, currentTenant } = useGlobalContext();
+  const mounted = useClientMounted();
 
   useEffect(() => {
-    if (isInitialized && currentTenant && currentTenant !== 'demo') {
-      router.push('/dashboard');
+    if (mounted && hasActiveSession()) {
+      void router.replace('/dashboard');
     }
-  }, [isInitialized, currentTenant, router]);
+  }, [mounted, router]);
 
-  if (!isInitialized) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-500"></div>
-      </div>
-    );
+  if (!mounted) {
+    return <PageLoadingState label="Loading…" />;
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-      <main className="container mx-auto px-4 py-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Welcome to LuxGen
-          </h1>
-          <p className="text-xl text-gray-600 mb-8">
-            Your multi-tenant learning management system
-          </p>
-          <div className="space-x-4">
-            <button 
-              onClick={() => router.push('/dashboard')}
-              className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
-            >
-              Get Started
-            </button>
-            <button className="border border-gray-300 text-gray-700 px-6 py-3 rounded-lg hover:bg-gray-50">
-              Learn More
-            </button>
-          </div>
-        </div>
-      </main>
-      <Footer />
-    </div>
-  );
+  return <SimpleHomeWelcome tenantName={tenantSubdomain} />;
 }
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
-  const host = context.req.headers.host;
-  const tenant = host?.split('.')[0] || null;
-
-  return {
-    props: {
-      tenant,
-    },
-  };
+  const { props } = learnStoreServerProps(context);
+  return { props };
 };

@@ -1,6 +1,6 @@
 /**
  * Idea Vibes Tenant Database Model
- * 
+ *
  * This file contains the database model and operations
  * specific to the Idea Vibes tenant.
  */
@@ -19,30 +19,35 @@ export interface IdeaVibesTenantDocument extends Document {
   updatedAt: Date;
 }
 
-const ideaVibesTenantSchema = new Schema<IdeaVibesTenantDocument>({
-  tenantId: {
-    type: String,
-    required: true,
-    unique: true,
-    default: 'idea-vibes'
-  },
-  customSettings: {
-    theme: {
+const ideaVibesTenantSchema = new Schema<IdeaVibesTenantDocument>(
+  {
+    tenantId: {
       type: String,
-      default: 'creative'
+      required: true,
+      unique: true,
+      default: 'idea-vibes',
     },
-    features: [{
-      type: String,
-      enum: ['analytics', 'reporting', 'notifications', 'userManagement', 'creativeMode']
-    }],
-    creativeMode: {
-      type: Boolean,
-      default: true
-    }
-  }
-}, {
-  timestamps: true
-});
+    customSettings: {
+      theme: {
+        type: String,
+        default: 'creative',
+      },
+      features: [
+        {
+          type: String,
+          enum: ['analytics', 'reporting', 'notifications', 'userManagement', 'creativeMode'],
+        },
+      ],
+      creativeMode: {
+        type: Boolean,
+        default: true,
+      },
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
 
 export const IdeaVibesTenant = model<IdeaVibesTenantDocument>('IdeaVibesTenant', ideaVibesTenantSchema);
 
@@ -56,7 +61,7 @@ export const ideaVibesTenantOperations = {
     return await IdeaVibesTenant.findOneAndUpdate(
       { tenantId },
       { customSettings: settings },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
   },
 
@@ -73,5 +78,5 @@ export const ideaVibesTenantOperations = {
   async isCreativeModeEnabled(tenantId: string) {
     const tenant = await IdeaVibesTenant.findOne({ tenantId });
     return tenant?.customSettings?.creativeMode || false;
-  }
+  },
 };

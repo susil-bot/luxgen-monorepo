@@ -32,7 +32,7 @@ describe('AssetImage', () => {
 
   it('renders image with correct attributes', () => {
     render(<AssetImage asset={mockAsset} />);
-    
+
     const img = screen.getByAltText('Test Image Alt');
     expect(img).toBeInTheDocument();
     expect(img).toHaveAttribute('src', '/test-image.jpg');
@@ -41,7 +41,7 @@ describe('AssetImage', () => {
 
   it('applies custom className', () => {
     render(<AssetImage asset={mockAsset} className="custom-class" />);
-    
+
     const img = screen.getByAltText('Test Image Alt');
     expect(img).toHaveClass('custom-class');
   });
@@ -49,23 +49,23 @@ describe('AssetImage', () => {
   it('applies custom style', () => {
     const customStyle = { width: '200px', height: '200px' };
     render(<AssetImage asset={mockAsset} style={customStyle} />);
-    
+
     const img = screen.getByAltText('Test Image Alt');
     expect(img).toHaveStyle(customStyle);
   });
 
   it('shows loading spinner initially', () => {
     render(<AssetImage asset={mockAsset} />);
-    
+
     expect(screen.getByRole('status', { hidden: true })).toBeInTheDocument();
   });
 
   it('shows fallback image on error', async () => {
     render(<AssetImage asset={mockAsset} fallback="/fallback.jpg" />);
-    
+
     const img = screen.getByAltText('Test Image Alt');
     fireEvent.error(img);
-    
+
     await waitFor(() => {
       const fallbackImg = screen.getByAltText('Test Image Alt');
       expect(fallbackImg).toHaveAttribute('src', '/fallback.jpg');
@@ -74,10 +74,10 @@ describe('AssetImage', () => {
 
   it('shows error message when no fallback provided', async () => {
     render(<AssetImage asset={mockAsset} />);
-    
+
     const img = screen.getByAltText('Test Image Alt');
     fireEvent.error(img);
-    
+
     await waitFor(() => {
       expect(screen.getByText('Image not found')).toBeInTheDocument();
     });
@@ -86,23 +86,23 @@ describe('AssetImage', () => {
   it('handles click events', () => {
     const handleClick = jest.fn();
     render(<AssetImage asset={mockAsset} onClick={handleClick} />);
-    
+
     const img = screen.getByAltText('Test Image Alt');
     fireEvent.click(img);
-    
+
     expect(handleClick).toHaveBeenCalledTimes(1);
   });
 
   it('applies loading attribute', () => {
     render(<AssetImage asset={mockAsset} loading="eager" />);
-    
+
     const img = screen.getByAltText('Test Image Alt');
     expect(img).toHaveAttribute('loading', 'eager');
   });
 
   it('applies sizes attribute', () => {
     render(<AssetImage asset={mockAsset} sizes="(max-width: 768px) 100vw, 50vw" />);
-    
+
     const img = screen.getByAltText('Test Image Alt');
     expect(img).toHaveAttribute('sizes', '(max-width: 768px) 100vw, 50vw');
   });
@@ -121,7 +121,7 @@ describe('AssetIcon', () => {
 
   it('renders icon with correct attributes', () => {
     render(<AssetIcon asset={mockAsset} />);
-    
+
     const img = screen.getByAltText('Test Icon Alt');
     expect(img).toBeInTheDocument();
     expect(img).toHaveAttribute('src', '/test-icon.svg');
@@ -129,28 +129,28 @@ describe('AssetIcon', () => {
 
   it('applies custom size', () => {
     render(<AssetIcon asset={mockAsset} size={32} />);
-    
+
     const img = screen.getByAltText('Test Icon Alt');
     expect(img).toHaveStyle({ width: '32px', height: '32px' });
   });
 
   it('applies custom size as string', () => {
     render(<AssetIcon asset={mockAsset} size="2rem" />);
-    
+
     const img = screen.getByAltText('Test Icon Alt');
     expect(img).toHaveStyle({ width: '2rem', height: '2rem' });
   });
 
   it('applies custom color', () => {
     render(<AssetIcon asset={mockAsset} color="#FF0000" />);
-    
+
     const img = screen.getByAltText('Test Icon Alt');
     expect(img).toHaveStyle({ color: '#FF0000' });
   });
 
   it('applies custom className', () => {
     render(<AssetIcon asset={mockAsset} className="custom-icon" />);
-    
+
     const img = screen.getByAltText('Test Icon Alt');
     expect(img).toHaveClass('custom-icon');
   });
@@ -160,9 +160,9 @@ describe('AssetIcon', () => {
       ...mockAsset,
       url: '/test-icon.png',
     };
-    
+
     render(<AssetIcon asset={nonSvgAsset} />);
-    
+
     expect(screen.getByText('Icon')).toBeInTheDocument();
   });
 });
@@ -198,7 +198,7 @@ describe('AssetLogo', () => {
 
   it('renders logo with correct attributes', () => {
     render(<AssetLogo brandAssets={mockBrandAssets} />);
-    
+
     const img = screen.getByAltText('Test Logo');
     expect(img).toBeInTheDocument();
     expect(img).toHaveAttribute('src', '/test-logo.svg');
@@ -220,9 +220,9 @@ describe('AssetLogo', () => {
         },
       },
     };
-    
+
     render(<AssetLogo brandAssets={brandAssetsWithSecondary} variant="secondary" />);
-    
+
     const img = screen.getByAltText('Test Logo Secondary');
     expect(img).toBeInTheDocument();
     expect(img).toHaveAttribute('src', '/test-logo-secondary.svg');
@@ -230,20 +230,20 @@ describe('AssetLogo', () => {
 
   it('applies custom size', () => {
     render(<AssetLogo brandAssets={mockBrandAssets} size={100} />);
-    
+
     const container = screen.getByAltText('Test Logo').parentElement;
     expect(container).toHaveStyle({ width: '100px', height: '100px' });
   });
 
   it('shows text when showText is true', () => {
     render(<AssetLogo brandAssets={mockBrandAssets} showText={true} />);
-    
+
     expect(screen.getByText('Test Logo')).toBeInTheDocument();
   });
 
   it('does not show text when showText is false', () => {
     render(<AssetLogo brandAssets={mockBrandAssets} showText={false} />);
-    
+
     expect(screen.queryByText('Test Logo')).not.toBeInTheDocument();
   });
 
@@ -262,9 +262,9 @@ describe('AssetLogo', () => {
         },
       },
     };
-    
+
     render(<AssetLogo brandAssets={brandAssetsWithoutLogo} />);
-    
+
     expect(screen.getByText('Logo')).toBeInTheDocument();
   });
 });
@@ -282,7 +282,7 @@ describe('AssetBackground', () => {
 
   it('renders background with correct style', () => {
     render(<AssetBackground asset={mockAsset} />);
-    
+
     const div = screen.getByRole('img', { hidden: true });
     expect(div).toHaveStyle({
       backgroundImage: 'url(/test-background.jpg)',
@@ -294,7 +294,7 @@ describe('AssetBackground', () => {
 
   it('applies custom className', () => {
     render(<AssetBackground asset={mockAsset} className="custom-bg" />);
-    
+
     const div = screen.getByRole('img', { hidden: true });
     expect(div).toHaveClass('custom-bg');
   });
@@ -302,21 +302,14 @@ describe('AssetBackground', () => {
   it('applies custom style', () => {
     const customStyle = { opacity: 0.5 };
     render(<AssetBackground asset={mockAsset} style={customStyle} />);
-    
+
     const div = screen.getByRole('img', { hidden: true });
     expect(div).toHaveStyle(customStyle);
   });
 
   it('renders overlay when enabled', () => {
-    render(
-      <AssetBackground 
-        asset={mockAsset} 
-        overlay={true}
-        overlayColor="black"
-        overlayOpacity={0.5}
-      />
-    );
-    
+    render(<AssetBackground asset={mockAsset} overlay={true} overlayColor="black" overlayOpacity={0.5} />);
+
     const overlay = screen.getByRole('img', { hidden: true }).querySelector('.absolute');
     expect(overlay).toBeInTheDocument();
     expect(overlay).toHaveStyle({
@@ -327,7 +320,7 @@ describe('AssetBackground', () => {
 
   it('does not render overlay when disabled', () => {
     render(<AssetBackground asset={mockAsset} overlay={false} />);
-    
+
     const overlay = screen.getByRole('img', { hidden: true }).querySelector('.absolute');
     expect(overlay).not.toBeInTheDocument();
   });

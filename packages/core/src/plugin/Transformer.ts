@@ -18,7 +18,7 @@ export interface Transformer {
  */
 export function createTransformer(
   path: string,
-  transform: (workflowContext: WorkflowContext) => Promise<any> | any
+  transform: (workflowContext: WorkflowContext) => Promise<any> | any,
 ): Transformer {
   return {
     path,
@@ -34,12 +34,7 @@ export function createTransformer(
  * @param end - End index
  * @returns Transformer instance
  */
-export function createSliceTransformer(
-  path: string,
-  sourcePath: string,
-  start: number,
-  end?: number
-): Transformer {
+export function createSliceTransformer(path: string, sourcePath: string, start: number, end?: number): Transformer {
   return createTransformer(path, (workflowContext) => {
     const sourceData = workflowContext.fetched[sourcePath];
     if (!Array.isArray(sourceData)) {
@@ -59,7 +54,7 @@ export function createSliceTransformer(
 export function createFilterTransformer(
   path: string,
   sourcePath: string,
-  filterFn: (item: any) => boolean
+  filterFn: (item: any) => boolean,
 ): Transformer {
   return createTransformer(path, (workflowContext) => {
     const sourceData = workflowContext.fetched[sourcePath];
@@ -77,11 +72,7 @@ export function createFilterTransformer(
  * @param mapFn - The map function
  * @returns Transformer instance
  */
-export function createMapTransformer(
-  path: string,
-  sourcePath: string,
-  mapFn: (item: any) => any
-): Transformer {
+export function createMapTransformer(path: string, sourcePath: string, mapFn: (item: any) => any): Transformer {
   return createTransformer(path, (workflowContext) => {
     const sourceData = workflowContext.fetched[sourcePath];
     if (!Array.isArray(sourceData)) {
@@ -101,7 +92,7 @@ export function createMapTransformer(
 export function createSortTransformer(
   path: string,
   sourcePath: string,
-  sortFn: (a: any, b: any) => number
+  sortFn: (a: any, b: any) => number,
 ): Transformer {
   return createTransformer(path, (workflowContext) => {
     const sourceData = workflowContext.fetched[sourcePath];
@@ -119,25 +110,24 @@ export function createSortTransformer(
  * @param groupBy - The group by function
  * @returns Transformer instance
  */
-export function createGroupTransformer(
-  path: string,
-  sourcePath: string,
-  groupBy: (item: any) => string
-): Transformer {
+export function createGroupTransformer(path: string, sourcePath: string, groupBy: (item: any) => string): Transformer {
   return createTransformer(path, (workflowContext) => {
     const sourceData = workflowContext.fetched[sourcePath];
     if (!Array.isArray(sourceData)) {
       throw new Error(`Source data at ${sourcePath} is not an array`);
     }
-    
-    return sourceData.reduce((groups, item) => {
-      const key = groupBy(item);
-      if (!groups[key]) {
-        groups[key] = [];
-      }
-      groups[key].push(item);
-      return groups;
-    }, {} as Record<string, any[]>);
+
+    return sourceData.reduce(
+      (groups, item) => {
+        const key = groupBy(item);
+        if (!groups[key]) {
+          groups[key] = [];
+        }
+        groups[key].push(item);
+        return groups;
+      },
+      {} as Record<string, any[]>,
+    );
   });
 }
 
@@ -151,7 +141,7 @@ export function createGroupTransformer(
 export function createAggregateTransformer(
   path: string,
   sourcePath: string,
-  aggregateFn: (data: any[]) => any
+  aggregateFn: (data: any[]) => any,
 ): Transformer {
   return createTransformer(path, (workflowContext) => {
     const sourceData = workflowContext.fetched[sourcePath];
@@ -169,11 +159,7 @@ export function createAggregateTransformer(
  * @param formatFn - The format function
  * @returns Transformer instance
  */
-export function createFormatTransformer(
-  path: string,
-  sourcePath: string,
-  formatFn: (data: any) => any
-): Transformer {
+export function createFormatTransformer(path: string, sourcePath: string, formatFn: (data: any) => any): Transformer {
   return createTransformer(path, (workflowContext) => {
     const sourceData = workflowContext.fetched[sourcePath];
     return formatFn(sourceData);
@@ -190,10 +176,10 @@ export function createFormatTransformer(
 export function createCombineTransformer(
   path: string,
   sourcePaths: string[],
-  combineFn: (...data: any[]) => any
+  combineFn: (...data: any[]) => any,
 ): Transformer {
   return createTransformer(path, (workflowContext) => {
-    const sourceData = sourcePaths.map(sourcePath => workflowContext.fetched[sourcePath]);
+    const sourceData = sourcePaths.map((sourcePath) => workflowContext.fetched[sourcePath]);
     return combineFn(...sourceData);
   });
 }
@@ -208,16 +194,16 @@ export function createCombineTransformer(
 export function createValidationTransformer(
   path: string,
   sourcePath: string,
-  validationFn: (data: any) => boolean
+  validationFn: (data: any) => boolean,
 ): Transformer {
   return createTransformer(path, (workflowContext) => {
     const sourceData = workflowContext.fetched[sourcePath];
     const isValid = validationFn(sourceData);
-    
+
     if (!isValid) {
       throw new Error(`Validation failed for data at ${sourcePath}`);
     }
-    
+
     return sourceData;
   });
 }

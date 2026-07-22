@@ -1,1 +1,1 @@
-export const PageWrapperTranslations = { en: { title: "PageWrapper" } };
+export const PageWrapperTranslations = { en: { title: 'PageWrapper' } };

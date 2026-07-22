@@ -210,7 +210,5 @@ packages/core/src/plugin/
 - **Environment setup** documentation
 
 ### Code Quality Tools
-- **ESLint** with strict rules
-- **Prettier** for formatting
-- **Husky** for git hooks
+- **Oxlint + Oxfmt** for lint/format (replaces ESLint + Prettier at root)
 - **lint-staged** for pre-commit checks

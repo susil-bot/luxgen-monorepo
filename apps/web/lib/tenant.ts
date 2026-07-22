@@ -1,3 +1,5 @@
+import { getWebUrl, getTenantWebOrigin } from './urls';
+
 export interface Tenant {
   id: string;
   name: string;
@@ -7,8 +9,12 @@ export interface Tenant {
 }
 
 export const getTenantFromHost = (host: string): string => {
-  const subdomain = host.split('.')[0];
-  return subdomain === 'www' || subdomain === 'localhost' ? 'default' : subdomain;
+  const hostname = host.split(':')[0];
+  const subdomain = hostname.split('.')[0];
+  if (subdomain === 'www' || subdomain === 'localhost' || subdomain === '127.0.0.1') {
+    return 'default';
+  }
+  return subdomain;
 };
 
 export const getTenantFromUrl = (url: string): string => {
@@ -31,13 +37,8 @@ export const isMultiTenant = (): boolean => {
 };
 
 export const getTenantUrl = (tenant: string, path: string = ''): string => {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
-  const protocol = baseUrl.startsWith('https') ? 'https' : 'http';
-  const domain = baseUrl.replace(/^https?:\/\//, '');
-  
   if (tenant === 'default') {
-    return `${protocol}://${domain}${path}`;
+    return `${getWebUrl()}${path}`;
   }
-  
-  return `${protocol}://${tenant}.${domain}${path}`;
+  return `${getTenantWebOrigin(tenant)}${path}`;
 };

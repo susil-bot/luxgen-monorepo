@@ -9,7 +9,7 @@ export const textStyles = {
       line-height: 1.5;
     }
   `,
-  
+
   variants: {
     caption: css`
       .text-caption {
@@ -50,7 +50,7 @@ export const textStyles = {
       }
     `,
   },
-  
+
   weights: {
     light: css`
       .text-light {
@@ -78,7 +78,7 @@ export const textStyles = {
       }
     `,
   },
-  
+
   alignments: {
     left: css`
       .text-left {
@@ -101,7 +101,7 @@ export const textStyles = {
       }
     `,
   },
-  
+
   colors: {
     primary: css`
       .text-primary {
@@ -134,7 +134,7 @@ export const textStyles = {
       }
     `,
   },
-  
+
   truncate: css`
     .text-truncate {
       overflow: hidden;
@@ -142,31 +142,31 @@ export const textStyles = {
       white-space: nowrap;
     }
   `,
-  
+
   responsive: css`
     @media (max-width: 768px) {
       .text-lead {
         font-size: 1.125rem;
       }
-      
+
       .text-large {
         font-size: 1rem;
       }
     }
   `,
-  
+
   darkMode: css`
     @media (prefers-color-scheme: dark) {
       .text {
-        color: #F9FAFB;
+        color: #f9fafb;
       }
-      
+
       .text-muted {
-        color: #9CA3AF;
+        color: #9ca3af;
       }
-      
+
       .text-caption {
-        color: #9CA3AF;
+        color: #9ca3af;
       }
     }
   `,

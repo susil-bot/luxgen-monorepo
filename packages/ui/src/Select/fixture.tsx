@@ -11,7 +11,7 @@ export const selectFixtures = {
     ],
     placeholder: 'Select an option...',
   } as SelectProps,
-  
+
   withLabel: {
     tenantTheme: defaultTheme,
     options: [
@@ -23,7 +23,7 @@ export const selectFixtures = {
     label: 'Choose Option',
     required: true,
   } as SelectProps,
-  
+
   withError: {
     tenantTheme: defaultTheme,
     options: [
@@ -34,7 +34,7 @@ export const selectFixtures = {
     label: 'Choose Option',
     error: 'This field is required',
   } as SelectProps,
-  
+
   withHelperText: {
     tenantTheme: defaultTheme,
     options: [
@@ -45,7 +45,7 @@ export const selectFixtures = {
     label: 'Choose Option',
     helperText: 'Please select an option from the list',
   } as SelectProps,
-  
+
   multiSelect: {
     tenantTheme: defaultTheme,
     options: [
@@ -58,7 +58,7 @@ export const selectFixtures = {
     label: 'Choose Options',
     multi: true,
   } as SelectProps,
-  
+
   searchable: {
     tenantTheme: defaultTheme,
     options: [
@@ -72,7 +72,7 @@ export const selectFixtures = {
     label: 'Choose Fruit',
     searchable: true,
   } as SelectProps,
-  
+
   disabled: {
     tenantTheme: defaultTheme,
     options: [
@@ -83,7 +83,7 @@ export const selectFixtures = {
     label: 'Choose Option',
     disabled: true,
   } as SelectProps,
-  
+
   withCustomTheme: {
     tenantTheme: {
       ...defaultTheme,
@@ -100,7 +100,7 @@ export const selectFixtures = {
     placeholder: 'Select an option...',
     label: 'Choose Option',
   } as SelectProps,
-  
+
   withDisabledOptions: {
     tenantTheme: defaultTheme,
     options: [
@@ -111,7 +111,7 @@ export const selectFixtures = {
     placeholder: 'Select an option...',
     label: 'Choose Option',
   } as SelectProps,
-  
+
   clearable: {
     tenantTheme: defaultTheme,
     options: [

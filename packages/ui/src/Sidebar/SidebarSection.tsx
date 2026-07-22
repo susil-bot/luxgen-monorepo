@@ -51,19 +51,11 @@ const SidebarSectionComponent: React.FC<SidebarSectionProps> = ({
       {/* Section Header */}
       {section.title && !isCollapsed && (
         <div className={getHeaderStyles()}>
-          <h3 className={getTitleStyles()}>
-            {section.title}
-          </h3>
+          <h3 className={getTitleStyles()}>{section.title}</h3>
           {section.collapsible !== false && (
-            <button
-              onClick={onToggle}
-              className={getToggleStyles()}
-              aria-label={`Toggle ${section.title} section`}
-            >
+            <button onClick={onToggle} className={getToggleStyles()} aria-label={`Toggle ${section.title} section`}>
               <svg
-                className={`h-4 w-4 transition-transform duration-200 ${
-                  isExpanded ? 'rotate-180' : ''
-                }`}
+                className={`h-4 w-4 transition-transform duration-200 ${isExpanded ? 'rotate-180' : ''}`}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"

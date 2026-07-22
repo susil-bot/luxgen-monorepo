@@ -55,9 +55,9 @@ export interface ClickableProps {
   onClick?: (e: React.MouseEvent) => void;
 }
 
-export interface BaseFormProps {
-  onChange?: (value: any) => void;
-  value?: any;
+export interface BaseFormProps<T = string> {
+  onChange?: (value: T) => void;
+  value?: T;
   error?: string;
   placeholder?: string;
 }

@@ -7,7 +7,7 @@ export const gridContainerStyles = {
       width: 100%;
     }
   `,
-  
+
   responsive: css`
     @media (max-width: 768px) {
       .grid-container {
@@ -15,14 +15,14 @@ export const gridContainerStyles = {
         gap: 0.5rem !important;
       }
     }
-    
+
     @media (min-width: 769px) and (max-width: 1024px) {
       .grid-container {
         grid-template-columns: repeat(2, 1fr) !important;
         gap: 1rem !important;
       }
     }
-    
+
     @media (min-width: 1025px) {
       .grid-container {
         grid-template-columns: repeat(3, 1fr) !important;
@@ -30,31 +30,31 @@ export const gridContainerStyles = {
       }
     }
   `,
-  
+
   autoFit: css`
     .grid-container.auto-fit {
       grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     }
   `,
-  
+
   autoFill: css`
     .grid-container.auto-fill {
       grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     }
   `,
-  
+
   masonry: css`
     .grid-container.masonry {
       column-count: 3;
       column-gap: 1rem;
     }
-    
+
     .grid-container.masonry > * {
       break-inside: avoid;
       margin-bottom: 1rem;
     }
   `,
-  
+
   gapVariants: {
     none: css`
       .grid-container.gap-none {
@@ -82,7 +82,7 @@ export const gridContainerStyles = {
       }
     `,
   },
-  
+
   columnVariants: {
     1: css`
       .grid-container.cols-1 {

@@ -62,21 +62,21 @@ import { RadioGroup } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `options` | `RadioOption[]` | `[]` | Array of radio options |
-| `name` | `string` | - | Name attribute for radio inputs |
-| `value` | `string | number` | - | Current selected value |
-| `onChange` | `(value: string | number) => void` | - | Change handler |
-| `disabled` | `boolean` | `false` | Disabled state |
-| `required` | `boolean` | `false` | Required field |
-| `orientation` | `'horizontal' | 'vertical'` | `'vertical'` | Layout orientation |
-| `label` | `string` | - | Label text |
-| `helperText` | `string` | - | Helper text |
-| `error` | `string` | - | Error message |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
+| Prop          | Type            | Default          | Description                     |
+| ------------- | --------------- | ---------------- | ------------------------------- | ---------------------- |
+| `tenantTheme` | `TenantTheme`   | `defaultTheme`   | Theme object for styling        |
+| `options`     | `RadioOption[]` | `[]`             | Array of radio options          |
+| `name`        | `string`        | -                | Name attribute for radio inputs |
+| `value`       | `string         | number`          | -                               | Current selected value |
+| `onChange`    | `(value: string | number) => void` | -                               | Change handler         |
+| `disabled`    | `boolean`       | `false`          | Disabled state                  |
+| `required`    | `boolean`       | `false`          | Required field                  |
+| `orientation` | `'horizontal'   | 'vertical'`      | `'vertical'`                    | Layout orientation     |
+| `label`       | `string`        | -                | Label text                      |
+| `helperText`  | `string`        | -                | Helper text                     |
+| `error`       | `string`        | -                | Error message                   |
+| `className`   | `string`        | `''`             | Additional CSS classes          |
+| `style`       | `CSSProperties` | `{}`             | Inline styles                   |
 
 ## RadioOption Interface
 
@@ -127,6 +127,7 @@ The component uses CSS custom properties for theming:
 ## Orientation
 
 ### Vertical (Default)
+
 ```tsx
 <RadioGroup
   name="preference"
@@ -138,6 +139,7 @@ The component uses CSS custom properties for theming:
 ```
 
 ### Horizontal
+
 ```tsx
 <RadioGroup
   name="preference"
@@ -168,16 +170,9 @@ test('renders with options', () => {
     { value: 'option1', label: 'Option 1' },
     { value: 'option2', label: 'Option 2' },
   ];
-  
-  render(
-    <RadioGroup
-      name="test"
-      options={options}
-      value="option1"
-      onChange={() => {}}
-    />
-  );
-  
+
+  render(<RadioGroup name="test" options={options} value="option1" onChange={() => {}} />);
+
   expect(screen.getByText('Option 1')).toBeInTheDocument();
   expect(screen.getByText('Option 2')).toBeInTheDocument();
 });
@@ -188,19 +183,12 @@ test('calls onChange when option is selected', () => {
     { value: 'option1', label: 'Option 1' },
     { value: 'option2', label: 'Option 2' },
   ];
-  
-  render(
-    <RadioGroup
-      name="test"
-      options={options}
-      value="option1"
-      onChange={mockOnChange}
-    />
-  );
-  
+
+  render(<RadioGroup name="test" options={options} value="option1" onChange={mockOnChange} />);
+
   const radio2 = screen.getByDisplayValue('option2');
   fireEvent.click(radio2);
-  
+
   expect(mockOnChange).toHaveBeenCalledWith('option2');
 });
 ```
@@ -208,6 +196,7 @@ test('calls onChange when option is selected', () => {
 ## Examples
 
 ### Basic Radio Group
+
 ```tsx
 <RadioGroup
   name="size"
@@ -222,6 +211,7 @@ test('calls onChange when option is selected', () => {
 ```
 
 ### Radio Group with Validation
+
 ```tsx
 <RadioGroup
   name="payment"
@@ -236,6 +226,7 @@ test('calls onChange when option is selected', () => {
 ```
 
 ### Horizontal Radio Group
+
 ```tsx
 <RadioGroup
   name="theme"
@@ -248,6 +239,7 @@ test('calls onChange when option is selected', () => {
 ```
 
 ### Disabled Radio Group
+
 ```tsx
 <RadioGroup
   name="preference"
@@ -260,6 +252,7 @@ test('calls onChange when option is selected', () => {
 ```
 
 ### Radio Group with Custom Theme
+
 ```tsx
 <RadioGroup
   tenantTheme={customTheme}

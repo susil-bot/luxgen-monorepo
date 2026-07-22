@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
+import './product-card.css';
 import { BaseComponentProps, TenantTheme } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
-import { 
-  getProductCardStyles, 
-  getProgressColor, 
-  getTagColor,
-  productCardClasses,
-  productCardCSS 
-} from './styles';
+import { getProductCardStyles, getProgressColor, getTagColor, productCardClasses } from './styles';
 
 export interface ProductCardProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
@@ -76,28 +71,17 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
     onViewDetails?.(product.id);
   };
 
-  const styles = getProductCardStyles(
-    tenantTheme,
-    variant,
-    product.tagColor,
-    product.progress?.scoreColor,
-    isLiked
-  );
+  const styles = getProductCardStyles(tenantTheme, variant, product.tagColor, product.progress?.scoreColor, isLiked);
 
   return (
-    <>
-      <style>{productCardCSS}</style>
-      <div
-        className={`${productCardClasses.card} product-card-${variant} ${className}`}
-        style={styles.card}
-        onClick={handleViewDetails}
-        {...props}
-      >
+    <div
+      className={`${productCardClasses.card} product-card-${variant} ${className}`}
+      style={styles.card}
+      onClick={handleViewDetails}
+      {...props}
+    >
       {/* Image Section */}
-      <div
-        className={productCardClasses.imageContainer}
-        style={styles.imageContainer}
-      >
+      <div className={productCardClasses.imageContainer} style={styles.imageContainer}>
         {!imageError ? (
           <img
             src={product.image}
@@ -107,10 +91,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
             onError={() => setImageError(true)}
           />
         ) : (
-          <div
-            className={productCardClasses.imagePlaceholder}
-            style={styles.imagePlaceholder}
-          >
+          <div className={productCardClasses.imagePlaceholder} style={styles.imagePlaceholder}>
             📷
           </div>
         )}
@@ -128,8 +109,8 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
             width="16"
             height="16"
             viewBox="0 0 24 24"
-            fill={isLiked ? '#EF4444' : 'none'}
-            stroke={isLiked ? '#EF4444' : '#6B7280'}
+            fill={isLiked ? 'var(--color-red)' : 'none'}
+            stroke={isLiked ? 'var(--color-red)' : 'var(--color-label-tertiary)'}
             strokeWidth="2"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -140,10 +121,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
       </div>
 
       {/* Content Section */}
-      <div
-        className={productCardClasses.content}
-        style={styles.content}
-      >
+      <div className={productCardClasses.content} style={styles.content}>
         {/* Tag */}
         {product.tag && (
           <div
@@ -158,37 +136,27 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
         )}
 
         {/* Title */}
-        <h3
-          className={productCardClasses.title}
-          style={styles.title}
-        >
+        <h3 className={productCardClasses.title} style={styles.title}>
           {product.title}
         </h3>
 
         {/* Progress Indicators */}
         {showProgress && product.progress && (
-          <div
-            className={productCardClasses.progress}
-            style={styles.progress}
-          >
+          <div className={productCardClasses.progress} style={styles.progress}>
             <div style={styles.progressItem}>
               <div style={styles.progressDot} />
-              <span style={styles.progressText}>
-                {product.progress.status}
-              </span>
+              <span style={styles.progressText}>{product.progress.status}</span>
             </div>
-            
+
             {product.progress.score !== undefined && (
               <div style={styles.progressItem}>
-                <div 
+                <div
                   style={{
                     ...styles.progressDot,
                     backgroundColor: getProgressColor(product.progress.score, product.progress.scoreColor),
                   }}
                 />
-                <span style={styles.progressText}>
-                  score: {product.progress.score}%
-                </span>
+                <span style={styles.progressText}>score: {product.progress.score}%</span>
               </div>
             )}
           </div>
@@ -196,34 +164,16 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
 
         {/* Price Section */}
         {showPrice && (product.price || product.originalPrice) && (
-          <div
-            className={productCardClasses.price}
-            style={styles.price}
-          >
-            {product.price && (
-              <span style={styles.currentPrice}>
-                {product.price}
-              </span>
-            )}
-            {product.originalPrice && (
-              <span style={styles.originalPrice}>
-                {product.originalPrice}
-              </span>
-            )}
-            {product.discount && (
-              <span style={styles.discount}>
-                -{product.discount}%
-              </span>
-            )}
+          <div className={productCardClasses.price} style={styles.price}>
+            {product.price && <span style={styles.currentPrice}>{product.price}</span>}
+            {product.originalPrice && <span style={styles.originalPrice}>{product.originalPrice}</span>}
+            {product.discount && <span style={styles.discount}>-{product.discount}%</span>}
           </div>
         )}
 
         {/* Actions */}
         {showActions && (
-          <div
-            className={productCardClasses.actions}
-            style={styles.actions}
-          >
+          <div className={productCardClasses.actions} style={styles.actions}>
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -234,7 +184,7 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
             >
               Edit Product
             </button>
-            
+
             {onAddToCart && (
               <button
                 onClick={(e) => {
@@ -251,7 +201,6 @@ const ProductCardComponent: React.FC<ProductCardProps> = ({
         )}
       </div>
     </div>
-    </>
   );
 };
 

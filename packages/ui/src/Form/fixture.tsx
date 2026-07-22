@@ -24,7 +24,7 @@ export const formFixtures = {
       </>
     ),
   } as FormComponentProps,
-  
+
   withValidation: {
     tenantTheme: defaultTheme,
     method: 'POST' as const,
@@ -48,7 +48,7 @@ export const formFixtures = {
       </>
     ),
   } as FormComponentProps,
-  
+
   withFileUpload: {
     tenantTheme: defaultTheme,
     method: 'POST' as const,
@@ -67,7 +67,7 @@ export const formFixtures = {
       </>
     ),
   } as FormComponentProps,
-  
+
   withCustomTheme: {
     tenantTheme: {
       ...defaultTheme,
@@ -93,7 +93,7 @@ export const formFixtures = {
       </>
     ),
   } as FormComponentProps,
-  
+
   withNoValidation: {
     tenantTheme: defaultTheme,
     method: 'POST' as const,
@@ -112,7 +112,7 @@ export const formFixtures = {
       </>
     ),
   } as FormComponentProps,
-  
+
   withGetMethod: {
     tenantTheme: defaultTheme,
     method: 'GET' as const,

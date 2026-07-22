@@ -1,1 +1,1 @@
-export const CheckboxTranslations = { en: { title: "Checkbox" } };
+export const CheckboxTranslations = { en: { title: 'Checkbox' } };

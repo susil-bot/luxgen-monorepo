@@ -44,14 +44,14 @@ import { GridContainer } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `columns` | `number` | `3` | Number of columns |
-| `gap` | `string` | `'1rem'` | Gap between grid items |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
-| `children` | `ReactNode` | - | Grid items to render |
+| Prop          | Type            | Default        | Description              |
+| ------------- | --------------- | -------------- | ------------------------ |
+| `tenantTheme` | `TenantTheme`   | `defaultTheme` | Theme object for styling |
+| `columns`     | `number`        | `3`            | Number of columns        |
+| `gap`         | `string`        | `'1rem'`       | Gap between grid items   |
+| `className`   | `string`        | `''`           | Additional CSS classes   |
+| `style`       | `CSSProperties` | `{}`           | Inline styles            |
+| `children`    | `ReactNode`     | -              | Grid items to render     |
 
 ## SSR Usage
 
@@ -111,9 +111,9 @@ test('renders with specified columns', () => {
     <GridContainer columns={2} gap="1rem">
       <div>Item 1</div>
       <div>Item 2</div>
-    </GridContainer>
+    </GridContainer>,
   );
-  
+
   const gridContainer = screen.getByText('Item 1').parentElement;
   expect(gridContainer).toHaveStyle('grid-template-columns: repeat(2, 1fr)');
   expect(gridContainer).toHaveStyle('gap: 1rem');
@@ -123,6 +123,7 @@ test('renders with specified columns', () => {
 ## Examples
 
 ### Basic Grid
+
 ```tsx
 <GridContainer columns={3} gap="1rem">
   <Card title="Card 1" />
@@ -132,6 +133,7 @@ test('renders with specified columns', () => {
 ```
 
 ### Responsive Grid
+
 ```tsx
 <GridContainer columns={4} gap="1.5rem">
   <ProductCard product={product1} />
@@ -142,6 +144,7 @@ test('renders with specified columns', () => {
 ```
 
 ### Single Column Layout
+
 ```tsx
 <GridContainer columns={1} gap="2rem">
   <ArticleCard article={article1} />
@@ -151,13 +154,9 @@ test('renders with specified columns', () => {
 ```
 
 ### Custom Styling
+
 ```tsx
-<GridContainer
-  columns={2}
-  gap="2rem"
-  className="custom-grid"
-  style={{ padding: '2rem' }}
->
+<GridContainer columns={2} gap="2rem" className="custom-grid" style={{ padding: '2rem' }}>
   <div>Custom Item 1</div>
   <div>Custom Item 2</div>
 </GridContainer>

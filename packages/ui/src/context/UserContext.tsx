@@ -1,6 +1,16 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { UserMenu } from '../NavBar/NavBar';
-import { fetchUserForTenant, getUserFromStorage, saveUserToStorage, clearUserFromStorage, updateUserForTenant, logoutUser } from '../services/userService';
+import {
+  fetchUserForTenant,
+  getUserFromStorage,
+  getSessionUserAsUserMenu,
+  saveUserToStorage,
+  clearUserFromStorage,
+  clearAuthSessionStorage,
+  hasValidAuthSession,
+  updateUserForTenant,
+  logoutUser,
+} from '../services/userService';
 
 interface UserContextType {
   user: UserMenu | null;
@@ -18,37 +28,53 @@ interface UserProviderProps {
   currentTenant: string;
 }
 
-export const UserProvider: React.FC<UserProviderProps> = ({
-  children,
-  currentTenant
-}) => {
+export const UserProvider: React.FC<UserProviderProps> = ({ children, currentTenant }) => {
   const [user, setUser] = useState<UserMenu | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load user data for current tenant
   const loadUser = async () => {
     try {
       setIsLoading(true);
       setError(null);
 
-      // First try to get user from storage
-      const storedUser = getUserFromStorage();
-      
-      // Check if stored user belongs to current tenant
-      if (storedUser && storedUser.tenant?.subdomain === currentTenant) {
-        console.log('👤 Using stored user for tenant:', currentTenant);
-        setUser(storedUser);
-      } else {
-        // Fetch new user data for tenant
-        console.log('👤 Fetching new user for tenant:', currentTenant);
-        const userData = await fetchUserForTenant(currentTenant);
-        setUser(userData);
-        saveUserToStorage(userData);
+      if (!hasValidAuthSession()) {
+        clearAuthSessionStorage();
+        setUser(null);
+        return;
       }
+
+      const sessionUser = getSessionUserAsUserMenu();
+      const storedUser = getUserFromStorage() ?? sessionUser;
+
+      if (storedUser) {
+        setUser(storedUser);
+        if (!getUserFromStorage() && sessionUser) {
+          saveUserToStorage(sessionUser);
+        }
+        return;
+      }
+
+      const tenantKey = sessionUser?.tenant?.subdomain ?? currentTenant;
+      const userData = await fetchUserForTenant(tenantKey);
+      setUser(userData);
+      saveUserToStorage(userData);
     } catch (err) {
+      if (err instanceof Error && err.message === 'UNAUTHENTICATED') {
+        clearAuthSessionStorage();
+        setUser(null);
+        return;
+      }
+
+      const fallback = getSessionUserAsUserMenu();
+      if (fallback) {
+        setUser(fallback);
+        saveUserToStorage(fallback);
+        return;
+      }
       console.error('Error loading user:', err);
       setError(err instanceof Error ? err.message : 'Failed to load user');
+      setUser(null);
     } finally {
       setIsLoading(false);
     }
@@ -61,7 +87,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // Use real API to update user data
       const updatedUser = await updateUserForTenant(currentTenant, updates);
       setUser(updatedUser);
@@ -79,7 +105,7 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // Use real API to logout
       await logoutUser(currentTenant);
       setUser(null);
@@ -99,11 +125,23 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     await loadUser();
   };
 
-  // Load user when tenant changes (with stability check)
+  // Load user when tenant changes or auth session updates
   useEffect(() => {
-    if (currentTenant) {
-      loadUser();
-    }
+    if (!currentTenant) return;
+
+    void loadUser();
+
+    const onAuthChange = () => {
+      void loadUser();
+    };
+
+    window.addEventListener('storage', onAuthChange);
+    window.addEventListener('luxgen-auth-change', onAuthChange);
+
+    return () => {
+      window.removeEventListener('storage', onAuthChange);
+      window.removeEventListener('luxgen-auth-change', onAuthChange);
+    };
   }, [currentTenant]);
 
   const contextValue: UserContextType = {
@@ -112,14 +150,10 @@ export const UserProvider: React.FC<UserProviderProps> = ({
     error,
     updateUser,
     logout,
-    refreshUser
+    refreshUser,
   };
 
-  return (
-    <UserContext.Provider value={contextValue}>
-      {children}
-    </UserContext.Provider>
-  );
+  return <UserContext.Provider value={contextValue}>{children}</UserContext.Provider>;
 };
 
 export const useUser = (): UserContextType => {

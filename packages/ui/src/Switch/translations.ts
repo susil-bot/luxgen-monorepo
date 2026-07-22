@@ -1,1 +1,1 @@
-export const SwitchTranslations = { en: { title: "Switch" } };
+export const SwitchTranslations = { en: { title: 'Switch' } };

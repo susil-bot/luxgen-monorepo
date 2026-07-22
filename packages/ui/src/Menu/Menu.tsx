@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { withSSR } from '../ssr';
 import { defaultTheme, TenantTheme } from '../theme';
 
@@ -152,7 +152,7 @@ const MenuComponent: React.FC<MenuProps> = ({
     const itemClasses = `
       ${styles.item}
       flex items-center justify-between
-      ${isActive ? 'bg-blue-100 text-blue-900 border-r-2 border-blue-500' : 'text-gray-700 hover:bg-gray-100'}
+      ${isActive ? 'bg-[color-mix(in_srgb,var(--color-blue)_10%,transparent)] text-primary border-r-2 border-[var(--color-blue)]' : 'text-gray-700 hover:bg-gray-100'}
       ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
       ${isHovered ? 'bg-gray-50' : ''}
       transition-colors duration-200
@@ -169,15 +169,9 @@ const MenuComponent: React.FC<MenuProps> = ({
           style={{ paddingLeft: `${depth * 16}px` }}
         >
           <div className="flex items-center space-x-3">
-            {showIcons && item.icon && (
-              <div className={`${styles.icon} flex-shrink-0`}>
-                {item.icon}
-              </div>
-            )}
-            
-            <span className="flex-1 truncate">
-              {item.label}
-            </span>
+            {showIcons && item.icon && <div className={`${styles.icon} flex-shrink-0`}>{item.icon}</div>}
+
+            <span className="flex-1 truncate">{item.label}</span>
 
             {showBadges && item.badge && (
               <span className={`${styles.badge} bg-blue-100 text-blue-800 rounded-full flex-shrink-0`}>
@@ -188,9 +182,7 @@ const MenuComponent: React.FC<MenuProps> = ({
             {canExpand && (
               <div className="flex-shrink-0">
                 <svg
-                  className={`w-4 h-4 transition-transform duration-200 ${
-                    isExpanded ? 'rotate-90' : ''
-                  }`}
+                  className={`w-4 h-4 transition-transform duration-200 ${isExpanded ? 'rotate-90' : ''}`}
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
@@ -204,9 +196,7 @@ const MenuComponent: React.FC<MenuProps> = ({
 
         {/* Submenu */}
         {canExpand && isExpanded && (
-          <div className="mt-1">
-            {item.children?.map((child) => renderMenuItem(child, depth + 1))}
-          </div>
+          <div className="mt-1">{item.children?.map((child) => renderMenuItem(child, depth + 1))}</div>
         )}
       </div>
     );
@@ -222,9 +212,7 @@ const MenuComponent: React.FC<MenuProps> = ({
         title={collapsed ? 'Expand menu' : 'Collapse menu'}
       >
         <svg
-          className={`w-4 h-4 transition-transform duration-200 ${
-            collapsed ? 'rotate-180' : ''
-          }`}
+          className={`w-4 h-4 transition-transform duration-200 ${collapsed ? 'rotate-180' : ''}`}
           fill="none"
           stroke="currentColor"
           viewBox="0 0 24 24"
@@ -241,9 +229,7 @@ const MenuComponent: React.FC<MenuProps> = ({
     return (
       <div className="flex items-center space-x-1 text-xs text-gray-500 mb-2">
         <span>Level {level}</span>
-        {level < maxLevel && (
-          <span className="text-gray-400">•</span>
-        )}
+        {level < maxLevel && <span className="text-gray-400">•</span>}
       </div>
     );
   };
@@ -261,23 +247,17 @@ const MenuComponent: React.FC<MenuProps> = ({
       {...props}
     >
       {renderLevelIndicator()}
-      
+
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-sm font-medium text-gray-900">
-          {collapsed ? 'Menu' : 'Navigation Menu'}
-        </h3>
+        <h3 className="text-sm font-medium text-gray-900">{collapsed ? 'Menu' : 'Navigation Menu'}</h3>
         {renderToggleButton()}
       </div>
 
-      <div className="space-y-1">
-        {items.map((item) => renderMenuItem(item))}
-      </div>
+      <div className="space-y-1">{items.map((item) => renderMenuItem(item))}</div>
 
       {collapsed && (
         <div className="mt-4 p-2 bg-gray-50 rounded-md">
-          <p className="text-xs text-gray-500 text-center">
-            Menu collapsed
-          </p>
+          <p className="text-xs text-gray-500 text-center">Menu collapsed</p>
         </div>
       )}
     </div>

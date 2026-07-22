@@ -7,19 +7,19 @@ export const radioGroupStyles = {
       flex-direction: column;
       gap: 0.5rem;
     }
-    
+
     .radio-group {
       display: flex;
       flex-direction: column;
       gap: 0.75rem;
     }
-    
+
     .radio-group.horizontal {
       flex-direction: row;
       gap: 1.5rem;
       flex-wrap: wrap;
     }
-    
+
     .radio-option {
       display: flex;
       align-items: center;
@@ -30,12 +30,12 @@ export const radioGroupStyles = {
       color: var(--color-text);
       transition: opacity 0.2s ease;
     }
-    
+
     .radio-option.disabled {
       cursor: not-allowed;
       opacity: 0.6;
     }
-    
+
     .radio-input {
       position: absolute;
       opacity: 0;
@@ -43,7 +43,7 @@ export const radioGroupStyles = {
       width: 0;
       height: 0;
     }
-    
+
     .radio-custom {
       position: relative;
       width: 1.25rem;
@@ -57,28 +57,28 @@ export const radioGroupStyles = {
       justify-content: center;
       flex-shrink: 0;
     }
-    
+
     .radio-custom:hover {
       border-color: var(--color-primary);
     }
-    
+
     .radio-custom.error {
       border-color: var(--color-error);
     }
-    
+
     .radio-input:checked + .radio-custom {
       border-color: var(--color-primary);
     }
-    
+
     .radio-input:checked + .radio-custom .radio-dot {
       display: block;
     }
-    
+
     .radio-input:focus + .radio-custom {
       outline: none;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
-    
+
     .radio-dot {
       width: 0.5rem;
       height: 0.5rem;
@@ -86,31 +86,31 @@ export const radioGroupStyles = {
       background-color: var(--color-primary);
       display: none;
     }
-    
+
     .radio-text {
       flex: 1;
       line-height: 1.5;
     }
-    
+
     .radio-group-label {
       font-weight: 500;
       color: var(--color-text);
       font-size: 0.875rem;
       margin-bottom: 0.25rem;
     }
-    
+
     .radio-group-required {
       color: var(--color-error);
       margin-left: 0.25rem;
     }
-    
+
     .radio-group-error {
       color: var(--color-error);
       font-size: 0.75rem;
       margin: 0;
       margin-top: 0.25rem;
     }
-    
+
     .radio-group-helper {
       color: var(--color-text-secondary);
       font-size: 0.75rem;
@@ -118,19 +118,19 @@ export const radioGroupStyles = {
       margin-top: 0.25rem;
     }
   `,
-  
+
   sizes: {
     sm: css`
       .radio-custom.radio-sm {
         width: 1rem;
         height: 1rem;
       }
-      
+
       .radio-dot.radio-sm {
         width: 0.375rem;
         height: 0.375rem;
       }
-      
+
       .radio-option.radio-sm {
         font-size: 0.75rem;
       }
@@ -140,12 +140,12 @@ export const radioGroupStyles = {
         width: 1.25rem;
         height: 1.25rem;
       }
-      
+
       .radio-dot.radio-md {
         width: 0.5rem;
         height: 0.5rem;
       }
-      
+
       .radio-option.radio-md {
         font-size: 0.875rem;
       }
@@ -155,25 +155,25 @@ export const radioGroupStyles = {
         width: 1.5rem;
         height: 1.5rem;
       }
-      
+
       .radio-dot.radio-lg {
         width: 0.625rem;
         height: 0.625rem;
       }
-      
+
       .radio-option.radio-lg {
         font-size: 1rem;
       }
     `,
   },
-  
+
   variants: {
     filled: css`
       .radio-custom.radio-filled {
         background-color: var(--color-surface);
         border: 2px solid transparent;
       }
-      
+
       .radio-custom.radio-filled:hover {
         background-color: var(--color-primary);
         border-color: var(--color-primary);
@@ -186,13 +186,13 @@ export const radioGroupStyles = {
       }
     `,
   },
-  
+
   states: {
     checked: css`
       .radio-input:checked + .radio-custom {
         border-color: var(--color-primary);
       }
-      
+
       .radio-input:checked + .radio-custom .radio-dot {
         display: block;
       }
@@ -204,45 +204,45 @@ export const radioGroupStyles = {
       }
     `,
   },
-  
+
   responsive: css`
     @media (max-width: 768px) {
       .radio-group.horizontal {
         flex-direction: column;
         gap: 0.75rem;
       }
-      
+
       .radio-option {
         font-size: 0.75rem;
       }
-      
+
       .radio-custom {
         width: 1.125rem;
         height: 1.125rem;
       }
-      
+
       .radio-dot {
         width: 0.375rem;
         height: 0.375rem;
       }
     }
   `,
-  
+
   darkMode: css`
     @media (prefers-color-scheme: dark) {
       .radio-custom {
-        background-color: #1F2937;
+        background-color: #1f2937;
         border-color: #374151;
       }
-      
+
       .radio-custom:hover {
         border-color: var(--color-primary);
       }
-      
+
       .radio-input:checked + .radio-custom {
         border-color: var(--color-primary);
       }
-      
+
       .radio-input:checked + .radio-custom .radio-dot {
         background-color: var(--color-primary);
       }

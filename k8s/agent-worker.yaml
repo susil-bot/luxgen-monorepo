@@ -1,0 +1,76 @@
+# LuxGen — Kubernetes manifest
+# Docs: k8s/README.md · docs/technical/README.md
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-worker
+  namespace: luxgen
+  labels:
+    app: agent-worker
+    component: worker
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: agent-worker
+  template:
+    metadata:
+      labels:
+        app: agent-worker
+        component: worker
+    spec:
+      containers:
+        - name: agent-worker
+          image: luxgen/agent-worker:latest
+          ports:
+            - containerPort: 9090
+              name: health
+          envFrom:
+            - configMapRef:
+                name: luxgen-config
+            - secretRef:
+                name: luxgen-secrets
+          env:
+            - name: HEALTH_PORT
+              value: '9090'
+            - name: AGENT_QUEUE_STALLED_INTERVAL_MS
+              value: '30000'
+            - name: AGENT_QUEUE_MAX_STALLED_COUNT
+              value: '1'
+            - name: OLLAMA_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: luxgen-config
+                  key: OLLAMA_HOST
+          resources:
+            requests:
+              memory: '512Mi'
+              cpu: '250m'
+            limits:
+              memory: '2Gi'
+              cpu: '1000m'
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 9090
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 9090
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /
+              port: 9090
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 12

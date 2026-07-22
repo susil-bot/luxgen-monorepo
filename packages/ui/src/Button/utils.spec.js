@@ -5,7 +5,7 @@ jest.mock('../../utils', () => ({
   getColorToken: (_, tokenName) => {
     if (tokenName === 'colors.interactive.base.white') return 'white';
     return null;
-  }
+  },
 }));
 
 jest.mock('./colors', () => ({
@@ -14,22 +14,22 @@ jest.mock('./colors', () => ({
       normal: {
         text: null,
         background: null,
-        border: null
+        border: null,
       },
       hover: {
-        text: null
+        text: null,
       },
       focus: {
-        text: null
+        text: null,
       },
       active: {
-        text: null
+        text: null,
       },
       disabled: {
-        text: null
-      }
-    }
-  }
+        text: null,
+      },
+    },
+  },
 }));
 
 describe('Utils', () => {

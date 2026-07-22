@@ -10,12 +10,12 @@ export const dashboardResolvers = {
 
         // Get basic stats
         const stats = await getDashboardStats(tenantId);
-        
+
         // Get chart data
         const userRetention = await getUserRetentionData(tenantId, '30d');
         const engagementBreakdown = await getEngagementBreakdown(tenantId);
         const engagementTrends = await getEngagementTrends(tenantId, 30);
-        
+
         // Get activity data
         const recentActivities = await getRecentActivities(tenantId, 10);
         const lastSurvey = await getLastSurvey(tenantId);
@@ -60,7 +60,11 @@ export const dashboardResolvers = {
       return getLastSurvey(tenant || context.tenant);
     },
 
-    getPermissionRequests: async (_: any, { tenant, status, limit }: { tenant?: string; status?: string; limit?: number }, context: any) => {
+    getPermissionRequests: async (
+      _: any,
+      { tenant, status, limit }: { tenant?: string; status?: string; limit?: number },
+      context: any,
+    ) => {
       return getPermissionRequests(tenant || context.tenant, status || 'all', limit || 10);
     },
   },
@@ -76,10 +80,10 @@ async function getDashboardStats(tenantId: string) {
     }
 
     // Get user counts
-    const totalUsers = await User.countDocuments({ tenant: tenant._id });
-    const activeUsers = await User.countDocuments({ 
-      tenant: tenant._id, 
-      isActive: true 
+    const _totalUsers = await User.countDocuments({ tenant: tenant._id });
+    const activeUsers = await User.countDocuments({
+      tenant: tenant._id,
+      isActive: true,
     });
 
     // Get group counts
@@ -114,22 +118,22 @@ async function getUserRetentionData(tenantId: string, period: string) {
   // Mock data for user retention
   const periods = period === '30d' ? 30 : 7;
   const data = [];
-  
+
   for (let i = periods - 1; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
-    
+
     data.push({
       period: date.toISOString().split('T')[0],
       retention: Math.random() * 40 + 50, // 50-90% retention
       users: Math.floor(Math.random() * 50) + 20, // 20-70 users
     });
   }
-  
+
   return data;
 }
 
-async function getEngagementBreakdown(tenantId: string) {
+async function getEngagementBreakdown(_tenantId: string) {
   return [
     { category: 'Active Learning', value: 45.2, color: '#3B82F6' },
     { category: 'Course Completion', value: 32.8, color: '#10B981' },
@@ -140,11 +144,11 @@ async function getEngagementBreakdown(tenantId: string) {
 
 async function getEngagementTrends(tenantId: string, days: number) {
   const data = [];
-  
+
   for (let i = days - 1; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
-    
+
     data.push({
       date: date.toISOString().split('T')[0],
       activeUsers: Math.floor(Math.random() * 30) + 20,
@@ -152,7 +156,7 @@ async function getEngagementTrends(tenantId: string, days: number) {
       newUsers: Math.floor(Math.random() * 8) + 2,
     });
   }
-  
+
   return data;
 }
 
@@ -218,7 +222,7 @@ async function getRecentActivities(tenantId: string, limit: number) {
   return activities.slice(0, limit);
 }
 
-async function getLastSurvey(tenantId: string) {
+async function getLastSurvey(_tenantId: string) {
   return {
     id: 'survey-1',
     title: 'Q1 2024 Employee Satisfaction Survey',
@@ -271,5 +275,5 @@ async function getPermissionRequests(tenantId: string, status: string, limit: nu
     return requests.slice(0, limit);
   }
 
-  return requests.filter(req => req.status === status).slice(0, limit);
+  return requests.filter((req) => req.status === status).slice(0, limit);
 }

@@ -1,0 +1,1 @@
+export const CartSessionTypeDefs = `type CartSessionItem{productId:ID!qty:Int!} type CartSession{sessionId:ID!items:[CartSessionItem!]!updatedAt:Date!} input CartSessionItemInput{productId:ID!qty:Int!} extend type Query{cartSession(sessionId:ID!):CartSession!} extend type Mutation{upsertCartSession(sessionId:ID!,items:[CartSessionItemInput!]!):CartSession!}`;

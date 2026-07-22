@@ -1,0 +1,18 @@
+# LuxGen — Kubernetes manifest
+# Docs: k8s/README.md · docs/technical/README.md
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: luxgen-config
+  namespace: luxgen
+data:
+  NODE_ENV: 'production'
+  PORT: '4000'
+  REDIS_URL: 'redis://redis-service:6379'
+  CORS_ORIGIN: 'https://luxgen.yourdomain.com'
+  NEXT_PUBLIC_API_URL: 'https://luxgen.yourdomain.com'
+  NEXT_PUBLIC_GRAPHQL_URL: 'https://luxgen.yourdomain.com/graphql'
+  NEXT_PUBLIC_APP_URL: 'https://luxgen.yourdomain.com'
+  NEXT_PUBLIC_APP_ENV: 'production'
+  OLLAMA_HOST: 'http://ollama-service:11434'

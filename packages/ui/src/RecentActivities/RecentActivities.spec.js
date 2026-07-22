@@ -10,22 +10,22 @@ describe('RecentActivities Component', () => {
       user: { name: 'John Doe', initials: 'JD' },
       action: 'Completed survey',
       time: '2 hours ago',
-      status: 'online'
+      status: 'online',
     },
     {
       id: '2',
       user: { name: 'Jane Smith', initials: 'JS' },
       action: 'Started training',
       time: '1 day ago',
-      status: 'offline'
+      status: 'offline',
     },
     {
       id: '3',
       user: { name: 'Bob Wilson', initials: 'BW' },
       action: 'Updated profile',
       time: '3 days ago',
-      status: 'online'
-    }
+      status: 'online',
+    },
   ];
 
   const defaultProps = {
@@ -33,7 +33,7 @@ describe('RecentActivities Component', () => {
     activities: defaultActivities,
     maxItems: 4,
     showStatus: true,
-    variant: 'default'
+    variant: 'default',
   };
 
   beforeEach(() => {
@@ -43,7 +43,7 @@ describe('RecentActivities Component', () => {
   describe('Rendering', () => {
     it('renders with default props', () => {
       render(<RecentActivities {...defaultProps} />);
-      
+
       expect(screen.getByText('Recent Activities')).toBeInTheDocument();
       expect(screen.getByText('John Doe')).toBeInTheDocument();
       expect(screen.getByText('Jane Smith')).toBeInTheDocument();
@@ -51,14 +51,14 @@ describe('RecentActivities Component', () => {
 
     it('renders with custom className', () => {
       render(<RecentActivities {...defaultProps} className="custom-class" />);
-      
+
       const container = screen.getByText('Recent Activities').closest('.recent-activities-container');
       expect(container).toHaveClass('custom-class');
     });
 
     it('renders empty state when no activities', () => {
       render(<RecentActivities {...defaultProps} activities={[]} />);
-      
+
       expect(screen.getByText('No recent activities')).toBeInTheDocument();
     });
   });
@@ -66,35 +66,35 @@ describe('RecentActivities Component', () => {
   describe('Activity Display', () => {
     it('displays user names', () => {
       render(<RecentActivities {...defaultProps} />);
-      
+
       expect(screen.getByText('John Doe')).toBeInTheDocument();
       expect(screen.getByText('Jane Smith')).toBeInTheDocument();
     });
 
     it('displays actions', () => {
       render(<RecentActivities {...defaultProps} />);
-      
+
       expect(screen.getByText('Completed survey')).toBeInTheDocument();
       expect(screen.getByText('Started training')).toBeInTheDocument();
     });
 
     it('displays timestamps', () => {
       render(<RecentActivities {...defaultProps} />);
-      
+
       expect(screen.getByText('2 hours ago')).toBeInTheDocument();
       expect(screen.getByText('1 day ago')).toBeInTheDocument();
     });
 
     it('shows status indicators when showStatus is true', () => {
       render(<RecentActivities {...defaultProps} showStatus={true} />);
-      
+
       const statusIndicators = screen.getAllByRole('status', { hidden: true });
       expect(statusIndicators.length).toBeGreaterThan(0);
     });
 
     it('hides status indicators when showStatus is false', () => {
       render(<RecentActivities {...defaultProps} showStatus={false} />);
-      
+
       const statusIndicators = screen.queryAllByRole('status', { hidden: true });
       expect(statusIndicators).toHaveLength(0);
     });
@@ -103,7 +103,7 @@ describe('RecentActivities Component', () => {
   describe('Max Items', () => {
     it('limits displayed activities to maxItems', () => {
       render(<RecentActivities {...defaultProps} maxItems={2} />);
-      
+
       expect(screen.getByText('John Doe')).toBeInTheDocument();
       expect(screen.getByText('Jane Smith')).toBeInTheDocument();
       expect(screen.queryByText('Bob Wilson')).not.toBeInTheDocument();
@@ -114,10 +114,10 @@ describe('RecentActivities Component', () => {
     it('calls onActivityClick when activity is clicked', async () => {
       const onActivityClick = jest.fn();
       render(<RecentActivities {...defaultProps} onActivityClick={onActivityClick} />);
-      
+
       const activity = screen.getByText('John Doe').closest('.recent-activities-item');
       await userEvent.click(activity);
-      
+
       expect(onActivityClick).toHaveBeenCalledWith(defaultActivities[0]);
     });
   });
@@ -125,13 +125,13 @@ describe('RecentActivities Component', () => {
   describe('Variants', () => {
     it('renders compact variant correctly', () => {
       render(<RecentActivities {...defaultProps} variant="compact" />);
-      
+
       expect(screen.getByText('Recent Activities')).toBeInTheDocument();
     });
 
     it('renders detailed variant correctly', () => {
       render(<RecentActivities {...defaultProps} variant="detailed" />);
-      
+
       expect(screen.getByText('Recent Activities')).toBeInTheDocument();
     });
   });
@@ -139,7 +139,7 @@ describe('RecentActivities Component', () => {
   describe('Avatar Generation', () => {
     it('generates initials from user name', () => {
       render(<RecentActivities {...defaultProps} />);
-      
+
       expect(screen.getByText('JD')).toBeInTheDocument();
       expect(screen.getByText('JS')).toBeInTheDocument();
     });
@@ -151,12 +151,12 @@ describe('RecentActivities Component', () => {
           user: { name: 'John Doe', initials: 'J' },
           action: 'Completed survey',
           time: '2 hours ago',
-          status: 'online'
-        }
+          status: 'online',
+        },
       ];
-      
+
       render(<RecentActivities {...defaultProps} activities={activitiesWithCustomInitials} />);
-      
+
       expect(screen.getByText('J')).toBeInTheDocument();
     });
   });
@@ -164,13 +164,13 @@ describe('RecentActivities Component', () => {
   describe('Accessibility', () => {
     it('has proper heading structure', () => {
       render(<RecentActivities {...defaultProps} />);
-      
+
       expect(screen.getByRole('heading', { level: 3 })).toHaveTextContent('Recent Activities');
     });
 
     it('has clickable activities', () => {
       render(<RecentActivities {...defaultProps} />);
-      
+
       const activities = screen.getAllByRole('button', { hidden: true });
       expect(activities.length).toBeGreaterThan(0);
     });
@@ -185,12 +185,12 @@ describe('RecentActivities Component', () => {
           action: 'Completed survey',
           time: '2 hours ago',
           status: 'online',
-          avatarColor: '#FF0000'
-        }
+          avatarColor: '#FF0000',
+        },
       ];
-      
+
       render(<RecentActivities {...defaultProps} activities={activitiesWithColors} />);
-      
+
       const container = screen.getByText('Recent Activities').closest('.recent-activities-container');
       expect(container).toBeInTheDocument();
     });

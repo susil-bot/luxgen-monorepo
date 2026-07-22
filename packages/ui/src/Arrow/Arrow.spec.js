@@ -130,10 +130,10 @@ describe('Arrow Component', () => {
       const user = userEvent.setup();
       const onClick = jest.fn();
       render(<Arrow {...defaultProps} onClick={onClick} />);
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       expect(onClick).toHaveBeenCalledTimes(1);
     });
 
@@ -141,20 +141,20 @@ describe('Arrow Component', () => {
       const user = userEvent.setup();
       const onClick = jest.fn();
       render(<Arrow {...defaultProps} onClick={onClick} disabled={true} />);
-      
+
       const button = screen.getByRole('button');
       await user.click(button);
-      
+
       expect(onClick).not.toHaveBeenCalled();
     });
 
     it('handles keyboard navigation', () => {
       const onClick = jest.fn();
       render(<Arrow {...defaultProps} onClick={onClick} />);
-      
+
       const button = screen.getByRole('button');
       fireEvent.keyDown(button, { key: 'Enter', code: 'Enter' });
-      
+
       // The button is focusable and clickable
       expect(button).toBeInTheDocument();
       expect(button).toHaveClass('arrow-button');
@@ -165,7 +165,7 @@ describe('Arrow Component', () => {
     it('has proper ARIA attributes', () => {
       render(<Arrow {...defaultProps} />);
       const button = screen.getByRole('button');
-      
+
       expect(button).toHaveAttribute('aria-label');
       expect(button).toHaveAttribute('type', 'button');
     });
@@ -179,8 +179,8 @@ describe('Arrow Component', () => {
 
     it('generates correct aria-label for each direction', () => {
       const directions = ['left', 'right', 'up', 'down'];
-      
-      directions.forEach(direction => {
+
+      directions.forEach((direction) => {
         const { unmount } = render(<Arrow direction={direction} onClick={jest.fn()} />);
         const button = screen.getByRole('button');
         expect(button).toHaveAttribute('aria-label', `Navigate ${direction}`);
@@ -193,7 +193,7 @@ describe('Arrow Component', () => {
     it('renders SVG with correct attributes', () => {
       render(<Arrow {...defaultProps} />);
       const svg = screen.getByRole('button').querySelector('svg');
-      
+
       expect(svg).toHaveAttribute('fill', 'none');
       expect(svg).toHaveAttribute('stroke', 'currentColor');
       expect(svg).toHaveAttribute('viewBox', '0 0 24 24');
@@ -203,7 +203,7 @@ describe('Arrow Component', () => {
     it('renders path element with correct attributes', () => {
       render(<Arrow {...defaultProps} />);
       const path = screen.getByRole('button').querySelector('path');
-      
+
       expect(path).toHaveClass('arrow-path');
       expect(path).toHaveAttribute('d', 'M15 19l-7-7 7-7');
       expect(path.getAttribute('stroke-linecap')).toBe('round');
@@ -223,9 +223,9 @@ describe('Arrow Component', () => {
           onClick={jest.fn()}
           className="custom-class"
           aria-label="Custom arrow"
-        />
+        />,
       );
-      
+
       const button = screen.getByRole('button');
       expect(button).toHaveClass('arrow-button');
       expect(button).toHaveClass('custom-class');

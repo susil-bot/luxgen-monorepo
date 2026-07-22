@@ -79,7 +79,7 @@ export class Plugin {
     return new Plugin(
       overrides.name ?? this.name,
       overrides.phaseSet ?? this.phaseSet,
-      overrides.component ?? this.component
+      overrides.component ?? this.component,
     );
   }
 }

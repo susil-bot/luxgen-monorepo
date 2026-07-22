@@ -1,12 +1,22 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { useMutation } from '@apollo/client';
 import { RegisterForm, RegisterFormData, RegisterVisual, SnackbarProvider, useSnackbar } from '@luxgen/ui';
 import { PageWrapper } from '@luxgen/ui';
 import { REGISTER_MUTATION } from '../graphql/queries/auth';
+import { formatRegisterError } from '../lib/auth-notices';
+import { persistSession } from '../lib/session';
+import { getTenantPageProps } from '../lib/tenant-page-props';
+import type { GetServerSideProps } from 'next';
 
-const RegisterPageContent: React.FC = () => {
+interface RegisterPageProps {
+  tenant: string;
+}
+
+const SOCIAL_LOGIN_ENABLED = process.env.NEXT_PUBLIC_SOCIAL_LOGIN_ENABLED === 'true';
+
+const RegisterPageContent: React.FC<RegisterPageProps> = ({ tenant }) => {
   const router = useRouter();
   const { showSuccess, showError, showInfo } = useSnackbar();
   const [loading, setLoading] = useState(false);
@@ -17,30 +27,6 @@ const RegisterPageContent: React.FC = () => {
     setLoading(true);
 
     try {
-      // Get current hostname to determine tenant
-      const hostname = window.location.hostname;
-      let tenantId = 'demo'; // default tenant
-      
-      if (hostname.includes('ideavibes')) {
-        tenantId = 'ideavibes';
-      } else if (hostname.includes('acme-corp')) {
-        tenantId = 'acme-corp';
-      }
-
-      console.log('📝 Attempting registration for tenant:', tenantId);
-      console.log('👤 Registration data:', data);
-      console.log('🎭 Selected role:', data.role);
-
-      // Map role from form to GraphQL enum
-      const roleMapping: { [key: string]: string } = {
-        'USER': 'STUDENT',
-        'ADMIN': 'INSTRUCTOR', 
-        'SUPER_ADMIN': 'ADMIN'
-      };
-
-      const graphqlRole = roleMapping[data.role] || 'STUDENT';
-
-      // Call GraphQL registration mutation
       const result = await registerMutation({
         variables: {
           input: {
@@ -48,33 +34,23 @@ const RegisterPageContent: React.FC = () => {
             password: data.password,
             firstName: data.firstName,
             lastName: data.lastName,
-            role: graphqlRole,
-            tenantId: tenantId
-          }
-        }
+            role: 'STUDENT',
+            tenantId: tenant,
+          },
+        },
       });
 
       if (result.data?.register) {
         const { token, user } = result.data.register;
-        
-        // Store token in localStorage
-        localStorage.setItem('authToken', token);
-        localStorage.setItem('currentUser', JSON.stringify(user));
-        localStorage.setItem('currentTenant', user.tenant.subdomain);
 
-        const roleDisplayName = data.role === 'SUPER_ADMIN' ? 'Super Admin' : 
-                               data.role === 'ADMIN' ? 'Admin' : 'User';
-        showSuccess(`Registration successful! Welcome ${data.firstName} ${data.lastName} as ${roleDisplayName}`);
-        
-        // Redirect after a short delay
-        setTimeout(() => {
-          router.push('/login');
-        }, 1500);
+        persistSession(token, user);
+        showSuccess('Registration successful! Check your email to verify your account.');
+        setTimeout(() => router.push('/verify-email'), 1200);
       }
     } catch (error: any) {
       console.error('Registration error:', error);
-      const errorMessage = error.message || 'Registration failed. Please try again.';
-      showError(errorMessage);
+      const rawMessage = error.message || 'Registration failed. Please try again.';
+      showError(formatRegisterError(rawMessage));
     } finally {
       setLoading(false);
     }
@@ -83,7 +59,7 @@ const RegisterPageContent: React.FC = () => {
   const handleSocialLogin = async (provider: 'google' | 'linkedin' | 'github') => {
     setLoading(true);
     showInfo(`Redirecting to ${provider}...`);
-    
+
     try {
       // TODO: Implement actual social login
       // For now, just show a message
@@ -91,7 +67,7 @@ const RegisterPageContent: React.FC = () => {
         showError(`${provider} registration is not yet implemented. Please use email/password.`);
         setLoading(false);
       }, 2000);
-    } catch (error) {
+    } catch {
       showError(`Failed to connect with ${provider}. Please try again.`);
       setLoading(false);
     }
@@ -116,12 +92,13 @@ const RegisterPageContent: React.FC = () => {
               <div className="order-2 md:order-1">
                 <RegisterForm
                   onSubmit={handleRegister}
-                  onSocialLogin={handleSocialLogin}
+                  onSocialLogin={SOCIAL_LOGIN_ENABLED ? handleSocialLogin : undefined}
                   onSignIn={handleLogin}
                   loading={loading}
                   title="Create Account"
                   subtitle="Sign up for your account to get started"
-                  socialProviders={['google', 'linkedin', 'github']}
+                  showSocialLogin={SOCIAL_LOGIN_ENABLED}
+                  socialProviders={SOCIAL_LOGIN_ENABLED ? ['google', 'linkedin', 'github'] : []}
                   className=""
                 />
               </div>
@@ -130,9 +107,10 @@ const RegisterPageContent: React.FC = () => {
               <div className="order-1 md:order-2">
                 <RegisterVisual
                   testimonial={{
-                    quote: "Join thousands of professionals who have found their dream careers through our platform. Start your journey today!",
-                    author: "Join Our Community",
-                    stats: "Over 10,000+ successful placements"
+                    quote:
+                      'Join thousands of professionals who have found their dream careers through our platform. Start your journey today!',
+                    author: 'Join Our Community',
+                    stats: 'Over 10,000+ successful placements',
                   }}
                 />
               </div>
@@ -144,10 +122,12 @@ const RegisterPageContent: React.FC = () => {
   );
 };
 
-export default function Register() {
+export default function Register(props: RegisterPageProps) {
   return (
     <SnackbarProvider position="top-right" maxSnackbars={3}>
-      <RegisterPageContent />
+      <RegisterPageContent {...props} />
     </SnackbarProvider>
   );
 }
+
+export const getServerSideProps: GetServerSideProps<RegisterPageProps> = getTenantPageProps;

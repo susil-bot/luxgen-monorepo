@@ -1,17 +1,27 @@
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
-import { AppLayout, getDefaultSidebarSections, getDefaultUser, getDefaultLogo, TenantDebug, CourseMenu, CourseOverview, CourseAnalytics } from '@luxgen/ui';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import { AppLayout, TenantDebug, CourseMenu, CourseOverview, CourseAnalytics } from '@luxgen/ui';
 import { TenantBanner } from '../components/tenant/TenantBanner';
+import { getTenantPageProps } from '../lib/tenant-page-props';
+import { PageLoadingState, PageEmptyState } from '../components/common/PageStates';
+import { useLayoutUser } from '../lib/app-layout-user';
+import { useAppShellConfig } from '../lib/app-shell-config';
+import { createHandleUserAction } from '../lib/user-actions';
 
 interface CoursesPageProps {
   tenant: string;
 }
 
 export default function CoursesPage({ tenant }: CoursesPageProps) {
+  const router = useRouter();
+  const layoutUser = useLayoutUser();
+  const { sidebarSections, logo } = useAppShellConfig();
+  const handleUserAction = createHandleUserAction(router);
   const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'learner' | 'user'>('learner');
   const [loading, setLoading] = useState(true);
 
-  // Mock course data
   const [sampleCourse] = useState({
     id: 'course-1',
     title: 'Advanced React Development',
@@ -21,34 +31,29 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
     level: 'Intermediate',
     rating: 4.8,
     enrolledCount: 1250,
-    thumbnail: '/images/course-thumbnail.jpg'
+    thumbnail: '/images/course-thumbnail.jpg',
   });
+  const [catalogCourses] = useState<unknown[]>([]);
 
   const [analyticsMetrics] = useState({
     totalEnrollments: 1250,
     completionRate: 78,
     averageRating: 4.8,
-    engagementScore: 85
+    engagementScore: 85,
   });
 
   useEffect(() => {
-    // Simulate role detection
     const role = tenant === 'demo' ? 'admin' : 'learner';
     setUserRole(role);
     setLoading(false);
   }, [tenant]);
 
   const handleNavigate = (path: string) => {
-    console.log('Navigate to:', path);
-    // Implement navigation logic
+    void router.push(path);
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-      </div>
-    );
+    return <PageLoadingState label="Loading courses…" />;
   }
 
   return (
@@ -56,24 +61,12 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
       <Head>
         <title>Courses - {tenant.charAt(0).toUpperCase() + tenant.slice(1)}</title>
       </Head>
-      
+
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
-        user={getDefaultUser()}
-        logo={getDefaultLogo()}
-        onUserAction={(action) => {
-          switch (action) {
-            case 'profile':
-              console.log('Navigate to profile');
-              break;
-            case 'settings':
-              console.log('Navigate to settings');
-              break;
-            case 'logout':
-              console.log('Logout');
-              break;
-          }
-        }}
+        sidebarSections={sidebarSections}
+        user={layoutUser ?? undefined}
+        logo={logo}
+        onUserAction={handleUserAction}
         showSearch={true}
         showNotifications={true}
         notificationCount={3}
@@ -81,62 +74,44 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
         responsive={true}
       >
         <TenantBanner tenant={tenant} />
-        
-        <div className="mt-6 space-y-8">
-          {/* Course Overview */}
-          <CourseOverview
-            course={sampleCourse}
-            userRole={userRole}
-            enrollmentStatus="enrolled"
-          />
 
-          {/* Course Analytics (Admin/Instructor only) */}
-          {(userRole === 'admin' || userRole === 'instructor') && (
-            <CourseAnalytics
-              courseId={sampleCourse.id}
-              userRole={userRole}
-              metrics={analyticsMetrics}
-            />
-          )}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-2">
+          <div className="mb-8">
+            <h1 className="ios-large-title">Courses</h1>
+            <p className="mt-1 text-secondary text-sm">Browse and manage learning content</p>
+          </div>
+          <div className="space-y-8">
+            {catalogCourses.length === 0 && (
+              <PageEmptyState
+                icon="📚"
+                title="No courses yet"
+                subtitle="Create your first course or browse the learn catalog."
+                action={
+                  <div className="flex flex-wrap justify-center gap-2 mt-4">
+                    <Link href="/courses/create" className="ios-btn-primary text-sm">
+                      Create course
+                    </Link>
+                    <Link href="/learn" className="ios-btn-secondary text-sm">
+                      Browse catalog
+                    </Link>
+                  </div>
+                }
+              />
+            )}
+            <CourseOverview course={sampleCourse} userRole={userRole} enrollmentStatus="enrolled" />
 
-          {/* Course Menu */}
-          <CourseMenu
-            userRole={userRole}
-            courseId={sampleCourse.id}
-            onNavigate={handleNavigate}
-          />
+            {(userRole === 'admin' || userRole === 'instructor') && (
+              <CourseAnalytics courseId={sampleCourse.id} userRole={userRole} metrics={analyticsMetrics} />
+            )}
+
+            <CourseMenu userRole={userRole} courseId={sampleCourse.id} onNavigate={handleNavigate} />
+          </div>
         </div>
-        
+
         <TenantDebug />
       </AppLayout>
     </>
   );
 }
 
-export const getServerSideProps = async (context: any) => {
-  const host = context.req.headers.host;
-  let tenant = 'demo'; // Default tenant
-  
-  // Extract tenant from subdomain
-  if (host && host.includes('.')) {
-    const parts = host.split('.');
-    if (parts.length > 1) {
-      const subdomain = parts[0];
-      if (subdomain !== 'www' && subdomain !== 'localhost' && subdomain !== '127.0.0.1') {
-        tenant = subdomain;
-      }
-    }
-  }
-  
-  // Check query parameter as fallback
-  if (context.query.tenant) {
-    tenant = context.query.tenant;
-  }
-  
-  return {
-    props: {
-      tenant
-    }
-  };
-};
-
+export const getServerSideProps = getTenantPageProps;

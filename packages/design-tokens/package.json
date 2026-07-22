@@ -1,0 +1,16 @@
+{
+  "name": "@luxgen/design-tokens",
+  "version": "1.0.0",
+  "private": true,
+  "description": "LuxGen iOS/macOS design tokens — shared by web and React Native",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "clean": "rm -rf dist"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

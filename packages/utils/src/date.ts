@@ -1,6 +1,6 @@
 export const formatDate = (date: Date, format: 'short' | 'long' | 'time' = 'short'): string => {
   let options: Intl.DateTimeFormatOptions;
-  
+
   switch (format) {
     case 'short':
       options = { year: 'numeric', month: 'short', day: 'numeric' };

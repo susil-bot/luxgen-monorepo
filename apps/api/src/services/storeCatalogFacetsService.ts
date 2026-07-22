@@ -1,0 +1,12 @@
+import { Course } from '@luxgen/db';
+export const storeCatalogFacetsService = {
+  async list(tenantId: string) {
+    const courses = await Course.find({ tenant: tenantId, status: 'published' });
+    const m = new Map<string, number>();
+    for (const c of courses) {
+      const cat = (c as { category?: string }).category ?? 'general';
+      m.set(cat, (m.get(cat) ?? 0) + 1);
+    }
+    return [...m.entries()].map(([category, count]) => ({ category, count }));
+  },
+};

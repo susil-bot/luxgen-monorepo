@@ -22,7 +22,7 @@ describe('UserRegistrationService', () => {
       const mockTenant = {
         _id: 'tenant123',
         name: 'Test Tenant',
-        subdomain: 'test'
+        subdomain: 'test',
       };
 
       const mockUser = {
@@ -40,7 +40,7 @@ describe('UserRegistrationService', () => {
           preferences: {
             theme: 'light',
             notifications: true,
-            language: 'en'
+            language: 'en',
           },
           permissions: {
             canManageUsers: false,
@@ -50,17 +50,19 @@ describe('UserRegistrationService', () => {
             canViewReports: false,
             canManageSettings: false,
             canInviteUsers: false,
-            canApproveRequests: false
+            canApproveRequests: false,
           },
-          tenantRoles: [{
-            tenantId: 'tenant123',
-            role: UserRole.USER,
-            assignedBy: 'tenant123',
-            assignedAt: expect.any(Date)
-          }]
+          tenantRoles: [
+            {
+              tenantId: 'tenant123',
+              role: UserRole.USER,
+              assignedBy: 'tenant123',
+              assignedAt: expect.any(Date),
+            },
+          ],
         },
         save: jest.fn().mockResolvedValue(true),
-        populate: jest.fn().mockResolvedValue(true)
+        populate: jest.fn().mockResolvedValue(true),
       };
 
       (Tenant.findById as jest.Mock).mockResolvedValue(mockTenant);
@@ -74,7 +76,7 @@ describe('UserRegistrationService', () => {
         firstName: 'John',
         lastName: 'Doe',
         role: UserRole.USER,
-        tenantId: 'tenant123'
+        tenantId: 'tenant123',
       });
 
       expect(result.success).toBe(true);
@@ -88,7 +90,7 @@ describe('UserRegistrationService', () => {
       const mockTenant = {
         _id: 'tenant123',
         name: 'Test Tenant',
-        subdomain: 'test'
+        subdomain: 'test',
       };
 
       const mockUser = {
@@ -109,11 +111,11 @@ describe('UserRegistrationService', () => {
             canViewReports: true,
             canManageSettings: true,
             canInviteUsers: true,
-            canApproveRequests: true
-          }
+            canApproveRequests: true,
+          },
         },
         save: jest.fn().mockResolvedValue(true),
-        populate: jest.fn().mockResolvedValue(true)
+        populate: jest.fn().mockResolvedValue(true),
       };
 
       (Tenant.findById as jest.Mock).mockResolvedValue(mockTenant);
@@ -127,7 +129,7 @@ describe('UserRegistrationService', () => {
         firstName: 'Admin',
         lastName: 'User',
         role: UserRole.ADMIN,
-        tenantId: 'tenant123'
+        tenantId: 'tenant123',
       });
 
       expect(result.success).toBe(true);
@@ -144,7 +146,7 @@ describe('UserRegistrationService', () => {
         firstName: 'John',
         lastName: 'Doe',
         role: UserRole.USER,
-        tenantId: 'invalid-tenant'
+        tenantId: 'invalid-tenant',
       });
 
       expect(result.success).toBe(false);
@@ -165,7 +167,7 @@ describe('UserRegistrationService', () => {
         firstName: 'John',
         lastName: 'Doe',
         role: UserRole.USER,
-        tenantId: 'tenant123'
+        tenantId: 'tenant123',
       });
 
       expect(result.success).toBe(false);
@@ -185,7 +187,7 @@ describe('UserRegistrationService', () => {
         firstName: 'Super',
         lastName: 'Admin',
         role: UserRole.SUPER_ADMIN,
-        tenantId: 'tenant123'
+        tenantId: 'tenant123',
       });
 
       expect(result.success).toBe(false);
@@ -202,7 +204,7 @@ describe('UserRegistrationService', () => {
         firstName: 'John',
         lastName: 'Doe',
         role: UserRole.USER,
-        tenantId: 'tenant123'
+        tenantId: 'tenant123',
       });
 
       expect(result.success).toBe(false);
@@ -219,9 +221,9 @@ describe('UserRegistrationService', () => {
         role: UserRole.USER,
         metadata: {
           permissions: {},
-          tenantRoles: []
+          tenantRoles: [],
         },
-        save: jest.fn().mockResolvedValue(true)
+        save: jest.fn().mockResolvedValue(true),
       };
 
       (User.findById as jest.Mock).mockResolvedValue(mockUser);
@@ -230,7 +232,7 @@ describe('UserRegistrationService', () => {
         'user123',
         UserRole.INSTRUCTOR,
         'admin123',
-        'tenant123'
+        'tenant123',
       );
 
       expect(result.success).toBe(true);
@@ -245,7 +247,7 @@ describe('UserRegistrationService', () => {
         'invalid-user',
         UserRole.INSTRUCTOR,
         'admin123',
-        'tenant123'
+        'tenant123',
       );
 
       expect(result.success).toBe(false);
@@ -259,23 +261,21 @@ describe('UserRegistrationService', () => {
         email: 'test@example.com',
         role: UserRole.USER,
         metadata: { permissions: {}, tenantRoles: [] },
-        save: jest.fn()
+        save: jest.fn(),
       };
 
       const mockInviter = {
         _id: 'admin123',
-        role: UserRole.ADMIN
+        role: UserRole.ADMIN,
       };
 
-      (User.findById as jest.Mock)
-        .mockResolvedValueOnce(mockUser)
-        .mockResolvedValueOnce(mockInviter);
+      (User.findById as jest.Mock).mockResolvedValueOnce(mockUser).mockResolvedValueOnce(mockInviter);
 
       const result = await UserRegistrationService.updateUserRole(
         'user123',
         UserRole.SUPER_ADMIN,
         'admin123',
-        'tenant123'
+        'tenant123',
       );
 
       expect(result.success).toBe(false);
@@ -290,7 +290,7 @@ describe('UserRegistrationService', () => {
         _id: 'user123',
         email: 'test@example.com',
         status: UserStatus.PENDING,
-        save: jest.fn().mockResolvedValue(true)
+        save: jest.fn().mockResolvedValue(true),
       };
 
       (User.findById as jest.Mock).mockResolvedValue(mockUser);

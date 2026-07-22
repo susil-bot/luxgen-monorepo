@@ -13,15 +13,15 @@ export const sidebarStyles = {
       transition: width 0.3s ease;
       overflow: hidden;
     }
-    
+
     .sidebar.collapsed {
       width: 4rem;
     }
-    
+
     .sidebar:not(.collapsed) {
       width: 16rem;
     }
-    
+
     .sidebar-header {
       display: flex;
       align-items: center;
@@ -30,14 +30,14 @@ export const sidebarStyles = {
       border-bottom: 1px solid var(--color-border);
       min-height: 4rem;
     }
-    
+
     .sidebar-title {
       font-size: 1.125rem;
       font-weight: 600;
       margin: 0;
       color: var(--color-text);
     }
-    
+
     .sidebar-toggle {
       background: none;
       border: none;
@@ -53,18 +53,18 @@ export const sidebarStyles = {
       align-items: center;
       justify-content: center;
     }
-    
+
     .sidebar-toggle:hover {
       background-color: var(--color-primary);
       color: white;
     }
-    
+
     .sidebar-nav {
       padding: 1rem 0;
       overflow-y: auto;
       height: calc(100vh - 4rem);
     }
-    
+
     .sidebar-nav-item {
       display: flex;
       align-items: center;
@@ -76,12 +76,12 @@ export const sidebarStyles = {
       margin: 0 0.5rem;
       border-radius: var(--border-radius-md);
     }
-    
+
     .sidebar-nav-item:hover {
       background-color: var(--color-primary);
       color: white;
     }
-    
+
     .sidebar-nav-icon {
       margin-right: 0.75rem;
       min-width: 1.25rem;
@@ -89,26 +89,26 @@ export const sidebarStyles = {
       align-items: center;
       justify-content: center;
     }
-    
+
     .sidebar-nav-label {
       font-size: 0.875rem;
       font-weight: 500;
     }
-    
+
     .sidebar.collapsed .sidebar-nav-label {
       display: none;
     }
-    
+
     .sidebar.collapsed .sidebar-nav-icon {
       margin-right: 0;
     }
-    
+
     .sidebar.collapsed .sidebar-nav-item {
       justify-content: center;
       padding: 0.75rem 0.5rem;
     }
   `,
-  
+
   mobile: css`
     @media (max-width: 768px) {
       .sidebar {
@@ -116,17 +116,17 @@ export const sidebarStyles = {
         transform: translateX(-100%);
         transition: transform 0.3s ease;
       }
-      
+
       .sidebar.open {
         transform: translateX(0);
       }
-      
+
       .sidebar.collapsed {
         width: 100vw;
       }
     }
   `,
-  
+
   tablet: css`
     @media (min-width: 769px) and (max-width: 1024px) {
       .sidebar:not(.collapsed) {
@@ -134,7 +134,7 @@ export const sidebarStyles = {
       }
     }
   `,
-  
+
   desktop: css`
     @media (min-width: 1025px) {
       .sidebar:not(.collapsed) {
@@ -142,24 +142,24 @@ export const sidebarStyles = {
       }
     }
   `,
-  
+
   darkMode: css`
     @media (prefers-color-scheme: dark) {
       .sidebar {
-        background-color: #1F2937;
+        background-color: #1f2937;
         border-right-color: #374151;
       }
-      
+
       .sidebar-title {
-        color: #F9FAFB;
+        color: #f9fafb;
       }
-      
+
       .sidebar-nav-item {
-        color: #F9FAFB;
+        color: #f9fafb;
       }
-      
+
       .sidebar-toggle {
-        color: #F9FAFB;
+        color: #f9fafb;
       }
     }
   `,

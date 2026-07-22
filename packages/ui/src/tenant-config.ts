@@ -20,7 +20,7 @@ export interface TenantConfig {
 }
 
 export const tenantConfigs: Record<string, TenantConfig> = {
-  'demo': {
+  demo: {
     id: 'demo',
     name: 'Demo Tenant',
     subdomain: 'demo',

@@ -2,11 +2,7 @@ import React from 'react';
 import { BaseComponentProps, TenantTheme } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
-import { 
-  getEngagementTrendsStyles, 
-  engagementTrendsClasses,
-  engagementTrendsCSS 
-} from './styles';
+import { getEngagementTrendsStyles, engagementTrendsClasses, engagementTrendsCSS } from './styles';
 
 export interface EngagementDataPoint {
   label: string;
@@ -39,9 +35,7 @@ const EngagementTrendsComponent: React.FC<EngagementTrendsProps> = ({
   const styles = getEngagementTrendsStyles(tenantTheme, variant);
 
   // Calculate chart dimensions
-  const maxValue = Math.max(
-    ...data.flatMap(d => [d.interactions, d.completions])
-  );
+  const maxValue = Math.max(...data.flatMap((d) => [d.interactions, d.completions]));
   const padding = 40;
   const chartWidth = 500;
   const chartHeight = height - padding * 2;
@@ -50,10 +44,10 @@ const EngagementTrendsComponent: React.FC<EngagementTrendsProps> = ({
   // Generate bars for each data point
   const generateBars = () => {
     return data.map((point, index) => {
-      const x = padding + index * (chartWidth - padding * 2) / data.length;
-      const interactionsHeight = (point.interactions / maxValue) * (chartHeight);
-      const completionsHeight = (point.completions / maxValue) * (chartHeight);
-      
+      const x = padding + (index * (chartWidth - padding * 2)) / data.length;
+      const interactionsHeight = (point.interactions / maxValue) * chartHeight;
+      const completionsHeight = (point.completions / maxValue) * chartHeight;
+
       const interactionsY = chartHeight - interactionsHeight + padding;
       const completionsY = chartHeight - completionsHeight + padding;
 
@@ -70,7 +64,7 @@ const EngagementTrendsComponent: React.FC<EngagementTrendsProps> = ({
             style={{ cursor: 'pointer' }}
             onClick={() => onDataPointClick?.(point)}
           />
-          
+
           {/* Completions bar */}
           <rect
             x={x + barWidth * 1.1}
@@ -111,12 +105,7 @@ const EngagementTrendsComponent: React.FC<EngagementTrendsProps> = ({
           {title}
         </h3>
         <div className={engagementTrendsClasses.chart} style={{ ...styles.chart, height }}>
-          <svg
-            width="100%"
-            height={height}
-            viewBox={`0 0 ${chartWidth} ${height}`}
-            style={{ overflow: 'visible' }}
-          >
+          <svg width="100%" height={height} viewBox={`0 0 ${chartWidth} ${height}`} style={{ overflow: 'visible' }}>
             {/* Grid lines */}
             {[0, 0.25, 0.5, 0.75, 1].map((ratio, index) => {
               const y = padding + (chartHeight - padding * 2) * ratio;
@@ -150,7 +139,10 @@ const EngagementTrendsComponent: React.FC<EngagementTrendsProps> = ({
 
             {/* X-axis labels */}
             {data.map((point, index) => {
-              const x = padding + index * (chartWidth - padding * 2) / data.length + (chartWidth - padding * 2) / (data.length * 2);
+              const x =
+                padding +
+                (index * (chartWidth - padding * 2)) / data.length +
+                (chartWidth - padding * 2) / (data.length * 2);
               return (
                 <text
                   key={index}
@@ -168,37 +160,47 @@ const EngagementTrendsComponent: React.FC<EngagementTrendsProps> = ({
 
           {/* Legend */}
           {showLegend && (
-            <div style={{
-              display: 'flex',
-              justifyContent: 'center',
-              gap: '24px',
-              marginTop: '16px'
-            }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'center',
+                gap: '24px',
+                marginTop: '16px',
+              }}
+            >
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  backgroundColor: styles.interactionsColor,
-                  borderRadius: '2px'
-                }} />
-                <span style={{
-                  fontSize: '0.875rem',
-                  color: tenantTheme.colors.textSecondary || '#64748B'
-                }}>
+                <div
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: styles.interactionsColor,
+                    borderRadius: '2px',
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: '0.875rem',
+                    color: tenantTheme.colors.textSecondary || '#64748B',
+                  }}
+                >
                   Interactions
                 </span>
               </div>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  backgroundColor: styles.completionsColor,
-                  borderRadius: '2px'
-                }} />
-                <span style={{
-                  fontSize: '0.875rem',
-                  color: tenantTheme.colors.textSecondary || '#64748B'
-                }}>
+                <div
+                  style={{
+                    width: '12px',
+                    height: '12px',
+                    backgroundColor: styles.completionsColor,
+                    borderRadius: '2px',
+                  }}
+                />
+                <span
+                  style={{
+                    fontSize: '0.875rem',
+                    color: tenantTheme.colors.textSecondary || '#64748B',
+                  }}
+                >
                   Completions
                 </span>
               </div>

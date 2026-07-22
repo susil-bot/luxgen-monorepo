@@ -21,12 +21,18 @@
     ],
     "baseUrl": ".",
     "paths": {
+      "@luxgen/billing": ["./packages/billing/src"],
+      "@luxgen/agent": ["./packages/agent/src"],
       "@luxgen/db": ["./packages/db/src"],
       "@luxgen/auth": ["./packages/auth/src"],
       "@luxgen/core": ["./packages/core/src"],
       "@luxgen/ui": ["./packages/ui/src"],
       "@luxgen/utils": ["./packages/utils/src"],
-      "@luxgen/config": ["./packages/config/src"]
+      "@luxgen/config": ["./packages/config/src"],
+      "@luxgen/shared": ["./packages/shared/src"],
+      "@luxgen/design-tokens": ["./packages/design-tokens/src"],
+      "@luxgen/types": ["./packages/types/src"],
+      "@luxgen/native-ui": ["./packages/native-ui/src"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

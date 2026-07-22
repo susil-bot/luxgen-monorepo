@@ -1,0 +1,10 @@
+# LuxGen — Kubernetes manifest
+# Docs: k8s/README.md · docs/technical/README.md
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: luxgen
+  labels:
+    name: luxgen
+    app: luxgen-monorepo

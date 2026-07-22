@@ -5,13 +5,13 @@ export const CountryLanguageDropdownExample: React.FC = () => {
   const [selectedCountry, setSelectedCountry] = useState<Country>({
     code: 'GB',
     name: 'United Kingdom',
-    flag: '🇬🇧'
+    flag: '🇬🇧',
   });
-  
+
   const [selectedLanguage, setSelectedLanguage] = useState<Language>({
     code: 'en',
     name: 'English',
-    nativeName: 'English'
+    nativeName: 'English',
   });
 
   const handleCountryChange = (country: Country) => {
@@ -27,7 +27,7 @@ export const CountryLanguageDropdownExample: React.FC = () => {
   return (
     <div className="space-y-6 p-6">
       <h2 className="text-2xl font-bold text-gray-900">Country & Language Dropdown Examples</h2>
-      
+
       {/* Default Dropdown */}
       <div>
         <h3 className="text-lg font-semibold text-gray-700 mb-2">Default Dropdown</h3>

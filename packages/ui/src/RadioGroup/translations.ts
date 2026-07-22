@@ -1,1 +1,1 @@
-export const RadioGroupTranslations = { en: { title: "RadioGroup" } };
+export const RadioGroupTranslations = { en: { title: 'RadioGroup' } };

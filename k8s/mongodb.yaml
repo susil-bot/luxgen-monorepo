@@ -1,0 +1,258 @@
+# LuxGen — Kubernetes manifest
+# Docs: k8s/README.md · docs/technical/README.md
+
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mongodb
+  namespace: luxgen
+  labels:
+    app: mongodb
+    component: database
+spec:
+  serviceName: mongodb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mongodb
+  template:
+    metadata:
+      labels:
+        app: mongodb
+        component: database
+    spec:
+      containers:
+        - name: mongodb
+          image: mongo:7.0
+          command:
+            - mongod
+          args:
+            - --replSet
+            - rs0
+            - --bind_ip_all
+          ports:
+            - containerPort: 27017
+              name: mongodb
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: luxgen-secrets
+                  key: MONGO_INITDB_ROOT_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: luxgen-secrets
+                  key: MONGO_INITDB_ROOT_PASSWORD
+            - name: MONGO_INITDB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  name: luxgen-secrets
+                  key: MONGO_INITDB_DATABASE
+          volumeMounts:
+            - name: mongodb-storage
+              mountPath: /data/db
+          resources:
+            requests:
+              memory: '512Mi'
+              cpu: '250m'
+            limits:
+              memory: '2Gi'
+              cpu: '1000m'
+          livenessProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - db.adminCommand('ping')
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - mongosh
+                - --eval
+                - db.adminCommand('ping')
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            timeoutSeconds: 3
+            failureThreshold: 3
+  volumeClaimTemplates:
+    - metadata:
+        name: mongodb-storage
+      spec:
+        accessModes: ['ReadWriteOnce']
+        resources:
+          requests:
+            storage: 10Gi
+---
+# Headless service — stable pod DNS for replica set member hostnames (mongodb-0.mongodb…)
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb
+  namespace: luxgen
+  labels:
+    app: mongodb
+    component: database
+spec:
+  clusterIP: None
+  ports:
+    - port: 27017
+      targetPort: 27017
+      protocol: TCP
+      name: mongodb
+  selector:
+    app: mongodb
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mongodb-service
+  namespace: luxgen
+  labels:
+    app: mongodb
+    component: database
+spec:
+  type: ClusterIP
+  ports:
+    - port: 27017
+      targetPort: 27017
+      protocol: TCP
+  selector:
+    app: mongodb
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: mongodb-pdb
+  namespace: luxgen
+  labels:
+    app: mongodb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: mongodb
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongodb-backup-storage
+  namespace: luxgen
+  labels:
+    app: mongodb
+    component: backup
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: mongodb-backup
+  namespace: luxgen
+  labels:
+    app: mongodb
+    component: backup
+spec:
+  schedule: '0 2 * * *'
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        metadata:
+          labels:
+            app: mongodb
+            component: backup
+        spec:
+          restartPolicy: OnFailure
+          containers:
+            - name: mongodump
+              image: mongo:7.0
+              env:
+                - name: MONGODB_URI
+                  valueFrom:
+                    secretKeyRef:
+                      name: luxgen-secrets
+                      key: MONGODB_URI
+              command:
+                - /bin/bash
+                - -ec
+                - |
+                  STAMP=$(date +%Y%m%d-%H%M%S)
+                  OUT="/backups/$STAMP"
+                  echo "Starting mongodump to $OUT"
+                  mongodump --uri="$MONGODB_URI" --out="$OUT"
+                  find /backups -mindepth 1 -maxdepth 1 -type d -mtime +7 -exec rm -rf {} +
+                  echo "Backup complete"
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: mongodb-backup-storage
+---
+# One-shot job — idempotent rs.initiate for single-member rs0 (re-run via deploy.sh if needed)
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mongodb-rs-init
+  namespace: luxgen
+  labels:
+    app: mongodb
+    component: replica-init
+spec:
+  ttlSecondsAfterFinished: 86400
+  backoffLimit: 12
+  template:
+    metadata:
+      labels:
+        app: mongodb
+        component: replica-init
+    spec:
+      restartPolicy: OnFailure
+      containers:
+        - name: rs-init
+          image: mongo:7.0
+          env:
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: luxgen-secrets
+                  key: MONGO_INITDB_ROOT_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: luxgen-secrets
+                  key: MONGO_INITDB_ROOT_PASSWORD
+          command:
+            - /bin/bash
+            - -ec
+            - |
+              RS_HOST="mongodb-0.mongodb.luxgen.svc.cluster.local:27017"
+              URI="mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb-service:27017/admin?authSource=admin"
+              echo "Waiting for MongoDB at mongodb-service..."
+              for i in $(seq 1 60); do
+                if mongosh "$URI" --eval "db.adminCommand('ping')" --quiet 2>/dev/null; then
+                  break
+                fi
+                sleep 5
+              done
+              mongosh "$URI" --eval "
+                try {
+                  var status = rs.status();
+                  if (status.ok) { print('Replica set already initialised'); quit(0); }
+                } catch (e) {}
+                rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: '${RS_HOST}' }] });
+                print('Replica set rs0 initiated');
+              "

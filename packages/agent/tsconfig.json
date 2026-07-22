@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "noEmit": false,
+    "declaration": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@luxgen/auth": ["../auth/src/index.ts"],
+      "@luxgen/db": ["../db/src/index.ts"]
+    }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist", "../auth", "../db"]
+}

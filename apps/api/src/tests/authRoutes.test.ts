@@ -1,14 +1,17 @@
 import { describe, it, expect, beforeEach, afterEach, jest } from '@jest/globals';
 import request from 'supertest';
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import authRoutes from '../routes/auth';
 import { UserRegistrationService } from '../services/userRegistrationService';
+import { sendTransactionalEmail } from '../utils/email';
 import { User, UserRole, UserStatus } from '@luxgen/db';
-import { Tenant } from '@luxgen/db';
 import { generateToken } from '../utils/jwt';
+import * as refreshToken from '../utils/refreshToken';
 
 // Mock dependencies
 jest.mock('../services/userRegistrationService');
+jest.mock('../utils/email');
 jest.mock('@luxgen/db');
 jest.mock('../utils/jwt');
 
@@ -17,6 +20,7 @@ describe('Auth Routes', () => {
 
   beforeEach(() => {
     app = express();
+    app.use(cookieParser());
     app.use(express.json());
     app.use('/auth', authRoutes);
     jest.clearAllMocks();
@@ -38,15 +42,15 @@ describe('Auth Routes', () => {
         tenant: {
           _id: 'tenant123',
           name: 'Test Tenant',
-          subdomain: 'test'
+          subdomain: 'test',
         },
-        populate: jest.fn().mockResolvedValue(true)
+        populate: jest.fn().mockResolvedValue(true),
       };
 
       (UserRegistrationService.registerUser as jest.Mock).mockResolvedValue({
         success: true,
         user: mockUser,
-        message: 'User registered successfully'
+        message: 'User registered successfully',
       });
 
       (generateToken as jest.Mock).mockReturnValue('mock-jwt-token');
@@ -58,7 +62,7 @@ describe('Auth Routes', () => {
           password: 'password123',
           firstName: 'John',
           lastName: 'Doe',
-          role: UserRole.STUDENT
+          role: UserRole.STUDENT,
         })
         .set('x-tenant', 'tenant123');
 
@@ -71,14 +75,12 @@ describe('Auth Routes', () => {
     });
 
     it('should fail registration if tenant context is missing', async () => {
-      const response = await request(app)
-        .post('/auth/register')
-        .send({
-          email: 'test@example.com',
-          password: 'password123',
-          firstName: 'John',
-          lastName: 'Doe'
-        });
+      const response = await request(app).post('/auth/register').send({
+        email: 'test@example.com',
+        password: 'password123',
+        firstName: 'John',
+        lastName: 'Doe',
+      });
 
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
@@ -89,7 +91,7 @@ describe('Auth Routes', () => {
       (UserRegistrationService.registerUser as jest.Mock).mockResolvedValue({
         success: false,
         message: 'User already exists',
-        errors: { email: 'Email is already registered' }
+        errors: { email: 'Email is already registered' },
       });
 
       const response = await request(app)
@@ -98,7 +100,7 @@ describe('Auth Routes', () => {
           email: 'existing@example.com',
           password: 'password123',
           firstName: 'John',
-          lastName: 'Doe'
+          lastName: 'Doe',
         })
         .set('x-tenant', 'tenant123');
 
@@ -109,9 +111,7 @@ describe('Auth Routes', () => {
     });
 
     it('should handle registration service errors', async () => {
-      (UserRegistrationService.registerUser as jest.Mock).mockRejectedValue(
-        new Error('Database connection failed')
-      );
+      (UserRegistrationService.registerUser as jest.Mock).mockRejectedValue(new Error('Database connection failed'));
 
       const response = await request(app)
         .post('/auth/register')
@@ -119,7 +119,7 @@ describe('Auth Routes', () => {
           email: 'test@example.com',
           password: 'password123',
           firstName: 'John',
-          lastName: 'Doe'
+          lastName: 'Doe',
         })
         .set('x-tenant', 'tenant123');
 
@@ -137,14 +137,15 @@ describe('Auth Routes', () => {
         firstName: 'Jane',
         lastName: 'Smith',
         role: UserRole.INSTRUCTOR,
-        status: UserStatus.PENDING
+        status: UserStatus.PENDING,
       };
 
       (UserRegistrationService.registerUser as jest.Mock).mockResolvedValue({
         success: true,
         user: mockUser,
-        message: 'User invited successfully'
+        message: 'User invited successfully',
       });
+      (sendTransactionalEmail as jest.Mock).mockResolvedValue(undefined);
 
       const response = await request(app)
         .post('/auth/invite')
@@ -152,16 +153,17 @@ describe('Auth Routes', () => {
           email: 'invited@example.com',
           firstName: 'Jane',
           lastName: 'Smith',
-          role: UserRole.USER
+          role: UserRole.USER,
         })
         .set('x-tenant', 'tenant123')
         .set('Authorization', 'Bearer mock-token');
 
       expect(response.status).toBe(201);
       expect(response.body.success).toBe(true);
-      expect(response.body.message).toBe('User invited successfully');
+      expect(response.body.message).toBe('User invited successfully. Login credentials were sent by email.');
       expect(response.body.data.user.email).toBe('invited@example.com');
-      expect(response.body.data.tempPassword).toBeDefined();
+      expect(response.body.data.tempPassword).toBeUndefined();
+      expect(sendTransactionalEmail).toHaveBeenCalled();
     });
 
     it('should fail invitation if authentication is missing', async () => {
@@ -170,7 +172,7 @@ describe('Auth Routes', () => {
         .send({
           email: 'invited@example.com',
           firstName: 'Jane',
-          lastName: 'Smith'
+          lastName: 'Smith',
         })
         .set('x-tenant', 'tenant123');
 
@@ -184,7 +186,7 @@ describe('Auth Routes', () => {
         .send({
           email: 'invited@example.com',
           firstName: 'Jane',
-          lastName: 'Smith'
+          lastName: 'Smith',
         })
         .set('Authorization', 'Bearer mock-token');
 
@@ -200,13 +202,13 @@ describe('Auth Routes', () => {
         _id: 'user123',
         email: 'user@example.com',
         role: UserRole.INSTRUCTOR,
-        status: UserStatus.ACTIVE
+        status: UserStatus.ACTIVE,
       };
 
       (UserRegistrationService.updateUserRole as jest.Mock).mockResolvedValue({
         success: true,
         user: mockUser,
-        message: 'User role updated successfully'
+        message: 'User role updated successfully',
       });
 
       const response = await request(app)
@@ -225,7 +227,7 @@ describe('Auth Routes', () => {
       (UserRegistrationService.updateUserRole as jest.Mock).mockResolvedValue({
         success: false,
         message: 'User not found',
-        errors: { user: 'User does not exist' }
+        errors: { user: 'User does not exist' },
       });
 
       const response = await request(app)
@@ -266,13 +268,13 @@ describe('Auth Routes', () => {
       const mockUser = {
         _id: 'user123',
         email: 'user@example.com',
-        status: UserStatus.ACTIVE
+        status: UserStatus.ACTIVE,
       };
 
       (UserRegistrationService.activateUser as jest.Mock).mockResolvedValue({
         success: true,
         user: mockUser,
-        message: 'User activated successfully'
+        message: 'User activated successfully',
       });
 
       const response = await request(app)
@@ -289,7 +291,7 @@ describe('Auth Routes', () => {
       (UserRegistrationService.activateUser as jest.Mock).mockResolvedValue({
         success: false,
         message: 'User not found',
-        errors: { user: 'User does not exist' }
+        errors: { user: 'User does not exist' },
       });
 
       const response = await request(app)
@@ -302,17 +304,14 @@ describe('Auth Routes', () => {
     });
 
     it('should fail activation if authentication is missing', async () => {
-      const response = await request(app)
-        .put('/auth/users/user123/activate');
+      const response = await request(app).put('/auth/users/user123/activate');
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
     });
 
     it('should handle activation service errors', async () => {
-      (UserRegistrationService.activateUser as jest.Mock).mockRejectedValue(
-        new Error('Database error')
-      );
+      (UserRegistrationService.activateUser as jest.Mock).mockRejectedValue(new Error('Database error'));
 
       const response = await request(app)
         .put('/auth/users/user123/activate')
@@ -335,20 +334,18 @@ describe('Auth Routes', () => {
         tenant: {
           _id: 'tenant123',
           name: 'Test Tenant',
-          subdomain: 'test'
-        }
+          subdomain: 'test',
+        },
       };
 
       (User.findOne as jest.Mock).mockResolvedValue(mockUser);
       (generateToken as jest.Mock).mockReturnValue('mock-jwt-token');
 
-      const response = await request(app)
-        .post('/auth/login')
-        .send({
-          email: 'test@example.com',
-          password: 'password123',
-          tenant: 'tenant123'
-        });
+      const response = await request(app).post('/auth/login').send({
+        email: 'test@example.com',
+        password: 'password123',
+        tenant: 'tenant123',
+      });
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);
@@ -360,12 +357,10 @@ describe('Auth Routes', () => {
     it('should fail login with invalid credentials', async () => {
       (User.findOne as jest.Mock).mockResolvedValue(null);
 
-      const response = await request(app)
-        .post('/auth/login')
-        .send({
-          email: 'nonexistent@example.com',
-          password: 'wrongpassword'
-        });
+      const response = await request(app).post('/auth/login').send({
+        email: 'nonexistent@example.com',
+        password: 'wrongpassword',
+      });
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
@@ -375,12 +370,10 @@ describe('Auth Routes', () => {
     it('should handle login errors gracefully', async () => {
       (User.findOne as jest.Mock).mockRejectedValue(new Error('Database error'));
 
-      const response = await request(app)
-        .post('/auth/login')
-        .send({
-          email: 'test@example.com',
-          password: 'password123'
-        });
+      const response = await request(app).post('/auth/login').send({
+        email: 'test@example.com',
+        password: 'password123',
+      });
 
       expect(response.status).toBe(500);
       expect(response.body.success).toBe(false);
@@ -399,13 +392,11 @@ describe('Auth Routes', () => {
         tenant: {
           _id: 'tenant123',
           name: 'Test Tenant',
-          subdomain: 'test'
-        }
+          subdomain: 'test',
+        },
       };
 
-      const response = await request(app)
-        .get('/auth/me')
-        .set('Authorization', 'Bearer mock-token');
+      const response = await request(app).get('/auth/me').set('Authorization', 'Bearer mock-token');
 
       // Note: This test would need proper middleware setup to work
       // For now, it will return 401 as the user is not authenticated
@@ -413,8 +404,7 @@ describe('Auth Routes', () => {
     });
 
     it('should return 401 if not authenticated', async () => {
-      const response = await request(app)
-        .get('/auth/me');
+      const response = await request(app).get('/auth/me');
 
       expect(response.status).toBe(401);
       expect(response.body.success).toBe(false);
@@ -422,10 +412,63 @@ describe('Auth Routes', () => {
     });
   });
 
+  describe('POST /auth/refresh', () => {
+    it('should issue a new access token when refresh cookie is valid', async () => {
+      const mockUser = {
+        _id: { toString: () => 'user123' },
+        email: 'test@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        role: UserRole.USER,
+        tenant: {
+          _id: { toString: () => 'tenant123' },
+          name: 'Test Tenant',
+          subdomain: 'test',
+        },
+      };
+
+      jest.spyOn(refreshToken, 'verifyRefreshToken').mockReturnValue({
+        id: 'user123',
+        email: 'test@example.com',
+        tenant: 'tenant123',
+        role: UserRole.USER,
+      });
+      (User.findById as jest.Mock).mockReturnValue({
+        populate: jest.fn().mockResolvedValue(mockUser),
+      });
+      (generateToken as jest.Mock).mockReturnValue('new-access-token');
+
+      const response = await request(app).post('/auth/refresh').set('Cookie', 'luxgen_refresh=valid-refresh-token');
+
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.message).toBe('Token refreshed');
+      expect(response.body.data.token).toBe('new-access-token');
+      expect(generateToken).toHaveBeenCalled();
+    });
+
+    it('should return 401 when refresh cookie is missing', async () => {
+      const response = await request(app).post('/auth/refresh');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe('Refresh token required');
+    });
+
+    it('should return 401 when refresh token is invalid', async () => {
+      jest.spyOn(refreshToken, 'verifyRefreshToken').mockReturnValue(null);
+
+      const response = await request(app).post('/auth/refresh').set('Cookie', 'luxgen_refresh=invalid-token');
+
+      expect(response.status).toBe(401);
+      expect(response.body.success).toBe(false);
+      expect(response.body.message).toBe('Invalid or expired refresh token');
+    });
+  });
+
   describe('POST /auth/logout', () => {
     it('should logout successfully', async () => {
-      const response = await request(app)
-        .post('/auth/logout');
+      const response = await request(app).post('/auth/logout');
 
       expect(response.status).toBe(200);
       expect(response.body.success).toBe(true);

@@ -1,0 +1,12 @@
+import { ActivityEvent } from '@luxgen/db';
+export const userActivityFeedService = {
+  async list(tenantId: string, limit = 20) {
+    const rows = await ActivityEvent.find({ tenant: tenantId }).sort({ createdAt: -1 }).limit(limit);
+    return rows.map((e) => ({
+      id: e._id.toString(),
+      eventType: e.eventType,
+      message: e.message,
+      createdAt: e.createdAt,
+    }));
+  },
+};

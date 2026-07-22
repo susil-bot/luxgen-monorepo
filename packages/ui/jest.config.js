@@ -2,9 +2,16 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'jsdom',
   roots: ['<rootDir>/src'],
-  testMatch: ['**/__tests__/**/*.ts', '**/__tests__/**/*.tsx', '**/?(*.)+(spec|test).ts', '**/?(*.)+(spec|test).tsx', '**/?(*.)+(spec|test).js', '**/?(*.)+(spec|test).jsx'],
+  testMatch: [
+    '**/__tests__/**/*.ts',
+    '**/__tests__/**/*.tsx',
+    '**/?(*.)+(spec|test).ts',
+    '**/?(*.)+(spec|test).tsx',
+    '**/?(*.)+(spec|test).js',
+    '**/?(*.)+(spec|test).jsx',
+  ],
   transform: {
-    '^.+\\.(ts|tsx)$': 'ts-jest',
+    '^.+\\.(ts|tsx)$': ['ts-jest', { tsconfig: 'tsconfig.json' }],
     '^.+\\.(js|jsx)$': 'babel-jest',
   },
   collectCoverageFrom: [
@@ -18,9 +25,4 @@ module.exports = {
   coverageReporters: ['text', 'lcov', 'html'],
   setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   testTimeout: 10000,
-  globals: {
-    'ts-jest': {
-      tsconfig: 'tsconfig.json',
-    },
-  },
 };

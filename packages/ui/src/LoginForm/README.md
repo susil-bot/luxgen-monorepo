@@ -55,53 +55,53 @@ const MyLoginPage = () => {
 
 ### Core Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `onSubmit` | `(data: LoginFormData) => Promise<void> \| void` | - | Callback when form is submitted |
-| `onSocialLogin` | `(provider: string) => Promise<void> \| void` | - | Callback for social login |
-| `onForgotPassword` | `() => void` | - | Callback for forgot password link |
-| `onSignUp` | `() => void` | - | Callback for sign up link |
+| Prop               | Type                                             | Default | Description                       |
+| ------------------ | ------------------------------------------------ | ------- | --------------------------------- |
+| `onSubmit`         | `(data: LoginFormData) => Promise<void> \| void` | -       | Callback when form is submitted   |
+| `onSocialLogin`    | `(provider: string) => Promise<void> \| void`    | -       | Callback for social login         |
+| `onForgotPassword` | `() => void`                                     | -       | Callback for forgot password link |
+| `onSignUp`         | `() => void`                                     | -       | Callback for sign up link         |
 
 ### State Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `loading` | `boolean` | `false` | Show loading state |
-| `error` | `string` | - | Error message to display |
-| `success` | `string` | - | Success message to display |
+| Prop      | Type      | Default | Description                |
+| --------- | --------- | ------- | -------------------------- |
+| `loading` | `boolean` | `false` | Show loading state         |
+| `error`   | `string`  | -       | Error message to display   |
+| `success` | `string`  | -       | Success message to display |
 
 ### Customization Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `title` | `string` | `"Welcome Back"` | Form title |
-| `subtitle` | `string` | `"Sign in to your account to continue"` | Form subtitle |
-| `submitText` | `string` | `"Sign In"` | Submit button text |
-| `emailLabel` | `string` | `"Email address"` | Email field label |
-| `passwordLabel` | `string` | `"Password"` | Password field label |
-| `rememberMeLabel` | `string` | `"Remember me"` | Remember me checkbox label |
-| `forgotPasswordText` | `string` | `"Forgot password?"` | Forgot password link text |
-| `signUpText` | `string` | `"Don't have an account?"` | Sign up text |
-| `signUpLinkText` | `string` | `"Sign up here"` | Sign up link text |
-| `socialLoginText` | `string` | `"Or continue with"` | Social login divider text |
+| Prop                 | Type     | Default                                 | Description                |
+| -------------------- | -------- | --------------------------------------- | -------------------------- |
+| `title`              | `string` | `"Welcome Back"`                        | Form title                 |
+| `subtitle`           | `string` | `"Sign in to your account to continue"` | Form subtitle              |
+| `submitText`         | `string` | `"Sign In"`                             | Submit button text         |
+| `emailLabel`         | `string` | `"Email address"`                       | Email field label          |
+| `passwordLabel`      | `string` | `"Password"`                            | Password field label       |
+| `rememberMeLabel`    | `string` | `"Remember me"`                         | Remember me checkbox label |
+| `forgotPasswordText` | `string` | `"Forgot password?"`                    | Forgot password link text  |
+| `signUpText`         | `string` | `"Don't have an account?"`              | Sign up text               |
+| `signUpLinkText`     | `string` | `"Sign up here"`                        | Sign up link text          |
+| `socialLoginText`    | `string` | `"Or continue with"`                    | Social login divider text  |
 
 ### Feature Toggle Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `showSocialLogin` | `boolean` | `true` | Show social login options |
-| `showRememberMe` | `boolean` | `true` | Show remember me checkbox |
-| `showForgotPassword` | `boolean` | `true` | Show forgot password link |
-| `showSignUpLink` | `boolean` | `true` | Show sign up link |
-| `socialProviders` | `('google' \| 'linkedin' \| 'github')[]` | `['google', 'linkedin']` | Available social providers |
+| Prop                 | Type                                     | Default                  | Description                |
+| -------------------- | ---------------------------------------- | ------------------------ | -------------------------- |
+| `showSocialLogin`    | `boolean`                                | `true`                   | Show social login options  |
+| `showRememberMe`     | `boolean`                                | `true`                   | Show remember me checkbox  |
+| `showForgotPassword` | `boolean`                                | `true`                   | Show forgot password link  |
+| `showSignUpLink`     | `boolean`                                | `true`                   | Show sign up link          |
+| `socialProviders`    | `('google' \| 'linkedin' \| 'github')[]` | `['google', 'linkedin']` | Available social providers |
 
 ### Styling Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Tenant-specific theme |
-| `className` | `string` | `""` | Additional CSS classes |
-| `style` | `React.CSSProperties` | - | Inline styles |
+| Prop          | Type                  | Default        | Description            |
+| ------------- | --------------------- | -------------- | ---------------------- |
+| `tenantTheme` | `TenantTheme`         | `defaultTheme` | Tenant-specific theme  |
+| `className`   | `string`              | `""`           | Additional CSS classes |
+| `style`       | `React.CSSProperties` | -              | Inline styles          |
 
 ## Form Data
 
@@ -126,8 +126,9 @@ The component includes built-in validation:
 ## Social Login
 
 Supported providers:
+
 - Google
-- LinkedIn  
+- LinkedIn
 - GitHub
 
 ## Accessibility
@@ -143,11 +144,7 @@ Supported providers:
 ### Basic Login Form
 
 ```tsx
-<LoginForm
-  onSubmit={handleLogin}
-  onForgotPassword={handleForgotPassword}
-  onSignUp={handleSignUp}
-/>
+<LoginForm onSubmit={handleLogin} onForgotPassword={handleForgotPassword} onSignUp={handleSignUp} />
 ```
 
 ### Custom Styled Login Form
@@ -178,12 +175,7 @@ Supported providers:
 ### Loading State
 
 ```tsx
-<LoginForm
-  onSubmit={handleLogin}
-  loading={isLoading}
-  error={error}
-  success={success}
-/>
+<LoginForm onSubmit={handleLogin} loading={isLoading} error={error} success={success} />
 ```
 
 ## Testing

@@ -20,9 +20,9 @@ export interface JwtHeader {
 export const generateToken = (payload: JwtPayload, tenantId?: string): string => {
   const keyId = tenantId || payload.tenant || 'default';
   const secret = tenantKeyManager.getTenantKey(keyId);
-  
+
   return jwt.sign(payload, secret, {
-    expiresIn: (process.env.JWT_EXPIRES_IN || '7d') as any,
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
     header: {
       alg: 'HS256',
       typ: 'JWT',
@@ -36,16 +36,23 @@ export const generateToken = (payload: JwtPayload, tenantId?: string): string =>
  */
 export const verifyToken = (token: string): JwtPayload | null => {
   try {
-    // First decode the header to get the key ID
     const header = jwt.decode(token, { complete: true })?.header as JwtHeader;
+
     if (!header?.kid) {
-      // Fallback to default key if no key ID
-      return jwt.verify(token, process.env.JWT_SECRET!) as JwtPayload;
+      const secret = process.env.JWT_SECRET;
+      if (!secret) throw new Error('JWT_SECRET is not configured');
+      return jwt.verify(token, secret) as JwtPayload;
     }
 
-    // Get the tenant-specific key
-    const secret = tenantKeyManager.getTenantKey(header.kid);
-    return jwt.verify(token, secret) as JwtPayload;
+    const secrets = tenantKeyManager.getSigningSecretsForKid(header.kid);
+    for (const secret of secrets) {
+      try {
+        return jwt.verify(token, secret) as JwtPayload;
+      } catch {
+        // try next grace key
+      }
+    }
+    return null;
   } catch (error) {
     console.error('Token verification error:', error);
     return null;
@@ -58,7 +65,7 @@ export const verifyToken = (token: string): JwtPayload | null => {
 export const decodeToken = (token: string): JwtPayload | null => {
   try {
     return jwt.decode(token) as JwtPayload;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -69,7 +76,7 @@ export const decodeToken = (token: string): JwtPayload | null => {
 export const decodeTokenHeader = (token: string): JwtHeader | null => {
   try {
     return jwt.decode(token, { complete: true })?.header as JwtHeader;
-  } catch (error) {
+  } catch {
     return null;
   }
 };
@@ -89,7 +96,7 @@ export const verifyTokenWithTenant = (token: string, tenantId: string): JwtPaylo
   try {
     const secret = tenantKeyManager.getTenantKey(tenantId);
     return jwt.verify(token, secret) as JwtPayload;
-  } catch (error) {
+  } catch {
     return null;
   }
 };

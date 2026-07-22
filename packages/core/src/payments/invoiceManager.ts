@@ -41,32 +41,26 @@ export class InvoiceManager {
     const invoice = this.invoices.get(id);
     if (!invoice) return null;
 
-    const updatedInvoice = { 
-      ...invoice, 
-      ...updates, 
-      updatedAt: new Date() 
+    const updatedInvoice = {
+      ...invoice,
+      ...updates,
+      updatedAt: new Date(),
     };
     this.invoices.set(id, updatedInvoice);
     return updatedInvoice;
   }
 
   getInvoicesByTenant(tenantId: string): Invoice[] {
-    return Array.from(this.invoices.values()).filter(
-      invoice => invoice.tenantId === tenantId
-    );
+    return Array.from(this.invoices.values()).filter((invoice) => invoice.tenantId === tenantId);
   }
 
   getInvoicesByUser(userId: string): Invoice[] {
-    return Array.from(this.invoices.values()).filter(
-      invoice => invoice.userId === userId
-    );
+    return Array.from(this.invoices.values()).filter((invoice) => invoice.userId === userId);
   }
 
   getOverdueInvoices(): Invoice[] {
     const now = new Date();
-    return Array.from(this.invoices.values()).filter(
-      invoice => invoice.dueDate < now && invoice.status !== 'paid'
-    );
+    return Array.from(this.invoices.values()).filter((invoice) => invoice.dueDate < now && invoice.status !== 'paid');
   }
 
   private generateId(): string {

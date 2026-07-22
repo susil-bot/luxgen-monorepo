@@ -82,12 +82,12 @@ const GroupFormComponent: React.FC<GroupFormProps> = ({
   // Update form data when initialData changes
   useEffect(() => {
     if (initialData) {
-      setFormData(prev => ({ ...prev, ...initialData }));
+      setFormData((prev) => ({ ...prev, ...initialData }));
     }
   }, [initialData]);
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => {
+    setFormData((prev) => {
       if (field.includes('.')) {
         const [parent, child] = field.split('.');
         return {
@@ -106,7 +106,7 @@ const GroupFormComponent: React.FC<GroupFormProps> = ({
 
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: '' }));
     }
   };
 
@@ -127,7 +127,7 @@ const GroupFormComponent: React.FC<GroupFormProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (validateForm()) {
       onSubmit(formData);
     }
@@ -166,7 +166,7 @@ const GroupFormComponent: React.FC<GroupFormProps> = ({
           {/* Basic Information */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">Basic Information</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Input
@@ -200,9 +200,7 @@ const GroupFormComponent: React.FC<GroupFormProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Group Color
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Group Color</label>
               <div className="grid grid-cols-4 gap-2">
                 {colorOptions.map((option) => (
                   <button
@@ -211,9 +209,10 @@ const GroupFormComponent: React.FC<GroupFormProps> = ({
                     onClick={() => handleInputChange('color', option.value)}
                     className={`
                       w-12 h-12 rounded-lg border-2 transition-all duration-200
-                      ${formData.color === option.value
-                        ? 'border-gray-900 scale-110'
-                        : 'border-gray-300 hover:border-gray-400'
+                      ${
+                        formData.color === option.value
+                          ? 'border-gray-900 scale-110'
+                          : 'border-gray-300 hover:border-gray-400'
                       }
                     `}
                     style={{ backgroundColor: option.color }}
@@ -227,14 +226,16 @@ const GroupFormComponent: React.FC<GroupFormProps> = ({
           {/* Group Settings */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">Group Settings</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Input
                   label="Maximum Members"
                   type="number"
                   value={formData.settings.maxMembers || ''}
-                  onChange={(e) => handleInputChange('settings.maxMembers', e.target.value ? parseInt(e.target.value) : null)}
+                  onChange={(e) =>
+                    handleInputChange('settings.maxMembers', e.target.value ? parseInt(e.target.value) : null)
+                  }
                   error={errors['settings.maxMembers']}
                   placeholder="Leave empty for unlimited"
                 />
@@ -282,7 +283,7 @@ const GroupFormComponent: React.FC<GroupFormProps> = ({
           {/* Notification Settings */}
           <div className="space-y-4">
             <h3 className="text-lg font-medium text-gray-900">Notification Settings</h3>
-            
+
             <div className="space-y-3">
               <Checkbox
                 label="Notify on member join"
@@ -324,21 +325,12 @@ const GroupFormComponent: React.FC<GroupFormProps> = ({
           {/* Actions */}
           <div className="flex items-center justify-end space-x-3 pt-6 border-t border-gray-200">
             {onCancel && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={onCancel}
-                disabled={loading}
-              >
+              <Button type="button" variant="outline" onClick={onCancel} disabled={loading}>
                 {cancelText}
               </Button>
             )}
-            
-            <Button
-              type="submit"
-              loading={loading}
-              disabled={loading}
-            >
+
+            <Button type="submit" loading={loading} disabled={loading}>
               {submitText}
             </Button>
           </div>

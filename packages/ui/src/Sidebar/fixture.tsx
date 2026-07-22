@@ -11,7 +11,7 @@ export const sidebarFixtures = {
     ],
     collapsed: false,
   } as SidebarProps,
-  
+
   collapsed: {
     tenantTheme: defaultTheme,
     menuItems: [
@@ -20,7 +20,7 @@ export const sidebarFixtures = {
     ],
     collapsed: true,
   } as SidebarProps,
-  
+
   withCustomTheme: {
     tenantTheme: {
       ...defaultTheme,
@@ -36,7 +36,7 @@ export const sidebarFixtures = {
     ],
     collapsed: false,
   } as SidebarProps,
-  
+
   withManyItems: {
     tenantTheme: defaultTheme,
     menuItems: [
@@ -51,7 +51,7 @@ export const sidebarFixtures = {
     ],
     collapsed: false,
   } as SidebarProps,
-  
+
   withToggle: {
     tenantTheme: defaultTheme,
     menuItems: [

@@ -8,7 +8,7 @@ export const textAreaFixtures = {
     placeholder: 'Enter your message...',
     rows: 4,
   } as TextAreaProps,
-  
+
   withLabel: {
     tenantTheme: defaultTheme,
     value: '',
@@ -17,7 +17,7 @@ export const textAreaFixtures = {
     label: 'Message',
     required: true,
   } as TextAreaProps,
-  
+
   withError: {
     tenantTheme: defaultTheme,
     value: '',
@@ -26,7 +26,7 @@ export const textAreaFixtures = {
     label: 'Message',
     error: 'This field is required',
   } as TextAreaProps,
-  
+
   withHelperText: {
     tenantTheme: defaultTheme,
     value: '',
@@ -35,7 +35,7 @@ export const textAreaFixtures = {
     label: 'Message',
     helperText: 'Please provide a detailed description',
   } as TextAreaProps,
-  
+
   withValue: {
     tenantTheme: defaultTheme,
     value: 'This is a sample message with some content.',
@@ -43,7 +43,7 @@ export const textAreaFixtures = {
     rows: 4,
     label: 'Message',
   } as TextAreaProps,
-  
+
   disabled: {
     tenantTheme: defaultTheme,
     value: 'This textarea is disabled',
@@ -52,7 +52,7 @@ export const textAreaFixtures = {
     label: 'Message',
     disabled: true,
   } as TextAreaProps,
-  
+
   readOnly: {
     tenantTheme: defaultTheme,
     value: 'This textarea is read-only',
@@ -61,7 +61,7 @@ export const textAreaFixtures = {
     label: 'Message',
     readOnly: true,
   } as TextAreaProps,
-  
+
   withCustomTheme: {
     tenantTheme: {
       ...defaultTheme,
@@ -76,7 +76,7 @@ export const textAreaFixtures = {
     rows: 4,
     label: 'Message',
   } as TextAreaProps,
-  
+
   withMaxLength: {
     tenantTheme: defaultTheme,
     value: '',
@@ -86,7 +86,7 @@ export const textAreaFixtures = {
     maxLength: 100,
     helperText: 'Maximum 100 characters',
   } as TextAreaProps,
-  
+
   withMinLength: {
     tenantTheme: defaultTheme,
     value: '',

@@ -1,4 +1,37 @@
 import { UserMenu } from '@luxgen/ui';
+import type { NextRouter } from 'next/router';
+import { createHandleUserAction } from './user-actions';
+import { getStoredUser, isStoredSessionExpired } from './session';
+
+type DashboardGraphRow = Record<string, unknown>;
+
+interface DashboardGraphActivity extends DashboardGraphRow {
+  id: string;
+  user: string;
+  userAvatar?: string;
+  description: string;
+  timestamp: string;
+  status: string;
+}
+
+interface DashboardGraphPermissionRequest extends DashboardGraphRow {
+  id: string;
+  user: string;
+  userAvatar?: string;
+  requestType: string;
+  description: string;
+  status: string;
+  requestedAt: string;
+  metadata?: Record<string, unknown>;
+}
+
+export type DashboardActionType =
+  | 'retention_click'
+  | 'engagement_click'
+  | 'trend_click'
+  | 'activity_click'
+  | 'survey_click'
+  | 'request_click';
 
 export interface DashboardData {
   stats: {
@@ -34,7 +67,7 @@ export interface DashboardData {
     userAvatar: string;
     timestamp: string;
     status: string;
-    metadata: any;
+    metadata: Record<string, unknown>;
   }>;
   lastSurvey: {
     id: string;
@@ -56,7 +89,7 @@ export interface DashboardData {
     description: string;
     status: string;
     requestedAt: string;
-    metadata: any;
+    metadata: Record<string, unknown>;
   }>;
 }
 
@@ -96,7 +129,7 @@ export interface TransformedDashboardData {
     userAvatar: string;
     timestamp: string;
     status: string;
-    metadata: any;
+    metadata: Record<string, unknown>;
   }>;
   surveyData: {
     id: string;
@@ -119,14 +152,14 @@ export interface TransformedDashboardData {
     description: string;
     status: string;
     requestedAt: string;
-    metadata: any;
+    metadata: Record<string, unknown>;
   }>;
 }
 
 /**
  * Default fallback data when GraphQL fails
  */
-export const getDefaultDashboardData = (tenant: string): DashboardData => ({
+export const getDefaultDashboardData = (_tenant: string): DashboardData => ({
   stats: {
     totalCourses: 12,
     activeStudents: 156,
@@ -205,11 +238,11 @@ export const getDefaultDashboardData = (tenant: string): DashboardData => ({
  * Transform GraphQL dashboard data to component format
  */
 export const transformDashboardData = (
-  graphqlData: any,
-  tenant: string
+  graphqlData: Record<string, unknown>,
+  tenant: string,
 ): TransformedDashboardData => {
-  // Use GraphQL data if available, otherwise use defaults
-  const data = graphqlData?.getDashboardData || getDefaultDashboardData(tenant);
+  const data: DashboardData =
+    (graphqlData?.getDashboardData as DashboardData | undefined) ?? getDefaultDashboardData(tenant);
 
   return {
     title: `Welcome to ${tenant.charAt(0).toUpperCase() + tenant.slice(1)}`,
@@ -221,36 +254,47 @@ export const transformDashboardData = (
       completionRate: data.stats?.completionRate || 87,
       totalUsers: data.stats?.totalGroups || 8,
     },
-    retentionData: data.userRetention ? [{
-      date: data.userRetention.period,
-      value: data.userRetention.retention,
-      label: data.userRetention.period,
-    }] : [{
-      date: '30d',
-      value: 85,
-      label: '30 days',
-    }],
-    engagementData: data.engagementBreakdown?.map((item: any) => ({
-      id: item.category.toLowerCase().replace(/\s+/g, '-'),
-      label: item.category,
-      value: item.value,
-      color: item.color,
-      percentage: item.value,
+    retentionData: data.userRetention
+      ? [
+          {
+            date: data.userRetention.period,
+            value: data.userRetention.retention,
+            label: data.userRetention.period,
+          },
+        ]
+      : [
+          {
+            date: '30d',
+            value: 85,
+            label: '30 days',
+          },
+        ],
+    engagementData: data.engagementBreakdown?.map((item) => ({
+      id: String(item.category).toLowerCase().replace(/\s+/g, '-'),
+      label: String(item.category),
+      value: Number(item.value),
+      color: String(item.color),
+      percentage: Number(item.value),
     })) || [
       { id: 'courses', label: 'Courses', value: 45, color: '#3B82F6', percentage: 45 },
       { id: 'groups', label: 'Groups', value: 30, color: '#10B981', percentage: 30 },
       { id: 'discussions', label: 'Discussions', value: 25, color: '#F59E0B', percentage: 25 },
     ],
-    trendsData: data.engagementTrends?.map((item: any) => ({
-      label: new Date(item.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      interactions: item.activeUsers,
-      completions: item.completedCourses,
-    })) || Array.from({ length: 7 }, (_, i) => ({
-      label: new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      interactions: Math.floor(Math.random() * 50) + 100,
-      completions: Math.floor(Math.random() * 20) + 10,
-    })),
-    activitiesData: data.recentActivities?.map((activity: any) => ({
+    trendsData:
+      data.engagementTrends?.map((item) => ({
+        label: new Date(String(item.date)).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        interactions: Number(item.activeUsers),
+        completions: Number(item.completedCourses),
+      })) ||
+      Array.from({ length: 7 }, (_, i) => ({
+        label: new Date(Date.now() - (6 - i) * 24 * 60 * 60 * 1000).toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+        }),
+        interactions: Math.floor(Math.random() * 50) + 100,
+        completions: Math.floor(Math.random() * 20) + 10,
+      })),
+    activitiesData: data.recentActivities?.map((activity: DashboardGraphActivity) => ({
       id: activity.id,
       user: {
         name: activity.user,
@@ -294,47 +338,72 @@ export const transformDashboardData = (
         avatarColor: '#8B5CF6',
       },
     ],
-    surveyData: data.lastSurvey ? {
-      id: data.lastSurvey.id,
-      title: data.lastSurvey.title,
-      description: data.lastSurvey.description,
-      status: data.lastSurvey.status,
-      progress: data.lastSurvey.progress,
-      totalQuestions: data.lastSurvey.totalQuestions,
-      completedQuestions: data.lastSurvey.completedQuestions,
-      createdAt: data.lastSurvey.createdAt,
-      expiresAt: data.lastSurvey.expiresAt,
-      totalResponses: data.lastSurvey.responses,
-      targetResponses: 100,
-    } : {
-      id: 'default-survey',
-      title: 'Default Survey',
-      description: 'No survey data available',
-      status: 'inactive',
-      progress: 0,
-      totalQuestions: 0,
-      completedQuestions: 0,
-      createdAt: new Date().toISOString(),
-      expiresAt: new Date().toISOString(),
-      totalResponses: 0,
-      targetResponses: 100,
-    },
-    requestsData: data.permissionRequests?.map((request: any) => ({
-      id: request.id,
-      user: request.user,
-      userAvatar: request.userAvatar,
-      requestType: request.requestType,
-      description: request.description,
-      status: request.status,
-      requestedAt: request.requestedAt,
-      metadata: request.metadata,
-    })) || [],
+    surveyData: data.lastSurvey
+      ? {
+          id: data.lastSurvey.id,
+          title: data.lastSurvey.title,
+          description: data.lastSurvey.description,
+          status: data.lastSurvey.status,
+          progress: data.lastSurvey.progress,
+          totalQuestions: data.lastSurvey.totalQuestions,
+          completedQuestions: data.lastSurvey.completedQuestions,
+          createdAt: data.lastSurvey.createdAt,
+          expiresAt: data.lastSurvey.expiresAt,
+          totalResponses: data.lastSurvey.responses,
+          targetResponses: 100,
+        }
+      : {
+          id: 'default-survey',
+          title: 'Default Survey',
+          description: 'No survey data available',
+          status: 'inactive',
+          progress: 0,
+          totalQuestions: 0,
+          completedQuestions: 0,
+          createdAt: new Date().toISOString(),
+          expiresAt: new Date().toISOString(),
+          totalResponses: 0,
+          targetResponses: 100,
+        },
+    requestsData:
+      data.permissionRequests?.map((request: DashboardGraphPermissionRequest) => ({
+        id: request.id,
+        user: request.user,
+        userAvatar: request.userAvatar,
+        requestType: request.requestType,
+        description: request.description,
+        status: request.status,
+        requestedAt: request.requestedAt,
+        metadata: request.metadata,
+      })) || [],
   };
 };
 
 /**
- * Transform user data for dashboard display
+ * Transform user data for dashboard display from the active auth session.
+ * Returns null when the user is not signed in.
  */
+export const transformUserDataFromSession = (): UserMenu | null => {
+  if (typeof window === 'undefined') return null;
+  if (!localStorage.getItem('authToken')) return null;
+  if (isStoredSessionExpired()) return null;
+
+  const sessionUser = getStoredUser();
+  if (!sessionUser) return null;
+
+  return {
+    name: `${sessionUser.firstName} ${sessionUser.lastName}`.trim() || sessionUser.email,
+    email: sessionUser.email,
+    role: sessionUser.role,
+    avatarUrl: sessionUser.avatar,
+    tenant: {
+      name: sessionUser.tenant.name,
+      subdomain: sessionUser.tenant.subdomain,
+    },
+  };
+};
+
+/** @deprecated Use transformUserDataFromSession — do not fabricate users for unauthenticated sessions */
 export const transformUserData = (tenant: string): UserMenu => ({
   name: `${tenant.charAt(0).toUpperCase() + tenant.slice(1)} User`,
   email: `user@${tenant}.com`,
@@ -348,7 +417,7 @@ export const transformUserData = (tenant: string): UserMenu => ({
 /**
  * Handle dashboard action events
  */
-export const handleDashboardAction = (action: string, data?: any) => {
+export const handleDashboardAction = (action: DashboardActionType | string, data?: unknown) => {
   console.log('Dashboard action:', action, data);
   // Handle dashboard-specific actions
   switch (action) {
@@ -378,16 +447,6 @@ export const handleDashboardAction = (action: string, data?: any) => {
 /**
  * Handle user action events
  */
-export const handleUserAction = (action: 'profile' | 'settings' | 'logout', router: any) => {
-  switch (action) {
-    case 'profile':
-      router.push('/profile');
-      break;
-    case 'settings':
-      router.push('/settings');
-      break;
-    case 'logout':
-      router.push('/login');
-      break;
-  }
+export const handleUserAction = (action: 'profile' | 'settings' | 'logout', router: NextRouter) => {
+  createHandleUserAction(router)(action);
 };

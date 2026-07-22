@@ -1,1 +1,1 @@
-export const FooterTranslations = { en: { title: "Footer" } };
+export const FooterTranslations = { en: { title: 'Footer' } };

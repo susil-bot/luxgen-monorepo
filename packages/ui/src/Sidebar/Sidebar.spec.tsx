@@ -63,7 +63,7 @@ describe('Sidebar', () => {
 
   it('renders with default props', () => {
     render(<Sidebar sections={mockSections} />);
-    
+
     expect(screen.getByText('Navigation')).toBeInTheDocument();
     expect(screen.getByText('Dashboard')).toBeInTheDocument();
     expect(screen.getByText('Groups')).toBeInTheDocument();
@@ -72,12 +72,12 @@ describe('Sidebar', () => {
 
   it('toggles submenu when clicking on item with children', async () => {
     render(<Sidebar sections={mockSections} />);
-    
+
     const groupsItem = screen.getByText('Groups');
     expect(screen.queryByText('All Groups')).not.toBeInTheDocument();
-    
+
     fireEvent.click(groupsItem);
-    
+
     await waitFor(() => {
       expect(screen.getByText('All Groups')).toBeInTheDocument();
       expect(screen.getByText('Create Group')).toBeInTheDocument();
@@ -87,10 +87,10 @@ describe('Sidebar', () => {
   it('navigates to page when clicking on item without children', () => {
     const mockOnItemClick = jest.fn();
     render(<Sidebar sections={mockSections} onItemClick={mockOnItemClick} />);
-    
+
     const dashboardItem = screen.getByText('Dashboard');
     fireEvent.click(dashboardItem);
-    
+
     expect(mockOnItemClick).toHaveBeenCalledWith({
       id: 'dashboard',
       label: 'Dashboard',
@@ -102,10 +102,10 @@ describe('Sidebar', () => {
   it('does not navigate when clicking on item with children', () => {
     const mockOnItemClick = jest.fn();
     render(<Sidebar sections={mockSections} onItemClick={mockOnItemClick} />);
-    
+
     const groupsItem = screen.getByText('Groups');
     fireEvent.click(groupsItem);
-    
+
     // Should not call onItemClick for parent items with children
     expect(mockOnItemClick).not.toHaveBeenCalled();
   });
@@ -113,19 +113,19 @@ describe('Sidebar', () => {
   it('navigates when clicking on submenu items', async () => {
     const mockOnItemClick = jest.fn();
     render(<Sidebar sections={mockSections} onItemClick={mockOnItemClick} />);
-    
+
     // First click to open submenu
     const groupsItem = screen.getByText('Groups');
     fireEvent.click(groupsItem);
-    
+
     await waitFor(() => {
       expect(screen.getByText('All Groups')).toBeInTheDocument();
     });
-    
+
     // Click on submenu item
     const allGroupsItem = screen.getByText('All Groups');
     fireEvent.click(allGroupsItem);
-    
+
     expect(mockOnItemClick).toHaveBeenCalledWith({
       id: 'all-groups',
       label: 'All Groups',
@@ -135,15 +135,15 @@ describe('Sidebar', () => {
 
   it('toggles submenu open and closed', async () => {
     render(<Sidebar sections={mockSections} />);
-    
+
     const groupsItem = screen.getByText('Groups');
-    
+
     // First click to open
     fireEvent.click(groupsItem);
     await waitFor(() => {
       expect(screen.getByText('All Groups')).toBeInTheDocument();
     });
-    
+
     // Second click to close
     fireEvent.click(groupsItem);
     await waitFor(() => {
@@ -153,23 +153,23 @@ describe('Sidebar', () => {
 
   it('shows chevron icon for items with children', () => {
     render(<Sidebar sections={mockSections} />);
-    
+
     const groupsItem = screen.getByText('Groups');
     const chevronIcon = groupsItem.parentElement?.querySelector('svg');
-    
+
     expect(chevronIcon).toBeInTheDocument();
   });
 
   it('rotates chevron when submenu is expanded', async () => {
     render(<Sidebar sections={mockSections} />);
-    
+
     const groupsItem = screen.getByText('Groups');
     const chevronIcon = groupsItem.parentElement?.querySelector('svg');
-    
+
     expect(chevronIcon).not.toHaveClass('rotate-180');
-    
+
     fireEvent.click(groupsItem);
-    
+
     await waitFor(() => {
       expect(chevronIcon).toHaveClass('rotate-180');
     });
@@ -177,7 +177,7 @@ describe('Sidebar', () => {
 
   it('handles collapsed state', () => {
     render(<Sidebar sections={mockSections} defaultCollapsed={true} />);
-    
+
     expect(screen.queryByText('Navigation')).not.toBeInTheDocument();
     expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
   });
@@ -188,9 +188,9 @@ describe('Sidebar', () => {
       email: 'john@example.com',
       role: 'Admin',
     };
-    
+
     render(<Sidebar sections={mockSections} user={mockUser} />);
-    
+
     expect(screen.getByText('John Doe')).toBeInTheDocument();
     expect(screen.getByText('Admin')).toBeInTheDocument();
   });
@@ -202,30 +202,18 @@ describe('Sidebar', () => {
       email: 'john@example.com',
       role: 'Admin',
     };
-    
-    render(
-      <Sidebar 
-        sections={mockSections} 
-        user={mockUser} 
-        onUserAction={mockOnUserAction}
-      />
-    );
-    
+
+    render(<Sidebar sections={mockSections} user={mockUser} onUserAction={mockOnUserAction} />);
+
     const userMenuButton = screen.getByRole('button', { name: /profile/i });
     fireEvent.click(userMenuButton);
-    
+
     expect(mockOnUserAction).toHaveBeenCalledWith('profile');
   });
 
   it('applies custom styling', () => {
-    render(
-      <Sidebar 
-        sections={mockSections} 
-        className="custom-sidebar"
-        variant="compact"
-      />
-    );
-    
+    render(<Sidebar sections={mockSections} className="custom-sidebar" variant="compact" />);
+
     const sidebar = screen.getByRole('complementary');
     expect(sidebar).toHaveClass('custom-sidebar');
   });
@@ -245,9 +233,9 @@ describe('Sidebar', () => {
         ],
       },
     ];
-    
+
     render(<Sidebar sections={sectionsWithDisabled} />);
-    
+
     const disabledItem = screen.getByText('Disabled Item');
     expect(disabledItem.closest('button')).toBeDisabled();
   });
@@ -267,9 +255,9 @@ describe('Sidebar', () => {
         ],
       },
     ];
-    
+
     render(<Sidebar sections={sectionsWithBadge} />);
-    
+
     expect(screen.getByText('5')).toBeInTheDocument();
   });
 });

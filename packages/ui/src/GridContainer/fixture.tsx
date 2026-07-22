@@ -14,7 +14,7 @@ export const gridContainerFixtures = {
       </>
     ),
   } as GridContainerProps,
-  
+
   twoColumns: {
     tenantTheme: defaultTheme,
     columns: 2,
@@ -26,7 +26,7 @@ export const gridContainerFixtures = {
       </>
     ),
   } as GridContainerProps,
-  
+
   fourColumns: {
     tenantTheme: defaultTheme,
     columns: 4,
@@ -40,7 +40,7 @@ export const gridContainerFixtures = {
       </>
     ),
   } as GridContainerProps,
-  
+
   withCustomTheme: {
     tenantTheme: {
       ...defaultTheme,
@@ -59,7 +59,7 @@ export const gridContainerFixtures = {
       </>
     ),
   } as GridContainerProps,
-  
+
   singleColumn: {
     tenantTheme: defaultTheme,
     columns: 1,

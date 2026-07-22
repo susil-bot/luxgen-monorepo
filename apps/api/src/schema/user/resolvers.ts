@@ -1,110 +1,124 @@
-import { User } from '@luxgen/db';
-import { hashPassword, verifyPassword } from '@luxgen/auth';
-import { generateToken } from '../../utils/jwt';
+import { GraphQLError } from 'graphql';
+import { UserRole } from '@luxgen/db';
+import { userService } from '../../services/userService';
+import { activityEventService, actorFromContext } from '../../services/activityEventService';
+import type { GraphQLContext } from '../../context';
+import { scopedTenantId } from '../../graphql/tenantScope';
+
+const STAFF_ROLES = new Set<UserRole>([UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.INSTRUCTOR]);
+
+function contextUserId(context: GraphQLContext): string {
+  return context.user?._id?.toString?.() ?? '';
+}
+
+function assertStaff(context: GraphQLContext): void {
+  if (!context.user) {
+    throw new GraphQLError('Authentication required', { extensions: { code: 'UNAUTHENTICATED' } });
+  }
+  if (!STAFF_ROLES.has(context.user.role)) {
+    throw new GraphQLError('Staff access required', { extensions: { code: 'FORBIDDEN' } });
+  }
+}
+
+function assertCanReadUser(context: GraphQLContext, userId: string): void {
+  if (!context.user) {
+    throw new GraphQLError('Authentication required', { extensions: { code: 'UNAUTHENTICATED' } });
+  }
+  if (contextUserId(context) === userId) return;
+  if (STAFF_ROLES.has(context.user.role)) return;
+  throw new GraphQLError('Not authorized to view this user', { extensions: { code: 'FORBIDDEN' } });
+}
 
 export const userResolvers = {
   Query: {
-    user: async (_: any, { id }: { id: string }) => {
-      return await User.findById(id).populate('tenant');
+    user: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
+      assertCanReadUser(ctx, id);
+      if (!ctx.tenantId) throw new Error('Tenant context required');
+      return userService.getUserById(id, scopedTenantId(ctx, ctx.tenantId));
     },
-    users: async (_: any, { tenantId }: { tenantId: string }) => {
-      return await User.find({ tenant: tenantId }).populate('tenant');
+    users: (_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) => {
+      assertStaff(ctx);
+      return userService.getUsersByTenant(scopedTenantId(ctx, tenantId));
     },
-    currentUser: async (_: any, __: any, context: any) => {
-      return context.user;
-    },
+    customers: (_: unknown, { tenantId, search }: { tenantId: string; search?: string }, ctx: GraphQLContext) =>
+      userService.getCustomersByTenant(scopedTenantId(ctx, tenantId), search),
+    currentUser: (_: unknown, __: unknown, context: GraphQLContext) => context.user ?? null,
   },
   Mutation: {
-    createUser: async (_: any, { input }: { input: any }) => {
-      const hashedPassword = await hashPassword(input.password);
-      const user = new User({
+    createUser: async (_: unknown, { input }: { input: any }, context: GraphQLContext) => {
+      const actor = actorFromContext(context.user);
+      const user = await userService.createUser({
         ...input,
-        password: hashedPassword,
+        invitedBy: actor?.id,
       });
-      await user.save();
-      await user.populate('tenant');
-      return user;
-    },
-    updateUser: async (_: any, { id, input }: { id: string; input: any }) => {
-      const user = await User.findByIdAndUpdate(id, input, { new: true }).populate('tenant');
-      if (!user) {
-        throw new Error('User not found');
+      if (input.role === 'STUDENT') {
+        const userId = (user as { _id?: { toString(): string }; id?: string })._id?.toString?.() ?? user.id;
+        await activityEventService.recordCustomerCreated(input.tenantId, userId, user.email, actor);
       }
       return user;
     },
-    deleteUser: async (_: any, { id }: { id: string }) => {
-      const result = await User.findByIdAndDelete(id);
-      return !!result;
-    },
-    login: async (_: any, { input }: { input: { email: string; password: string } }) => {
-      try {
-        // Find user by email
-        const user = await User.findOne({ 
-          email: input.email.toLowerCase().trim() 
-        }).populate('tenant');
 
-        if (!user) {
-          throw new Error('Invalid email or password');
+    updateUser: async (_: unknown, { id, input }: { id: string; input: any }, context: GraphQLContext) => {
+      if (!context.tenantId) throw new Error('Tenant context required');
+      const user = await userService.updateUser(id, context.tenantId, input);
+      const role = user.role === 'USER' ? 'STUDENT' : user.role;
+      if (role === 'STUDENT') {
+        const actor = actorFromContext(context.user);
+        const tenantId =
+          (user.tenant as { _id?: { toString(): string }; id?: string })?._id?.toString?.() ??
+          (user.tenant as { toString(): string })?.toString?.();
+        if (tenantId) {
+          await activityEventService.recordCustomerUpdated(tenantId, id, 'Customer profile updated', actor);
         }
-
-        // Verify password
-        const isPasswordValid = await verifyPassword(input.password, user.password);
-        if (!isPasswordValid) {
-          throw new Error('Invalid email or password');
-        }
-
-        // Generate JWT token with tenant-specific key
-        const token = generateToken({
-          id: user._id.toString(),
-          email: user.email,
-          tenant: user.tenant.toString(),
-          role: user.role,
-        }, (user.tenant as any)?._id?.toString());
-
-        return {
-          token,
-          user,
-        };
-      } catch (error) {
-        throw new Error((error as Error).message || 'Login failed');
       }
+      return user;
     },
-    register: async (_: any, { input }: { input: any }) => {
-      try {
-        // Check if user already exists
-        const existingUser = await User.findOne({ email: input.email.toLowerCase().trim() });
-        if (existingUser) {
-          throw new Error('User already exists');
-        }
 
-        // Hash password
-        const hashedPassword = await hashPassword(input.password);
+    deleteUser: (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
+      if (!context.tenantId) throw new Error('Tenant context required');
+      return userService.deleteUser(id, context.tenantId);
+    },
 
-        // Create new user
-        const user = new User({
-          ...input,
-          email: input.email.toLowerCase().trim(),
-          password: hashedPassword,
-        });
+    login: (_: unknown, { input }: { input: { email: string; password: string } }, ctx: GraphQLContext) =>
+      userService.login({ ...input, req: ctx.req }),
 
-        await user.save();
-        await user.populate('tenant');
+    register: (_: unknown, { input }: { input: any }, ctx: GraphQLContext) =>
+      userService.register(input, { selfService: true, tenantId: ctx.tenantId }),
 
-        // Generate JWT token with tenant-specific key
-        const token = generateToken({
-          id: user._id.toString(),
-          email: user.email,
-          tenant: user.tenant.toString(),
-          role: user.role,
-        }, (user.tenant as any)?._id?.toString());
-
-        return {
-          token,
-          user,
-        };
-      } catch (error) {
-        throw new Error((error as Error).message || 'Registration failed');
+    registerPushToken: async (_: unknown, { token }: { token: string }, context: GraphQLContext) => {
+      if (!context.user || !context.tenantId) {
+        throw new Error('Authentication required');
       }
+      const userId = context.user._id?.toString?.() ?? '';
+      if (!userId) throw new Error('Authentication required');
+      return userService.registerPushToken(userId, context.tenantId, token);
+    },
+  },
+  User: {
+    id: (parent: { _id?: { toString(): string }; id?: string }) => parent._id?.toString?.() ?? parent.id ?? '',
+    role: (parent: { role: string }) => (parent.role === 'USER' ? 'STUDENT' : parent.role),
+    status: (parent: { status?: string }) => parent.status ?? 'ACTIVE',
+    isActive: (parent: { isActive?: boolean }) => parent.isActive ?? true,
+    staffNotes: (parent: { staffNotes?: string }) => parent.staffNotes ?? '',
+    phone: (parent: { phone?: string }) => parent.phone ?? '',
+    marketingEmail: (parent: { marketingEmail?: boolean }) => parent.marketingEmail ?? true,
+    marketingSms: (parent: { marketingSms?: boolean }) => parent.marketingSms ?? false,
+    marketingWhatsapp: (parent: { marketingWhatsapp?: boolean }) => parent.marketingWhatsapp ?? false,
+    tenant: (parent: {
+      tenant?: {
+        _id?: { toString(): string };
+        id?: string;
+        name?: string;
+        subdomain?: string;
+      };
+    }) => {
+      const t = parent.tenant;
+      if (!t || typeof t !== 'object') return t;
+      return {
+        id: t._id?.toString?.() ?? t.id,
+        name: t.name,
+        subdomain: t.subdomain,
+      };
     },
   },
 };

@@ -18,9 +18,10 @@ function RegisterPage() {
   return (
     <RegisterVisual
       testimonial={{
-        quote: "Join thousands of professionals who have found their dream careers through our platform. Start your journey today!",
-        author: "Join Our Community",
-        stats: "Over 10,000+ successful placements"
+        quote:
+          'Join thousands of professionals who have found their dream careers through our platform. Start your journey today!',
+        author: 'Join Our Community',
+        stats: 'Over 10,000+ successful placements',
       }}
     />
   );
@@ -29,22 +30,22 @@ function RegisterPage() {
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `testimonial` | `object` | See below | Testimonial content |
-| `testimonial.quote` | `string` | Default quote | The testimonial quote text |
-| `testimonial.author` | `string` | "Join Our Community" | The author name |
-| `testimonial.stats` | `string` | "Over 10,000+ successful placements" | Statistics text |
-| `className` | `string` | `''` | Additional CSS classes |
-| `title` | `string` | "Join Our Community" | Title for the testimonial |
-| `subtitle` | `string` | "Over 10,000+ successful placements" | Subtitle for the testimonial |
+| Prop                 | Type     | Default                              | Description                  |
+| -------------------- | -------- | ------------------------------------ | ---------------------------- |
+| `testimonial`        | `object` | See below                            | Testimonial content          |
+| `testimonial.quote`  | `string` | Default quote                        | The testimonial quote text   |
+| `testimonial.author` | `string` | "Join Our Community"                 | The author name              |
+| `testimonial.stats`  | `string` | "Over 10,000+ successful placements" | Statistics text              |
+| `className`          | `string` | `''`                                 | Additional CSS classes       |
+| `title`              | `string` | "Join Our Community"                 | Title for the testimonial    |
+| `subtitle`           | `string` | "Over 10,000+ successful placements" | Subtitle for the testimonial |
 
 ## Default Testimonial
 
 ```tsx
 {
   quote: "Join thousands of professionals who have found their dream careers through our platform. Start your journey today!",
-  author: "Join Our Community", 
+  author: "Join Our Community",
   stats: "Over 10,000+ successful placements"
 }
 ```
@@ -52,6 +53,7 @@ function RegisterPage() {
 ## Styling
 
 The component uses Tailwind CSS classes and includes:
+
 - Gradient backgrounds with blur effects
 - Animated rings with different delays
 - Floating particle animations
@@ -62,7 +64,7 @@ The component uses Tailwind CSS classes and includes:
 
 - **Outer Ring**: Pulses continuously
 - **Middle Ring**: Pulses with 0.5s delay
-- **Inner Ring**: Pulses with 1s delay  
+- **Inner Ring**: Pulses with 1s delay
 - **Center Dot**: Pings continuously
 - **Floating Particles**: 8 particles with staggered bounce animations
 

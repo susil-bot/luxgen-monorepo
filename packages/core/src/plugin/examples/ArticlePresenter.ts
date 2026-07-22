@@ -14,7 +14,7 @@ export class ArticlePresenter extends Presenter {
         createFetcher('articleData', async (workflowContext) => {
           const { request } = workflowContext;
           const articleId = request?.params?.id;
-          
+
           if (!articleId) {
             throw new Error('Article ID is required');
           }
@@ -42,8 +42,8 @@ export class ArticlePresenter extends Presenter {
           };
         }),
         createFetcher('relatedArticles', async (workflowContext) => {
-          const articleData = workflowContext.fetched.articleData;
-          
+          const _articleData = workflowContext.fetched.articleData;
+
           // This would typically fetch related articles from a database
           return [
             {
@@ -66,7 +66,7 @@ export class ArticlePresenter extends Presenter {
         }),
         createFetcher('comments', async (workflowContext) => {
           const articleId = workflowContext.fetched.articleData?.id;
-          
+
           if (!articleId) {
             return [];
           }
@@ -94,7 +94,7 @@ export class ArticlePresenter extends Presenter {
         // Transformers
         createTransformer('articleMeta', (workflowContext) => {
           const articleData = workflowContext.fetched.articleData;
-          
+
           return {
             title: articleData.title,
             description: articleData.excerpt,
@@ -117,7 +117,7 @@ export class ArticlePresenter extends Presenter {
         }),
         createTransformer('articleContent', (workflowContext) => {
           const articleData = workflowContext.fetched.articleData;
-          
+
           return {
             title: articleData.title,
             content: articleData.content,
@@ -135,15 +135,10 @@ export class ArticlePresenter extends Presenter {
             },
           };
         }),
-      ]
+      ],
     );
 
-    super(
-      'presenter-articles',
-      '/articles/:id',
-      'article',
-      phaseSet
-    );
+    super('presenter-articles', '/articles/:id', 'article', phaseSet);
   }
 }
 

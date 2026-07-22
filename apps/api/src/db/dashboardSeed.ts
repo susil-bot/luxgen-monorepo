@@ -1,6 +1,5 @@
-import { logger } from '../utils/logger';
 import { connectDB } from './connect';
-import { User, Group, Tenant } from '@luxgen/db';
+import { User, Tenant } from '@luxgen/db';
 
 export interface DashboardSeedData {
   activities: any[];
@@ -13,17 +12,17 @@ export interface DashboardSeedData {
 export const seedDashboardData = async (): Promise<DashboardSeedData> => {
   try {
     console.log('🌱 Starting dashboard data seeding...');
-    
+
     // Connect to database
     await connectDB();
     console.log('✅ Connected to database');
-    
+
     // Get all tenants
     const tenants = await Tenant.find({});
     if (tenants.length === 0) {
       throw new Error('No tenants found. Please run main seed first.');
     }
-    
+
     const seedData: DashboardSeedData = {
       activities: [],
       surveys: [],
@@ -31,35 +30,37 @@ export const seedDashboardData = async (): Promise<DashboardSeedData> => {
       userRetention: [],
       engagementData: [],
     };
-    
+
     // Create dashboard data for each tenant
     for (const tenant of tenants) {
       console.log(`📊 Creating dashboard data for tenant: ${tenant.name}`);
-      
+
       // Create activities
       const activities = await createDashboardActivities(tenant);
       seedData.activities.push(...activities);
-      
+
       // Create surveys
       const surveys = await createDashboardSurveys(tenant);
       seedData.surveys.push(...surveys);
-      
+
       // Create permission requests
       const requests = await createDashboardPermissionRequests(tenant);
       seedData.permissionRequests.push(...requests);
-      
+
       // Create user retention data
       const retention = await createUserRetentionData(tenant);
       seedData.userRetention.push(...retention);
-      
+
       // Create engagement data
       const engagement = await createEngagementData(tenant);
       seedData.engagementData.push(...engagement);
     }
-    
+
     console.log('🎉 Dashboard data seeding completed successfully!');
-    console.log(`📊 Summary: ${seedData.activities.length} activities, ${seedData.surveys.length} surveys, ${seedData.permissionRequests.length} requests`);
-    
+    console.log(
+      `📊 Summary: ${seedData.activities.length} activities, ${seedData.surveys.length} surveys, ${seedData.permissionRequests.length} requests`,
+    );
+
     return seedData;
   } catch (error) {
     console.error('❌ Dashboard data seeding error:', error);
@@ -70,7 +71,7 @@ export const seedDashboardData = async (): Promise<DashboardSeedData> => {
 const createDashboardActivities = async (tenant: any) => {
   const activities = [];
   const tenantUsers = await User.find({ tenant: tenant._id });
-  
+
   const activityTypes = [
     'course_completion',
     'course_start',
@@ -81,17 +82,17 @@ const createDashboardActivities = async (tenant: any) => {
     'profile_update',
     'permission_request',
   ];
-  
+
   const statuses = ['completed', 'in_progress', 'pending', 'failed'];
-  
+
   // Create 20-30 activities per tenant
   const activityCount = Math.floor(Math.random() * 11) + 20;
-  
+
   for (let i = 0; i < activityCount; i++) {
     const user = tenantUsers[Math.floor(Math.random() * tenantUsers.length)];
     const activityType = activityTypes[Math.floor(Math.random() * activityTypes.length)];
     const status = statuses[Math.floor(Math.random() * statuses.length)];
-    
+
     const activity = {
       id: `activity-${tenant._id}-${i}`,
       type: activityType,
@@ -107,16 +108,16 @@ const createDashboardActivities = async (tenant: any) => {
         activityId: `activity-${tenant._id}-${i}`,
       },
     };
-    
+
     activities.push(activity);
   }
-  
+
   return activities;
 };
 
 const createDashboardSurveys = async (tenant: any) => {
   const surveys = [];
-  
+
   const surveyTemplates = [
     {
       title: 'Q1 2024 Employee Satisfaction Survey',
@@ -146,7 +147,7 @@ const createDashboardSurveys = async (tenant: any) => {
       responses: 0,
     },
   ];
-  
+
   for (let i = 0; i < surveyTemplates.length; i++) {
     const template = surveyTemplates[i];
     const survey = {
@@ -158,24 +159,27 @@ const createDashboardSurveys = async (tenant: any) => {
       totalQuestions: template.totalQuestions,
       completedQuestions: template.completedQuestions,
       createdAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-      expiresAt: template.status === 'active' ? new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString() : null,
+      expiresAt:
+        template.status === 'active'
+          ? new Date(Date.now() + Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString()
+          : null,
       responses: template.responses,
       metadata: {
         tenantId: tenant._id,
         surveyId: `survey-${tenant._id}-${i}`,
       },
     };
-    
+
     surveys.push(survey);
   }
-  
+
   return surveys;
 };
 
 const createDashboardPermissionRequests = async (tenant: any) => {
   const requests = [];
   const tenantUsers = await User.find({ tenant: tenant._id });
-  
+
   const requestTypes = [
     'admin_access',
     'group_management',
@@ -184,17 +188,17 @@ const createDashboardPermissionRequests = async (tenant: any) => {
     'course_creation',
     'survey_management',
   ];
-  
+
   const statuses = ['pending', 'approved', 'denied'];
-  
+
   // Create 5-10 permission requests per tenant
   const requestCount = Math.floor(Math.random() * 6) + 5;
-  
+
   for (let i = 0; i < requestCount; i++) {
     const user = tenantUsers[Math.floor(Math.random() * tenantUsers.length)];
     const requestType = requestTypes[Math.floor(Math.random() * requestTypes.length)];
     const status = statuses[Math.floor(Math.random() * statuses.length)];
-    
+
     const request = {
       id: `request-${tenant._id}-${i}`,
       user: `${user.firstName} ${user.lastName}`,
@@ -209,21 +213,21 @@ const createDashboardPermissionRequests = async (tenant: any) => {
         reason: generatePermissionRequestReason(requestType),
       },
     };
-    
+
     requests.push(request);
   }
-  
+
   return requests;
 };
 
 const createUserRetentionData = async (tenant: any) => {
   const retentionData = [];
-  
+
   // Generate 30 days of retention data
   for (let i = 29; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
-    
+
     retentionData.push({
       period: date.toISOString().split('T')[0],
       retention: Math.random() * 40 + 50, // 50-90% retention
@@ -231,18 +235,18 @@ const createUserRetentionData = async (tenant: any) => {
       tenantId: tenant._id,
     });
   }
-  
+
   return retentionData;
 };
 
 const createEngagementData = async (tenant: any) => {
   const engagementData = [];
-  
+
   // Generate 30 days of engagement data
   for (let i = 29; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
-    
+
     engagementData.push({
       date: date.toISOString().split('T')[0],
       activeUsers: Math.floor(Math.random() * 30) + 20,
@@ -251,7 +255,7 @@ const createEngagementData = async (tenant: any) => {
       tenantId: tenant._id,
     });
   }
-  
+
   return engagementData;
 };
 
@@ -267,7 +271,7 @@ const generateActivityTitle = (type: string): string => {
     profile_update: 'Profile Updated',
     permission_request: 'Permission Request',
   };
-  
+
   return titles[type as keyof typeof titles] || 'Activity';
 };
 
@@ -282,7 +286,7 @@ const generateActivityDescription = (type: string, user: any): string => {
     profile_update: `${user.firstName} ${user.lastName} updated their profile information`,
     permission_request: `${user.firstName} ${user.lastName} requested admin access`,
   };
-  
+
   return descriptions[type as keyof typeof descriptions] || 'Activity performed';
 };
 
@@ -295,7 +299,7 @@ const generatePermissionRequestDescription = (type: string): string => {
     course_creation: 'Request to create and manage courses',
     survey_management: 'Request to create and manage surveys',
   };
-  
+
   return descriptions[type as keyof typeof descriptions] || 'Permission request';
 };
 
@@ -308,17 +312,19 @@ const generatePermissionRequestReason = (type: string): string => {
     course_creation: 'Develop training content for team development',
     survey_management: 'Create feedback surveys for team improvement',
   };
-  
+
   return reasons[type as keyof typeof reasons] || 'Business requirement';
 };
 
 // Run the seed function if this file is executed directly
 if (require.main === module) {
-  seedDashboardData().then(() => {
-    console.log('✅ Dashboard seed script completed');
-    process.exit(0);
-  }).catch((error) => {
-    console.error('❌ Dashboard seed script failed:', error);
-    process.exit(1);
-  });
+  seedDashboardData()
+    .then(() => {
+      console.log('✅ Dashboard seed script completed');
+      process.exit(0);
+    })
+    .catch((error) => {
+      console.error('❌ Dashboard seed script failed:', error);
+      process.exit(1);
+    });
 }

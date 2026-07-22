@@ -1,4 +1,5 @@
 import React from 'react';
+import './kicker.css';
 import { BaseComponentProps, TenantTheme, VariantProps } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
@@ -40,33 +41,15 @@ const KickerComponent: React.FC<KickerProps> = ({
       warning: tenantTheme.colors.warning,
       info: tenantTheme.colors.info,
     };
-    
+
     return variantColors[variant];
   };
 
-  const getSizeStyles = () => {
-    const sizeMap = {
-      small: {
-        fontSize: '0.75rem',
-        letterSpacing: '0.05em',
-        lineHeight: '1.2',
-      },
-      medium: {
-        fontSize: '0.875rem',
-        letterSpacing: '0.1em',
-        lineHeight: '1.3',
-      },
-      large: {
-        fontSize: '1rem',
-        letterSpacing: '0.15em',
-        lineHeight: '1.4',
-      },
-    };
-    
-    return sizeMap[size];
+  const getSizeClass = () => {
+    if (size === 'small') return 'kicker-small';
+    if (size === 'large') return 'kicker-large';
+    return 'kicker-medium';
   };
-
-  const sizeStyles = getSizeStyles();
 
   const styles = {
     ...style,
@@ -79,27 +62,20 @@ const KickerComponent: React.FC<KickerProps> = ({
     textDecorationColor: getVariantColor(),
     textDecorationThickness: '2px',
     textUnderlineOffset: '0.25em',
-    ...sizeStyles,
     display: 'flex',
     alignItems: 'center',
     gap: '0.5rem',
     flexDirection: iconPosition === 'right' ? 'row-reverse' : 'row',
-  };
+  } as React.CSSProperties;
 
   return (
     <div
-      className={`kicker kicker-${variant} kicker-${size} ${className}`}
+      className={`kicker kicker-${variant} ${getSizeClass()} ${className}`}
       style={styles as React.CSSProperties}
       {...props}
     >
-      {icon && (
-        <span className="kicker-icon">
-          {icon}
-        </span>
-      )}
-      <span className="kicker-content">
-        {children}
-      </span>
+      {icon && <span className="kicker-icon">{icon}</span>}
+      <span className="kicker-content">{children}</span>
     </div>
   );
 };

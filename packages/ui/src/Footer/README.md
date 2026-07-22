@@ -39,13 +39,13 @@ import { Footer } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `links` | `FooterLink[]` | `[]` | Array of footer links |
-| `copyright` | `string` | `'© 2024 LuxGen. All rights reserved.'` | Copyright text |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
+| Prop          | Type            | Default                                 | Description              |
+| ------------- | --------------- | --------------------------------------- | ------------------------ |
+| `tenantTheme` | `TenantTheme`   | `defaultTheme`                          | Theme object for styling |
+| `links`       | `FooterLink[]`  | `[]`                                    | Array of footer links    |
+| `copyright`   | `string`        | `'© 2024 LuxGen. All rights reserved.'` | Copyright text           |
+| `className`   | `string`        | `''`                                    | Additional CSS classes   |
+| `style`       | `CSSProperties` | `{}`                                    | Inline styles            |
 
 ## FooterLink Interface
 
@@ -112,14 +112,9 @@ test('renders with links and copyright', () => {
     { label: 'Privacy Policy', href: '/privacy' },
     { label: 'Terms of Service', href: '/terms' },
   ];
-  
-  render(
-    <Footer 
-      links={links} 
-      copyright="© 2024 My Company. All rights reserved." 
-    />
-  );
-  
+
+  render(<Footer links={links} copyright="© 2024 My Company. All rights reserved." />);
+
   expect(screen.getByText('Privacy Policy')).toBeInTheDocument();
   expect(screen.getByText('Terms of Service')).toBeInTheDocument();
   expect(screen.getByText('© 2024 My Company. All rights reserved.')).toBeInTheDocument();
@@ -129,6 +124,7 @@ test('renders with links and copyright', () => {
 ## Examples
 
 ### Basic Footer
+
 ```tsx
 <Footer
   links={[
@@ -140,6 +136,7 @@ test('renders with links and copyright', () => {
 ```
 
 ### Footer with Many Links
+
 ```tsx
 <Footer
   links={[
@@ -156,14 +153,13 @@ test('renders with links and copyright', () => {
 ```
 
 ### Footer with Custom Copyright
+
 ```tsx
-<Footer
-  links={links}
-  copyright="© 2024 My Company. Made with ❤️"
-/>
+<Footer links={links} copyright="© 2024 My Company. Made with ❤️" />
 ```
 
 ### Footer without Links
+
 ```tsx
 <Footer copyright="© 2024 Simple Company. All rights reserved." />
 ```

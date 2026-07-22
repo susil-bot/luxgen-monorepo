@@ -6,20 +6,20 @@ export const cardFixtures = {
     tenantTheme: defaultTheme,
     children: <div>Card content</div>,
   } as CardProps,
-  
+
   withTitle: {
     tenantTheme: defaultTheme,
     children: <div>Card content</div>,
     title: 'Card Title',
   } as CardProps,
-  
+
   withDescription: {
     tenantTheme: defaultTheme,
     children: <div>Card content</div>,
     title: 'Card Title',
     description: 'Card description',
   } as CardProps,
-  
+
   withIcon: {
     tenantTheme: defaultTheme,
     children: <div>Card content</div>,
@@ -27,49 +27,49 @@ export const cardFixtures = {
     description: 'Card description',
     icon: '🔖',
   } as CardProps,
-  
+
   elevated: {
     tenantTheme: defaultTheme,
     children: <div>Card content</div>,
     title: 'Elevated Card',
     variant: 'elevated' as const,
   } as CardProps,
-  
+
   outlined: {
     tenantTheme: defaultTheme,
     children: <div>Card content</div>,
     title: 'Outlined Card',
     variant: 'outlined' as const,
   } as CardProps,
-  
+
   filled: {
     tenantTheme: defaultTheme,
     children: <div>Card content</div>,
     title: 'Filled Card',
     variant: 'filled' as const,
   } as CardProps,
-  
+
   small: {
     tenantTheme: defaultTheme,
     children: <div>Card content</div>,
     title: 'Small Card',
     size: 'small' as const,
   } as CardProps,
-  
+
   medium: {
     tenantTheme: defaultTheme,
     children: <div>Card content</div>,
     title: 'Medium Card',
     size: 'medium' as const,
   } as CardProps,
-  
+
   large: {
     tenantTheme: defaultTheme,
     children: <div>Card content</div>,
     title: 'Large Card',
     size: 'large' as const,
   } as CardProps,
-  
+
   clickable: {
     tenantTheme: defaultTheme,
     children: <div>Card content</div>,
@@ -77,14 +77,14 @@ export const cardFixtures = {
     clickable: true,
     onClick: () => console.log('Card clicked'),
   } as CardProps,
-  
+
   withHover: {
     tenantTheme: defaultTheme,
     children: <div>Card content</div>,
     title: 'Hover Card',
     hover: true,
   } as CardProps,
-  
+
   withImage: {
     tenantTheme: defaultTheme,
     children: <div>Card content</div>,
@@ -92,20 +92,20 @@ export const cardFixtures = {
     image: 'https://via.placeholder.com/300x200',
     imageAlt: 'Placeholder image',
   } as CardProps,
-  
+
   withHeader: {
     tenantTheme: defaultTheme,
     children: <div>Card content</div>,
     header: <div>Custom header</div>,
   } as CardProps,
-  
+
   withFooter: {
     tenantTheme: defaultTheme,
     children: <div>Card content</div>,
     title: 'Card with Footer',
     footer: <div>Custom footer</div>,
   } as CardProps,
-  
+
   withCustomTheme: {
     tenantTheme: {
       ...defaultTheme,
@@ -117,7 +117,7 @@ export const cardFixtures = {
     children: <div>Card content</div>,
     title: 'Custom Themed Card',
   } as CardProps,
-  
+
   withAllFeatures: {
     tenantTheme: defaultTheme,
     children: <div>Card content with all features</div>,

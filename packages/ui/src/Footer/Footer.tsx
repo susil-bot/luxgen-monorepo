@@ -14,6 +14,7 @@ export interface FooterProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
   links?: FooterLink[];
   copyright?: string;
+  companyName?: string;
 }
 
 const FooterComponent: React.FC<FooterProps> = ({
@@ -21,9 +22,11 @@ const FooterComponent: React.FC<FooterProps> = ({
   className = '',
   style,
   links = [],
-  copyright = '© 2024 LuxGen. All rights reserved.',
+  copyright,
+  companyName = 'LuxGen',
   ...props
 }) => {
+  const resolvedCopyright = copyright ?? `© ${new Date().getFullYear()} ${companyName}. All rights reserved.`;
   const styles = {
     ...style,
     backgroundColor: tenantTheme.colors.surface,
@@ -33,29 +36,21 @@ const FooterComponent: React.FC<FooterProps> = ({
   };
 
   return (
-    <footer
-      className={`footer ${className}`}
-      style={styles}
-      {...props}
-    >
+    <footer className={`footer ${className}`} style={styles} {...props}>
       <div className="footer-container">
         <div className="footer-content">
           {links.length > 0 && (
             <nav className="footer-nav">
               {links.map((link, index) => (
-                <a
-                  key={index}
-                  href={link.href}
-                  className="footer-link"
-                >
+                <a key={index} href={link.href} className="footer-link">
                   {link.label}
                 </a>
               ))}
             </nav>
           )}
-          
+
           <div className="footer-copyright">
-            <p>{copyright}</p>
+            <p>{resolvedCopyright}</p>
           </div>
         </div>
       </div>

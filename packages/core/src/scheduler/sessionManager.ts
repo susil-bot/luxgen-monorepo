@@ -41,15 +41,11 @@ export class SessionManager {
   }
 
   getSessionsByCourse(courseId: string): Session[] {
-    return Array.from(this.sessions.values()).filter(
-      session => session.courseId === courseId
-    );
+    return Array.from(this.sessions.values()).filter((session) => session.courseId === courseId);
   }
 
   getSessionsByInstructor(instructorId: string): Session[] {
-    return Array.from(this.sessions.values()).filter(
-      session => session.instructorId === instructorId
-    );
+    return Array.from(this.sessions.values()).filter((session) => session.instructorId === instructorId);
   }
 
   private generateId(): string {

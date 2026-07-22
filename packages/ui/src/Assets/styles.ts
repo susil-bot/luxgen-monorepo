@@ -235,7 +235,7 @@ export const getAspectRatioStyles = (ratio: string) => {
     wide: 'aspect-[16/9]',
     portrait: 'aspect-[3/4]',
   };
-  
+
   return ratios[ratio] || 'aspect-square';
 };
 
@@ -248,7 +248,7 @@ export const getAnimationStyles = (animation: string) => {
     pulse: assetStyles.animation.pulse,
     spin: assetStyles.animation.spin,
   };
-  
+
   return animations[animation] || '';
 };
 
@@ -259,7 +259,7 @@ export const getHoverStyles = (hover: string) => {
     shadow: assetStyles.hover.shadow,
     brightness: assetStyles.hover.brightness,
   };
-  
+
   return hovers[hover] || '';
 };
 
@@ -275,7 +275,7 @@ export const getAssetTypeStyles = (type: string) => {
     background: assetStyles.assetType.background,
     illustration: assetStyles.assetType.illustration,
   };
-  
+
   return types[type] || assetStyles.assetType.image;
 };
 
@@ -291,6 +291,6 @@ export const getAccessibilityStyles = (level: 'basic' | 'enhanced' | 'high-contr
     enhanced: `${assetStyles.accessibility.screenReader} ${assetStyles.focus.ring}`,
     'high-contrast': `${assetStyles.accessibility.screenReader} ${assetStyles.accessibility.highContrast}`,
   };
-  
+
   return levels[level] || assetStyles.accessibility.screenReader;
 };

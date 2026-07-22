@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Arrow } from '../Arrow';
 
+/** @deprecated Prefer `Carousel` with banner styling — consolidation tracked as UI-110. */
 export interface BannerSlide {
   id: string;
   title: string;
@@ -11,9 +12,12 @@ export interface BannerSlide {
   ctaHref?: string;
   ctaOnClick?: () => void;
   backgroundImage?: string;
+  /** Alias used by dashboard page data (UI-164) */
+  image?: string;
   backgroundColor?: string;
   textColor?: string;
   ctaColor?: string;
+  renderBackground?: () => React.ReactNode;
 }
 
 export interface BannerCarouselProps {
@@ -29,17 +33,29 @@ export interface BannerCarouselProps {
 
 export const BannerCarousel: React.FC<BannerCarouselProps> = ({
   slides,
-  autoPlay = true,
+  autoPlay = typeof window === 'undefined' ? true : !window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   autoPlayInterval = 5000,
   showArrows = true,
   showDots = true,
   className = '',
   onSlideChange,
-  onCtaClick
+  onCtaClick,
 }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(autoPlay);
-
+  const rootRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const pause = () => setIsPlaying(false);
+    const resume = () => setIsPlaying(autoPlay);
+    el.addEventListener('focusin', pause);
+    el.addEventListener('focusout', resume);
+    return () => {
+      el.removeEventListener('focusin', pause);
+      el.removeEventListener('focusout', resume);
+    };
+  }, [autoPlay]);
   useEffect(() => {
     if (!isPlaying || slides.length <= 1) return;
 
@@ -83,37 +99,26 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
   const currentSlideData = slides[currentSlide];
 
   return (
-    <div className={`relative overflow-hidden rounded-lg ${className}`}>
+    <div ref={rootRef} className={`relative overflow-hidden rounded-lg ${className}`}>
       {/* Banner Container */}
       <div
         className="relative w-full h-64 md:h-80 lg:h-96 flex items-center"
         style={{
-          backgroundColor: currentSlideData.backgroundColor || '#4A70F7',
-          backgroundImage: currentSlideData.backgroundImage 
-            ? `url(${currentSlideData.backgroundImage})` 
-            : undefined,
+          backgroundColor: currentSlideData.backgroundColor || 'var(--color-blue)',
+          backgroundImage:
+            !currentSlideData.renderBackground && (currentSlideData.backgroundImage || currentSlideData.image)
+              ? `url(${currentSlideData.backgroundImage || currentSlideData.image})`
+              : undefined,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
+        {currentSlideData.renderBackground?.()}
         {/* Background Pattern Overlay */}
         <div className="absolute inset-0 opacity-10">
-          <svg
-            className="w-full h-full"
-            viewBox="0 0 400 200"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M0,100 Q100,50 200,100 T400,100 L400,200 L0,200 Z"
-              fill="currentColor"
-              className="text-white"
-            />
-            <path
-              d="M0,120 Q150,80 300,120 T400,120 L400,200 L0,200 Z"
-              fill="currentColor"
-              className="text-white"
-            />
+          <svg className="w-full h-full" viewBox="0 0 400 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0,100 Q100,50 200,100 T400,100 L400,200 L0,200 Z" fill="currentColor" className="text-white" />
+            <path d="M0,120 Q150,80 300,120 T400,120 L400,200 L0,200 Z" fill="currentColor" className="text-white" />
           </svg>
         </div>
 
@@ -122,27 +127,27 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
           <div className="max-w-4xl">
             {/* Date */}
             {currentSlideData.date && (
-              <div 
+              <div
                 className="text-sm md:text-base mb-2 opacity-80"
-                style={{ color: currentSlideData.textColor || '#E5E7EB' }}
+                style={{ color: currentSlideData.textColor || 'var(--color-label-secondary)' }}
               >
                 {currentSlideData.date}
               </div>
             )}
 
             {/* Title */}
-            <h2 
+            <h2
               className="text-2xl md:text-3xl lg:text-4xl font-bold mb-3 leading-tight"
-              style={{ color: currentSlideData.textColor || '#FFFFFF' }}
+              style={{ color: currentSlideData.textColor || 'var(--color-label-on-fill)' }}
             >
               {currentSlideData.title}
             </h2>
 
             {/* Subtitle */}
             {currentSlideData.subtitle && (
-              <h3 
+              <h3
                 className="text-lg md:text-xl lg:text-2xl font-semibold mb-3"
-                style={{ color: currentSlideData.textColor || '#FFFFFF' }}
+                style={{ color: currentSlideData.textColor || 'var(--color-label-on-fill)' }}
               >
                 {currentSlideData.subtitle}
               </h3>
@@ -150,9 +155,9 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
 
             {/* Description */}
             {currentSlideData.description && (
-              <p 
+              <p
                 className="text-sm md:text-base mb-6 opacity-90 max-w-2xl"
-                style={{ color: currentSlideData.textColor || '#E5E7EB' }}
+                style={{ color: currentSlideData.textColor || 'var(--color-label-secondary)' }}
               >
                 {currentSlideData.description}
               </p>
@@ -164,8 +169,8 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
                 onClick={() => handleCtaClick(currentSlideData)}
                 className="inline-flex items-center px-6 py-3 rounded-lg font-medium transition-all duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-white/50"
                 style={{
-                  backgroundColor: currentSlideData.ctaColor || '#F78C4A',
-                  color: '#FFFFFF'
+                  backgroundColor: currentSlideData.ctaColor || 'var(--color-orange)',
+                  color: 'var(--color-label-on-fill)',
                 }}
               >
                 {currentSlideData.ctaText}
@@ -210,9 +215,7 @@ export const BannerCarousel: React.FC<BannerCarouselProps> = ({
                 key={index}
                 onClick={() => goToSlide(index)}
                 className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                  index === currentSlide
-                    ? 'bg-white scale-125'
-                    : 'bg-white/50 hover:bg-white/75'
+                  index === currentSlide ? 'bg-white scale-125' : 'bg-white/50 hover:bg-white/75'
                 }`}
                 aria-label={`Go to slide ${index + 1}`}
               />

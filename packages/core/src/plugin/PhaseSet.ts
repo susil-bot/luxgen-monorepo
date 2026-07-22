@@ -22,7 +22,7 @@ export class PhaseSet {
   public async execute(workflowContext: WorkflowContext): Promise<void> {
     // Execute fetchers first
     await this.executeFetchers(workflowContext);
-    
+
     // Then execute transformers
     await this.executeTransformers(workflowContext);
   }
@@ -83,10 +83,7 @@ export class PhaseSet {
    * @returns new PhaseSet with prepended phases
    */
   public prepend(phaseSet: PhaseSet): PhaseSet {
-    return new PhaseSet(
-      [...phaseSet.fetchers, ...this.fetchers],
-      [...phaseSet.transformers, ...this.transformers]
-    );
+    return new PhaseSet([...phaseSet.fetchers, ...this.fetchers], [...phaseSet.transformers, ...this.transformers]);
   }
 
   /**
@@ -95,10 +92,7 @@ export class PhaseSet {
    * @returns new PhaseSet with appended phases
    */
   public append(phaseSet: PhaseSet): PhaseSet {
-    return new PhaseSet(
-      [...this.fetchers, ...phaseSet.fetchers],
-      [...this.transformers, ...phaseSet.transformers]
-    );
+    return new PhaseSet([...this.fetchers, ...phaseSet.fetchers], [...this.transformers, ...phaseSet.transformers]);
   }
 
   /**
@@ -106,7 +100,7 @@ export class PhaseSet {
    * @returns array of fetcher paths
    */
   public getFetcherPaths(): string[] {
-    return this.fetchers.map(fetcher => fetcher.path);
+    return this.fetchers.map((fetcher) => fetcher.path);
   }
 
   /**
@@ -114,7 +108,7 @@ export class PhaseSet {
    * @returns array of transformer paths
    */
   public getTransformerPaths(): string[] {
-    return this.transformers.map(transformer => transformer.path);
+    return this.transformers.map((transformer) => transformer.path);
   }
 
   /**

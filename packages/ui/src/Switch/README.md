@@ -59,19 +59,19 @@ import { Switch } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `checked` | `boolean` | - | Checked state |
-| `onChange` | `(checked: boolean) => void` | - | Change handler |
-| `label` | `string` | - | Label text |
-| `disabled` | `boolean` | `false` | Disabled state |
-| `required` | `boolean` | `false` | Required field |
-| `size` | `'sm' | 'md' | 'lg'` | `'md'` | Switch size |
-| `helperText` | `string` | - | Helper text |
-| `error` | `string` | - | Error message |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
+| Prop          | Type                         | Default        | Description              |
+| ------------- | ---------------------------- | -------------- | ------------------------ | ------ | ----------- |
+| `tenantTheme` | `TenantTheme`                | `defaultTheme` | Theme object for styling |
+| `checked`     | `boolean`                    | -              | Checked state            |
+| `onChange`    | `(checked: boolean) => void` | -              | Change handler           |
+| `label`       | `string`                     | -              | Label text               |
+| `disabled`    | `boolean`                    | `false`        | Disabled state           |
+| `required`    | `boolean`                    | `false`        | Required field           |
+| `size`        | `'sm'                        | 'md'           | 'lg'`                    | `'md'` | Switch size |
+| `helperText`  | `string`                     | -              | Helper text              |
+| `error`       | `string`                     | -              | Error message            |
+| `className`   | `string`                     | `''`           | Additional CSS classes   |
+| `style`       | `CSSProperties`              | `{}`           | Inline styles            |
 
 ## SSR Usage
 
@@ -135,44 +135,25 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { Switch } from '@luxgen/ui';
 
 test('renders with label', () => {
-  render(
-    <Switch
-      label="Test switch"
-      checked={false}
-      onChange={() => {}}
-    />
-  );
-  
+  render(<Switch label="Test switch" checked={false} onChange={() => {}} />);
+
   expect(screen.getByText('Test switch')).toBeInTheDocument();
   expect(screen.getByRole('checkbox')).toBeInTheDocument();
 });
 
 test('calls onChange when clicked', () => {
   const mockOnChange = jest.fn();
-  render(
-    <Switch
-      label="Test switch"
-      checked={false}
-      onChange={mockOnChange}
-    />
-  );
-  
+  render(<Switch label="Test switch" checked={false} onChange={mockOnChange} />);
+
   const switchInput = screen.getByRole('checkbox');
   fireEvent.click(switchInput);
-  
+
   expect(mockOnChange).toHaveBeenCalledWith(true);
 });
 
 test('renders with different sizes', () => {
-  render(
-    <Switch
-      label="Small switch"
-      checked={false}
-      onChange={() => {}}
-      size="sm"
-    />
-  );
-  
+  render(<Switch label="Small switch" checked={false} onChange={() => {}} size="sm" />);
+
   const switchCustom = screen.getByText('Small switch').closest('.switch-label')?.querySelector('.switch-custom');
   expect(switchCustom).toHaveClass('sm');
 });
@@ -181,15 +162,13 @@ test('renders with different sizes', () => {
 ## Examples
 
 ### Basic Switch
+
 ```tsx
-<Switch
-  label="Enable notifications"
-  checked={notificationsEnabled}
-  onChange={setNotificationsEnabled}
-/>
+<Switch label="Enable notifications" checked={notificationsEnabled} onChange={setNotificationsEnabled} />
 ```
 
 ### Switch with Validation
+
 ```tsx
 <Switch
   label="I agree to the terms and conditions"
@@ -202,53 +181,29 @@ test('renders with different sizes', () => {
 ```
 
 ### Switch with Different Sizes
+
 ```tsx
 <div>
-  <Switch
-    label="Small Switch"
-    checked={value}
-    onChange={setValue}
-    size="sm"
-  />
-  <Switch
-    label="Medium Switch"
-    checked={value}
-    onChange={setValue}
-    size="md"
-  />
-  <Switch
-    label="Large Switch"
-    checked={value}
-    onChange={setValue}
-    size="lg"
-  />
+  <Switch label="Small Switch" checked={value} onChange={setValue} size="sm" />
+  <Switch label="Medium Switch" checked={value} onChange={setValue} size="md" />
+  <Switch label="Large Switch" checked={value} onChange={setValue} size="lg" />
 </div>
 ```
 
 ### Disabled Switch
+
 ```tsx
-<Switch
-  label="This option is not available"
-  checked={false}
-  onChange={() => {}}
-  disabled
-/>
+<Switch label="This option is not available" checked={false} onChange={() => {}} disabled />
 ```
 
 ### Switch with Custom Theme
+
 ```tsx
-<Switch
-  tenantTheme={customTheme}
-  label="Custom themed switch"
-  checked={checked}
-  onChange={setChecked}
-/>
+<Switch tenantTheme={customTheme} label="Custom themed switch" checked={checked} onChange={setChecked} />
 ```
 
 ### Switch without Label
+
 ```tsx
-<Switch
-  checked={checked}
-  onChange={setChecked}
-/>
+<Switch checked={checked} onChange={setChecked} />
 ```

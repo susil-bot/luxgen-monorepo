@@ -21,12 +21,15 @@ export function TenantSwitcher({ currentTenant, tenants }: TenantSwitcherProps) 
   };
 
   return (
-    <div className="relative">
+    <div className="relative min-w-0 max-w-full">
       <button
+        type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center space-x-2 bg-white border border-gray-300 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        className="flex items-center gap-2 min-w-0 max-w-full bg-white border border-gray-300 rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+        aria-expanded={isOpen}
+        aria-haspopup="listbox"
       >
-        <span>{currentTenant}</span>
+        <span className="truncate">{currentTenant}</span>
         <svg
           className={`w-4 h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
@@ -38,7 +41,7 @@ export function TenantSwitcher({ currentTenant, tenants }: TenantSwitcherProps) 
       </button>
 
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-56 bg-white rounded-md shadow-lg z-10">
+        <div className="absolute right-0 mt-2 w-full min-w-[12rem] max-w-[14rem] bg-white rounded-md shadow-lg z-10">
           <div className="py-1">
             {tenants.map((tenant) => (
               <button

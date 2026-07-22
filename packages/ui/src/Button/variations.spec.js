@@ -23,10 +23,7 @@ describe('<Button.* />', () => {
       return render(<ThemeWrapper>{component}</ThemeWrapper>);
     } catch (error) {
       // Fallback to rendering without ThemeWrapper if it fails
-      console.warn(
-        'ThemeWrapper failed, rendering without theme:',
-        error.message
-      );
+      console.warn('ThemeWrapper failed, rendering without theme:', error.message);
       return render(component);
     }
   };
@@ -36,9 +33,7 @@ describe('<Button.* />', () => {
       let container;
 
       expect(() => {
-        const { container: renderedContainer } = renderWithTheme(
-          <Button.Primary {...fixture} />
-        );
+        const { container: renderedContainer } = renderWithTheme(<Button.Primary {...fixture} />);
         container = renderedContainer;
       }).not.toThrow();
 
@@ -68,9 +63,7 @@ describe('<Button.* />', () => {
       let container;
 
       expect(() => {
-        const { container: renderedContainer } = renderWithTheme(
-          <Button.Primary {...fixture} hasLink={false} />
-        );
+        const { container: renderedContainer } = renderWithTheme(<Button.Primary {...fixture} hasLink={false} />);
         container = renderedContainer;
       }).not.toThrow();
 
@@ -97,9 +90,7 @@ describe('<Button.* />', () => {
       let container;
 
       expect(() => {
-        const { container: renderedContainer } = renderWithTheme(
-          <Button.Utility {...fixture} />
-        );
+        const { container: renderedContainer } = renderWithTheme(<Button.Utility {...fixture} />);
         container = renderedContainer;
       }).not.toThrow();
 
@@ -121,9 +112,7 @@ describe('<Button.* />', () => {
       let container;
 
       expect(() => {
-        const { container: renderedContainer } = renderWithTheme(
-          <Button.UtilityInverted {...fixture} />
-        );
+        const { container: renderedContainer } = renderWithTheme(<Button.UtilityInverted {...fixture} />);
         container = renderedContainer;
       }).not.toThrow();
 
@@ -172,14 +161,9 @@ describe('<Button.* />', () => {
         expect(element).toBeInTheDocument();
       } catch (error) {
         // Fallback: check if aria-label attribute exists anywhere
-        const elementWithAriaLabel = screen
-          .getByText('Load More')
-          .closest('[aria-label]');
+        const elementWithAriaLabel = screen.getByText('Load More').closest('[aria-label]');
         if (elementWithAriaLabel) {
-          expect(elementWithAriaLabel).toHaveAttribute(
-            'aria-label',
-            fixture.ariaLabel
-          );
+          expect(elementWithAriaLabel).toHaveAttribute('aria-label', fixture.ariaLabel);
         }
       }
     });

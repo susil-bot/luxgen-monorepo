@@ -14,6 +14,7 @@ export interface AccordionItem {
 export interface AccordionProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
   items: AccordionItem[];
+  loading?: boolean;
   allowMultiple?: boolean;
   allowNone?: boolean;
   variant?: 'default' | 'bordered' | 'filled' | 'minimal';
@@ -37,10 +38,11 @@ const AccordionComponent: React.FC<AccordionProps> = ({
   showIcon = true,
   onToggle,
   onItemClick,
+  loading = false,
   ...props
 }) => {
   const [openItems, setOpenItems] = useState<Set<string>>(
-    new Set(items.filter(item => item.defaultOpen).map(item => item.id))
+    new Set(items.filter((item) => item.defaultOpen).map((item) => item.id)),
   );
 
   const handleToggle = (itemId: string) => {
@@ -91,7 +93,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
         overflow: 'visible',
       },
     };
-    
+
     return variantStyles[variant];
   };
 
@@ -110,7 +112,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
         padding: '1.25rem 1.5rem',
       },
     };
-    
+
     return sizeStyles[size];
   };
 
@@ -124,12 +126,22 @@ const AccordionComponent: React.FC<AccordionProps> = ({
     ...variantStyles,
   };
 
+  if (loading) {
+    return (
+      <div className={`accordion accordion--loading ${className}`} style={styles} aria-busy="true" {...props}>
+        {[0, 1, 2].map((i) => (
+          <div
+            key={i}
+            className="accordion-skeleton ios-card p-4 mb-2 animate-pulse h-12 rounded-lg"
+            style={{ background: 'var(--color-fill-tertiary)' }}
+          />
+        ))}
+      </div>
+    );
+  }
+
   return (
-    <div
-      className={`accordion accordion-${variant} accordion-${size} ${className}`}
-      style={styles}
-      {...props}
-    >
+    <div className={`accordion accordion-${variant} accordion-${size} ${className}`} style={styles} {...props}>
       {items.map((item, index) => {
         const isOpen = openItems.has(item.id);
         const isDisabled = item.disabled;
@@ -145,6 +157,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
             <button
               className="accordion-trigger"
               onClick={() => handleToggle(item.id)}
+              aria-expanded={isOpen}
               disabled={isDisabled}
               style={{
                 width: '100%',
@@ -159,7 +172,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
                 fontFamily: tenantTheme.fonts.primary,
                 fontSize: sizeStyles.fontSize,
                 color: isDisabled ? tenantTheme.colors.textSecondary : tenantTheme.colors.text,
-                transition: 'all 0.2s ease',
+                transition: 'var(--transition-base, all 0.25s ease)',
                 ...(isOpen && {
                   backgroundColor: tenantTheme.colors.backgroundSecondary,
                 }),
@@ -168,7 +181,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
               <span className="accordion-title" style={{ flex: 1 }}>
                 {item.title}
               </span>
-              
+
               {showIcon && (
                 <span
                   className="accordion-icon"
@@ -181,7 +194,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
                     fontSize: '1rem',
                     color: tenantTheme.colors.textSecondary,
                     transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                    transition: 'transform 0.2s ease',
+                    transition: 'transform var(--transition-fast, 120ms ease)',
                     order: iconPosition === 'left' ? -1 : 1,
                     marginLeft: iconPosition === 'left' ? 0 : '0.5rem',
                     marginRight: iconPosition === 'right' ? 0 : '0.5rem',
@@ -197,7 +210,7 @@ const AccordionComponent: React.FC<AccordionProps> = ({
               style={{
                 maxHeight: isOpen ? '1000px' : '0',
                 overflow: 'hidden',
-                transition: 'max-height 0.3s ease',
+                transition: 'max-height var(--transition-slow, 350ms ease)',
                 backgroundColor: tenantTheme.colors.background,
               }}
             >

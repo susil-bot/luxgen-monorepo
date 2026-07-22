@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+.next/
+coverage/
+.turbo/
+*.min.js
+packages/ui/**/*.spec.js
+packages/ui/**/*.spec.ts
+packages/ui/**/*.spec.tsx

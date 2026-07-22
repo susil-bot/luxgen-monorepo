@@ -50,19 +50,19 @@ import { Text } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `text` | `string` | - | Text content |
-| `variant` | `'normal' | 'muted' | 'small' | 'large' | 'lead' | 'caption'` | `'normal'` | Text variant |
-| `weight` | `'light' | 'normal' | 'medium' | 'semibold' | 'bold'` | `'normal'` | Font weight |
-| `align` | `'left' | 'center' | 'right' | 'justify'` | `'left'` | Text alignment |
-| `color` | `string` | - | Custom text color |
-| `variant` | `'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info'` | `'primary'` | Color variant |
-| `truncate` | `boolean` | `false` | Truncate long text with ellipsis |
-| `as` | `'p' | 'span' | 'div' | 'label'` | `'p'` | HTML element to render |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
+| Prop          | Type            | Default        | Description                      |
+| ------------- | --------------- | -------------- | -------------------------------- | ---------- | --------- | ---------------------- | ----------- | ------------- |
+| `tenantTheme` | `TenantTheme`   | `defaultTheme` | Theme object for styling         |
+| `text`        | `string`        | -              | Text content                     |
+| `variant`     | `'normal'       | 'muted'        | 'small'                          | 'large'    | 'lead'    | 'caption'`             | `'normal'`  | Text variant  |
+| `weight`      | `'light'        | 'normal'       | 'medium'                         | 'semibold' | 'bold'`   | `'normal'`             | Font weight |
+| `align`       | `'left'         | 'center'       | 'right'                          | 'justify'` | `'left'`  | Text alignment         |
+| `color`       | `string`        | -              | Custom text color                |
+| `variant`     | `'primary'      | 'secondary'    | 'success'                        | 'error'    | 'warning' | 'info'`                | `'primary'` | Color variant |
+| `truncate`    | `boolean`       | `false`        | Truncate long text with ellipsis |
+| `as`          | `'p'            | 'span'         | 'div'                            | 'label'`   | `'p'`     | HTML element to render |
+| `className`   | `string`        | `''`           | Additional CSS classes           |
+| `style`       | `CSSProperties` | `{}`           | Inline styles                    |
 
 ## SSR Usage
 
@@ -159,20 +159,20 @@ import { Text } from '@luxgen/ui';
 
 test('renders with text content', () => {
   render(<Text text="Test content" />);
-  
+
   expect(screen.getByText('Test content')).toBeInTheDocument();
 });
 
 test('renders with different variants', () => {
   render(<Text text="Small text" variant="small" />);
-  
+
   const text = screen.getByText('Small text');
   expect(text).toHaveClass('text-small');
 });
 
 test('renders as different elements', () => {
   render(<Text text="Span text" as="span" />);
-  
+
   expect(screen.getByText('Span text').tagName).toBe('SPAN');
 });
 ```
@@ -180,11 +180,13 @@ test('renders as different elements', () => {
 ## Examples
 
 ### Basic Text
+
 ```tsx
 <Text text="This is normal text content" />
 ```
 
 ### Variant Text
+
 ```tsx
 <Text text="This is lead text" variant="lead" />
 <Text text="This is small text" variant="small" />
@@ -192,16 +194,13 @@ test('renders as different elements', () => {
 ```
 
 ### Styled Text
+
 ```tsx
-<Text
-  text="This is styled text"
-  weight="bold"
-  align="center"
-  color="#8B5CF6"
-/>
+<Text text="This is styled text" weight="bold" align="center" color="#8B5CF6" />
 ```
 
 ### Colored Text
+
 ```tsx
 <Text text="Success message" variant="success" />
 <Text text="Error message" variant="error" />
@@ -209,14 +208,13 @@ test('renders as different elements', () => {
 ```
 
 ### Truncated Text
+
 ```tsx
-<Text
-  text="This is a very long text that should be truncated when the container is too small"
-  truncate
-/>
+<Text text="This is a very long text that should be truncated when the container is too small" truncate />
 ```
 
 ### Different Elements
+
 ```tsx
 <Text text="Paragraph text" as="p" />
 <Text text="Inline text" as="span" />
@@ -225,9 +223,7 @@ test('renders as different elements', () => {
 ```
 
 ### Custom Themed Text
+
 ```tsx
-<Text
-  tenantTheme={customTheme}
-  text="Custom themed text"
-/>
+<Text tenantTheme={customTheme} text="Custom themed text" />
 ```

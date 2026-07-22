@@ -9,7 +9,7 @@ global.fetch = jest.fn();
 // Test component to access context
 const TestComponent: React.FC = () => {
   const { assets, brandAssets, loading, error, getAsset, getBrandAssets } = useAssetManager();
-  
+
   return (
     <div>
       <div data-testid="loading">{loading ? 'Loading' : 'Not Loading'}</div>
@@ -31,9 +31,9 @@ describe('AssetManager', () => {
     render(
       <AssetManagerProvider>
         <TestComponent />
-      </AssetManagerProvider>
+      </AssetManagerProvider>,
     );
-    
+
     expect(screen.getByTestId('loading')).toHaveTextContent('Not Loading');
     expect(screen.getByTestId('error')).toHaveTextContent('No Error');
     expect(screen.getByTestId('assets-count')).toHaveTextContent('0');
@@ -54,9 +54,9 @@ describe('AssetManager', () => {
     render(
       <AssetManagerProvider defaultAssets={defaultAssets}>
         <TestComponent />
-      </AssetManagerProvider>
+      </AssetManagerProvider>,
     );
-    
+
     expect(screen.getByTestId('assets-count')).toHaveTextContent('1');
     expect(screen.getByTestId('asset')).toHaveTextContent('Test Asset');
   });
@@ -92,9 +92,9 @@ describe('AssetManager', () => {
     render(
       <AssetManagerProvider defaultBrandAssets={defaultBrandAssets}>
         <TestComponent />
-      </AssetManagerProvider>
+      </AssetManagerProvider>,
     );
-    
+
     expect(screen.getByTestId('brand-assets')).toHaveTextContent('Has Brand Assets');
   });
 
@@ -110,9 +110,9 @@ describe('AssetManager', () => {
     render(
       <AssetManagerProvider autoLoad={true}>
         <TestComponent />
-      </AssetManagerProvider>
+      </AssetManagerProvider>,
     );
-    
+
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('/api/assets/global');
     });
@@ -130,9 +130,9 @@ describe('AssetManager', () => {
     render(
       <AssetManagerProvider tenantId="demo" autoLoad={true}>
         <TestComponent />
-      </AssetManagerProvider>
+      </AssetManagerProvider>,
     );
-    
+
     await waitFor(() => {
       expect(fetch).toHaveBeenCalledWith('/api/assets/tenant/demo');
     });
@@ -140,20 +140,27 @@ describe('AssetManager', () => {
 
   it('handles loading state', async () => {
     (fetch as jest.Mock).mockImplementationOnce(
-      () => new Promise(resolve => setTimeout(() => resolve({
-        ok: true,
-        json: async () => ({ assets: [], brandAssets: null }),
-      }), 100))
+      () =>
+        new Promise((resolve) =>
+          setTimeout(
+            () =>
+              resolve({
+                ok: true,
+                json: async () => ({ assets: [], brandAssets: null }),
+              }),
+            100,
+          ),
+        ),
     );
 
     render(
       <AssetManagerProvider autoLoad={true}>
         <TestComponent />
-      </AssetManagerProvider>
+      </AssetManagerProvider>,
     );
-    
+
     expect(screen.getByTestId('loading')).toHaveTextContent('Loading');
-    
+
     await waitFor(() => {
       expect(screen.getByTestId('loading')).toHaveTextContent('Not Loading');
     });
@@ -165,9 +172,9 @@ describe('AssetManager', () => {
     render(
       <AssetManagerProvider autoLoad={true}>
         <TestComponent />
-      </AssetManagerProvider>
+      </AssetManagerProvider>,
     );
-    
+
     await waitFor(() => {
       expect(screen.getByTestId('error')).toHaveTextContent('Network error');
     });
@@ -177,9 +184,9 @@ describe('AssetManager', () => {
     render(
       <AssetManagerProvider autoLoad={false}>
         <TestComponent />
-      </AssetManagerProvider>
+      </AssetManagerProvider>,
     );
-    
+
     expect(fetch).not.toHaveBeenCalled();
   });
 
@@ -198,9 +205,9 @@ describe('AssetManager', () => {
     render(
       <AssetManagerProvider defaultAssets={defaultAssets}>
         <TestComponent />
-      </AssetManagerProvider>
+      </AssetManagerProvider>,
     );
-    
+
     expect(screen.getByTestId('asset')).toHaveTextContent('Test Asset');
   });
 
@@ -208,9 +215,9 @@ describe('AssetManager', () => {
     render(
       <AssetManagerProvider>
         <TestComponent />
-      </AssetManagerProvider>
+      </AssetManagerProvider>,
     );
-    
+
     expect(screen.getByTestId('asset')).toHaveTextContent('No Asset');
   });
 
@@ -245,9 +252,9 @@ describe('AssetManager', () => {
     render(
       <AssetManagerProvider defaultBrandAssets={defaultBrandAssets}>
         <TestComponent />
-      </AssetManagerProvider>
+      </AssetManagerProvider>,
     );
-    
+
     expect(screen.getByTestId('brand-asset')).toHaveTextContent('Has Brand Assets');
   });
 });
@@ -257,11 +264,11 @@ describe('useAssetManager hook', () => {
     // Suppress console.error for this test
     const originalError = console.error;
     console.error = jest.fn();
-    
+
     expect(() => {
       render(<TestComponent />);
     }).toThrow('useAssetManager must be used within an AssetManagerProvider');
-    
+
     console.error = originalError;
   });
 });

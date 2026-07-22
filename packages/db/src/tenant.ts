@@ -1,4 +1,4 @@
-import { Schema, model, Document } from 'mongoose';
+import mongoose, { Schema, model, Document } from 'mongoose';
 
 export interface TenantBranding {
   logo?: string;
@@ -29,6 +29,11 @@ export interface TenantSecurity {
   };
 }
 
+export interface TenantOnboarding {
+  completedSteps: string[];
+  dismissed: boolean;
+}
+
 export interface TenantConfig {
   features: {
     analytics: boolean;
@@ -47,6 +52,29 @@ export interface TenantConfig {
     paymentProvider?: string;
     analyticsProvider?: string;
   };
+  regional?: {
+    contactEmail?: string;
+    timezone?: string;
+    currency?: string;
+  };
+  storefront?: {
+    landingEnabled: boolean;
+    slug?: string;
+    routes: {
+      landing: string;
+      courses: string;
+      programs: string;
+      login: string;
+      register: string;
+    };
+    content?: Record<string, unknown>;
+    theme?: {
+      accentColor?: string;
+      warmAccentColor?: string;
+      heroImage?: string;
+      layout?: 'classic' | 'split';
+    };
+  };
 }
 
 export interface ITenant extends Document {
@@ -58,9 +86,9 @@ export interface ITenant extends Document {
     branding: TenantBranding;
     security: TenantSecurity;
     config: TenantConfig;
+    onboarding?: TenantOnboarding;
   };
   metadata: {
-    plan: 'free' | 'pro' | 'enterprise';
     createdAt: Date;
     lastActive: Date;
     createdBy: Schema.Types.ObjectId;
@@ -69,174 +97,199 @@ export interface ITenant extends Document {
   updatedAt: Date;
 }
 
-const tenantSchema = new Schema<ITenant>({
-  name: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  subdomain: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true,
-    match: [/^[a-z0-9-]+$/, 'Subdomain can only contain lowercase letters, numbers, and hyphens'],
-  },
-  domain: {
-    type: String,
-    trim: true,
-    lowercase: true,
-  },
-  status: {
-    type: String,
-    enum: ['active', 'suspended', 'pending'],
-    default: 'active',
-  },
-  settings: {
-    branding: {
-      logo: String,
-      favicon: String,
-      primaryColor: {
-        type: String,
-        default: '#3B82F6',
-        match: [/^#[0-9A-Fa-f]{6}$/, 'Primary color must be a valid hex color'],
-      },
-      secondaryColor: {
-        type: String,
-        default: '#6B7280',
-        match: [/^#[0-9A-Fa-f]{6}$/, 'Secondary color must be a valid hex color'],
-      },
-      accentColor: {
-        type: String,
-        default: '#10B981',
-        match: [/^#[0-9A-Fa-f]{6}$/, 'Accent color must be a valid hex color'],
-      },
-      fontFamily: {
-        type: String,
-        default: 'Inter, system-ui, sans-serif',
-      },
-      customCSS: String,
-    },
-    security: {
-      allowedDomains: [String],
-      corsOrigins: [String],
-      rateLimiting: {
-        enabled: {
-          type: Boolean,
-          default: true,
-        },
-        maxRequests: {
-          type: Number,
-          default: 1000,
-        },
-        windowMs: {
-          type: Number,
-          default: 900000, // 15 minutes
-        },
-      },
-      sessionTimeout: {
-        type: Number,
-        default: 480, // 8 hours in minutes
-      },
-      requireMFA: {
-        type: Boolean,
-        default: false,
-      },
-      passwordPolicy: {
-        minLength: {
-          type: Number,
-          default: 8,
-        },
-        requireUppercase: {
-          type: Boolean,
-          default: true,
-        },
-        requireLowercase: {
-          type: Boolean,
-          default: true,
-        },
-        requireNumbers: {
-          type: Boolean,
-          default: true,
-        },
-        requireSymbols: {
-          type: Boolean,
-          default: false,
-        },
-      },
-    },
-    config: {
-      features: {
-        analytics: {
-          type: Boolean,
-          default: true,
-        },
-        notifications: {
-          type: Boolean,
-          default: true,
-        },
-        fileUpload: {
-          type: Boolean,
-          default: true,
-        },
-        apiAccess: {
-          type: Boolean,
-          default: true,
-        },
-        customDomain: {
-          type: Boolean,
-          default: false,
-        },
-      },
-      limits: {
-        maxUsers: {
-          type: Number,
-          default: 100,
-        },
-        maxStorage: {
-          type: Number,
-          default: 1024, // 1GB in MB
-        },
-        maxApiCalls: {
-          type: Number,
-          default: 10000,
-        },
-      },
-      integrations: {
-        emailProvider: String,
-        paymentProvider: String,
-        analyticsProvider: String,
-      },
-    },
-  },
-  metadata: {
-    plan: {
+const tenantSchema = new Schema<ITenant>(
+  {
+    name: {
       type: String,
-      enum: ['free', 'pro', 'enterprise'],
-      default: 'free',
+      required: true,
+      trim: true,
     },
-    createdAt: {
-      type: Date,
-      default: Date.now,
+    subdomain: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+      match: [/^[a-z0-9-]+$/, 'Subdomain can only contain lowercase letters, numbers, and hyphens'],
     },
-    lastActive: {
-      type: Date,
-      default: Date.now,
+    domain: {
+      type: String,
+      trim: true,
+      lowercase: true,
     },
-    createdBy: {
-      type: Schema.Types.ObjectId,
-      ref: 'User',
+    status: {
+      type: String,
+      enum: ['active', 'suspended', 'pending'],
+      default: 'active',
+    },
+    settings: {
+      branding: {
+        logo: String,
+        favicon: String,
+        primaryColor: {
+          type: String,
+          default: '#3B82F6',
+          match: [/^#[0-9A-Fa-f]{6}$/, 'Primary color must be a valid hex color'],
+        },
+        secondaryColor: {
+          type: String,
+          default: '#6B7280',
+          match: [/^#[0-9A-Fa-f]{6}$/, 'Secondary color must be a valid hex color'],
+        },
+        accentColor: {
+          type: String,
+          default: '#10B981',
+          match: [/^#[0-9A-Fa-f]{6}$/, 'Accent color must be a valid hex color'],
+        },
+        fontFamily: {
+          type: String,
+          default: 'Inter, system-ui, sans-serif',
+        },
+        customCSS: String,
+      },
+      security: {
+        allowedDomains: [String],
+        corsOrigins: [String],
+        rateLimiting: {
+          enabled: {
+            type: Boolean,
+            default: true,
+          },
+          maxRequests: {
+            type: Number,
+            default: 1000,
+          },
+          windowMs: {
+            type: Number,
+            default: 900000, // 15 minutes
+          },
+        },
+        sessionTimeout: {
+          type: Number,
+          default: 480, // 8 hours in minutes
+        },
+        requireMFA: {
+          type: Boolean,
+          default: false,
+        },
+        passwordPolicy: {
+          minLength: {
+            type: Number,
+            default: 8,
+          },
+          requireUppercase: {
+            type: Boolean,
+            default: true,
+          },
+          requireLowercase: {
+            type: Boolean,
+            default: true,
+          },
+          requireNumbers: {
+            type: Boolean,
+            default: true,
+          },
+          requireSymbols: {
+            type: Boolean,
+            default: false,
+          },
+        },
+      },
+      onboarding: {
+        completedSteps: { type: [String], default: [] },
+        dismissed: { type: Boolean, default: false },
+      },
+      config: {
+        features: {
+          analytics: {
+            type: Boolean,
+            default: true,
+          },
+          notifications: {
+            type: Boolean,
+            default: true,
+          },
+          fileUpload: {
+            type: Boolean,
+            default: true,
+          },
+          apiAccess: {
+            type: Boolean,
+            default: true,
+          },
+          customDomain: {
+            type: Boolean,
+            default: false,
+          },
+        },
+        limits: {
+          maxUsers: {
+            type: Number,
+            default: 100,
+          },
+          maxStorage: {
+            type: Number,
+            default: 1024, // 1GB in MB
+          },
+          maxApiCalls: {
+            type: Number,
+            default: 10000,
+          },
+        },
+        integrations: {
+          emailProvider: String,
+          paymentProvider: String,
+          analyticsProvider: String,
+        },
+        regional: {
+          contactEmail: String,
+          timezone: String,
+          currency: String,
+        },
+        storefront: {
+          landingEnabled: {
+            type: Boolean,
+            default: false,
+          },
+          slug: {
+            type: String,
+            default: 'mentors',
+            match: [/^[a-z0-9-]+$/, 'Slug can only contain lowercase letters, numbers, and hyphens'],
+          },
+          routes: {
+            landing: { type: String, default: '/store/mentors' },
+            courses: { type: String, default: '/learn' },
+            programs: { type: String, default: '/store/product' },
+            login: { type: String, default: '/login' },
+            register: { type: String, default: '/register' },
+          },
+          content: { type: Schema.Types.Mixed },
+          theme: { type: Schema.Types.Mixed },
+        },
+      },
+    },
+    metadata: {
+      createdAt: {
+        type: Date,
+        default: Date.now,
+      },
+      lastActive: {
+        type: Date,
+        default: Date.now,
+      },
+      createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+      },
     },
   },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true,
+  },
+);
 
 // Indexes for performance
 tenantSchema.index({ subdomain: 1 });
 tenantSchema.index({ domain: 1 });
 tenantSchema.index({ status: 1 });
-tenantSchema.index({ 'metadata.plan': 1 });
-
-export const Tenant = model<ITenant>('Tenant', tenantSchema);
+export const Tenant = (mongoose.models.Tenant as mongoose.Model<ITenant>) || model<ITenant>('Tenant', tenantSchema);

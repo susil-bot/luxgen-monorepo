@@ -21,6 +21,7 @@ export interface CardProps extends BaseComponentProps {
   image?: string;
   imageAlt?: string;
   imagePosition?: 'top' | 'bottom' | 'left' | 'right';
+  loading?: boolean;
 }
 
 const CardComponent: React.FC<CardProps> = ({
@@ -43,8 +44,20 @@ const CardComponent: React.FC<CardProps> = ({
   image,
   imageAlt = '',
   imagePosition = 'top',
+  loading = false,
   ...props
 }) => {
+  if (loading) {
+    return (
+      <div
+        className={`card card--loading animate-pulse ${className}`}
+        style={{ ...style, minHeight: '12rem', background: 'var(--color-fill-tertiary)', borderRadius: '0.5rem' }}
+        aria-busy="true"
+        {...props}
+      />
+    );
+  }
+
   const getVariantStyles = () => {
     const variantStyles = {
       default: {
@@ -69,7 +82,7 @@ const CardComponent: React.FC<CardProps> = ({
         borderRadius: '0.5rem',
       },
     };
-    
+
     return variantStyles[variant];
   };
 
@@ -77,18 +90,18 @@ const CardComponent: React.FC<CardProps> = ({
     const sizeStyles = {
       small: {
         fontSize: '0.875rem',
-        minHeight: '8rem',
+        minHeight: '8em',
       },
       medium: {
         fontSize: '1rem',
-        minHeight: '10rem',
+        minHeight: '10em',
       },
       large: {
         fontSize: '1.125rem',
-        minHeight: '12rem',
+        minHeight: '12em',
       },
     };
-    
+
     return sizeStyles[size];
   };
 
@@ -99,7 +112,7 @@ const CardComponent: React.FC<CardProps> = ({
       medium: '1rem',
       large: '1.5rem',
     };
-    
+
     return paddingStyles[padding];
   };
 
@@ -110,7 +123,7 @@ const CardComponent: React.FC<CardProps> = ({
       medium: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
       large: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
     };
-    
+
     return shadowStyles[shadow];
   };
 
@@ -143,7 +156,7 @@ const CardComponent: React.FC<CardProps> = ({
 
   const renderImage = () => {
     if (!image) return null;
-    
+
     return (
       <img
         src={image}
@@ -154,13 +167,14 @@ const CardComponent: React.FC<CardProps> = ({
           objectFit: 'cover',
           order: imagePosition === 'bottom' || imagePosition === 'right' ? 1 : 0,
         }}
+        className={imagePosition === 'left' || imagePosition === 'right' ? 'card-adaptive-image-side' : undefined}
       />
     );
   };
 
   const renderHeader = () => {
     if (!header && !title && !icon) return null;
-    
+
     return (
       <div
         className="card-header"
@@ -225,7 +239,7 @@ const CardComponent: React.FC<CardProps> = ({
 
   const renderFooter = () => {
     if (!footer) return null;
-    
+
     return (
       <div
         className="card-footer"
@@ -243,17 +257,20 @@ const CardComponent: React.FC<CardProps> = ({
 
   return (
     <div
-      className={`card card-${variant} card-${size} ${clickable ? 'card-clickable' : ''} ${hover ? 'card-hover' : ''} ${className}`}
+      className={`card card-${variant} card-${size} lux-card-container lux-card-adaptive ${clickable ? 'card-clickable' : ''} ${hover ? 'card-hover' : ''} ${className}`}
       style={styles as React.CSSProperties}
       onClick={handleClick}
       {...props}
     >
       {image && imagePosition === 'top' && renderImage()}
       {image && imagePosition === 'left' && renderImage()}
-      
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' } as React.CSSProperties}>
+
+      <div
+        className="card-adaptive-body"
+        style={{ flex: 1, display: 'flex', flexDirection: 'column' } as React.CSSProperties}
+      >
         {renderHeader()}
-        
+
         <div
           className="card-content"
           style={{
@@ -264,10 +281,10 @@ const CardComponent: React.FC<CardProps> = ({
         >
           {children}
         </div>
-        
+
         {renderFooter()}
       </div>
-      
+
       {image && imagePosition === 'right' && renderImage()}
       {image && imagePosition === 'bottom' && renderImage()}
     </div>

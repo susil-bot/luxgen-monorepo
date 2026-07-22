@@ -90,11 +90,11 @@ const MenuLayerComponent: React.FC<MenuLayerProps> = ({
     if (isMobile) {
       return 'fixed top-0 left-0 right-0 z-50';
     }
-    
+
     if (isTablet) {
       return 'sticky top-0 z-40';
     }
-    
+
     return 'sticky top-0 z-30';
   };
 
@@ -130,11 +130,7 @@ const MenuLayerComponent: React.FC<MenuLayerProps> = ({
   };
 
   return (
-    <MenuProvider
-      initialItems={items}
-      defaultCollapsed={defaultCollapsed}
-      onActiveChange={onActiveChange}
-    >
+    <MenuProvider initialItems={items} defaultCollapsed={defaultCollapsed} onActiveChange={onActiveChange}>
       <div
         className={`
           ${getLayerStyles()}

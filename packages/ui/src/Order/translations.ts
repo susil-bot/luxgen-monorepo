@@ -1,0 +1,20 @@
+export const OrderTranslations = {
+  en: {
+    orders: 'Orders',
+    backToOrders: '← Orders',
+    backToOrderDetail: '← Order',
+    refund: 'Refund',
+    edit: 'Edit',
+    moreActions: 'More actions',
+    cancelOrder: 'Cancel order',
+    export: 'Export',
+    createOrder: 'Create order',
+    searchPlaceholder: 'Search orders',
+    noOrders: 'No orders yet',
+    noOrdersHint: 'Enrollments appear here as orders when learners purchase courses.',
+    saveOrder: 'Save',
+    saving: 'Saving…',
+    refundConfirm: 'Refund this order? Payment will be marked as refunded.',
+    cancelConfirm: 'Cancel this order? The customer will be unenrolled from the course.',
+  },
+};

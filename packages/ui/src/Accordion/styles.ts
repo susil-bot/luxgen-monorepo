@@ -7,17 +7,17 @@ export const accordionStyles = {
       color: var(--color-text);
     }
   `,
-  
+
   item: css`
     .accordion-item {
       border-bottom: 1px solid var(--color-border);
     }
-    
+
     .accordion-item:last-child {
       border-bottom: none;
     }
   `,
-  
+
   trigger: css`
     .accordion-trigger {
       width: 100%;
@@ -32,30 +32,30 @@ export const accordionStyles = {
       font-family: var(--font-primary);
       font-size: 1rem;
       color: var(--color-text);
-      transition: all 0.2s ease;
+      transition: all var(--transition-fast, 120ms ease);
     }
-    
+
     .accordion-trigger:hover {
       background-color: var(--color-background-secondary);
     }
-    
+
     .accordion-trigger:focus {
       outline: 2px solid var(--color-primary);
       outline-offset: 2px;
     }
-    
+
     .accordion-trigger:disabled {
       cursor: not-allowed;
       color: var(--color-text-secondary);
     }
   `,
-  
+
   title: css`
     .accordion-title {
       flex: 1;
     }
   `,
-  
+
   icon: css`
     .accordion-icon {
       display: flex;
@@ -65,38 +65,38 @@ export const accordionStyles = {
       height: 1.5rem;
       font-size: 1rem;
       color: var(--color-text-secondary);
-      transition: transform 0.2s ease;
+      transition: transform var(--transition-fast, 120ms ease);
     }
-    
+
     .accordion-item.open .accordion-icon {
       transform: rotate(180deg);
     }
   `,
-  
+
   content: css`
     .accordion-content {
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.3s ease;
+      transition: max-height var(--transition-slow, 350ms ease);
       background-color: var(--color-background);
     }
-    
+
     .accordion-item.open .accordion-content {
       max-height: 1000px;
     }
   `,
-  
+
   contentInner: css`
     .accordion-content-inner {
       padding: 1rem 1.25rem;
       border-top: 1px solid var(--color-border);
     }
-    
+
     .accordion-item.open .accordion-content-inner {
       border-top: 1px solid var(--color-border);
     }
   `,
-  
+
   variants: {
     default: css`
       .accordion-default {
@@ -127,17 +127,17 @@ export const accordionStyles = {
       }
     `,
   },
-  
+
   sizes: {
     small: css`
       .accordion-small {
         font-size: 0.875rem;
       }
-      
+
       .accordion-small .accordion-trigger {
         padding: 0.75rem 1rem;
       }
-      
+
       .accordion-small .accordion-content-inner {
         padding: 0.75rem 1rem;
       }
@@ -146,11 +146,11 @@ export const accordionStyles = {
       .accordion-medium {
         font-size: 1rem;
       }
-      
+
       .accordion-medium .accordion-trigger {
         padding: 1rem 1.25rem;
       }
-      
+
       .accordion-medium .accordion-content-inner {
         padding: 1rem 1.25rem;
       }
@@ -159,17 +159,17 @@ export const accordionStyles = {
       .accordion-large {
         font-size: 1.125rem;
       }
-      
+
       .accordion-large .accordion-trigger {
         padding: 1.25rem 1.5rem;
       }
-      
+
       .accordion-large .accordion-content-inner {
         padding: 1.25rem 1.5rem;
       }
     `,
   },
-  
+
   states: {
     open: css`
       .accordion-item.open .accordion-trigger {
@@ -183,12 +183,12 @@ export const accordionStyles = {
       }
     `,
   },
-  
+
   animations: css`
     .accordion-content {
       animation: slideDown 0.3s ease;
     }
-    
+
     @keyframes slideDown {
       from {
         max-height: 0;
@@ -199,11 +199,11 @@ export const accordionStyles = {
         opacity: 1;
       }
     }
-    
+
     .accordion-icon {
       animation: rotate 0.2s ease;
     }
-    
+
     @keyframes rotate {
       from {
         transform: rotate(0deg);
@@ -213,17 +213,17 @@ export const accordionStyles = {
       }
     }
   `,
-  
+
   responsive: css`
     @media (max-width: 768px) {
       .accordion-trigger {
         padding: 0.75rem 1rem;
       }
-      
+
       .accordion-content-inner {
         padding: 0.75rem 1rem;
       }
-      
+
       .accordion-icon {
         width: 1.25rem;
         height: 1.25rem;
@@ -231,34 +231,34 @@ export const accordionStyles = {
       }
     }
   `,
-  
+
   darkMode: css`
     @media (prefers-color-scheme: dark) {
       .accordion-trigger:hover {
         background-color: var(--color-background-secondary-dark);
       }
-      
+
       .accordion-item.open .accordion-trigger {
         background-color: var(--color-background-secondary-dark);
       }
-      
+
       .accordion-content {
         background-color: var(--color-background-dark);
       }
     }
   `,
-  
+
   accessibility: css`
     .accordion:focus {
       outline: 2px solid var(--color-primary);
       outline-offset: 2px;
     }
-    
+
     .accordion-trigger:focus {
       outline: 2px solid var(--color-primary);
       outline-offset: 2px;
     }
-    
+
     .accordion-trigger:focus-visible {
       outline: 2px solid var(--color-primary);
       outline-offset: 2px;

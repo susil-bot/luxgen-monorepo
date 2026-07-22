@@ -13,7 +13,7 @@ export const SearchBarExample: React.FC = () => {
     'Notifications',
     'Calendar',
     'Goals',
-    'Progress Tracking'
+    'Progress Tracking',
   ]);
 
   const handleSearch = (query: string) => {
@@ -29,7 +29,7 @@ export const SearchBarExample: React.FC = () => {
   return (
     <div className="space-y-6 p-6">
       <h2 className="text-2xl font-bold text-gray-900">SearchBar Examples</h2>
-      
+
       {/* Default SearchBar */}
       <div>
         <h3 className="text-lg font-semibold text-gray-700 mb-2">Default SearchBar</h3>
@@ -47,55 +47,31 @@ export const SearchBarExample: React.FC = () => {
       {/* Minimal SearchBar */}
       <div>
         <h3 className="text-lg font-semibold text-gray-700 mb-2">Minimal SearchBar</h3>
-        <SearchBar
-          placeholder="Search..."
-          variant="minimal"
-          onSearch={handleSearch}
-          className="w-full max-w-md"
-        />
+        <SearchBar placeholder="Search..." variant="minimal" onSearch={handleSearch} className="w-full max-w-md" />
       </div>
 
       {/* Outlined SearchBar */}
       <div>
         <h3 className="text-lg font-semibold text-gray-700 mb-2">Outlined SearchBar</h3>
-        <SearchBar
-          placeholder="Search..."
-          variant="outlined"
-          onSearch={handleSearch}
-          className="w-full max-w-md"
-        />
+        <SearchBar placeholder="Search..." variant="outlined" onSearch={handleSearch} className="w-full max-w-md" />
       </div>
 
       {/* Large SearchBar */}
       <div>
         <h3 className="text-lg font-semibold text-gray-700 mb-2">Large SearchBar</h3>
-        <SearchBar
-          placeholder="Search..."
-          size="lg"
-          onSearch={handleSearch}
-          className="w-full max-w-md"
-        />
+        <SearchBar placeholder="Search..." size="lg" onSearch={handleSearch} className="w-full max-w-md" />
       </div>
 
       {/* SearchBar without icon */}
       <div>
         <h3 className="text-lg font-semibold text-gray-700 mb-2">SearchBar without icon</h3>
-        <SearchBar
-          placeholder="Search..."
-          showIcon={false}
-          onSearch={handleSearch}
-          className="w-full max-w-md"
-        />
+        <SearchBar placeholder="Search..." showIcon={false} onSearch={handleSearch} className="w-full max-w-md" />
       </div>
 
       {/* Disabled SearchBar */}
       <div>
         <h3 className="text-lg font-semibold text-gray-700 mb-2">Disabled SearchBar</h3>
-        <SearchBar
-          placeholder="Search..."
-          disabled={true}
-          className="w-full max-w-md"
-        />
+        <SearchBar placeholder="Search..." disabled={true} className="w-full max-w-md" />
       </div>
     </div>
   );

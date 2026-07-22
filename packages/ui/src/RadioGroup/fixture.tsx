@@ -12,7 +12,7 @@ export const radioGroupFixtures = {
     name: 'radio-group',
     value: 'option1',
   } as RadioGroupProps,
-  
+
   withLabel: {
     tenantTheme: defaultTheme,
     options: [
@@ -24,7 +24,7 @@ export const radioGroupFixtures = {
     label: 'Choose Option',
     required: true,
   } as RadioGroupProps,
-  
+
   withError: {
     tenantTheme: defaultTheme,
     options: [
@@ -36,7 +36,7 @@ export const radioGroupFixtures = {
     label: 'Choose Option',
     error: 'This field is required',
   } as RadioGroupProps,
-  
+
   withHelperText: {
     tenantTheme: defaultTheme,
     options: [
@@ -48,7 +48,7 @@ export const radioGroupFixtures = {
     label: 'Choose Option',
     helperText: 'Please select one option from the list',
   } as RadioGroupProps,
-  
+
   horizontal: {
     tenantTheme: defaultTheme,
     options: [
@@ -61,7 +61,7 @@ export const radioGroupFixtures = {
     label: 'Choose Option',
     orientation: 'horizontal' as const,
   } as RadioGroupProps,
-  
+
   disabled: {
     tenantTheme: defaultTheme,
     options: [
@@ -73,7 +73,7 @@ export const radioGroupFixtures = {
     label: 'Choose Option',
     disabled: true,
   } as RadioGroupProps,
-  
+
   withDisabledOptions: {
     tenantTheme: defaultTheme,
     options: [
@@ -85,7 +85,7 @@ export const radioGroupFixtures = {
     value: 'option1',
     label: 'Choose Option',
   } as RadioGroupProps,
-  
+
   withCustomTheme: {
     tenantTheme: {
       ...defaultTheme,
@@ -103,7 +103,7 @@ export const radioGroupFixtures = {
     value: 'option1',
     label: 'Choose Option',
   } as RadioGroupProps,
-  
+
   manyOptions: {
     tenantTheme: defaultTheme,
     options: [
@@ -118,7 +118,7 @@ export const radioGroupFixtures = {
     value: 'option1',
     label: 'Choose Option',
   } as RadioGroupProps,
-  
+
   noSelection: {
     tenantTheme: defaultTheme,
     options: [

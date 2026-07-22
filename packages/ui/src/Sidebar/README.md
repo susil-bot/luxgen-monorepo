@@ -19,24 +19,24 @@ To provide a consistent navigation experience with hierarchical menu structure, 
 
 ## Props
 
-| Property                    | Type                    | Default     | Description                                                                                                                        |
-| --------------------------- | ----------------------- | ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
-| sections                   | SidebarSection[]        | -           | Required array of sidebar sections                                                                                                |
-| user                       | UserMenu                | -           | User information for user section                                                                                                 |
-| onUserAction               | Function                | -           | Callback for user actions (profile, settings, logout)                                                                             |
-| logo                       | Object                  | -           | Logo configuration (src, alt, text, href)                                                                                         |
-| className                  | String                  | ''          | Additional CSS classes                                                                                                             |
-| variant                    | String                  | 'default'   | Sidebar variant ('default', 'compact', 'minimal')                                                                                |
-| position                   | String                  | 'static'    | Sidebar position ('fixed', 'absolute', 'static')                                                                                 |
-| width                      | String                  | 'normal'    | Sidebar width ('normal', 'wide', 'narrow')                                                                                        |
-| collapsible                | Boolean                 | true        | Allow sidebar to be collapsed                                                                                                     |
-| defaultCollapsed           | Boolean                 | false       | Start with sidebar collapsed                                                                                                       |
-| showUserSection            | Boolean                 | true        | Show user section at bottom                                                                                                        |
-| showLogo                   | Boolean                 | true        | Show logo at top                                                                                                                   |
-| responsive                 | Boolean                 | true        | Enable responsive behavior                                                                                                         |
-| mobileBreakpoint           | Number                  | 640         | Mobile breakpoint in pixels                                                                                                        |
-| tabletBreakpoint           | Number                  | 768         | Tablet breakpoint in pixels                                                                                                       |
-| desktopBreakpoint          | Number                  | 1024        | Desktop breakpoint in pixels                                                                                                      |
+| Property          | Type             | Default   | Description                                           |
+| ----------------- | ---------------- | --------- | ----------------------------------------------------- |
+| sections          | SidebarSection[] | -         | Required array of sidebar sections                    |
+| user              | UserMenu         | -         | User information for user section                     |
+| onUserAction      | Function         | -         | Callback for user actions (profile, settings, logout) |
+| logo              | Object           | -         | Logo configuration (src, alt, text, href)             |
+| className         | String           | ''        | Additional CSS classes                                |
+| variant           | String           | 'default' | Sidebar variant ('default', 'compact', 'minimal')     |
+| position          | String           | 'static'  | Sidebar position ('fixed', 'absolute', 'static')      |
+| width             | String           | 'normal'  | Sidebar width ('normal', 'wide', 'narrow')            |
+| collapsible       | Boolean          | true      | Allow sidebar to be collapsed                         |
+| defaultCollapsed  | Boolean          | false     | Start with sidebar collapsed                          |
+| showUserSection   | Boolean          | true      | Show user section at bottom                           |
+| showLogo          | Boolean          | true      | Show logo at top                                      |
+| responsive        | Boolean          | true      | Enable responsive behavior                            |
+| mobileBreakpoint  | Number           | 640       | Mobile breakpoint in pixels                           |
+| tabletBreakpoint  | Number           | 768       | Tablet breakpoint in pixels                           |
+| desktopBreakpoint | Number           | 1024      | Desktop breakpoint in pixels                          |
 
 ## Component Usage
 
@@ -51,16 +51,12 @@ const sections = [
     title: 'Main Navigation',
     items: [
       { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
-      { id: 'users', label: 'Users', href: '/users' }
-    ]
-  }
+      { id: 'users', label: 'Users', href: '/users' },
+    ],
+  },
 ];
 
-<Sidebar
-  sections={sections}
-  user={user}
-  onUserAction={handleUserAction}
-/>
+<Sidebar sections={sections} user={user} onUserAction={handleUserAction} />;
 ```
 
 ### With Nested Items
@@ -75,7 +71,7 @@ const sections = [
         id: 'dashboard',
         label: 'Dashboard',
         href: '/dashboard',
-        icon: <DashboardIcon />
+        icon: <DashboardIcon />,
       },
       {
         id: 'users',
@@ -84,18 +80,14 @@ const sections = [
         icon: <UsersIcon />,
         children: [
           { id: 'user-list', label: 'User List', href: '/users/list' },
-          { id: 'user-roles', label: 'User Roles', href: '/users/roles' }
-        ]
-      }
-    ]
-  }
+          { id: 'user-roles', label: 'User Roles', href: '/users/roles' },
+        ],
+      },
+    ],
+  },
 ];
 
-<Sidebar
-  sections={sections}
-  user={user}
-  onUserAction={handleUserAction}
-/>
+<Sidebar sections={sections} user={user} onUserAction={handleUserAction} />;
 ```
 
 ### With Multiple Sections
@@ -107,35 +99,31 @@ const sections = [
     title: 'Main Navigation',
     items: [
       { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
-      { id: 'users', label: 'Users', href: '/users' }
-    ]
+      { id: 'users', label: 'Users', href: '/users' },
+    ],
   },
   {
     id: 'settings',
     title: 'Settings',
     items: [
       { id: 'profile', label: 'Profile', href: '/profile' },
-      { id: 'preferences', label: 'Preferences', href: '/preferences' }
-    ]
-  }
+      { id: 'preferences', label: 'Preferences', href: '/preferences' },
+    ],
+  },
 ];
 
-<Sidebar
-  sections={sections}
-  user={user}
-  onUserAction={handleUserAction}
-/>
+<Sidebar sections={sections} user={user} onUserAction={handleUserAction} />;
 ```
 
 ## SidebarSection Interface
 
 ```typescript
 interface SidebarSection {
-  id: string;                    // Unique section identifier
-  title?: string;               // Optional section title
-  items: SidebarItem[];         // Array of sidebar items
-  collapsible?: boolean;        // Allow section to be collapsed
-  defaultCollapsed?: boolean;    // Start with section collapsed
+  id: string; // Unique section identifier
+  title?: string; // Optional section title
+  items: SidebarItem[]; // Array of sidebar items
+  collapsible?: boolean; // Allow section to be collapsed
+  defaultCollapsed?: boolean; // Start with section collapsed
 }
 ```
 
@@ -143,16 +131,16 @@ interface SidebarSection {
 
 ```typescript
 interface SidebarItem {
-  id: string;                    // Unique item identifier
-  label: string;                 // Display text
-  href?: string;                 // Link URL
-  icon?: React.ReactNode;        // Optional icon
-  badge?: string | number;       // Optional badge
-  children?: SidebarItem[];      // Nested items
-  external?: boolean;            // External link
-  disabled?: boolean;            // Disabled state
-  active?: boolean;              // Active state
-  onClick?: () => void;         // Click handler
+  id: string; // Unique item identifier
+  label: string; // Display text
+  href?: string; // Link URL
+  icon?: React.ReactNode; // Optional icon
+  badge?: string | number; // Optional badge
+  children?: SidebarItem[]; // Nested items
+  external?: boolean; // External link
+  disabled?: boolean; // Disabled state
+  active?: boolean; // Active state
+  onClick?: () => void; // Click handler
 }
 ```
 
@@ -257,10 +245,7 @@ interface SidebarItem {
 ### Collapsible Sidebar
 
 ```jsx
-<Sidebar
-  collapsible={true}
-  defaultCollapsed={false}
-/>
+<Sidebar collapsible={true} defaultCollapsed={false} />
 ```
 
 - Toggle button in header
@@ -270,9 +255,7 @@ interface SidebarItem {
 ### Non-Collapsible Sidebar
 
 ```jsx
-<Sidebar
-  collapsible={false}
-/>
+<Sidebar collapsible={false} />
 ```
 
 - Always expanded
@@ -290,7 +273,7 @@ interface SidebarItem {
     name: 'John Doe',
     email: 'john@example.com',
     role: 'Admin',
-    avatar: '/avatar.jpg'
+    avatar: '/avatar.jpg',
   }}
   onUserAction={handleUserAction}
 />
@@ -315,7 +298,7 @@ The `onUserAction` callback receives the following actions:
     src: '/logo.png',
     alt: 'Company Logo',
     text: 'My Company',
-    href: '/'
+    href: '/',
   }}
 />
 ```
@@ -369,10 +352,10 @@ const sections = [
         id: 'dashboard',
         label: 'Dashboard',
         href: '/dashboard',
-        active: true  // Manually set as active
-      }
-    ]
-  }
+        active: true, // Manually set as active
+      },
+    ],
+  },
 ];
 ```
 
@@ -391,16 +374,16 @@ const sections = [
         id: 'dashboard',
         label: 'Dashboard',
         href: '/dashboard',
-        icon: <DashboardIcon />
+        icon: <DashboardIcon />,
       },
       {
         id: 'users',
         label: 'Users',
         href: '/users',
-        icon: <UsersIcon />
-      }
-    ]
-  }
+        icon: <UsersIcon />,
+      },
+    ],
+  },
 ];
 ```
 
@@ -415,16 +398,16 @@ const sections = [
         id: 'notifications',
         label: 'Notifications',
         href: '/notifications',
-        badge: 5
+        badge: 5,
       },
       {
         id: 'messages',
         label: 'Messages',
         href: '/messages',
-        badge: 'New'
-      }
-    ]
-  }
+        badge: 'New',
+      },
+    ],
+  },
 ];
 ```
 
@@ -441,10 +424,10 @@ const sections = [
         id: 'external-docs',
         label: 'Documentation',
         href: 'https://docs.example.com',
-        external: true
-      }
-    ]
-  }
+        external: true,
+      },
+    ],
+  },
 ];
 ```
 
@@ -463,10 +446,10 @@ const sections = [
         id: 'feature',
         label: 'Coming Soon',
         href: '/feature',
-        disabled: true
-      }
-    ]
-  }
+        disabled: true,
+      },
+    ],
+  },
 ];
 ```
 
@@ -487,10 +470,10 @@ const sections = [
         onClick: () => {
           console.log('Custom action clicked');
           // Handle custom logic
-        }
-      }
-    ]
-  }
+        },
+      },
+    ],
+  },
 ];
 ```
 
@@ -501,19 +484,14 @@ const sections = [
 ```jsx
 import React from 'react';
 import { Sidebar } from '@luxgen/ui';
-import { 
-  DashboardIcon, 
-  UsersIcon, 
-  SettingsIcon,
-  LogoutIcon 
-} from '@luxgen/ui';
+import { DashboardIcon, UsersIcon, SettingsIcon, LogoutIcon } from '@luxgen/ui';
 
 const MySidebar = () => {
   const user = {
     name: 'John Doe',
     email: 'john@example.com',
     role: 'Admin',
-    avatar: '/avatar.jpg'
+    avatar: '/avatar.jpg',
   };
 
   const handleUserAction = (action) => {
@@ -540,7 +518,7 @@ const MySidebar = () => {
           id: 'dashboard',
           label: 'Dashboard',
           href: '/dashboard',
-          icon: <DashboardIcon />
+          icon: <DashboardIcon />,
         },
         {
           id: 'users',
@@ -549,10 +527,10 @@ const MySidebar = () => {
           icon: <UsersIcon />,
           children: [
             { id: 'user-list', label: 'User List', href: '/users/list' },
-            { id: 'user-roles', label: 'User Roles', href: '/users/roles' }
-          ]
-        }
-      ]
+            { id: 'user-roles', label: 'User Roles', href: '/users/roles' },
+          ],
+        },
+      ],
     },
     {
       id: 'settings',
@@ -562,10 +540,10 @@ const MySidebar = () => {
           id: 'profile',
           label: 'Profile',
           href: '/profile',
-          icon: <SettingsIcon />
-        }
-      ]
-    }
+          icon: <SettingsIcon />,
+        },
+      ],
+    },
   ];
 
   return (
@@ -597,7 +575,7 @@ export default MySidebar;
   onUserAction={handleUserAction}
   style={{
     backgroundColor: 'var(--color-surface)',
-    borderRight: '1px solid var(--color-border)'
+    borderRight: '1px solid var(--color-border)',
   }}
 />
 ```

@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { withSSR } from '../ssr';
-import { defaultTheme, TenantTheme } from '../theme';
 import { useGlobalContext } from '../context/GlobalContext';
-import { useTheme } from '../context/ThemeContext';
 import { useUser } from '../context/UserContext';
+import { useNavigation } from '../context/NavigationContext';
+import { useSidebarActive } from './useSidebarActive';
+import { LuxSidebarNavItem } from './LuxSidebarNavItem';
+import type { NavSection } from './sidebar.types';
 
 export interface SidebarItem {
   id: string;
@@ -15,6 +17,8 @@ export interface SidebarItem {
   external?: boolean;
   disabled?: boolean;
   active?: boolean;
+  /** Require exact pathname match for active state (e.g. dashboard) */
+  exact?: boolean;
   onClick?: () => void;
 }
 
@@ -24,10 +28,11 @@ export interface SidebarSection {
   items: SidebarItem[];
   collapsible?: boolean;
   defaultCollapsed?: boolean;
+  showTitle?: boolean;
+  separator?: boolean;
 }
 
 export interface SidebarProps {
-  tenantTheme?: TenantTheme;
   sections?: SidebarSection[];
   logo?: {
     src?: string;
@@ -43,237 +48,243 @@ export interface SidebarProps {
   };
   onUserAction?: (action: 'profile' | 'settings' | 'logout') => void;
   className?: string;
-  variant?: 'default' | 'compact' | 'minimal';
-  position?: 'fixed' | 'sticky' | 'static';
-  width?: 'narrow' | 'normal' | 'wide';
   showUserSection?: boolean;
   showLogo?: boolean;
   collapsible?: boolean;
   defaultCollapsed?: boolean;
   onToggle?: (collapsed: boolean) => void;
   onItemClick?: (item: SidebarItem) => void;
+  /** @deprecated Prefer `onNavigate` — item clicks route via href when provided (UI-162). */
+  pathname?: string;
+  onNavigate?: (href: string) => void;
+}
+
+function hasActiveDescendant(item: SidebarItem, isItemActive: (id: string) => boolean): boolean {
+  if (!item.children?.length) return false;
+  return item.children.some((child) => isItemActive(child.id) || hasActiveDescendant(child, isItemActive));
 }
 
 const SidebarComponent: React.FC<SidebarProps> = ({
-  tenantTheme = defaultTheme,
   sections = [],
   logo,
   user = null,
   onUserAction,
   className = '',
-  variant = 'default',
-  position = 'fixed',
-  width = 'normal',
   showUserSection = true,
   showLogo = true,
   collapsible = true,
   defaultCollapsed = false,
   onToggle,
   onItemClick,
+  pathname,
+  onNavigate,
   ...props
 }) => {
+  const navigation = useNavigation();
+  const effectivePathname = pathname ?? navigation.pathname ?? '';
+  const effectiveNavigate = onNavigate ?? navigation.onNavigate;
+
   const [isCollapsed, setIsCollapsed] = useState(defaultCollapsed);
-  const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set());
-  const [activeItem, setActiveItem] = useState<string>('');
+  const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Get tenant-specific logo from runtime tenant detection
-  const { tenantConfig } = useGlobalContext();
-  const { theme } = useTheme();
-  const { user: dynamicUser, logout: userLogout } = useUser();
-  const tenantLogo = logo || tenantConfig.branding.logo;
-  
-  // Use dynamic user data if available, fallback to prop
-  const currentUser = dynamicUser || user;
-
-  // Initialize expanded sections
   useEffect(() => {
-    const initialExpanded = new Set<string>();
-    sections.forEach(section => {
+    const mq = window.matchMedia('(max-width: 767px)');
+    const onChange = () => {
+      if (mq.matches) {
+        setIsCollapsed(true);
+        setMobileOpen(false);
+      }
+    };
+    onChange();
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+  const [expandedSections, setExpandedSections] = useState<Set<string>>(() => {
+    const initial = new Set<string>();
+    sections.forEach((section) => {
       if (!section.defaultCollapsed && section.collapsible !== false) {
-        initialExpanded.add(section.id);
+        initial.add(section.id);
       }
     });
-    setExpandedSections(initialExpanded);
-  }, [sections]);
+    return initial;
+  });
 
-  // Handle sidebar toggle
+  const navSections = useMemo(() => sections as unknown as NavSection[], [sections]);
+  const { activeItemId, expandedByUrl } = useSidebarActive(navSections, effectivePathname);
+  const urlDrivenActive = Boolean(effectivePathname);
+
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(() => new Set(expandedByUrl));
+
+  const { tenantConfig } = useGlobalContext();
+  const { user: dynamicUser } = useUser();
+  const tenantLogoRaw = logo ?? tenantConfig.branding.logo;
+  const logoText = 'text' in tenantLogoRaw && tenantLogoRaw.text ? tenantLogoRaw.text : 'LuxGen';
+  const logoSrc =
+    ('src' in tenantLogoRaw && tenantLogoRaw.src) || ('image' in tenantLogoRaw && tenantLogoRaw.image) || undefined;
+  const logoHref = 'href' in tenantLogoRaw ? tenantLogoRaw.href : '/';
+  const currentUser = dynamicUser || user;
+
+  useEffect(() => {
+    setExpandedItems((prev) => {
+      const next = new Set(prev);
+      expandedByUrl.forEach((id) => next.add(id));
+      return next;
+    });
+  }, [expandedByUrl]);
+
   const handleToggle = () => {
     const newCollapsed = !isCollapsed;
     setIsCollapsed(newCollapsed);
     onToggle?.(newCollapsed);
   };
 
-  // Handle section toggle
   const handleSectionToggle = (sectionId: string) => {
-    const newExpanded = new Set(expandedSections);
-    if (newExpanded.has(sectionId)) {
-      newExpanded.delete(sectionId);
-    } else {
-      newExpanded.add(sectionId);
-    }
-    setExpandedSections(newExpanded);
+    setExpandedSections((prev) => {
+      const next = new Set(prev);
+      if (next.has(sectionId)) next.delete(sectionId);
+      else next.add(sectionId);
+      return next;
+    });
   };
 
-  // Handle item click
+  const handleItemToggle = (itemId: string) => {
+    setExpandedItems((prev) => {
+      const next = new Set(prev);
+      if (next.has(itemId)) next.delete(itemId);
+      else next.add(itemId);
+      return next;
+    });
+  };
+
+  const navigateTo = useCallback(
+    (href: string, external?: boolean) => {
+      if (external) {
+        window.open(href, '_blank', 'noopener,noreferrer');
+        return;
+      }
+      if (effectiveNavigate) {
+        effectiveNavigate(href);
+      } else {
+        window.location.href = href;
+      }
+    },
+    [effectiveNavigate],
+  );
+
   const handleItemClick = (item: SidebarItem) => {
-    setActiveItem(item.id);
-    onItemClick?.(item);
-    
+    if (item.disabled) return;
     if (item.onClick) {
       item.onClick();
-    } else if (item.href && !item.external) {
-      window.location.href = item.href;
-    } else if (item.href && item.external) {
-      window.open(item.href, '_blank', 'noopener,noreferrer');
+      return;
     }
+    if (item.href && effectiveNavigate) {
+      effectiveNavigate(item.href);
+      return;
+    }
+    onItemClick?.(item);
   };
 
-  // Handle user action
+  const isItemActive = useCallback(
+    (itemId: string) => (urlDrivenActive ? activeItemId === itemId : false),
+    [urlDrivenActive, activeItemId],
+  );
+
   const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
     onUserAction?.(action);
   };
 
-  // Get variant styles
-  const getVariantStyles = () => {
-    const colors = tenantTheme?.colors || defaultTheme.colors;
-    
-    switch (variant) {
-      case 'compact':
-        return {
-          container: 'w-16',
-          logo: 'justify-center',
-          item: 'justify-center px-3',
-          itemText: 'hidden',
-          section: 'px-3',
-        };
-      case 'minimal':
-        return {
-          container: 'w-12',
-          logo: 'justify-center',
-          item: 'justify-center px-2',
-          itemText: 'hidden',
-          section: 'px-2',
-        };
-      case 'default':
-      default:
-        return {
-          container: width === 'narrow' ? 'w-48' : width === 'wide' ? 'w-80' : 'w-64',
-          logo: 'justify-start',
-          item: 'justify-start px-4',
-          itemText: 'block',
-          section: 'px-4',
-        };
-    }
-  };
+  const userInitials =
+    currentUser?.name
+      ?.split(' ')
+      .map((p) => p[0])
+      .join('')
+      .slice(0, 2)
+      .toUpperCase() ?? '?';
 
-  // Get position styles
-  const getPositionStyles = () => {
-    switch (position) {
-      case 'fixed':
-        return 'fixed top-0 left-0 h-full z-40';
-      case 'sticky':
-        return 'sticky top-0 h-screen z-40';
-      case 'static':
-      default:
-        return 'static h-auto';
-    }
-  };
-
-  const styles = getVariantStyles();
-  const positionStyles = getPositionStyles();
+  const userAvatar =
+    currentUser && 'avatarUrl' in currentUser && currentUser.avatarUrl
+      ? currentUser.avatarUrl
+      : currentUser && 'avatar' in currentUser && typeof currentUser.avatar === 'string'
+        ? currentUser.avatar
+        : undefined;
 
   return (
-    <aside
-      className={`
-        ${positionStyles}
-        ${styles.container}
-        bg-white border-r border-gray-200 shadow-sm
-        transition-all duration-300 ease-in-out
-        ${isCollapsed ? 'w-16' : ''}
-        ${className}
-      `}
-      {...props}
-    >
-      <div className="flex flex-col h-full">
-        {/* Logo Section */}
+    <aside className={`lux-sidebar ${className}`.trim()} data-collapsed={isCollapsed ? 'true' : 'false'} {...props}>
+      <div className="lux-sidebar__body">
         {showLogo && (
-          <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <div className="lux-sidebar-header">
+            <div className="lux-sidebar-header__avatar" aria-hidden>
+              {logoSrc ? (
+                <img src={logoSrc} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                logoText.charAt(0).toUpperCase()
+              )}
+            </div>
             {!isCollapsed && (
-              <a
-                href={tenantLogo.href || '/'}
-                className="flex items-center space-x-2 text-xl font-bold text-green-600"
-              >
-                {tenantLogo.src ? (
-                  <img
-                    src={tenantLogo.src}
-                    alt={tenantLogo.alt || 'Logo'}
-                    className="h-8 w-8"
-                  />
-                ) : null}
-                <span style={{ color: theme.colors.primary }}>{tenantLogo.text}</span>
-              </a>
-            )}
-            
-            {collapsible && (
               <button
-                onClick={handleToggle}
-                className="p-2 rounded-md text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors duration-200"
+                type="button"
+                onClick={() => logoHref && navigateTo(logoHref)}
+                className="lux-sidebar-header__info"
+                style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer', textAlign: 'left' }}
               >
-                <svg
-                  className={`h-5 w-5 transition-transform duration-200 ${isCollapsed ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-                </svg>
+                <span className="lux-sidebar-header__name">{logoText}</span>
               </button>
             )}
+            {collapsible ? (
+              <button
+                type="button"
+                onClick={handleToggle}
+                className="lux-sidebar-header__collapse"
+                aria-label={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              >
+                <svg viewBox="0 0 20 20" fill="none" width={16} height={16} aria-hidden>
+                  <path
+                    d={isCollapsed ? 'M7 5l5 5-5 5' : 'M13 5l-5 5 5 5'}
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+            ) : null}
           </div>
         )}
 
-        {/* Navigation Sections */}
-        <nav className="flex-1 overflow-y-auto">
-          {sections.map((section) => (
-            <div key={section.id} className="py-2">
-              {/* Section Header */}
-              {section.title && !isCollapsed && (
-                <div className="flex items-center justify-between px-4 py-2">
-                  <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    {section.title}
-                  </h3>
-                  {section.collapsible !== false && (
-                    <button
-                      onClick={() => handleSectionToggle(section.id)}
-                      className="p-1 rounded text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                    >
-                      <svg
-                        className={`h-4 w-4 transition-transform duration-200 ${
-                          expandedSections.has(section.id) ? 'rotate-180' : ''
-                        }`}
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                      </svg>
-                    </button>
-                  )}
-                </div>
-              )}
+        <nav className="lux-sidebar-nav" aria-label="Main navigation" /* UI-178 */>
+          {sections.map((section, sectionIndex) => (
+            <div key={section.id} className="lux-sidebar-section">
+              {section.separator && sectionIndex > 0 ? <div className="lux-separator" /> : null}
 
-              {/* Section Items */}
+              {section.title && !isCollapsed && (section.showTitle ?? section.title !== 'Navigation') ? (
+                <div className="lux-sidebar-section__header">
+                  <span className="lux-sidebar-section__title">{section.title}</span>
+                  {section.collapsible !== false ? (
+                    <button
+                      type="button"
+                      onClick={() => handleSectionToggle(section.id)}
+                      className="lux-sidebar-section__toggle"
+                      aria-expanded={expandedSections.has(section.id)}
+                    >
+                      <NavChevronSmall open={expandedSections.has(section.id)} />
+                    </button>
+                  ) : null}
+                </div>
+              ) : null}
+
               {(!section.collapsible || expandedSections.has(section.id) || isCollapsed) && (
-                <div className="space-y-1">
+                <div className="lux-sidebar-section__items">
                   {section.items.map((item) => (
-                    <SidebarItemComponent
+                    <LuxSidebarNavItem
                       key={item.id}
                       item={item}
-                      isActive={activeItem === item.id}
+                      isActive={isItemActive(item.id)}
+                      isAncestorActive={hasActiveDescendant(item, isItemActive)}
+                      isExpanded={expandedItems.has(item.id)}
                       isCollapsed={isCollapsed}
-                      onClick={() => handleItemClick(item)}
-                      variant={variant}
-                      styles={styles}
+                      onToggle={handleItemToggle}
+                      onItemClick={handleItemClick}
+                      isItemActive={isItemActive}
                     />
                   ))}
                 </div>
@@ -282,144 +293,47 @@ const SidebarComponent: React.FC<SidebarProps> = ({
           ))}
         </nav>
 
-        {/* User Section */}
-        {showUserSection && currentUser && !isCollapsed && (
-          <div className="border-t border-gray-200 p-4">
-            <div className="flex items-center space-x-3">
-              {currentUser.avatar ? (
-                <img
-                  src={currentUser.avatar}
-                  alt={currentUser.name}
-                  className="h-8 w-8 rounded-full"
-                />
-              ) : (
-                <div className="h-8 w-8 bg-green-500 rounded-full flex items-center justify-center text-white font-medium">
-                  {currentUser.name.charAt(0).toUpperCase()}
-                </div>
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">
-                  {currentUser.name}
-                </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {currentUser.role}
-                </p>
-                {dynamicUser && dynamicUser.tenant && (
-                  <p className="text-xs text-gray-400 truncate">
-                    {dynamicUser.tenant.name}
-                  </p>
+        {showUserSection && !isCollapsed ? (
+          currentUser ? (
+            <div className="lux-sidebar-footer">
+              <button type="button" className="lux-sidebar-footer__user" onClick={() => handleUserAction('profile')}>
+                {userAvatar ? (
+                  <img src={userAvatar} alt="" className="lux-sidebar-footer__avatar" style={{ objectFit: 'cover' }} />
+                ) : (
+                  <div className="lux-sidebar-footer__avatar">{userInitials}</div>
                 )}
-              </div>
-              <div className="relative">
-                <button
-                  onClick={() => handleUserAction('profile')}
-                  className="p-1 rounded text-gray-400 hover:text-gray-600 transition-colors duration-200"
-                >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />
-                  </svg>
-                </button>
-              </div>
+                <div className="lux-sidebar-footer__name">
+                  <span>{currentUser.name}</span>
+                  {currentUser.role ? <span className="lux-sidebar-header__sub">{currentUser.role}</span> : null}
+                </div>
+              </button>
             </div>
-          </div>
-        )}
+          ) : (
+            <div className="lux-sidebar-footer lux-sidebar-footer--guest">
+              <button type="button" className="lux-sidebar-footer__sign-in" onClick={() => navigateTo('/login')}>
+                Sign in
+              </button>
+            </div>
+          )
+        ) : null}
       </div>
     </aside>
   );
 };
 
-// Separate component for sidebar items for better performance
-const SidebarItemComponent: React.FC<{
-  item: SidebarItem;
-  isActive: boolean;
-  isCollapsed: boolean;
-  onClick: () => void;
-  variant: string;
-  styles: any;
-}> = React.memo(({ item, isActive, isCollapsed, onClick, variant, styles }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const handleClick = () => {
-    if (item.children && item.children.length > 0) {
-      // Only toggle submenu, don't navigate
-      setIsExpanded(!isExpanded);
-    } else {
-      // Only navigate if no children
-      onClick();
-    }
-  };
-
+function NavChevronSmall({ open }: { open: boolean }) {
   return (
-    <div>
-      <button
-        onClick={handleClick}
-        disabled={item.disabled}
-        className={`
-          w-full flex items-center ${styles.item} py-2 text-sm font-medium rounded-md
-          transition-colors duration-200
-          ${isActive 
-            ? 'bg-green-50 text-green-700 border-r-2 border-green-500' 
-            : item.children && item.children.length > 0
-              ? 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
-              : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900'
-          }
-          ${item.disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-        `}
-      >
-        {item.icon && (
-          <span className="flex-shrink-0 mr-3">
-            {item.icon}
-          </span>
-        )}
-        
-        {!isCollapsed && (
-          <>
-            <span className={`flex-1 text-left ${styles.itemText}`}>
-              {item.label}
-            </span>
-            
-            {item.badge && (
-              <span className="ml-2 px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">
-                {item.badge}
-              </span>
-            )}
-            
-            {item.children && item.children.length > 0 && (
-              <svg
-                className={`h-4 w-4 transition-transform duration-200 ${
-                  isExpanded ? 'rotate-180' : ''
-                }`}
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            )}
-          </>
-        )}
-      </button>
-
-      {/* Sub-menu items */}
-      {item.children && item.children.length > 0 && isExpanded && !isCollapsed && (
-        <div className="ml-4 mt-1 space-y-1">
-          {item.children.map((child) => (
-            <SidebarItemComponent
-              key={child.id}
-              item={child}
-              isActive={false}
-              isCollapsed={isCollapsed}
-              onClick={onClick}
-              variant={variant}
-              styles={styles}
-            />
-          ))}
-        </div>
-      )}
-    </div>
+    <svg
+      className={`lux-nav-item__chevron ${open ? 'lux-nav-item__chevron--open' : ''}`}
+      viewBox="0 0 16 16"
+      fill="none"
+      width={14}
+      height={14}
+      aria-hidden
+    >
+      <path d="M6 4l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   );
-});
-
-SidebarItemComponent.displayName = 'SidebarItemComponent';
+}
 
 export const Sidebar = withSSR(SidebarComponent);

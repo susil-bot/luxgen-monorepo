@@ -9,9 +9,7 @@ export interface FormData {
   noValidate: boolean;
 }
 
-export const fetchFormData = async (
-  tenantId?: string
-): Promise<FormData> => {
+export const fetchFormData = async (tenantId?: string): Promise<FormData> => {
   return {
     tenantTheme: defaultTheme,
     method: 'POST',
@@ -21,11 +19,9 @@ export const fetchFormData = async (
   };
 };
 
-export const fetchFormSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchFormSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchFormData(tenantId);
-  
+
   const html = `
     <form 
       class="form" 
@@ -38,7 +34,7 @@ export const fetchFormSSR = async (
       <!-- Form content will be inserted here -->
     </form>
   `;
-  
+
   const styles = `
     .form {
       display: flex;
@@ -97,6 +93,6 @@ export const fetchFormSSR = async (
       }
     }
   `;
-  
+
   return { html, styles };
 };

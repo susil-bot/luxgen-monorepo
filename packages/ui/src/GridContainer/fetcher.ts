@@ -7,9 +7,7 @@ export interface GridContainerData {
   gap: string;
 }
 
-export const fetchGridContainerData = async (
-  tenantId?: string
-): Promise<GridContainerData> => {
+export const fetchGridContainerData = async (tenantId?: string): Promise<GridContainerData> => {
   return {
     tenantTheme: defaultTheme,
     columns: 3,
@@ -17,17 +15,15 @@ export const fetchGridContainerData = async (
   };
 };
 
-export const fetchGridContainerSSR = async (
-  tenantId?: string
-): Promise<{ html: string; styles: string }> => {
+export const fetchGridContainerSSR = async (tenantId?: string): Promise<{ html: string; styles: string }> => {
   const data = await fetchGridContainerData(tenantId);
-  
+
   const html = `
     <div class="grid-container" style="display: grid; grid-template-columns: repeat(${data.columns}, 1fr); gap: ${data.gap}; font-family: ${data.tenantTheme.fonts.primary};">
       <!-- Grid items will be inserted here -->
     </div>
   `;
-  
+
   const styles = `
     .grid-container {
       display: grid;
@@ -47,6 +43,6 @@ export const fetchGridContainerSSR = async (
       }
     }
   `;
-  
+
   return { html, styles };
 };

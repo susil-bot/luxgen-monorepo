@@ -9,7 +9,7 @@ export const headingStyles = {
       line-height: 1.2;
     }
   `,
-  
+
   sizes: {
     sm: css`
       .heading-sm {
@@ -66,7 +66,7 @@ export const headingStyles = {
       }
     `,
   },
-  
+
   weights: {
     light: css`
       .heading-light {
@@ -104,7 +104,7 @@ export const headingStyles = {
       }
     `,
   },
-  
+
   alignments: {
     left: css`
       .heading-left {
@@ -127,7 +127,7 @@ export const headingStyles = {
       }
     `,
   },
-  
+
   variants: {
     primary: css`
       .heading-primary {
@@ -160,7 +160,7 @@ export const headingStyles = {
       }
     `,
   },
-  
+
   truncate: css`
     .heading-truncate {
       overflow: hidden;
@@ -168,39 +168,39 @@ export const headingStyles = {
       white-space: nowrap;
     }
   `,
-  
+
   responsive: css`
     @media (max-width: 768px) {
       .heading-6xl {
         font-size: 2.5rem;
       }
-      
+
       .heading-5xl {
         font-size: 2rem;
       }
-      
+
       .heading-4xl {
         font-size: 1.75rem;
       }
-      
+
       .heading-3xl {
         font-size: 1.5rem;
       }
-      
+
       .heading-2xl {
         font-size: 1.25rem;
       }
     }
   `,
-  
+
   darkMode: css`
     @media (prefers-color-scheme: dark) {
       .heading {
-        color: #F9FAFB;
+        color: #f9fafb;
       }
-      
+
       .heading-secondary {
-        color: #9CA3AF;
+        color: #9ca3af;
       }
     }
   `,

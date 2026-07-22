@@ -1,0 +1,62 @@
+export interface AgentMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  toolUses?: ToolUse[];
+  timestamp: number;
+}
+
+export interface ToolUse {
+  id: string;
+  name: string;
+  input: Record<string, unknown>;
+  result?: string;
+  status: 'pending' | 'done' | 'error';
+}
+
+export interface StagedFile {
+  path: string;
+  content: string;
+  originalContent?: string;
+  type: 'new' | 'modified';
+  description: string;
+  stagedAt: number;
+  pendingDelete?: boolean;
+}
+
+import type { AgentSessionGit } from './git';
+import type { ValidationResult } from './validation';
+
+/** Persisted chat turn (capped at 50 per session). */
+export interface SessionChatMessage {
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+}
+
+export interface AgentSession {
+  id: string;
+  files: Record<string, StagedFile>;
+  createdAt: number;
+  updatedAt: number;
+  git?: AgentSessionGit;
+  validation?: ValidationResult;
+  tenantId?: string;
+  userId?: string;
+  status?: import('./task').TaskStatus;
+  mode?: import('./task').TaskMode;
+  prompt?: string;
+  metadata?: {
+    model?: string;
+  };
+  messages?: SessionChatMessage[];
+}
+
+export interface ApplyResult {
+  applied: string[];
+  errors: string[];
+  conflicts: string[];
+  mode?: 'filesystem' | 'worktree';
+  branch?: string;
+  blocked?: boolean;
+}

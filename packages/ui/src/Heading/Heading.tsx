@@ -3,7 +3,7 @@ import { BaseComponentProps, TenantTheme, VariantProps } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
-export interface HeadingProps extends BaseComponentProps, VariantProps {
+export interface HeadingProps extends Omit<BaseComponentProps, 'loading'>, VariantProps {
   tenantTheme?: TenantTheme;
   level: 1 | 2 | 3 | 4 | 5 | 6;
   text: string;
@@ -30,7 +30,7 @@ const HeadingComponent: React.FC<HeadingProps> = ({
 }) => {
   const getSizeClass = () => {
     if (size) return size;
-    
+
     const sizeMap = {
       1: '6xl',
       2: '5xl',
@@ -39,13 +39,13 @@ const HeadingComponent: React.FC<HeadingProps> = ({
       5: '2xl',
       6: 'xl',
     };
-    
+
     return sizeMap[level];
   };
 
   const getVariantColor = () => {
     if (color) return color;
-    
+
     const variantColors = {
       primary: tenantTheme.colors.text,
       secondary: tenantTheme.colors.textSecondary,
@@ -54,7 +54,7 @@ const HeadingComponent: React.FC<HeadingProps> = ({
       warning: tenantTheme.colors.warning,
       info: tenantTheme.colors.info,
     };
-    
+
     return variantColors[variant] || tenantTheme.colors.text;
   };
 
@@ -74,14 +74,8 @@ const HeadingComponent: React.FC<HeadingProps> = ({
   const HeadingTag = `h${level}` as keyof JSX.IntrinsicElements;
   const sizeClass = getSizeClass();
 
-  const { loading, ...headingProps } = props;
-  
   return (
-    <HeadingTag
-      className={`heading heading-${sizeClass} ${className}`}
-      style={styles}
-      {...headingProps}
-    >
+    <HeadingTag className={`heading heading-${sizeClass} ${className}`} style={styles} {...props}>
       {text}
     </HeadingTag>
   );

@@ -1,5 +1,6 @@
 // Test setup file
 import dotenv from 'dotenv';
+import { resetLoginRateLimitStore } from '../middleware/loginRateLimit';
 
 // Load environment variables for testing
 dotenv.config({ path: '.env.test' });
@@ -8,6 +9,7 @@ dotenv.config({ path: '.env.test' });
 process.env.NODE_ENV = 'test';
 process.env.JWT_SECRET = 'test-jwt-secret';
 process.env.JWT_EXPIRES_IN = '1h';
+process.env.JWT_REFRESH_SECRET = 'test-refresh-secret';
 process.env.MONGODB_URI = 'mongodb://localhost:27017/luxgen-test';
 
 // Mock console methods to reduce noise in tests
@@ -35,3 +37,8 @@ jest.mock('../utils/logger', () => ({
     debug: jest.fn(),
   },
 }));
+
+// Reset in-memory rate-limit store before each test to prevent cross-test accumulation
+beforeEach(() => {
+  resetLoginRateLimitStore();
+});

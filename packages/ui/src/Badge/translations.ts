@@ -1,1 +1,1 @@
-export const BadgeTranslations = { en: { title: "Badge" } };
+export const BadgeTranslations = { en: { title: 'Badge' } };

@@ -25,23 +25,13 @@ npm install @luxgen/ui
 
 ```jsx
 import React from 'react';
-import { 
-  GlobalProvider, 
-  ThemeProvider, 
-  AppLayout,
-  NavBar,
-  Sidebar 
-} from '@luxgen/ui';
+import { GlobalProvider, ThemeProvider, AppLayout, NavBar, Sidebar } from '@luxgen/ui';
 
 const App = () => {
   return (
     <GlobalProvider>
       <ThemeProvider>
-        <AppLayout
-          sidebarSections={sidebarSections}
-          user={user}
-          onUserAction={handleUserAction}
-        >
+        <AppLayout sidebarSections={sidebarSections} user={user} onUserAction={handleUserAction}>
           <h1>Welcome to LuxGen</h1>
           <p>Your content goes here</p>
         </AppLayout>
@@ -55,12 +45,7 @@ const App = () => {
 
 ```jsx
 import React from 'react';
-import { 
-  GlobalProvider, 
-  ThemeProvider, 
-  AppLayout,
-  TenantDebug 
-} from '@luxgen/ui';
+import { GlobalProvider, ThemeProvider, AppLayout, TenantDebug } from '@luxgen/ui';
 
 const App = () => {
   const sidebarSections = [
@@ -69,15 +54,15 @@ const App = () => {
       title: 'Main Navigation',
       items: [
         { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
-        { id: 'users', label: 'Users', href: '/users' }
-      ]
-    }
+        { id: 'users', label: 'Users', href: '/users' },
+      ],
+    },
   ];
 
   const user = {
     name: 'John Doe',
     email: 'john@example.com',
-    role: 'Admin'
+    role: 'Admin',
   };
 
   const handleUserAction = (action) => {
@@ -209,11 +194,11 @@ Themes are applied through CSS custom properties:
 
 ```css
 :root {
-  --color-primary: #3B82F6;
-  --color-secondary: #1E40AF;
-  --color-background: #F8FAFC;
-  --color-surface: #FFFFFF;
-  --color-text: #1F2937;
+  --color-primary: #3b82f6;
+  --color-secondary: #1e40af;
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-text: #1f2937;
   /* ... more properties */
 }
 ```
@@ -225,9 +210,7 @@ Themes are applied through CSS custom properties:
 Manages tenant detection and configuration:
 
 ```jsx
-<GlobalProvider defaultTenant="demo">
-  {children}
-</GlobalProvider>
+<GlobalProvider defaultTenant="demo">{children}</GlobalProvider>
 ```
 
 ### ThemeProvider
@@ -235,9 +218,7 @@ Manages tenant detection and configuration:
 Manages theme application and CSS custom properties:
 
 ```jsx
-<ThemeProvider initialTheme={tenantConfig.theme}>
-  {children}
-</ThemeProvider>
+<ThemeProvider initialTheme={tenantConfig.theme}>{children}</ThemeProvider>
 ```
 
 ## Hooks
@@ -251,7 +232,7 @@ import { useGlobalContext } from '@luxgen/ui';
 
 const MyComponent = () => {
   const { currentTenant, tenantConfig, isInitialized } = useGlobalContext();
-  
+
   return (
     <div>
       <p>Current tenant: {currentTenant}</p>
@@ -270,12 +251,8 @@ import { useTheme } from '@luxgen/ui';
 
 const MyComponent = () => {
   const { theme, setTheme, applyTheme } = useTheme();
-  
-  return (
-    <div style={{ color: theme.colors.primary }}>
-      Themed content
-    </div>
-  );
+
+  return <div style={{ color: theme.colors.primary }}>Themed content</div>;
 };
 ```
 
@@ -292,12 +269,7 @@ const MyComponent = () => {
 All components automatically adapt to different screen sizes:
 
 ```jsx
-<AppLayout
-  responsive={true}
-  mobileBreakpoint={640}
-  tabletBreakpoint={768}
-  desktopBreakpoint={1024}
->
+<AppLayout responsive={true} mobileBreakpoint={640} tabletBreakpoint={768} desktopBreakpoint={1024}>
   {content}
 </AppLayout>
 ```
@@ -320,14 +292,14 @@ import { useGlobalContext } from '@luxgen/ui';
 
 const MyComponent = () => {
   const { trackLayoutEvent } = useGlobalContext();
-  
+
   const handleClick = () => {
     trackLayoutEvent('custom_action', {
       action: 'button_click',
-      target: 'custom_button'
+      target: 'custom_button',
     });
   };
-  
+
   return <button onClick={handleClick}>Click me</button>;
 };
 ```
@@ -368,9 +340,7 @@ Layout components include skip links:
 
 ```html
 <a href="#main-content">Skip to main content</a>
-<main id="main-content">
-  {content}
-</main>
+<main id="main-content">{content}</main>
 ```
 
 ## TypeScript Support
@@ -426,9 +396,7 @@ Components automatically hydrate on the client:
 ```jsx
 // Server renders with default theme
 // Client hydrates with tenant-specific theme
-<ThemeProvider initialTheme={serverTheme}>
-  {children}
-</ThemeProvider>
+<ThemeProvider initialTheme={serverTheme}>{children}</ThemeProvider>
 ```
 
 ## Development
@@ -443,7 +411,7 @@ import { TenantDebug } from '@luxgen/ui';
 <AppLayout>
   {content}
   <TenantDebug />
-</AppLayout>
+</AppLayout>;
 ```
 
 ### Console Logging
@@ -480,14 +448,7 @@ npm run lint
 
 ```jsx
 import React from 'react';
-import { 
-  GlobalProvider, 
-  ThemeProvider, 
-  AppLayout,
-  NavBar,
-  Sidebar,
-  TenantDebug 
-} from '@luxgen/ui';
+import { GlobalProvider, ThemeProvider, AppLayout, NavBar, Sidebar, TenantDebug } from '@luxgen/ui';
 
 const App = () => {
   const sidebarSections = [
@@ -496,15 +457,15 @@ const App = () => {
       title: 'Main Navigation',
       items: [
         { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
-        { id: 'users', label: 'Users', href: '/users' }
-      ]
-    }
+        { id: 'users', label: 'Users', href: '/users' },
+      ],
+    },
   ];
 
   const user = {
     name: 'John Doe',
     email: 'john@example.com',
-    role: 'Admin'
+    role: 'Admin',
   };
 
   const handleUserAction = (action) => {

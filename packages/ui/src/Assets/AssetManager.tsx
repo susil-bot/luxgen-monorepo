@@ -105,13 +105,13 @@ export const AssetManagerProvider: React.FC<AssetManagerProviderProps> = ({
 
     try {
       const currentTenantId = targetTenantId || tenantId;
-      
+
       if (currentTenantId) {
         // Load tenant-specific assets
         const response = await fetch(`/api/assets/tenant/${currentTenantId}`);
         if (response.ok) {
           const tenantData = await response.json();
-          setTenantAssets(prev => ({
+          setTenantAssets((prev) => ({
             ...prev,
             [currentTenantId]: tenantData.brandAssets,
           }));
@@ -136,68 +136,66 @@ export const AssetManagerProvider: React.FC<AssetManagerProviderProps> = ({
 
   const getAsset = (id: string, targetTenantId?: string): AssetConfig | null => {
     const currentTenantId = targetTenantId || tenantId;
-    
+
     // First try to find tenant-specific asset
     if (currentTenantId && tenantAssets[currentTenantId]) {
       const tenantAsset = findAssetInBrandAssets(tenantAssets[currentTenantId], id);
       if (tenantAsset) return tenantAsset;
     }
-    
+
     // Then try global assets
     const globalAsset = findAssetInBrandAssets(brandAssets, id);
     if (globalAsset) return globalAsset;
-    
+
     // Finally try the assets array
-    return assets.find(asset => asset.id === id) || null;
+    return assets.find((asset) => asset.id === id) || null;
   };
 
   const findAssetInBrandAssets = (brandAssets: BrandAssets | null, id: string): AssetConfig | null => {
     if (!brandAssets) return null;
-    
+
     // Search in logo assets
     if (brandAssets.logo.primary.id === id) return brandAssets.logo.primary;
     if (brandAssets.logo.secondary?.id === id) return brandAssets.logo.secondary;
     if (brandAssets.logo.icon?.id === id) return brandAssets.logo.icon;
     if (brandAssets.logo.favicon?.id === id) return brandAssets.logo.favicon;
-    
+
     // Search in images
     if (brandAssets.images.hero?.id === id) return brandAssets.images.hero;
     if (brandAssets.images.background?.id === id) return brandAssets.images.background;
     if (brandAssets.images.placeholder?.id === id) return brandAssets.images.placeholder;
-    
+
     // Search in icons
-    const iconAsset = Object.values(brandAssets.icons).find(asset => asset.id === id);
+    const iconAsset = Object.values(brandAssets.icons).find((asset) => asset.id === id);
     if (iconAsset) return iconAsset;
-    
+
     // Search in illustrations
-    const illustrationAsset = Object.values(brandAssets.illustrations).find(asset => asset.id === id);
+    const illustrationAsset = Object.values(brandAssets.illustrations).find((asset) => asset.id === id);
     if (illustrationAsset) return illustrationAsset;
-    
+
     return null;
   };
 
   const getBrandAssets = (targetTenantId?: string): BrandAssets | null => {
     const currentTenantId = targetTenantId || tenantId;
-    
+
     if (currentTenantId && tenantAssets[currentTenantId]) {
       return tenantAssets[currentTenantId];
     }
-    
+
     return brandAssets;
   };
 
   const addAsset = (asset: AssetConfig) => {
-    setAssets(prev => [...prev, asset]);
+    setAssets((prev) => [...prev, asset]);
   };
 
   const updateAsset = (id: string, updates: Partial<AssetConfig>) => {
-    setAssets(prev => prev.map(asset => 
-      asset.id === id ? { ...asset, ...updates } : asset
-    ));
+    setAssets((prev) => prev.map((asset) => (asset.id === id ? { ...asset, ...updates } : asset)));
   };
 
   const removeAsset = (id: string) => {
-    setAssets(prev => prev.filter(asset => asset.id !== id));
+    setAssets((prev) => prev.filter((asset) => asset.id !== id));
   };
 
   useEffect(() => {
@@ -220,9 +218,5 @@ export const AssetManagerProvider: React.FC<AssetManagerProviderProps> = ({
     error,
   };
 
-  return (
-    <AssetManagerContext.Provider value={value}>
-      {children}
-    </AssetManagerContext.Provider>
-  );
+  return <AssetManagerContext.Provider value={value}>{children}</AssetManagerContext.Provider>;
 };

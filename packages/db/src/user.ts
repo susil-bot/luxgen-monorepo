@@ -3,6 +3,9 @@ import { Schema, model, Document } from 'mongoose';
 export enum UserRole {
   SUPER_ADMIN = 'SUPER_ADMIN',
   ADMIN = 'ADMIN',
+  INSTRUCTOR = 'INSTRUCTOR',
+  STUDENT = 'STUDENT',
+  /** @deprecated Use STUDENT — kept for legacy seed data */
   USER = 'USER',
 }
 
@@ -49,135 +52,211 @@ export interface IUser extends Document {
   role: UserRole;
   status: UserStatus;
   tenant: Schema.Types.ObjectId;
+  staffNotes?: string;
+  phone?: string;
+  marketingEmail?: boolean;
+  marketingSms?: boolean;
+  marketingWhatsapp?: boolean;
+  /** Public avatar image URL or data URL */
+  avatar?: string;
+  /** Expo push tokens registered from mobile devices */
+  pushTokens?: string[];
+  /** SHA-256 hash of password reset token */
+  passwordResetToken?: string;
+  passwordResetExpires?: Date;
+  emailVerified?: boolean;
+  emailVerificationToken?: string;
+  emailVerificationExpires?: Date;
   isActive: boolean;
   metadata: IUserMetadata;
   createdAt: Date;
   updatedAt: Date;
 }
 
-const userSchema = new Schema<IUser>({
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-    lowercase: true,
-    trim: true,
-  },
-  password: {
-    type: String,
-    required: true,
-    minlength: 6,
-  },
-  firstName: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  lastName: {
-    type: String,
-    required: true,
-    trim: true,
-  },
-  role: {
-    type: String,
-    enum: Object.values(UserRole),
-    default: UserRole.USER,
-  },
-  status: {
-    type: String,
-    enum: Object.values(UserStatus),
-    default: UserStatus.PENDING,
-  },
-  tenant: {
-    type: Schema.Types.ObjectId,
-    ref: 'Tenant',
-    required: true,
-  },
-  isActive: {
-    type: Boolean,
-    default: true,
-  },
-  metadata: {
-    lastLogin: {
+const userSchema = new Schema<IUser>(
+  {
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      lowercase: true,
+      trim: true,
+    },
+    password: {
+      type: String,
+      required: true,
+      minlength: 6,
+      select: false,
+    },
+    firstName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    lastName: {
+      type: String,
+      required: true,
+      trim: true,
+    },
+    role: {
+      type: String,
+      enum: Object.values(UserRole),
+      default: UserRole.USER,
+    },
+    status: {
+      type: String,
+      enum: Object.values(UserStatus),
+      default: UserStatus.PENDING,
+    },
+    tenant: {
+      type: Schema.Types.ObjectId,
+      ref: 'Tenant',
+      required: true,
+    },
+    staffNotes: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    phone: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    marketingEmail: {
+      type: Boolean,
+      default: true,
+    },
+    marketingSms: {
+      type: Boolean,
+      default: false,
+    },
+    marketingWhatsapp: {
+      type: Boolean,
+      default: false,
+    },
+    avatar: {
+      type: String,
+      default: '',
+      trim: true,
+    },
+    pushTokens: {
+      type: [String],
+      default: [],
+    },
+    passwordResetToken: {
+      type: String,
+      select: false,
+    },
+    passwordResetExpires: {
       type: Date,
+      select: false,
     },
-    loginCount: {
-      type: Number,
-      default: 0,
+    emailVerified: {
+      type: Boolean,
+      default: false,
     },
-    preferences: {
-      theme: {
-        type: String,
-        enum: ['light', 'dark', 'auto'],
-        default: 'light',
-      },
-      notifications: {
-        type: Boolean,
-        default: true,
-      },
-      language: {
-        type: String,
-        default: 'en',
-      },
+    emailVerificationToken: {
+      type: String,
+      select: false,
     },
-    permissions: {
-      canManageUsers: {
-        type: Boolean,
-        default: false,
-      },
-      canManageTenants: {
-        type: Boolean,
-        default: false,
-      },
-      canManageCourses: {
-        type: Boolean,
-        default: false,
-      },
-      canManageGroups: {
-        type: Boolean,
-        default: false,
-      },
-      canViewReports: {
-        type: Boolean,
-        default: false,
-      },
-      canManageSettings: {
-        type: Boolean,
-        default: false,
-      },
-      canInviteUsers: {
-        type: Boolean,
-        default: false,
-      },
-      canApproveRequests: {
-        type: Boolean,
-        default: false,
-      },
+    emailVerificationExpires: {
+      type: Date,
+      select: false,
     },
-    tenantRoles: [{
-      tenantId: {
-        type: Schema.Types.ObjectId,
-        ref: 'Tenant',
-        required: true,
-      },
-      role: {
-        type: String,
-        enum: Object.values(UserRole),
-        required: true,
-      },
-      assignedBy: {
-        type: Schema.Types.ObjectId,
-        ref: 'User',
-        required: true,
-      },
-      assignedAt: {
+    isActive: {
+      type: Boolean,
+      default: true,
+    },
+    metadata: {
+      lastLogin: {
         type: Date,
-        default: Date.now,
       },
-    }],
+      loginCount: {
+        type: Number,
+        default: 0,
+      },
+      preferences: {
+        theme: {
+          type: String,
+          enum: ['light', 'dark', 'auto'],
+          default: 'light',
+        },
+        notifications: {
+          type: Boolean,
+          default: true,
+        },
+        language: {
+          type: String,
+          default: 'en',
+        },
+      },
+      permissions: {
+        canManageUsers: {
+          type: Boolean,
+          default: false,
+        },
+        canManageTenants: {
+          type: Boolean,
+          default: false,
+        },
+        canManageCourses: {
+          type: Boolean,
+          default: false,
+        },
+        canManageGroups: {
+          type: Boolean,
+          default: false,
+        },
+        canViewReports: {
+          type: Boolean,
+          default: false,
+        },
+        canManageSettings: {
+          type: Boolean,
+          default: false,
+        },
+        canInviteUsers: {
+          type: Boolean,
+          default: false,
+        },
+        canApproveRequests: {
+          type: Boolean,
+          default: false,
+        },
+      },
+      tenantRoles: [
+        {
+          tenantId: {
+            type: Schema.Types.ObjectId,
+            ref: 'Tenant',
+            required: true,
+          },
+          role: {
+            type: String,
+            enum: Object.values(UserRole),
+            required: true,
+          },
+          assignedBy: {
+            type: Schema.Types.ObjectId,
+            ref: 'User',
+            required: true,
+          },
+          assignedAt: {
+            type: Date,
+            default: Date.now,
+          },
+        },
+      ],
+    },
   },
-}, {
-  timestamps: true,
-});
+  {
+    timestamps: true,
+  },
+);
+
+userSchema.index({ tenant: 1, email: 1 });
+userSchema.index({ tenant: 1, role: 1 });
+userSchema.index({ tenant: 1, status: 1 });
 
 export const User = model<IUser>('User', userSchema);

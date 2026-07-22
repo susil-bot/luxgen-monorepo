@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
-import { BaseComponentProps, TenantTheme, BaseFormProps, SelectOption } from '../types';
+import React, { useState, useRef } from 'react';
+import { BaseComponentProps, TenantTheme, SelectOption } from '../types';
 import { withSSR } from '../ssr';
 import { defaultTheme } from '../theme';
 
-export interface SelectProps extends BaseComponentProps, BaseFormProps {
+export interface SelectProps extends BaseComponentProps {
   tenantTheme?: TenantTheme;
   options: SelectOption[];
+  value?: string | number | Array<string | number>;
+  onChange?: (value: string | number | Array<string | number>) => void;
   placeholder?: string;
   disabled?: boolean;
   required?: boolean;
@@ -36,24 +38,43 @@ const SelectComponent: React.FC<SelectProps> = ({
   ...props
 }) => {
   const [isOpen, setIsOpen] = useState(false);
+  const [dropup, setDropup] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const DROPDOWN_MAX_HEIGHT = 200;
+
+  const toggleOpen = () => {
+    if (disabled) return;
+
+    if (!isOpen && containerRef.current) {
+      const rect = containerRef.current.getBoundingClientRect();
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      setDropup(spaceBelow < DROPDOWN_MAX_HEIGHT && spaceAbove > spaceBelow);
+    }
+
+    setIsOpen((open) => !open);
+  };
 
   const filteredOptions = searchable
-    ? options.filter(option =>
-        option.label.toLowerCase().includes(searchTerm.toLowerCase())
-      )
+    ? options.filter((option) => option.label.toLowerCase().includes(searchTerm.toLowerCase()))
     : options;
 
-  const selectedOptions = multi
-    ? (Array.isArray(value) ? value : [])
-    : (value ? [value] : []);
+  const selectedOptions: Array<string | number> = multi
+    ? Array.isArray(value)
+      ? value
+      : []
+    : value !== undefined && value !== null && !Array.isArray(value)
+      ? [value]
+      : [];
 
   const handleSelect = (option: SelectOption) => {
     if (disabled || option.disabled) return;
 
     if (multi) {
       const newValue = selectedOptions.includes(option.value)
-        ? selectedOptions.filter(v => v !== option.value)
+        ? selectedOptions.filter((v) => v !== option.value)
         : [...selectedOptions, option.value];
       onChange?.(newValue);
     } else {
@@ -81,11 +102,11 @@ const SelectComponent: React.FC<SelectProps> = ({
           {required && <span className="select-required">*</span>}
         </label>
       )}
-      
-      <div className="select-container">
+
+      <div className="select-container" ref={containerRef}>
         <div
           className={`select-trigger ${error ? 'error' : ''} ${disabled ? 'disabled' : ''}`}
-          onClick={() => !disabled && setIsOpen(!isOpen)}
+          onClick={toggleOpen}
           {...props}
         >
           <div className="select-value">
@@ -93,7 +114,7 @@ const SelectComponent: React.FC<SelectProps> = ({
               selectedOptions.length > 0 ? (
                 <div className="select-multi-value">
                   {selectedOptions.map((val, index) => {
-                    const option = options.find(opt => opt.value === val);
+                    const option = options.find((opt) => opt.value === val);
                     return (
                       <span key={index} className="select-multi-tag">
                         {option?.label}
@@ -116,27 +137,33 @@ const SelectComponent: React.FC<SelectProps> = ({
               )
             ) : (
               <span className="select-single-value">
-                {value ? options.find(opt => opt.value === value)?.label : placeholder}
+                {value ? options.find((opt) => opt.value === value)?.label : placeholder}
               </span>
             )}
           </div>
-          
+
           <div className="select-actions">
             {clearable && value && (
-              <button
-                type="button"
-                className="select-clear"
-                onClick={handleClear}
-              >
+              <button type="button" className="select-clear" onClick={handleClear}>
                 ×
               </button>
             )}
-            <span className="select-arrow">▼</span>
+            <span className="select-arrow" aria-hidden>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                  d="M2.5 4.5L6 8L9.5 4.5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </span>
           </div>
         </div>
-        
+
         {isOpen && (
-          <div className="select-dropdown">
+          <div className={`select-dropdown${dropup ? ' select-dropdown--dropup' : ''}`}>
             {searchable && (
               <div className="select-search">
                 <input
@@ -148,7 +175,7 @@ const SelectComponent: React.FC<SelectProps> = ({
                 />
               </div>
             )}
-            
+
             <div className="select-options">
               {filteredOptions.map((option) => (
                 <div
@@ -171,14 +198,10 @@ const SelectComponent: React.FC<SelectProps> = ({
           </div>
         )}
       </div>
-      
-      {error && (
-        <p className="select-error">{error}</p>
-      )}
-      
-      {helperText && !error && (
-        <p className="select-helper">{helperText}</p>
-      )}
+
+      {error && <p className="select-error">{error}</p>}
+
+      {helperText && !error && <p className="select-helper">{helperText}</p>}
     </div>
   );
 };

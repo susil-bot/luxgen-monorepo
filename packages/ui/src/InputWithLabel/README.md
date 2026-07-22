@@ -64,21 +64,21 @@ import { InputWithLabel } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `label` | `string` | - | Label text |
-| `type` | `'text' | 'email' | 'password' | 'number' | 'tel' | 'url' | 'search'` | `'text'` | Input type |
-| `value` | `string` | - | Current value |
-| `onChange` | `(value: string) => void` | - | Change handler |
-| `placeholder` | `string` | - | Placeholder text |
-| `disabled` | `boolean` | `false` | Disabled state |
-| `required` | `boolean` | `false` | Required field |
-| `size` | `'sm' | 'md' | 'lg'` | `'md'` | Input size |
-| `helperText` | `string` | - | Helper text |
-| `error` | `string` | - | Error message |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
+| Prop          | Type                      | Default        | Description              |
+| ------------- | ------------------------- | -------------- | ------------------------ | -------- | ---------- | ----- | --------- | -------- | ---------- |
+| `tenantTheme` | `TenantTheme`             | `defaultTheme` | Theme object for styling |
+| `label`       | `string`                  | -              | Label text               |
+| `type`        | `'text'                   | 'email'        | 'password'               | 'number' | 'tel'      | 'url' | 'search'` | `'text'` | Input type |
+| `value`       | `string`                  | -              | Current value            |
+| `onChange`    | `(value: string) => void` | -              | Change handler           |
+| `placeholder` | `string`                  | -              | Placeholder text         |
+| `disabled`    | `boolean`                 | `false`        | Disabled state           |
+| `required`    | `boolean`                 | `false`        | Required field           |
+| `size`        | `'sm'                     | 'md'           | 'lg'`                    | `'md'`   | Input size |
+| `helperText`  | `string`                  | -              | Helper text              |
+| `error`       | `string`                  | -              | Error message            |
+| `className`   | `string`                  | `''`           | Additional CSS classes   |
+| `style`       | `CSSProperties`           | `{}`           | Inline styles            |
 
 ## SSR Usage
 
@@ -156,44 +156,25 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { InputWithLabel } from '@luxgen/ui';
 
 test('renders with label and input', () => {
-  render(
-    <InputWithLabel
-      label="Test Input"
-      value=""
-      onChange={() => {}}
-    />
-  );
-  
+  render(<InputWithLabel label="Test Input" value="" onChange={() => {}} />);
+
   expect(screen.getByText('Test Input')).toBeInTheDocument();
   expect(screen.getByRole('textbox')).toBeInTheDocument();
 });
 
 test('calls onChange when value changes', () => {
   const mockOnChange = jest.fn();
-  render(
-    <InputWithLabel
-      label="Test Input"
-      value=""
-      onChange={mockOnChange}
-    />
-  );
-  
+  render(<InputWithLabel label="Test Input" value="" onChange={mockOnChange} />);
+
   const input = screen.getByRole('textbox');
   fireEvent.change(input, { target: { value: 'New value' } });
-  
+
   expect(mockOnChange).toHaveBeenCalledWith('New value');
 });
 
 test('renders with different types', () => {
-  render(
-    <InputWithLabel
-      label="Email"
-      type="email"
-      value=""
-      onChange={() => {}}
-    />
-  );
-  
+  render(<InputWithLabel label="Email" type="email" value="" onChange={() => {}} />);
+
   const input = screen.getByRole('textbox');
   expect(input).toHaveAttribute('type', 'email');
 });
@@ -202,16 +183,13 @@ test('renders with different types', () => {
 ## Examples
 
 ### Basic Input
+
 ```tsx
-<InputWithLabel
-  label="Name"
-  value={name}
-  onChange={setName}
-  placeholder="Enter your name"
-/>
+<InputWithLabel label="Name" value={name} onChange={setName} placeholder="Enter your name" />
 ```
 
 ### Email Input with Validation
+
 ```tsx
 <InputWithLabel
   label="Email Address"
@@ -226,6 +204,7 @@ test('renders with different types', () => {
 ```
 
 ### Password Input
+
 ```tsx
 <InputWithLabel
   label="Password"
@@ -239,45 +218,23 @@ test('renders with different types', () => {
 ```
 
 ### Different Sizes
+
 ```tsx
 <div>
-  <InputWithLabel
-    label="Small Input"
-    value={value}
-    onChange={setValue}
-    size="sm"
-  />
-  <InputWithLabel
-    label="Medium Input"
-    value={value}
-    onChange={setValue}
-    size="md"
-  />
-  <InputWithLabel
-    label="Large Input"
-    value={value}
-    onChange={setValue}
-    size="lg"
-  />
+  <InputWithLabel label="Small Input" value={value} onChange={setValue} size="sm" />
+  <InputWithLabel label="Medium Input" value={value} onChange={setValue} size="md" />
+  <InputWithLabel label="Large Input" value={value} onChange={setValue} size="lg" />
 </div>
 ```
 
 ### Disabled Input
+
 ```tsx
-<InputWithLabel
-  label="Disabled Input"
-  value="Cannot be edited"
-  onChange={() => {}}
-  disabled
-/>
+<InputWithLabel label="Disabled Input" value="Cannot be edited" onChange={() => {}} disabled />
 ```
 
 ### Input with Custom Theme
+
 ```tsx
-<InputWithLabel
-  tenantTheme={customTheme}
-  label="Custom Themed Input"
-  value={value}
-  onChange={setValue}
-/>
+<InputWithLabel tenantTheme={customTheme} label="Custom Themed Input" value={value} onChange={setValue} />
 ```

@@ -60,7 +60,7 @@ export const PAGINATION = {
 export const VALIDATION = {
   PASSWORD_MIN_LENGTH: 6,
   EMAIL_REGEX: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-  PHONE_REGEX: /^\+?[\d\s\-\(\)]+$/,
+  PHONE_REGEX: /^\+?[\d\s\-()]+$/,
 } as const;
 
 export const STORAGE_KEYS = {

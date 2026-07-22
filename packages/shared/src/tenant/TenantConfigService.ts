@@ -1,6 +1,6 @@
 /**
  * Centralized Tenant Configuration Service
- * 
+ *
  * This service provides a sustainable approach to tenant management by:
  * 1. Centralizing all tenant configurations in workflow objects
  * 2. Providing type-safe access to tenant properties
@@ -24,28 +24,30 @@ export class TenantConfigService {
   private cache: Map<string, TenantWorkflow> = new Map();
   private options: TenantConfigServiceOptions;
   private syncInterval?: NodeJS.Timeout;
-  
-  private constructor(options: TenantConfigServiceOptions = {
-    cacheEnabled: true,
-    cacheTTL: 300, // 5 minutes
-    autoSync: true,
-    syncInterval: 60 // 1 minute
-  }) {
+
+  private constructor(
+    options: TenantConfigServiceOptions = {
+      cacheEnabled: true,
+      cacheTTL: 300, // 5 minutes
+      autoSync: true,
+      syncInterval: 60, // 1 minute
+    },
+  ) {
     this.workflowManager = TenantWorkflowManager.getInstance();
     this.options = options;
-    
+
     if (this.options.autoSync) {
       this.startAutoSync();
     }
   }
-  
+
   public static getInstance(options?: TenantConfigServiceOptions): TenantConfigService {
     if (!TenantConfigService.instance) {
       TenantConfigService.instance = new TenantConfigService(options);
     }
     return TenantConfigService.instance;
   }
-  
+
   /**
    * Get tenant configuration
    */
@@ -57,21 +59,21 @@ export class TenantConfigService {
         return cached;
       }
     }
-    
+
     // Get from workflow manager
     const workflow = this.workflowManager.getWorkflow(tenantId);
     if (!workflow) {
       return null;
     }
-    
+
     // Cache the result
     if (this.options.cacheEnabled) {
       this.cache.set(tenantId, workflow);
     }
-    
+
     return workflow;
   }
-  
+
   /**
    * Get tenant branding configuration
    */
@@ -79,7 +81,7 @@ export class TenantConfigService {
     const workflow = await this.getTenantConfig(tenantId);
     return workflow?.branding || null;
   }
-  
+
   /**
    * Get tenant security configuration
    */
@@ -87,7 +89,7 @@ export class TenantConfigService {
     const workflow = await this.getTenantConfig(tenantId);
     return workflow?.security || null;
   }
-  
+
   /**
    * Get tenant features
    */
@@ -95,7 +97,7 @@ export class TenantConfigService {
     const workflow = await this.getTenantConfig(tenantId);
     return workflow?.features || null;
   }
-  
+
   /**
    * Get tenant limits
    */
@@ -103,17 +105,17 @@ export class TenantConfigService {
     const workflow = await this.getTenantConfig(tenantId);
     return workflow?.limits || null;
   }
-  
+
   /**
    * Check if a feature is enabled for a tenant
    */
   public async isFeatureEnabled(tenantId: string, featurePath: string): Promise<boolean> {
     const features = await this.getTenantFeatures(tenantId);
     if (!features) return false;
-    
+
     const pathParts = featurePath.split('.');
     let current: any = features;
-    
+
     for (const part of pathParts) {
       if (current && typeof current === 'object' && part in current) {
         current = current[part];
@@ -121,51 +123,53 @@ export class TenantConfigService {
         return false;
       }
     }
-    
+
     return Boolean(current);
   }
-  
+
   /**
    * Check if tenant has reached a limit
    */
   public async isLimitReached(tenantId: string, limitType: keyof TenantWorkflow['limits']): Promise<boolean> {
     const limits = await this.getTenantLimits(tenantId);
     if (!limits) return false;
-    
+
     const limit = limits[limitType];
     if (!limit) return false;
-    
+
     return limit.current >= limit.max;
   }
-  
+
   /**
    * Get tenant usage statistics
    */
-  public async getTenantUsage(tenantId: string): Promise<Record<string, { current: number; max: number; percentage: number }> | null> {
+  public async getTenantUsage(
+    tenantId: string,
+  ): Promise<Record<string, { current: number; max: number; percentage: number }> | null> {
     const limits = await this.getTenantLimits(tenantId);
     if (!limits) return null;
-    
+
     const usage: Record<string, { current: number; max: number; percentage: number }> = {};
-    
+
     for (const [key, limit] of Object.entries(limits)) {
       if (limit && typeof limit === 'object' && 'current' in limit && 'max' in limit) {
         usage[key] = {
           current: limit.current,
           max: limit.max,
-          percentage: Math.round((limit.current / limit.max) * 100)
+          percentage: Math.round((limit.current / limit.max) * 100),
         };
       }
     }
-    
+
     return usage;
   }
-  
+
   /**
    * Update tenant configuration
    */
   public async updateTenantConfig(tenantId: string, updates: Partial<TenantWorkflow>): Promise<boolean> {
     const success = this.workflowManager.updateWorkflow(tenantId, updates);
-    
+
     if (success && this.options.cacheEnabled) {
       // Update cache
       const updatedWorkflow = this.workflowManager.getWorkflow(tenantId);
@@ -173,31 +177,31 @@ export class TenantConfigService {
         this.cache.set(tenantId, updatedWorkflow);
       }
     }
-    
+
     return success;
   }
-  
+
   /**
    * Create new tenant from template
    */
   public async createTenantFromTemplate(
     tenantId: string,
     template: 'demo' | 'idea-vibes' | 'enterprise' | 'startup',
-    overrides: Partial<TenantWorkflow> = {}
+    overrides: Partial<TenantWorkflow> = {},
   ): Promise<TenantWorkflow> {
     const workflow = TenantWorkflowUtils.createFromTemplate(tenantId, template, overrides);
-    
+
     // Register the workflow
     this.workflowManager.registerWorkflow(tenantId, workflow);
-    
+
     // Cache the workflow
     if (this.options.cacheEnabled) {
       this.cache.set(tenantId, workflow);
     }
-    
+
     return workflow;
   }
-  
+
   /**
    * Validate tenant configuration
    */
@@ -206,47 +210,47 @@ export class TenantConfigService {
     if (!workflow) {
       return { valid: false, errors: ['Tenant not found'] };
     }
-    
+
     return this.workflowManager.validateWorkflow(workflow);
   }
-  
+
   /**
    * Get all tenant configurations
    */
   public async getAllTenantConfigs(): Promise<Map<string, TenantWorkflow>> {
     return this.workflowManager.getAllWorkflows();
   }
-  
+
   /**
    * Remove tenant configuration
    */
   public async removeTenantConfig(tenantId: string): Promise<boolean> {
     const success = this.workflowManager.removeWorkflow(tenantId);
-    
+
     if (success && this.options.cacheEnabled) {
       this.cache.delete(tenantId);
     }
-    
+
     return success;
   }
-  
+
   /**
    * Clear cache
    */
   public clearCache(): void {
     this.cache.clear();
   }
-  
+
   /**
    * Get cache statistics
    */
   public getCacheStats(): { size: number; keys: string[] } {
     return {
       size: this.cache.size,
-      keys: Array.from(this.cache.keys())
+      keys: Array.from(this.cache.keys()),
     };
   }
-  
+
   /**
    * Start auto-sync
    */
@@ -255,7 +259,7 @@ export class TenantConfigService {
       this.syncAllConfigs();
     }, this.options.syncInterval * 1000);
   }
-  
+
   /**
    * Stop auto-sync
    */
@@ -265,7 +269,7 @@ export class TenantConfigService {
       this.syncInterval = undefined;
     }
   }
-  
+
   /**
    * Sync all configurations
    */
@@ -278,20 +282,20 @@ export class TenantConfigService {
       console.error('Failed to sync tenant configurations:', error);
     }
   }
-  
+
   /**
    * Check if cache is valid
    */
   private isCacheValid(workflow: TenantWorkflow): boolean {
     if (!this.options.cacheEnabled) return false;
-    
+
     const now = Date.now();
     const cacheTime = (workflow as any).__cacheTime || 0;
     const ttl = this.options.cacheTTL * 1000;
-    
-    return (now - cacheTime) < ttl;
+
+    return now - cacheTime < ttl;
   }
-  
+
   /**
    * Set cache timestamp
    */
@@ -315,7 +319,7 @@ export class TenantConfigUtils {
   public static extractSubdomain(hostname: string): string | null {
     const cleanHostname = hostname.split(':')[0];
     const parts = cleanHostname.split('.');
-    
+
     // For localhost development
     if (cleanHostname.includes('localhost') || cleanHostname.includes('127.0.0.1')) {
       if (parts.length >= 2 && parts[0] !== 'www') {
@@ -323,15 +327,15 @@ export class TenantConfigUtils {
       }
       return null;
     }
-    
+
     // For production domains
     if (parts.length >= 3) {
       return parts[0];
     }
-    
+
     return null;
   }
-  
+
   /**
    * Get tenant ID from request
    */
@@ -339,32 +343,32 @@ export class TenantConfigUtils {
     // Try subdomain first
     const hostname = req.get('host') || req.hostname;
     const subdomain = this.extractSubdomain(hostname);
-    
+
     if (subdomain) {
       return subdomain;
     }
-    
+
     // Try custom domain
     const customDomain = req.get('host') || req.hostname;
     if (customDomain && !customDomain.includes('localhost')) {
       return customDomain;
     }
-    
+
     // Try header
     const tenantHeader = req.get('X-Tenant-ID');
     if (tenantHeader) {
       return tenantHeader;
     }
-    
+
     return null;
   }
-  
+
   /**
    * Generate tenant-specific CSS
    */
   public static generateTenantCSS(branding: TenantWorkflow['branding']): string {
     const { colors, typography, spacing, borderRadius, shadows } = branding;
-    
+
     return `
       :root {
         --tenant-primary-color: ${colors.primary};
@@ -431,16 +435,16 @@ export class TenantConfigUtils {
       ${branding.customCSS || ''}
     `;
   }
-  
+
   /**
    * Generate tenant-specific environment variables
    */
-  public static generateTenantEnvVars(workflow: TenantWorkflow): Record<string, string> {
+  public static generateTenantEnvVars(workflow: TenantWorkflow, billingPlan?: string): Record<string, string> {
     return {
       TENANT_ID: workflow.id,
       TENANT_NAME: workflow.name,
       TENANT_SUBDOMAIN: workflow.subdomain,
-      TENANT_PLAN: workflow.metadata.plan,
+      TENANT_PLAN: billingPlan ?? workflow.metadata.plan,
       TENANT_TIER: workflow.metadata.tier,
       TENANT_REGION: workflow.metadata.region,
       TENANT_TIMEZONE: workflow.metadata.timezone,
@@ -457,7 +461,7 @@ export class TenantConfigUtils {
       TENANT_REQUIRE_MFA: workflow.security.authentication.requireMFA.toString(),
       TENANT_RATE_LIMIT: workflow.security.rateLimiting.maxRequests.toString(),
       TENANT_CORS_ORIGINS: workflow.security.cors.origins.join(','),
-      TENANT_ALLOWED_DOMAINS: workflow.security.domainRestrictions.allowedDomains.join(',')
+      TENANT_ALLOWED_DOMAINS: workflow.security.domainRestrictions.allowedDomains.join(','),
     };
   }
 }

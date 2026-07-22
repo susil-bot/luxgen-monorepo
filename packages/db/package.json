@@ -11,6 +11,7 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
+    "@luxgen/billing": "*",
     "mongoose": "^7.5.0"
   },
   "devDependencies": {

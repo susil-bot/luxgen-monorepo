@@ -38,15 +38,11 @@ export class PaymentTracker {
   }
 
   getPaymentsByInvoice(invoiceId: string): Payment[] {
-    return Array.from(this.payments.values()).filter(
-      payment => payment.invoiceId === invoiceId
-    );
+    return Array.from(this.payments.values()).filter((payment) => payment.invoiceId === invoiceId);
   }
 
   getPaymentsByStatus(status: Payment['status']): Payment[] {
-    return Array.from(this.payments.values()).filter(
-      payment => payment.status === status
-    );
+    return Array.from(this.payments.values()).filter((payment) => payment.status === status);
   }
 
   getPaymentStats(period: { start: Date; end: Date }): {
@@ -56,12 +52,12 @@ export class PaymentTracker {
     averageAmount: number;
   } {
     const payments = Array.from(this.payments.values()).filter(
-      payment => payment.createdAt >= period.start && payment.createdAt <= period.end
+      (payment) => payment.createdAt >= period.start && payment.createdAt <= period.end,
     );
 
     const totalAmount = payments.reduce((sum, payment) => sum + payment.amount, 0);
     const totalCount = payments.length;
-    const successfulPayments = payments.filter(p => p.status === 'completed').length;
+    const successfulPayments = payments.filter((p) => p.status === 'completed').length;
     const successRate = totalCount > 0 ? (successfulPayments / totalCount) * 100 : 0;
     const averageAmount = totalCount > 0 ? totalAmount / totalCount : 0;
 

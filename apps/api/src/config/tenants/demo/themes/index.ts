@@ -16,10 +16,10 @@ export const demoThemes = {
       text: {
         primary: '#0F172A',
         secondary: '#475569',
-        muted: '#94A3B8'
+        muted: '#94A3B8',
       },
       border: '#E2E8F0',
-      shadow: 'rgba(0, 0, 0, 0.1)'
+      shadow: 'rgba(0, 0, 0, 0.1)',
     },
     components: {
       button: {
@@ -28,21 +28,21 @@ export const demoThemes = {
           color: '#FFFFFF',
           hover: '#1E3A8A',
           border: 'none',
-          borderRadius: '0.375rem'
+          borderRadius: '0.375rem',
         },
         secondary: {
           background: 'transparent',
           color: '#1E40AF',
           hover: '#F1F5F9',
           border: '1px solid #1E40AF',
-          borderRadius: '0.375rem'
-        }
+          borderRadius: '0.375rem',
+        },
       },
       card: {
         background: '#FFFFFF',
         border: '1px solid #E2E8F0',
         borderRadius: '0.5rem',
-        shadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)'
+        shadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1)',
       },
       input: {
         background: '#FFFFFF',
@@ -50,10 +50,10 @@ export const demoThemes = {
         borderRadius: '0.375rem',
         focus: {
           border: '2px solid #1E40AF',
-          shadow: '0 0 0 3px rgba(30, 64, 175, 0.1)'
-        }
-      }
-    }
+          shadow: '0 0 0 3px rgba(30, 64, 175, 0.1)',
+        },
+      },
+    },
   },
 
   // Dark theme
@@ -68,10 +68,10 @@ export const demoThemes = {
       text: {
         primary: '#F8FAFC',
         secondary: '#CBD5E1',
-        muted: '#64748B'
+        muted: '#64748B',
       },
       border: '#334155',
-      shadow: 'rgba(0, 0, 0, 0.3)'
+      shadow: 'rgba(0, 0, 0, 0.3)',
     },
     components: {
       button: {
@@ -80,21 +80,21 @@ export const demoThemes = {
           color: '#FFFFFF',
           hover: '#2563EB',
           border: 'none',
-          borderRadius: '0.375rem'
+          borderRadius: '0.375rem',
         },
         secondary: {
           background: 'transparent',
           color: '#3B82F6',
           hover: '#1E293B',
           border: '1px solid #3B82F6',
-          borderRadius: '0.375rem'
-        }
+          borderRadius: '0.375rem',
+        },
       },
       card: {
         background: '#1E293B',
         border: '1px solid #334155',
         borderRadius: '0.5rem',
-        shadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+        shadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
       },
       input: {
         background: '#1E293B',
@@ -102,10 +102,10 @@ export const demoThemes = {
         borderRadius: '0.375rem',
         focus: {
           border: '2px solid #3B82F6',
-          shadow: '0 0 0 3px rgba(59, 130, 246, 0.1)'
-        }
-      }
-    }
+          shadow: '0 0 0 3px rgba(59, 130, 246, 0.1)',
+        },
+      },
+    },
   },
 
   // High contrast theme (accessibility)
@@ -120,10 +120,10 @@ export const demoThemes = {
       text: {
         primary: '#000000',
         secondary: '#333333',
-        muted: '#666666'
+        muted: '#666666',
       },
       border: '#000000',
-      shadow: 'rgba(0, 0, 0, 0.5)'
+      shadow: 'rgba(0, 0, 0, 0.5)',
     },
     components: {
       button: {
@@ -132,21 +132,21 @@ export const demoThemes = {
           color: '#FFFFFF',
           hover: '#0000CC',
           border: '2px solid #000000',
-          borderRadius: '0.25rem'
+          borderRadius: '0.25rem',
         },
         secondary: {
           background: 'transparent',
           color: '#000000',
           hover: '#F0F0F0',
           border: '2px solid #000000',
-          borderRadius: '0.25rem'
-        }
+          borderRadius: '0.25rem',
+        },
       },
       card: {
         background: '#FFFFFF',
         border: '2px solid #000000',
         borderRadius: '0.25rem',
-        shadow: '0 2px 4px rgba(0, 0, 0, 0.5)'
+        shadow: '0 2px 4px rgba(0, 0, 0, 0.5)',
       },
       input: {
         background: '#FFFFFF',
@@ -154,11 +154,11 @@ export const demoThemes = {
         borderRadius: '0.25rem',
         focus: {
           border: '3px solid #0000FF',
-          shadow: '0 0 0 2px #0000FF'
-        }
-      }
-    }
-  }
+          shadow: '0 0 0 2px #0000FF',
+        },
+      },
+    },
+  },
 };
 
 // Theme selector configuration
@@ -167,5 +167,5 @@ export const themeConfig = {
   available: ['light', 'dark', 'highContrast'],
   autoDetect: true,
   persist: true,
-  storageKey: 'demo-theme'
+  storageKey: 'demo-theme',
 };

@@ -39,15 +39,15 @@ const myPlugin = new Plugin(
     [
       createFetcher('data', async (context) => {
         return { message: 'Hello World' };
-      })
+      }),
     ],
     [
       createTransformer('formattedData', (context) => {
         const data = context.fetched.data;
         return { formatted: data.message.toUpperCase() };
-      })
-    ]
-  )
+      }),
+    ],
+  ),
 );
 ```
 
@@ -57,12 +57,7 @@ const myPlugin = new Plugin(
 import { Presenter, createArticlePresenter } from '@luxgen/core';
 
 // Create an article presenter
-const articlePresenter = createArticlePresenter(
-  'presenter-articles',
-  '/articles/:id',
-  ArticleComponent,
-  phaseSet
-);
+const articlePresenter = createArticlePresenter('presenter-articles', '/articles/:id', ArticleComponent, phaseSet);
 ```
 
 ### Plugin Registry
@@ -88,17 +83,15 @@ await registry.executePresenterWorkflow(articlePresenter, context, ['plugin-head
 Fetchers define network interactions and data fetching:
 
 ### API Fetcher
+
 ```typescript
 import { createApiFetcher } from '@luxgen/core';
 
-const apiFetcher = createApiFetcher(
-  'userData',
-  '/api/users/123',
-  { headers: { 'Authorization': 'Bearer token' } }
-);
+const apiFetcher = createApiFetcher('userData', '/api/users/123', { headers: { Authorization: 'Bearer token' } });
 ```
 
 ### GraphQL Fetcher
+
 ```typescript
 import { createGraphQLFetcher } from '@luxgen/core';
 
@@ -113,19 +106,16 @@ const graphqlFetcher = createGraphQLFetcher(
       }
     }
   `,
-  { limit: 10 }
+  { limit: 10 },
 );
 ```
 
 ### Database Fetcher
+
 ```typescript
 import { createDatabaseFetcher } from '@luxgen/core';
 
-const dbFetcher = createDatabaseFetcher(
-  'articles',
-  'SELECT * FROM articles WHERE published = true',
-  []
-);
+const dbFetcher = createDatabaseFetcher('articles', 'SELECT * FROM articles WHERE published = true', []);
 ```
 
 ## Transformers
@@ -133,41 +123,35 @@ const dbFetcher = createDatabaseFetcher(
 Transformers define data transformation operations:
 
 ### Slice Transformer
+
 ```typescript
 import { createSliceTransformer } from '@luxgen/core';
 
-const topArticles = createSliceTransformer(
-  'topArticles',
-  'articles',
-  0,
-  5
-);
+const topArticles = createSliceTransformer('topArticles', 'articles', 0, 5);
 ```
 
 ### Filter Transformer
+
 ```typescript
 import { createFilterTransformer } from '@luxgen/core';
 
 const publishedArticles = createFilterTransformer(
   'publishedArticles',
   'articles',
-  (article) => article.published === true
+  (article) => article.published === true,
 );
 ```
 
 ### Map Transformer
+
 ```typescript
 import { createMapTransformer } from '@luxgen/core';
 
-const articleSummaries = createMapTransformer(
-  'articleSummaries',
-  'articles',
-  (article) => ({
-    id: article.id,
-    title: article.title,
-    excerpt: article.content.substring(0, 100)
-  })
-);
+const articleSummaries = createMapTransformer('articleSummaries', 'articles', (article) => ({
+  id: article.id,
+  title: article.title,
+  excerpt: article.content.substring(0, 100),
+}));
 ```
 
 ## Workflow Context
@@ -180,7 +164,7 @@ import { WorkflowContext } from '@luxgen/core';
 const context = new WorkflowContext({
   tenant: 'luxgen',
   user: { id: '123', name: 'John Doe' },
-  request: { path: '/articles/123' }
+  request: { path: '/articles/123' },
 });
 
 // Access data
@@ -194,6 +178,7 @@ context.setMetadata('renderTime', Date.now());
 ## Example Plugins
 
 ### Head Plugin
+
 ```typescript
 import { HeadPlugin } from '@luxgen/core';
 
@@ -202,6 +187,7 @@ const headPlugin = new HeadPlugin();
 ```
 
 ### Navigation Plugin
+
 ```typescript
 import { NavigationPlugin } from '@luxgen/core';
 
@@ -210,6 +196,7 @@ const navPlugin = new NavigationPlugin();
 ```
 
 ### Article Presenter
+
 ```typescript
 import { ArticlePresenter } from '@luxgen/core';
 
@@ -248,7 +235,7 @@ await plugin.execute(context);
 
 // Assert results
 expect(context.getTransformed('formattedData')).toEqual({
-  formatted: 'HELLO WORLD'
+  formatted: 'HELLO WORLD',
 });
 ```
 
@@ -263,11 +250,7 @@ interface MyPluginProps {
   data: MyData;
 }
 
-const MyPlugin: Plugin<MyPluginProps> = new Plugin(
-  'my-plugin',
-  phaseSet,
-  MyComponent
-);
+const MyPlugin: Plugin<MyPluginProps> = new Plugin('my-plugin', phaseSet, MyComponent);
 ```
 
 ## Migration from Existing Code

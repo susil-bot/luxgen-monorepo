@@ -14,7 +14,7 @@ export const courseMenuSections: CourseSection[] = [
         description: 'Browse all available courses with filters and search',
         icon: '📚',
         href: '/courses',
-        visible: ['admin', 'instructor', 'learner', 'user']
+        visible: ['admin', 'instructor', 'learner', 'user'],
       },
       {
         id: 'my-courses',
@@ -22,7 +22,7 @@ export const courseMenuSections: CourseSection[] = [
         description: 'Courses you are enrolled in',
         icon: '🎓',
         href: '/courses/my-courses',
-        visible: ['learner', 'user']
+        visible: ['learner', 'user'],
       },
       {
         id: 'manage-courses',
@@ -30,9 +30,9 @@ export const courseMenuSections: CourseSection[] = [
         description: 'Create and manage your courses',
         icon: '⚙️',
         href: '/courses/manage',
-        visible: ['admin', 'instructor']
-      }
-    ]
+        visible: ['admin', 'instructor'],
+      },
+    ],
   },
   {
     id: 'course-details',
@@ -46,7 +46,7 @@ export const courseMenuSections: CourseSection[] = [
         description: 'View course content and videos',
         icon: '▶️',
         href: '/courses/[id]',
-        visible: ['admin', 'instructor', 'learner', 'user']
+        visible: ['admin', 'instructor', 'learner', 'user'],
       },
       {
         id: 'course-analytics',
@@ -54,9 +54,9 @@ export const courseMenuSections: CourseSection[] = [
         description: 'View completion rates and engagement metrics',
         icon: '📊',
         href: '/courses/[id]/analytics',
-        visible: ['admin', 'instructor']
-      }
-    ]
+        visible: ['admin', 'instructor'],
+      },
+    ],
   },
   {
     id: 'interactions',
@@ -70,7 +70,7 @@ export const courseMenuSections: CourseSection[] = [
         description: 'View and manage course reviews',
         icon: '⭐',
         href: '/courses/[id]/reviews',
-        visible: ['admin', 'instructor', 'learner', 'user']
+        visible: ['admin', 'instructor', 'learner', 'user'],
       },
       {
         id: 'assignments',
@@ -78,7 +78,7 @@ export const courseMenuSections: CourseSection[] = [
         description: 'Submit or grade course activities',
         icon: '📝',
         href: '/courses/[id]/assignments',
-        visible: ['admin', 'instructor', 'learner', 'user']
+        visible: ['admin', 'instructor', 'learner', 'user'],
       },
       {
         id: 'certificates',
@@ -86,10 +86,10 @@ export const courseMenuSections: CourseSection[] = [
         description: 'Generate or verify completion certificates',
         icon: '🏆',
         href: '/courses/[id]/certificates',
-        visible: ['admin', 'instructor', 'learner', 'user']
-      }
-    ]
-  }
+        visible: ['admin', 'instructor', 'learner', 'user'],
+      },
+    ],
+  },
 ];
 
 // Course detail menu items (for individual course pages)
@@ -101,7 +101,7 @@ export const getCourseDetailMenu = (courseId: string, userRole: UserRole): Cours
       description: 'Course intro, syllabus, instructor info',
       icon: '📋',
       href: `/courses/${courseId}`,
-      visible: ['admin', 'instructor', 'learner', 'user']
+      visible: ['admin', 'instructor', 'learner', 'user'],
     },
     {
       id: 'modules',
@@ -109,7 +109,7 @@ export const getCourseDetailMenu = (courseId: string, userRole: UserRole): Cours
       description: 'Structured list of course contents',
       icon: '📖',
       href: `/courses/${courseId}/modules`,
-      visible: ['admin', 'instructor', 'learner', 'user']
+      visible: ['admin', 'instructor', 'learner', 'user'],
     },
     {
       id: 'assignments',
@@ -117,7 +117,7 @@ export const getCourseDetailMenu = (courseId: string, userRole: UserRole): Cours
       description: 'View and submit course activities',
       icon: '📝',
       href: `/courses/${courseId}/assignments`,
-      visible: ['admin', 'instructor', 'learner', 'user']
+      visible: ['admin', 'instructor', 'learner', 'user'],
     },
     {
       id: 'discussions',
@@ -125,7 +125,7 @@ export const getCourseDetailMenu = (courseId: string, userRole: UserRole): Cours
       description: 'Ask questions, interact with peers',
       icon: '💬',
       href: `/courses/${courseId}/discussions`,
-      visible: ['admin', 'instructor', 'learner', 'user']
+      visible: ['admin', 'instructor', 'learner', 'user'],
     },
     {
       id: 'resources',
@@ -133,7 +133,7 @@ export const getCourseDetailMenu = (courseId: string, userRole: UserRole): Cours
       description: 'PDFs, reference materials',
       icon: '📁',
       href: `/courses/${courseId}/resources`,
-      visible: ['admin', 'instructor', 'learner', 'user']
+      visible: ['admin', 'instructor', 'learner', 'user'],
     },
     {
       id: 'progress',
@@ -141,7 +141,7 @@ export const getCourseDetailMenu = (courseId: string, userRole: UserRole): Cours
       description: 'View own progress & completion',
       icon: '📈',
       href: `/courses/${courseId}/progress`,
-      visible: ['learner', 'user']
+      visible: ['learner', 'user'],
     },
     {
       id: 'notes',
@@ -149,7 +149,7 @@ export const getCourseDetailMenu = (courseId: string, userRole: UserRole): Cours
       description: 'Private study notes',
       icon: '📝',
       href: `/courses/${courseId}/notes`,
-      visible: ['learner', 'user']
+      visible: ['learner', 'user'],
     },
     {
       id: 'certificate',
@@ -157,7 +157,7 @@ export const getCourseDetailMenu = (courseId: string, userRole: UserRole): Cours
       description: 'Download or view certificate',
       icon: '🏆',
       href: `/courses/${courseId}/certificate`,
-      visible: ['admin', 'instructor', 'learner', 'user']
+      visible: ['admin', 'instructor', 'learner', 'user'],
     },
     {
       id: 'feedback',
@@ -165,11 +165,11 @@ export const getCourseDetailMenu = (courseId: string, userRole: UserRole): Cours
       description: 'Rate the course or submit feedback',
       icon: '⭐',
       href: `/courses/${courseId}/feedback`,
-      visible: ['learner', 'user']
-    }
+      visible: ['learner', 'user'],
+    },
   ];
 
-  return baseItems.filter(item => item.visible.includes(userRole));
+  return baseItems.filter((item) => item.visible.includes(userRole));
 };
 
 // Admin/Instructor course management menu
@@ -181,7 +181,7 @@ export const getCourseManagementMenu = (courseId: string, userRole: UserRole): C
       description: 'Overview of course metrics',
       icon: '📊',
       href: `/courses/${courseId}/admin/dashboard`,
-      visible: ['admin', 'instructor']
+      visible: ['admin', 'instructor'],
     },
     {
       id: 'create-edit',
@@ -189,7 +189,7 @@ export const getCourseManagementMenu = (courseId: string, userRole: UserRole): C
       description: 'Form to add metadata, content, and structure',
       icon: '✏️',
       href: `/courses/${courseId}/admin/edit`,
-      visible: ['admin', 'instructor']
+      visible: ['admin', 'instructor'],
     },
     {
       id: 'modules-manager',
@@ -197,7 +197,7 @@ export const getCourseManagementMenu = (courseId: string, userRole: UserRole): C
       description: 'Add, edit, reorder lessons',
       icon: '📚',
       href: `/courses/${courseId}/admin/modules`,
-      visible: ['admin', 'instructor']
+      visible: ['admin', 'instructor'],
     },
     {
       id: 'assignments-manager',
@@ -205,15 +205,15 @@ export const getCourseManagementMenu = (courseId: string, userRole: UserRole): C
       description: 'Create or grade assessments',
       icon: '📝',
       href: `/courses/${courseId}/admin/assignments`,
-      visible: ['admin', 'instructor']
+      visible: ['admin', 'instructor'],
     },
     {
       id: 'enrollments',
       label: 'Enrollments',
-      description: 'Manage who\'s enrolled (invite/remove users)',
+      description: "Manage who's enrolled (invite/remove users)",
       icon: '👥',
       href: `/courses/${courseId}/admin/enrollments`,
-      visible: ['admin', 'instructor']
+      visible: ['admin', 'instructor'],
     },
     {
       id: 'certificates-setup',
@@ -221,7 +221,7 @@ export const getCourseManagementMenu = (courseId: string, userRole: UserRole): C
       description: 'Configure certificate templates and rules',
       icon: '🏆',
       href: `/courses/${courseId}/admin/certificates`,
-      visible: ['admin', 'instructor']
+      visible: ['admin', 'instructor'],
     },
     {
       id: 'discussions-moderation',
@@ -229,7 +229,7 @@ export const getCourseManagementMenu = (courseId: string, userRole: UserRole): C
       description: 'Moderate Q&A or forum comments',
       icon: '💬',
       href: `/courses/${courseId}/admin/discussions`,
-      visible: ['admin', 'instructor']
+      visible: ['admin', 'instructor'],
     },
     {
       id: 'reports',
@@ -237,7 +237,7 @@ export const getCourseManagementMenu = (courseId: string, userRole: UserRole): C
       description: 'User progress, completion rates',
       icon: '📊',
       href: `/courses/${courseId}/admin/reports`,
-      visible: ['admin', 'instructor']
+      visible: ['admin', 'instructor'],
     },
     {
       id: 'settings',
@@ -245,7 +245,7 @@ export const getCourseManagementMenu = (courseId: string, userRole: UserRole): C
       description: 'Course visibility, price, prerequisites',
       icon: '⚙️',
       href: `/courses/${courseId}/admin/settings`,
-      visible: ['admin', 'instructor']
+      visible: ['admin', 'instructor'],
     },
     {
       id: 'integrations',
@@ -253,28 +253,28 @@ export const getCourseManagementMenu = (courseId: string, userRole: UserRole): C
       description: 'SCORM / xAPI / video platform connectors',
       icon: '🔗',
       href: `/courses/${courseId}/admin/integrations`,
-      visible: ['admin', 'instructor']
-    }
+      visible: ['admin', 'instructor'],
+    },
   ];
 
-  return managementItems.filter(item => item.visible.includes(userRole));
+  return managementItems.filter((item) => item.visible.includes(userRole));
 };
 
 // Helper function to get menu items based on user role
 export const getMenuItemsForRole = (userRole: UserRole, courseId?: string): CourseMenuItem[] => {
   const allItems: CourseMenuItem[] = [];
-  
-  courseMenuSections.forEach(section => {
+
+  courseMenuSections.forEach((section) => {
     if (section.visibility.includes(userRole)) {
-      allItems.push(...section.items.filter(item => item.visible.includes(userRole)));
+      allItems.push(...section.items.filter((item) => item.visible.includes(userRole)));
     }
   });
-  
+
   return allItems;
 };
 
 // Helper function to check if user has access to a specific menu item
 export const hasAccessToMenuItem = (itemId: string, userRole: UserRole): boolean => {
   const allItems = getMenuItemsForRole(userRole);
-  return allItems.some(item => item.id === itemId);
+  return allItems.some((item) => item.id === itemId);
 };

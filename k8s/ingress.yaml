@@ -1,0 +1,59 @@
+# LuxGen — Kubernetes manifest
+# Docs: k8s/README.md · docs/technical/README.md
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: luxgen-ingress
+  namespace: luxgen
+  annotations:
+    # TLS — requires cert-manager installed in the cluster:
+    # kubectl apply -f https://github.com/cert-manager/cert-manager/releases/latest/download/cert-manager.yaml
+    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+
+    # Routing
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+    nginx.ingress.kubernetes.io/proxy-body-size: '50m'
+
+    # Timeouts — standard requests + long-running agent/bulk-ops jobs
+    nginx.ingress.kubernetes.io/proxy-connect-timeout: '60'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: '3600'
+    nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
+
+    # WebSocket upgrade — required for GraphQL subscriptions (graphql-ws)
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - luxgen.yourdomain.com
+      secretName: luxgen-tls
+  rules:
+    - host: luxgen.yourdomain.com
+      http:
+        paths:
+          - path: /api(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service
+                port:
+                  number: 4000
+          - path: /graphql(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: api-service
+                port:
+                  number: 4000
+          - path: /(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: web-service
+                port:
+                  number: 3000

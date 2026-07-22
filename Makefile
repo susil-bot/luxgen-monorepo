@@ -1,164 +1,238 @@
-# Luxgen Monorepo Makefile
-# Easy commands for development and deployment
+# ─────────────────────────────────────────────────────────────────────────────
+# LuxGen Development Makefile
+# Usage: make <target>   |   make help
+# ─────────────────────────────────────────────────────────────────────────────
 
-.PHONY: help install build dev start stop restart logs clean test lint format
+.DEFAULT_GOAL := help
+.PHONY: help setup dev dev-infra dev-full dev-docker dev-stack-web dev-stack-admin dev-stack-mobile dev-stack-api \
+        dev-clean-web dev-web dev-api staging prod clean clean-all \
+        logs logs-api logs-web logs-ollama \
+        agent-start agent-stop agent-status \
+        agent-pull agent-pull-mistral agent-pull-qwen \
+        build build-api build-web build-mcp mcp-smoke \
+        db-seed db-reset lint test
 
-# Default target
-help: ## Show this help message
-	@echo "Luxgen Monorepo - Available Commands:"
+# ─── Colors ──────────────────────────────────────────────────────────────────
+CYAN   := \033[36m
+YELLOW := \033[33m
+GREEN  := \033[32m
+RED    := \033[31m
+RESET  := \033[0m
+BOLD   := \033[1m
+
+# ─── Help ─────────────────────────────────────────────────────────────────────
+help: ## Show this help
 	@echo ""
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2}'
+	@echo "$(BOLD)LuxGen — Available Commands$(RESET)"
+	@echo ""
+	@awk 'BEGIN {FS = ":.*##"} /^[a-zA-Z_-]+:.*##/ { printf "  $(CYAN)%-22s$(RESET) %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+	@echo ""
+	@echo "$(YELLOW)Quick start:$(RESET) make dev-stack-web   (or dev-stack-admin / dev-stack-mobile)"
+	@echo ""
 
-# Development Commands
-install: ## Install all dependencies
-	@echo "Installing dependencies..."
-	npm install
+# ─── Setup (First-Time) ───────────────────────────────────────────────────────
+setup: ## First-time setup: copy env examples, start infra
+	@echo "$(GREEN)► Setting up LuxGen...$(RESET)"
+	@[ -f apps/web/.env.local ]  || (cp apps/web/.env.example apps/web/.env.local  && echo "  Created apps/web/.env.local")
+	@[ -f apps/api/.env ]        || (cp apps/api/.env.example apps/api/.env        && echo "  Created apps/api/.env")
+	@if [ -d apps/mobile ] && [ ! -f apps/mobile/.env.local ]; then \
+		cp apps/mobile/.env.example apps/mobile/.env.local && echo "  Created apps/mobile/.env.local"; \
+	fi
+	@[ -f .env.local ]           || (cp .env.example .env.local                    && echo "  Created .env.local")
+	@npm install
+	@npm run prepare
+	@$(MAKE) dev-infra
+	@echo "$(GREEN)✓ Setup complete. Run: make dev$(RESET)"
 
-dev: ## Start development environment with Docker
-	@echo "Starting development environment..."
-	./scripts/dev.sh start
+# ─── Development ──────────────────────────────────────────────────────────────
+dev: ## Run web + api locally via turbo (fastest — infra must be running)
+	@echo "$(GREEN)► Starting local dev servers...$(RESET)"
+	@npx turbo run dev --concurrency=15
 
-start: ## Start all services
-	@echo "Starting services..."
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+dev-web: ## Run only the web app locally
+	@npx turbo run dev --filter=@luxgen/web
 
-stop: ## Stop all services
-	@echo "Stopping services..."
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down
+dev-api: ## Run only the API locally
+	@npx turbo run dev --filter=@luxgen/api
 
-restart: ## Restart all services
-	@echo "Restarting services..."
-	./scripts/dev.sh restart
+# ─── Role-based dev stacks (shared API + Mongo) ───────────────────────────────
+dev-stack-web: ## Web/learner dev: Mongo + API + Next.js (see skills/dev-workflows)
+	@bash scripts/dev-stack.sh web
 
-# Build Commands
+dev-clean-web: ## Kill :3000/:4000, wipe apps/web/.next, restart web stack
+	@echo "$(GREEN)► Cleaning web dev stack (ports + .next)...$(RESET)"
+	@for port in 3000 4000; do lsof -ti :$$port 2>/dev/null | xargs kill -9 2>/dev/null || true; done
+	@rm -rf apps/web/.next
+	@$(MAKE) dev-stack-web
+
+dev-stack-admin: ## Admin/commerce dev: Mongo + API + Next.js (admin routes)
+	@bash scripts/dev-stack.sh admin
+
+dev-stack-mobile: ## Expo dev: Mongo + API + apps/mobile
+	@bash scripts/dev-stack.sh mobile
+
+dev-stack-api: ## Backend-only: Mongo + GraphQL API
+	@bash scripts/dev-stack.sh api
+
+dev-infra: ## Start MongoDB + Redis + Ollama in Docker (background)
+	@echo "$(GREEN)► Starting infrastructure (MongoDB, Redis, Ollama)...$(RESET)"
+	@docker compose up mongodb redis ollama -d
+	@echo "$(GREEN)✓ Infrastructure running$(RESET)"
+	@echo "  MongoDB:  localhost:27017"
+	@echo "  Redis:    localhost:6379"
+	@echo "  Ollama:   localhost:11434"
+
+dev-full: dev-docker ## Alias for dev-docker
+
+dev-docker: ## Full dev stack in Docker (build + hot reload + auto-seed on first boot)
+	@echo "$(GREEN)► Starting Docker dev stack (persistent volumes)...$(RESET)"
+	@docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d
+	@echo ""
+	@echo "$(GREEN)✓ Stack starting — first boot may take 2–3 min (npm install + seed)$(RESET)"
+	@echo "  Web:      http://demo.localhost:3000"
+	@echo "  Login:    http://demo.localhost:3000/login"
+	@echo "  GraphQL:  http://localhost:4000/graphql"
+	@echo "  Mongo UI: http://localhost:8081  (admin / admin123)"
+	@echo ""
+	@echo "  Demo login: alex.thompson@demo.com / password123"
+	@echo "  Logs:       make logs"
+	@echo "  Stop:       make clean  (keeps DB volume)"
+	@echo "  Reset DB:   make db-reset  (wipes volume data, re-seeds on next start)"
+
+# ─── Agent Studio (Local LLM) ─────────────────────────────────────────────────
+agent-start: ## Start Ollama in Docker
+	@echo "$(GREEN)► Starting Ollama...$(RESET)"
+	@docker compose up ollama -d
+	@echo "$(GREEN)✓ Ollama running at http://localhost:11434$(RESET)"
+
+agent-stop: ## Stop Ollama
+	@docker compose stop ollama
+
+agent-status: ## Check Ollama and model status
+	@echo "$(CYAN)Ollama status:$(RESET)"
+	@curl -sf http://localhost:11434/api/tags | python3 -c \
+		"import sys,json; d=json.load(sys.stdin); models=d.get('models',[]); \
+		[print(f'  ✓ {m[\"name\"]} ({m[\"details\"][\"parameter_size\"]})')\
+		 for m in models] if models else print('  ✗ No models downloaded')" \
+		2>/dev/null || echo "  ✗ Ollama not running — run: make agent-start"
+
+agent-pull: ## Pull the recommended model (qwen2.5-coder:7b, ~4.7 GB)
+	@$(MAKE) agent-pull-qwen
+
+agent-pull-mistral: ## Pull mistral:latest (~4.1 GB) — good general model
+	@echo "$(YELLOW)► Pulling mistral:latest (~4.1 GB)...$(RESET)"
+	@ollama pull mistral:latest 2>/dev/null || \
+		docker exec luxgen-ollama ollama pull mistral:latest
+	@echo "$(GREEN)✓ mistral:latest ready$(RESET)"
+
+agent-pull-qwen: ## Pull qwen2.5-coder:7b (~4.7 GB) — best for code
+	@echo "$(YELLOW)► Pulling qwen2.5-coder:7b (~4.7 GB)...$(RESET)"
+	@ollama pull qwen2.5-coder:7b 2>/dev/null || \
+		docker exec luxgen-ollama ollama pull qwen2.5-coder:7b
+	@echo "$(GREEN)✓ qwen2.5-coder:7b ready. Update OLLAMA_MODEL=qwen2.5-coder:7b in apps/web/.env.local$(RESET)"
+
+# ─── Environments ─────────────────────────────────────────────────────────────
+staging: ## Build and start the staging environment
+	@echo "$(GREEN)► Starting staging environment...$(RESET)"
+	@[ -f .env.staging ] || (echo "$(RED)✗ .env.staging not found. Copy .env.staging.example and fill in values.$(RESET)" && exit 1)
+	@docker compose -f docker-compose.staging.yml --env-file .env.staging up --build -d
+	@echo "$(GREEN)✓ Staging running at http://localhost:3000$(RESET)"
+
+staging-down: ## Stop the staging environment
+	@docker compose -f docker-compose.staging.yml down
+
+prod: ## Build and start production (requires .env.production)
+	@echo "$(GREEN)► Starting production environment...$(RESET)"
+	@[ -f .env.production ] || (echo "$(RED)✗ .env.production not found$(RESET)" && exit 1)
+	@docker compose -f docker-compose.prod.yml --env-file .env.production up --build -d
+	@echo "$(GREEN)✓ Production started$(RESET)"
+
+prod-down: ## Stop production environment
+	@docker compose -f docker-compose.prod.yml down
+
+# ─── Build ────────────────────────────────────────────────────────────────────
 build: ## Build all packages
-	@echo "Building packages..."
-	npm run build
+	@npx turbo run build
 
-build-docker: ## Build Docker images
-	@echo "Building Docker images..."
-	docker-compose build
+build-web: ## Build web app only
+	@npx turbo run build --filter=@luxgen/web
 
-# Development Tools
-logs: ## Show logs for all services
-	@echo "Showing logs..."
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs -f
+build-api: ## Build API only
+	@npx turbo run build --filter=@luxgen/api
 
-logs-web: ## Show logs for web service
-	@echo "Showing web logs..."
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs -f web
+build-mcp: ## Build MCP server (packages/mcp-core + apps/mcp-server)
+	@npm run build:mcp
 
-logs-api: ## Show logs for API service
-	@echo "Showing API logs..."
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs -f api
+mcp-smoke: ## Smoke test MCP GraphQL tools (requires LUXGEN_* env vars)
+	@bash scripts/mcp-smoke.sh
 
-logs-db: ## Show logs for database services
-	@echo "Showing database logs..."
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml logs -f mongodb redis
+mcp-http-smoke: ## Smoke test MCP HTTP /health (MCP_HTTP_URL optional)
+	@bash scripts/mcp-http-smoke.sh
 
-# Testing Commands
-test: ## Run all tests
-	@echo "Running tests..."
-	npm run test
+dev-mcp-http: ## Run MCP HTTP server on :3100 (requires API)
+	@MCP_TRANSPORT=http MCP_HTTP_PORT=3100 npm run dev:mcp
 
-test-watch: ## Run tests in watch mode
-	@echo "Running tests in watch mode..."
-	npm run test:watch
+# ─── Database ─────────────────────────────────────────────────────────────────
+db-seed: ## Seed the database with dev data (force — idempotent upsert)
+	@echo "$(GREEN)► Seeding database...$(RESET)"
+	@if docker compose ps api 2>/dev/null | grep -q Up; then \
+		docker compose exec api sh -c "cd apps/api && npm run seed"; \
+	else \
+		cd apps/api && npm run seed; \
+	fi
 
-test-coverage: ## Run tests with coverage
-	@echo "Running tests with coverage..."
-	npm run test:coverage
+db-reset: ## Drop dev database volume data and re-seed on next API start
+	@echo "$(RED)► Resetting dev database (luxgen_dev)...$(RESET)"
+	@if docker compose ps mongodb 2>/dev/null | grep -q Up; then \
+		docker compose exec mongodb mongosh -u admin -p password123 --authenticationDatabase admin luxgen_dev --eval "db.dropDatabase()"; \
+		if docker compose ps api 2>/dev/null | grep -q Up; then \
+			echo "  Restarting API to trigger auto-seed..."; \
+			docker compose restart api; \
+		fi; \
+	else \
+		echo "  MongoDB container not running — start with: make dev-docker"; exit 1; \
+	fi
+	@echo "$(GREEN)✓ Database dropped. API will auto-seed on restart.$(RESET)"
 
-# Code Quality Commands
-lint: ## Run ESLint
-	@echo "Running ESLint..."
-	npm run lint
+# ─── Logs ─────────────────────────────────────────────────────────────────────
+logs: ## Follow all Docker logs
+	@docker compose logs -f
 
-lint-fix: ## Fix ESLint issues
-	@echo "Fixing ESLint issues..."
-	npm run lint:fix
+logs-web: ## Follow web app logs
+	@docker compose logs -f web
 
-format: ## Format code with Prettier
-	@echo "Formatting code..."
-	npm run format
+logs-api: ## Follow API logs
+	@docker compose logs -f api
 
-format-check: ## Check code formatting
-	@echo "Checking code formatting..."
-	npm run format:check
+logs-ollama: ## Follow Ollama logs
+	@docker compose logs -f ollama
 
-# Database Commands
-db:seed ## Seed the database
-	@echo "Seeding database..."
-	docker-compose exec api npm run db:seed
+# ─── Code Quality ─────────────────────────────────────────────────────────────
+lint: ## Run linting across all packages
+	@npx turbo run lint
 
-db-reset: ## Reset the database
-	@echo "Resetting database..."
-	docker-compose exec mongodb mongosh --eval "db.dropDatabase()"
-	$(MAKE) db-seed
+test: ## Run tests across all packages
+	@npx turbo run test
 
-db-backup: ## Backup the database
-	@echo "Backing up database..."
-	docker-compose exec mongodb mongodump --out /backup/$(shell date +%Y%m%d_%H%M%S)
+# ─── Cleanup ──────────────────────────────────────────────────────────────────
+clean: ## Stop all Docker services (preserves volumes/data)
+	@echo "$(YELLOW)► Stopping all services...$(RESET)"
+	@docker compose down 2>/dev/null || true
+	@docker compose -f docker-compose.staging.yml down 2>/dev/null || true
+	@echo "$(GREEN)✓ All services stopped$(RESET)"
 
-db-restore: ## Restore the database
-	@echo "Restoring database..."
-	docker-compose exec mongodb mongorestore /backup/latest
+clean-all: ## Nuclear clean: stop services AND delete all volumes/data
+	@echo "$(RED)► WARNING: This deletes all data including databases and model weights!$(RESET)"
+	@read -p "Are you sure? [y/N] " confirm && [ "$$confirm" = "y" ]
+	@docker compose down -v --remove-orphans 2>/dev/null || true
+	@docker compose -f docker-compose.staging.yml down -v 2>/dev/null || true
+	@npx turbo run clean 2>/dev/null || true
+	@echo "$(GREEN)✓ Full clean complete$(RESET)"
 
-# Cleanup Commands
-clean: ## Clean up Docker resources
-	@echo "Cleaning up Docker resources..."
-	./scripts/dev.sh cleanup
-
-clean-volumes: ## Clean up Docker volumes
-	@echo "Cleaning up Docker volumes..."
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml down -v
-
-clean-all: ## Clean up everything
-	@echo "Cleaning up everything..."
-	docker system prune -af
-	docker volume prune -f
-
-# Production Commands
-prod:build ## Build for production
-	@echo "Building for production..."
-	docker build -t luxgen-monorepo:latest .
-
-prod-deploy: ## Deploy to production
-	@echo "Deploying to production..."
-	docker-compose -f docker-compose.prod.yml up -d
-
-# Utility Commands
+# ─── Status ───────────────────────────────────────────────────────────────────
 status: ## Show status of all services
-	@echo "Service status:"
-	docker-compose -f docker-compose.yml -f docker-compose.dev.yml ps
-
-shell-web: ## Open shell in web container
-	@echo "Opening shell in web container..."
-	docker-compose exec web bash
-
-shell-api: ## Open shell in API container
-	@echo "Opening shell in API container..."
-	docker-compose exec api bash
-
-shell-db: ## Open MongoDB shell
-	@echo "Opening MongoDB shell..."
-	docker-compose exec mongodb mongosh
-
-# Health Checks
-health: ## Check health of all services
-	@echo "Checking service health..."
-	@curl -f http://localhost:3000/api/health || echo "Web service is not healthy"
-	@curl -f http://localhost:4000/health || echo "API service is not healthy"
-
-# Development Setup
-setup: ## Initial development setup
-	@echo "Setting up development environment..."
-	$(MAKE) install
-	$(MAKE) build
-	$(MAKE) dev
-	@echo "Development environment is ready!"
-	@echo "Access the application at:"
-	@echo "  - Web: http://localhost:3000"
-	@echo "  - API: http://localhost:4000"
-	@echo "  - MongoDB Admin: http://localhost:8081"
-	@echo "  - Redis Admin: http://localhost:8082"
+	@echo "$(CYAN)Docker services:$(RESET)"
+	@docker compose ps 2>/dev/null || echo "  No services running"
+	@echo ""
+	@echo "$(CYAN)Ollama:$(RESET)"
+	@$(MAKE) --no-print-directory agent-status

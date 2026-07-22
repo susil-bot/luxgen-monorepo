@@ -1,48 +1,195 @@
-import { User, IUser } from '@luxgen/db';
-import { hashPassword, verifyPassword } from '@luxgen/auth';
-import { generateToken } from '@luxgen/auth';
+import { User, IUser, Enrollment } from '@luxgen/db';
+import { verifyPassword } from '@luxgen/auth';
+import { generateToken } from '../utils/jwt';
+import { logger } from '../utils/logger';
+import { isAccountActive, ACCOUNT_DEACTIVATED_MESSAGE } from '../utils/accountStatus';
+import { checkLoginRateLimit } from '../middleware/loginRateLimit';
+import type { Request } from 'express';
+import { UserRegistrationService, UserRegistrationData } from './userRegistrationService';
+
+export class AuthServiceError extends Error {
+  constructor(
+    message: string,
+    public statusCode: number = 400,
+    public errors?: Record<string, string>,
+  ) {
+    super(message);
+    this.name = 'AuthServiceError';
+  }
+}
+
+type PopulatedTenant = { _id?: unknown; name?: string; subdomain?: string };
+
+export function buildAuthRestPayload(token: string, user: IUser, includeStatus = false) {
+  const tenant = user.tenant as PopulatedTenant;
+  return {
+    token,
+    user: {
+      id: user._id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      ...(includeStatus ? { status: user.status } : {}),
+      tenant: {
+        id: tenant._id,
+        name: tenant.name,
+        subdomain: tenant.subdomain,
+      },
+    },
+    expiresIn: process.env.JWT_EXPIRES_IN || '7d',
+  };
+}
+
+export interface LoginInput {
+  email: string;
+  password: string;
+  tenantId?: string;
+  req?: Request;
+}
+
+export interface AuthResult {
+  token: string;
+  user: IUser;
+}
+
+export interface UpdateUserInput {
+  email?: string;
+  firstName?: string;
+  lastName?: string;
+  role?: string;
+  phone?: string;
+  marketingEmail?: boolean;
+  marketingSms?: boolean;
+  marketingWhatsapp?: boolean;
+  avatar?: string;
+}
 
 export class UserService {
-  async getUserById(id: string): Promise<IUser | null> {
-    // TODO: Implement database query
-    console.log('Getting user by ID:', id);
-    return null;
+  async getUserById(id: string, tenantId?: string): Promise<IUser | null> {
+    const filter: { _id: string; tenant?: string } = { _id: id };
+    if (tenantId) filter.tenant = tenantId;
+    return User.findOne(filter).populate('tenant');
   }
 
   async getUsersByTenant(tenantId: string): Promise<IUser[]> {
-    // TODO: Implement database query
-    console.log('Getting users by tenant:', tenantId);
-    return [];
+    return User.find({ tenant: tenantId }).populate('tenant');
   }
 
-  async createUser(input: any): Promise<IUser> {
-    // TODO: Implement database creation
-    console.log('Creating user:', input);
-    throw new Error('Not implemented');
+  async createUser(input: UserRegistrationData): Promise<IUser> {
+    const result = await UserRegistrationService.registerUser(input);
+    if (!result.success || !result.user) {
+      throw new AuthServiceError(result.message, 400, result.errors);
+    }
+    return result.user;
   }
 
-  async updateUser(id: string, input: any): Promise<IUser> {
-    // TODO: Implement database update
-    console.log('Updating user:', id, input);
-    throw new Error('Not implemented');
+  async updateUser(id: string, tenantId: string, input: UpdateUserInput): Promise<IUser> {
+    const user = await User.findOneAndUpdate({ _id: id, tenant: tenantId }, input, { new: true }).populate('tenant');
+    if (!user) throw new Error('User not found');
+    return user;
   }
 
-  async deleteUser(id: string): Promise<boolean> {
-    // TODO: Implement database deletion
-    console.log('Deleting user:', id);
-    throw new Error('Not implemented');
+  async getCustomersByTenant(tenantId: string, search?: string): Promise<IUser[]> {
+    const query: Record<string, unknown> = {
+      tenant: tenantId,
+      role: { $in: ['STUDENT', 'USER'] },
+    };
+    if (search?.trim()) {
+      const pattern = new RegExp(search.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
+      query.$or = [{ email: pattern }, { firstName: pattern }, { lastName: pattern }];
+    }
+    return User.find(query).populate('tenant').sort({ createdAt: -1 });
   }
 
-  async login(input: { email: string; password: string }): Promise<{ token: string; user: IUser }> {
-    // TODO: Implement login logic
-    console.log('User login:', input.email);
-    throw new Error('Not implemented');
+  async deleteUser(id: string, tenantId: string): Promise<boolean> {
+    const user = await User.findOne({ _id: id, tenant: tenantId });
+    if (!user) throw new Error('User not found');
+
+    const activeOrders = await Enrollment.countDocuments({
+      tenant: tenantId,
+      student: id,
+      cancelledAt: null,
+    });
+    if (activeOrders > 0) {
+      throw new Error(`Cannot delete customer with ${activeOrders} active order(s). Cancel or complete orders first.`);
+    }
+
+    const result = await User.findOneAndDelete({ _id: id, tenant: tenantId });
+    return !!result;
   }
 
-  async register(input: any): Promise<{ token: string; user: IUser }> {
-    // TODO: Implement registration logic
-    console.log('User registration:', input.email);
-    throw new Error('Not implemented');
+  async registerPushToken(userId: string, tenantId: string, token: string): Promise<boolean> {
+    const { pushNotificationService } = await import('./pushNotificationService');
+    return pushNotificationService.registerToken(userId, tenantId, token);
+  }
+
+  async login({ email, password, tenantId: inputTenantId, req }: LoginInput): Promise<AuthResult> {
+    if (req) {
+      await checkLoginRateLimit(req, email);
+    }
+
+    const query: Record<string, unknown> = { email: email.toLowerCase().trim() };
+    if (inputTenantId) query.tenant = inputTenantId;
+
+    const user = await User.findOne(query).select('+password').populate('tenant');
+    if (!user) {
+      throw new AuthServiceError('Invalid email or password', 401, {
+        email: 'Invalid email or password',
+        password: 'Invalid email or password',
+      });
+    }
+
+    const isValid = await verifyPassword(password, user.password);
+    if (!isValid) {
+      throw new AuthServiceError('Invalid email or password', 401, {
+        email: 'Invalid email or password',
+        password: 'Invalid email or password',
+      });
+    }
+
+    if (!isAccountActive(user)) {
+      throw new AuthServiceError(ACCOUNT_DEACTIVATED_MESSAGE, 403);
+    }
+
+    const tenantId = (user.tenant as any)?._id?.toString();
+    if (!tenantId) throw new Error('User has no associated tenant');
+
+    const token = generateToken(
+      { id: (user as any)._id.toString(), email: user.email, tenant: tenantId, role: user.role },
+      tenantId,
+    );
+
+    logger.info(`User login: ${user.email}`);
+    return { token, user };
+  }
+
+  async register(
+    input: UserRegistrationData,
+    options?: { selfService?: boolean; tenantId?: string },
+  ): Promise<AuthResult> {
+    const registration: UserRegistrationData = { ...input };
+
+    if (options?.selfService) {
+      registration.role = 'STUDENT' as UserRegistrationData['role'];
+      if (options.tenantId) {
+        registration.tenantId = options.tenantId;
+      }
+    }
+
+    const user = await this.createUser(registration);
+    await user.populate('tenant');
+
+    const tenantId = (user.tenant as any)?._id?.toString();
+    if (!tenantId) throw new Error('User has no associated tenant');
+
+    const token = generateToken(
+      { id: (user as any)._id.toString(), email: user.email, tenant: tenantId, role: user.role },
+      tenantId,
+    );
+
+    logger.info(`User registered: ${user.email}`);
+    return { token, user };
   }
 }
 

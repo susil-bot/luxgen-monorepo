@@ -43,154 +43,141 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 
-  // Update internal state when value prop changes
   useEffect(() => {
     setSearchQuery(value);
   }, [value]);
 
-  // Handle input change
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+        setShowSuggestionsList(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     setSearchQuery(newValue);
     onChange?.(newValue);
-    setShowSuggestionsList(showSuggestions && newValue.length > 0);
+    if (newValue && suggestions.length > 0) {
+      setShowSuggestionsList(true);
+    } else {
+      setShowSuggestionsList(false);
+    }
   };
 
-  // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSearch?.(searchQuery);
     setShowSuggestionsList(false);
   };
 
-  // Handle input focus
   const handleFocus = () => {
     setIsFocused(true);
     onFocus?.();
-    if (showSuggestions && searchQuery.length > 0) {
+    if (searchQuery && suggestions.length > 0) {
       setShowSuggestionsList(true);
     }
   };
 
-  // Handle input blur
-  const handleBlur = (e: React.FocusEvent) => {
-    // Delay blur to allow clicking on suggestions
-    setTimeout(() => {
-      if (!suggestionsRef.current?.contains(document.activeElement)) {
-        setIsFocused(false);
-        setShowSuggestionsList(false);
-        onBlur?.();
-      }
-    }, 150);
+  const handleBlur = () => {
+    setIsFocused(false);
+    onBlur?.();
+    setTimeout(() => setShowSuggestionsList(false), 200);
   };
 
-  // Handle suggestion click
+  const getInputClasses = () => {
+    const baseStyles = 'input-field w-full transition-all duration-200';
+    const sizeStyles = size === 'sm' ? 'text-xs py-1.5' : size === 'lg' ? 'text-base py-3' : 'text-sm py-2';
+    if (showIcon) {
+      return `${baseStyles} ${sizeStyles} pl-10`;
+    }
+    return `${baseStyles} ${sizeStyles}`;
+  };
+
   const handleSuggestionClick = (suggestion: string) => {
     setSearchQuery(suggestion);
     onChange?.(suggestion);
+    onSearch?.(suggestion);
     onSuggestionClick?.(suggestion);
     setShowSuggestionsList(false);
-    inputRef.current?.focus();
   };
 
-  // Handle key navigation
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      setShowSuggestionsList(false);
-      inputRef.current?.blur();
-    }
-  };
-
-  // Get variant styles
-  const getVariantStyles = () => {
-    switch (variant) {
-      case 'minimal':
-        return 'bg-transparent border-0 focus:ring-0 focus:outline-none';
-      case 'outlined':
-        return 'bg-white border-2 border-gray-300 focus:border-blue-500 focus:ring-0';
-      case 'default':
-      default:
-        return 'bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500 focus:ring-opacity-20';
-    }
-  };
-
-  // Get size styles
-  const getSizeStyles = () => {
-    switch (size) {
-      case 'sm':
-        return 'px-3 py-2 text-sm';
-      case 'lg':
-        return 'px-4 py-3 text-lg';
-      case 'md':
-      default:
-        return 'px-4 py-2 text-base';
-    }
-  };
-
-  // Filter suggestions based on search query
   const filteredSuggestions = suggestions
-    .filter(suggestion => 
-      suggestion.toLowerCase().includes(searchQuery.toLowerCase())
-    )
+    .filter((s) => s.toLowerCase().includes(searchQuery.toLowerCase()))
     .slice(0, maxSuggestions);
 
   return (
-    <div className={`relative ${className}`} {...props}>
-      <form onSubmit={handleSubmit} className="relative">
+    <div className={`relative ${className}`} ref={suggestionsRef}>
+      <form onSubmit={handleSubmit}>
         <div className="relative">
           {showIcon && (
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <svg 
-                className="h-5 w-5 text-gray-400" 
-                fill="none" 
-                stroke="currentColor" 
+              <svg
+                className="h-4 w-4"
+                fill="none"
+                stroke="currentColor"
                 viewBox="0 0 24 24"
+                style={{ color: 'var(--color-label-tertiary)' }}
               >
-                <path 
-                  strokeLinecap="round" 
-                  strokeLinejoin="round" 
-                  strokeWidth={2} 
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
                 />
               </svg>
             </div>
           )}
-          
           <input
+            role="combobox"
             ref={inputRef}
             type="text"
-            placeholder={placeholder}
             value={searchQuery}
-            onChange={handleInputChange}
+            onChange={handleChange}
             onFocus={handleFocus}
             onBlur={handleBlur}
-            onKeyDown={handleKeyDown}
+            placeholder={placeholder}
             disabled={disabled}
-            className={`
-              w-full rounded-lg transition-all duration-200
-              ${getVariantStyles()}
-              ${getSizeStyles()}
-              ${showIcon ? 'pl-10' : 'pl-4'}
-              ${disabled ? 'opacity-50 cursor-not-allowed' : 'cursor-text'}
-              focus:outline-none
-            `}
+            className={getInputClasses()}
+            aria-label={placeholder}
           />
         </div>
       </form>
 
-      {/* Suggestions Dropdown */}
-      {showSuggestionsList && filteredSuggestions.length > 0 && (
+      {showSuggestions && showSuggestionsList && filteredSuggestions.length > 0 && (
         <div
-          ref={suggestionsRef}
-          className="absolute top-full left-0 right-0 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto"
+          className="surface-elevated absolute top-full left-0 right-0 mt-1 z-50 max-h-60 overflow-y-auto rounded-xl"
+          style={{ boxShadow: 'var(--shadow-lg)' }}
         >
           {filteredSuggestions.map((suggestion, index) => (
             <button
               key={index}
               onClick={() => handleSuggestionClick(suggestion)}
-              className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-50 focus:bg-gray-50 focus:outline-none transition-colors duration-150"
+              className="w-full px-4 py-2.5 text-left text-sm transition-colors duration-150"
+              style={{ color: 'var(--color-label-primary)' }}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-fill-quaternary)')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
             >
-              {suggestion}
+              <div className="flex items-center gap-2">
+                <svg
+                  className="h-3.5 w-3.5 flex-shrink-0"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  style={{ color: 'var(--color-label-tertiary)' }}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
+                <span>{suggestion}</span>
+              </div>
             </button>
           ))}
         </div>

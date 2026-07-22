@@ -44,7 +44,7 @@ export const getLogoutStyles = ({ variant, disabled, loading }: LogoutStylesProp
             color: '#6b7280',
             cursor: disabled ? 'not-allowed' : 'pointer',
             opacity: disabled ? 0.5 : 1,
-            transition: 'all 0.2s ease',
+            transition: 'all var(--transition-fast, 120ms ease)',
           },
           buttonText: {
             display: 'none',
@@ -68,7 +68,7 @@ export const getLogoutStyles = ({ variant, disabled, loading }: LogoutStylesProp
             fontWeight: '500',
             cursor: disabled ? 'not-allowed' : 'pointer',
             opacity: disabled ? 0.5 : 1,
-            transition: 'all 0.2s ease',
+            transition: 'all var(--transition-fast, 120ms ease)',
             minHeight: '40px',
           },
           confirmButton: {
@@ -95,7 +95,7 @@ export const getLogoutStyles = ({ variant, disabled, loading }: LogoutStylesProp
             fontWeight: '500',
             cursor: disabled ? 'not-allowed' : 'pointer',
             opacity: disabled ? 0.5 : 1,
-            transition: 'all 0.2s ease',
+            transition: 'all var(--transition-fast, 120ms ease)',
             minHeight: '40px',
           },
           confirmButton: {
@@ -129,11 +129,14 @@ export const getLogoutStyles = ({ variant, disabled, loading }: LogoutStylesProp
         cursor: 'wait',
         opacity: 0.7,
       }),
-      ':hover': !disabled && !loading ? {
-        background: variant === 'danger' ? '#b91c1c' : '#e5e7eb',
-        transform: 'translateY(-1px)',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-      } : {},
+      ':hover':
+        !disabled && !loading
+          ? {
+              background: variant === 'danger' ? '#b91c1c' : '#e5e7eb',
+              transform: 'translateY(-1px)',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+            }
+          : {},
     },
     buttonContent: {
       display: 'flex',
@@ -266,7 +269,7 @@ export const getLogoutStyles = ({ variant, disabled, loading }: LogoutStylesProp
       border: '1px solid #d1d5db',
       borderRadius: '6px',
       cursor: 'pointer',
-      transition: 'all 0.2s ease',
+      transition: 'all var(--transition-fast, 120ms ease)',
     },
     confirmButton: {
       ...variantStyles.confirmButton,
@@ -275,7 +278,7 @@ export const getLogoutStyles = ({ variant, disabled, loading }: LogoutStylesProp
       fontWeight: '500',
       borderRadius: '6px',
       cursor: 'pointer',
-      transition: 'all 0.2s ease',
+      transition: 'all var(--transition-fast, 120ms ease)',
       border: 'none',
       outline: 'none',
     },

@@ -1,3 +1,7 @@
+# LuxGen — Base Docker stack (MongoDB, Redis, API, Web, Ollama)
+# Docs: docs/deployment/DOCKER.md · docs/technical/development/QUICK_START.md
+# Usage: docker compose up -d  OR  make dev-docker (with docker-compose.dev.yml)
+
 services:
   # MongoDB Database
   mongodb:
@@ -5,18 +9,17 @@ services:
     container_name: luxgen-mongodb
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      - '27017:27017'
     environment:
       MONGO_INITDB_ROOT_USERNAME: admin
       MONGO_INITDB_ROOT_PASSWORD: password123
       MONGO_INITDB_DATABASE: luxgen
     volumes:
       - mongodb_data:/data/db
-      - ./packages/db/src/seed.ts:/docker-entrypoint-initdb.d/seed.ts:ro
     networks:
       - luxgen-network
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ['CMD', 'mongosh', '--eval', "db.adminCommand('ping')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -27,13 +30,13 @@ services:
     container_name: luxgen-redis
     restart: unless-stopped
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_data:/data
     networks:
       - luxgen-network
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -46,13 +49,17 @@ services:
     container_name: luxgen-api
     restart: unless-stopped
     ports:
-      - "4000:4000"
+      - '4000:4000'
     environment:
       NODE_ENV: development
       PORT: 4000
-      MONGODB_URI: mongodb://admin:password123@mongodb:27017/luxgen?authSource=admin
+      MONGODB_URI: mongodb://admin:password123@mongodb:27017/luxgen_dev?authSource=admin
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: your-super-secret-jwt-key-change-in-production
+      JWT_SECRET: dev-jwt-secret-change-in-production-min-32-chars
+      JWT_EXPIRES_IN: 7d
+      SEED_IF_EMPTY: 'true'
+      TENANT_DEMO_KEY: demo-tenant-signing-key-dev-32chars-min
+      TENANT_IDEA-VIBES_KEY: idea-vibes-signing-key-dev-32chars-min
       CORS_ORIGIN: http://localhost:3000
     volumes:
       - ./apps/api:/app/apps/api
@@ -66,10 +73,11 @@ services:
     networks:
       - luxgen-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
-      interval: 30s
+      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
+      interval: 15s
       timeout: 10s
-      retries: 3
+      retries: 10
+      start_period: 120s
 
   # Web Application
   web:
@@ -79,12 +87,17 @@ services:
     container_name: luxgen-web
     restart: unless-stopped
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       NODE_ENV: development
       PORT: 3000
+      # API_URL: server-side (SSR/API routes/rewrites) → Docker service name
+      API_URL: http://api:4000
+      GRAPHQL_URL: http://api:4000/graphql
+      # NEXT_PUBLIC_*: baked into browser bundle → must use host-visible address
       NEXT_PUBLIC_API_URL: http://localhost:4000
-      NEXT_PUBLIC_BASE_URL: http://localhost:3000
+      NEXT_PUBLIC_GRAPHQL_URL: http://localhost:4000/graphql
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
     volumes:
       - ./apps/web:/app/apps/web
       - ./packages:/app/packages
@@ -96,13 +109,15 @@ services:
     networks:
       - luxgen-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/api/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
       interval: 30s
       timeout: 10s
       retries: 3
 
-  # Development Tools
+  # Legacy turbo dev container — opt-in only (conflicts with api/web services)
   dev-tools:
+    profiles:
+      - tools
     image: node:18-alpine
     container_name: luxgen-dev-tools
     restart: unless-stopped
@@ -129,7 +144,7 @@ services:
     container_name: luxgen-mongo-express
     restart: unless-stopped
     ports:
-      - "8081:8081"
+      - '8081:8081'
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: admin
       ME_CONFIG_MONGODB_ADMINPASSWORD: password123
@@ -148,7 +163,7 @@ services:
     container_name: luxgen-redis-commander
     restart: unless-stopped
     ports:
-      - "8082:8081"
+      - '8082:8081'
     environment:
       REDIS_HOSTS: local:redis:6379
     depends_on:
@@ -174,10 +189,44 @@ services:
   #   networks:
   #     - luxgen-network
 
+  # Local LLM — Ollama serving Qwen2.5-Coder:7b for Agent Studio
+  ollama:
+    image: ollama/ollama:latest
+    container_name: luxgen-ollama
+    ports:
+      - '11434:11434'
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - luxgen-network
+    restart: unless-stopped
+    healthcheck:
+      test: ['CMD', 'ollama', 'list']
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  # Pulls qwen2.5-coder:7b into the ollama volume (~4.7 GB, runs once)
+  ollama-model-pull:
+    image: ollama/ollama:latest
+    container_name: luxgen-ollama-pull
+    depends_on:
+      ollama:
+        condition: service_healthy
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+    command: ['pull', 'qwen2.5-coder:7b']
+    networks:
+      - luxgen-network
+    restart: 'no'
+
 volumes:
   mongodb_data:
     driver: local
   redis_data:
+    driver: local
+  ollama_data:
     driver: local
 
 networks:

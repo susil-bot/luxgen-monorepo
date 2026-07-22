@@ -1,6 +1,6 @@
 /**
  * ACME Corporation Tenant Database Model
- * 
+ *
  * This file contains the database model and operations
  * specific to the ACME Corporation tenant.
  */
@@ -20,35 +20,40 @@ export interface AcmeCorpTenantDocument extends Document {
   updatedAt: Date;
 }
 
-const acmeCorpTenantSchema = new Schema<AcmeCorpTenantDocument>({
-  tenantId: {
-    type: String,
-    required: true,
-    unique: true,
-    default: 'acme-corp'
+const acmeCorpTenantSchema = new Schema<AcmeCorpTenantDocument>(
+  {
+    tenantId: {
+      type: String,
+      required: true,
+      unique: true,
+      default: 'acme-corp',
+    },
+    customSettings: {
+      theme: {
+        type: String,
+        default: 'enterprise',
+      },
+      features: [
+        {
+          type: String,
+          enum: ['analytics', 'reporting', 'notifications', 'userManagement', 'enterpriseMode'],
+        },
+      ],
+      enterpriseMode: {
+        type: Boolean,
+        default: true,
+      },
+      securityLevel: {
+        type: String,
+        enum: ['standard', 'high', 'maximum'],
+        default: 'high',
+      },
+    },
   },
-  customSettings: {
-    theme: {
-      type: String,
-      default: 'enterprise'
-    },
-    features: [{
-      type: String,
-      enum: ['analytics', 'reporting', 'notifications', 'userManagement', 'enterpriseMode']
-    }],
-    enterpriseMode: {
-      type: Boolean,
-      default: true
-    },
-    securityLevel: {
-      type: String,
-      enum: ['standard', 'high', 'maximum'],
-      default: 'high'
-    }
-  }
-}, {
-  timestamps: true
-});
+  {
+    timestamps: true,
+  },
+);
 
 export const AcmeCorpTenant = model<AcmeCorpTenantDocument>('AcmeCorpTenant', acmeCorpTenantSchema);
 
@@ -62,7 +67,7 @@ export const acmeCorpTenantOperations = {
     return await AcmeCorpTenant.findOneAndUpdate(
       { tenantId },
       { customSettings: settings },
-      { upsert: true, new: true }
+      { upsert: true, new: true },
     );
   },
 
@@ -84,5 +89,5 @@ export const acmeCorpTenantOperations = {
   async getSecurityLevel(tenantId: string) {
     const tenant = await AcmeCorpTenant.findOne({ tenantId });
     return tenant?.customSettings?.securityLevel || 'high';
-  }
+  },
 };

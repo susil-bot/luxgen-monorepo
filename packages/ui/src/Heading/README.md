@@ -51,19 +51,19 @@ import { Heading } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `level` | `1 | 2 | 3 | 4 | 5 | 6` | - | Heading level (h1-h6) |
-| `text` | `string` | - | Heading text content |
-| `size` | `'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl'` | - | Custom size override |
-| `weight` | `'light' | 'normal' | 'medium' | 'semibold' | 'bold' | 'extrabold' | 'black'` | `'semibold'` | Font weight |
-| `align` | `'left' | 'center' | 'right' | 'justify'` | `'left'` | Text alignment |
-| `color` | `string` | - | Custom text color |
-| `variant` | `'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info'` | `'primary'` | Color variant |
-| `truncate` | `boolean` | `false` | Truncate long text with ellipsis |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
+| Prop          | Type            | Default        | Description                      |
+| ------------- | --------------- | -------------- | -------------------------------- | ---------- | --------- | -------------- | ----------- | --------------------- | ----------- | --- | -------------------- |
+| `tenantTheme` | `TenantTheme`   | `defaultTheme` | Theme object for styling         |
+| `level`       | `1              | 2              | 3                                | 4          | 5         | 6`             | -           | Heading level (h1-h6) |
+| `text`        | `string`        | -              | Heading text content             |
+| `size`        | `'sm'           | 'md'           | 'lg'                             | 'xl'       | '2xl'     | '3xl'          | '4xl'       | '5xl'                 | '6xl'`      | -   | Custom size override |
+| `weight`      | `'light'        | 'normal'       | 'medium'                         | 'semibold' | 'bold'    | 'extrabold'    | 'black'`    | `'semibold'`          | Font weight |
+| `align`       | `'left'         | 'center'       | 'right'                          | 'justify'` | `'left'`  | Text alignment |
+| `color`       | `string`        | -              | Custom text color                |
+| `variant`     | `'primary'      | 'secondary'    | 'success'                        | 'error'    | 'warning' | 'info'`        | `'primary'` | Color variant         |
+| `truncate`    | `boolean`       | `false`        | Truncate long text with ellipsis |
+| `className`   | `string`        | `''`           | Additional CSS classes           |
+| `style`       | `CSSProperties` | `{}`           | Inline styles                    |
 
 ## SSR Usage
 
@@ -156,22 +156,14 @@ import { Heading } from '@luxgen/ui';
 
 test('renders with correct heading level', () => {
   render(<Heading level={1} text="Main Heading" />);
-  
+
   expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument();
   expect(screen.getByText('Main Heading')).toBeInTheDocument();
 });
 
 test('renders with custom styling', () => {
-  render(
-    <Heading
-      level={2}
-      text="Custom Heading"
-      size="5xl"
-      weight="bold"
-      align="center"
-    />
-  );
-  
+  render(<Heading level={2} text="Custom Heading" size="5xl" weight="bold" align="center" />);
+
   const heading = screen.getByRole('heading', { level: 2 });
   expect(heading).toHaveClass('heading-5xl');
   expect(heading).toHaveStyle('text-align: center');
@@ -182,6 +174,7 @@ test('renders with custom styling', () => {
 ## Examples
 
 ### Basic Headings
+
 ```tsx
 <Heading level={1} text="Page Title" />
 <Heading level={2} text="Section Title" />
@@ -189,18 +182,13 @@ test('renders with custom styling', () => {
 ```
 
 ### Styled Headings
+
 ```tsx
-<Heading
-  level={1}
-  text="Welcome to LuxGen"
-  size="6xl"
-  weight="bold"
-  align="center"
-  variant="primary"
-/>
+<Heading level={1} text="Welcome to LuxGen" size="6xl" weight="bold" align="center" variant="primary" />
 ```
 
 ### Colored Headings
+
 ```tsx
 <Heading
   level={2}
@@ -216,6 +204,7 @@ test('renders with custom styling', () => {
 ```
 
 ### Truncated Headings
+
 ```tsx
 <Heading
   level={2}
@@ -225,15 +214,13 @@ test('renders with custom styling', () => {
 ```
 
 ### Custom Themed Headings
+
 ```tsx
-<Heading
-  tenantTheme={customTheme}
-  level={2}
-  text="Custom Themed Heading"
-/>
+<Heading tenantTheme={customTheme} level={2} text="Custom Themed Heading" />
 ```
 
 ### Responsive Headings
+
 ```tsx
 <Heading
   level={1}

@@ -1,3 +1,5 @@
+import { getApiUrl, getTenantDomain } from './urls';
+
 /**
  * Dynamic Tenant Service
  * Fetches tenant configurations from the API instead of using hardcoded configs
@@ -47,18 +49,18 @@ export interface AvailableTenant {
  */
 export const getTenantConfig = async (tenantId: string): Promise<TenantConfig> => {
   try {
-    const response = await fetch(`http://localhost:4000/api/tenant-config/config/${tenantId}`);
-    
+    const response = await fetch(`${getApiUrl()}/api/tenant-config/config/${tenantId}`);
+
     if (!response.ok) {
       throw new Error(`Failed to fetch tenant config: ${response.status}`);
     }
-    
+
     const result = await response.json();
-    
+
     if (!result.success) {
       throw new Error(result.message || 'Failed to fetch tenant config');
     }
-    
+
     return result.data;
   } catch (error) {
     console.error('Error fetching tenant config:', error);
@@ -72,18 +74,18 @@ export const getTenantConfig = async (tenantId: string): Promise<TenantConfig> =
  */
 export const getAvailableTenants = async (): Promise<AvailableTenant[]> => {
   try {
-    const response = await fetch('http://localhost:4000/api/tenant-config/available');
-    
+    const response = await fetch(`${getApiUrl()}/api/tenant-config/available`);
+
     if (!response.ok) {
       throw new Error(`Failed to fetch available tenants: ${response.status}`);
     }
-    
+
     const result = await response.json();
-    
+
     if (!result.success) {
       throw new Error(result.message || 'Failed to fetch available tenants');
     }
-    
+
     return result.data;
   } catch (error) {
     console.error('Error fetching available tenants:', error);
@@ -97,18 +99,18 @@ export const getAvailableTenants = async (): Promise<AvailableTenant[]> => {
  */
 export const getTenantAssets = async (tenantId: string) => {
   try {
-    const response = await fetch(`http://localhost:4000/api/tenant-config/assets/${tenantId}`);
-    
+    const response = await fetch(`${getApiUrl()}/api/tenant-config/assets/${tenantId}`);
+
     if (!response.ok) {
       throw new Error(`Failed to fetch tenant assets: ${response.status}`);
     }
-    
+
     const result = await response.json();
-    
+
     if (!result.success) {
       throw new Error(result.message || 'Failed to fetch tenant assets');
     }
-    
+
     return result.data;
   } catch (error) {
     console.error('Error fetching tenant assets:', error);
@@ -124,7 +126,7 @@ const getDefaultTenantConfig = (tenantId: string): TenantConfig => {
     id: tenantId,
     name: `${tenantId.charAt(0).toUpperCase() + tenantId.slice(1)} Company`,
     subdomain: tenantId,
-    domain: `${tenantId}.localhost`,
+    domain: getTenantDomain(tenantId),
     status: 'active',
     theme: {
       colors: {

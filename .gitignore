@@ -259,14 +259,21 @@ out/
 *.sqlite
 *.sqlite3
 
-# Docker
-.dockerignore
-Dockerfile.dev
+# Docker — local-only overrides (committed: apps/*/Dockerfile.dev, .dockerignore)
+Dockerfile.local
+
+# Kubernetes secrets — never commit real secret manifests or production env files
+k8s/secret.yaml
+.env.production
 
 # Testing
 coverage/
 .nyc_output/
 junit.xml
+
+# Agent Studio — staged files awaiting user approval (never commit)
+.agent-staging/
+.agent-worktrees/
 
 # Misc
 *.tgz

@@ -1,172 +1,165 @@
+import { createServer, type Server as HttpServer } from 'http';
+import { execute, subscribe } from 'graphql';
+import { useServer } from 'graphql-ws/lib/use/ws';
+import { WebSocketServer } from 'ws';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
 import cors from 'cors';
 import helmet from 'helmet';
-import { typeDefs } from './schema';
-import { resolvers } from './schema';
-import { context } from './context';
+import cookieParser from 'cookie-parser';
+
+import { schema } from './schema';
+import { context, buildGraphQLContext, type GraphQLContext } from './context';
+import { logger } from './utils/logger';
+import { errorHandler, notFoundHandler } from './utils/errorHandler';
+
+// Middleware
 import { authMiddleware } from './middleware/auth';
-import {
-  tenantRoutingMiddleware,
-  tenantAuthMiddleware,
-  tenantSecurityMiddleware
-} from './middleware/tenantRouting';
+import { mcpApiKeyMiddleware } from './middleware/mcpApiKey';
+import { tenantRoutingMiddleware, tenantAuthMiddleware, tenantSecurityMiddleware } from './middleware/tenantRouting';
 import {
   tenantHeadersMiddleware,
   tenantBrandingMiddleware,
   tenantSecurityHeadersMiddleware,
-  tenantRateLimitMiddleware
+  tenantRateLimitMiddleware,
 } from './middleware/tenantHeaders';
-// import {
-//   tenantWorkflowMiddleware,
-//   tenantFeatureMiddleware,
-//   tenantLimitMiddleware,
-//   tenantUsageTrackingMiddleware,
-//   tenantComplianceMiddleware
-// } from './middleware/tenantWorkflow';
+
+// Routes
 import authRoutes from './routes/auth';
 import adminRoutes from './routes/admin';
 import tenantRoutes from './routes/tenant';
 import tenantConfigRoutes from './routes/tenantConfig';
+import billingRoutes, { stripeWebhookHandler } from './routes/billing';
+import jobsRoutes from './routes/jobs';
+import notificationsRoutes from './routes/notifications';
+import securityRoutes from './routes/security';
+import commerceWebhookRoutes from './routes/commerceWebhook';
 
-/**
- * CORS origin matching.
- *
- * The old version checked against a hardcoded list of four literal
- * strings, which doesn't scale to a subdomain-per-tenant model (every new
- * tenant subdomain would need a code change and redeploy). This derives
- * an allowed base domain from CORS_ORIGIN (e.g. "https://app.example.com"
- * -> "example.com") and allows that domain plus any HTTPS subdomain of
- * it, so demo.example.com / acme-corp.example.com / etc. all work without
- * further config. Falls back to the literal CORS_ORIGIN value if it
- * doesn't parse as a URL.
- */
-const DEV_ORIGINS = [
-  'http://localhost:3000',
-  'http://demo.localhost:3000',
-  'http://idea-vibes.localhost:3000',
-  'http://acme-corp.localhost:3000',
-];
-
-const getBaseDomain = (origin: string | undefined): string | null => {
-  if (!origin) return null;
-  try {
-    const hostname = new URL(origin).hostname;
-    const parts = hostname.split('.');
-    return parts.length >= 2 ? parts.slice(-2).join('.') : hostname;
-  } catch {
-    return null;
-  }
-};
-
-const configuredOrigin = process.env.CORS_ORIGIN;
-const allowedBaseDomain = getBaseDomain(configuredOrigin);
-
-const isAllowedOrigin = (origin: string): boolean => {
-  if (DEV_ORIGINS.includes(origin)) return true;
-  if (configuredOrigin && origin === configuredOrigin) return true;
-
-  if (allowedBaseDomain) {
-    try {
-      const url = new URL(origin);
-      if (url.protocol !== 'https:') return false;
-      return url.hostname === allowedBaseDomain || url.hostname.endsWith(`.${allowedBaseDomain}`);
-    } catch {
-      return false;
-    }
-  }
-
-  return false;
-};
+import { getCorsOrigins, isDevLocalOrigin } from '@luxgen/config';
 
 const app = express();
 
-// Security middleware
+// ── Security ───────────────────────────────────────────────────────────────
 app.use(helmet());
-app.use(cors({
-  origin: (origin, callback) => {
-    // Allow requests with no Origin header (server-to-server, curl, mobile apps)
-    if (!origin) return callback(null, true);
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || isDevLocalOrigin(origin) || getCorsOrigins().includes(origin)) {
+        return callback(null, true);
+      }
+      callback(new Error('Not allowed by CORS'));
+    },
+    credentials: true,
+  }),
+);
 
-    if (isAllowedOrigin(origin)) {
-      return callback(null, true);
-    }
+// ── Stripe webhook (raw body — must register before express.json) ───────────
+app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), stripeWebhookHandler);
 
-    return callback(new Error('Not allowed by CORS'));
-  },
-  credentials: true,
-}));
-
-// Body parsing middleware
+// ── Body parsing ───────────────────────────────────────────────────────────
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-// Centralized tenant workflow middleware (must be first)
-// app.use(tenantWorkflowMiddleware);
-
-// Legacy tenant routing middleware (for backward compatibility)
+// ── Tenant resolution (must run before auth) ───────────────────────────────
 app.use(tenantRoutingMiddleware);
-
-// Tenant security middleware
 app.use(tenantSecurityMiddleware);
-
-// Tenant headers middleware
 app.use(tenantHeadersMiddleware);
 app.use(tenantBrandingMiddleware);
 app.use(tenantSecurityHeadersMiddleware);
 app.use(tenantRateLimitMiddleware);
 
-// Authentication middleware
+// ── Authentication ─────────────────────────────────────────────────────────
 app.use(tenantAuthMiddleware);
 app.use(authMiddleware);
+app.use(mcpApiKeyMiddleware);
 
-// Legacy tenant middleware (for backward compatibility)
-// app.use(tenantMiddleware); // Commented out as it overwrites the tenant object
-
-// Health check endpoint
-app.get('/health', (req, res) => {
+// ── Health check ──────────────────────────────────────────────────────────
+app.get('/health', (_req, res) => {
   res.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 
-// API Routes
+// ── REST routes ───────────────────────────────────────────────────────────
 app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/tenant', tenantRoutes);
 app.use('/api/tenant-config', tenantConfigRoutes);
+app.use('/api/billing', billingRoutes);
+app.use('/api/jobs', jobsRoutes);
+app.use('/api/notifications', notificationsRoutes);
+app.use('/api/security', securityRoutes);
+app.use('/api/commerce', commerceWebhookRoutes);
 
-/**
- * Attaches the Apollo Server GraphQL middleware to `app` at /graphql.
- * Must be awaited before the HTTP server starts accepting connections -
- * index.ts does `await attachApolloServer(app)` before `app.listen()`.
- *
- * Previously this ran as a fire-and-forget async call at module load
- * time (`startServer().catch(console.error)`) while index.ts called
- * app.listen() immediately after connectDB() resolved, with no ordering
- * guarantee between the two - a request landing in that window hit a
- * 404 instead of GraphQL (most likely right after a cold start / ASG
- * instance replacement). REST routes above don't depend on this and are
- * available as soon as `app` is imported, which is what the existing
- * supertest-based route tests rely on.
- */
-export async function attachApolloServer(target: express.Express = app): Promise<void> {
-  const server = new ApolloServer({
-    typeDefs,
-    resolvers,
-    context,
-    introspection: process.env.APOLLO_INTROSPECTION === 'true',
-    formatError: (error) => {
-      console.error('GraphQL Error:', error);
-      return {
-        message: error.message,
-        locations: error.locations,
-        path: error.path,
-      };
+const apolloServer = new ApolloServer({
+  schema,
+  context,
+  introspection: process.env.APOLLO_INTROSPECTION === 'true',
+  formatError: (error) => {
+    logger.error('GraphQL Error', { error });
+    return { message: error.message, locations: error.locations, path: error.path };
+  },
+});
+
+let httpServer: HttpServer | null = null;
+let wsServer: WebSocketServer | null = null;
+let wsCleanup: (() => Promise<void>) | null = null;
+
+const startApollo = async () => {
+  await apolloServer.start();
+  apolloServer.applyMiddleware({ app: app as any, path: '/graphql' });
+  app.use(notFoundHandler);
+  app.use(errorHandler);
+};
+
+export async function createAppServer(): Promise<HttpServer> {
+  await startApollo();
+
+  httpServer = createServer(app);
+
+  // graphql-ws replaces the deprecated subscriptions-transport-ws
+  wsServer = new WebSocketServer({ server: httpServer, path: apolloServer.graphqlPath });
+
+  const cleanup = useServer(
+    {
+      schema,
+      execute,
+      subscribe,
+      context: async (ctx: { connectionParams?: Record<string, unknown> }) => {
+        const params = (ctx.connectionParams ?? {}) as Record<string, string>;
+        const gqlCtx = await buildGraphQLContext({
+          headers: {
+            authorization: params.authorization ?? '',
+            'x-tenant': params['x-tenant'] ?? '',
+          },
+        });
+        if (!gqlCtx.user) throw new Error('Authentication required');
+        return gqlCtx as GraphQLContext;
+      },
     },
-  });
+    wsServer,
+  );
 
-  await server.start();
-  server.applyMiddleware({ app: target as any, path: '/graphql' });
-  console.log('✅ Apollo Server middleware applied to /graphql');
+  wsCleanup = async () => {
+    await cleanup.dispose();
+  };
+
+  return httpServer;
+}
+
+export async function stopAppServer(): Promise<void> {
+  if (wsCleanup) {
+    await wsCleanup();
+    wsCleanup = null;
+  }
+  wsServer?.close();
+  wsServer = null;
+  if (httpServer) {
+    await new Promise<void>((resolve, reject) => {
+      httpServer!.close((err) => (err ? reject(err) : resolve()));
+    });
+    httpServer = null;
+  }
+  await apolloServer.stop();
 }
 
 export { app };

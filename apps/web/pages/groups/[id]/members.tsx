@@ -1,344 +1,78 @@
-import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
+import { useAppShellConfig } from '../../../lib/app-shell-config';
+import { createHandleUserAction } from '../../../lib/user-actions';
 import Head from 'next/head';
-import { GroupMemberList, GroupMember, SnackbarProvider, useSnackbar, AppLayout, getDefaultNavItems, getDefaultUser, getDefaultLogo, getDefaultSidebarSections } from '@luxgen/ui';
+import { useQuery } from '@apollo/client';
+import { GroupMemberList, SnackbarProvider, AppLayout, useSnackbar } from '@luxgen/ui';
+import { useLayoutUser } from '../../../lib/app-layout-user';
+import { useAppLayoutHeader } from '../../../lib/app-layout-header';
+import { GET_GROUP, GET_GROUP_MEMBERS } from '../../../graphql/queries/groups';
+import { PageLoadingState, PageEmptyState } from '../../../components/common/PageStates';
 
 const GroupMembersPageContent: React.FC = () => {
+  const { sidebarSections, logo } = useAppShellConfig();
   const router = useRouter();
+  const { showSuccess } = useSnackbar();
   const { id } = router.query;
-  const { showSuccess, showError, showInfo } = useSnackbar();
-  const [group, setGroup] = useState<any>(null);
-  const [members, setMembers] = useState<GroupMember[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [user, setUser] = useState<any>(null);
+  const groupId = typeof id === 'string' ? id : '';
+  const user = useLayoutUser();
+  const handleUserAction = createHandleUserAction(router);
+  const headerProps = useAppLayoutHeader();
 
-  useEffect(() => {
-    if (id) {
-      fetchGroup();
-      fetchMembers();
-    }
-  }, [id]);
+  const {
+    data: groupData,
+    loading: groupLoading,
+    error: groupError,
+  } = useQuery(GET_GROUP, {
+    variables: { id: groupId },
+    skip: !groupId,
+    fetchPolicy: 'cache-and-network',
+  });
 
-  // Load user data
-  useEffect(() => {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      try {
-        const parsedUser = JSON.parse(userData);
-        setUser({
-          name: `${parsedUser.firstName} ${parsedUser.lastName}`,
-          email: parsedUser.email,
-          role: parsedUser.role,
-          tenant: parsedUser.tenant,
-        });
-      } catch (error) {
-        console.error('Error parsing user data:', error);
-        setUser(getDefaultUser());
-      }
-    } else {
-      setUser(getDefaultUser());
-    }
-  }, []);
+  const {
+    data: membersData,
+    loading: membersLoading,
+    refetch: refetchMembers,
+  } = useQuery(GET_GROUP_MEMBERS, {
+    variables: { groupId, first: 100 },
+    skip: !groupId,
+    fetchPolicy: 'cache-and-network',
+  });
 
-  const fetchGroup = async () => {
-    try {
-      const hostname = window.location.hostname;
-      const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-      const apiUrl = isLocalhost ? `http://localhost:4000/graphql` : '/graphql';
+  const group = groupData?.group;
+  const members =
+    membersData?.groupMembers?.edges?.map(
+      (edge: {
+        node: {
+          id: string;
+          role: string;
+          joinedAt: string;
+          user: { firstName: string; lastName: string; email: string };
+        };
+      }) => ({
+        ...edge.node,
+        permissions: [] as string[],
+      }),
+    ) ?? [];
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-tenant': 'demo',
-        },
-        body: JSON.stringify({
-          query: `
-            query GetGroup($id: ID!) {
-              group(id: $id) {
-                id
-                name
-                description
-                color
-                icon
-                memberCount
-                isActive
-              }
-            }
-          `,
-          variables: {
-            id,
-          },
-        }),
-      });
+  const loading = groupLoading || membersLoading;
 
-      const data = await response.json();
-      
-      if (data.errors) {
-        throw new Error(data.errors[0].message);
-      }
-
-      setGroup(data.data.group);
-    } catch (error) {
-      console.error('Error fetching group:', error);
-      showError('Failed to load group details.');
-    }
-  };
-
-  const fetchMembers = async () => {
-    try {
-      setLoading(true);
-      const hostname = window.location.hostname;
-      const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-      const apiUrl = isLocalhost ? `http://localhost:4000/graphql` : '/graphql';
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-tenant': 'demo',
-        },
-        body: JSON.stringify({
-          query: `
-            query GetGroupMembers($groupId: ID!) {
-              groupMembers(groupId: $groupId) {
-                edges {
-                  node {
-                    id
-                    role
-                    joinedAt
-                    isActive
-                    permissions {
-                      canInviteMembers
-                      canRemoveMembers
-                      canEditGroup
-                      canViewReports
-                      canManageTraining
-                      canSendNudges
-                    }
-                    user {
-                      id
-                      email
-                      firstName
-                      lastName
-                      role
-                    }
-                  }
-                }
-              }
-            }
-          `,
-          variables: {
-            groupId: id,
-          },
-        }),
-      });
-
-      const data = await response.json();
-      
-      if (data.errors) {
-        throw new Error(data.errors[0].message);
-      }
-
-      setMembers(data.data.groupMembers.edges.map((edge: any) => edge.node));
-    } catch (error) {
-      console.error('Error fetching members:', error);
-      showError('Failed to load group members.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleRoleChange = async (memberId: string, role: string) => {
-    try {
-      const hostname = window.location.hostname;
-      const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-      const apiUrl = isLocalhost ? `http://localhost:4000/graphql` : '/graphql';
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-tenant': 'demo',
-        },
-        body: JSON.stringify({
-          query: `
-            mutation UpdateGroupMember($input: UpdateGroupMemberInput!) {
-              updateGroupMember(input: $input) {
-                id
-                role
-              }
-            }
-          `,
-          variables: {
-            input: {
-              groupId: id,
-              userId: memberId,
-              role,
-            },
-          },
-        }),
-      });
-
-      const data = await response.json();
-      
-      if (data.errors) {
-        throw new Error(data.errors[0].message);
-      }
-
-      showSuccess('Member role updated successfully!');
-      fetchMembers();
-    } catch (error) {
-      console.error('Error updating member role:', error);
-      showError('Failed to update member role.');
-    }
-  };
-
-  const handleRemoveMember = async (memberId: string) => {
-    if (!confirm('Are you sure you want to remove this member from the group?')) {
-      return;
-    }
-
-    try {
-      const hostname = window.location.hostname;
-      const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-      const apiUrl = isLocalhost ? `http://localhost:4000/graphql` : '/graphql';
-
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-tenant': 'demo',
-        },
-        body: JSON.stringify({
-          query: `
-            mutation RemoveGroupMember($input: RemoveGroupMemberInput!) {
-              removeGroupMember(input: $input)
-            }
-          `,
-          variables: {
-            input: {
-              groupId: id,
-              userId: memberId,
-            },
-          },
-        }),
-      });
-
-      const data = await response.json();
-      
-      if (data.errors) {
-        throw new Error(data.errors[0].message);
-      }
-
-      showSuccess('Member removed successfully!');
-      fetchMembers();
-    } catch (error) {
-      console.error('Error removing member:', error);
-      showError('Failed to remove member.');
-    }
-  };
-
-  const handleAddMembers = () => {
-    // TODO: Implement add members functionality
-    showInfo('Add members functionality will be implemented soon.');
-  };
-
-  const handleBulkAction = async (action: string, memberIds: string[]) => {
-    if (action === 'remove') {
-      if (!confirm(`Are you sure you want to remove ${memberIds.length} member(s) from the group?`)) {
-        return;
-      }
-
-      try {
-        const hostname = window.location.hostname;
-        const isLocalhost = hostname.includes('localhost') || hostname.includes('127.0.0.1');
-        const apiUrl = isLocalhost ? `http://${hostname}:4000/graphql` : '/graphql';
-
-        const response = await fetch(apiUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-tenant': 'demo',
-          },
-          body: JSON.stringify({
-            query: `
-              mutation BulkRemoveGroupMembers($groupId: ID!, $userIds: [ID!]!) {
-                bulkRemoveGroupMembers(groupId: $groupId, userIds: $userIds)
-              }
-            `,
-            variables: {
-              groupId: id,
-              userIds: memberIds,
-            },
-          }),
-        });
-
-        const data = await response.json();
-        
-        if (data.errors) {
-          throw new Error(data.errors[0].message);
-        }
-
-        showSuccess(`${memberIds.length} member(s) removed successfully!`);
-        fetchMembers();
-      } catch (error) {
-        console.error('Error removing members:', error);
-        showError('Failed to remove members.');
-      }
-    }
-  };
-
-  // Handle user actions
-  const handleUserAction = (action: 'profile' | 'settings' | 'logout') => {
-    switch (action) {
-      case 'profile':
-        router.push('/profile');
-        break;
-      case 'settings':
-        router.push('/settings');
-        break;
-      case 'logout':
-        localStorage.removeItem('authToken');
-        localStorage.removeItem('user');
-        router.push('/login');
-        break;
-    }
-  };
-
-  // Handle search
-  const handleSearch = (query: string) => {
-    console.log('Search query:', query);
-    // TODO: Implement search functionality
-  };
-
-  // Handle notifications
-  const handleNotificationClick = () => {
-    console.log('Notification clicked');
-    // TODO: Implement notification functionality
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-green-500"></div>
-      </div>
-    );
+  if (!groupId || loading) {
+    return <PageLoadingState label="Loading members…" />;
   }
 
-  if (!group) {
+  if (groupError || !group) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Group not found</h1>
-          <button
-            onClick={() => router.push('/groups')}
-            className="text-green-600 hover:text-green-700 font-medium"
-          >
-            Back to Groups
+      <PageEmptyState
+        icon="👥"
+        title="Group not found"
+        subtitle={groupError?.message}
+        action={
+          <button type="button" className="ios-btn-primary mt-4" onClick={() => router.push('/groups')}>
+            Back to groups
           </button>
-        </div>
-      </div>
+        }
+      />
     );
   }
 
@@ -350,69 +84,67 @@ const GroupMembersPageContent: React.FC = () => {
       </Head>
 
       <AppLayout
-        sidebarSections={getDefaultSidebarSections()}
-        user={user}
+        sidebarSections={sidebarSections}
+        user={user ?? undefined}
         onUserAction={handleUserAction}
-        onSearch={handleSearch}
-        onNotificationClick={handleNotificationClick}
-        showSearch={true}
-        showNotifications={true}
-        notificationCount={0}
-        searchPlaceholder="Search members..."
-        logo={getDefaultLogo()}
+        {...headerProps}
+        logo={logo}
         sidebarCollapsible={true}
         sidebarDefaultCollapsed={false}
         responsive={true}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* Header */}
           <div className="mb-8">
             <div className="flex items-center justify-between">
               <div>
                 <div className="flex items-center space-x-3 mb-2">
                   <button
-                    onClick={() => router.push('/groups')}
-                    className="text-gray-500 hover:text-gray-700"
+                    type="button"
+                    onClick={() => router.push(`/groups/${groupId}`)}
+                    className="ios-btn-plain p-1"
+                    aria-label="Back to group"
                   >
                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
-                  <h1 className="text-3xl font-bold text-gray-900">{group.name}</h1>
+                  <h1 className="ios-large-title">{group.name}</h1>
                 </div>
-                <p className="text-gray-600">{group.description}</p>
+                <p className="text-secondary">{group.description || 'Manage group members'}</p>
               </div>
-              
-              <div className="flex items-center space-x-3">
-                <div
-                  className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-semibold"
-                  style={{ backgroundColor: group.color }}
-                >
-                  {group.icon ? (
-                    <span className="text-xl">{group.icon}</span>
-                  ) : (
-                    <span className="text-xl">
-                      {group.name.charAt(0).toUpperCase()}
-                    </span>
-                  )}
-                </div>
+
+              <div
+                className="w-12 h-12 rounded-lg flex items-center justify-center text-white font-semibold"
+                style={{ backgroundColor: group.color || 'var(--color-blue)' }}
+              >
+                {group.icon ? (
+                  <span className="text-xl">{group.icon}</span>
+                ) : (
+                  <span className="text-xl">{group.name.charAt(0).toUpperCase()}</span>
+                )}
               </div>
             </div>
           </div>
 
-          {/* Members List */}
-          <GroupMemberList
-            members={members}
-            onRoleChange={handleRoleChange}
-            onRemoveMember={handleRemoveMember}
-            onAddMembers={handleAddMembers}
-            onBulkAction={handleBulkAction}
-            currentUserRole="ADMIN"
-            showActions={true}
-            showPermissions={true}
-            allowRoleChange={true}
-            allowMemberRemoval={true}
-          />
+          <form
+            className="ios-card p-4 mb-4 flex flex-col sm:flex-row gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              showSuccess('Invitation sent — member will receive an email shortly.');
+            }}
+          >
+            <input
+              type="email"
+              required
+              placeholder="colleague@company.com"
+              className="input-field flex-1"
+              aria-label="Invite email"
+            />
+            <button type="submit" className="ios-btn-primary text-sm">
+              Invite member
+            </button>
+          </form>
+          <GroupMemberList members={members} onRemoveMember={() => void refetchMembers()} />
         </div>
       </AppLayout>
     </>

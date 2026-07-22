@@ -1,152 +1,106 @@
+# LuxGen — Development overrides (hot reload, seed-on-first-boot)
+# Docs: docs/technical/development/QUICK_START.md · docs/deployment/DOCKER.md
+# Usage: make dev-docker   OR   npm run dev:docker
+
 services:
-  # Development API Server with hot reload
+  # ── API — dev override (hot reload via ts-node-dev) ───────────────────────
   api:
     build:
       context: .
       dockerfile: apps/api/Dockerfile.dev
     environment:
       NODE_ENV: development
-      DEBUG: luxgen:*
+      DEBUG: 'luxgen:*'
       LOG_LEVEL: debug
       PORT: 4000
       MONGODB_URI: mongodb://admin:password123@mongodb:27017/luxgen_dev?authSource=admin
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: dev-jwt-secret-change-in-production
+      JWT_SECRET: dev-jwt-secret-change-in-production-min-32-chars
+      JWT_EXPIRES_IN: 7d
+      SEED_IF_EMPTY: 'true'
+      TENANT_DEMO_KEY: demo-tenant-signing-key-dev-32chars-min
+      TENANT_IDEA-VIBES_KEY: idea-vibes-signing-key-dev-32chars-min
       CORS_ORIGIN: http://localhost:3000
+      APOLLO_INTROSPECTION: 'true'
     volumes:
-      - ./apps/api:/app/apps/api
-      - ./packages:/app/packages
+      - .:/app
       - /app/node_modules
-      - /app/.turbo
-    command: npm run dev:api
+      - /app/apps/api/node_modules
+    command: ['sh', 'scripts/docker/api-dev-entrypoint.sh']
     ports:
-      - "4000:4000"
-      - "9229:9229"  # Debug port
+      - '4000:4000'
+      - '9229:9229'
     depends_on:
-      - mongodb
-      - redis
-    networks:
-      - luxgen-dev-network
+      mongodb:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
+      interval: 15s
+      timeout: 10s
+      retries: 12
+      start_period: 180s
 
-  # Development Web Application with hot reload
+  # ── Web — dev override (Next.js hot reload) ───────────────────────────────
   web:
     build:
       context: .
       dockerfile: apps/web/Dockerfile.dev
     environment:
       NODE_ENV: development
-      NEXT_PUBLIC_DEBUG: true
+      NEXT_TELEMETRY_DISABLED: '1'
       NEXT_PUBLIC_API_URL: http://localhost:4000
-      NEXT_PUBLIC_BASE_URL: http://localhost:3000
-    volumes:
-      - ./apps/web:/app/apps/web
-      - ./packages:/app/packages
-      - /app/node_modules
-      - /app/.next
-      - /app/.turbo
-    command: npm run dev:web
-    ports:
-      - "3000:3000"
-      - "3001:3001"  # Next.js dev server
-    depends_on:
-      - api
-    networks:
-      - luxgen-dev-network
-
-  # Development Tools with live reload
-  dev-tools:
-    image: node:18-alpine
-    working_dir: /app
-    command: >
-      sh -c "
-        npm install &&
-        npm run dev
-      "
+      NEXT_PUBLIC_GRAPHQL_URL: http://localhost:4000/graphql
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+      NEXT_PUBLIC_APP_ENV: development
+      API_URL: http://api:4000
+      OLLAMA_HOST: http://ollama:11434
+      OLLAMA_MODEL: ${OLLAMA_MODEL:-mistral:latest}
     volumes:
       - .:/app
       - /app/node_modules
-      - /app/.turbo
-    environment:
-      NODE_ENV: development
-      WATCHPACK_POLLING: true
+      - /app/apps/web/.next
+      - /app/apps/web/node_modules
+    command: ['sh', 'scripts/docker/web-dev-entrypoint.sh']
+    ports:
+      - '3000:3000'
     depends_on:
-      - mongodb
-      - redis
-    networks:
-      - luxgen-dev-network
-
-  # MongoDB with development data
-  mongodb:
-    image: mongo:7.0
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: password123
-      MONGO_INITDB_DATABASE: luxgen_dev
-    volumes:
-      - ./scripts/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
-      - mongodb_dev_data:/data/db
-    ports:
-      - "27017:27017"
-    networks:
-      - luxgen-dev-network
+      api:
+        condition: service_healthy
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000/api/health']
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
+      start_period: 120s
 
-  # Redis with development configuration
-  redis:
-    image: redis:7.2-alpine
-    command: redis-server --appendonly yes --loglevel debug
-    volumes:
-      - redis_dev_data:/data
-    ports:
-      - "6379:6379"
-    networks:
-      - luxgen-dev-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-  # Database Admin (Mongo Express)
+  # ── Mongo Express (dev only) ───────────────────────────────────────────────
   mongo-express:
     image: mongo-express:1.0.0
+    container_name: luxgen-mongo-express
+    restart: unless-stopped
+    ports:
+      - '8081:8081'
     environment:
       ME_CONFIG_MONGODB_ADMINUSERNAME: admin
       ME_CONFIG_MONGODB_ADMINPASSWORD: password123
       ME_CONFIG_MONGODB_URL: mongodb://admin:password123@mongodb:27017/
       ME_CONFIG_BASICAUTH_USERNAME: admin
       ME_CONFIG_BASICAUTH_PASSWORD: admin123
-    ports:
-      - "8081:8081"
     depends_on:
       mongodb:
         condition: service_healthy
-    networks:
-      - luxgen-dev-network
 
-  # Redis Admin (Redis Commander)
+  # ── Redis Commander (dev only) ─────────────────────────────────────────────
   redis-commander:
     image: rediscommander/redis-commander:latest
+    container_name: luxgen-redis-commander
+    restart: unless-stopped
+    ports:
+      - '8082:8081'
     environment:
       REDIS_HOSTS: local:redis:6379
-    ports:
-      - "8082:8081"
     depends_on:
       redis:
         condition: service_healthy
-    networks:
-      - luxgen-dev-network
-
-volumes:
-  mongodb_dev_data:
-    driver: local
-  redis_dev_data:
-    driver: local
-
-networks:
-  luxgen-dev-network:
-    driver: bridge

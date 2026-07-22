@@ -57,20 +57,20 @@ import { Badge } from '@luxgen/ui';
 
 ## Props
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `tenantTheme` | `TenantTheme` | `defaultTheme` | Theme object for styling |
-| `children` | `React.ReactNode` | - | Badge content |
-| `variant` | `'primary' | 'secondary' | 'success' | 'error' | 'warning' | 'info'` | `'primary'` | Badge variant |
-| `size` | `'small' | 'medium' | 'large'` | `'medium'` | Badge size |
-| `shape` | `'rounded' | 'pill' | 'square'` | `'rounded'` | Badge shape |
-| `dot` | `boolean` | `false` | Render as a dot indicator |
-| `closable` | `boolean` | `false` | Show close button |
-| `onClose` | `() => void` | - | Close button handler |
-| `icon` | `React.ReactNode` | - | Icon to display |
-| `maxWidth` | `string | number` | - | Maximum width |
-| `className` | `string` | `''` | Additional CSS classes |
-| `style` | `CSSProperties` | `{}` | Inline styles |
+| Prop          | Type              | Default        | Description               |
+| ------------- | ----------------- | -------------- | ------------------------- | ------------- | ----------- | ------- | ----------- | ------------- |
+| `tenantTheme` | `TenantTheme`     | `defaultTheme` | Theme object for styling  |
+| `children`    | `React.ReactNode` | -              | Badge content             |
+| `variant`     | `'primary'        | 'secondary'    | 'success'                 | 'error'       | 'warning'   | 'info'` | `'primary'` | Badge variant |
+| `size`        | `'small'          | 'medium'       | 'large'`                  | `'medium'`    | Badge size  |
+| `shape`       | `'rounded'        | 'pill'         | 'square'`                 | `'rounded'`   | Badge shape |
+| `dot`         | `boolean`         | `false`        | Render as a dot indicator |
+| `closable`    | `boolean`         | `false`        | Show close button         |
+| `onClose`     | `() => void`      | -              | Close button handler      |
+| `icon`        | `React.ReactNode` | -              | Icon to display           |
+| `maxWidth`    | `string           | number`        | -                         | Maximum width |
+| `className`   | `string`          | `''`           | Additional CSS classes    |
+| `style`       | `CSSProperties`   | `{}`           | Inline styles             |
 
 ## SSR Usage
 
@@ -134,21 +134,21 @@ The component uses CSS custom properties for theming:
 ## Interactive Features
 
 ### Closable Badges
+
 ```tsx
-<Badge
-  closable
-  onClose={() => console.log('Badge closed')}
->
+<Badge closable onClose={() => console.log('Badge closed')}>
   Closable badge
 </Badge>
 ```
 
 ### Dot Indicators
+
 ```tsx
 <Badge dot />
 ```
 
 ### Icons
+
 ```tsx
 <Badge icon="🔖">Badge with icon</Badge>
 <Badge icon={<Icon name="star" />}>Badge with component icon</Badge>
@@ -170,24 +170,28 @@ import { Badge } from '@luxgen/ui';
 
 test('renders with content', () => {
   render(<Badge>Test badge</Badge>);
-  
+
   expect(screen.getByText('Test badge')).toBeInTheDocument();
 });
 
 test('renders with different variants', () => {
   render(<Badge variant="success">Success badge</Badge>);
-  
+
   const badge = screen.getByText('Success badge');
   expect(badge).toHaveClass('badge-success');
 });
 
 test('calls onClose when close button is clicked', () => {
   const onClose = jest.fn();
-  render(<Badge closable onClose={onClose}>Closable badge</Badge>);
-  
+  render(
+    <Badge closable onClose={onClose}>
+      Closable badge
+    </Badge>,
+  );
+
   const closeButton = screen.getByLabelText('Close badge');
   fireEvent.click(closeButton);
-  
+
   expect(onClose).toHaveBeenCalledTimes(1);
 });
 ```
@@ -195,6 +199,7 @@ test('calls onClose when close button is clicked', () => {
 ## Examples
 
 ### Status Badges
+
 ```tsx
 <Badge variant="success">Active</Badge>
 <Badge variant="error">Inactive</Badge>
@@ -203,6 +208,7 @@ test('calls onClose when close button is clicked', () => {
 ```
 
 ### Size Variations
+
 ```tsx
 <Badge size="small">Small</Badge>
 <Badge size="medium">Medium</Badge>
@@ -210,6 +216,7 @@ test('calls onClose when close button is clicked', () => {
 ```
 
 ### Shape Variations
+
 ```tsx
 <Badge shape="rounded">Rounded</Badge>
 <Badge shape="pill">Pill</Badge>
@@ -217,6 +224,7 @@ test('calls onClose when close button is clicked', () => {
 ```
 
 ### Interactive Badges
+
 ```tsx
 <Badge closable onClose={() => setShow(false)}>
   Dismissible badge
@@ -226,6 +234,7 @@ test('calls onClose when close button is clicked', () => {
 ```
 
 ### Dot Indicators
+
 ```tsx
 <Badge dot />
 <Badge dot variant="success" />
@@ -233,16 +242,15 @@ test('calls onClose when close button is clicked', () => {
 ```
 
 ### Custom Themed Badges
+
 ```tsx
-<Badge
-  tenantTheme={customTheme}
-  variant="primary"
->
+<Badge tenantTheme={customTheme} variant="primary">
   Custom themed badge
 </Badge>
 ```
 
 ### Complex Content
+
 ```tsx
 <Badge>
   <Icon name="star" />
@@ -256,8 +264,7 @@ test('calls onClose when close button is clicked', () => {
 ```
 
 ### Responsive Badges
+
 ```tsx
-<Badge maxWidth="200px">
-  Long badge content that should be constrained
-</Badge>
+<Badge maxWidth="200px">Long badge content that should be constrained</Badge>
 ```

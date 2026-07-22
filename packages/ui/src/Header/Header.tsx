@@ -35,26 +35,17 @@ const HeaderComponent: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header
-      className={`header ${className}`}
-      style={styles}
-      {...props}
-    >
+    <header className={`header ${className}`} style={styles} {...props}>
       <div className="header-container">
         {logoUrl && (
           <div className="header-logo">
             <img src={logoUrl} alt="Logo" className="header-logo-image" />
           </div>
         )}
-        
+
         <nav className="header-nav">
           {menuItems.map((item) => (
-            <a
-              key={item.id}
-              href={item.href}
-              className="header-nav-item"
-              onClick={() => handleMenuClick(item)}
-            >
+            <a key={item.id} href={item.href} className="header-nav-item" onClick={() => handleMenuClick(item)}>
               {item.icon && <span className="header-nav-icon">{item.icon}</span>}
               <span className="header-nav-label">{item.label}</span>
             </a>

@@ -1,6 +1,6 @@
 /**
  * Demo Tenant Database Model
- * 
+ *
  * This file contains the database model and operations
  * specific to the demo tenant.
  */
@@ -18,26 +18,31 @@ export interface DemoTenantDocument extends Document {
   updatedAt: Date;
 }
 
-const demoTenantSchema = new Schema<DemoTenantDocument>({
-  tenantId: {
-    type: String,
-    required: true,
-    unique: true,
-    default: 'demo'
-  },
-  customSettings: {
-    theme: {
+const demoTenantSchema = new Schema<DemoTenantDocument>(
+  {
+    tenantId: {
       type: String,
-      default: 'default'
+      required: true,
+      unique: true,
+      default: 'demo',
     },
-    features: [{
-      type: String,
-      enum: ['analytics', 'reporting', 'notifications', 'userManagement']
-    }]
-  }
-}, {
-  timestamps: true
-});
+    customSettings: {
+      theme: {
+        type: String,
+        default: 'default',
+      },
+      features: [
+        {
+          type: String,
+          enum: ['analytics', 'reporting', 'notifications', 'userManagement'],
+        },
+      ],
+    },
+  },
+  {
+    timestamps: true,
+  },
+);
 
 export const DemoTenant = model<DemoTenantDocument>('DemoTenant', demoTenantSchema);
 
@@ -48,11 +53,7 @@ export const demoTenantOperations = {
   },
 
   async updateCustomSettings(tenantId: string, settings: any) {
-    return await DemoTenant.findOneAndUpdate(
-      { tenantId },
-      { customSettings: settings },
-      { upsert: true, new: true }
-    );
+    return await DemoTenant.findOneAndUpdate({ tenantId }, { customSettings: settings }, { upsert: true, new: true });
   },
 
   async getTheme(tenantId: string) {
@@ -63,5 +64,5 @@ export const demoTenantOperations = {
   async getFeatures(tenantId: string) {
     const tenant = await DemoTenant.findOne({ tenantId });
     return tenant?.customSettings?.features || [];
-  }
+  },
 };

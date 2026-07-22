@@ -2,7 +2,12 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 import { Snackbar, SnackbarItem, SnackbarType } from './Snackbar';
 
 interface SnackbarContextType {
-  showSnackbar: (message: string, type?: SnackbarType, duration?: number, action?: { label: string; onClick: () => void }) => void;
+  showSnackbar: (
+    message: string,
+    type?: SnackbarType,
+    duration?: number,
+    action?: { label: string; onClick: () => void },
+  ) => void;
   showSuccess: (message: string, duration?: number) => void;
   showError: (message: string, duration?: number) => void;
   showWarning: (message: string, duration?: number) => void;
@@ -34,46 +39,61 @@ export const SnackbarProvider: React.FC<SnackbarProviderProps> = ({
 }) => {
   const [snackbars, setSnackbars] = useState<SnackbarItem[]>([]);
 
-  const showSnackbar = useCallback((
-    message: string,
-    type: SnackbarType = 'info',
-    duration: number = 5000,
-    action?: { label: string; onClick: () => void }
-  ) => {
-    const id = Math.random().toString(36).substr(2, 9);
-    const newSnackbar: SnackbarItem = {
-      id,
-      message,
-      type,
-      duration,
-      action,
-    };
+  const showSnackbar = useCallback(
+    (
+      message: string,
+      type: SnackbarType = 'info',
+      duration: number = 5000,
+      action?: { label: string; onClick: () => void },
+    ) => {
+      const id = Math.random().toString(36).substr(2, 9);
+      const newSnackbar: SnackbarItem = {
+        id,
+        message,
+        type,
+        duration,
+        action,
+      };
 
-    setSnackbars(prev => {
-      const updated = [...prev, newSnackbar];
-      // Keep only the most recent snackbars
-      return updated.slice(-maxSnackbars);
-    });
-  }, [maxSnackbars]);
+      setSnackbars((prev) => {
+        const updated = [...prev, newSnackbar];
+        // Keep only the most recent snackbars
+        return updated.slice(-maxSnackbars);
+      });
+    },
+    [maxSnackbars],
+  );
 
-  const showSuccess = useCallback((message: string, duration?: number) => {
-    showSnackbar(message, 'success', duration);
-  }, [showSnackbar]);
+  const showSuccess = useCallback(
+    (message: string, duration?: number) => {
+      showSnackbar(message, 'success', duration);
+    },
+    [showSnackbar],
+  );
 
-  const showError = useCallback((message: string, duration?: number) => {
-    showSnackbar(message, 'error', duration);
-  }, [showSnackbar]);
+  const showError = useCallback(
+    (message: string, duration?: number) => {
+      showSnackbar(message, 'error', duration);
+    },
+    [showSnackbar],
+  );
 
-  const showWarning = useCallback((message: string, duration?: number) => {
-    showSnackbar(message, 'warning', duration);
-  }, [showSnackbar]);
+  const showWarning = useCallback(
+    (message: string, duration?: number) => {
+      showSnackbar(message, 'warning', duration);
+    },
+    [showSnackbar],
+  );
 
-  const showInfo = useCallback((message: string, duration?: number) => {
-    showSnackbar(message, 'info', duration);
-  }, [showSnackbar]);
+  const showInfo = useCallback(
+    (message: string, duration?: number) => {
+      showSnackbar(message, 'info', duration);
+    },
+    [showSnackbar],
+  );
 
   const hideSnackbar = useCallback((id: string) => {
-    setSnackbars(prev => prev.filter(snackbar => snackbar.id !== id));
+    setSnackbars((prev) => prev.filter((snackbar) => snackbar.id !== id));
   }, []);
 
   const clearAll = useCallback(() => {
@@ -93,19 +113,17 @@ export const SnackbarProvider: React.FC<SnackbarProviderProps> = ({
   return (
     <SnackbarContext.Provider value={contextValue}>
       {children}
-      
+
       {/* Render all snackbars */}
       <div className="fixed z-50 pointer-events-none">
         {snackbars.map((snackbar, index) => {
-          const adjustedPosition = position.includes('top') 
-            ? position.replace('top', 'top') as any
-            : position.replace('bottom', 'bottom') as any;
-          
+          const adjustedPosition = position.includes('top')
+            ? (position.replace('top', 'top') as any)
+            : (position.replace('bottom', 'bottom') as any);
+
           const offset = index * 80; // Stack snackbars with offset
-          const positionStyle = adjustedPosition.includes('top')
-            ? `top-${4 + index * 20}`
-            : `bottom-${4 + index * 20}`;
-          
+          const positionStyle = adjustedPosition.includes('top') ? `top-${4 + index * 20}` : `bottom-${4 + index * 20}`;
+
           return (
             <Snackbar
               key={snackbar.id}
@@ -118,9 +136,7 @@ export const SnackbarProvider: React.FC<SnackbarProviderProps> = ({
               onClose={() => hideSnackbar(snackbar.id)}
               className="pointer-events-auto"
               style={{
-                transform: adjustedPosition.includes('top') 
-                  ? `translateY(${offset}px)` 
-                  : `translateY(-${offset}px)`,
+                transform: adjustedPosition.includes('top') ? `translateY(${offset}px)` : `translateY(-${offset}px)`,
               }}
             />
           );
