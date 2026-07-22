@@ -245,13 +245,18 @@ export const tenantRoutingMiddleware = async (
     });
     
     // Set tenant context
+    // tenantId is guaranteed non-null here: both branches above that can
+    // lead to a non-null `tenant` also set `tenantId = tenant._id.toString()`
+    // in the same pass. Read it off `tenant` directly rather than trusting
+    // the mutable local, which TS (correctly) still widens to `string | null`.
+    const resolvedTenantId = tenant._id.toString();
     req.tenant = tenant;
-    req.tenantId = tenantId;
+    req.tenantId = resolvedTenantId;
     req.subdomain = subdomain || '';
     req.isCustomDomain = isCustomDomain;
-    
+
     // Add tenant headers for client-side use
-    res.set('X-Tenant-ID', tenantId);
+    res.set('X-Tenant-ID', resolvedTenantId);
     res.set('X-Tenant-Name', tenant.name);
     res.set('X-Tenant-Subdomain', tenant.subdomain);
     res.set('X-Tenant-Plan', tenant.metadata.plan);

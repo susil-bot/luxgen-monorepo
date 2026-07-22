@@ -9,9 +9,14 @@ export interface GraphQLContext {
 }
 
 export const context = ({ req, res }: { req: Request; res: Response }): GraphQLContext => {
-  // For GraphQL requests, try to get tenant from headers or default to 'demo'
-  let tenant = req.tenant;
-  
+  // GraphQLContext.tenant is a plain subdomain/identifier string (consumed
+  // as such by dashboard and userRole resolvers, e.g. getDashboardStats(tenantId)).
+  // That's a different shape from req.tenant, which tenantRoutingMiddleware
+  // (middleware/tenantRouting.ts) sets to the full populated ITenant document.
+  // Use req.subdomain - the string form the same middleware already derived -
+  // rather than req.tenant, and fall back to headers / 'demo' as before.
+  let tenant = req.subdomain;
+
   if (!tenant) {
     // Check for tenant in headers
     const tenantHeader = req.get('x-tenant');

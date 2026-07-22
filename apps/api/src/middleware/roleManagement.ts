@@ -50,7 +50,7 @@ export const requireRole = (requiredRole: UserRole) => {
       return res.status(500).json({
         success: false,
         message: 'Internal server error during role verification',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
       });
     }
   };
@@ -91,7 +91,7 @@ export const requirePermissions = (requiredPermissions: string[]) => {
       return res.status(500).json({
         success: false,
         message: 'Internal server error during permission verification',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
       });
     }
   };
@@ -151,7 +151,7 @@ export const canManageUsers = async (req: RoleManagementRequest, res: Response, 
     return res.status(500).json({
       success: false,
       message: 'Internal server error during user management verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
     });
   }
 };
@@ -184,7 +184,7 @@ export const canManageTenants = async (req: RoleManagementRequest, res: Response
     return res.status(500).json({
       success: false,
       message: 'Internal server error during tenant management verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
     });
   }
 };
@@ -217,7 +217,7 @@ export const canInviteUsers = async (req: RoleManagementRequest, res: Response, 
     return res.status(500).json({
       success: false,
       message: 'Internal server error during invitation verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
     });
   }
 };
@@ -250,7 +250,7 @@ export const canApproveRequests = async (req: RoleManagementRequest, res: Respon
     return res.status(500).json({
       success: false,
       message: 'Internal server error during approval verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
     });
   }
 };
@@ -292,7 +292,7 @@ export const requireTenantAccess = async (req: RoleManagementRequest, res: Respo
     return res.status(500).json({
       success: false,
       message: 'Internal server error during tenant access verification',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
     });
   }
 };

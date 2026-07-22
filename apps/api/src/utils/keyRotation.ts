@@ -1,3 +1,4 @@
+import crypto from 'crypto';
 import { tenantKeyManager } from './tenantKeys';
 import { generateToken, verifyToken } from './jwt';
 
@@ -41,23 +42,30 @@ export const rotateTenantKey = async (
       newKeyId,
     };
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
     return {
       success: false,
-      message: `Failed to rotate key for tenant ${tenantId}: ${error.message}`,
+      message: `Failed to rotate key for tenant ${tenantId}: ${message}`,
     };
   }
 };
 
 /**
- * Generate a new random key for a tenant
+ * Generate a new random key for a tenant.
+ *
+ * Uses crypto.randomBytes (CSPRNG), not Math.random() - Math.random() is
+ * not cryptographically secure and must never back a JWT signing secret;
+ * its internal state can be inferred from a handful of outputs, which
+ * would let an attacker forge tokens for any tenant.
  */
 export const generateNewTenantKey = (length: number = 64): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
+  // base64url has ~4 output chars per 3 input bytes; over-generate then
+  // trim so the returned string is exactly `length` characters.
+  const byteLength = Math.ceil((length * 3) / 4) + 4;
+  return crypto
+    .randomBytes(byteLength)
+    .toString('base64url')
+    .slice(0, length);
 };
 
 /**
@@ -102,9 +110,10 @@ export const revokeTenantKeys = (tenantId: string): KeyRotationResult => {
       affectedTokens: 0, // Would need to track active tokens
     };
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
     return {
       success: false,
-      message: `Failed to revoke keys for tenant ${tenantId}: ${error.message}`,
+      message: `Failed to revoke keys for tenant ${tenantId}: ${message}`,
     };
   }
 };

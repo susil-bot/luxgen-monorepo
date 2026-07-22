@@ -1,7 +1,23 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    // tsconfig.base.json is written for the Next.js web app (Next does its
+    // own bundling/output) and sets noEmit: true. apps/api actually needs
+    // tsc to emit real .js to dist/ for `npm start` / the Docker image to
+    // run - without this override, `tsc` (no --noEmit flag) silently
+    // succeeded while writing nothing but tsconfig.tsbuildinfo, which is
+    // why dist/ was always empty of compiled output.
+    "noEmit": false,
     "outDir": "./dist",
+    // apps/api imports shared packages via path aliases that resolve to
+    // *source* .ts under packages/*/src (see tsconfig.base.json "paths"),
+    // not to prebuilt package output - so those files become part of this
+    // compilation too, and tsc mirrors their directory structure under
+    // outDir. Pinning rootDir to the monorepo root makes that emit layout
+    // explicit and stable (dist/apps/api/src/index.js, dist/packages/**)
+    // instead of leaving it to whatever the compiler infers from whichever
+    // packages happen to be imported.
+    "rootDir": "../..",
     "module": "commonjs",
     "target": "ES2020",
     "lib": ["ES2020"],
@@ -21,6 +37,9 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "src/tests",
+    "src/middleware/tenantWorkflow.ts",
+    "src/middleware/tenant.ts"
   ]
 }

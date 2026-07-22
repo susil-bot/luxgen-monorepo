@@ -68,7 +68,7 @@ export const demoTenantConfig: Partial<ITenant> = {
     plan: 'pro',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null // Will be set when tenant is created
+    createdBy: null as any // Will be set when tenant is created
   }
 };
 
@@ -153,7 +153,7 @@ export const ideaVibesTenantConfig: Partial<ITenant> = {
     plan: 'enterprise',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null // Will be set when tenant is created
+    createdBy: null as any // Will be set when tenant is created
   }
 };
 
@@ -210,7 +210,7 @@ export const defaultTenantConfig: Partial<ITenant> = {
     plan: 'free',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null
+    createdBy: null as any
   }
 };
 

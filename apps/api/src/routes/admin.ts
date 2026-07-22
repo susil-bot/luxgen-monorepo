@@ -38,7 +38,7 @@ router.get('/tenants/keys', requireAdmin, (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve tenant key information',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
@@ -57,7 +57,7 @@ router.get('/tenants/:tenantId/keys', requireAdmin, (req: Request, res: Response
     res.status(500).json({
       success: false,
       message: 'Failed to retrieve tenant key information',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
@@ -93,13 +93,13 @@ router.post('/tenants/:tenantId/keys/generate', requireAdmin, (req: Request, res
     res.status(500).json({
       success: false,
       message: 'Failed to generate new key',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
 
 // Rotate keys for a tenant
-router.post('/tenants/:tenantId/keys/rotate', requireAdmin, (req: Request, res: Response) => {
+router.post('/tenants/:tenantId/keys/rotate', requireAdmin, async (req: Request, res: Response) => {
   try {
     const { tenantId } = req.params;
     const { newKey } = req.body;
@@ -118,7 +118,12 @@ router.post('/tenants/:tenantId/keys/rotate', requireAdmin, (req: Request, res: 
       });
     }
 
-    const result = rotateTenantKey(tenantId, newKey);
+    // rotateTenantKey is async - this was previously called without
+    // await, so `result` was a pending Promise and result.success /
+    // result.message / result.newKeyId were all always undefined,
+    // meaning key rotation always fell through to the failure branch
+    // below regardless of whether it actually succeeded.
+    const result = await rotateTenantKey(tenantId, newKey);
 
     if (result.success) {
       res.json({
@@ -139,7 +144,7 @@ router.post('/tenants/:tenantId/keys/rotate', requireAdmin, (req: Request, res: 
     res.status(500).json({
       success: false,
       message: 'Failed to rotate tenant key',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
@@ -169,7 +174,7 @@ router.delete('/tenants/:tenantId/keys', requireAdmin, (req: Request, res: Respo
     res.status(500).json({
       success: false,
       message: 'Failed to revoke tenant keys',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
@@ -192,7 +197,7 @@ router.post('/keys/reload', requireAdmin, (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Failed to reload keys',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });

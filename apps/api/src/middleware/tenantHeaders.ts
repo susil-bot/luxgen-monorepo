@@ -182,8 +182,36 @@ export const tenantSecurityHeadersMiddleware = (
 
 /**
  * Tenant rate limiting middleware
- * Applies tenant-specific rate limiting
+ *
+ * The previous version set X-Rate-Limit-* headers based on each tenant's
+ * configured maxRequests/windowMs but never actually counted a request or
+ * rejected anything - every response claimed a limit that didn't exist.
+ * This is a real fixed-window counter, keyed per tenant+client, single
+ * process in-memory Map (correct for the single free-tier instance this
+ * runs on - would need a shared store like Redis if this ever runs as
+ * more than one instance). Requests over the tenant's configured limit
+ * get a real 429, not just an honest-looking header.
  */
+interface RateWindow {
+  count: number;
+  windowStart: number;
+}
+
+const rateWindows = new Map<string, RateWindow>();
+
+// Bound memory: drop windows that are well past expiry instead of letting
+// the map grow forever as new tenant/IP combinations show up. Cheap
+// enough to run on every tick given the traffic this instance handles.
+const RATE_WINDOW_CLEANUP_INTERVAL_MS = 5 * 60 * 1000;
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, entry] of rateWindows) {
+    if (now - entry.windowStart > 10 * 60 * 1000) {
+      rateWindows.delete(key);
+    }
+  }
+}, RATE_WINDOW_CLEANUP_INTERVAL_MS).unref();
+
 export const tenantRateLimitMiddleware = (
   req: Request,
   res: Response,
@@ -193,24 +221,41 @@ export const tenantRateLimitMiddleware = (
     if (!req.tenant) {
       return next();
     }
-    
+
     const { rateLimiting } = req.tenant.settings.security;
-    
+
     if (!rateLimiting.enabled) {
       return next();
     }
-    
-    // Simple in-memory rate limiting (in production, use Redis)
+
     const clientId = req.ip || req.connection.remoteAddress || 'unknown';
+    const key = `${req.tenant._id.toString()}:${clientId}`;
     const now = Date.now();
-    const windowStart = now - rateLimiting.windowMs;
-    
-    // This is a simplified implementation
-    // In production, use a proper rate limiting library like express-rate-limit
+
+    let entry = rateWindows.get(key);
+    if (!entry || now - entry.windowStart >= rateLimiting.windowMs) {
+      entry = { count: 0, windowStart: now };
+      rateWindows.set(key, entry);
+    }
+
+    entry.count += 1;
+
+    const remaining = Math.max(0, rateLimiting.maxRequests - entry.count);
+    const resetAt = entry.windowStart + rateLimiting.windowMs;
+
     res.set('X-Rate-Limit-Limit', rateLimiting.maxRequests.toString());
-    res.set('X-Rate-Limit-Remaining', rateLimiting.maxRequests.toString());
-    res.set('X-Rate-Limit-Reset', new Date(now + rateLimiting.windowMs).toISOString());
-    
+    res.set('X-Rate-Limit-Remaining', remaining.toString());
+    res.set('X-Rate-Limit-Reset', new Date(resetAt).toISOString());
+
+    if (entry.count > rateLimiting.maxRequests) {
+      const retryAfterSeconds = Math.max(1, Math.ceil((resetAt - now) / 1000));
+      res.set('Retry-After', retryAfterSeconds.toString());
+      return res.status(429).json({
+        error: 'Too Many Requests',
+        message: `Rate limit exceeded for tenant ${req.tenant.subdomain}. Try again in ${retryAfterSeconds}s.`,
+      });
+    }
+
     next();
   } catch (error) {
     console.error('Tenant rate limit middleware error:', error);

@@ -30,7 +30,7 @@ export const authMiddleware = async (req: Request, res: Response, next: NextFunc
     if (user) {
       // Verify that the token's tenant matches the user's tenant
       const tokenTenant = getTenantFromToken(token);
-      if (tokenTenant && user.tenant._id?.toString() !== tokenTenant) {
+      if (tokenTenant && (user.tenant as any)._id?.toString() !== tokenTenant) {
         console.warn('Token tenant mismatch for user:', user._id);
         return next();
       }

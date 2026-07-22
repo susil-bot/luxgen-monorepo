@@ -42,7 +42,7 @@ router.get('/current', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
     });
   }
 });
@@ -76,7 +76,7 @@ router.get('/config', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
     });
   }
 });
@@ -106,11 +106,23 @@ router.patch('/branding', async (req: Request, res: Response) => {
       });
     }
 
+    // Load the current tenant so the branding update can be merged rather
+    // than replacing the whole object (this previously referenced an
+    // undefined `tenant` variable - a real ReferenceError at runtime any
+    // time this route was hit, not just a type-checking issue).
+    const existingTenant = await Tenant.findById(tenantId);
+    if (!existingTenant) {
+      return res.status(404).json({
+        success: false,
+        message: 'Tenant not found'
+      });
+    }
+
     // Update tenant branding
     const updatedTenant = await Tenant.findByIdAndUpdate(
       tenantId,
-      { 
-        'settings.branding': { ...tenant.settings.branding, ...branding },
+      {
+        'settings.branding': { ...existingTenant.settings.branding, ...branding },
         updatedAt: new Date()
       },
       { new: true }
@@ -135,7 +147,7 @@ router.patch('/branding', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
     });
   }
 });
@@ -194,7 +206,7 @@ router.patch('/security', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
     });
   }
 });
@@ -242,7 +254,7 @@ router.get('/stats', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
     });
   }
 });
@@ -304,7 +316,7 @@ router.post('/init', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined
     });
   }
 });

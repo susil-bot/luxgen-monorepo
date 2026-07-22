@@ -59,7 +59,7 @@ export const userResolvers = {
           email: user.email,
           tenant: user.tenant.toString(),
           role: user.role,
-        }, user.tenant._id?.toString());
+        }, (user.tenant as any)?._id?.toString());
 
         return {
           token,
@@ -96,7 +96,7 @@ export const userResolvers = {
           email: user.email,
           tenant: user.tenant.toString(),
           role: user.role,
-        }, user.tenant._id?.toString());
+        }, (user.tenant as any)?._id?.toString());
 
         return {
           token,

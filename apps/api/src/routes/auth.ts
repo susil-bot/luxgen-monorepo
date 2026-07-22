@@ -57,9 +57,9 @@ router.post('/login', validateLogin, async (req: Request, res: Response) => {
     const token = generateToken({
       id: user._id.toString(),
       email: user.email,
-      tenant: user.tenant._id?.toString(),
+      tenant: (user.tenant as any)._id?.toString(),
       role: user.role,
-    }, user.tenant._id?.toString());
+    }, (user.tenant as any)._id?.toString());
 
     // Return success response
     res.json({
@@ -74,9 +74,9 @@ router.post('/login', validateLogin, async (req: Request, res: Response) => {
           lastName: user.lastName,
           role: user.role,
           tenant: {
-            id: user.tenant._id,
-            name: user.tenant.name,
-            subdomain: user.tenant.subdomain,
+            id: (user.tenant as any)._id,
+            name: (user.tenant as any).name,
+            subdomain: (user.tenant as any).subdomain,
           },
         },
         expiresIn: process.env.JWT_EXPIRES_IN || '7d',
@@ -88,7 +88,7 @@ router.post('/login', validateLogin, async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
@@ -135,9 +135,9 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
     const token = generateToken({
       id: newUser._id.toString(),
       email: newUser.email,
-      tenant: newUser.tenant._id?.toString(),
+      tenant: (newUser.tenant as any)._id?.toString(),
       role: newUser.role,
-    }, newUser.tenant._id?.toString());
+    }, (newUser.tenant as any)._id?.toString());
 
     // Return success response
     res.status(201).json({
@@ -153,9 +153,9 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
           role: newUser.role,
           status: newUser.status,
           tenant: {
-            id: newUser.tenant._id,
-            name: newUser.tenant.name,
-            subdomain: newUser.tenant.subdomain,
+            id: (newUser.tenant as any)._id,
+            name: (newUser.tenant as any).name,
+            subdomain: (newUser.tenant as any).subdomain,
           },
         },
         expiresIn: process.env.JWT_EXPIRES_IN || '7d',
@@ -167,7 +167,7 @@ router.post('/register', validateRegister, async (req: Request, res: Response) =
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
@@ -199,9 +199,9 @@ router.get('/me', async (req: Request, res: Response) => {
         lastName: user.lastName,
         role: user.role,
         tenant: {
-          id: user.tenant._id,
-          name: user.tenant.name,
-          subdomain: user.tenant.subdomain,
+          id: (user.tenant as any)._id,
+          name: (user.tenant as any).name,
+          subdomain: (user.tenant as any).subdomain,
         },
       }
     });
@@ -211,7 +211,7 @@ router.get('/me', async (req: Request, res: Response) => {
     res.status(500).json({
       success: false,
       message: 'Internal server error',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
@@ -283,7 +283,7 @@ router.post('/invite',
       res.status(500).json({
         success: false,
         message: 'Internal server error',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
       });
     }
   }
@@ -340,7 +340,7 @@ router.put('/users/:userId/role',
       res.status(500).json({
         success: false,
         message: 'Internal server error',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
       });
     }
   }
@@ -389,7 +389,7 @@ router.put('/users/:userId/activate',
       res.status(500).json({
         success: false,
         message: 'Internal server error',
-        error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+        error: process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
       });
     }
   }

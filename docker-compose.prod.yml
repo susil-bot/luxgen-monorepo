@@ -58,6 +58,24 @@ services:
       context: .
       dockerfile: Dockerfile
       target: runner
+      # Same build args as the web service below - api and web share one
+      # Dockerfile/image (only the command: differs), so both builds need
+      # identical args or Compose ends up building two divergent images.
+      args:
+        TENANT: ${TENANT:-demo}
+        NEXT_PUBLIC_GRAPHQL_URL: ${NEXT_PUBLIC_GRAPHQL_URL}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+    # Without this override, the container inherits the image's default
+    # CMD (node apps/web/server.js) and runs a second copy of the Next.js
+    # web app instead of the Express/Apollo API - GraphQL and /api/* would
+    # never actually be served. Both api and web share one image; only the
+    # command differs.
+    #
+    # Path is apps/api/dist/apps/api/src/index.js, not apps/api/dist/index.js:
+    # apps/api's tsconfig has rootDir pinned to the monorepo root (it also
+    # compiles in shared packages/*/src via path aliases), so tsc mirrors
+    # that full path under dist/ instead of flattening to dist/index.js.
+    command: ["node", "apps/api/dist/apps/api/src/index.js"]
     container_name: luxgen-api-prod
     restart: unless-stopped
     ports:
@@ -95,6 +113,16 @@ services:
       context: .
       dockerfile: Dockerfile
       target: runner
+      # These get inlined into the browser bundle at build time - setting
+      # them under `environment:` below does nothing for a Next.js
+      # standalone build, the page JS is already compiled by then. Note:
+      # the app code only actually reads NEXT_PUBLIC_GRAPHQL_URL today
+      # (apps/web/graphql/client.ts) - NEXT_PUBLIC_API_URL isn't
+      # referenced anywhere, kept here only for forward compatibility.
+      args:
+        TENANT: ${TENANT:-demo}
+        NEXT_PUBLIC_GRAPHQL_URL: ${NEXT_PUBLIC_GRAPHQL_URL}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
     container_name: luxgen-web-prod
     restart: unless-stopped
     ports:
@@ -102,8 +130,6 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
-      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
     depends_on:
       api:
         condition: service_healthy

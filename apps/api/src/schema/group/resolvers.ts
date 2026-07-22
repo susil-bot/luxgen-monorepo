@@ -1,4 +1,4 @@
-import { Context } from '../../context';
+import { GraphQLContext as Context } from '../../context';
 import { GroupService } from '../../services/groupService';
 
 export const groupResolvers = {

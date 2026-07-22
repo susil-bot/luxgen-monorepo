@@ -83,7 +83,7 @@ const loadDemoTenantConfig = (): Partial<ITenant> => ({
     plan: 'pro',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null
+    createdBy: null as any
   }
 });
 
@@ -149,7 +149,7 @@ const loadIdeaVibesTenantConfig = (): Partial<ITenant> => ({
     plan: 'enterprise',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null
+    createdBy: null as any
   }
 });
 
@@ -205,7 +205,7 @@ const loadDefaultTenantConfig = (): Partial<ITenant> => ({
     plan: 'free',
     createdAt: new Date(),
     lastActive: new Date(),
-    createdBy: null
+    createdBy: null as any
   }
 });
 
@@ -222,7 +222,7 @@ const generateDemoCSS = (): string => `
     background-color: var(--tenant-primary-color);
     border-radius: ${demoBrandConfig.borderRadius.md};
     font-weight: ${demoBrandConfig.typography.fontWeight.semibold};
-    transition: all ${demoBrandConfig.animations.duration.normal} ${demoBrandConfig.animations.easing.ease};
+    transition: all ${(demoBrandConfig as any).animations.duration.normal} ${(demoBrandConfig as any).animations.easing.ease};
   }
   
   .demo-button:hover {
@@ -233,7 +233,7 @@ const generateDemoCSS = (): string => `
   .demo-card {
     border-radius: ${demoBrandConfig.borderRadius.lg};
     box-shadow: ${demoBrandConfig.shadows.md};
-    transition: all ${demoBrandConfig.animations.duration.normal} ${demoBrandConfig.animations.easing.ease};
+    transition: all ${(demoBrandConfig as any).animations.duration.normal} ${(demoBrandConfig as any).animations.easing.ease};
   }
   
   .demo-card:hover {

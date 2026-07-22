@@ -67,7 +67,7 @@ export class UserRegistrationService {
         return {
           success: false,
           message: 'Invalid role assignment',
-          errors: { role: roleValidation.reason }
+          errors: { role: roleValidation.reason || 'Invalid role assignment' }
         };
       }
 
@@ -259,7 +259,7 @@ export class UserRegistrationService {
         return {
           success: false,
           message: 'Invalid role assignment',
-          errors: { role: roleValidation.reason }
+          errors: { role: roleValidation.reason || 'Invalid role assignment' }
         };
       }
 
@@ -274,7 +274,7 @@ export class UserRegistrationService {
       
       if (existingTenantRole) {
         existingTenantRole.role = newRole;
-        existingTenantRole.assignedBy = updatedBy;
+        existingTenantRole.assignedBy = updatedBy as any;
         existingTenantRole.assignedAt = new Date();
       } else {
         user.metadata.tenantRoles.push({

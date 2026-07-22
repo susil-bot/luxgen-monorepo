@@ -23,7 +23,20 @@ router.get('/config/:subdomain', async (req: Request, res: Response) => {
       });
     }
     
-    // Return tenant configuration in the format expected by frontend
+    // Return tenant configuration in the format expected by frontend.
+    //
+    // This previously read everything from tenant.metadata.branding /
+    // .features / .limits, none of which exist on the Tenant schema
+    // (metadata only has plan/createdAt/lastActive/createdBy - see
+    // packages/db/src/tenant.ts). The real data lives under
+    // tenant.settings. Optional chaining meant this never crashed, it
+    // just silently returned hardcoded defaults for every tenant,
+    // regardless of what branding/features/limits were actually
+    // configured. background/text colors and separate primary/secondary
+    // fonts and a text-vs-image logo split aren't modeled on
+    // TenantBranding today (it only has logo, favicon, primaryColor,
+    // secondaryColor, accentColor, fontFamily) - those specific fields
+    // keep their hardcoded fallback until the schema grows to cover them.
     const config = {
       id: tenant.subdomain,
       name: tenant.name,
@@ -32,25 +45,25 @@ router.get('/config/:subdomain', async (req: Request, res: Response) => {
       status: tenant.status,
       theme: {
         colors: {
-          primary: tenant.metadata?.branding?.primaryColor || '#3B82F6',
-          secondary: tenant.metadata?.branding?.secondaryColor || '#10B981',
-          background: tenant.metadata?.branding?.backgroundColor || '#F8FAFC',
-          text: tenant.metadata?.branding?.textColor || '#1F2937',
+          primary: tenant.settings?.branding?.primaryColor || '#3B82F6',
+          secondary: tenant.settings?.branding?.secondaryColor || '#10B981',
+          background: '#F8FAFC',
+          text: '#1F2937',
         },
         fonts: {
-          primary: tenant.metadata?.branding?.primaryFont || 'Inter',
-          secondary: tenant.metadata?.branding?.secondaryFont || 'Inter',
+          primary: tenant.settings?.branding?.fontFamily || 'Inter',
+          secondary: tenant.settings?.branding?.fontFamily || 'Inter',
         }
       },
       branding: {
         logo: {
-          text: tenant.metadata?.branding?.logoText || tenant.name,
-          image: tenant.metadata?.branding?.logoImage || null,
+          text: tenant.name,
+          image: tenant.settings?.branding?.logo || null,
         },
-        favicon: tenant.metadata?.branding?.favicon || null,
+        favicon: tenant.settings?.branding?.favicon || null,
       },
-      features: tenant.metadata?.features || [],
-      limits: tenant.metadata?.limits || {},
+      features: tenant.settings?.config?.features || [],
+      limits: tenant.settings?.config?.limits || {},
       plan: tenant.metadata?.plan || 'free',
       createdAt: tenant.createdAt,
       updatedAt: tenant.updatedAt,
@@ -122,16 +135,16 @@ router.get('/assets/:subdomain', async (req: Request, res: Response) => {
     
     const assets = {
       logo: {
-        text: tenant.metadata?.branding?.logoText || tenant.name,
-        image: tenant.metadata?.branding?.logoImage || null,
+        text: tenant.name,
+        image: tenant.settings?.branding?.logo || null,
       },
-      favicon: tenant.metadata?.branding?.favicon || null,
-      background: tenant.metadata?.branding?.backgroundImage || null,
+      favicon: tenant.settings?.branding?.favicon || null,
+      background: null,
       colors: {
-        primary: tenant.metadata?.branding?.primaryColor || '#3B82F6',
-        secondary: tenant.metadata?.branding?.secondaryColor || '#10B981',
-        background: tenant.metadata?.branding?.backgroundColor || '#F8FAFC',
-        text: tenant.metadata?.branding?.textColor || '#1F2937',
+        primary: tenant.settings?.branding?.primaryColor || '#3B82F6',
+        secondary: tenant.settings?.branding?.secondaryColor || '#10B981',
+        background: '#F8FAFC',
+        text: '#1F2937',
       }
     };
     

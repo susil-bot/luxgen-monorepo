@@ -1,5 +1,5 @@
 import { config } from 'dotenv';
-import { app } from './app';
+import { app, attachApolloServer } from './app';
 import { connectDB } from './db/connect';
 
 // Load environment variables
@@ -12,6 +12,10 @@ async function startServer() {
     // Connect to database
     await connectDB();
     console.log('✅ Connected to MongoDB');
+
+    // Attach GraphQL middleware BEFORE accepting connections, so a
+    // request can never arrive before /graphql is ready.
+    await attachApolloServer(app);
 
     // Start server
     app.listen(PORT, () => {

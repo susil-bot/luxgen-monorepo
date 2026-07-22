@@ -63,8 +63,7 @@ const GroupDetailsPageContent: React.FC = () => {
   useEffect(() => {
     if (id) {
       // Simulate API call
-
-      connect with real db through graphql
+      // TODO: connect with real db through graphql
       setTimeout(() => {
         setGroup({
           id: id as string,

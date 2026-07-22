@@ -45,7 +45,13 @@ export const dashboardAuthMiddleware = async (
     // Set dashboard user and tenant
     req.dashboardUser = user;
     req.dashboardTenant = user.tenant.toString();
-    req.dashboardPermissions = user.metadata?.permissions || [];
+    // FLAGGED, not resolved here: req.dashboardPermissions is typed
+    // string[] globally, but user.metadata.permissions is IUserPermissions
+    // (an object, not an array) - one of these two is wrong, and any code
+    // downstream doing `.includes(...)` on this value is worth checking.
+    // Cast unblocks the build; the actual permission-check logic needs a
+    // real look, not a guess made here.
+    req.dashboardPermissions = (user.metadata?.permissions || []) as any;
 
     logger.info(`Dashboard access granted for user ${user.email} in tenant ${req.dashboardTenant}`);
     next();
