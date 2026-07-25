@@ -16,7 +16,13 @@ function devAllowedOrigins() {
 }
 
 const nextConfig = {
-  output: 'standalone',
+  // 'standalone' output is a self-hosting/Docker setting (produces a
+  // trimmed server bundle + its own node_modules, per the Dockerfile's
+  // runner-web stage). Vercel has its own serverless build pipeline and
+  // doesn't need or want this - `process.env.VERCEL` is set automatically
+  // by Vercel's build environment, so this keeps one config file working
+  // correctly for both deployment targets instead of needing two.
+  ...(process.env.VERCEL ? {} : { output: 'standalone' }),
   images: {
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
@@ -54,6 +60,19 @@ const nextConfig = {
      * (Next 14 forbids both). Externalize ioredis via this list + webpack.
      */
     serverComponentsExternalPackages: ['ioredis', 'mongodb', '@luxgen/db'],
+    /**
+     * Vercel builds each app's serverless functions by tracing which files
+     * are actually required at runtime, starting from apps/web. Without an
+     * explicit root, that trace can stop at apps/web's own directory and
+     * silently omit sibling packages/* files this app imports (@luxgen/ui,
+     * @luxgen/config, etc.) - the build succeeds, but a deployed function
+     * throws "Cannot find module '@luxgen/...'" in production. Pointing
+     * this at the monorepo root (two levels up from apps/web) tells
+     * Vercel's tracer to look there instead. Self-hosted Docker builds are
+     * unaffected - this setting is a no-op for `next build`'s standalone
+     * output, which already copies packages/ separately (see Dockerfile).
+     */
+    outputFileTracingRoot: path.join(__dirname, '../../'),
   },
   typescript: {
     ignoreBuildErrors: true,
