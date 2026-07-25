@@ -37,14 +37,31 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ARG TENANT
 
+# V8 auto-limits its heap based on detected system memory and, on a small
+# instance like a free-tier t3.micro (916MB usable RAM), sets a ceiling far
+# below what's actually available once swap is counted - tsc compiling
+# apps/api (by far the heaviest package here: Express, Apollo, Mongoose,
+# Stripe types, GraphQL tooling all type-checked together) hits that ceiling
+# and crashes with "JavaScript heap out of memory" well before the OS itself
+# runs out of RAM+swap. Raising --max-old-space-size explicitly tells V8 it's
+# allowed to use more before giving up. 768MB leaves headroom under this
+# instance's ~1.9GB RAM+swap total for npm/turbo's own overhead; tune this
+# value down if a future EC2 size ever runs with less swap configured.
+ENV NODE_OPTIONS="--max-old-space-size=768"
+
 # Scope the build to apps/api plus its real dependency graph instead of the
 # whole monorepo - packages/mcp-core, packages/mcp-server,
 # packages/agent-worker, packages/mobile, packages/native-ui are not
 # dependencies of apps/api and don't need to compile to ship this image.
 # (mcp-core in particular has a real, separately-tracked TypeScript error
 # against the MCP SDK's newer request-handler types as of 2026-07-22.)
+# --concurrency=1: run one package's build at a time instead of turbo's
+# default parallelism. On a 1-vCPU/1GB free-tier instance, launching several
+# tsc processes at once fights over the same tiny RAM budget and tips into
+# swap, which is far slower overall than compiling packages one after
+# another. This trades wall-clock time for staying inside available memory.
 RUN node scripts/select-tenant.js ${TENANT} && \
-    npx turbo run build --filter=@luxgen/api...
+    npx turbo run build --filter=@luxgen/api... --concurrency=1
 
 # --- Web builder ---------------------------------------------------------
 FROM base AS builder-web
