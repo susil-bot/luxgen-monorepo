@@ -45,11 +45,17 @@ RUN node scripts/select-tenant.js ${TENANT} && \
 # regardless of a turbo scoping gap observed in production (2026-07-25) where
 # packages/config/dist silently didn't get built despite being a correctly
 # declared dependency with a normal tsc build script.
+# See the root Dockerfile's equivalent stage for why @luxgen/db is a special
+# case: its real entrypoint is nested at dist/db/src/index.js, not
+# dist/index.js, because it imports @luxgen/billing via the repo's
+# source-level cross-package type resolution.
 RUN for pkg in config core utils auth db billing agent automation-flow storefront; do \
-      if [ -f "packages/$pkg/package.json" ] && [ ! -f "packages/$pkg/dist/index.js" ]; then \
-        echo "==> packages/$pkg/dist/index.js missing after turbo build - building it directly"; \
-        if [ "$pkg" = "db" ]; then baseline=16; else baseline=0; fi; \
-        (cd "packages/$pkg" && node ../../scripts/tsc-tolerant.js "$baseline"); \
+      if [ "$pkg" = "db" ]; then entry="packages/$pkg/dist/db/src/index.js"; baseline=16; extra="dist/db/src/index.js"; \
+      elif [ "$pkg" = "agent" ]; then entry="packages/$pkg/dist/agent/src/index.js"; baseline=16; extra="dist/agent/src/index.js"; \
+      else entry="packages/$pkg/dist/index.js"; baseline=0; extra=""; fi; \
+      if [ -f "packages/$pkg/package.json" ] && [ ! -f "$entry" ]; then \
+        echo "==> $entry missing after turbo build - building it directly"; \
+        (cd "packages/$pkg" && node ../../scripts/tsc-tolerant.js "$baseline" $extra); \
       fi; \
     done
 

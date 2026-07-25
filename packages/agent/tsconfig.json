@@ -3,6 +3,7 @@
   "compilerOptions": {
     "outDir": "./dist",
     "noEmit": false,
+    "module": "commonjs",
     "declaration": true,
     "skipLibCheck": true,
     "baseUrl": ".",

@@ -27,14 +27,25 @@
  * build, same guarantee apps/api's build-tolerant.js already provides.
  *
  * Usage: "build": "node ../../scripts/tsc-tolerant.js 16"
+ *
+ * Optional 2nd arg: relative path (from cwd) to the real compiled entrypoint,
+ * for packages whose output isn't a flat dist/index.js. This happens when a
+ * package imports another package via the cross-package tsconfig "paths"/
+ * package.json "types" source-resolution convention used repo-wide (e.g.
+ * @luxgen/db importing @luxgen/billing's src/index.ts for types) - tsc then
+ * infers rootDir as the common ancestor of both packages' source trees
+ * instead of just "./src", nesting output under dist/<pkg>/src/index.js.
+ * Same pattern apps/api already relies on (see its Docker CMD).
+ * Usage: "build": "node ../../scripts/tsc-tolerant.js 16 dist/db/src/index.js"
  */
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
 
 const baseline = Number(process.argv[2] ?? '0');
+const entrypointArg = process.argv[3] || path.join('dist', 'index.js');
 const cwd = process.cwd();
-const entrypoint = path.join(cwd, 'dist', 'index.js');
+const entrypoint = path.join(cwd, entrypointArg);
 const pkgName = path.basename(cwd);
 
 let output = '';
