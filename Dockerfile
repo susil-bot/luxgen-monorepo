@@ -63,6 +63,30 @@ ENV NODE_OPTIONS="--max-old-space-size=768"
 RUN node scripts/select-tenant.js ${TENANT} && \
     npx turbo run build --filter=@luxgen/api... --concurrency=1
 
+# Defense-in-depth: `turbo run build --filter=@luxgen/api...` is supposed to
+# build every workspace package apps/api depends on (all declared in its
+# package.json "dependencies" - config, core, utils, auth, db, billing,
+# agent, automation-flow, storefront), since turbo's dependency graph is
+# derived from those exact declarations and each package.json's "main" now
+# correctly points at "dist/index.js" (see docs/DEPLOYMENT_ISSUES_AND_STANDARD_WORKFLOW.md
+# Part 1/6). In production this was observed to silently produce an image
+# missing packages/config/dist entirely - `docker run --entrypoint sh` into
+# the built image confirmed the symlink and package.json were both correct,
+# but dist/ simply wasn't there, causing `require("@luxgen/config")` to fall
+# through to a raw .ts file and crash at container start with
+# "SyntaxError: Unexpected token 'export'". Root cause not fully isolated
+# under deploy time pressure (2026-07-25) - rather than block on that,
+# guarantee correctness directly: explicitly (re)build any of these packages
+# whose dist/index.js is missing after the turbo step. Cheap and a no-op
+# when turbo already did its job; only actually compiles anything on the
+# packages where it silently didn't.
+RUN for pkg in config core utils auth db billing agent automation-flow storefront; do \
+      if [ -f "packages/$pkg/package.json" ] && [ ! -f "packages/$pkg/dist/index.js" ]; then \
+        echo "==> packages/$pkg/dist/index.js missing after turbo build - building it directly"; \
+        (cd "packages/$pkg" && npx tsc); \
+      fi; \
+    done
+
 # --- Web builder ---------------------------------------------------------
 FROM base AS builder-web
 WORKDIR /app

@@ -40,6 +40,18 @@ ENV NODE_OPTIONS="--max-old-space-size=768"
 RUN node scripts/select-tenant.js ${TENANT} && \
     npx turbo run build --filter=@luxgen/api... --concurrency=1
 
+# See the root Dockerfile's builder-api stage for the full explanation: this
+# guarantees every internal dependency's dist/index.js actually exists,
+# regardless of a turbo scoping gap observed in production (2026-07-25) where
+# packages/config/dist silently didn't get built despite being a correctly
+# declared dependency with a normal tsc build script.
+RUN for pkg in config core utils auth db billing agent automation-flow storefront; do \
+      if [ -f "packages/$pkg/package.json" ] && [ ! -f "packages/$pkg/dist/index.js" ]; then \
+        echo "==> packages/$pkg/dist/index.js missing after turbo build - building it directly"; \
+        (cd "packages/$pkg" && npx tsc); \
+      fi; \
+    done
+
 FROM base AS runner-api
 WORKDIR /app
 
