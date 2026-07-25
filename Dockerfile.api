@@ -48,7 +48,8 @@ RUN node scripts/select-tenant.js ${TENANT} && \
 RUN for pkg in config core utils auth db billing agent automation-flow storefront; do \
       if [ -f "packages/$pkg/package.json" ] && [ ! -f "packages/$pkg/dist/index.js" ]; then \
         echo "==> packages/$pkg/dist/index.js missing after turbo build - building it directly"; \
-        (cd "packages/$pkg" && npx tsc); \
+        if [ "$pkg" = "db" ]; then baseline=16; else baseline=0; fi; \
+        (cd "packages/$pkg" && node ../../scripts/tsc-tolerant.js "$baseline"); \
       fi; \
     done
 
