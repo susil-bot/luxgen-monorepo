@@ -2,6 +2,7 @@ import type { NextRouter } from 'next/router';
 import { safeClearApolloStore } from '../graphql/safe-apollo-store';
 import { buildLogoutRedirect } from './auth-routes';
 import { clearStoredSession } from './session';
+import { revokeRefreshToken } from './token-refresh';
 
 export interface LogoutOptions {
   /** Next.js router — uses client navigation when set */
@@ -23,6 +24,7 @@ export function performLogout(options: LogoutOptions = {}): void {
   const destination = redirectTo ?? (showLoggedOutNotice ? buildLogoutRedirect() : '/login');
 
   clearStoredSession();
+  void revokeRefreshToken();
 
   if (resetApolloCache) {
     void safeClearApolloStore();

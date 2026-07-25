@@ -1,4 +1,4 @@
-import { ApolloClient, InMemoryCache, createHttpLink, from, split } from '@apollo/client';
+import { ApolloClient, InMemoryCache, Observable, createHttpLink, from, split } from '@apollo/client';
 import { setContext } from '@apollo/client/link/context';
 import { onError } from '@apollo/client/link/error';
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions';
@@ -10,6 +10,7 @@ import { getClientGraphqlUrl, getClientGraphqlWsUrl } from '../lib/urls';
 import { AUTH_STORAGE_KEYS, clearStoredSession, getStoredUser, isStoredSessionExpired } from '../lib/session';
 import { resolveAuthRedirectReason } from '../lib/session-guard';
 import { isSessionTenantMismatch, resolveRequestTenant } from '../lib/tenant-auth';
+import { refreshAccessToken } from '../lib/token-refresh';
 
 const httpLink = createHttpLink({
   uri: getClientGraphqlUrl(),
@@ -77,7 +78,7 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
-const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
+const errorLink = onError(({ graphQLErrors, networkError, operation, forward }) => {
   if (typeof window === 'undefined') return;
 
   if (graphQLErrors?.some((e) => e.extensions?.code === 'PLAN_UPGRADE_REQUIRED')) {
@@ -94,6 +95,35 @@ const errorLink = onError(({ graphQLErrors, networkError, operation }) => {
 
   const reason = resolveAuthRedirectReason(graphQLErrors, statusCode);
   if (!reason) return;
+
+  // Only "session_expired" (an actually-expired/invalid access token) is
+  // worth a silent-refresh attempt. tenant_mismatch/unauthorized are real
+  // authorization failures, not expiry — retrying won't fix those, and
+  // retrying would mask a permissions bug as a login redirect.
+  const alreadyRetried = operation.getContext().__refreshRetried;
+  if (reason === 'session_expired' && !alreadyRetried) {
+    return new Observable((observer) => {
+      refreshAccessToken().then((newToken) => {
+        if (!newToken) {
+          clearStoredSession();
+          redirectToLogin(reason);
+          observer.complete();
+          return;
+        }
+
+        operation.setContext(({ headers = {} }: { headers?: Record<string, string> }) => ({
+          headers: { ...headers, authorization: `Bearer ${newToken}` },
+          __refreshRetried: true,
+        }));
+
+        forward(operation).subscribe({
+          next: (result) => observer.next(result),
+          error: (err) => observer.error(err),
+          complete: () => observer.complete(),
+        });
+      });
+    });
+  }
 
   clearStoredSession();
   redirectToLogin(reason);

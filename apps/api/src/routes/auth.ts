@@ -25,7 +25,7 @@ import {
   setRefreshCookie,
   clearRefreshCookie,
   verifyRefreshToken,
-  type RefreshTokenPayload,
+  refreshPayloadFromUser,
 } from '../utils/refreshToken';
 
 const router = Router();
@@ -59,20 +59,6 @@ async function issueEmailVerification(user: IUser): Promise<void> {
 }
 
 const PASSWORD_RESET_SENT_MESSAGE = 'If an account exists with that email, a password reset link has been sent.';
-
-function refreshPayloadFromUser(user: IUser): RefreshTokenPayload {
-  const tenant = user.tenant as { _id?: { toString(): string } } | undefined;
-  const id = user._id?.toString();
-  if (!id) {
-    throw new Error('User id is required for refresh token');
-  }
-  return {
-    id,
-    email: user.email,
-    tenant: tenant?._id?.toString(),
-    role: user.role,
-  };
-}
 
 // Login endpoint
 router.post('/login', loginRateLimitMiddleware, validateLogin, async (req: Request, res: Response) => {

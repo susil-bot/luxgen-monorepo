@@ -1,11 +1,23 @@
-name: CI/CD - API
+name: CI - API
 
-# Builds the api Docker image on GitHub's runners (not the free-tier EC2
-# instance, which does not have the RAM/CPU to reliably compile this
-# monorepo's heaviest package under load - see docs/WELL_ARCHITECTED_FREE_STACK.md)
-# and deploys it by telling the instance to pull the freshly built image via
-# SSM Run Command. No AWS credentials are stored as GitHub secrets - the
-# workflow assumes a short-lived role via OIDC.
+# Render deploys itself: once the API service is connected to this repo as a
+# Blueprint (render.yaml), Render watches `main` directly and rebuilds
+# Dockerfile.api on its own infrastructure on every push - no GitHub Action
+# needed to trigger or perform that deploy.
+#
+# What this workflow does instead: fail fast, before Render even starts its
+# own (slower) build. If apps/api or a package it depends on doesn't
+# type-check/build, this catches it in ~a minute on GitHub's runners instead
+# of after Render spends several minutes building a broken image.
+#
+# This replaces the previous version of this workflow, which built/pushed a
+# Docker image to GHCR and deployed it to an EC2 instance via AWS SSM Run
+# Command (OIDC role assumption, no stored AWS keys). That path is retired
+# along with the EC2 host itself - see docs/RENDER_VERCEL_FREE_STACK.md for
+# why, and docs/ORACLE_CLOUD_MIGRATION.md for the other free-host option
+# this project considered. If this project ever moves the API to a plain VM
+# again (Oracle, a paid EC2, etc.), the old build-push-action/SSM steps are
+# still in git history on this file's previous commits and can be restored.
 
 on:
   push:
@@ -13,63 +25,42 @@ on:
     paths:
       - 'apps/api/**'
       - 'packages/**'
-      - 'Dockerfile'
-      - 'docker-compose.prod.yml'
+      - 'Dockerfile.api'
+      - 'render.yaml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'packages/**'
+      - 'Dockerfile.api'
+      - 'render.yaml'
   workflow_dispatch: {}
 
 permissions:
-  id-token: write   # required for OIDC - no stored AWS keys
   contents: read
-  packages: write   # push to GHCR
-
-env:
-  IMAGE: ghcr.io/${{ github.repository }}/luxgen-api
 
 jobs:
-  build-and-deploy:
+  build-check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
-      - uses: docker/setup-buildx-action@v3
-
-      - name: Log in to GHCR
-        uses: docker/login-action@v3
+      - uses: actions/setup-node@v4
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          node-version: 18
+          cache: npm
 
-      - name: Build and push api image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          target: runner-api
-          push: true
-          tags: |
-            ${{ env.IMAGE }}:${{ github.sha }}
-            ${{ env.IMAGE }}:latest
-          build-args: |
-            TENANT=demo
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+      - name: Install
+        run: npm ci
 
-      # Requires the IAM OIDC provider + github-actions-deploy role described
-      # in docs/WELL_ARCHITECTED_FREE_STACK.md to already exist. Until then,
-      # this step (and the deploy below) will fail with an AssumeRoleWithWebIdentity
-      # error - that's expected and harmless; the build/push above still runs.
-      - name: Configure AWS credentials via OIDC
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: arn:aws:iam::501970550497:role/github-actions-deploy
-          aws-region: eu-north-1
+      - name: Build @luxgen/api + its dependency graph
+        run: npm run build:api:deps && npm run build:api
 
-      - name: Deploy to EC2 via SSM Run Command
-        run: |
-          aws ssm send-command \
-            --instance-ids i-09671064a03e91562 \
-            --document-name "AWS-RunShellScript" \
-            --parameters '{"commands":["cd /opt/luxgen && docker pull '"${IMAGE}"':latest && docker compose -f docker-compose.prod.yml up -d api redis"]}' \
-            --region eu-north-1 \
-            --comment "Deploy ${{ github.sha }}"
+      - name: Run API test suite
+        run: npm run test -- --filter=@luxgen/api
+        continue-on-error: true
+        # continue-on-error: this repo has a documented, tracked set of
+        # pre-existing test/type gaps (see docs/DEPLOYMENT_ISSUES_AND_STANDARD_WORKFLOW.md
+        # Part 2) that aren't regressions from any given PR. Flip this to a
+        # hard failure once that backlog is actually cleared, so it starts
+        # blocking merges instead of just reporting.

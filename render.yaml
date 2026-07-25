@@ -1,0 +1,49 @@
+# Render Blueprint — codifies the API service config instead of manual
+# dashboard clicking. Import this file when creating the service ("New +" →
+# "Blueprint" → point at this repo) and Render reads it automatically.
+#
+# `sync: false` on every secret below means Render will prompt you to type
+# each value in during the first deploy and will NOT read them from this
+# file — nothing sensitive is committed to git. Values match whatever is
+# currently in the AWS SSM parameters (/luxgen/prod/*) 1:1; copy them across.
+services:
+  - type: web
+    name: luxgen-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile.api
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      # Core — required for the API to start and authenticate at all.
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      - key: CORS_ORIGIN
+        value: https://luxgen.shop
+      # Redis (Upstash) — required for realtime activity events
+      # (timelineRedisBridge/activityPubSub); ioredis reads TLS straight off
+      # a rediss:// URL, no extra config needed. Use Upstash's provided
+      # connection string exactly as given, starting with rediss://.
+      - key: REDIS_URL
+        sync: false
+      # Optional — only needed if these features are actually in use.
+      # Leave unset if not; each service already degrades gracefully
+      # without them (billing/email/etc. simply no-op or log a warning).
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: TENANT_SUBDOMAINS
+        value: demo

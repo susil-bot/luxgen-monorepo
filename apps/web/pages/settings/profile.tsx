@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
 import { Tab, TabItem, ProfileForm, ProfileFormData, ProfilePicture, SnackbarProvider, useSnackbar } from '@luxgen/ui';
 import { PageWrapper } from '@luxgen/ui';
 
-const EditProfilePageContent: React.FC = () => {
+const EditProfilePageContentImpl: React.FC = () => {
   const router = useRouter();
   const { showSuccess, showError } = useSnackbar();
   const [loading, setLoading] = useState(false);
@@ -268,6 +269,24 @@ const EditProfilePageContent: React.FC = () => {
     </>
   );
 };
+
+// This page is purely interactive settings UI with no SEO value, and pulls in
+// several @luxgen/ui components (Tab, ProfileForm, ProfilePicture) whose
+// render output isn't guaranteed safe to execute in Next.js's Node-based
+// static export step. Rather than chase the exact throw inside a shared UI
+// package, opt this page out of static prerendering entirely via
+// next/dynamic's ssr:false - it still works normally once hydrated in the
+// browser (including on Vercel), it's just never pre-rendered to static HTML
+// at build time. This is the standard fix for "Export encountered errors on
+// following paths" when a page is inherently client-only.
+const EditProfilePageContent = dynamic(() => Promise.resolve(EditProfilePageContentImpl), {
+  ssr: false,
+  loading: () => (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <p className="text-gray-500">Loading settings…</p>
+    </div>
+  ),
+});
 
 export default function EditProfile() {
   return (
