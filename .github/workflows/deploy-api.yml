@@ -1,0 +1,75 @@
+name: CI/CD - API
+
+# Builds the api Docker image on GitHub's runners (not the free-tier EC2
+# instance, which does not have the RAM/CPU to reliably compile this
+# monorepo's heaviest package under load - see docs/WELL_ARCHITECTED_FREE_STACK.md)
+# and deploys it by telling the instance to pull the freshly built image via
+# SSM Run Command. No AWS credentials are stored as GitHub secrets - the
+# workflow assumes a short-lived role via OIDC.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'packages/**'
+      - 'Dockerfile'
+      - 'docker-compose.prod.yml'
+  workflow_dispatch: {}
+
+permissions:
+  id-token: write   # required for OIDC - no stored AWS keys
+  contents: read
+  packages: write   # push to GHCR
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}/luxgen-api
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push api image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          target: runner-api
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+          build-args: |
+            TENANT=demo
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Requires the IAM OIDC provider + github-actions-deploy role described
+      # in docs/WELL_ARCHITECTED_FREE_STACK.md to already exist. Until then,
+      # this step (and the deploy below) will fail with an AssumeRoleWithWebIdentity
+      # error - that's expected and harmless; the build/push above still runs.
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::501970550497:role/github-actions-deploy
+          aws-region: eu-north-1
+
+      - name: Deploy to EC2 via SSM Run Command
+        run: |
+          aws ssm send-command \
+            --instance-ids i-09671064a03e91562 \
+            --document-name "AWS-RunShellScript" \
+            --parameters '{"commands":["cd /opt/luxgen && docker pull '"${IMAGE}"':latest && docker compose -f docker-compose.prod.yml up -d api redis"]}' \
+            --region eu-north-1 \
+            --comment "Deploy ${{ github.sha }}"
