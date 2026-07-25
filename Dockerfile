@@ -19,16 +19,39 @@ COPY apps/ ./apps/
 # Install all dependencies (including dev dependencies for build)
 RUN npm install
 
-# Rebuild the source code only when needed
-FROM base AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
-COPY . .
-
 # Build all packages for a specific tenant (defaults to "demo", which is
 # branded as LuxGen). `npm run build` alone is interactive and will hang
 # here - always build with an explicit tenant id.
 ARG TENANT=demo
+
+# --- API builder --------------------------------------------------------
+# Separate builder stage per app: `docker build --target runner-api` only
+# ever executes this stage (plus `deps`), never `builder-web`. That means a
+# broken apps/web page (or any web-only dependency) can never block shipping
+# apps/api, and vice versa - Docker's BuildKit skips stages that aren't
+# ancestors of the requested --target. Previously api and web shared one
+# builder stage, so a single failing page in web aborted the api image too.
+FROM base AS builder-api
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+ARG TENANT
+
+# Scope the build to apps/api plus its real dependency graph instead of the
+# whole monorepo - packages/mcp-core, packages/mcp-server,
+# packages/agent-worker, packages/mobile, packages/native-ui are not
+# dependencies of apps/api and don't need to compile to ship this image.
+# (mcp-core in particular has a real, separately-tracked TypeScript error
+# against the MCP SDK's newer request-handler types as of 2026-07-22.)
+RUN node scripts/select-tenant.js ${TENANT} && \
+    npx turbo run build --filter=@luxgen/api...
+
+# --- Web builder ---------------------------------------------------------
+FROM base AS builder-web
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+ARG TENANT
 
 # Next.js inlines NEXT_PUBLIC_* variables into the client bundle at BUILD
 # time, not at container start - setting these later via docker-compose
@@ -45,58 +68,61 @@ ARG NEXT_PUBLIC_BASE_URL
 ENV NEXT_PUBLIC_GRAPHQL_URL=${NEXT_PUBLIC_GRAPHQL_URL}
 ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
 
-# Scope the build to apps/api and apps/web plus their real dependency graph,
-# instead of every workspace package. The runner stage below only ever
-# packages api + web into the final image, so packages neither one actually
-# imports - packages/mcp-core, packages/mcp-server, packages/agent-worker,
-# packages/mobile, packages/native-ui - don't need to compile to ship this
-# image. This matters in practice: as of 2026-07-22, mcp-core has a real
-# TypeScript error against the MCP SDK's newer request-handler types
-# (unrelated to this deploy work, tracked separately), and turbo treats any
-# package's build failure as a whole-pipeline failure - building everything
-# meant one broken, irrelevant package blocked shipping api and web entirely.
 RUN node scripts/select-tenant.js ${TENANT} && \
-    npx turbo run build --filter=@luxgen/api... --filter=@luxgen/web...
+    npx turbo run build --filter=@luxgen/web...
 
-# Production image, copy all the files and run the app
-FROM base AS runner
+# --- API production image -------------------------------------------------
+FROM base AS runner-api
 WORKDIR /app
 
 ENV NODE_ENV=production
 
-# Create a non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy built application
-COPY --from=builder /app/apps/web/.next/standalone ./
-COPY --from=builder /app/apps/web/.next/static ./apps/web/.next/static
-COPY --from=builder /app/apps/web/public ./apps/web/public
-
-# Copy API server
-COPY --from=builder /app/apps/api/dist ./apps/api/dist
-COPY --from=builder /app/apps/api/package.json ./apps/api/
-
-# Copy shared packages
-COPY --from=builder /app/packages ./packages
-
-# The web app's standalone output above bundles its own trimmed
-# node_modules, but the API (apps/api/dist, plain tsc output, not bundled)
-# still needs its runtime deps - express, apollo-server-express, mongoose,
-# jsonwebtoken, etc. Copy the full install over the top so both processes
-# can resolve their requires; this must come AFTER the standalone copy or
-# it gets overwritten by the trimmed version.
+# apps/api/dist is plain tsc output (not bundled like Next.js standalone), so
+# it needs its runtime deps - express, apollo-server-express, mongoose,
+# jsonwebtoken, etc. - copied in alongside it.
+COPY --from=builder-api /app/apps/api/dist ./apps/api/dist
+COPY --from=builder-api /app/apps/api/package.json ./apps/api/
+COPY --from=builder-api /app/packages ./packages
 COPY --from=deps /app/node_modules ./node_modules
 
 USER nextjs
 
-EXPOSE 3000
 EXPOSE 4000
+ENV PORT=4000
 
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:4000/health || exit 1
+
+# Path is apps/api/dist/apps/api/src/index.js, not apps/api/dist/index.js:
+# apps/api's tsconfig has rootDir pinned to the monorepo root (it also
+# compiles in shared packages/*/src via path aliases), so tsc mirrors that
+# full path under dist/ instead of flattening to dist/index.js.
+CMD ["node", "apps/api/dist/apps/api/src/index.js"]
+
+# --- Web production image -------------------------------------------------
+FROM base AS runner-web
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+# Next.js standalone output bundles its own trimmed node_modules - no need
+# to copy the full install here like the API image does above.
+COPY --from=builder-web /app/apps/web/.next/standalone ./
+COPY --from=builder-web /app/apps/web/.next/static ./apps/web/.next/static
+COPY --from=builder-web /app/apps/web/public ./apps/web/public
+
+USER nextjs
+
+EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/api/health || exit 1
 
