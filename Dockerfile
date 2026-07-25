@@ -45,7 +45,18 @@ ARG NEXT_PUBLIC_BASE_URL
 ENV NEXT_PUBLIC_GRAPHQL_URL=${NEXT_PUBLIC_GRAPHQL_URL}
 ENV NEXT_PUBLIC_BASE_URL=${NEXT_PUBLIC_BASE_URL}
 
-RUN node scripts/select-tenant.js ${TENANT} && npx turbo run build
+# Scope the build to apps/api and apps/web plus their real dependency graph,
+# instead of every workspace package. The runner stage below only ever
+# packages api + web into the final image, so packages neither one actually
+# imports - packages/mcp-core, packages/mcp-server, packages/agent-worker,
+# packages/mobile, packages/native-ui - don't need to compile to ship this
+# image. This matters in practice: as of 2026-07-22, mcp-core has a real
+# TypeScript error against the MCP SDK's newer request-handler types
+# (unrelated to this deploy work, tracked separately), and turbo treats any
+# package's build failure as a whole-pipeline failure - building everything
+# meant one broken, irrelevant package blocked shipping api and web entirely.
+RUN node scripts/select-tenant.js ${TENANT} && \
+    npx turbo run build --filter=@luxgen/api... --filter=@luxgen/web...
 
 # Production image, copy all the files and run the app
 FROM base AS runner
