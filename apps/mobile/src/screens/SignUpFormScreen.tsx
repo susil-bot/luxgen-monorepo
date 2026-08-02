@@ -128,21 +128,10 @@ export default function SignUpFormScreen({ navigation }: Props) {
           </TouchableOpacity>
         </View>
 
-      {/* Social + Signup Buttons */}
-      <View style={styles.buttons}>
-        <TouchableOpacity
-          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
-          onPress={() => showSocialLoginUnavailable('google')}
-        >
-          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Google</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
-          onPress={() => showSocialLoginUnavailable('apple')}
-        >
-          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Apple</Text>
-        </TouchableOpacity>
+        {/* Social + Signup Buttons */}
+        <View style={styles.buttons}>
+          <SocialAuthButton provider="google" onPress={() => showSocialLoginUnavailable('google')} />
+          <SocialAuthButton provider="apple" onPress={() => showSocialLoginUnavailable('apple')} />
 
           <TouchableOpacity
             style={[
