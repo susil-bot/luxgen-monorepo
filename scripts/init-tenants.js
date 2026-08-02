@@ -33,8 +33,11 @@ const demoTenantConfig = {
       `
     },
     security: {
-      allowedDomains: ['demo.localhost', 'demo.example.com'],
-      corsOrigins: ['http://demo.localhost:3000', 'https://demo.example.com'],
+      // Flat-domain production deployment (no wildcard *.luxgen.in DNS) —
+      // real traffic arrives with Origin/Host www.luxgen.in or luxgen.in
+      // via the x-tenant header, not a per-tenant subdomain.
+      allowedDomains: ['demo.localhost', 'www.luxgen.in', 'luxgen.in', 'luxgen-monorepo-web.vercel.app', 'demo.example.com'],
+      corsOrigins: ['http://demo.localhost:3000', 'https://www.luxgen.in', 'https://luxgen.in', 'https://luxgen-monorepo-web.vercel.app', 'https://demo.example.com'],
       rateLimiting: {
         enabled: true,
         maxRequests: 2000,
@@ -104,8 +107,20 @@ const ideaVibesTenantConfig = {
       `
     },
     security: {
-      allowedDomains: ['idea-vibes.localhost', 'idea-vibes.example.com'],
-      corsOrigins: ['http://idea-vibes.localhost:3000', 'https://idea-vibes.example.com'],
+      allowedDomains: [
+        'idea-vibes.localhost',
+        'www.luxgen.in',
+        'luxgen.in',
+        'luxgen-monorepo-web.vercel.app',
+        'idea-vibes.example.com',
+      ],
+      corsOrigins: [
+        'http://idea-vibes.localhost:3000',
+        'https://www.luxgen.in',
+        'https://luxgen.in',
+        'https://luxgen-monorepo-web.vercel.app',
+        'https://idea-vibes.example.com',
+      ],
       rateLimiting: {
         enabled: true,
         maxRequests: 5000,
@@ -164,20 +179,38 @@ async function initializeTenants() {
     // an empty list with no error.
     const db = client.db();
     const tenantsCollection = db.collection('tenants');
-    
-    // Clear existing demo and idea-vibes tenants
-    await tenantsCollection.deleteMany({ 
-      subdomain: { $in: ['demo', 'idea-vibes'] } 
-    });
-    console.log('Cleared existing demo and idea-vibes tenants');
-    
-    // Insert demo tenant
-    const demoResult = await tenantsCollection.insertOne(demoTenantConfig);
-    console.log('✅ Demo tenant created:', demoResult.insertedId);
-    
-    // Insert idea-vibes tenant
-    const ideaVibesResult = await tenantsCollection.insertOne(ideaVibesTenantConfig);
-    console.log('✅ Idea Vibes tenant created:', ideaVibesResult.insertedId);
+
+    // Upsert by subdomain instead of delete+insert. Once real users exist
+    // (users.tenant references a Tenant _id), deleting and re-inserting
+    // would hand the tenant a brand-new _id and silently orphan every
+    // user pointed at the old one — this is exactly what would have
+    // happened to the SUPER_ADMIN account bootstrapped for 'demo' the
+    // next time this script ran (e.g. just to pick up a corsOrigins fix).
+    // upsert:true still creates it fresh on a truly empty database.
+    // createdAt is preserved on existing docs (read the original value
+    // first) rather than being reset to "now" on every re-run. Mongo
+    // rejects $set on 'metadata' combined with $setOnInsert on
+    // 'metadata.createdAt' in the same update (overlapping paths), so the
+    // existing value is resolved up front and folded into one plain $set.
+    async function upsertTenant(config) {
+      const existing = await tenantsCollection.findOne(
+        { subdomain: config.subdomain },
+        { projection: { 'metadata.createdAt': 1 } },
+      );
+      const createdAt = existing?.metadata?.createdAt || config.metadata.createdAt;
+      const result = await tenantsCollection.updateOne(
+        { subdomain: config.subdomain },
+        { $set: { ...config, metadata: { ...config.metadata, createdAt } } },
+        { upsert: true },
+      );
+      return result.upsertedId || '(existing _id preserved)';
+    }
+
+    const demoResult = await upsertTenant(demoTenantConfig);
+    console.log('✅ Demo tenant upserted:', demoResult);
+
+    const ideaVibesResult = await upsertTenant(ideaVibesTenantConfig);
+    console.log('✅ Idea Vibes tenant upserted:', ideaVibesResult);
     
     // Verify tenants were created
     const tenants = await tenantsCollection.find({ 

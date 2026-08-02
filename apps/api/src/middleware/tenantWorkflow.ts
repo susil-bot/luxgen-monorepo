@@ -96,14 +96,16 @@ function applyTenantHeaders(_req: Request, res: Response, workflow: TenantWorkfl
 function applyTenantSecurity(req: Request, res: Response, workflow: TenantWorkflow): void {
   const { security } = workflow;
 
-  if (security.domainRestrictions.allowedDomains.length > 0) {
-    const hostname = req.get('host') || req.hostname;
-    const isAllowed = security.domainRestrictions.allowedDomains.some((domain: string) => hostname.includes(domain));
-    if (!isAllowed) {
-      res.status(403).json({ success: false, message: 'Domain not allowed', error: 'Access denied for this domain' });
-      return;
-    }
-  }
+  // Removed: an allowedDomains check against req.get('host') used to live
+  // here — same bug already fixed in tenantRouting.ts's tenantSecurityMiddleware.
+  // hostname here is unavoidably the API's own address (Render/custom API
+  // domain), while allowedDomains lists *web frontend* domains
+  // (www.luxgen.in, luxgen-monorepo-web.vercel.app, etc). Those can never
+  // match in this cross-origin (API + separately-hosted web) deployment,
+  // so this would reject every request the moment a tenant had a non-empty
+  // allowedDomains list — see tenantRouting.ts for the full writeup. This
+  // middleware isn't currently wired into app.ts, but kept in sync so it
+  // doesn't reintroduce the same bug if it's ever enabled.
 
   if (security.domainRestrictions.blockedDomains.length > 0) {
     const hostname = req.get('host') || req.hostname;
