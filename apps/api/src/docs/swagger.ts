@@ -1,6 +1,6 @@
 import path from 'path';
 import fs from 'fs';
-import YAML from 'yamljs';
+import { load as loadYaml } from 'js-yaml';
 import swaggerUi from 'swagger-ui-express';
 import type { Express } from 'express';
 import { logger } from '../utils/logger';
@@ -39,7 +39,7 @@ export function mountApiDocs(app: Express): void {
     return;
   }
 
-  const spec = YAML.load(specPath);
+  const spec = loadYaml(fs.readFileSync(specPath, 'utf8')) as Record<string, unknown>;
 
   app.get('/openapi.json', (_req, res) => res.json(spec));
   app.use(

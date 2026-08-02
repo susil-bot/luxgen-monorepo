@@ -458,7 +458,7 @@ paths:
               properties:
                 logoUrl:
                   type: string
-                  description: https(s) URL, or data:image/{png,jpeg,svg+xml,webp} base64 URI, <=512000 bytes decoded
+                  description: "https(s) URL, or data:image/{png,jpeg,svg+xml,webp} base64 URI, <=512000 bytes decoded"
       responses:
         "200": { description: Logo saved }
         "400": { description: Invalid logo URL/image or too large }
@@ -481,7 +481,7 @@ paths:
       summary: List active tenants for a tenant switcher (no auth)
       security: []
       responses:
-        "200": { description: Array of { id, name, subdomain, plan } }
+        "200": { description: "Array of { id, name, subdomain, plan }" }
 
   /api/tenant-config/assets/{subdomain}:
     get:
