@@ -45,10 +45,18 @@ services:
         sync: false
       - key: JWT_SECRET
         generateValue: true
-      - key: CORS_ORIGIN
-        sync: false
+      # Kept in sync with the root render.yaml blueprint (the one actually
+      # in use) — this secondary blueprint previously had no CORS_ORIGINS
+      # default and only a sync:false singular CORS_ORIGIN, meaning any
+      # fresh deploy from this file would start with an empty CORS
+      # allowlist and hit the exact "CORS policy violation" 403 that the
+      # root blueprint's domain cutover already fixed. See
+      # tenantRouting.ts's tenantSecurityMiddleware for the full incident
+      # writeup. Update both files together when domains change.
+      - key: CORS_ORIGINS
+        value: https://www.luxgen.in,https://luxgen.in,https://luxgen-monorepo-web.vercel.app,https://luxgen.shop
       - key: WEB_APP_URL
-        sync: false
+        value: https://www.luxgen.in
       - key: STRIPE_SECRET_KEY
         sync: false
       - key: STRIPE_WEBHOOK_SECRET
