@@ -18,6 +18,16 @@ services:
     dockerContext: .
     plan: free
     healthCheckPath: /health
+    # Monorepo: only rebuild this service when something it actually depends
+    # on changed. Without this, every push to main (including web-only or
+    # docs-only changes) triggers a full Docker rebuild here too.
+    # render.yaml itself is always honored regardless of this filter.
+    buildFilter:
+      paths:
+        - apps/api/**
+        - packages/**
+        - Dockerfile.api
+        - render.yaml
     envVars:
       - key: NODE_ENV
         value: production

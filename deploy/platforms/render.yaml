@@ -17,6 +17,14 @@ services:
     dockerfilePath: ./Dockerfile.api
     dockerContext: .
     healthCheckPath: /health
+    # Monorepo: only rebuild when something this service depends on changed.
+    # render.yaml itself is always honored regardless of this filter.
+    buildFilter:
+      paths:
+        - apps/api/**
+        - packages/**
+        - Dockerfile.api
+        - deploy/platforms/render.yaml
     envVars:
       - key: NODE_ENV
         value: production
@@ -64,6 +72,11 @@ services:
     dockerfilePath: ./apps/mcp-server/Dockerfile
     dockerContext: .
     healthCheckPath: /health
+    buildFilter:
+      paths:
+        - apps/mcp-server/**
+        - packages/**
+        - deploy/platforms/render.yaml
     envVars:
       - key: NODE_ENV
         value: production

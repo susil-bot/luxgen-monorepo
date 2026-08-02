@@ -14,11 +14,21 @@
     },
     "preview": {
       "distribution": "internal",
-      "channel": "preview"
+      "channel": "preview",
+      "env": {
+        "EXPO_PUBLIC_GRAPHQL_URL": "https://luxgen-api.onrender.com/graphql",
+        "EXPO_PUBLIC_API_URL": "https://luxgen-api.onrender.com",
+        "EXPO_PUBLIC_DEFAULT_TENANT": "demo"
+      }
     },
     "production": {
       "autoIncrement": true,
-      "channel": "production"
+      "channel": "production",
+      "env": {
+        "EXPO_PUBLIC_GRAPHQL_URL": "https://luxgen-api.onrender.com/graphql",
+        "EXPO_PUBLIC_API_URL": "https://luxgen-api.onrender.com",
+        "EXPO_PUBLIC_DEFAULT_TENANT": "demo"
+      }
     },
     "tenant-demo": {
       "extends": "preview",
