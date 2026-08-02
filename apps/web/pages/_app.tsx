@@ -6,6 +6,7 @@ import { GlobalProvider, NavigationProvider, AIStudioProvider, AIStudioPanelSlot
 import { ThemeProvider } from '../lib/theme';
 import { TenantThemeBridge } from '../components/theme/TenantThemeBridge';
 import { RouteProgressBar } from '../components/layout/RouteProgressBar';
+import { SlowRequestBanner } from '../components/layout/SlowRequestBanner';
 import { AuthGuard } from '../components/auth/AuthGuard';
 import { SessionMonitor } from '../components/auth/SessionMonitor';
 import { SessionSync } from '../components/auth/SessionSync';
@@ -48,6 +49,7 @@ export default function App({ Component, pageProps }: AppProps) {
           <GlobalProvider initialTenant={pageProps.tenant || 'demo'}>
             <TenantThemeBridge />
             <RouteProgressBar />
+            <SlowRequestBanner />
             <DefaultPageHead />
             <AIStudioProvider>
               <WebNavigationProvider>
