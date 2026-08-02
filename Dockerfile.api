@@ -9,7 +9,7 @@
 # Kept in sync by hand with the root Dockerfile's base/deps/builder-api/
 # runner-api stages — if you change one, check the other.
 
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 FROM base AS deps
 RUN apk add --no-cache libc6-compat

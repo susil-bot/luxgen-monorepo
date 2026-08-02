@@ -4,8 +4,12 @@
 #
 # `sync: false` on every secret below means Render will prompt you to type
 # each value in during the first deploy and will NOT read them from this
-# file — nothing sensitive is committed to git. Values match whatever is
-# currently in the AWS SSM parameters (/luxgen/prod/*) 1:1; copy them across.
+# file — nothing sensitive is committed to git.
+#
+# Render is the sole backend deployment target for the API (Vercel hosts
+# the web frontend). The previous EC2/AWS SSM deployment path is retired —
+# see .github/workflows/deploy-api.yml's header comment for why, and
+# docs/RENDER_VERCEL_FREE_STACK.md for the current stack.
 services:
   - type: web
     name: luxgen-api
