@@ -137,6 +137,7 @@ RUN adduser --system --uid 1001 nextjs
 # jsonwebtoken, etc. - copied in alongside it.
 COPY --from=builder-api /app/apps/api/dist ./apps/api/dist
 COPY --from=builder-api /app/apps/api/package.json ./apps/api/
+COPY --from=builder-api /app/apps/api/openapi.yaml ./apps/api/openapi.yaml
 COPY --from=builder-api /app/packages ./packages
 COPY --from=deps /app/node_modules ./node_modules
 
