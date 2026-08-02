@@ -156,7 +156,13 @@ async function initializeTenants() {
     await client.connect();
     console.log('Connected to MongoDB');
     
-    const db = client.db('luxgen_dev');
+    // No argument = use whatever database is in MONGODB_URI's path (matches
+    // Mongoose's own behavior). Previously hardcoded to 'luxgen_dev', which
+    // silently wrote tenants into the wrong database whenever MONGODB_URI
+    // pointed anywhere else (e.g. production's luxgen_prod) — the API would
+    // never see them, and /api/tenant-config/available would keep returning
+    // an empty list with no error.
+    const db = client.db();
     const tenantsCollection = db.collection('tenants');
     
     // Clear existing demo and idea-vibes tenants

@@ -7,12 +7,18 @@ export interface TenantPageProps {
   layoutUser?: LayoutUser | null;
 }
 
+// Same flat-hostname problem as apps/web/lib/tenant.ts's getTenantFromHost —
+// kept in sync manually since this file resolves tenant server-side for
+// getServerSideProps rather than from window.location.
+const FLAT_HOST_SUFFIXES = ['.vercel.app', '.onrender.com', '.netlify.app'];
+
 /** Resolve tenant subdomain from host + query (matches users.tsx pattern) */
 export function resolvePageTenant(context: GetServerSidePropsContext): string {
   const host = context.req.headers.host;
   let tenant = 'demo';
 
-  if (host?.includes('.')) {
+  const isFlatHost = !!host && FLAT_HOST_SUFFIXES.some((suffix) => host.endsWith(suffix));
+  if (host?.includes('.') && !isFlatHost) {
     const subdomain = host.split('.')[0];
     if (subdomain && !['www', 'localhost', '127', '0'].includes(subdomain)) {
       tenant = subdomain;
