@@ -11,7 +11,7 @@ import cookieParser from 'cookie-parser';
 import { schema } from './schema';
 import { context, buildGraphQLContext, type GraphQLContext } from './context';
 import { logger } from './utils/logger';
-import { errorHandler, notFoundHandler } from './utils/errorHandler';
+import { AppError, errorHandler, notFoundHandler } from './utils/errorHandler';
 import { mountApiDocs } from './docs/swagger';
 
 // Middleware
@@ -48,7 +48,11 @@ app.use(
       if (!origin || isDevLocalOrigin(origin) || getCorsOrigins().includes(origin)) {
         return callback(null, true);
       }
-      callback(new Error('Not allowed by CORS'));
+      // AppError (not a bare Error) so errorHandler reports the real 403
+      // CORS rejection instead of falling through to its generic 500
+      // "Internal Server Error" — that masking is what made a CORS_ORIGINS
+      // gap on a newly cut-over domain look like a server crash.
+      callback(new AppError('Not allowed by CORS', 403));
     },
     credentials: true,
   }),

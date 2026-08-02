@@ -44,18 +44,37 @@ export const demoSecurityConfig = {
   },
 
   // CORS configuration
+  //
+  // The live deployment is a single flat domain with x-tenant header
+  // routing (no wildcard *.luxgen.in subdomain DNS), so real production
+  // traffic for this tenant arrives with Origin www.luxgen.in / luxgen.in
+  // — not demoDevOrigin's generated "demo.luxgen.in". Both are listed:
+  // the real flat-domain origins actually in use today, plus the
+  // subdomain form in case wildcard subdomain routing is set up later.
   cors: {
     enabled: true,
-    origins: [demoDevOrigin, 'https://demo.example.com', 'https://demo.vercel.app'],
+    origins: [
+      demoDevOrigin,
+      'https://www.luxgen.in',
+      'https://luxgen.in',
+      'https://luxgen-monorepo-web.vercel.app',
+      'https://demo.example.com',
+    ],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
     allowedHeaders: ['Origin', 'X-Requested-With', 'Content-Type', 'Accept', 'Authorization', 'X-Tenant-ID'],
     credentials: true,
     maxAge: 86400, // 24 hours
   },
 
-  // Domain restrictions
+  // Domain restrictions — same flat-domain reasoning as cors.origins above.
   domainRestrictions: {
-    allowedDomains: [demoDevDomain, 'demo.example.com', 'demo.vercel.app'],
+    allowedDomains: [
+      demoDevDomain,
+      'www.luxgen.in',
+      'luxgen.in',
+      'luxgen-monorepo-web.vercel.app',
+      'demo.example.com',
+    ],
     blockedDomains: [],
     redirectToHttps: true,
     enforceSubdomain: true,

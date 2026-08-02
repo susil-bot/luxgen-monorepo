@@ -117,8 +117,22 @@ const loadIdeaVibesTenantConfig = (): Partial<ITenant> => ({
       customCSS: generateIdeaVibesCSS(),
     },
     security: {
-      allowedDomains: [ideaVibesDevDomain, 'idea-vibes.example.com'],
-      corsOrigins: [ideaVibesDevOrigin, 'https://idea-vibes.example.com'],
+      // Flat-domain deployment (no wildcard *.luxgen.in DNS) — see the
+      // matching comment in config/tenants/demo/security/index.ts.
+      allowedDomains: [
+        ideaVibesDevDomain,
+        'www.luxgen.in',
+        'luxgen.in',
+        'luxgen-monorepo-web.vercel.app',
+        'idea-vibes.example.com',
+      ],
+      corsOrigins: [
+        ideaVibesDevOrigin,
+        'https://www.luxgen.in',
+        'https://luxgen.in',
+        'https://luxgen-monorepo-web.vercel.app',
+        'https://idea-vibes.example.com',
+      ],
       rateLimiting: {
         enabled: true,
         maxRequests: 5000,
