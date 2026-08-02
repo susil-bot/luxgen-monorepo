@@ -230,12 +230,18 @@ export const tenantSecurityMiddleware = async (req: Request, res: Response, next
         .json({ success: false, message: 'CORS policy violation', error: 'Origin not allowed for this tenant' });
     }
 
-    const hostname = req.get('host') || req.hostname;
-    if (security.allowedDomains.length > 0 && !security.allowedDomains.some((d: string) => hostname.includes(d))) {
-      return res
-        .status(403)
-        .json({ success: false, message: 'Domain not allowed', error: 'Request domain not in allowed domains list' });
-    }
+    // Removed: a Host-header check against tenant.settings.security.allowedDomains
+    // used to live here. It compared the *request's own Host* (unavoidably the
+    // API's own address, e.g. luxgen-api.onrender.com) against a list of *web
+    // frontend* domains (demo.example.com, demo.vercel.app, etc). Those can
+    // never match in a cross-origin deployment (API and web on separate
+    // domains, as they are here — Render + Vercel) or from mobile clients,
+    // which hit the API directly. Found live: it silently rejected every
+    // request to any tenant with a non-empty allowedDomains list (i.e. demo)
+    // the moment tenant resolution actually worked, with no way to ever pass.
+    // The CORS Origin check above already does the real, meaningful check for
+    // browser traffic; this one wasn't providing additional protection, only
+    // false-positive-blocking legitimate requests.
 
     next();
   } catch {
