@@ -40,8 +40,15 @@ services:
         sync: false
       - key: JWT_REFRESH_SECRET
         sync: false
-      - key: CORS_ORIGIN
-        value: https://luxgen.shop
+      # Comma-separated allowlist (packages/config's getCorsOrigins() reads
+      # this in preference to the singular CORS_ORIGIN). Includes the actual
+      # live Vercel URL today; add the custom domain here too once it's
+      # cut over instead of replacing this line, so both keep working
+      # during the switch.
+      - key: CORS_ORIGINS
+        value: https://luxgen-monorepo-web.vercel.app,https://luxgen.shop
+      - key: WEB_APP_URL
+        value: https://luxgen-monorepo-web.vercel.app
       # Redis (Upstash) — required for realtime activity events
       # (timelineRedisBridge/activityPubSub); ioredis reads TLS straight off
       # a rediss:// URL, no extra config needed. Use Upstash's provided

@@ -3,6 +3,8 @@
 > **Main constraint:** deploy to the cloud on **free tiers** where possible.  
 > **Start here:** [FREE_TIER_CLOUD.md](./FREE_TIER_CLOUD.md)
 
+**Live:** [web](https://luxgen-monorepo-web.vercel.app) (Vercel) · [API](https://luxgen-api.onrender.com) (Render) · [API docs](https://luxgen-api.onrender.com/api-docs). Full architecture: [../RENDER_VERCEL_FREE_STACK.md](../RENDER_VERCEL_FREE_STACK.md).
+
 ---
 
 ## Documents
