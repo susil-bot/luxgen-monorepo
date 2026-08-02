@@ -8,7 +8,13 @@ services:
     runtime: docker
     plan: free
     region: oregon
-    dockerfilePath: ./apps/api/Dockerfile
+    # Consolidated onto the same Dockerfile as the root render.yaml blueprint
+    # (Node 20, tsc-compiled dist/ output) -- this used to point at
+    # apps/api/Dockerfile, a tsx-runtime, no-typecheck build that had drifted
+    # from the root Dockerfile.api. apps/api/Dockerfile still exists and is
+    # still valid -- it's the Fly.io fallback path's Dockerfile
+    # (deploy/platforms/fly.api.toml) -- just no longer Render's.
+    dockerfilePath: ./Dockerfile.api
     dockerContext: .
     healthCheckPath: /health
     envVars:
