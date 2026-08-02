@@ -2,6 +2,16 @@
 
 Replaces the Oracle Cloud plan (`docs/ORACLE_CLOUD_MIGRATION.md`) with an all-PaaS stack: nothing to SSH into, no server to patch, no swap/heap-ceiling tuning, no SSM. Both halves deploy on `git push` and both have real, current free tiers.
 
+## Live right now
+
+| Component | URL |
+| --------- | --- |
+| Web (Vercel) | https://luxgen-monorepo-web.vercel.app |
+| API (Render) | https://luxgen-api.onrender.com |
+| API docs (Swagger UI) | https://luxgen-api.onrender.com/api-docs |
+
+Custom domains (`luxgen.shop` / `api.luxgen.in`) referenced elsewhere in this doc are the intended production domains, not yet cut over — both platforms are currently serving from their default `*.vercel.app` / `*.onrender.com` hostnames above. `render.yaml`'s `CORS_ORIGINS` already lists both the live Vercel URL and `luxgen.shop`, so the custom-domain cutover won't require a CORS change when it happens.
+
 ## Architecture
 
 ```mermaid
@@ -29,6 +39,8 @@ Render's free Redis is 25MB — workable for light pub/sub message passing but t
 ## Render service configuration
 
 A `render.yaml` Blueprint is now checked into the repo root — in Render's dashboard, choose "New +" → "Blueprint", point it at this repo, and it reads the config automatically instead of setting each field by hand. It declares: Runtime `Docker`, Dockerfile Path `Dockerfile.api`, Docker Build Context `.` (repo root, so the build can see `apps/` and `packages/`), Health Check Path `/health`, Plan `free`.
+
+Both `render.yaml` (root) and `deploy/platforms/render.yaml` also declare a `buildFilter` scoped to `apps/api/**`, `packages/**`, and the relevant Dockerfile — this is a monorepo, and without it every push to `main` (including a web-only or docs-only change) would trigger a full Docker rebuild here too. `render.yaml` itself is always honored by Render regardless of the filter. The Vercel side has the equivalent: `apps/web/vercel.json`'s `ignoreCommand: npx turbo-ignore` skips the build when nothing `apps/web` depends on changed since the last successful deploy.
 
 Every secret in the Blueprint is marked `sync: false`, which means Render prompts you to type each value in on first deploy rather than reading it from the committed file — nothing sensitive lives in git.
 
