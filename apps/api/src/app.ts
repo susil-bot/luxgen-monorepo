@@ -103,6 +103,14 @@ const apolloServer = new ApolloServer({
   schema,
   context,
   introspection: process.env.APOLLO_INTROSPECTION === 'true',
+  // Apollo Server enables automatic persisted queries by default, backed by
+  // an *unbounded* in-memory LRU cache — Apollo's own startup log flags this
+  // as a DoS/memory-exhaustion risk. Neither apps/web nor apps/mobile's
+  // Apollo clients send persisted-query hashes (no createPersistedQueryLink
+  // anywhere), so the feature is enabled but never actually used. Disabled
+  // outright rather than just bounding the cache, since there's no upside
+  // to keeping it on.
+  persistedQueries: false,
   // Apollo's default landing page (shown when hitting /graphql via GET in a
   // browser) loads its embedded UI from apollo-server-landing-page.cdn
   // .apollographql.com. helmet()'s default CSP blocks that cross-origin
