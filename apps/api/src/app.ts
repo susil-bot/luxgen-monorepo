@@ -4,6 +4,7 @@ import { useServer } from 'graphql-ws/lib/use/ws';
 import { WebSocketServer } from 'ws';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
+import { ApolloServerPluginLandingPageDisabled, ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -102,6 +103,20 @@ const apolloServer = new ApolloServer({
   schema,
   context,
   introspection: process.env.APOLLO_INTROSPECTION === 'true',
+  // Apollo's default landing page (shown when hitting /graphql via GET in a
+  // browser) loads its embedded UI from apollo-server-landing-page.cdn
+  // .apollographql.com. helmet()'s default CSP blocks that cross-origin
+  // script, so it silently degrades to "The full landing page cannot be
+  // loaded; it appears that you might be offline" - a confusing, broken-
+  // looking response with no real functionality behind it. Disabled outright
+  // in production (this endpoint is only ever meant to be POSTed to by the
+  // app itself, not browsed - same reasoning as introspection being off by
+  // default); kept as the normal interactive page in development.
+  plugins: [
+    process.env.NODE_ENV === 'production'
+      ? ApolloServerPluginLandingPageDisabled()
+      : ApolloServerPluginLandingPageLocalDefault({ embed: true }),
+  ],
   formatError: (error) => {
     logger.error('GraphQL Error', { error });
     return { message: error.message, locations: error.locations, path: error.path };
