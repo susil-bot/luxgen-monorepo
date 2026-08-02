@@ -1,0 +1,676 @@
+openapi: 3.0.3
+info:
+  title: LuxGen API — REST surface
+  description: >
+    This spec documents ONLY the REST/Express endpoints of the LuxGen API
+    (auth, tenant admin, billing plan lookup, webhooks, ops).
+    The primary application API — courses, enrollments, orders, listings,
+    automations, analytics, dashboards — is GraphQL, served at /graphql,
+    and is self-documented via GraphQL introspection (see the
+    "GraphQL API" section of the architecture doc for schema conventions).
+    Every request below (except /health, webhooks, and the public
+    tenant-config lookups) requires the same two headers web and mobile
+    clients already send to GraphQL: Authorization Bearer JWT + x-tenant.
+  version: "1.0.0"
+  contact:
+    name: LuxGen Engineering
+servers:
+  - url: http://localhost:4000
+    description: Local development
+  - url: https://api.luxgen.shop
+    description: Production (Render free tier)
+
+tags:
+  - name: Health
+  - name: Auth
+  - name: Admin — Tenant Keys
+  - name: Tenant
+  - name: Tenant Config (public)
+  - name: Billing
+  - name: Jobs
+  - name: Notifications
+  - name: Security
+  - name: Commerce Webhooks
+
+security:
+  - bearerAuth: []
+    tenantHeader: []
+
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Liveness check
+      security: []
+      responses:
+        "200":
+          description: API is up
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status: { type: string, example: OK }
+                  timestamp: { type: string, format: date-time }
+
+  # ── Auth ──────────────────────────────────────────────────────────────────
+  /api/auth/login:
+    post:
+      tags: [Auth]
+      summary: Log in with email + password
+      security: [{ tenantHeader: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+                tenant: { type: string, description: Optional tenant id override; normally resolved from x-tenant/subdomain }
+      responses:
+        "200":
+          description: Login successful — access token in body, refresh token set as httpOnly cookie
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "401":
+          $ref: "#/components/responses/AuthError"
+        "429":
+          description: Too many login attempts (rate limited)
+
+  /api/auth/register:
+    post:
+      tags: [Auth]
+      summary: Register a new user in the current tenant
+      security: [{ tenantHeader: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, firstName, lastName]
+              properties:
+                email: { type: string, format: email }
+                password: { type: string, format: password }
+                firstName: { type: string }
+                lastName: { type: string }
+                role: { type: string, description: "Defaults to USER; ignored unless caller is privileged" }
+      responses:
+        "201":
+          description: Registration successful — verification email sent
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/AuthResponse" }
+        "400": { $ref: "#/components/responses/ValidationError" }
+
+  /api/auth/verify-email:
+    post:
+      tags: [Auth]
+      summary: Consume an email verification token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token]
+              properties: { token: { type: string } }
+      responses:
+        "200": { $ref: "#/components/responses/SimpleSuccess" }
+        "400": { description: Invalid or expired token }
+
+  /api/auth/resend-verification:
+    post:
+      tags: [Auth]
+      summary: Resend the email verification link (no-op if already verified or unknown)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+                tenant: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/SimpleSuccess" }
+
+  /api/auth/me:
+    get:
+      tags: [Auth]
+      summary: Get the authenticated user's profile
+      responses:
+        "200":
+          description: Current user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data: { $ref: "#/components/schemas/UserProfile" }
+        "401": { $ref: "#/components/responses/AuthError" }
+
+  /api/auth/refresh:
+    post:
+      tags: [Auth]
+      summary: Exchange the httpOnly refresh cookie for a new access token
+      description: Reads the `luxgen_refresh` httpOnly cookie — no body required.
+      responses:
+        "200":
+          description: New access token issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success: { type: boolean }
+                  data:
+                    type: object
+                    properties:
+                      token: { type: string }
+                      expiresIn: { type: string, example: 7d }
+        "401": { description: Missing, invalid, or expired refresh token }
+
+  /api/auth/logout:
+    post:
+      tags: [Auth]
+      summary: Clear the refresh-token cookie
+      security: []
+      responses:
+        "200": { $ref: "#/components/responses/SimpleSuccess" }
+
+  /api/auth/forgot-password:
+    post:
+      tags: [Auth]
+      summary: Request a password reset email
+      description: Always returns 200 regardless of whether the email exists (prevents account enumeration).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email]
+              properties:
+                email: { type: string, format: email }
+                tenant: { type: string }
+      responses:
+        "200": { $ref: "#/components/responses/SimpleSuccess" }
+
+  /api/auth/reset-password:
+    post:
+      tags: [Auth]
+      summary: Consume a password-reset token and set a new password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [token, password]
+              properties:
+                token: { type: string }
+                password: { type: string, format: password }
+      responses:
+        "200": { $ref: "#/components/responses/SimpleSuccess" }
+        "400": { description: Invalid/expired token }
+        "403": { description: Account deactivated }
+
+  /api/auth/invite:
+    post:
+      tags: [Auth]
+      summary: Invite a new user (admin/owner only) — temp password sent by email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, firstName, lastName]
+              properties:
+                email: { type: string, format: email }
+                firstName: { type: string }
+                lastName: { type: string }
+                role: { type: string }
+      responses:
+        "201": { description: User invited }
+        "400": { $ref: "#/components/responses/ValidationError" }
+        "403": { description: Caller lacks invite permission }
+
+  /api/auth/users/{userId}/role:
+    put:
+      tags: [Auth]
+      summary: Change a user's role (admin only)
+      security: [{ bearerAuth: [], tenantHeader: [] }]
+      parameters:
+        - { name: userId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [role]
+              properties: { role: { type: string } }
+      responses:
+        "200": { description: Role updated }
+        "403": { description: Requires ADMIN role }
+
+  /api/auth/users/{userId}/activate:
+    put:
+      tags: [Auth]
+      summary: Reactivate a deactivated user (admin only)
+      parameters:
+        - { name: userId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: User activated }
+        "403": { description: Requires ADMIN role }
+
+  # ── Admin: tenant signing keys ──────────────────────────────────────────
+  /api/admin/tenants/keys:
+    get:
+      tags: [Admin — Tenant Keys]
+      summary: List all tenants' JWT signing-key metadata (super admin only)
+      responses:
+        "200": { description: Key metadata list }
+        "403": { description: Requires SUPER_ADMIN role }
+
+  /api/admin/tenants/{tenantId}/keys:
+    get:
+      tags: [Admin — Tenant Keys]
+      summary: Get one tenant's signing-key metadata (super admin only)
+      parameters:
+        - { name: tenantId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Key metadata }
+    delete:
+      tags: [Admin — Tenant Keys]
+      summary: Revoke all signing keys for a tenant, invalidating its tokens (super admin only)
+      parameters:
+        - { name: tenantId, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Keys revoked }
+
+  /api/admin/tenants/{tenantId}/keys/generate:
+    post:
+      tags: [Admin — Tenant Keys]
+      summary: Generate and set a new random signing key for a tenant (super admin only)
+      parameters:
+        - { name: tenantId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: { length: { type: integer, default: 64 } }
+      responses:
+        "200": { description: New key generated }
+
+  /api/admin/tenants/{tenantId}/keys/rotate:
+    post:
+      tags: [Admin — Tenant Keys]
+      summary: Rotate a tenant's signing key with a grace period for in-flight tokens (super admin only)
+      parameters:
+        - { name: tenantId, in: path, required: true, schema: { type: string } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [newKey]
+              properties: { newKey: { type: string, minLength: 32 } }
+      responses:
+        "200": { description: Key rotated }
+
+  /api/admin/keys/reload:
+    post:
+      tags: [Admin — Tenant Keys]
+      summary: Reload signing keys from environment + database (super admin only)
+      responses:
+        "200": { description: Keys reloaded }
+
+  # ── Tenant (current tenant, authenticated) ──────────────────────────────
+  /api/tenant/current:
+    get:
+      tags: [Tenant]
+      summary: Get the resolved current tenant (from subdomain/x-tenant)
+      responses:
+        "200": { description: Tenant summary + plan + branding + features }
+        "404": { description: No tenant context resolved }
+
+  /api/tenant/config:
+    get:
+      tags: [Tenant]
+      summary: Get the current tenant's branding/security/feature config
+      responses:
+        "200": { description: Tenant config }
+
+  /api/tenant/branding:
+    patch:
+      tags: [Tenant]
+      summary: Update tenant branding (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [branding]
+              properties: { branding: { type: object } }
+      responses:
+        "200": { description: Branding updated }
+
+  /api/tenant/general:
+    patch:
+      tags: [Tenant]
+      summary: Update tenant name / regional settings (admin only)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name: { type: string }
+                regional:
+                  type: object
+                  properties:
+                    contactEmail: { type: string }
+                    timezone: { type: string }
+                    currency: { type: string }
+      responses:
+        "200": { description: Updated }
+
+  /api/tenant/security:
+    patch:
+      tags: [Tenant]
+      summary: Update tenant security settings — CORS, MFA, password policy (admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [security]
+              properties: { security: { type: object } }
+      responses:
+        "200": { description: Updated }
+
+  /api/tenant/stats:
+    get:
+      tags: [Tenant]
+      summary: Get usage stats for the current tenant (admin only)
+      responses:
+        "200": { description: Users/courses counts + plan + limits }
+
+  /api/tenant/init:
+    post:
+      tags: [Tenant]
+      summary: Provision a brand-new tenant (super admin only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [subdomain]
+              properties: { subdomain: { type: string } }
+      responses:
+        "201": { description: Tenant created }
+        "409": { description: Tenant already exists }
+
+  /api/tenant/storefront:
+    patch:
+      tags: [Tenant]
+      summary: Update the public storefront/marketplace landing config (admin only)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                landingEnabled: { type: boolean }
+                slug: { type: string }
+                routes: { type: object }
+                content: { type: object }
+                theme: { type: object }
+      responses:
+        "200": { description: Storefront config updated }
+        "400": { description: Validation failed }
+
+  /api/tenant/branding/logo:
+    post:
+      tags: [Tenant]
+      summary: Upload tenant logo as a URL or base64 data URI (max 500KB)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [logoUrl]
+              properties:
+                logoUrl:
+                  type: string
+                  description: "https(s) URL, or data:image/{png,jpeg,svg+xml,webp} base64 URI, <=512000 bytes decoded"
+      responses:
+        "200": { description: Logo saved }
+        "400": { description: Invalid logo URL/image or too large }
+
+  # ── Tenant config: public, unauthenticated lookups ──────────────────────
+  /api/tenant-config/config/{subdomain}:
+    get:
+      tags: [Tenant Config (public)]
+      summary: Public tenant theme/branding lookup by subdomain (no auth — used pre-login)
+      security: []
+      parameters:
+        - { name: subdomain, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Tenant theme/branding/features config }
+        "404": { description: Tenant not found or inactive }
+
+  /api/tenant-config/available:
+    get:
+      tags: [Tenant Config (public)]
+      summary: List active tenants for a tenant switcher (no auth)
+      security: []
+      responses:
+        "200": { description: "Array of { id, name, subdomain, plan }" }
+
+  /api/tenant-config/assets/{subdomain}:
+    get:
+      tags: [Tenant Config (public)]
+      summary: Public tenant assets — logo/favicon/colors (no auth)
+      security: []
+      parameters:
+        - { name: subdomain, in: path, required: true, schema: { type: string } }
+      responses:
+        "200": { description: Tenant asset bundle }
+        "404": { description: Tenant not found }
+
+  # ── Billing ──────────────────────────────────────────────────────────────
+  /api/billing/plan:
+    get:
+      tags: [Billing]
+      summary: Get the effective billing plan for a tenant (server-side plan gates)
+      parameters:
+        - name: tenant
+          in: query
+          required: false
+          schema: { type: string }
+          description: Defaults to the caller's own tenant; only SUPER_ADMIN may query another tenant's plan
+      responses:
+        "200": { description: Billing/plan record }
+        "403": { description: Access denied to requested tenant billing }
+
+  /api/billing/webhook:
+    post:
+      tags: [Billing]
+      summary: Stripe webhook receiver (raw body, signature-verified)
+      security: []
+      parameters:
+        - name: Stripe-Signature
+          in: header
+          required: true
+          schema: { type: string }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { type: string, format: binary, description: Raw Stripe event payload }
+      responses:
+        "200": { description: Event processed }
+        "400": { description: Missing/invalid signature or processing error }
+
+  # ── Jobs (cron-triggered, shared-secret auth) ───────────────────────────
+  /api/jobs/listing-reminders:
+    post:
+      tags: [Jobs]
+      summary: Run the business-listing reminder sweep — intended for external cron (cron-job.org on free tier)
+      security: [{ jobsKey: [] }]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: { tenantId: { type: string, description: Optional — restricts the sweep to one tenant } }
+      responses:
+        "200": { description: Reminder run result }
+        "401": { description: Missing/invalid x-jobs-key header }
+
+  # ── Notifications ────────────────────────────────────────────────────────
+  /api/notifications/templates:
+    get:
+      tags: [Notifications]
+      summary: List email notification templates for the current tenant (admin only)
+      responses:
+        "200": { description: Template list with rendered sample subject/body preview }
+
+  /api/notifications/templates/{id}:
+    patch:
+      tags: [Notifications]
+      summary: Override a template's subject/body for the current tenant (admin only)
+      parameters:
+        - { name: id, in: path, required: true, schema: { type: string } }
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                subject: { type: string }
+                body: { type: string }
+      responses:
+        "200": { description: Override saved }
+
+  # ── Security / SCIM ──────────────────────────────────────────────────────
+  /api/security/scim:
+    get:
+      tags: [Security]
+      summary: Get SCIM provisioning status for the current tenant (admin only)
+      responses:
+        "200": { description: "{ enabled, tokenHint }" }
+
+  /api/security/scim/token:
+    post:
+      tags: [Security]
+      summary: Issue a new SCIM bearer token for the current tenant (admin only)
+      responses:
+        "200": { description: New token (shown once) + tokenHint }
+
+  # ── Commerce webhooks ────────────────────────────────────────────────────
+  /api/commerce/order-status-webhook:
+    post:
+      tags: [Commerce Webhooks]
+      summary: Receive order-status events from an external commerce/fulfillment integration
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: { type: { type: string } }
+      responses:
+        "200": { description: Acknowledged }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        Access token from /api/auth/login, /api/auth/register, or the
+        GraphQL login/register mutations — identical token accepted by both.
+    tenantHeader:
+      type: apiKey
+      in: header
+      name: x-tenant
+      description: Tenant subdomain (e.g. demo, idea-vibes). Same header GraphQL clients send.
+    jobsKey:
+      type: apiKey
+      in: header
+      name: x-jobs-key
+      description: Shared secret for the cron-triggered jobs endpoint (JOBS_API_KEY env var)
+
+  responses:
+    SimpleSuccess:
+      description: Generic success envelope
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean, example: true }
+              message: { type: string }
+    ValidationError:
+      description: Request failed validation
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean, example: false }
+              message: { type: string }
+              errors: { type: object, additionalProperties: { type: string } }
+    AuthError:
+      description: Missing or invalid credentials
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              success: { type: boolean, example: false }
+              message: { type: string }
+
+  schemas:
+    UserProfile:
+      type: object
+      properties:
+        id: { type: string }
+        email: { type: string, format: email }
+        firstName: { type: string }
+        lastName: { type: string }
+        role: { type: string, enum: [SUPER_ADMIN, ADMIN, INSTRUCTOR, USER] }
+        tenant:
+          type: object
+          properties:
+            id: { type: string }
+            name: { type: string }
+            subdomain: { type: string }
+    AuthResponse:
+      type: object
+      properties:
+        success: { type: boolean }
+        message: { type: string }
+        data:
+          type: object
+          properties:
+            token: { type: string, description: Short-lived JWT access token (also usable as GraphQL bearer token) }
+            user: { $ref: "#/components/schemas/UserProfile" }

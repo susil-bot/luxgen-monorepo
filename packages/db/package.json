@@ -2,10 +2,10 @@
   "name": "@luxgen/db",
   "version": "1.0.0",
   "private": true,
-  "main": "dist/index.js",
+  "main": "dist/db/src/index.js",
   "types": "src/index.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "node ../../scripts/tsc-tolerant.js 16 dist/db/src/index.js",
     "dev": "tsc --watch",
     "lint": "eslint src --ext .ts",
     "clean": "rm -rf dist"

@@ -12,6 +12,7 @@ import { schema } from './schema';
 import { context, buildGraphQLContext, type GraphQLContext } from './context';
 import { logger } from './utils/logger';
 import { errorHandler, notFoundHandler } from './utils/errorHandler';
+import { mountApiDocs } from './docs/swagger';
 
 // Middleware
 import { authMiddleware } from './middleware/auth';
@@ -60,6 +61,9 @@ app.post('/api/billing/webhook', express.raw({ type: 'application/json' }), stri
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// ── API docs (public, no tenant/auth required) ─────────────────────────────
+mountApiDocs(app);
 
 // ── Tenant resolution (must run before auth) ───────────────────────────────
 app.use(tenantRoutingMiddleware);

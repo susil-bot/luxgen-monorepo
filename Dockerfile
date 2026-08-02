@@ -80,10 +80,21 @@ RUN node scripts/select-tenant.js ${TENANT} && \
 # whose dist/index.js is missing after the turbo step. Cheap and a no-op
 # when turbo already did its job; only actually compiles anything on the
 # packages where it silently didn't.
+# @luxgen/db's real entrypoint is nested at dist/db/src/index.js, not
+# dist/index.js - it's the one package that imports another package
+# (@luxgen/billing) via the repo's source-level cross-package type
+# resolution, which makes tsc infer rootDir as the common ancestor of both
+# packages' src trees instead of just "./src" (see packages/db/tsconfig.json
+# and scripts/tsc-tolerant.js for the full explanation). package.json's
+# "main" already points at this real path; this loop's existence check has
+# to agree with it or it will "fix" a package that was never actually broken.
 RUN for pkg in config core utils auth db billing agent automation-flow storefront; do \
-      if [ -f "packages/$pkg/package.json" ] && [ ! -f "packages/$pkg/dist/index.js" ]; then \
-        echo "==> packages/$pkg/dist/index.js missing after turbo build - building it directly"; \
-        (cd "packages/$pkg" && npx tsc); \
+      if [ "$pkg" = "db" ]; then entry="packages/$pkg/dist/db/src/index.js"; baseline=16; extra="dist/db/src/index.js"; \
+      elif [ "$pkg" = "agent" ]; then entry="packages/$pkg/dist/agent/src/index.js"; baseline=16; extra="dist/agent/src/index.js"; \
+      else entry="packages/$pkg/dist/index.js"; baseline=0; extra=""; fi; \
+      if [ -f "packages/$pkg/package.json" ] && [ ! -f "$entry" ]; then \
+        echo "==> $entry missing after turbo build - building it directly"; \
+        (cd "packages/$pkg" && node ../../scripts/tsc-tolerant.js "$baseline" $extra); \
       fi; \
     done
 
@@ -126,6 +137,7 @@ RUN adduser --system --uid 1001 nextjs
 # jsonwebtoken, etc. - copied in alongside it.
 COPY --from=builder-api /app/apps/api/dist ./apps/api/dist
 COPY --from=builder-api /app/apps/api/package.json ./apps/api/
+COPY --from=builder-api /app/apps/api/openapi.yaml ./apps/api/openapi.yaml
 COPY --from=builder-api /app/packages ./packages
 COPY --from=deps /app/node_modules ./node_modules
 
