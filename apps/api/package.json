@@ -28,6 +28,7 @@
     "@luxgen/test-harness": "*",
     "@luxgen/utils": "*",
     "@types/ws": "^8.18.1",
+    "apollo-server-core": "^3.12.0",
     "apollo-server-express": "^3.12.0",
     "bcryptjs": "^2.4.3",
     "cookie-parser": "^1.4.7",
