@@ -11,6 +11,17 @@ function isSuperAdminSession(): boolean {
   return session?.role === UserRole.SUPER_ADMIN;
 }
 
+// Tenant switching navigates to https://{subdomain}.luxgen.in via
+// getTenantUrl(), which requires wildcard DNS / a Vercel wildcard domain
+// that isn't set up on this flat-domain deployment (only www.luxgen.in /
+// luxgen.in resolve today). Even with that in place, the backend's
+// tenantAuthMiddleware rejects the existing JWT for any tenant other than
+// the one it was issued for ("Token tenant mismatch"), so switching also
+// needs a SUPER_ADMIN-scoped re-auth endpoint, not just a working link.
+// Disabled until one of those exists — flip this back on then, the rest
+// of the wiring below (GET_TENANTS, onTenantSelect) is unchanged.
+const TENANT_SWITCHING_ENABLED = false;
+
 export function SuperAdminTenantSwitchProvider({ children }: { children: React.ReactNode }) {
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
   const [currentSubdomain, setCurrentSubdomain] = useState('demo');
@@ -28,7 +39,7 @@ export function SuperAdminTenantSwitchProvider({ children }: { children: React.R
   }, [refreshSession]);
 
   const { data } = useQuery(GET_TENANTS, {
-    skip: !isSuperAdmin,
+    skip: !isSuperAdmin || !TENANT_SWITCHING_ENABLED,
     fetchPolicy: 'cache-first',
   });
 
@@ -47,7 +58,7 @@ export function SuperAdminTenantSwitchProvider({ children }: { children: React.R
   }, []);
 
   const value = useMemo(() => {
-    if (!isSuperAdmin || tenants.length === 0) return null;
+    if (!TENANT_SWITCHING_ENABLED || !isSuperAdmin || tenants.length === 0) return null;
     return { currentSubdomain, tenants, onTenantSelect };
   }, [isSuperAdmin, currentSubdomain, tenants, onTenantSelect]);
 
