@@ -12,8 +12,22 @@ export interface TenantContext {
   isCustomDomain: boolean;
 }
 
+// PaaS-provided default hostnames (e.g. luxgen-api.onrender.com) have 3+
+// dot-separated parts too, but the first label is the service name, not a
+// tenant subdomain — without this check, hitting the bare API host directly
+// renders a misleading "tenant luxgen-api not found" page instead of just
+// having no subdomain. Real customer routing goes through a custom domain
+// (or the x-tenant header, which tenantRoutingMiddleware checks separately
+// as a fallback) rather than this host directly.
+const FLAT_HOST_SUFFIXES = ['.onrender.com', '.vercel.app', '.netlify.app'];
+
 export const extractSubdomain = (hostname: string): string | null => {
   const cleanHostname = hostname.split(':')[0];
+
+  if (FLAT_HOST_SUFFIXES.some((suffix) => cleanHostname.endsWith(suffix))) {
+    return null;
+  }
+
   const parts = cleanHostname.split('.');
 
   if (cleanHostname.includes('localhost') || cleanHostname.includes('127.0.0.1')) {
