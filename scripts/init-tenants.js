@@ -187,23 +187,39 @@ async function initializeTenants() {
     // happened to the SUPER_ADMIN account bootstrapped for 'demo' the
     // next time this script ran (e.g. just to pick up a corsOrigins fix).
     // upsert:true still creates it fresh on a truly empty database.
-    // createdAt is preserved on existing docs (read the original value
-    // first) rather than being reset to "now" on every re-run. Mongo
-    // rejects $set on 'metadata' combined with $setOnInsert on
-    // 'metadata.createdAt' in the same update (overlapping paths), so the
-    // existing value is resolved up front and folded into one plain $set.
+    //
+    // On an existing doc, a full $set of every field would also silently
+    // clobber anything hand-edited live in Atlas (e.g. exactly the
+    // corsOrigins/allowedDomains patch this script's own config was meant
+    // to obsolete) the next time someone re-runs this for an unrelated
+    // reason. Default behavior is now: skip existing tenants entirely and
+    // just report their current settings; pass --force to actually
+    // overwrite one with the hardcoded config below. createdAt is still
+    // preserved on a --force overwrite (read the original value first)
+    // rather than being reset to "now" — Mongo rejects $set on 'metadata'
+    // combined with $setOnInsert on 'metadata.createdAt' in the same
+    // update (overlapping paths), so the existing value is resolved up
+    // front and folded into one plain $set.
+    const FORCE = process.argv.includes('--force');
+
     async function upsertTenant(config) {
-      const existing = await tenantsCollection.findOne(
-        { subdomain: config.subdomain },
-        { projection: { 'metadata.createdAt': 1 } },
-      );
+      const existing = await tenantsCollection.findOne({ subdomain: config.subdomain });
+
+      if (existing && !FORCE) {
+        console.log(
+          `⏭️  ${config.subdomain} already exists (_id ${existing._id}) — leaving it untouched.\n` +
+            `   Re-run with --force to overwrite it with the config in this script.`,
+        );
+        return '(existing, left untouched)';
+      }
+
       const createdAt = existing?.metadata?.createdAt || config.metadata.createdAt;
       const result = await tenantsCollection.updateOne(
         { subdomain: config.subdomain },
         { $set: { ...config, metadata: { ...config.metadata, createdAt } } },
         { upsert: true },
       );
-      return result.upsertedId || '(existing _id preserved)';
+      return result.upsertedId || (existing ? '(existing _id preserved, forced overwrite)' : '(existing _id preserved)');
     }
 
     const demoResult = await upsertTenant(demoTenantConfig);
