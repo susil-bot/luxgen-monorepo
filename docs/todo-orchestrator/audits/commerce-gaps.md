@@ -16,7 +16,7 @@ Status: `wired` · `partial` · `missing`
 | --- | --- | --- |
 | Products | partial | Live CRUD via courses GraphQL; TODO `/commerce/products` → actual `/products`; many Phase-3 fields disabled |
 | Orders | partial | List/detail/create via enrollments/`orderRows`; no `/commerce/orders` path |
-| Customers | partial | Admin CRUD at `/admin/customers*`; segmentation page exists (verify depth) |
+| Customers | wired | Admin CRUD at `/admin/customers*`; staff+tenant gates (`T-COM-03`); segmentation live via `customersInSegment` |
 | Bundles | partial | Learner storefront `/store/bundles` only — **no admin commerce bundles CRUD** |
 | Coupons | missing | No coupon pages, schema, or db model found |
 
@@ -93,14 +93,15 @@ Nav: `DefaultNavigation.tsx` — Products, Orders (drafts/abandoned), Customers 
 
 | Capability | Status | Evidence |
 | --- | --- | --- |
-| List + search | wired | `admin/customers/index.tsx` → `GET_CUSTOMERS` |
-| Create | wired | `create.tsx` → `CREATE_USER` (STUDENT) |
+| List + search | wired | `admin/customers/index.tsx` → `GET_CUSTOMERS` (staff + scoped tenant) |
+| Create | wired | `create.tsx` → `CREATE_USER` (STUDENT); `createUser` staff + `scopedTenantId` |
 | Detail / edit | wired | `[id].tsx`, `[id]/edit.tsx` → `GET_USER` / `UPDATE_USER` / `UPDATE_CUSTOMER_NOTES` |
-| Delete | wired | `DELETE_USER` on detail |
-| Segmentation | partial | `segmentation.tsx` exists — checklist: confirm not display-only |
+| Delete | wired | `DELETE_USER` — staff, tenant-scoped, STUDENT/USER only |
+| Staff notes | wired | `updateCustomerNotes` staff + tenant filter (no cross-tenant write) |
+| Segmentation | wired | `segmentation.tsx` → `customersInSegment` (staff-gated) |
 | LTV / cohort widgets | missing | TODO analytics-heavy; not on list |
 
-**API:** `apps/web/graphql/queries/users.ts` · `customers(tenantId, search)` resolver.
+**API:** `apps/web/graphql/queries/users.ts` · `customers` / `createUser` / `updateUser` / `deleteUser` / `updateCustomerNotes`.
 
 ---
 

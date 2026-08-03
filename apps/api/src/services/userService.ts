@@ -106,6 +106,11 @@ export class UserService {
     const user = await User.findOne({ _id: id, tenant: tenantId });
     if (!user) throw new Error('User not found');
 
+    const role = String(user.role);
+    if (role !== 'STUDENT' && role !== 'USER') {
+      throw new Error('Only customer accounts (STUDENT) can be deleted from commerce customers');
+    }
+
     const activeOrders = await Enrollment.countDocuments({
       tenant: tenantId,
       student: id,

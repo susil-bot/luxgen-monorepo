@@ -223,8 +223,17 @@ export const enrollmentResolvers = {
       { input }: { input: { customerId: string; notes: string } },
       context: GraphQLContext,
     ) => {
-      await enrollmentService.updateCustomerNotes(input.customerId, input.notes, actorFromContext(context.user));
-      const user = await User.findById(input.customerId).populate('tenant');
+      if (!context.user) throw new Error('Authentication required');
+      if (!STAFF_ROLES.has(context.user.role)) throw new Error('Staff access required');
+      if (!context.tenantId) throw new Error('Tenant context required');
+      const scoped = scopedTenantId(context, context.tenantId);
+      await enrollmentService.updateCustomerNotes(
+        input.customerId,
+        scoped,
+        input.notes,
+        actorFromContext(context.user),
+      );
+      const user = await User.findOne({ _id: input.customerId, tenant: scoped }).populate('tenant');
       if (!user) throw new Error('Customer not found');
       return user;
     },

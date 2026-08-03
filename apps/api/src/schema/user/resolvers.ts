@@ -9,7 +9,7 @@ import { setRefreshCookie, refreshPayloadFromUser } from '../../utils/refreshTok
 const STAFF_ROLES = new Set<UserRole>([UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.INSTRUCTOR]);
 
 function contextUserId(context: GraphQLContext): string {
-  return context.user?._id?.toString?.() ?? '';
+  return context.user?._id?.toString?.() ?? (context.user as { id?: string } | null)?.id ?? '';
 }
 
 function assertStaff(context: GraphQLContext): void {
@@ -30,6 +30,15 @@ function assertCanReadUser(context: GraphQLContext, userId: string): void {
   throw new GraphQLError('Not authorized to view this user', { extensions: { code: 'FORBIDDEN' } });
 }
 
+function assertCanWriteUser(context: GraphQLContext, userId: string): void {
+  if (!context.user) {
+    throw new GraphQLError('Authentication required', { extensions: { code: 'UNAUTHENTICATED' } });
+  }
+  if (contextUserId(context) === userId) return;
+  if (STAFF_ROLES.has(context.user.role)) return;
+  throw new GraphQLError('Not authorized to update this user', { extensions: { code: 'FORBIDDEN' } });
+}
+
 export const userResolvers = {
   Query: {
     user: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
@@ -41,27 +50,39 @@ export const userResolvers = {
       assertStaff(ctx);
       return userService.getUsersByTenant(scopedTenantId(ctx, tenantId));
     },
-    customers: (_: unknown, { tenantId, search }: { tenantId: string; search?: string }, ctx: GraphQLContext) =>
-      userService.getCustomersByTenant(scopedTenantId(ctx, tenantId), search),
+    customers: (_: unknown, { tenantId, search }: { tenantId: string; search?: string }, ctx: GraphQLContext) => {
+      assertStaff(ctx);
+      return userService.getCustomersByTenant(scopedTenantId(ctx, tenantId), search);
+    },
     currentUser: (_: unknown, __: unknown, context: GraphQLContext) => context.user ?? null,
   },
   Mutation: {
     createUser: async (_: unknown, { input }: { input: any }, context: GraphQLContext) => {
+      assertStaff(context);
+      const tenantId = scopedTenantId(context, input.tenantId);
       const actor = actorFromContext(context.user);
       const user = await userService.createUser({
         ...input,
+        tenantId,
         invitedBy: actor?.id,
       });
-      if (input.role === 'STUDENT') {
+      if (input.role === 'STUDENT' || input.role === 'USER') {
         const userId = (user as { _id?: { toString(): string }; id?: string })._id?.toString?.() ?? user.id;
-        await activityEventService.recordCustomerCreated(input.tenantId, userId, user.email, actor);
+        await activityEventService.recordCustomerCreated(tenantId, userId, user.email, actor);
       }
       return user;
     },
 
     updateUser: async (_: unknown, { id, input }: { id: string; input: any }, context: GraphQLContext) => {
       if (!context.tenantId) throw new Error('Tenant context required');
-      const user = await userService.updateUser(id, context.tenantId, input);
+      assertCanWriteUser(context, id);
+      const scoped = scopedTenantId(context, context.tenantId);
+      // Non-staff cannot escalate their own role
+      const patch = { ...input };
+      if (!STAFF_ROLES.has(context.user!.role)) {
+        delete patch.role;
+      }
+      const user = await userService.updateUser(id, scoped, patch);
       const role = user.role === 'USER' ? 'STUDENT' : user.role;
       if (role === 'STUDENT') {
         const actor = actorFromContext(context.user);
@@ -75,9 +96,10 @@ export const userResolvers = {
       return user;
     },
 
-    deleteUser: (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
+    deleteUser: async (_: unknown, { id }: { id: string }, context: GraphQLContext) => {
+      assertStaff(context);
       if (!context.tenantId) throw new Error('Tenant context required');
-      return userService.deleteUser(id, context.tenantId);
+      return userService.deleteUser(id, scopedTenantId(context, context.tenantId));
     },
 
     login: async (_: unknown, { input }: { input: { email: string; password: string } }, ctx: GraphQLContext) => {
