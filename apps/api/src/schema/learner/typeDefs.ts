@@ -34,6 +34,15 @@ export const learnerTypeDefs = `
     stats: LearnerDashboardStats!
   }
 
+  input LearnerChatMessageInput {
+    role: String!
+    content: String!
+  }
+
+  type LearnerChatResponse {
+    content: String!
+  }
+
   type CustomerSegmentSummary {
     segment: CustomerSegmentId!
     label: String!
@@ -67,5 +76,9 @@ export const learnerTypeDefs = `
     learnerDashboard(tenantId: ID!, studentId: ID): LearnerDashboard!
     customerSegments(tenantId: ID!): [CustomerSegmentSummary!]!
     customersInSegment(tenantId: ID!, segment: CustomerSegmentId!): [CustomerSegmentMember!]!
+  }
+
+  extend type Mutation {
+    learnerChat(messages: [LearnerChatMessageInput!]!): LearnerChatResponse!
   }
 `;
