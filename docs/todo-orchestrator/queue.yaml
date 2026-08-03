@@ -350,7 +350,7 @@ tasks:
     epic: E2
     priority: 0
     sla: M
-    status: todo
+    status: review
     title: Builder canvas add/edit/delete step wired to live mutations
     skill: automation
     source:
@@ -366,6 +366,8 @@ tasks:
     acceptance:
       - User can add configure delete a step and persist
       - iOS tokens; no mock-only save
+    notes: Config-panel Delete + dirty footer + ⌘S / Delete keys —
+      feat/tower-step-crud-persist
   - id: T-AUTO-04
     epic: E2
     priority: 0

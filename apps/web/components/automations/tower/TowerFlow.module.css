@@ -1108,3 +1108,46 @@
     border-top: 1px solid #e1e3e5;
   }
 }
+
+.configDeleteBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: 8px;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  color: var(--color-red);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--color-red) 35%, transparent);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.configDeleteBtn:hover {
+  background: color-mix(in srgb, var(--color-red) 8%, transparent);
+}
+
+.editorFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--color-separator, #e1e3e5);
+  background: var(--color-background-secondary, #f6f6f7);
+}
+
+.editorFooterHint {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-label-secondary);
+}
+
+.editorFooterActions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
