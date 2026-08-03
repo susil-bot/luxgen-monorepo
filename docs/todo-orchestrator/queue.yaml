@@ -546,7 +546,7 @@ tasks:
     epic: E3
     priority: 0
     sla: M
-    status: todo
+    status: review
     title: Customers list detail edit per commerce TODO
     skill: persona-pages
     source:
@@ -560,6 +560,8 @@ tasks:
       - T-E0-04
     acceptance:
       - CRUD chain complete; tenant scoped
+    notes: Staff + tenant gates on customers/create/update/delete/notes —
+      feat/customers-commerce-crud
   - id: T-COM-04
     epic: E3
     priority: 1

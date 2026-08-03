@@ -126,24 +126,30 @@ export class EnrollmentService {
 
   async updateCustomerNotes(
     customerId: string,
+    tenantId: string,
     notes: string,
     actor?: { id: string; name: string },
   ): Promise<{ id: string; staffNotes: string; tenantId: string }> {
-    const user = await User.findById(customerId);
+    const user = await User.findOne({ _id: customerId, tenant: tenantId });
     if (!user) throw new Error('Customer not found');
+
+    const role = String(user.role);
+    if (role !== 'STUDENT' && role !== 'USER') {
+      throw new Error('Staff notes apply to customer accounts only');
+    }
 
     const previous = user.staffNotes ?? '';
     user.staffNotes = notes;
     await user.save();
 
     if (notes.trim() && notes !== previous) {
-      await activityEventService.recordCustomerNoteAdded(user.tenant.toString(), customerId, notes, actor);
+      await activityEventService.recordCustomerNoteAdded(tenantId, customerId, notes, actor);
     }
 
     return {
       id: user.id,
       staffNotes: user.staffNotes ?? '',
-      tenantId: user.tenant.toString(),
+      tenantId,
     };
   }
 

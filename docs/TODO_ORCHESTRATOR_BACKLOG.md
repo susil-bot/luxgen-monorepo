@@ -130,7 +130,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 | --- | --- | --- | --- | --- | --- |
 | [~] `T-COM-01` | P0 | M | L21–L417 | Products list + create/edit: persist all editable fields (no disabled fakes) | review — commerce + collections |
 | [~] `T-COM-02` | P0 | M | L517–L653 | Orders list/detail: status filters + live order fields | review — filters + line items/payment |
-| [ ] `T-COM-03` | P0 | M | L654–L827 | Customers list/detail/edit aligned to commerce TODO | `persona-pages` |
+| [x] `T-COM-03` | P0 | M | L654–L827 | Customers list/detail/edit aligned to commerce TODO | `persona-pages` → review `feat/customers-commerce-crud` |
 | [ ] `T-COM-04` | P1 | M | L418–L516 | Bundles CRUD vertical | `fullstack-developer` |
 | [ ] `T-COM-05` | P1 | M | L828–L944 | Coupons CRUD vertical | `fullstack-developer` |
 | [ ] `T-COM-06` | P1 | M | L945–L1075 | Payments & subscriptions status surfaces | `billing` |
