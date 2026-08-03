@@ -1,8 +1,13 @@
 import React from 'react';
 import { NavItem, UserMenu } from '../index';
-import { MenuItem } from '../Menu';
 import { SidebarSection } from '../Sidebar/Sidebar';
 
+/**
+ * Flat nav list used by UserDashboardLayout/AdminDashboardLayout (a simpler layout variant,
+ * distinct from AppLayout+Sidebar's DEFAULT_SIDEBAR_SECTIONS below, which is what actual pages
+ * use). Kept as-is — every href here is a real, live route. Not touched by the domain-grouping
+ * rework below since these two layouts don't render sectioned/nested nav.
+ */
 export const getDefaultNavItems = (): NavItem[] => [
   { id: 'dashboard', label: 'Dashboard', href: '/dashboard' },
   { id: 'courses', label: 'Courses', href: '/courses' },
@@ -12,249 +17,17 @@ export const getDefaultNavItems = (): NavItem[] => [
   { id: 'settings', label: 'Settings', href: '/settings' },
 ];
 
-export const getDefaultMenuItems = (): MenuItem[] => [
-  {
-    id: 'quick-actions',
-    label: 'Quick Actions',
-    icon: (
-      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-      </svg>
-    ),
-    children: [
-      {
-        id: 'create-group',
-        label: 'Create Group',
-        href: '/groups/create',
-        icon: (
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
-        ),
-      },
-      {
-        id: 'invite-users',
-        label: 'Invite Users',
-        href: '/users/invite',
-        icon: (
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
-            />
-          </svg>
-        ),
-      },
-      {
-        id: 'create-course',
-        label: 'Create Course',
-        href: '/courses/create',
-        icon: (
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-            />
-          </svg>
-        ),
-      },
-      {
-        id: 'generate-report',
-        label: 'Generate Report',
-        href: '/reports/generate',
-        icon: (
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-        ),
-      },
-    ],
-  },
-  {
-    id: 'recent-courses',
-    label: 'Recent Courses',
-    icon: (
-      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-        />
-      </svg>
-    ),
-    children: [
-      {
-        id: 'react-course',
-        label: 'Advanced React Development',
-        href: '/courses/react-advanced',
-        icon: (
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-            />
-          </svg>
-        ),
-      },
-      {
-        id: 'typescript-course',
-        label: 'TypeScript Fundamentals',
-        href: '/courses/typescript-fundamentals',
-        icon: (
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"
-            />
-          </svg>
-        ),
-      },
-    ],
-  },
-  {
-    id: 'recent-groups',
-    label: 'Recent Groups',
-    icon: (
-      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-        />
-      </svg>
-    ),
-    children: [
-      {
-        id: 'dev-team',
-        label: 'Development Team',
-        href: '/groups/1',
-        icon: (
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-            />
-          </svg>
-        ),
-      },
-      {
-        id: 'marketing-team',
-        label: 'Marketing Team',
-        href: '/groups/2',
-        icon: (
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"
-            />
-          </svg>
-        ),
-      },
-    ],
-  },
-  {
-    id: 'admin-tools',
-    label: 'Admin Tools',
-    icon: (
-      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          strokeWidth={2}
-          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-        />
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-    children: [
-      {
-        id: 'user-management',
-        label: 'User Management',
-        href: '/users',
-        icon: (
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"
-            />
-          </svg>
-        ),
-      },
-      {
-        id: 'system-settings',
-        label: 'System Settings',
-        href: '/admin/settings',
-        icon: (
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
-            />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        ),
-      },
-      {
-        id: 'audit-logs',
-        label: 'Audit Logs',
-        href: '/admin/audit',
-        icon: (
-          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-        ),
-      },
-    ],
-  },
-];
-
-/** @deprecated Layout/storybook placeholder only — never pass to AppLayout/NavBar on real pages. Use useLayoutUser() or transformUserDataFromSession(); omit `user` when guest. */
-export const DEFAULT_USER: UserMenu = {
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  role: 'Admin',
-  tenant: { name: 'Demo Platform', subdomain: 'demo' },
-};
-
-export const getDefaultUser = (): UserMenu => DEFAULT_USER;
-
-export const getDefaultLogo = () => ({
-  text: 'LuxGen',
-  href: '/dashboard',
-});
-
+/**
+ * Sidebar grouped by business domain, not by code layer — see docs/PRODUCT_ARCHITECTURE.md and
+ * docs/MENU_STRUCTURE.md. All `href`s are unchanged from the previous flat grouping; this pass
+ * only reorganizes which section each item lives under and a few labels
+ * (Groups -> Teams, section titles), so no route/redirect changes are needed anywhere else in
+ * the app. See docs/AGENT_ORCHESTRATOR.md-adjacent PR for the accompanying doc rewrite.
+ */
 export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
   {
-    id: 'navigation',
-    title: 'Navigation',
+    id: 'home',
+    title: 'Home',
     items: [
       {
         id: 'dashboard',
@@ -278,6 +51,12 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
           </svg>
         ),
       },
+    ],
+  },
+  {
+    id: 'learning',
+    title: 'Learning',
+    items: [
       {
         id: 'courses',
         label: 'Courses',
@@ -299,6 +78,12 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
           </svg>
         ),
       },
+    ],
+  },
+  {
+    id: 'commerce',
+    title: 'Commerce',
+    items: [
       {
         id: 'products',
         label: 'Products',
@@ -354,47 +139,11 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
           </svg>
         ),
       },
-      {
-        id: 'analytics',
-        label: 'Analytics',
-        href: '/analytics',
-        icon: (
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-            />
-          </svg>
-        ),
-      },
-      {
-        id: 'project',
-        label: 'Project',
-        href: '/project/iteration/current',
-        children: [
-          { id: 'project-current', label: 'Ongoing iteration', href: '/project/iteration/current' },
-          { id: 'project-next', label: 'Next iteration', href: '/project/iteration/next' },
-          { id: 'project-priority', label: 'Priority', href: '/project/priority' },
-          { id: 'project-workflows', label: 'My workflows', href: '/project/workflows' },
-        ],
-        icon: (
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
-            />
-          </svg>
-        ),
-      },
     ],
   },
   {
-    id: 'organization',
-    title: 'Organization',
+    id: 'people',
+    title: 'People',
     items: [
       {
         id: 'org-users',
@@ -427,8 +176,12 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
         ),
       },
       {
+        // href unchanged (/organization/groups) — that page is the canonical list view and
+        // already links into /groups/create, /groups/[id], /groups/analytics, etc. for the
+        // actual CRUD flows. Label renamed Groups -> Teams per the domain-model IA; no route
+        // under /groups/* needed to change.
         id: 'org-groups',
-        label: 'Groups',
+        label: 'Teams',
         href: '/organization/groups',
         icon: (
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -441,41 +194,11 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
           </svg>
         ),
       },
-      {
-        id: 'org-security',
-        label: 'Security',
-        href: '/organization/security',
-        icon: (
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
-            />
-          </svg>
-        ),
-      },
-      {
-        id: 'org-billing',
-        label: 'Billing',
-        href: '/organization/billing',
-        icon: (
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"
-            />
-          </svg>
-        ),
-      },
     ],
   },
   {
-    id: 'developer',
-    title: 'Automations',
+    id: 'automation-hub',
+    title: 'Automation Hub',
     items: [
       {
         id: 'automations',
@@ -502,6 +225,54 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
               strokeLinejoin="round"
               strokeWidth={2}
               d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"
+            />
+          </svg>
+        ),
+      },
+    ],
+  },
+  {
+    id: 'intelligence',
+    title: 'Intelligence',
+    items: [
+      {
+        id: 'analytics',
+        label: 'Analytics',
+        href: '/analytics',
+        icon: (
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+            />
+          </svg>
+        ),
+      },
+    ],
+  },
+  {
+    id: 'workspace',
+    title: 'Workspace',
+    items: [
+      {
+        id: 'project',
+        label: 'Project',
+        href: '/project/iteration/current',
+        children: [
+          { id: 'project-current', label: 'Ongoing iteration', href: '/project/iteration/current' },
+          { id: 'project-next', label: 'Next iteration', href: '/project/iteration/next' },
+          { id: 'project-priority', label: 'Priority', href: '/project/priority' },
+          { id: 'project-workflows', label: 'My workflows', href: '/project/workflows' },
+        ],
+        icon: (
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2"
             />
           </svg>
         ),
@@ -560,9 +331,39 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
     ],
   },
   {
-    id: 'developer-tools',
-    title: 'Developer',
+    id: 'administration',
+    title: 'Administration',
     items: [
+      {
+        id: 'org-security',
+        label: 'Security',
+        href: '/organization/security',
+        icon: (
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+            />
+          </svg>
+        ),
+      },
+      {
+        id: 'org-billing',
+        label: 'Billing',
+        href: '/organization/billing',
+        icon: (
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"
+            />
+          </svg>
+        ),
+      },
       {
         id: 'agent-studio',
         label: 'Agent Studio',
@@ -584,21 +385,6 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
     id: 'settings',
     title: 'Settings',
     items: [
-      {
-        id: 'billing',
-        label: 'Billing',
-        href: '/organization/billing',
-        icon: (
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"
-            />
-          </svg>
-        ),
-      },
       {
         id: 'profile',
         label: 'Profile',
@@ -635,3 +421,18 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
 ];
 
 export const getDefaultSidebarSections = (): SidebarSection[] => DEFAULT_SIDEBAR_SECTIONS;
+
+/** @deprecated Layout/storybook placeholder only — never pass to AppLayout/NavBar on real pages. Use useLayoutUser() or transformUserDataFromSession(); omit `user` when guest. */
+export const DEFAULT_USER: UserMenu = {
+  name: 'John Doe',
+  email: 'john.doe@example.com',
+  role: 'Admin',
+  tenant: { name: 'Demo Platform', subdomain: 'demo' },
+};
+
+export const getDefaultUser = (): UserMenu => DEFAULT_USER;
+
+export const getDefaultLogo = () => ({
+  text: 'LuxGen',
+  href: '/dashboard',
+});

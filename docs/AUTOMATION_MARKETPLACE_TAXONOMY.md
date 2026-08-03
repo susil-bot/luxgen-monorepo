@@ -36,6 +36,7 @@ This is the actual catalog, not a wishlist. Anything not listed here doesn't exi
 | `learner.user.enrolled` | learner | New enrollment |
 | `learner.group.joined` | learner | Learner added to a group/team |
 | `learner.certificate.issued` | learner | Certificate issued |
+| `learner.certificate.expiring_soon` | learner | Certificate approaching its recertification window |
 | `core.schedule.cron` | core | Recurring schedule (cron expression) |
 | `core.webhook.received` | core | Inbound webhook |
 | `developer.code.staged` / `.committed` / `.merged` / `.failed` | developer | Agent Studio pipeline events |
@@ -60,12 +61,15 @@ This is the actual catalog, not a wishlist. Anything not listed here doesn't exi
 | `core.schedule.delay_event` | Re-emit an event after a delay (distinct from a `wait` node — see `TEMPLATE_CONTROL_CORE.md`) |
 | `learner.enrollment.add_to_group` | Add a learner to a group |
 | `learner.course.enroll` | Enroll a learner in a course |
+| `learner.certificate.issue` | Generate a completion certificate and set its recertification window |
 | `developer.agent.run_task` | Kick off an Agent Studio task |
 | `core.wait.delay` | Pause a flow for N seconds before the next node |
 
-**Note:** `learner.certificate.expiring_soon` (trigger) and `learner.certificate.issue` (action) are
-in progress on a separate branch (`feat/automation-hub-industry-compounds`) — not yet merged, not
-listed above since this table reflects what's actually on `main`.
+**Ground-truth check (re-verified against `origin/main` before this PR branched):** the
+certificate-reminder compounds (`learner.certificate.expiring_soon` trigger,
+`learner.certificate.issue` action) landed via the now-merged
+`feat/automation-hub-industry-compounds` PR (#443/#444) — included in the tables above as real,
+not aspirational. `docs/AUTOMATION_HUB_STRATEGY.md` (referenced above) also now exists on `main`.
 
 ## Scoring framework for new compounds/templates
 
@@ -85,7 +89,7 @@ Before building a new trigger, action, or template, score it against:
 | Rank | Template/Compound | Status | Rationale |
 | --- | --- | --- | --- |
 | 1 | Abandoned Cart Reminder | **Shipped** (`commerce.order.drafted` → wait → `core.condition.field_equals` → `core.notification.send_email`) | Very frequent, urgent, direct revenue impact |
-| 2 | Certification Renewal Alert | In progress, unmerged (`feat/automation-hub-industry-compounds`) | Frequent in compliance-training/franchise/healthcare, low competition |
+| 2 | Certification Renewal Alert | **Shipped** (`learner.certificate.expiring_soon` → `core.notification.send_email` / `learner.certificate.issue`) | Frequent in compliance-training/franchise/healthcare, low competition |
 | 3 | New Student Onboarding | Proposed | Universal pain point, composable from existing `learner.user.enrolled` trigger + `core.notification.send_email` action — no new compound needed |
 | 4 | Course Completion Upsell | Proposed | `learner.course.completed` trigger already exists; needs a "suggest next course" action (new) |
 | 5 | Payment Failed/Retry | Proposed | Needs a new `commerce.payment.failed` trigger — not yet in the catalog |
