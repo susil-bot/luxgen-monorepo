@@ -3,7 +3,7 @@ import Head from 'next/head';
 import { EditProfile, EditProfileData } from '@luxgen/ui';
 
 const SettingsPage: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'profile' | 'preferences' | 'security'>('profile');
+  const [activeTab] = useState<'profile' | 'preferences' | 'security'>('profile');
   const [loading, setLoading] = useState(false);
 
   const handleSaveProfile = async (data: EditProfileData) => {
@@ -25,11 +25,6 @@ const SettingsPage: React.FC = () => {
     }
   };
 
-  const tabs = [
-    { id: 'profile', label: 'Edit Profile' },
-    { id: 'preferences', label: 'Preferences' },
-    { id: 'security', label: 'Security' },
-  ] as const;
 
   return (
     <>
