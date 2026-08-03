@@ -60,7 +60,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: apps/api/Dockerfile
       target: runner
     container_name: luxgen-api-prod
     restart: unless-stopped
@@ -97,8 +97,12 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: apps/web/Dockerfile
       target: runner
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_APP_ENV: production
     container_name: luxgen-web-prod
     restart: unless-stopped
     ports:
@@ -106,6 +110,8 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      API_URL: http://api:4000
+      GRAPHQL_URL: http://api:4000/graphql
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
       NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
     depends_on:
