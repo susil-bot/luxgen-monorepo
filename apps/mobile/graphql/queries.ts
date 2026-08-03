@@ -57,6 +57,14 @@ export const GET_CURRENT_USER = gql`
   }
 `;
 
+export const LEARNER_CHAT_MUTATION = gql`
+  mutation LearnerChat($messages: [LearnerChatMessageInput!]!) {
+    learnerChat(messages: $messages) {
+      content
+    }
+  }
+`;
+
 export const GET_COURSES = gql`
   query GetCourses($tenantId: ID!) {
     courses(tenantId: $tenantId) {
