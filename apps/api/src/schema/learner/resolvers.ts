@@ -1,8 +1,10 @@
+import { GraphQLError } from 'graphql';
 import { UserRole } from '@luxgen/db';
 import type { GraphQLContext } from '../../context';
 import { scopedTenantId } from '../../graphql/tenantScope';
 import { enrollmentService } from '../../services/enrollmentService';
 import { learnerService, type CustomerSegmentId } from '../../services/learnerService';
+import { learnerChatService, type LearnerChatMessage } from '../../services/learnerChatService';
 
 const STAFF_ROLES = new Set<UserRole>([UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.INSTRUCTOR]);
 
@@ -66,6 +68,41 @@ export const learnerResolvers = {
     ) => {
       assertStaff(context);
       return learnerService.getCustomersInSegment(scopedTenantId(context, tenantId), segment);
+    },
+  },
+  Mutation: {
+    learnerChat: async (_: unknown, { messages }: { messages: LearnerChatMessage[] }, context: GraphQLContext) => {
+      if (!context.user) throw new GraphQLError('Authentication required', { extensions: { code: 'UNAUTHENTICATED' } });
+      if (!Array.isArray(messages) || messages.length === 0 || messages.length > 20) {
+        throw new GraphQLError('Provide between 1 and 20 chat messages', { extensions: { code: 'BAD_USER_INPUT' } });
+      }
+
+      const sanitizedMessages = messages.map((message) => ({
+        role: message.role,
+        content: message.content.trim(),
+      }));
+
+      if (
+        sanitizedMessages.some(
+          (message) =>
+            (message.role !== 'user' && message.role !== 'assistant') ||
+            !message.content ||
+            message.content.length > 4_000,
+        )
+      ) {
+        throw new GraphQLError('Chat messages must have a valid role and content up to 4,000 characters', {
+          extensions: { code: 'BAD_USER_INPUT' },
+        });
+      }
+
+      try {
+        return { content: await learnerChatService.respond(sanitizedMessages) };
+      } catch (error) {
+        throw new GraphQLError('The learning assistant is temporarily unavailable. Please try again shortly.', {
+          extensions: { code: 'SERVICE_UNAVAILABLE' },
+          originalError: error instanceof Error ? error : undefined,
+        });
+      }
     },
   },
 };

@@ -24,26 +24,9 @@ export default function SignUpScreen({ navigation }: Props) {
       <Text style={[styles.subHeader, { color: theme.subtext }]}>Log in before you start learning</Text>
 
       <View style={styles.socialButtons}>
-        <TouchableOpacity
-          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
-          onPress={() => showSocialLoginUnavailable('google')}
-        >
-          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Google</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
-          onPress={() => showSocialLoginUnavailable('apple')}
-        >
-          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Apple</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
-          onPress={() => showSocialLoginUnavailable('facebook')}
-        >
-          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Facebook</Text>
-        </TouchableOpacity>
+        <SocialAuthButton provider="google" onPress={() => showSocialLoginUnavailable('google')} />
+        <SocialAuthButton provider="apple" onPress={() => showSocialLoginUnavailable('apple')} />
+        <SocialAuthButton provider="facebook" onPress={() => showSocialLoginUnavailable('facebook')} />
       </View>
 
       <TouchableOpacity

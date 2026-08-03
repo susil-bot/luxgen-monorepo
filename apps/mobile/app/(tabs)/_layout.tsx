@@ -25,6 +25,7 @@ export default function TabsLayout() {
       }}
     >
       <Tabs.Screen name="dashboard" options={{ title: 'Home' }} />
+      <Tabs.Screen name="chat" options={{ title: 'AI Chat' }} />
       <Tabs.Screen name="courses" options={{ title: 'Courses' }} />
       <Tabs.Screen name="enrollments" options={{ title: 'Learning' }} />
       <Tabs.Screen name="profile" options={{ title: 'Account' }} />

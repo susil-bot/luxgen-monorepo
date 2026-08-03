@@ -9,19 +9,24 @@ import {
   ScrollView,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
+import { BackButton } from '../components/BackButton';
 import { requestPasswordReset } from '../../lib/auth-api';
 import type { LearnerNavigation } from '../../lib/learner-navigation';
 
 type Props = {
   navigation: LearnerNavigation;
   email?: string;
+  /** Prefill from forgot-password when API returns a local/dev token */
+  initialToken?: string;
 };
 
-export default function OTPScreen({ navigation, email = '' }: Props) {
+export default function OTPScreen({ navigation, email = '', initialToken = '' }: Props) {
   const theme = useTheme();
-  const [token, setToken] = useState('');
+  const [token, setToken] = useState(initialToken);
   const [resending, setResending] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  const [message, setMessage] = useState<string | null>(
+    initialToken ? 'Local/dev: reset code filled from the API (EMAIL_PROVIDER=log does not send real email).' : null,
+  );
   const [error, setError] = useState<string | null>(null);
 
   const handleResend = async () => {
@@ -32,8 +37,12 @@ export default function OTPScreen({ navigation, email = '' }: Props) {
     setResending(true);
     setError(null);
     try {
-      const msg = await requestPasswordReset(email);
-      setMessage(msg);
+      const result = await requestPasswordReset(email);
+      setMessage(result.message);
+      if (result.resetToken) {
+        setToken(result.resetToken);
+        setMessage('Local/dev: new reset code filled from the API (no real email when EMAIL_PROVIDER=log).');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to resend code');
     } finally {
@@ -48,14 +57,12 @@ export default function OTPScreen({ navigation, email = '' }: Props) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={[styles.backArrow, { color: theme.text }]}>{'<'}</Text>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} style={styles.backBtn} />
 
         <Text style={[styles.heading, { color: theme.text }]}>Enter Reset Code</Text>
         <Text style={[styles.description, { color: theme.subtext }]}>
-          Paste the reset code from your email{email ? ` (${email})` : ''}. You can also open the link from the email to
-          land here automatically.
+          Paste the reset code from your email{email ? ` (${email})` : ''}. In local development the code is filled
+          automatically when the API uses EMAIL_PROVIDER=log.
         </Text>
 
         <TextInput
@@ -96,10 +103,6 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     marginBottom: 28,
-    alignSelf: 'flex-start',
-  },
-  backArrow: {
-    fontSize: 24,
   },
   heading: {
     fontSize: 26,

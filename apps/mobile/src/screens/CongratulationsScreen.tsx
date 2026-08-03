@@ -4,19 +4,29 @@ import { useRouter } from 'expo-router';
 import Image27Svg from '../assets/images/image27.svg';
 import { useTheme } from '../theme/ThemeContext';
 import { skillLevelFromPercent } from '../data/skill-assessment';
-import type { LearnerNavigation } from '../../lib/learner-navigation';
+import { useAuth } from '../../hooks/useAuth';
+import { DASHBOARD_ROUTE, markSkillCheckCompleted } from '../../lib/skill-check';
 
 type Props = {
-  navigation: LearnerNavigation;
   correct?: number;
   total?: number;
   percent?: number;
 };
 
-export default function CongratulationsScreen({ navigation, correct, total, percent }: Props) {
+export default function CongratulationsScreen({ correct, total, percent }: Props) {
+  const router = useRouter();
+  const { user } = useAuth();
   const theme = useTheme();
   const scored = typeof percent === 'number' && !Number.isNaN(percent);
   const level = skillLevelFromPercent(scored ? percent : 70);
+
+  const handleFinish = async () => {
+    try {
+      if (user?.id) await markSkillCheckCompleted(user.id);
+    } finally {
+      router.replace(DASHBOARD_ROUTE);
+    }
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>

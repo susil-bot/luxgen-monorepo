@@ -10,8 +10,13 @@ async function authHeaders(): Promise<HeadersInit> {
   };
 }
 
-export async function requestPasswordReset(email: string): Promise<string> {
-  const tenant = await resolveRequestTenant();
+export type PasswordResetRequestResult = {
+  message: string;
+  /** Present in local/dev when EMAIL_PROVIDER=log — paste into OTP screen */
+  resetToken?: string;
+};
+
+export async function requestPasswordReset(email: string): Promise<PasswordResetRequestResult> {
   let tenantMongoId: string | undefined;
 
   try {
@@ -26,7 +31,8 @@ export async function requestPasswordReset(email: string): Promise<string> {
     headers: await authHeaders(),
     body: JSON.stringify({
       email: email.trim().toLowerCase(),
-      ...(tenantMongoId ? { tenant: tenantMongoId } : { tenant }),
+      // Only send Mongo ObjectId — subdomain strings like "demo" crash the API cast
+      ...(tenantMongoId && /^[a-fA-F0-9]{24}$/.test(tenantMongoId) ? { tenant: tenantMongoId } : {}),
     }),
   });
 
@@ -35,7 +41,10 @@ export async function requestPasswordReset(email: string): Promise<string> {
     throw new Error(result.message || 'Failed to send reset code');
   }
 
-  return result.message as string;
+  return {
+    message: result.message as string,
+    resetToken: typeof result.devResetToken === 'string' ? result.devResetToken : undefined,
+  };
 }
 
 export async function resetPasswordWithToken(token: string, password: string): Promise<string> {

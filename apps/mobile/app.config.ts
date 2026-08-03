@@ -3,6 +3,8 @@ import { ExpoConfig, ConfigContext } from 'expo/config';
 const tenantSlug = process.env.EXPO_PUBLIC_TENANT_SLUG;
 const appName = process.env.EXPO_PUBLIC_APP_NAME ?? 'LuxGen';
 const bundleSuffix = tenantSlug ? `.${tenantSlug}` : '';
+const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? process.env.EXPO_PUBLIC_GRAPHQL_URL;
+const allowsCleartextApi = process.env.NODE_ENV !== 'production' && apiUrl?.startsWith('http://');
 
 export default ({ config }: ConfigContext): ExpoConfig => ({
   ...config,
@@ -16,12 +18,22 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
   ios: {
     supportsTablet: true,
     bundleIdentifier: `com.luxgen.mobile${bundleSuffix}`,
+    ...(allowsCleartextApi
+      ? {
+          infoPlist: {
+            NSAppTransportSecurity: {
+              NSAllowsArbitraryLoads: true,
+            },
+          },
+        }
+      : {}),
   },
   android: {
     adaptiveIcon: {
       backgroundColor: '#007AFF',
     },
     package: `com.luxgen.mobile${bundleSuffix}`,
+    ...(allowsCleartextApi ? ({ usesCleartextTraffic: true } as Record<string, unknown>) : {}),
   },
   plugins: ['expo-router', 'expo-secure-store', 'expo-notifications'],
   updates: {
