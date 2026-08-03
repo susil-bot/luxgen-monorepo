@@ -22,6 +22,7 @@ export function getUserSearchFieldFragment(): string {
       firstName
       lastName
       role
+      status
     }
   `;
 }

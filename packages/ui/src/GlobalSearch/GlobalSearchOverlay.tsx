@@ -28,6 +28,16 @@ export const DEFAULT_GLOBAL_SEARCH_FILTERS: GlobalSearchFilter[] = [
   { id: 'settings', label: 'Settings' },
 ];
 
+export interface GlobalSearchResultItem {
+  id: string;
+  kind: 'course' | 'learner' | string;
+  title: string;
+  typeLabel: string;
+  status?: string;
+  metadata?: string;
+  href: string;
+}
+
 export interface GlobalSearchOverlayProps {
   open: boolean;
   onClose: () => void;
@@ -35,11 +45,28 @@ export interface GlobalSearchOverlayProps {
   initialQuery?: string;
   filters?: GlobalSearchFilter[];
   placeholder?: string;
+  /** Live hits (courses + learners). Filtered by sidebar type. */
+  results?: GlobalSearchResultItem[];
+  loading?: boolean;
+  error?: string | null;
+  onQueryChange?: (query: string) => void;
+  onSelectResult?: (item: GlobalSearchResultItem) => void;
+}
+
+const LIVE_FILTERS = new Set<GlobalSearchFilterId>(['all', 'courses', 'learners']);
+
+function filterResults(
+  results: GlobalSearchResultItem[],
+  activeFilter: GlobalSearchFilterId,
+): GlobalSearchResultItem[] {
+  if (activeFilter === 'all') return results;
+  if (activeFilter === 'courses') return results.filter((r) => r.kind === 'course');
+  if (activeFilter === 'learners') return results.filter((r) => r.kind === 'learner');
+  return [];
 }
 
 /**
- * Global search modal shell — filter sidebar + results panel.
- * Live result cards land in a follow-up task; this ships structure + keyboard chrome only.
+ * Global search modal — filter sidebar + live course/learner result cards.
  */
 export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
   open,
@@ -47,6 +74,11 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
   initialQuery = '',
   filters = DEFAULT_GLOBAL_SEARCH_FILTERS,
   placeholder = 'Search anything…',
+  results = [],
+  loading = false,
+  error = null,
+  onQueryChange,
+  onSelectResult,
 }) => {
   const titleId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -57,6 +89,7 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
     if (!open) return;
     setQuery(initialQuery);
     setActiveFilter('all');
+    onQueryChange?.(initialQuery);
     const t = window.setTimeout(() => inputRef.current?.focus(), 0);
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -64,6 +97,8 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
       window.clearTimeout(t);
       document.body.style.overflow = prevOverflow;
     };
+    // intentionally omit onQueryChange — stable enough via host
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initialQuery]);
 
   useEffect(() => {
@@ -80,6 +115,24 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
   }, [open, onClose]);
 
   if (!open) return null;
+
+  const trimmed = query.trim();
+  const visible = filterResults(results, activeFilter);
+  const filterSupportsLive = LIVE_FILTERS.has(activeFilter);
+
+  const handleQueryChange = (next: string) => {
+    setQuery(next);
+    onQueryChange?.(next);
+  };
+
+  const handleSelect = (item: GlobalSearchResultItem) => {
+    if (onSelectResult) {
+      onSelectResult(item);
+      return;
+    }
+    window.location.assign(item.href);
+    onClose();
+  };
 
   return (
     <div
@@ -111,7 +164,6 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
           Global search
         </h2>
 
-        {/* Search input */}
         <div
           className="flex items-center gap-3 px-4"
           style={{
@@ -138,7 +190,7 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
             ref={inputRef}
             type="search"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => handleQueryChange(e.target.value)}
             placeholder={placeholder}
             aria-label={placeholder}
             className="flex-1 min-w-0 bg-transparent outline-none text-base"
@@ -161,7 +213,6 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
           </button>
         </div>
 
-        {/* Filter sidebar + results */}
         <div className="flex flex-1 min-h-0 overflow-hidden">
           <aside
             className="hidden sm:flex flex-col flex-shrink-0 overflow-y-auto"
@@ -208,8 +259,10 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
             style={{ backgroundColor: 'var(--color-bg-secondary)' }}
             aria-live="polite"
           >
-            {/* Mobile filter chips */}
-            <div className="flex sm:hidden gap-2 overflow-x-auto pb-3 mb-2" style={{ borderBottom: '1px solid var(--color-separator)' }}>
+            <div
+              className="flex sm:hidden gap-2 overflow-x-auto pb-3 mb-2"
+              style={{ borderBottom: '1px solid var(--color-separator)' }}
+            >
               {filters.map((f) => {
                 const selected = f.id === activeFilter;
                 return (
@@ -230,18 +283,18 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
               })}
             </div>
 
-            <div className="ios-empty-state py-10 px-4 text-center">
-              <p className="text-sm font-medium" style={{ color: 'var(--color-label-primary)' }}>
-                {query.trim() ? 'Results will appear here' : 'Start typing to search…'}
-              </p>
-              <p className="text-xs mt-2" style={{ color: 'var(--color-label-tertiary)' }}>
-                Filter: {filters.find((f) => f.id === activeFilter)?.label ?? 'All Types'}
-              </p>
-            </div>
+            <ResultsPanel
+              trimmed={trimmed}
+              loading={loading}
+              error={error}
+              filterSupportsLive={filterSupportsLive}
+              activeFilterLabel={filters.find((f) => f.id === activeFilter)?.label ?? 'All Types'}
+              visible={visible}
+              onSelect={handleSelect}
+            />
           </div>
         </div>
 
-        {/* Keyboard footer */}
         <div
           className="flex items-center px-4 text-[11px] gap-3 flex-wrap"
           style={{
@@ -265,6 +318,129 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
     </div>
   );
 };
+
+function ResultsPanel({
+  trimmed,
+  loading,
+  error,
+  filterSupportsLive,
+  activeFilterLabel,
+  visible,
+  onSelect,
+}: {
+  trimmed: string;
+  loading: boolean;
+  error: string | null;
+  filterSupportsLive: boolean;
+  activeFilterLabel: string;
+  visible: GlobalSearchResultItem[];
+  onSelect: (item: GlobalSearchResultItem) => void;
+}) {
+  if (!trimmed) {
+    return (
+      <div className="ios-empty-state py-10 px-4 text-center">
+        <p className="text-sm font-medium" style={{ color: 'var(--color-label-primary)' }}>
+          Start typing to search…
+        </p>
+        <p className="text-xs mt-2" style={{ color: 'var(--color-label-tertiary)' }}>
+          Courses and learners in this tenant
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="ios-empty-state py-10 px-4 text-center">
+        <p className="text-sm font-medium" style={{ color: 'var(--color-red)' }}>
+          Search temporarily unavailable
+        </p>
+        <p className="text-xs mt-2" style={{ color: 'var(--color-label-tertiary)' }}>
+          {error}
+        </p>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="ios-empty-state py-10 px-4 text-center">
+        <div className="ios-spinner mx-auto mb-3" aria-hidden />
+        <p className="text-sm" style={{ color: 'var(--color-label-secondary)' }}>
+          Searching…
+        </p>
+      </div>
+    );
+  }
+
+  if (!filterSupportsLive) {
+    return (
+      <div className="ios-empty-state py-10 px-4 text-center">
+        <p className="text-sm font-medium" style={{ color: 'var(--color-label-primary)' }}>
+          No {activeFilterLabel.toLowerCase()} results yet
+        </p>
+        <p className="text-xs mt-2" style={{ color: 'var(--color-label-tertiary)' }}>
+          Try Courses or Learners — other types come later
+        </p>
+      </div>
+    );
+  }
+
+  if (visible.length === 0) {
+    return (
+      <div className="ios-empty-state py-10 px-4 text-center">
+        <p className="text-sm font-medium" style={{ color: 'var(--color-label-primary)' }}>
+          No results found
+        </p>
+        <p className="text-xs mt-2" style={{ color: 'var(--color-label-tertiary)' }}>
+          Nothing matched “{trimmed}” in {activeFilterLabel.toLowerCase()}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <ul className="list-none m-0 p-0 flex flex-col">
+      {visible.map((item) => (
+        <li key={`${item.kind}-${item.id}`} style={{ borderBottom: '1px solid var(--color-separator)' }}>
+          <button
+            type="button"
+            onClick={() => onSelect(item)}
+            className="w-full text-left flex items-start gap-3 px-2 py-3 rounded-md transition-colors"
+            style={{ color: 'var(--color-label-primary)' }}
+            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-fill-quaternary)')}
+            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+          >
+            <span
+              className="flex-shrink-0 w-8 h-8 rounded-md flex items-center justify-center text-sm"
+              style={{ backgroundColor: 'var(--color-fill-tertiary)' }}
+              aria-hidden
+            >
+              {item.kind === 'course' ? '🎓' : '👤'}
+            </span>
+            <span className="flex-1 min-w-0">
+              <span className="flex items-start justify-between gap-2">
+                <span className="text-sm font-semibold truncate">{item.title}</span>
+                <span className="text-xs flex-shrink-0" style={{ color: 'var(--color-blue)' }}>
+                  Open
+                </span>
+              </span>
+              <span className="block text-xs mt-0.5" style={{ color: 'var(--color-label-secondary)' }}>
+                {item.typeLabel}
+                {item.status ? ` · ${item.status}` : ''}
+              </span>
+              {item.metadata ? (
+                <span className="block text-xs mt-0.5 truncate" style={{ color: 'var(--color-label-tertiary)' }}>
+                  {item.metadata}
+                </span>
+              ) : null}
+            </span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 const kbdStyle: React.CSSProperties = {
   display: 'inline-block',

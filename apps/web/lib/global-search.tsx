@@ -1,5 +1,8 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useDeferredValue, useEffect, useState, type ReactNode } from 'react';
+import { useRouter } from 'next/router';
 import { GlobalSearchOverlay } from '@luxgen/ui';
+import { useSearchPresenter } from '@luxgen/presenters/search';
+import { useAppTenant, useAppTenantId } from './app-layout-user';
 
 export const OPEN_GLOBAL_SEARCH_EVENT = 'luxgen-open-global-search';
 
@@ -23,20 +26,27 @@ function isEditableTarget(target: EventTarget | null): boolean {
 }
 
 /**
- * Mount once in `_app` — Cmd/Ctrl+K opens the global search overlay shell.
- * Does not fabricate users; guest NavBar/session rules stay with layout headers.
+ * Mount once in `_app` — Cmd/Ctrl+K opens global search with live course/learner cards.
  */
 export function GlobalSearchHost({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const tenant = useAppTenant();
+  const tenantId = useAppTenantId();
   const [open, setOpen] = useState(false);
   const [initialQuery, setInitialQuery] = useState('');
+  const [query, setQuery] = useState('');
+  const deferredQuery = useDeferredValue(query);
 
   const close = useCallback(() => {
     setOpen(false);
     setInitialQuery('');
+    setQuery('');
   }, []);
 
-  const openWith = useCallback((query?: string) => {
-    setInitialQuery(query?.trim() ?? '');
+  const openWith = useCallback((q?: string) => {
+    const next = q?.trim() ?? '';
+    setInitialQuery(next);
+    setQuery(next);
     setOpen(true);
   }, []);
 
@@ -52,23 +62,39 @@ export function GlobalSearchHost({ children }: { children: ReactNode }) {
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (!(e.metaKey || e.ctrlKey) || e.key.toLowerCase() !== 'k') return;
-      // Always intercept so the browser find UI does not steal focus
       e.preventDefault();
       if (open) {
         close();
         return;
       }
-      // Allow Cmd+K even from inputs (common command-palette UX)
       openWith(isEditableTarget(e.target) && e.target instanceof HTMLInputElement ? e.target.value : undefined);
     };
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [open, close, openWith]);
 
+  const { viewModel, loading, error } = useSearchPresenter({
+    query: open ? deferredQuery : '',
+    tenantId,
+    tenant,
+  });
+
   return (
     <>
       {children}
-      <GlobalSearchOverlay open={open} onClose={close} initialQuery={initialQuery} />
+      <GlobalSearchOverlay
+        open={open}
+        onClose={close}
+        initialQuery={initialQuery}
+        results={viewModel.results}
+        loading={loading}
+        error={error}
+        onQueryChange={setQuery}
+        onSelectResult={(item) => {
+          close();
+          void router.push(item.href);
+        }}
+      />
     </>
   );
 }
