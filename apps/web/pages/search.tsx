@@ -14,7 +14,7 @@ export default function SearchPage() {
   const { sidebarSections, logo } = useAppShellConfig();
   const tenantId = useAppTenantId();
 
-  const { viewModel, loading } = useSearchPresenter({
+  const { viewModel, loading, error } = useSearchPresenter({
     query: q,
     tenantId,
     tenant,
@@ -27,7 +27,9 @@ export default function SearchPage() {
         <div className="max-w-3xl mx-auto px-4 py-8">
           <h1 className="ios-large-title mb-2">Search</h1>
           {!viewModel.hasQuery ? (
-            <PageEmptyState title="Enter a search term" subtitle="Use the nav search bar to find courses and users." />
+            <PageEmptyState title="Enter a search term" subtitle="Use ⌘K / Ctrl+K or the nav search to find courses and learners." />
+          ) : error ? (
+            <PageEmptyState title="Search temporarily unavailable" subtitle={error} />
           ) : loading ? (
             <p className="text-secondary text-sm">Searching…</p>
           ) : viewModel.isEmpty ? (
@@ -36,25 +38,60 @@ export default function SearchPage() {
             <div className="space-y-6">
               <section>
                 <h2 className="font-semibold mb-2">Courses ({viewModel.courseCount})</h2>
-                <ul className="space-y-2">
+                <ul className="space-y-1 list-none m-0 p-0">
                   {viewModel.courses.map((c) => (
-                    <li key={c.id}>
-                      <a href={c.href} className="text-blue hover:underline">
-                        {c.title}
+                    <li key={c.id} style={{ borderBottom: '1px solid var(--color-separator)' }}>
+                      <a
+                        href={c.href}
+                        className="flex items-start gap-3 py-3 no-underline"
+                        style={{ color: 'var(--color-label-primary)' }}
+                      >
+                        <span className="text-sm" aria-hidden>
+                          🎓
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-semibold">{c.title}</span>
+                          <span className="block text-xs" style={{ color: 'var(--color-label-secondary)' }}>
+                            {c.typeLabel} · {c.status}
+                          </span>
+                          <span className="block text-xs truncate" style={{ color: 'var(--color-label-tertiary)' }}>
+                            {c.metadata}
+                          </span>
+                        </span>
+                        <span className="text-xs" style={{ color: 'var(--color-blue)' }}>
+                          Open
+                        </span>
                       </a>
                     </li>
                   ))}
                 </ul>
               </section>
               <section>
-                <h2 className="font-semibold mb-2">Users ({viewModel.userCount})</h2>
-                <ul className="space-y-2">
+                <h2 className="font-semibold mb-2">Learners ({viewModel.userCount})</h2>
+                <ul className="space-y-1 list-none m-0 p-0">
                   {viewModel.users.map((u) => (
-                    <li key={u.id}>
-                      <span className="text-primary">{u.label}</span>
-                      {u.email && u.label !== u.email ? (
-                        <span className="text-secondary text-sm ml-2">{u.email}</span>
-                      ) : null}
+                    <li key={u.id} style={{ borderBottom: '1px solid var(--color-separator)' }}>
+                      <a
+                        href={u.href}
+                        className="flex items-start gap-3 py-3 no-underline"
+                        style={{ color: 'var(--color-label-primary)' }}
+                      >
+                        <span className="text-sm" aria-hidden>
+                          👤
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <span className="block text-sm font-semibold">{u.title}</span>
+                          <span className="block text-xs" style={{ color: 'var(--color-label-secondary)' }}>
+                            {u.typeLabel} · {u.status}
+                          </span>
+                          <span className="block text-xs truncate" style={{ color: 'var(--color-label-tertiary)' }}>
+                            {u.metadata}
+                          </span>
+                        </span>
+                        <span className="text-xs" style={{ color: 'var(--color-blue)' }}>
+                          Open
+                        </span>
+                      </a>
                     </li>
                   ))}
                 </ul>

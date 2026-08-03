@@ -17,7 +17,7 @@ Status: `wired` = works end-to-end · `partial` = some pieces · `missing` = not
 | partial | 3 |
 | missing | 10 |
 
-**Bottom line:** Nav search opens a global overlay shell (⌘K). `/search` page still returns **courses + users** via GraphQL presenter. No live multi-type cards in overlay, command palette commands, AI search, saved/recent/pinned, or analytics yet.
+**Bottom line:** Nav ⌘K overlay returns **live courses + learners** (tenant-scoped). No command palette commands, AI search, saved/recent/pinned, analytics, or multi-type results (workflows/orders/products/settings) yet.
 
 ---
 
@@ -27,9 +27,9 @@ Status: `wired` = works end-to-end · `partial` = some pieces · `missing` = not
 | ---: | --- | --- | --- | --- |
 | 1 | Search System Overview (unified discovery) | partial | Nav bar search + `/search` page | Not unified; no overlay modalities; only courses+users |
 | 2 | Global Search — header bar | partial | `NavBar` + `SearchBar`; `useAppLayoutHeader().onSearch` / `onSearchFocus` | Placeholder “Search anything…” + ⌘K/Ctrl+K badge; focus/submit opens overlay |
-| 2a | Global Search — overlay (filters + results) | partial | `GlobalSearchOverlay` + `GlobalSearchHost` (Cmd/Ctrl+K, Esc) | Shell only — filter sidebar + empty results; live cards = `T-SRCH-02` |
-| 2b | Result: Course | wired | `useSearchPresenter` + `GET_SEARCH_COURSES` → `/search` list links | Cards lack enrollment/completion metadata from TODO |
-| 2c | Result: Learner/User | partial | `GET_SEARCH_USERS` on `/search` | Shown as plain text (no profile actions); TODO “Learner” semantics incomplete |
+| 2a | Global Search — overlay (filters + results) | wired | `GlobalSearchOverlay` + `GlobalSearchHost` + `useSearchPresenter` | Live course/learner cards; empty/loading/error; other types stub |
+| 2b | Result: Course | wired | Overlay + `/search` cards → `/courses/:id` | Tenant-scoped `courses(tenantId)` |
+| 2c | Result: Learner/User | wired | STUDENT/USER only → `/admin/customers/:id` | Staff-gated `users(tenantId)`; non-learners excluded |
 | 2d | Result: Workflow | missing | — | No automation search query/UI |
 | 2e | Result: Order | missing | — | List pages have local filter only |
 | 2f | Result: Product | missing | — | `/products` local `search` query param only |

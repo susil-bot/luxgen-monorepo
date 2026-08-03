@@ -7,5 +7,6 @@ export {
   type SearchViewModel,
   type SearchCourseHit,
   type SearchUserHit,
+  type SearchResultHit,
 } from './transformers';
 export { useSearchPresenter } from './client.entry';

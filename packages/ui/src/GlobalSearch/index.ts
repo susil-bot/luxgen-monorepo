@@ -6,4 +6,5 @@ export type {
   GlobalSearchOverlayProps,
   GlobalSearchFilter,
   GlobalSearchFilterId,
+  GlobalSearchResultItem,
 } from './GlobalSearchOverlay';

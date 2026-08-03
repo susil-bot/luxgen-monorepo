@@ -144,7 +144,7 @@ tasks:
     epic: E1
     priority: 0
     sla: M
-    status: todo
+    status: review
     title: Search result cards for courses + learners (live data)
     skill: graphql
     source:
@@ -160,6 +160,7 @@ tasks:
       - Query returns tenant-scoped courses and learners
       - Cards show title type metadata + open action
       - Empty/loading/error states present
+    notes: Live overlay cards via useSearchPresenter — feat/search-result-cards-live
   - id: T-SRCH-03
     epic: E1
     priority: 1
