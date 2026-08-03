@@ -44,6 +44,8 @@
 | [BUSINESS_STRATEGY_2026.md](./BUSINESS_STRATEGY_2026.md)       | ICP, pricing, GTM, roadmap                      |
 | [BUSINESS_TECH_TRANSLATION.md](./BUSINESS_TECH_TRANSLATION.md) | Business goal → technical feature map           |
 | [FEATURE_CATALOG.md](./FEATURE_CATALOG.md)                     | Every feature: user value, code locations, APIs |
+| [TODO_ORCHESTRATOR_BACKLOG.md](./TODO_ORCHESTRATOR_BACKLOG.md) | **PM backlog** from all `TODO*.md` — priority, SLA, AC, 24×7 queue |
+| [todo-orchestrator/queue.yaml](./todo-orchestrator/queue.yaml) | Machine task queue for headless orchestrator    |
 | [PERSONA_PAGES.md](./PERSONA_PAGES.md)                         | Admin, learner, analytics, developer personas   |
 
 ### Revenue & monetization (Phases 9–10)
@@ -64,6 +66,8 @@
 | [AUTOMATION_FLOW_SCHEMA.md](./AUTOMATION_FLOW_SCHEMA.md)             | `flowDefinition` v1 schema                                |
 | [technical/agent/AGENT_STUDIO.md](./technical/agent/AGENT_STUDIO.md) | SSE, tools, staging (implementation)                      |
 | [AGENT_STUDIO_ARCHITECTURE.md](./AGENT_STUDIO_ARCHITECTURE.md)       | Phases 3–7 target architecture                            |
+| [AGENT_ORCHESTRATOR.md](./AGENT_ORCHESTRATOR.md)                     | Developer → Reviewer → PM Tester loop                     |
+| [TODO_ORCHESTRATOR_BACKLOG.md](./TODO_ORCHESTRATOR_BACKLOG.md)       | Execute `TODO*.md` specs via min-token task cards         |
 | [AI_STUDIO_TIMELINE.md](./AI_STUDIO_TIMELINE.md)                     | Task backlog & edge cases                                 |
 
 ### UI & design
