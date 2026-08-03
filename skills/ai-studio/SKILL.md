@@ -1,7 +1,7 @@
 # Skill: AI Studio / Agent Platform
 
-**Domain:** Agent chat, git worktree pipeline, validation, headless worker, `runAgentTask`.  
-**Docs:** [docs/technical/agent/AGENT_STUDIO.md](../../docs/technical/agent/AGENT_STUDIO.md), [AGENT_STUDIO_ARCHITECTURE.md](../../docs/AGENT_STUDIO_ARCHITECTURE.md)
+**Domain:** Agent chat, git worktree pipeline, validation, headless worker, `runAgentTask`, the Developer/Reviewer/PM Tester orchestrator.  
+**Docs:** [docs/technical/agent/AGENT_STUDIO.md](../../docs/technical/agent/AGENT_STUDIO.md), [AGENT_STUDIO_ARCHITECTURE.md](../../docs/AGENT_STUDIO_ARCHITECTURE.md), [AGENT_ORCHESTRATOR.md](../../docs/AGENT_ORCHESTRATOR.md), role docs in [`.agents/`](../../.agents/AGENTS.md)
 
 ---
 
@@ -34,6 +34,11 @@ User chat → /api/agent/chat (SSE) → @luxgen/agent orchestrator → Ollama
          AutomationBridge (CODE_CHANGE_MERGED trigger)
 ```
 
+**Headless tasks** (`apps/agent-worker`, queued via `enqueueHeadlessTask`) run the full
+Developer -> Reviewer -> PM Tester loop instead of a single Developer pass — see
+`docs/AGENT_ORCHESTRATOR.md`. Interactive chat is unchanged; a human in the chat already plays
+the reviewer/tester role there.
+
 ---
 
 ## Plan gate
@@ -58,6 +63,7 @@ User chat → /api/agent/chat (SSE) → @luxgen/agent orchestrator → Ollama
 | Stricter validation   | Agent validation pipeline in `@luxgen/agent`               |
 | Queue long jobs       | Redis + `apps/agent-worker`                                |
 | Post-merge automation | Emit `CODE_CHANGE_MERGED` in merge handler                 |
+| New orchestration role | `prompts/roles.ts` + `core/roles.ts` + a stage in `core/orchestrated-task.ts` — see `docs/AGENT_ORCHESTRATOR.md` "Extending this" |
 
 ---
 
@@ -75,3 +81,5 @@ OLLAMA_MODEL=mistral:latest
 
 - Skip audit logging for agent actions
 - Expose agent API without Enterprise gate in production
+- Give Reviewer/PM Tester the `write_file` tool — they report, the Developer fixes (see `.agents/AGENTS.md`)
+- Auto-merge on the orchestrator converging — `pending_review` is a human checkpoint, same as before this feature

@@ -9,9 +9,13 @@ interface HeadlessTaskPanelProps {
 
 const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   created: { label: 'Queued', color: 'var(--color-label-secondary)' },
-  running: { label: 'Running', color: 'var(--color-blue)' },
+  running: { label: 'Running (Developer)', color: 'var(--color-blue)' },
   staged: { label: 'Staged', color: 'var(--color-orange)' },
   validating: { label: 'Validating', color: 'var(--color-orange)' },
+  reviewing: { label: 'In review (Reviewer)', color: 'var(--color-blue)' },
+  review_changes_requested: { label: 'Changes requested (Reviewer)', color: 'var(--color-red)' },
+  pm_testing: { label: 'Acceptance testing (PM Tester)', color: 'var(--color-blue)' },
+  pm_test_changes_requested: { label: 'Changes requested (PM Tester)', color: 'var(--color-red)' },
   pending_review: { label: 'Ready for review', color: 'var(--color-green)' },
   committed: { label: 'Committed', color: 'var(--color-green)' },
   merged: { label: 'Merged', color: 'var(--color-green)' },
@@ -19,7 +23,18 @@ const STATUS_LABELS: Record<string, { label: string; color: string }> = {
   cancelled: { label: 'Cancelled', color: 'var(--color-label-tertiary)' },
 };
 
-const TERMINAL = new Set(['pending_review', 'failed', 'merged', 'cancelled']);
+// review_changes_requested / pm_test_changes_requested only appear here once the orchestrator's
+// iteration limit is reached (docs/AGENT_ORCHESTRATOR.md) — mid-loop retries stay in
+// 'running'/'staged' and never surface a changes_requested status to the UI. Terminal in the
+// sense that the loop stopped and a human needs to act (edit the prompt, re-run, or discard).
+const TERMINAL = new Set([
+  'pending_review',
+  'failed',
+  'merged',
+  'cancelled',
+  'review_changes_requested',
+  'pm_test_changes_requested',
+]);
 
 export default function HeadlessTaskPanel({ sessionId, prompt, onComplete, onClose }: HeadlessTaskPanelProps) {
   const [status, setStatus] = useState('created');
