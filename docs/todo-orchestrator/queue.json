@@ -529,7 +529,7 @@
       "epic": "E2",
       "priority": 1,
       "sla": "M",
-      "status": "review",
+      "status": "done",
       "title": "Test-run workflow with sample payload",
       "skill": "automation",
       "source": {
@@ -548,14 +548,14 @@
       "acceptance": [
         "Test action creates a run without requiring live trigger event"
       ],
-      "notes": "testAutomation + runAutomationTest \u2014 feat/automation-test-run"
+      "notes": "testAutomation + runAutomationTest \u2014 feat/automation-test-run \u2014 merged #472"
     },
     {
       "id": "T-AUTO-07",
       "epic": "E2",
       "priority": 1,
       "sla": "M",
-      "status": "todo",
+      "status": "review",
       "title": "Enforce publish business rules (trigger required tenant scope)",
       "skill": "automation",
       "source": {
@@ -571,7 +571,8 @@
       ],
       "acceptance": [
         "Cannot publish empty/invalid workflow; clear GraphQL errors"
-      ]
+      ],
+      "notes": "collectAutomationPublishErrors + AUTOMATION_PUBLISH_INVALID \u2014 feat/automation-publish-rules"
     },
     {
       "id": "T-AUTO-08",

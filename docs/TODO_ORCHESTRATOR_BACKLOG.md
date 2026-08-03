@@ -114,8 +114,8 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 | [x] `T-AUTO-03` | P0 | M | L276–L431 | Builder canvas: add/edit/delete step UI wired to live mutations | merged #460 |
 | [x] `T-AUTO-04` | P0 | M | L819–L884 | Publish / pause / archive actions + status UI | merged #461 |
 | [x] `T-AUTO-05` | P1 | M | L716–L751 | Run history list + detail drawer | merged #471 |
-| [x] `T-AUTO-06` | P1 | M | L846–L864 | Test-run with sample payload | review `feat/automation-test-run` |
-| [ ] `T-AUTO-07` | P1 | M | L942–L1054 | Enforce must-have business rules (tenant scope, required trigger, no empty publish) | `automation` |
+| [x] `T-AUTO-06` | P1 | M | L846–L864 | Test-run with sample payload | done #472 |
+| [x] `T-AUTO-07` | P1 | M | L942–L1054 | Enforce must-have business rules (tenant scope, required trigger, no empty publish) | review `feat/automation-publish-rules` |
 | [ ] `T-AUTO-08` | P2 | M | L2083–L2172 | Workflow analytics page (success rate, run volume) | `persona-pages` |
 | [ ] `T-AUTO-09` | P2 | L | L886–L940 | Real-time subscriptions for runs | **split** — schema then UI |
 | [ ] `T-AUTO-10` | P2 | M | L1647–L1748 | Permission gates on edit/publish | `billing`/`automation` |

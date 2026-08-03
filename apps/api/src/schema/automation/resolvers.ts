@@ -1,6 +1,6 @@
 import { exportAutomationSchema } from '@luxgen/automation-flow';
 import { randomUUID } from 'crypto';
-import { automationService } from '../../services/automationService';
+import { automationService, AutomationPublishError } from '../../services/automationService';
 import { requireFeature } from '../../middleware/planGate';
 import { usageService, UsageLimitError } from '../../services/usageService';
 import type { GraphQLContext } from '../../context';
@@ -111,8 +111,22 @@ export const automationResolvers = {
     publishAutomation: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
       await requireFeature(ctx, 'automations');
       if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
-      const updated = await automationService.publishAutomation(id, ctx.tenantId);
-      return updated ? automationService.toGraphQL(updated) : null;
+      try {
+        const updated = await automationService.publishAutomation(id, ctx.tenantId);
+        if (!updated) {
+          throw new GraphQLError('Automation not found or archived', {
+            extensions: { code: 'NOT_FOUND' },
+          });
+        }
+        return automationService.toGraphQL(updated);
+      } catch (e) {
+        if (e instanceof AutomationPublishError) {
+          throw new GraphQLError(e.message, {
+            extensions: { code: e.code, errors: e.errors },
+          });
+        }
+        throw e;
+      }
     },
     pauseAutomation: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
       await requireFeature(ctx, 'automations');

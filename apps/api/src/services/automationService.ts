@@ -12,8 +12,25 @@ import {
   type IAutomationRun,
 } from '@luxgen/db';
 import { emitAutomationEvent, runAutomationTest } from '@luxgen/agent';
-import { flowToLegacyAutomation, parseTowerFlowDocument } from '@luxgen/automation-flow';
+import {
+  collectTowerFlowGraphWarnings,
+  flowToLegacyAutomation,
+  parseTowerFlowDocument,
+  validateTowerFlowDocument,
+} from '@luxgen/automation-flow';
 import { logger } from '../utils/logger';
+
+/** Thrown when publish rules fail — mapped to GraphQL AUTOMATION_PUBLISH_INVALID. */
+export class AutomationPublishError extends Error {
+  readonly code = 'AUTOMATION_PUBLISH_INVALID';
+  readonly errors: string[];
+
+  constructor(errors: string[]) {
+    super(errors.join('; '));
+    this.name = 'AutomationPublishError';
+    this.errors = errors;
+  }
+}
 
 export interface AutomationActionInput {
   type: AutomationActionType;
@@ -99,6 +116,55 @@ function applyFlowDefinitionSync<T extends { flowDefinition?: Record<string, unk
     flowDefinition: flow as unknown as Record<string, unknown>,
     // Lifecycle (`status` / `enabled`) is owned by publish/pause/archive — not flow.meta
   };
+}
+
+/** TODO §13 Publishing Rules — structural checks before going live (tenant-scoped caller). */
+export function collectAutomationPublishErrors(automation: {
+  name?: string | null;
+  triggerType?: string | null;
+  actions?: Array<{ type?: string }> | null;
+  flowDefinition?: unknown;
+}): string[] {
+  const errors: string[] = [];
+  const name = (automation.name ?? '').trim();
+  if (!name) {
+    errors.push('Workflow name is required');
+  } else if (name.length > 100) {
+    errors.push('Workflow name must be at most 100 characters');
+  }
+
+  const flowRaw = automation.flowDefinition;
+  if (flowRaw != null && typeof flowRaw === 'object') {
+    const validated = validateTowerFlowDocument(flowRaw);
+    if (!validated.ok) {
+      for (const err of validated.errors) {
+        errors.push(`${err.path}: ${err.message}`);
+      }
+      return errors;
+    }
+    const actionCount = validated.data.nodes.filter((n) => n.kind === 'action').length;
+    if (actionCount < 1) {
+      errors.push('Must have at least one action step before publishing');
+    }
+    for (const warning of collectTowerFlowGraphWarnings(validated.data)) {
+      if (
+        warning.message.includes('unreachable') ||
+        warning.message.includes('missing outgoing') ||
+        warning.message.includes('multiple outgoing')
+      ) {
+        errors.push(`${warning.path}: ${warning.message}`);
+      }
+    }
+    return errors;
+  }
+
+  if (!automation.triggerType) {
+    errors.push('Exactly one trigger is required');
+  }
+  if (!automation.actions?.length) {
+    errors.push('Must have at least one action step before publishing');
+  }
+  return errors;
 }
 
 const DEMO_SEED: Omit<CreateAutomationInput, 'tenantId'>[] = [
@@ -262,6 +328,11 @@ export class AutomationService {
     const existing = await this.getAutomationById(id, tenantId);
     if (!existing) return null;
     if (resolveAutomationStatus(existing) === 'archived') return null;
+
+    const publishErrors = collectAutomationPublishErrors(existing);
+    if (publishErrors.length > 0) {
+      throw new AutomationPublishError(publishErrors);
+    }
 
     const $set: Record<string, unknown> = {
       status: 'live',
