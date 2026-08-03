@@ -36,14 +36,25 @@ export interface IAutomationAction {
 }
 
 export interface IAutomation extends Document {
+  /** Tenant isolation — TODO §11 `organizationId` */
   tenantId: string;
   name: string;
+  /**
+   * Lifecycle stand-in for TODO `WorkflowStatus` (DRAFT/LIVE/PAUSED/ARCHIVED).
+   * `false` ≈ draft/paused; `true` ≈ live. Archive = delete (no soft status yet).
+   */
   enabled: boolean;
+  /** Flat trigger — mirrored from `flowDefinition` entry node via `flowToLegacyAutomation` */
   triggerType: AutomationTriggerType;
   triggerLabel: string;
+  /** Flat actions — mirrored from action nodes; prefer graph at runtime when flow valid */
   actions: IAutomationAction[];
-  /** Tower flow document (@luxgen/automation-flow v1) */
+  /**
+   * Canonical Tower graph (`TowerFlowDocument` v1 from `@luxgen/automation-flow`).
+   * Maps TODO `Workflow.trigger` + `Workflow.steps` (see docs/todo-orchestrator/audits/automation-model-map.md).
+   */
   flowDefinition?: Record<string, unknown>;
+  /** TODO `totalRuns` (success/fail split not stored — see AutomationRun) */
   runCount: number;
   lastRunAt?: Date;
   createdAt: Date;

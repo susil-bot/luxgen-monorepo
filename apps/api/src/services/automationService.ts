@@ -8,6 +8,7 @@ import {
   type IAutomationRun,
 } from '@luxgen/db';
 import { emitAutomationEvent } from '@luxgen/agent';
+import { flowToLegacyAutomation, parseTowerFlowDocument } from '@luxgen/automation-flow';
 import { logger } from '../utils/logger';
 
 export interface AutomationActionInput {
@@ -33,6 +34,41 @@ export interface UpdateAutomationInput {
   actions?: AutomationActionInput[];
   enabled?: boolean;
   flowDefinition?: Record<string, unknown>;
+}
+
+/**
+ * When `flowDefinition` is present and valid, derive legacy flat fields so list/bridge
+ * queries stay aligned with Tower graph (TODO §11 Workflow.steps ↔ Automation dual write).
+ * Invalid/missing flow left unchanged — callers may still use flat-only automations.
+ */
+function applyFlowDefinitionSync<T extends { flowDefinition?: Record<string, unknown> }>(
+  input: T,
+): T &
+  Partial<{
+    name: string;
+    enabled: boolean;
+    triggerType: AutomationTriggerType;
+    triggerLabel: string;
+    actions: AutomationActionInput[];
+    flowDefinition: Record<string, unknown>;
+  }> {
+  if (input.flowDefinition == null) return input;
+  const flow = parseTowerFlowDocument(input.flowDefinition);
+  if (!flow) return input;
+  const legacy = flowToLegacyAutomation(flow);
+  return {
+    ...input,
+    name: legacy.name,
+    enabled: legacy.enabled,
+    triggerType: legacy.triggerType as AutomationTriggerType,
+    triggerLabel: legacy.triggerLabel,
+    actions: legacy.actions.map((a) => ({
+      type: a.type as AutomationActionType,
+      label: a.label,
+      config: a.config,
+    })),
+    flowDefinition: flow as unknown as Record<string, unknown>,
+  };
 }
 
 const DEMO_SEED: Omit<CreateAutomationInput, 'tenantId'>[] = [
@@ -121,9 +157,11 @@ export class AutomationService {
   }
 
   async createAutomation(input: CreateAutomationInput): Promise<IAutomation> {
+    const synced = applyFlowDefinitionSync(input);
     const automation = await Automation.create({
-      ...input,
-      enabled: input.enabled ?? false,
+      ...synced,
+      tenantId: input.tenantId,
+      enabled: synced.enabled ?? false,
       runCount: 0,
     });
     logger.info(`Automation created: ${automation.name} (${automation.tenantId})`);
@@ -131,7 +169,8 @@ export class AutomationService {
   }
 
   async updateAutomation(id: string, tenantId: string, input: UpdateAutomationInput): Promise<IAutomation | null> {
-    return Automation.findOneAndUpdate({ _id: id, tenantId }, { $set: input }, { new: true });
+    const synced = applyFlowDefinitionSync(input);
+    return Automation.findOneAndUpdate({ _id: id, tenantId }, { $set: synced }, { new: true });
   }
 
   async toggleAutomation(id: string, tenantId: string, enabled: boolean): Promise<IAutomation | null> {
