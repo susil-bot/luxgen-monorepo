@@ -90,6 +90,11 @@ export const automationTypeDefs = `
     jobId: String
   }
 
+  type TestAutomationResult {
+    run: AutomationRun!
+    errors: [String!]!
+  }
+
   input AutomationActionInput {
     type: AutomationActionType!
     label: String!
@@ -144,6 +149,8 @@ export const automationTypeDefs = `
     deleteAutomation(id: ID!): Boolean!
     """TODO §12 DuplicateWorkflow — clone automation config; new row starts disabled."""
     duplicateAutomation(id: ID!, name: String): Automation
+    """TODO §12 TestWorkflow — create a run with sample payload (no live trigger)."""
+    testAutomation(id: ID!, testData: JSON): TestAutomationResult!
     runAgentTask(input: RunAgentTaskInput!): AgentTaskResult!
   }
 `;

@@ -11,7 +11,7 @@ import {
   type IAutomationAction,
   type IAutomationRun,
 } from '@luxgen/db';
-import { emitAutomationEvent } from '@luxgen/agent';
+import { emitAutomationEvent, runAutomationTest } from '@luxgen/agent';
 import { flowToLegacyAutomation, parseTowerFlowDocument } from '@luxgen/automation-flow';
 import { logger } from '../utils/logger';
 
@@ -349,6 +349,18 @@ export class AutomationService {
       status: 'draft',
       flowDefinition,
     });
+  }
+
+  /**
+   * Test-run: create a run with sample payload without a live trigger event.
+   * Works for draft/paused/live; blocked for archived.
+   */
+  async testAutomation(
+    automationId: string,
+    tenantId: string,
+    testData: Record<string, unknown> = {},
+  ): Promise<IAutomationRun> {
+    return runAutomationTest({ automationId, tenantId, testData });
   }
 
   async executeAutomation(

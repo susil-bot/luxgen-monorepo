@@ -160,7 +160,8 @@ export {
   emitAgentAutomationEvent,
   emitCommerceAutomationEvent,
   emitCertificateExpiringSoonEvent,
+  runAutomationTest,
 } from './automation/bridge';
-export type { CommerceAutomationEventKind } from './automation/bridge';
+export type { CommerceAutomationEventKind, RunAutomationTestOptions } from './automation/bridge';
 export { AUTOMATION_EVENTS_CHANNEL, AUTOMATION_SCHEMA_DOC, AGENT_TRIGGER_TYPES } from './automation/events';
 export type { AutomationEventPayload } from './automation/events';

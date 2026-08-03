@@ -9,9 +9,11 @@ import {
   ActivityActorType,
   enrollmentSubjectId,
   liveAutomationFilter,
+  resolveAutomationStatus,
   type AutomationTriggerType,
   type IAutomation,
   type IAutomationAction,
+  type IAutomationRun,
 } from '@luxgen/db';
 import { assertWithinLimit } from '@luxgen/billing';
 import { randomUUID } from 'crypto';
@@ -116,6 +118,93 @@ export async function emitAutomationEvent(options: EmitAutomationEventOptions): 
   }
 
   return executed;
+}
+
+export interface RunAutomationTestOptions {
+  automationId: string;
+  tenantId: string;
+  testData?: Record<string, unknown>;
+}
+
+/**
+ * Manual test run — creates an AutomationRun without a live trigger event.
+ * Allowed for draft/paused/live (not archived). Counts toward monthly run usage.
+ */
+export async function runAutomationTest(options: RunAutomationTestOptions): Promise<IAutomationRun> {
+  const { automationId, tenantId, testData = {} } = options;
+
+  const connected = await ensureMongoConnection();
+  if (!connected) {
+    throw new Error('MongoDB unavailable — cannot create test run');
+  }
+
+  const automation = await Automation.findOne({ _id: automationId, tenantId }).lean<IAutomation | null>();
+  if (!automation) {
+    throw new Error('Automation not found');
+  }
+  if (resolveAutomationStatus(automation) === 'archived') {
+    throw new Error('Cannot test-run an archived automation');
+  }
+
+  await assertMonthlyAutomationRunsAllowed(tenantId);
+
+  const payload: Record<string, unknown> = {
+    ...testData,
+    __testRun: true,
+  };
+
+  const event: AutomationEventPayload = {
+    tenantId,
+    triggerType: automation.triggerType,
+    payload,
+    source: 'system',
+    timestamp: new Date().toISOString(),
+  };
+
+  const started = Date.now();
+  const run = await AutomationRun.create({
+    automationId: String(automation._id),
+    automationName: automation.name,
+    tenantId,
+    triggerType: automation.triggerType,
+    status: 'running',
+    durationMs: 0,
+    payload,
+    triggeredAt: new Date(),
+  });
+
+  try {
+    await executeAutomationActions(automation, event, String(run._id));
+    const durationMs = Date.now() - started;
+    await AutomationRun.updateOne({ _id: run._id }, { status: 'success', durationMs });
+    await Automation.updateOne({ _id: automation._id }, { $inc: { runCount: 1 }, lastRunAt: new Date() });
+    await incrementAutomationRuns(tenantId);
+    await recordAutomationTimeline({
+      tenantId,
+      automation,
+      event,
+      runId: String(run._id),
+      status: 'success',
+    });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : String(e);
+    const durationMs = Date.now() - started;
+    await AutomationRun.updateOne({ _id: run._id }, { status: 'error', durationMs, error: message });
+    await Automation.updateOne({ _id: automation._id }, { $inc: { runCount: 1 }, lastRunAt: new Date() });
+    await incrementAutomationRuns(tenantId);
+    await recordAutomationTimeline({
+      tenantId,
+      automation,
+      event,
+      runId: String(run._id),
+      status: 'error',
+      error: message,
+    });
+  }
+
+  const saved = await AutomationRun.findById(run._id);
+  if (!saved) throw new Error('Test run record missing after execute');
+  return saved;
 }
 
 async function publishAutomationEvent(event: AutomationEventPayload): Promise<void> {

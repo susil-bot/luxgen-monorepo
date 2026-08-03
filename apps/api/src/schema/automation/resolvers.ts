@@ -150,6 +150,30 @@ export const automationResolvers = {
       const created = await automationService.duplicateAutomation(id, ctx.tenantId, name ?? undefined);
       return created ? automationService.toGraphQL(created) : null;
     },
+    testAutomation: async (
+      _: unknown,
+      { id, testData }: { id: string; testData?: Record<string, unknown> | null },
+      ctx: GraphQLContext,
+    ) => {
+      await requireFeature(ctx, 'automations');
+      if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
+      try {
+        const run = await automationService.testAutomation(
+          id,
+          ctx.tenantId,
+          testData && typeof testData === 'object' ? testData : {},
+        );
+        const errors = run.error ? [run.error] : [];
+        return { run: automationService.runToGraphQL(run), errors };
+      } catch (e) {
+        if (e instanceof UsageLimitError) {
+          const { code: _code, ...rest } = e.toJSON();
+          throw new GraphQLError(e.message, { extensions: { code: e.code, ...rest } });
+        }
+        const message = e instanceof Error ? e.message : String(e);
+        throw new GraphQLError(message);
+      }
+    },
     runAgentTask: async (
       _: unknown,
       { input }: { input: { tenantId: string; prompt: string; model?: string } },

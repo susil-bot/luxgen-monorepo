@@ -195,6 +195,24 @@ export const DUPLICATE_AUTOMATION = gql`
   }
 `;
 
+export const TEST_AUTOMATION = gql`
+  mutation TestAutomation($id: ID!, $testData: JSON) {
+    testAutomation(id: $id, testData: $testData) {
+      run {
+        id
+        automationId
+        automationName
+        status
+        startedAt
+        completedAt
+        durationMs
+        error
+      }
+      errors
+    }
+  }
+`;
+
 export const RUN_AGENT_TASK = gql`
   mutation RunAgentTask($input: RunAgentTaskInput!) {
     runAgentTask(input: $input) {

@@ -87,6 +87,9 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
     publish,
     pause,
     archive,
+    testRun,
+    testBusy,
+    testError,
   } = useTowerFlowPersist({
     towerId,
     tenantId: queryTenantId,
@@ -257,6 +260,21 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
           void router.push(`/automations/tower/runs?${qs.toString()}`);
         },
       },
+      {
+        id: 'test-run',
+        label: testBusy ? 'Testing…' : 'Test run',
+        disabled: !persistedId || lifecycleStatus === 'archived' || testBusy || dirty,
+        onClick: () => {
+          void (async () => {
+            const run = await testRun();
+            if (run?.id) {
+              void router.push(
+                `/automations/tower/runs/${run.id}?tenant=${encodeURIComponent(tenant)}`,
+              );
+            }
+          })();
+        },
+      },
     ];
 
     if (persistedId && lifecycleStatus !== 'archived') {
@@ -301,6 +319,9 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
     publish,
     pause,
     archive,
+    testRun,
+    testBusy,
+    dirty,
   ]);
 
   if (loading) {
@@ -376,6 +397,11 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
           {saveError ? (
             <span className={styles.statusPill} style={{ color: 'var(--color-red)' }} title={saveError}>
               {saveError}
+            </span>
+          ) : null}
+          {testError ? (
+            <span className={styles.statusPill} style={{ color: 'var(--color-red)' }} title={testError}>
+              Test: {testError}
             </span>
           ) : null}
 
