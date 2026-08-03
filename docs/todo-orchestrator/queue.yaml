@@ -70,7 +70,7 @@ tasks:
     epic: E0
     priority: 0
     sla: S
-    status: todo
+    status: done
     title: Audit Commerce TODO vs products/orders/customers pages
     skill: fullstack-developer
     source:
@@ -83,6 +83,7 @@ tasks:
     acceptance:
       - Gap table for Products Orders Customers Coupons Bundles
       - Cross-links PAGE_FUNCTIONALITY_CHECKLIST.md
+    notes: commerce-gaps.md landed on main via chore/t-e0-04-commerce-audit
   - id: T-E0-05
     epic: E0
     priority: 1
@@ -301,7 +302,7 @@ tasks:
     epic: E2
     priority: 0
     sla: M
-    status: todo
+    status: done
     title: Align automation data model with flowDefinition + TODO §11
     skill: automation
     source:
@@ -319,6 +320,7 @@ tasks:
       - Documented mapping of TODO entities to existing models
       - Code changes only where schema gap blocks builder
       - Tenant fields preserved
+    notes: "Completed via automation-model-map.md + #457"
   - id: T-AUTO-02
     epic: E2
     priority: 0
@@ -499,7 +501,7 @@ tasks:
     epic: E3
     priority: 0
     sla: M
-    status: blocked
+    status: todo
     title: Products list create edit — all fields persist
     skill: fullstack-developer
     source:
@@ -518,7 +520,7 @@ tasks:
     epic: E3
     priority: 0
     sla: M
-    status: blocked
+    status: todo
     title: Orders list detail status filters live
     skill: fullstack-developer
     source:
@@ -536,7 +538,7 @@ tasks:
     epic: E3
     priority: 0
     sla: M
-    status: blocked
+    status: todo
     title: Customers list detail edit per commerce TODO
     skill: persona-pages
     source:
@@ -572,7 +574,7 @@ tasks:
     epic: E3
     priority: 1
     sla: M
-    status: blocked
+    status: todo
     title: Coupons CRUD vertical
     skill: fullstack-developer
     source:
