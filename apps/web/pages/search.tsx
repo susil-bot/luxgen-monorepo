@@ -4,7 +4,7 @@ import { useAppShellConfig } from '../lib/app-shell-config';
 import { useLayoutUser, useAppTenantId } from '../lib/app-layout-user';
 import { PageHead } from '../components/seo/PageHead';
 import { PageEmptyState } from '../components/common/PageStates';
-import { useSearchPresenter } from '../presenters/search';
+import { useSearchPresenter } from '@luxgen/presenters/search';
 
 export default function SearchPage() {
   const router = useRouter();

@@ -23,6 +23,7 @@
     "@luxgen/config": "*",
     "@luxgen/db": "*",
     "@luxgen/design-tokens": "*",
+    "@luxgen/presenters": "*",
     "@luxgen/storefront": "*",
     "@luxgen/test-harness": "*",
     "@luxgen/ui": "*",

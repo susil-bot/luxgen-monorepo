@@ -32,7 +32,9 @@
       "@luxgen/shared": ["./packages/shared/src"],
       "@luxgen/design-tokens": ["./packages/design-tokens/src"],
       "@luxgen/types": ["./packages/types/src"],
-      "@luxgen/native-ui": ["./packages/native-ui/src"]
+      "@luxgen/native-ui": ["./packages/native-ui/src"],
+      "@luxgen/presenters": ["./packages/presenters"],
+      "@luxgen/presenters/*": ["./packages/presenters/*"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
