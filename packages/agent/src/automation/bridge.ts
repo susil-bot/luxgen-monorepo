@@ -20,7 +20,16 @@ import { getRedisClient } from '../queue/redis-queue';
 import { getOllamaUrl } from '@luxgen/config';
 import { AUTOMATION_EVENTS_CHANNEL, type AutomationEventPayload } from './events';
 import { recordTimelineEvent, subjectsFromAutomationPayload } from '../timeline/record';
-import { planFlowExecutionFromDefinition } from '@luxgen/automation-flow';
+import {
+  planFlowExecutionFromDefinition,
+  parseTowerFlowDocument,
+  getNode,
+  getOutgoingEdge,
+  evaluateFlowCondition,
+  flowActionNodeToLegacyAction,
+  type TowerFlowDocument,
+} from '@luxgen/automation-flow';
+import { sendAutomationEmail, resolveRecipientEmail } from './email';
 
 export interface EmitAutomationEventOptions {
   tenantId: string;
@@ -130,24 +139,115 @@ async function executeAutomationActions(
   event: AutomationEventPayload,
   runId: string,
 ): Promise<void> {
-  const flowSteps = planFlowExecutionFromDefinition(automation.flowDefinition, event.payload);
+  const flow = automation.flowDefinition ? parseTowerFlowDocument(automation.flowDefinition) : null;
 
-  if (flowSteps) {
-    for (const step of flowSteps) {
-      if (step.kind === 'wait') {
-        if (step.seconds > 0) {
-          console.log(`[automation-bridge] Wait ${step.seconds}s (${step.title}) for "${automation.name}"`);
-          await sleep(step.seconds * 1000);
-        }
-        continue;
-      }
-      await executeAction(step.action as IAutomationAction, automation, event, runId);
-    }
+  if (flow) {
+    await walkFlowLive(flow, automation, event, runId);
     return;
   }
 
   for (const action of automation.actions) {
     await executeAction(action, automation, event, runId);
+  }
+}
+
+const MAX_LIVE_FLOW_STEPS = 200;
+
+/**
+ * Walk the flow graph one node at a time (unlike `planFlowExecutionFromDefinition`, which
+ * resolves the *entire* graph — including condition branches — against the static trigger
+ * payload before any `wait` step runs). A condition placed after a `wait` (e.g. "is the cart
+ * still unpaid after 60 minutes?") needs live data, not the payload captured at trigger time,
+ * so this refetches state from the DB after every wait before evaluating the next condition.
+ */
+async function walkFlowLive(
+  flow: TowerFlowDocument,
+  automation: IAutomation,
+  event: AutomationEventPayload,
+  runId: string,
+): Promise<void> {
+  let payload = { ...event.payload };
+  const visited = new Set<string>();
+  let stepCount = 0;
+
+  async function walk(nodeId: string): Promise<void> {
+    if (visited.has(nodeId) || stepCount >= MAX_LIVE_FLOW_STEPS) return;
+    visited.add(nodeId);
+    stepCount += 1;
+
+    const node = getNode(flow, nodeId);
+    if (!node) return;
+
+    switch (node.kind) {
+      case 'trigger': {
+        const next = getOutgoingEdge(flow, node.id);
+        if (next) await walk(next.to);
+        break;
+      }
+      case 'wait': {
+        const seconds = Math.max(0, Number(node.config?.seconds ?? 0));
+        if (seconds > 0) {
+          console.log(`[automation-bridge] Wait ${seconds}s (${node.title ?? 'Wait'}) for "${automation.name}"`);
+          await sleep(seconds * 1000);
+          payload = await refreshEventPayload(event.tenantId, payload);
+        }
+        const next = getOutgoingEdge(flow, node.id);
+        if (next) await walk(next.to);
+        break;
+      }
+      case 'condition': {
+        const branch = evaluateFlowCondition(node, payload) ? 'true' : 'false';
+        const edge = getOutgoingEdge(flow, node.id, branch);
+        if (edge) await walk(edge.to);
+        break;
+      }
+      case 'action': {
+        const action = flowActionNodeToLegacyAction(node) as IAutomationAction;
+        await executeAction(action, automation, { ...event, payload }, runId);
+        const next = getOutgoingEdge(flow, node.id);
+        if (next) await walk(next.to);
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  await walk(flow.entryNodeId);
+}
+
+/**
+ * Re-fetch live enrollment state (the "order" record for commerce triggers — see
+ * `resolveOrderIds`) so a post-wait condition reflects reality, not the trigger-time snapshot.
+ * Fails open: a lookup error or unresolvable payload just returns the payload unchanged.
+ */
+async function refreshEventPayload(
+  tenantId: string,
+  payload: Record<string, unknown>,
+): Promise<Record<string, unknown>> {
+  const courseId = payload.courseId as string | undefined;
+  const studentId = (payload.studentId ?? payload.userId) as string | undefined;
+  if (!courseId || !studentId) return payload;
+
+  try {
+    const enrollment = await Enrollment.findOne({ tenant: tenantId, course: courseId, student: studentId }).lean<{
+      paymentStatus?: string;
+      learningStatus?: string;
+      progressPercent?: number;
+    }>();
+    if (!enrollment) return payload;
+    return {
+      ...payload,
+      paymentStatus: enrollment.paymentStatus,
+      learningStatus: enrollment.learningStatus,
+      progressPercent: enrollment.progressPercent,
+    };
+  } catch (e: unknown) {
+    console.warn(
+      '[automation-bridge] refreshEventPayload lookup failed — continuing with stale payload:',
+      e instanceof Error ? e.message : e,
+    );
+    return payload;
   }
 }
 
@@ -179,8 +279,36 @@ async function executeAction(
       }
       break;
     }
+    case 'SEND_EMAIL': {
+      const to = resolveRecipientEmail(event.payload);
+      const template = (action.config?.template as string) || 'custom';
+      const subject = action.config?.subject as string | undefined;
+
+      if (!to) {
+        console.warn(
+          `[automation-bridge] SEND_EMAIL skipped for "${automation.name}" — no recipient email found in payload`,
+        );
+      } else {
+        try {
+          await sendAutomationEmail({ to, template, subject, payload: event.payload });
+        } catch (e: unknown) {
+          console.error(
+            `[automation-bridge] SEND_EMAIL failed for "${automation.name}":`,
+            e instanceof Error ? e.message : e,
+          );
+        }
+      }
+
+      await recordAutomationActionTimeline({
+        tenantId: event.tenantId,
+        automation,
+        action,
+        payload: event.payload,
+        runId,
+      });
+      break;
+    }
     case 'NOTIFY_SLACK':
-    case 'SEND_EMAIL':
     case 'CALL_WEBHOOK':
     case 'TAG_USER':
     case 'ADD_TO_GROUP':
