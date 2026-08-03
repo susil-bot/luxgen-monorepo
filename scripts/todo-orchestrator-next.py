@@ -38,7 +38,8 @@ def pick_next(tasks):
     candidates = [t for t in tasks if t["status"] == "todo" and deps_done(t, by_id)]
     if not candidates:
         return None
-    candidates.sort(key=lambda t: (t["priority"], t["id"]))
+    # Prefer bootstrap audits (E0) before same-priority feature work
+    candidates.sort(key=lambda t: (t["priority"], 0 if t.get("epic") == "E0" else 1, t["id"]))
     return candidates[0]
 
 
