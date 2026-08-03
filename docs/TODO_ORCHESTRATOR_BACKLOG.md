@@ -80,7 +80,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 | [x] `T-E0-03` | P0 | S | Audit Automation builder: TODO vs `/automations` + GraphQL | → `docs/todo-orchestrator/audits/automation-gaps.md` |
 | [x] `T-E0-04` | P0 | S | Audit Commerce: TODO vs `/products` `/orders` `/admin/customers` | → `docs/todo-orchestrator/audits/commerce-gaps.md` |
 | [x] `T-E0-05` | P1 | S | Audit Sitemap L1/L2 vs `DefaultNavigation.tsx` + pages | → `docs/todo-orchestrator/audits/sitemap-gaps.md` |
-| [ ] `T-E0-06` | P1 | S | Audit Role modules vs `/organization/*` settings | Gap list for IAM/SSO/SCIM |
+| [x] `T-E0-06` | P1 | S | Audit Role modules vs `/organization/*` settings | → `docs/todo-orchestrator/audits/role-gaps.md` |
 
 **Acceptance (all E0):** output is a **diff to docs or checklist only** (or tiny inventory markdown under `docs/todo-orchestrator/audits/`). No product code unless a one-line fix is required to document truth.
 
@@ -91,7 +91,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 | ID | Pri | SLA | Source slice | Task | Skill |
 | --- | --- | --- | --- | --- | --- |
 | [x] `T-SRCH-01` | P0 | M | L25–L256 | Global search overlay: open via header + ⌘K/Ctrl+K; filters + result list shell | merged #465 |
-| [x] `T-SRCH-02` | P0 | M | L187–L256 | Result cards for Courses + Learners (live GraphQL or existing queries) | review `feat/search-result-cards-live` |
+| [x] `T-SRCH-02` | P0 | M | L187–L256 | Result cards for Courses + Learners (live GraphQL or existing queries) | merged #468 |
 | [ ] `T-SRCH-03` | P1 | M | L258–L425 | Command palette: create/nav commands (subset: create course, go dashboard, go orders) | `ios-design` |
 | [ ] `T-SRCH-04` | P1 | M | L569–L660 | Saved searches: persist per-user (localStorage MVP OK if API absent; document follow-up) | `fullstack-developer` |
 | [ ] `T-SRCH-05` | P2 | M | L661–L787 | Advanced filters panel for one domain (courses) | `persona-pages` |
