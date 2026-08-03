@@ -27,12 +27,30 @@
 | `/courses/[id]` | Course detail (content, enrollment) |
 | `/courses/[id]/edit` | Edit course metadata/content |
 | `/courses/analytics` | Course Analytics — completion rate, engagement (Pro plan gate) |
+| `/certificates` | **Issued certificates** (admin) — tenant completed enrollments + expiry |
 
 - [ ] `/courses` — pagination, tenant scoping
 - [ ] `/courses/create` — multi-step validation, draft save
 - [ ] `/courses/[id]` — enrollment CTA, progress display
 - [ ] `/courses/[id]/edit` — permission check (owner/admin only)
 - [ ] `/courses/analytics` — confirm live data (flagged as partially mock in `CODEBASE.md` Known Issues)
+- [x] `/certificates` — wired via `issuedCertificates` (T-MAP-01); shows learner, course, issued/expiry, verification code
+
+### Learning sitemap gaps — T-MAP-01 decision
+
+Highest-traffic gap closed: **Certificates → Issued** (`/certificates`, flat route; sitemap `/learning/certificates/issued`).
+
+**Explicitly deferred** (no page/nav this PR — enqueue later):
+
+| Sitemap item | Route (aspirational) | Reason deferred |
+| --- | --- | --- |
+| Lessons editor / preview | `/learning/lessons/*` | Needs curriculum model beyond course metadata |
+| Quizzes list / builder | `/learning/quizzes*` | Greenfield; larger than M SLA |
+| Certificate designer | `/learning/certificates/:id/edit` | Design canvas not started |
+| Learning paths | `/learning/paths*` | Greenfield |
+| Assignments | `/learning/assignments*` | Greenfield |
+| Categories | `/learning/categories` | Greenfield |
+| Path prefix `/learning/*` | — | Keep flat `/courses` `/certificates` until migration decision |
 
 ---
 
@@ -202,7 +220,7 @@
 | `/learn/certificates` | Earned certificates |
 | `/learn/subscriptions` | Active subscriptions |
 
-- [ ] `/learn/certificates` — display `certificateExpiresAt`/recert status (schema field exists; UI not yet built)
+- [x] `/learn/certificates` — list + verification code + `certificateExpiresAt` when set (T-MAP-01)
 - [ ] `/learn/courses/[id]` — progress persists and drives `COURSE_COMPLETED` trigger
 
 ---

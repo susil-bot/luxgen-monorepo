@@ -132,7 +132,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 | [x] `T-COM-02` | P0 | M | L517–L653 | Orders list/detail: status filters + live order fields | merged #463 |
 | [x] `T-COM-03` | P0 | M | L654–L827 | Customers list/detail/edit aligned to commerce TODO | merged #464 |
 | [ ] `T-COM-04` | P1 | M | L418–L516 | Bundles CRUD vertical | `fullstack-developer` |
-| [x] `T-COM-05` | P1 | M | L828–L944 | Coupons CRUD vertical | review `feat/coupons-crud` |
+| [x] `T-COM-05` | P1 | M | L828–L944 | Coupons CRUD vertical | done #474 |
 | [ ] `T-COM-06` | P1 | M | L945–L1075 | Payments & subscriptions status surfaces | `billing` |
 | [ ] `T-COM-07` | P2 | M | L1076–L1154 | Revenue analytics widgets (live or clearly gated) | `persona-pages` |
 | [ ] `T-COM-08` | P2 | M | L1155–L1235 | Conversion funnels view | `persona-pages` |
@@ -148,7 +148,7 @@ Work **only** missing/partial routes from `T-E0-05`. Do not rebuild working page
 
 | ID | Pri | SLA | Source slice | Task |
 | --- | --- | --- | --- | --- |
-| [ ] `T-MAP-01` | P1 | M | L12–L110 | Learning: close highest-traffic gaps (lessons/quizzes/certs) one vertical at a time |
+| [x] `T-MAP-01` | P1 | M | L12–L110 | Learning: close highest-traffic gaps (lessons/quizzes/certs) one vertical at a time | review `feat/learning-sitemap-certificates` |
 | [ ] `T-MAP-02` | P1 | M | L219–L388 | Automation/AI sitemap items not yet in nav — add nav + stub or wire |
 | [ ] `T-MAP-03` | P1 | M | L389–L487 | Analytics subdomain pages missing from nav/pages |
 | [ ] `T-MAP-04` | P2 | M | L488–L675 | Marketplace IA gaps |

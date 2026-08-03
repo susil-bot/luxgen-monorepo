@@ -50,7 +50,8 @@ Flat legacy list `getDefaultNavItems()` still exposes `/courses`, `/groups`, `/u
 | Courses | `/learning/courses` (+ detail/new/edit) | Yes → `/courses*` | `courses.tsx`, `courses/[id]`, `create`, `[id]/edit`, `analytics`, `my-courses` (nav) | partial — path prefix `/courses` not `/learning/courses` |
 | Lessons | `/learning/lessons/:id/edit\|preview` | No | No dedicated lesson routes under `pages/` | missing |
 | Quizzes | `/learning/quizzes*` | No | No `pages/quizzes*` | missing |
-| Certificates | `/learning/certificates*` | No | `learn/certificates/index.tsx` (learner) | partial — learner list only; no admin designer/issued |
+| Certificates | `/learning/certificates*` | Yes → `/certificates` (+ learner `/learn/certificates`) | Admin issued list `pages/certificates/index.tsx` + `issuedCertificates`; designer still missing | partial — issued wired (T-MAP-01); designer deferred |
+
 | Learning Paths | `/learning/paths*` | No | — | missing |
 | Assignments | `/learning/assignments*` | No | — | missing |
 | Categories | `/learning/categories` | No | — | missing |
