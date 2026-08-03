@@ -1,26 +1,15 @@
-# Machine queue for headless orchestrator.
-# Canonical for scripts: queue.json (keep in sync after edits).
-# Pick next: status=todo, min priority, all deps status=done.
-# Update status on enqueue/merge. Never embed full TODO bodies here.
 version: 1
 updated: 2026-08-03
 prompt_template: docs/todo-orchestrator/AGENT_TASK_CARD.md
 backlog: docs/TODO_ORCHESTRATOR_BACKLOG.md
 orchestrator: docs/AGENT_ORCHESTRATOR.md
-
 sources:
   sitemap: docs/TODO-sitemap.md
   search: docs/TODO-search.md
   automation: "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md"
-  commerce: "docs/TODO-Commerce Experience.md"
+  commerce: docs/TODO-Commerce Experience.md
   role: docs/TODO-role.md
-
-# priority: 0=P0 … 3=P3
-# sla: S|M|L
-# status: todo|blocked|doing|review|done|wont
-
 tasks:
-  # —— E0 Bootstrap ——
   - id: T-E0-01
     epic: E0
     priority: 0
@@ -28,29 +17,36 @@ tasks:
     status: blocked
     title: Ensure commerce + role TODO docs non-empty on main (merge PR 453)
     skill: null
-    source: { file: docs/TODO-Commerce Experience.md, start: 1, end: 1 }
-    touch: [docs/TODO-Commerce Experience.md, docs/TODO-role.md]
+    source:
+      file: docs/TODO-Commerce Experience.md
+      start: 1
+      end: 1
+    touch:
+      - docs/TODO-Commerce Experience.md
+      - docs/TODO-role.md
     deps: []
     acceptance:
       - docs/TODO-Commerce Experience.md has content on main
       - docs/TODO-role.md exists on main
-    notes: "Blocked until https://github.com/susil-bot/luxgen-monorepo/pull/453 merges"
-
+    notes: Blocked until https://github.com/susil-bot/luxgen-monorepo/pull/453 merges
   - id: T-E0-02
     epic: E0
     priority: 0
     sla: S
-    status: todo
+    status: done
     title: Audit Search TODO vs codebase; write gap table
     skill: fullstack-developer
-    source: { file: docs/TODO-search.md, start: 1, end: 50 }
-    touch: [docs/todo-orchestrator/audits/search-gaps.md]
+    source:
+      file: docs/TODO-search.md
+      start: 1
+      end: 50
+    touch:
+      - docs/todo-orchestrator/audits/search-gaps.md
     deps: []
     acceptance:
       - Audit markdown lists each Search section vs existing route/component/API
       - Marks wired / partial / missing
       - No product code changes
-
   - id: T-E0-03
     epic: E0
     priority: 0
@@ -58,14 +54,18 @@ tasks:
     status: todo
     title: Audit Automation builder TODO vs automations UI + GraphQL
     skill: automation
-    source: { file: "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md", start: 1, end: 120 }
-    touch: [docs/todo-orchestrator/audits/automation-gaps.md]
+    source:
+      file: "docs/TODO-Enterprise Product Specification: Workflow Automation
+        Builder.md"
+      start: 1
+      end: 120
+    touch:
+      - docs/todo-orchestrator/audits/automation-gaps.md
     deps: []
     acceptance:
       - Gap table for §11–§12 model/GraphQL and builder UI
       - File paths cited
       - No product code unless documenting a one-line truth fix
-
   - id: T-E0-04
     epic: E0
     priority: 0
@@ -73,13 +73,17 @@ tasks:
     status: blocked
     title: Audit Commerce TODO vs products/orders/customers pages
     skill: fullstack-developer
-    source: { file: "docs/TODO-Commerce Experience.md", start: 1, end: 80 }
-    touch: [docs/todo-orchestrator/audits/commerce-gaps.md]
-    deps: [T-E0-01]
+    source:
+      file: docs/TODO-Commerce Experience.md
+      start: 1
+      end: 80
+    touch:
+      - docs/todo-orchestrator/audits/commerce-gaps.md
+    deps:
+      - T-E0-01
     acceptance:
       - Gap table for Products Orders Customers Coupons Bundles
       - Cross-links PAGE_FUNCTIONALITY_CHECKLIST.md
-
   - id: T-E0-05
     epic: E0
     priority: 1
@@ -87,13 +91,16 @@ tasks:
     status: todo
     title: Audit Sitemap L1/L2 vs DefaultNavigation + pages
     skill: sidebar
-    source: { file: docs/TODO-sitemap.md, start: 1, end: 220 }
-    touch: [docs/todo-orchestrator/audits/sitemap-gaps.md]
+    source:
+      file: docs/TODO-sitemap.md
+      start: 1
+      end: 220
+    touch:
+      - docs/todo-orchestrator/audits/sitemap-gaps.md
     deps: []
     acceptance:
       - Missing/partial routes table for Learning Commerce Automation Analytics
       - Uses DefaultNavigation.tsx as nav source of truth
-
   - id: T-E0-06
     epic: E0
     priority: 1
@@ -101,13 +108,16 @@ tasks:
     status: blocked
     title: Audit Role modules vs organization settings routes
     skill: persona-pages
-    source: { file: docs/TODO-role.md, start: 270, end: 350 }
-    touch: [docs/todo-orchestrator/audits/role-gaps.md]
-    deps: [T-E0-01]
+    source:
+      file: docs/TODO-role.md
+      start: 270
+      end: 350
+    touch:
+      - docs/todo-orchestrator/audits/role-gaps.md
+    deps:
+      - T-E0-01
     acceptance:
       - Gap table for org dashboard profile tenants users roles security SSO SCIM
-
-  # —— E1 Search ——
   - id: T-SRCH-01
     epic: E1
     priority: 0
@@ -115,14 +125,20 @@ tasks:
     status: todo
     title: Global search overlay shell (header + Cmd/Ctrl+K)
     skill: ios-design
-    source: { file: docs/TODO-search.md, start: 25, end: 256 }
-    touch: [apps/web/pages, apps/web/components, packages/ui/src]
-    deps: [T-E0-02]
+    source:
+      file: docs/TODO-search.md
+      start: 25
+      end: 256
+    touch:
+      - apps/web/pages
+      - apps/web/components
+      - packages/ui/src
+    deps:
+      - T-E0-02
     acceptance:
       - Cmd/Ctrl+K opens overlay; Esc closes
       - Filter sidebar + results panel shell render
       - Uses iOS tokens; guest auth rules intact
-
   - id: T-SRCH-02
     epic: E1
     priority: 0
@@ -130,14 +146,19 @@ tasks:
     status: todo
     title: Search result cards for courses + learners (live data)
     skill: graphql
-    source: { file: docs/TODO-search.md, start: 187, end: 256 }
-    touch: [apps/web, apps/api/src/schema]
-    deps: [T-SRCH-01]
+    source:
+      file: docs/TODO-search.md
+      start: 187
+      end: 256
+    touch:
+      - apps/web
+      - apps/api/src/schema
+    deps:
+      - T-SRCH-01
     acceptance:
       - Query returns tenant-scoped courses and learners
       - Cards show title type metadata + open action
       - Empty/loading/error states present
-
   - id: T-SRCH-03
     epic: E1
     priority: 1
@@ -145,13 +166,17 @@ tasks:
     status: todo
     title: Command palette subset (create course, nav dashboard/orders)
     skill: ios-design
-    source: { file: docs/TODO-search.md, start: 258, end: 425 }
-    touch: [apps/web]
-    deps: [T-SRCH-01]
+    source:
+      file: docs/TODO-search.md
+      start: 258
+      end: 425
+    touch:
+      - apps/web
+    deps:
+      - T-SRCH-01
     acceptance:
       - At least 3 create/nav commands work
       - Keyboard select + enter navigates
-
   - id: T-SRCH-04
     epic: E1
     priority: 1
@@ -159,13 +184,17 @@ tasks:
     status: todo
     title: Saved searches MVP
     skill: fullstack-developer
-    source: { file: docs/TODO-search.md, start: 569, end: 660 }
-    touch: [apps/web]
-    deps: [T-SRCH-01]
+    source:
+      file: docs/TODO-search.md
+      start: 569
+      end: 660
+    touch:
+      - apps/web
+    deps:
+      - T-SRCH-01
     acceptance:
       - User can save star and reopen a search
       - Persistence documented (API or localStorage MVP)
-
   - id: T-SRCH-05
     epic: E1
     priority: 2
@@ -173,12 +202,16 @@ tasks:
     status: todo
     title: Advanced course filters in search
     skill: persona-pages
-    source: { file: docs/TODO-search.md, start: 661, end: 787 }
-    touch: [apps/web]
-    deps: [T-SRCH-02]
+    source:
+      file: docs/TODO-search.md
+      start: 661
+      end: 787
+    touch:
+      - apps/web
+    deps:
+      - T-SRCH-02
     acceptance:
       - Multi-filter course search updates results
-
   - id: T-SRCH-06
     epic: E1
     priority: 2
@@ -186,12 +219,16 @@ tasks:
     status: todo
     title: Recent searches list + clear
     skill: ios-design
-    source: { file: docs/TODO-search.md, start: 788, end: 866 }
-    touch: [apps/web]
-    deps: [T-SRCH-01]
+    source:
+      file: docs/TODO-search.md
+      start: 788
+      end: 866
+    touch:
+      - apps/web
+    deps:
+      - T-SRCH-01
     acceptance:
       - Shows last searches; clear removes them
-
   - id: T-SRCH-07
     epic: E1
     priority: 3
@@ -199,12 +236,15 @@ tasks:
     status: wont
     title: AI conversational search (SPLIT REQUIRED — do not enqueue)
     skill: ai-studio
-    source: { file: docs/TODO-search.md, start: 427, end: 568 }
+    source:
+      file: docs/TODO-search.md
+      start: 427
+      end: 568
     touch: []
-    deps: [T-SRCH-02]
+    deps:
+      - T-SRCH-02
     acceptance:
       - Split into T-SRCH-07a schema T-SRCH-07b UI before enqueue
-
   - id: T-SRCH-08
     epic: E1
     priority: 2
@@ -212,13 +252,18 @@ tasks:
     status: todo
     title: Search analytics admin stub + client event hook
     skill: persona-pages
-    source: { file: docs/TODO-search.md, start: 867, end: 973 }
-    touch: [apps/web, apps/api]
-    deps: [T-SRCH-01]
+    source:
+      file: docs/TODO-search.md
+      start: 867
+      end: 973
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-SRCH-01
     acceptance:
       - Admin page or section exists
       - At least one search event logged or stubbed with TODO API
-
   - id: T-SRCH-09
     epic: E1
     priority: 2
@@ -226,12 +271,17 @@ tasks:
     status: todo
     title: Search overlay a11y (focus trap aria keyboard)
     skill: ios-design
-    source: { file: docs/TODO-search.md, start: 1021, end: 1069 }
-    touch: [apps/web, packages/ui]
-    deps: [T-SRCH-01]
+    source:
+      file: docs/TODO-search.md
+      start: 1021
+      end: 1069
+    touch:
+      - apps/web
+      - packages/ui
+    deps:
+      - T-SRCH-01
     acceptance:
       - Focus trapped; aria labels; Tab cycle; Esc restores focus
-
   - id: T-SRCH-10
     epic: E1
     priority: 2
@@ -239,13 +289,16 @@ tasks:
     status: todo
     title: Search error empty loading states
     skill: ios-design
-    source: { file: docs/TODO-search.md, start: 1070, end: 1100 }
-    touch: [apps/web]
-    deps: [T-SRCH-02]
+    source:
+      file: docs/TODO-search.md
+      start: 1070
+      end: 1100
+    touch:
+      - apps/web
+    deps:
+      - T-SRCH-02
     acceptance:
       - Distinct UI for loading empty error; no fabricated results
-
-  # —— E2 Automation ——
   - id: T-AUTO-01
     epic: E2
     priority: 0
@@ -253,29 +306,44 @@ tasks:
     status: todo
     title: Align automation data model with flowDefinition + TODO §11
     skill: automation
-    source: { file: "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md", start: 432, end: 596 }
-    touch: [packages/automation-flow, packages/db, apps/api]
-    deps: [T-E0-03]
+    source:
+      file: "docs/TODO-Enterprise Product Specification: Workflow Automation
+        Builder.md"
+      start: 432
+      end: 596
+    touch:
+      - packages/automation-flow
+      - packages/db
+      - apps/api
+    deps:
+      - T-E0-03
     acceptance:
       - Documented mapping of TODO entities to existing models
       - Code changes only where schema gap blocks builder
       - Tenant fields preserved
-
   - id: T-AUTO-02
     epic: E2
     priority: 0
     sla: M
     status: todo
-    title: Close one GraphQL mutation family from TODO §12 (pick highest gap from audit)
+    title: Close one GraphQL mutation family from TODO §12 (pick highest gap from
+      audit)
     skill: graphql
-    source: { file: "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md", start: 597, end: 940 }
-    touch: [apps/api/src/schema/automation, apps/web/graphql]
-    deps: [T-E0-03, T-AUTO-01]
+    source:
+      file: "docs/TODO-Enterprise Product Specification: Workflow Automation
+        Builder.md"
+      start: 597
+      end: 940
+    touch:
+      - apps/api/src/schema/automation
+      - apps/web/graphql
+    deps:
+      - T-E0-03
+      - T-AUTO-01
     acceptance:
       - Chosen mutations work end-to-end
       - Resolvers thin; services hold logic
       - Single feat PR
-
   - id: T-AUTO-03
     epic: E2
     priority: 0
@@ -283,13 +351,19 @@ tasks:
     status: todo
     title: Builder canvas add/edit/delete step wired to live mutations
     skill: automation
-    source: { file: "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md", start: 276, end: 431 }
-    touch: [apps/web/pages/automations, packages/ui]
-    deps: [T-AUTO-02]
+    source:
+      file: "docs/TODO-Enterprise Product Specification: Workflow Automation
+        Builder.md"
+      start: 276
+      end: 431
+    touch:
+      - apps/web/pages/automations
+      - packages/ui
+    deps:
+      - T-AUTO-02
     acceptance:
       - User can add configure delete a step and persist
       - iOS tokens; no mock-only save
-
   - id: T-AUTO-04
     epic: E2
     priority: 0
@@ -297,12 +371,18 @@ tasks:
     status: todo
     title: Publish pause archive workflow actions + status UI
     skill: automation
-    source: { file: "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md", start: 819, end: 884 }
-    touch: [apps/web, apps/api]
-    deps: [T-AUTO-02]
+    source:
+      file: "docs/TODO-Enterprise Product Specification: Workflow Automation
+        Builder.md"
+      start: 819
+      end: 884
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-AUTO-02
     acceptance:
       - Status transitions persist and reflect in list/detail
-
   - id: T-AUTO-05
     epic: E2
     priority: 1
@@ -310,12 +390,18 @@ tasks:
     status: todo
     title: Workflow run history list + detail
     skill: automation
-    source: { file: "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md", start: 716, end: 751 }
-    touch: [apps/web, apps/api]
-    deps: [T-AUTO-04]
+    source:
+      file: "docs/TODO-Enterprise Product Specification: Workflow Automation
+        Builder.md"
+      start: 716
+      end: 751
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-AUTO-04
     acceptance:
       - Runs list tenant-scoped; detail shows status timestamps
-
   - id: T-AUTO-06
     epic: E2
     priority: 1
@@ -323,12 +409,19 @@ tasks:
     status: todo
     title: Test-run workflow with sample payload
     skill: automation
-    source: { file: "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md", start: 846, end: 864 }
-    touch: [apps/web, apps/api, packages/agent]
-    deps: [T-AUTO-03]
+    source:
+      file: "docs/TODO-Enterprise Product Specification: Workflow Automation
+        Builder.md"
+      start: 846
+      end: 864
+    touch:
+      - apps/web
+      - apps/api
+      - packages/agent
+    deps:
+      - T-AUTO-03
     acceptance:
       - Test action creates a run without requiring live trigger event
-
   - id: T-AUTO-07
     epic: E2
     priority: 1
@@ -336,12 +429,17 @@ tasks:
     status: todo
     title: Enforce publish business rules (trigger required tenant scope)
     skill: automation
-    source: { file: "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md", start: 942, end: 1054 }
-    touch: [apps/api]
-    deps: [T-AUTO-04]
+    source:
+      file: "docs/TODO-Enterprise Product Specification: Workflow Automation
+        Builder.md"
+      start: 942
+      end: 1054
+    touch:
+      - apps/api
+    deps:
+      - T-AUTO-04
     acceptance:
       - Cannot publish empty/invalid workflow; clear GraphQL errors
-
   - id: T-AUTO-08
     epic: E2
     priority: 2
@@ -349,12 +447,18 @@ tasks:
     status: todo
     title: Workflow analytics page (success rate run volume)
     skill: persona-pages
-    source: { file: "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md", start: 2083, end: 2172 }
-    touch: [apps/web, apps/api]
-    deps: [T-AUTO-05]
+    source:
+      file: "docs/TODO-Enterprise Product Specification: Workflow Automation
+        Builder.md"
+      start: 2083
+      end: 2172
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-AUTO-05
     acceptance:
       - Page shows live or empty-with-reason metrics; plan gate if needed
-
   - id: T-AUTO-09
     epic: E2
     priority: 2
@@ -362,12 +466,16 @@ tasks:
     status: wont
     title: Real-time run subscriptions (SPLIT — schema then UI)
     skill: graphql
-    source: { file: "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md", start: 886, end: 940 }
+    source:
+      file: "docs/TODO-Enterprise Product Specification: Workflow Automation
+        Builder.md"
+      start: 886
+      end: 940
     touch: []
-    deps: [T-AUTO-05]
+    deps:
+      - T-AUTO-05
     acceptance:
       - Create T-AUTO-09a and T-AUTO-09b before enqueue
-
   - id: T-AUTO-10
     epic: E2
     priority: 2
@@ -375,13 +483,18 @@ tasks:
     status: todo
     title: Permission gates on workflow edit/publish
     skill: automation
-    source: { file: "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md", start: 1647, end: 1748 }
-    touch: [apps/api, apps/web]
-    deps: [T-AUTO-04]
+    source:
+      file: "docs/TODO-Enterprise Product Specification: Workflow Automation
+        Builder.md"
+      start: 1647
+      end: 1748
+    touch:
+      - apps/api
+      - apps/web
+    deps:
+      - T-AUTO-04
     acceptance:
       - Unauthorized role cannot publish; UI hides or disables correctly
-
-  # —— E3 Commerce ——
   - id: T-COM-01
     epic: E3
     priority: 0
@@ -389,13 +502,19 @@ tasks:
     status: blocked
     title: Products list create edit — all fields persist
     skill: fullstack-developer
-    source: { file: "docs/TODO-Commerce Experience.md", start: 21, end: 417 }
-    touch: [apps/web/pages, apps/api]
-    deps: [T-E0-01, T-E0-04]
+    source:
+      file: docs/TODO-Commerce Experience.md
+      start: 21
+      end: 417
+    touch:
+      - apps/web/pages
+      - apps/api
+    deps:
+      - T-E0-01
+      - T-E0-04
     acceptance:
       - Create read update list reflect changes
       - No disabled fields that should save
-
   - id: T-COM-02
     epic: E3
     priority: 0
@@ -403,12 +522,17 @@ tasks:
     status: blocked
     title: Orders list detail status filters live
     skill: fullstack-developer
-    source: { file: "docs/TODO-Commerce Experience.md", start: 517, end: 653 }
-    touch: [apps/web, apps/api]
-    deps: [T-E0-04]
+    source:
+      file: docs/TODO-Commerce Experience.md
+      start: 517
+      end: 653
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-E0-04
     acceptance:
       - Filters work; detail shows line items status payment
-
   - id: T-COM-03
     epic: E3
     priority: 0
@@ -416,12 +540,17 @@ tasks:
     status: blocked
     title: Customers list detail edit per commerce TODO
     skill: persona-pages
-    source: { file: "docs/TODO-Commerce Experience.md", start: 654, end: 827 }
-    touch: [apps/web, apps/api]
-    deps: [T-E0-04]
+    source:
+      file: docs/TODO-Commerce Experience.md
+      start: 654
+      end: 827
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-E0-04
     acceptance:
       - CRUD chain complete; tenant scoped
-
   - id: T-COM-04
     epic: E3
     priority: 1
@@ -429,12 +558,17 @@ tasks:
     status: blocked
     title: Bundles CRUD vertical
     skill: fullstack-developer
-    source: { file: "docs/TODO-Commerce Experience.md", start: 418, end: 516 }
-    touch: [apps/web, apps/api]
-    deps: [T-COM-01]
+    source:
+      file: docs/TODO-Commerce Experience.md
+      start: 418
+      end: 516
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-COM-01
     acceptance:
       - Bundle create edit list works with included products
-
   - id: T-COM-05
     epic: E3
     priority: 1
@@ -442,12 +576,17 @@ tasks:
     status: blocked
     title: Coupons CRUD vertical
     skill: fullstack-developer
-    source: { file: "docs/TODO-Commerce Experience.md", start: 828, end: 944 }
-    touch: [apps/web, apps/api]
-    deps: [T-E0-04]
+    source:
+      file: docs/TODO-Commerce Experience.md
+      start: 828
+      end: 944
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-E0-04
     acceptance:
       - Coupon create edit list; discount fields persist
-
   - id: T-COM-06
     epic: E3
     priority: 1
@@ -455,12 +594,18 @@ tasks:
     status: blocked
     title: Payments and subscriptions status surfaces
     skill: billing
-    source: { file: "docs/TODO-Commerce Experience.md", start: 945, end: 1075 }
-    touch: [apps/web, apps/api, packages/billing]
-    deps: [T-COM-02]
+    source:
+      file: docs/TODO-Commerce Experience.md
+      start: 945
+      end: 1075
+    touch:
+      - apps/web
+      - apps/api
+      - packages/billing
+    deps:
+      - T-COM-02
     acceptance:
       - Status visible; plan gates respected
-
   - id: T-COM-07
     epic: E3
     priority: 2
@@ -468,12 +613,17 @@ tasks:
     status: blocked
     title: Revenue analytics widgets
     skill: persona-pages
-    source: { file: "docs/TODO-Commerce Experience.md", start: 1076, end: 1154 }
-    touch: [apps/web, apps/api]
-    deps: [T-COM-02]
+    source:
+      file: docs/TODO-Commerce Experience.md
+      start: 1076
+      end: 1154
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-COM-02
     acceptance:
       - Widgets live or empty-with-reason; no fake revenue
-
   - id: T-COM-08
     epic: E3
     priority: 2
@@ -481,12 +631,17 @@ tasks:
     status: blocked
     title: Conversion funnels view
     skill: persona-pages
-    source: { file: "docs/TODO-Commerce Experience.md", start: 1155, end: 1235 }
-    touch: [apps/web, apps/api]
-    deps: [T-COM-07]
+    source:
+      file: docs/TODO-Commerce Experience.md
+      start: 1155
+      end: 1235
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-COM-07
     acceptance:
       - Funnel stages render from real or empty data
-
   - id: T-COM-09
     epic: E3
     priority: 2
@@ -494,13 +649,18 @@ tasks:
     status: blocked
     title: Upsell cross-sell config + automation hook
     skill: automation
-    source: { file: "docs/TODO-Commerce Experience.md", start: 1236, end: 1367 }
-    touch: [apps/web, apps/api, packages/agent]
-    deps: [T-COM-01]
+    source:
+      file: docs/TODO-Commerce Experience.md
+      start: 1236
+      end: 1367
+    touch:
+      - apps/web
+      - apps/api
+      - packages/agent
+    deps:
+      - T-COM-01
     acceptance:
       - Config persists; documented trigger/action hook
-
-  # —— E4 Sitemap ——
   - id: T-MAP-01
     epic: E4
     priority: 1
@@ -508,12 +668,18 @@ tasks:
     status: todo
     title: Close top Learning sitemap gaps (one vertical from audit)
     skill: persona-pages
-    source: { file: docs/TODO-sitemap.md, start: 12, end: 110 }
-    touch: [apps/web, apps/api]
-    deps: [T-E0-05]
+    source:
+      file: docs/TODO-sitemap.md
+      start: 12
+      end: 110
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-E0-05
     acceptance:
-      - Highest-traffic missing Learning item wired or explicitly deferred in checklist
-
+      - Highest-traffic missing Learning item wired or explicitly deferred in
+        checklist
   - id: T-MAP-02
     epic: E4
     priority: 1
@@ -521,12 +687,17 @@ tasks:
     status: todo
     title: Automation/AI sitemap items missing from nav
     skill: sidebar
-    source: { file: docs/TODO-sitemap.md, start: 219, end: 388 }
-    touch: [packages/ui/src/Layout, apps/web]
-    deps: [T-E0-05]
+    source:
+      file: docs/TODO-sitemap.md
+      start: 219
+      end: 388
+    touch:
+      - packages/ui/src/Layout
+      - apps/web
+    deps:
+      - T-E0-05
     acceptance:
       - Nav entries match shipped pages; no dead links
-
   - id: T-MAP-03
     epic: E4
     priority: 1
@@ -534,12 +705,16 @@ tasks:
     status: todo
     title: Analytics sitemap gaps
     skill: persona-pages
-    source: { file: docs/TODO-sitemap.md, start: 389, end: 487 }
-    touch: [apps/web]
-    deps: [T-E0-05]
+    source:
+      file: docs/TODO-sitemap.md
+      start: 389
+      end: 487
+    touch:
+      - apps/web
+    deps:
+      - T-E0-05
     acceptance:
       - Missing analytics routes added or deferred with note
-
   - id: T-MAP-04
     epic: E4
     priority: 2
@@ -547,12 +722,16 @@ tasks:
     status: todo
     title: Marketplace IA gaps
     skill: automation
-    source: { file: docs/TODO-sitemap.md, start: 488, end: 675 }
-    touch: [apps/web]
-    deps: [T-E0-05]
+    source:
+      file: docs/TODO-sitemap.md
+      start: 488
+      end: 675
+    touch:
+      - apps/web
+    deps:
+      - T-E0-05
     acceptance:
       - Browse/publish gaps addressed or deferred
-
   - id: T-MAP-05
     epic: E4
     priority: 2
@@ -560,12 +739,15 @@ tasks:
     status: wont
     title: Settings content support gaps (SPLIT before enqueue)
     skill: persona-pages
-    source: { file: docs/TODO-sitemap.md, start: 676, end: 1029 }
+    source:
+      file: docs/TODO-sitemap.md
+      start: 676
+      end: 1029
     touch: []
-    deps: [T-E0-05]
+    deps:
+      - T-E0-05
     acceptance:
       - Split into per-settings-area tasks after audit
-
   - id: T-MAP-06
     epic: E4
     priority: 2
@@ -573,12 +755,17 @@ tasks:
     status: todo
     title: Search route in nav + page exists
     skill: sidebar
-    source: { file: docs/TODO-sitemap.md, start: 1030, end: 1042 }
-    touch: [packages/ui/src/Layout, apps/web/pages]
-    deps: [T-SRCH-01]
+    source:
+      file: docs/TODO-sitemap.md
+      start: 1030
+      end: 1042
+    touch:
+      - packages/ui/src/Layout
+      - apps/web/pages
+    deps:
+      - T-SRCH-01
     acceptance:
       - /search reachable from nav; page renders overlay or dedicated UI
-
   - id: T-MAP-07
     epic: E4
     priority: 3
@@ -586,13 +773,15 @@ tasks:
     status: wont
     title: Mobile adaptations from sitemap (defer)
     skill: ios-design
-    source: { file: docs/TODO-sitemap.md, start: 1043, end: 1266 }
-    touch: [apps/mobile]
+    source:
+      file: docs/TODO-sitemap.md
+      start: 1043
+      end: 1266
+    touch:
+      - apps/mobile
     deps: []
     acceptance:
       - Track under separate mobile epic
-
-  # —— E5 Role / Enterprise ——
   - id: T-ROLE-01
     epic: E5
     priority: 1
@@ -600,12 +789,18 @@ tasks:
     status: blocked
     title: Organization dashboard KPIs live
     skill: persona-pages
-    source: { file: docs/TODO-role.md, start: 272, end: 336 }
-    touch: [apps/web, apps/api]
-    deps: [T-E0-01, T-E0-06]
+    source:
+      file: docs/TODO-role.md
+      start: 272
+      end: 336
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-E0-01
+      - T-E0-06
     acceptance:
       - Dashboard shows live tenant-scoped KPIs or empty-with-reason
-
   - id: T-ROLE-02
     epic: E5
     priority: 1
@@ -613,12 +808,17 @@ tasks:
     status: blocked
     title: Organization profile edit persists
     skill: fullstack-developer
-    source: { file: docs/TODO-role.md, start: 337, end: 427 }
-    touch: [apps/web, apps/api]
-    deps: [T-E0-06]
+    source:
+      file: docs/TODO-role.md
+      start: 337
+      end: 427
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-E0-06
     acceptance:
       - Profile fields save and reload
-
   - id: T-ROLE-03
     epic: E5
     priority: 1
@@ -626,12 +826,17 @@ tasks:
     status: blocked
     title: Tenant list + create wizard (superadmin)
     skill: fullstack-developer
-    source: { file: docs/TODO-role.md, start: 428, end: 628 }
-    touch: [apps/web, apps/api]
-    deps: [T-E0-06]
+    source:
+      file: docs/TODO-role.md
+      start: 428
+      end: 628
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-E0-06
     acceptance:
       - Authorized role can list/create tenant; unauthorized blocked
-
   - id: T-ROLE-04
     epic: E5
     priority: 1
@@ -639,12 +844,17 @@ tasks:
     status: blocked
     title: Users invite roles permission matrix (incremental slice)
     skill: fullstack-developer
-    source: { file: docs/TODO-role.md, start: 886, end: 1195 }
-    touch: [apps/web, apps/api]
-    deps: [T-E0-06]
+    source:
+      file: docs/TODO-role.md
+      start: 886
+      end: 1195
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-E0-06
     acceptance:
       - Invite or role assignment persists; audit-friendly
-
   - id: T-ROLE-05
     epic: E5
     priority: 2
@@ -652,12 +862,17 @@ tasks:
     status: blocked
     title: Brand theme custom domain settings
     skill: ios-design
-    source: { file: docs/TODO-role.md, start: 629, end: 885 }
-    touch: [apps/web, apps/api]
-    deps: [T-ROLE-02]
+    source:
+      file: docs/TODO-role.md
+      start: 629
+      end: 885
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-ROLE-02
     acceptance:
       - At least brand assets or theme persists
-
   - id: T-ROLE-06
     epic: E5
     priority: 1
@@ -665,12 +880,17 @@ tasks:
     status: blocked
     title: Security dashboard login history MFA settings
     skill: fullstack-developer
-    source: { file: docs/TODO-role.md, start: 1196, end: 1530 }
-    touch: [apps/web, apps/api]
-    deps: [T-E0-06]
+    source:
+      file: docs/TODO-role.md
+      start: 1196
+      end: 1530
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-E0-06
     acceptance:
       - Security surfaces render with real or empty data; no fake users
-
   - id: T-ROLE-07
     epic: E5
     priority: 2
@@ -678,12 +898,15 @@ tasks:
     status: wont
     title: SSO configuration (SPLIT api then ui)
     skill: graphql
-    source: { file: docs/TODO-role.md, start: 1531, end: 1676 }
+    source:
+      file: docs/TODO-role.md
+      start: 1531
+      end: 1676
     touch: []
-    deps: [T-ROLE-06]
+    deps:
+      - T-ROLE-06
     acceptance:
       - Create T-ROLE-07a API and T-ROLE-07b UI tasks before enqueue
-
   - id: T-ROLE-08
     epic: E5
     priority: 2
@@ -691,8 +914,12 @@ tasks:
     status: wont
     title: SCIM configuration (SPLIT api then ui)
     skill: graphql
-    source: { file: docs/TODO-role.md, start: 1677, end: 2035 }
+    source:
+      file: docs/TODO-role.md
+      start: 1677
+      end: 2035
     touch: []
-    deps: [T-ROLE-06]
+    deps:
+      - T-ROLE-06
     acceptance:
       - Create T-ROLE-08a API and T-ROLE-08b UI tasks before enqueue

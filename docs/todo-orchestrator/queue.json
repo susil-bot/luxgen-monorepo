@@ -41,7 +41,7 @@
       "epic": "E0",
       "priority": 0,
       "sla": "S",
-      "status": "todo",
+      "status": "done",
       "title": "Audit Search TODO vs codebase; write gap table",
       "skill": "fullstack-developer",
       "source": {
