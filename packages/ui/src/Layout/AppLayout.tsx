@@ -26,6 +26,7 @@ export interface AppLayoutProps {
   /** Client-side navigation (e.g. Next.js router.push). Falls back to location.href */
   onNavigate?: (href: string) => void;
   onSearch?: (query: string) => void;
+  onSearchFocus?: () => void;
   onNotificationClick?: () => void;
   showSearch?: boolean;
   showNotifications?: boolean;
@@ -33,6 +34,7 @@ export interface AppLayoutProps {
   onAIStudioClick?: () => void;
   notificationCount?: number;
   searchPlaceholder?: string;
+  searchShortcutBadge?: string;
   showThemeToggle?: boolean;
   isDarkMode?: boolean;
   onThemeToggle?: () => void;
@@ -66,6 +68,7 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   pathname,
   onNavigate,
   onSearch,
+  onSearchFocus,
   onNotificationClick,
   showSearch = true,
   showNotifications = false,
@@ -73,6 +76,7 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
   onAIStudioClick,
   notificationCount = 0,
   searchPlaceholder = 'Search...',
+  searchShortcutBadge,
   showThemeToggle = false,
   isDarkMode = false,
   onThemeToggle,
@@ -343,7 +347,9 @@ const AppLayoutComponent: React.FC<AppLayoutProps> = ({
             onUserAction={onUserAction}
             showSearch={showSearch}
             onSearch={onSearch}
+            onSearchFocus={onSearchFocus}
             searchPlaceholder={searchPlaceholder}
+            searchShortcutBadge={searchShortcutBadge}
             showNotifications={showNotifications}
             notificationCount={notificationCount}
             onNotificationClick={onNotificationClick}

@@ -98,11 +98,13 @@ export interface AdminDashboardLayoutProps extends BaseComponentProps {
   pathname?: string;
   onNavigate?: (href: string) => void;
   onSearch?: (query: string) => void;
+  onSearchFocus?: () => void;
   onNotificationClick?: () => void;
   showSearch?: boolean;
   showNotifications?: boolean;
   notificationCount?: number;
   searchPlaceholder?: string;
+  searchShortcutBadge?: string;
   showThemeToggle?: boolean;
   isDarkMode?: boolean;
   onThemeToggle?: () => void;
@@ -209,11 +211,13 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
   pathname,
   onNavigate,
   onSearch,
+  onSearchFocus,
   onNotificationClick,
   showSearch = true,
   showNotifications = false,
   notificationCount = 0,
   searchPlaceholder = 'Search...',
+  searchShortcutBadge,
   showThemeToggle = false,
   isDarkMode = false,
   onThemeToggle,
@@ -365,11 +369,13 @@ const AdminDashboardLayoutComponent: React.FC<AdminDashboardLayoutProps> = ({
           pathname={pathname ?? navigation.pathname}
           onNavigate={onNavigate ?? navigation.onNavigate}
           onSearch={onSearch}
+          onSearchFocus={onSearchFocus}
           onNotificationClick={onNotificationClick}
           showSearch={showSearch}
           showNotifications={showNotifications}
           notificationCount={notificationCount}
           searchPlaceholder={searchPlaceholder}
+          searchShortcutBadge={searchShortcutBadge}
           showThemeToggle={showThemeToggle}
           isDarkMode={isDarkMode}
           onThemeToggle={onThemeToggle}

@@ -12,12 +12,14 @@ export interface PageLayoutProps {
   user?: UserMenu;
   onUserAction?: (action: 'profile' | 'settings' | 'logout') => void;
   onSearch?: (query: string) => void;
+  onSearchFocus?: () => void;
   onNotificationClick?: () => void;
   showSearch?: boolean;
   showNotifications?: boolean;
   showAIStudio?: boolean;
   notificationCount?: number;
   searchPlaceholder?: string;
+  searchShortcutBadge?: string;
   logo?: {
     text: string;
     href: string;
@@ -43,12 +45,14 @@ const PageLayoutComponent: React.FC<PageLayoutProps> = ({
   user,
   onUserAction,
   onSearch,
+  onSearchFocus,
   onNotificationClick,
   showSearch = true,
   showNotifications = false,
   showAIStudio = true,
   notificationCount = 0,
   searchPlaceholder = 'Search...',
+  searchShortcutBadge,
   logo = {
     text: 'LuxGen',
     href: '/',
@@ -127,7 +131,9 @@ const PageLayoutComponent: React.FC<PageLayoutProps> = ({
         onUserAction={onUserAction}
         showSearch={showSearch}
         onSearch={onSearch}
+        onSearchFocus={onSearchFocus}
         searchPlaceholder={searchPlaceholder}
+        searchShortcutBadge={searchShortcutBadge}
         showNotifications={showNotifications}
         showAIStudio={showAIStudio}
         notificationCount={notificationCount}

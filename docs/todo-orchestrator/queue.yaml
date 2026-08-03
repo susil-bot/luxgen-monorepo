@@ -121,7 +121,7 @@ tasks:
     epic: E1
     priority: 0
     sla: M
-    status: todo
+    status: review
     title: Global search overlay shell (header + Cmd/Ctrl+K)
     skill: ios-design
     source:
@@ -138,6 +138,7 @@ tasks:
       - Cmd/Ctrl+K opens overlay; Esc closes
       - Filter sidebar + results panel shell render
       - Uses iOS tokens; guest auth rules intact
+    notes: Overlay shell + ⌘K host — feat/global-search-overlay-shell
   - id: T-SRCH-02
     epic: E1
     priority: 0

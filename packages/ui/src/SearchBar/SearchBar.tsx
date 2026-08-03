@@ -17,6 +17,8 @@ export interface SearchBarProps {
   onSuggestionClick?: (suggestion: string) => void;
   showSuggestions?: boolean;
   maxSuggestions?: number;
+  /** Optional keyboard shortcut hint (e.g. ⌘K) shown on the right */
+  shortcutBadge?: string;
 }
 
 const SearchBarComponent: React.FC<SearchBarProps> = ({
@@ -35,6 +37,7 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
   onSuggestionClick,
   showSuggestions = true,
   maxSuggestions = 5,
+  shortcutBadge,
   ...props
 }) => {
   const [searchQuery, setSearchQuery] = useState(value);
@@ -91,10 +94,9 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
   const getInputClasses = () => {
     const baseStyles = 'input-field w-full transition-all duration-200';
     const sizeStyles = size === 'sm' ? 'text-xs py-1.5' : size === 'lg' ? 'text-base py-3' : 'text-sm py-2';
-    if (showIcon) {
-      return `${baseStyles} ${sizeStyles} pl-10`;
-    }
-    return `${baseStyles} ${sizeStyles}`;
+    const leftPad = showIcon ? 'pl-10' : '';
+    const rightPad = shortcutBadge ? 'pr-14' : '';
+    return `${baseStyles} ${sizeStyles} ${leftPad} ${rightPad}`.trim();
   };
 
   const handleSuggestionClick = (suggestion: string) => {
@@ -143,7 +145,26 @@ const SearchBarComponent: React.FC<SearchBarProps> = ({
             disabled={disabled}
             className={getInputClasses()}
             aria-label={placeholder}
+            aria-autocomplete="list"
+            aria-expanded={showSuggestions && showSuggestionsList && filteredSuggestions.length > 0}
           />
+          {shortcutBadge && (
+            <span
+              className="absolute inset-y-0 right-0 pr-2.5 flex items-center pointer-events-none"
+              aria-hidden
+            >
+              <kbd
+                className="text-[10px] font-medium px-1.5 py-0.5 rounded"
+                style={{
+                  color: 'var(--color-label-tertiary)',
+                  backgroundColor: 'var(--color-fill-tertiary)',
+                  border: '1px solid var(--color-separator)',
+                }}
+              >
+                {shortcutBadge}
+              </kbd>
+            </span>
+          )}
         </div>
       </form>
 
