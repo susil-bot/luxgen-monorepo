@@ -70,7 +70,7 @@ tasks:
     epic: E0
     priority: 0
     sla: S
-    status: todo
+    status: done
     title: Audit Commerce TODO vs products/orders/customers pages
     skill: fullstack-developer
     source:
@@ -497,7 +497,7 @@ tasks:
     epic: E3
     priority: 0
     sla: M
-    status: blocked
+    status: todo
     title: Products list create edit — all fields persist
     skill: fullstack-developer
     source:
@@ -516,7 +516,7 @@ tasks:
     epic: E3
     priority: 0
     sla: M
-    status: blocked
+    status: todo
     title: Orders list detail status filters live
     skill: fullstack-developer
     source:
@@ -534,7 +534,7 @@ tasks:
     epic: E3
     priority: 0
     sla: M
-    status: blocked
+    status: todo
     title: Customers list detail edit per commerce TODO
     skill: persona-pages
     source:
@@ -570,7 +570,7 @@ tasks:
     epic: E3
     priority: 1
     sla: M
-    status: blocked
+    status: todo
     title: Coupons CRUD vertical
     skill: fullstack-developer
     source:
