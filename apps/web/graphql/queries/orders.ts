@@ -1,8 +1,8 @@
 import { gql } from '@apollo/client';
 
 export const GET_ORDER_ROWS = gql`
-  query GetOrderRows($tenantId: ID!) {
-    orderRows(tenantId: $tenantId) {
+  query GetOrderRows($tenantId: ID!, $statusTab: String) {
+    orderRows(tenantId: $tenantId, statusTab: $statusTab) {
       id
       subjectId
       courseId
@@ -14,6 +14,7 @@ export const GET_ORDER_ROWS = gql`
       customerEmail
       paymentStatus
       fulfillmentStatus
+      learningStatus
       total
       itemCount
       courseTitle

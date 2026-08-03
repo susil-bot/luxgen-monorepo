@@ -62,6 +62,10 @@ export const GET_ENROLLMENT_BY_ID = gql`
       notes
       tags
       paymentStatus
+      progressPercent
+      learningStatus
+      lastAccessedAt
+      completedAt
       paidAt
       cancelledAt
       enrolledAt

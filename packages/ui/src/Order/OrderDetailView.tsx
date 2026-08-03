@@ -7,6 +7,8 @@ import {
   formatOrderDate,
   fulfillmentBadgeClass,
   fulfillmentDisplayLabel,
+  learningBadgeClass,
+  learningDisplayLabel,
   paymentBadgeClass,
   paymentDisplayLabel,
 } from './fetcher';
@@ -82,6 +84,9 @@ export function OrderDetailView({
               </span>
               <span className={`badge ${fulfillmentBadgeClass(order.fulfillmentStatus)}`}>
                 {fulfillmentDisplayLabel(order.fulfillmentStatus)}
+              </span>
+              <span className={`badge ${learningBadgeClass(order.learningStatus)}`}>
+                {learningDisplayLabel(order.learningStatus)}
               </span>
             </>
           }

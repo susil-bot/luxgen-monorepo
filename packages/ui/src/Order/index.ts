@@ -32,8 +32,10 @@ export {
   formatOrderDate,
   paymentBadgeClass,
   fulfillmentBadgeClass,
+  learningBadgeClass,
   paymentDisplayLabel,
   fulfillmentDisplayLabel,
+  learningDisplayLabel,
   mapEnrollmentPaymentStatus,
 } from './fetcher';
 export type {
@@ -43,6 +45,7 @@ export type {
   OrderTimelineEvent,
   OrderPaymentStatus,
   OrderFulfillmentStatus,
+  OrderLearningStatus,
   OrderFilterTab,
   EnrollmentCourseSource,
   EnrollmentUserSource,

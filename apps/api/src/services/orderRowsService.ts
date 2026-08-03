@@ -1,5 +1,7 @@
 import { Course, Enrollment, User, enrollmentSubjectId } from '@luxgen/db';
 
+export type OrderStatusTab = 'all' | 'unpaid' | 'unfulfilled' | 'open' | 'archived';
+
 export interface ApiOrderRow {
   id: string;
   subjectId: string;
@@ -12,10 +14,15 @@ export interface ApiOrderRow {
   customerEmail: string;
   paymentStatus: string;
   fulfillmentStatus: string;
+  learningStatus: string;
   total: string;
   itemCount: number;
   courseTitle: string;
   archived: boolean;
+}
+
+export interface ListOrderRowsOptions {
+  statusTab?: OrderStatusTab | null;
 }
 
 function orderNumberFromId(id: string): string {
@@ -27,22 +34,62 @@ function userDisplayName(user: { firstName?: string; lastName?: string; email: s
   return name || user.email;
 }
 
-function mapPayment(status?: string, courseStatus?: string): string {
+export function mapPayment(status?: string, courseStatus?: string): string {
   if (status === 'PAID') return 'paid';
   if (status === 'REFUNDED') return 'refunded';
   if (status === 'VOIDED') return 'voided';
   if (courseStatus === 'DRAFT') return 'pending';
+  if (status === 'PENDING' || !status) return 'pending';
   return 'pending';
 }
 
-function mapFulfillment(courseStatus?: string, progress?: number): string {
-  if (courseStatus === 'ARCHIVED' || courseStatus === 'CANCELLED') return 'unfulfilled';
-  if ((progress ?? 0) >= 100) return 'fulfilled';
+/** Align with UI OrderFulfillmentStatus: fulfilled | unfulfilled | partial | restocked */
+export function mapFulfillment(params: {
+  courseStatus?: string;
+  paymentStatus?: string;
+  learningStatus?: string;
+  progressPercent?: number;
+}): string {
+  const { courseStatus, paymentStatus, learningStatus, progressPercent } = params;
+  if (paymentStatus === 'VOIDED' || paymentStatus === 'REFUNDED') return 'restocked';
+  if (courseStatus === 'ARCHIVED' || courseStatus === 'CANCELLED') return 'restocked';
+  if (learningStatus === 'COMPLETED' || (progressPercent ?? 0) >= 100) return 'fulfilled';
+  if (learningStatus === 'ACTIVE' || courseStatus === 'PUBLISHED') return 'partial';
   return 'unfulfilled';
 }
 
+function formatTotalCents(cents: number | null | undefined, currency = 'usd'): string {
+  if (cents == null || !Number.isFinite(cents)) return '—';
+  try {
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency: currency.toUpperCase(),
+    }).format(cents / 100);
+  } catch {
+    return `$${(cents / 100).toFixed(2)}`;
+  }
+}
+
+function matchesStatusTab(row: ApiOrderRow, tab: OrderStatusTab): boolean {
+  switch (tab) {
+    case 'unpaid':
+      return row.paymentStatus === 'pending';
+    case 'unfulfilled':
+      return row.fulfillmentStatus === 'unfulfilled' || row.fulfillmentStatus === 'partial';
+    case 'open':
+      return !row.archived && row.fulfillmentStatus !== 'fulfilled';
+    case 'archived':
+      return row.archived;
+    default:
+      return true;
+  }
+}
+
 /** Pre-joined order rows for orders page (UI-147). */
-export async function listOrderRows(tenantId: string): Promise<ApiOrderRow[]> {
+export async function listOrderRows(
+  tenantId: string,
+  options: ListOrderRowsOptions = {},
+): Promise<ApiOrderRow[]> {
   const [courses, users, enrollments] = await Promise.all([
     Course.find({ tenant: tenantId }).populate('students'),
     User.find({ tenant: tenantId }),
@@ -75,6 +122,14 @@ export async function listOrderRows(tenantId: string): Promise<ApiOrderRow[]> {
       const subjectId = enrollmentSubjectId(courseId, studentId);
       const orderId = enrollment?._id?.toString() ?? subjectId;
       const date = enrollment?.enrolledAt ?? course.updatedAt ?? course.createdAt ?? new Date();
+      const paymentStatus = mapPayment(enrollment?.paymentStatus, course.status);
+      const fulfillmentStatus = mapFulfillment({
+        courseStatus: course.status,
+        paymentStatus: enrollment?.paymentStatus,
+        learningStatus: enrollment?.learningStatus,
+        progressPercent: enrollment?.progressPercent,
+      });
+      const commerce = course.commerce as { priceCents?: number; currency?: string } | undefined;
 
       rows.push({
         id: orderId,
@@ -86,9 +141,10 @@ export async function listOrderRows(tenantId: string): Promise<ApiOrderRow[]> {
         customerId: studentId,
         customerName: userDisplayName(user as { firstName?: string; lastName?: string; email: string }),
         customerEmail: (user as { email: string }).email,
-        paymentStatus: mapPayment(enrollment?.paymentStatus, course.status),
-        fulfillmentStatus: mapFulfillment(course.status, enrollment?.progressPercent),
-        total: '—',
+        paymentStatus,
+        fulfillmentStatus,
+        learningStatus: enrollment?.learningStatus ?? 'ACTIVE',
+        total: formatTotalCents(commerce?.priceCents, commerce?.currency ?? 'usd'),
         itemCount: 1,
         courseTitle: course.title,
         archived: course.status === 'ARCHIVED' || course.status === 'CANCELLED',
@@ -96,5 +152,8 @@ export async function listOrderRows(tenantId: string): Promise<ApiOrderRow[]> {
     }
   }
 
-  return rows.sort((a, b) => b.date.getTime() - a.date.getTime());
+  const sorted = rows.sort((a, b) => b.date.getTime() - a.date.getTime());
+  const tab = options.statusTab && options.statusTab !== 'all' ? options.statusTab : null;
+  if (!tab) return sorted;
+  return sorted.filter((row) => matchesStatusTab(row, tab));
 }
