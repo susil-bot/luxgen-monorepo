@@ -1,0 +1,419 @@
+From c7fc98ff0d47d1b8edcd2b937bd3dd7cc59f8bc3 Mon Sep 17 00:00:00 2001
+From: susil-bot <susil-bot@users.noreply.github.com>
+Date: Sat, 11 Jul 2026 12:48:08 +0530
+Subject: [PATCH] ci: dedupe/scope workflow triggers, pin presubmit action, add
+ EC2 OIDC deploy
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
+
+- ci.yml, web-build.yml: paths-ignore/paths filters + timeout-minutes on
+  every job so an unrelated change (docs-only, api-only) doesn't spin up
+  a full monorepo npm ci + build it doesn't need. Repo is public so
+  Actions minutes are unlimited — this is about fast feedback and not
+  hogging the org's shared concurrent-job slots, not a per-minute bill.
+- web-build.yml: added the concurrency group it was missing (ci.yml and
+  e2e.yml already had one), so repeated pushes to a PR don't pile up
+  parallel redundant builds.
+- presubmit.yml: pinned presubmit/ai-reviewer to its v0.2.5 commit SHA
+  instead of the movable tag — this action runs with
+  pull-requests:write/issues:write on pull_request_target.
+- deploy-ec2.yml (new): CD workflow for the AWS free-tier EC2 box from
+  docs/AWS_FREE_TIER_RUNBOOK.md. Authenticates via GitHub OIDC (zero
+  stored AWS credentials) into a least-privilege role, then pushes the
+  redeploy through SSM Send-Command (git pull + docker compose up) —
+  no SSH key, no long-lived access key in repo secrets. Runs after CI
+  goes green on main, or manually via workflow_dispatch.
+- docs/deployment/GITHUB_ACTIONS_OIDC_SETUP.md (new): one-time AWS
+  console steps (OIDC provider, IAM role + trust policy, repo variables)
+  required before deploy-ec2.yml can run.
+
+Left e2e.yml untouched (explicit review-only stub, if: false, not yet
+wired to real infra) and kept the CI test job non-blocking, per request.
+---
+ .github/workflows/ci.yml                     |  16 +++
+ .github/workflows/deploy-ec2.yml             | 103 +++++++++++++++++
+ .github/workflows/presubmit.yml              |   6 +-
+ .github/workflows/web-build.yml              |  37 +++++-
+ docs/deployment/GITHUB_ACTIONS_OIDC_SETUP.md | 115 +++++++++++++++++++
+ 5 files changed, 274 insertions(+), 3 deletions(-)
+ create mode 100644 .github/workflows/deploy-ec2.yml
+ create mode 100644 docs/deployment/GITHUB_ACTIONS_OIDC_SETUP.md
+
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index fcc9086..6901e27 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -1,14 +1,26 @@
+ # LuxGen — CI pipeline (lint, format, test, build)
+ # Docs: docs/deployment/MONOREPO_BUILD.md · docs/_meta/DOCUMENTATION_STANDARD.md
+ # Triggers: push/PR to main
++#
++# Cost note: this repo is public, so Actions minutes are unlimited/free — the
++# path filter and timeouts below are about fast feedback and not tying up the
++# org's shared concurrent-job slots, not about a per-minute bill.
+ 
+ name: CI
+ 
+ on:
+   push:
+     branches: [main, master]
++    paths-ignore:
++      - '**.md'
++      - 'docs/**'
++      - '.gitignore'
+   pull_request:
+     branches: [main, master]
++    paths-ignore:
++      - '**.md'
++      - 'docs/**'
++      - '.gitignore'
+ 
+ concurrency:
+   group: ci-${{ github.ref }}
+@@ -24,6 +36,7 @@ jobs:
+   lint:
+     name: Lint
+     runs-on: ubuntu-latest
++    timeout-minutes: 10
+     steps:
+       - uses: actions/checkout@v4
+ 
+@@ -41,6 +54,7 @@ jobs:
+   format:
+     name: Format check
+     runs-on: ubuntu-latest
++    timeout-minutes: 10
+     steps:
+       - uses: actions/checkout@v4
+ 
+@@ -59,6 +73,7 @@ jobs:
+     name: Build
+     runs-on: ubuntu-latest
+     needs: [lint, format]
++    timeout-minutes: 15
+     steps:
+       - uses: actions/checkout@v4
+ 
+@@ -80,6 +95,7 @@ jobs:
+     name: Test
+     runs-on: ubuntu-latest
+     needs: build
++    timeout-minutes: 15
+     steps:
+       - uses: actions/checkout@v4
+ 
+diff --git a/.github/workflows/deploy-ec2.yml b/.github/workflows/deploy-ec2.yml
+new file mode 100644
+index 0000000..98f3613
+--- /dev/null
++++ b/.github/workflows/deploy-ec2.yml
+@@ -0,0 +1,103 @@
++# LuxGen — Deploy to the AWS free-tier EC2 box
++# Docs: docs/deployment/GITHUB_ACTIONS_OIDC_SETUP.md (one-time AWS console setup)
++#
++# Zero stored AWS credentials: this workflow authenticates via GitHub's OIDC
++# provider (aws-actions/configure-aws-credentials), assumes a short-lived,
++# least-privilege IAM role, and pushes the deploy command through SSM
++# Send-Command — no SSH key, no long-lived access key sitting in repo secrets.
++#
++# Runs only after CI has gone green on main (workflow_run), or manually via
++# workflow_dispatch for a redeploy without a new commit (e.g. after rotating
++# a Parameter Store value).
++
++name: Deploy to EC2 (free tier)
++
++on:
++  workflow_run:
++    workflows: [CI]
++    branches: [main]
++    types: [completed]
++  workflow_dispatch: {}
++
++permissions:
++  id-token: write # required for OIDC — do not add contents:write, not needed
++  contents: read
++
++concurrency:
++  group: deploy-ec2-production
++  cancel-in-progress: false # never cancel a deploy mid-flight
++
++jobs:
++  deploy:
++    name: Deploy via SSM
++    runs-on: ubuntu-latest
++    timeout-minutes: 15
++    environment: production
++    if: >
++      github.event_name == 'workflow_dispatch' ||
++      github.event.workflow_run.conclusion == 'success'
++    steps:
++      - name: Configure AWS credentials (OIDC, no stored keys)
++        uses: aws-actions/configure-aws-credentials@v4
++        with:
++          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
++          aws-region: ${{ vars.AWS_REGION || 'us-east-1' }}
++          role-session-name: gha-luxgen-deploy
++
++      - name: Resolve target instance
++        id: instance
++        run: |
++          INSTANCE_ID=$(aws ec2 describe-instances \
++            --filters "Name=tag:Name,Values=${{ vars.EC2_INSTANCE_TAG || 'luxgen-prod' }}" \
++                      "Name=instance-state-name,Values=running" \
++            --query "Reservations[0].Instances[0].InstanceId" \
++            --output text)
++          if [ "$INSTANCE_ID" = "None" ] || [ -z "$INSTANCE_ID" ]; then
++            echo "::error::No running EC2 instance tagged Name=${{ vars.EC2_INSTANCE_TAG || 'luxgen-prod' }} found."
++            exit 1
++          fi
++          echo "instance_id=$INSTANCE_ID" >> "$GITHUB_OUTPUT"
++
++      - name: Send deploy command over SSM
++        id: send
++        run: |
++          COMMAND_ID=$(aws ssm send-command \
++            --instance-ids "${{ steps.instance.outputs.instance_id }}" \
++            --document-name "AWS-RunShellScript" \
++            --comment "gha-deploy ${{ github.sha }}" \
++            --parameters commands='[
++              "set -euo pipefail",
++              "cd /opt/luxgen",
++              "git fetch origin main",
++              "git reset --hard origin/main",
++              "aws ssm get-parameters-by-path --path /luxgen/prod/ --with-decryption --query \"Parameters[*].[Name,Value]\" --output text | sed \"s#/luxgen/prod/##\" | awk \"{print \\$1\\\"=\\\"\\$2}\" > .env",
++              "docker compose -f docker-compose.yml -f docker-compose.prod.yml pull",
++              "docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build mongodb redis api web nginx",
++              "docker image prune -af --filter until=48h"
++            ]' \
++            --query "Command.CommandId" \
++            --output text)
++          echo "command_id=$COMMAND_ID" >> "$GITHUB_OUTPUT"
++
++      - name: Wait for deploy to finish
++        run: |
++          aws ssm wait command-executed \
++            --command-id "${{ steps.send.outputs.command_id }}" \
++            --instance-id "${{ steps.instance.outputs.instance_id }}" \
++          || true
++          STATUS=$(aws ssm get-command-invocation \
++            --command-id "${{ steps.send.outputs.command_id }}" \
++            --instance-id "${{ steps.instance.outputs.instance_id }}" \
++            --query "Status" --output text)
++          echo "Deploy status: $STATUS"
++          aws ssm get-command-invocation \
++            --command-id "${{ steps.send.outputs.command_id }}" \
++            --instance-id "${{ steps.instance.outputs.instance_id }}" \
++            --query "StandardOutputContent" --output text
++          if [ "$STATUS" != "Success" ]; then
++            aws ssm get-command-invocation \
++              --command-id "${{ steps.send.outputs.command_id }}" \
++              --instance-id "${{ steps.instance.outputs.instance_id }}" \
++              --query "StandardErrorContent" --output text
++            exit 1
++          fi
+diff --git a/.github/workflows/presubmit.yml b/.github/workflows/presubmit.yml
+index 00de104..8ac1f97 100644
+--- a/.github/workflows/presubmit.yml
++++ b/.github/workflows/presubmit.yml
+@@ -33,8 +33,10 @@ jobs:
+             exit 1
+           fi
+ 
+-      # v0.2.5 — latest release: https://github.com/presubmit/ai-reviewer/releases
+-      - uses: presubmit/ai-reviewer@v0.2.5
++      # Pinned to v0.2.5's commit SHA (not the movable tag) — supply-chain
++      # hardening for a third-party action with pull-requests:write + issues:write.
++      # https://github.com/presubmit/ai-reviewer/releases/tag/v0.2.5
++      - uses: presubmit/ai-reviewer@5f1290b6142b14b44cd2e8e3ffda84cd0a22e94f # v0.2.5
+         with:
+           style_guide_rules: |
+             Follow docs/technical/development/CODING_STANDARDS.md.
+diff --git a/.github/workflows/web-build.yml b/.github/workflows/web-build.yml
+index 6849a90..bd93722 100644
+--- a/.github/workflows/web-build.yml
++++ b/.github/workflows/web-build.yml
+@@ -1,16 +1,50 @@
+ # LuxGen — Web production build validation
+ # Docs: docs/deployment/MONOREPO_BUILD.md
+-# Triggers: push/PR to main, workflow_dispatch
++# Triggers: push/PR to main touching apps/web or a package it depends on,
++# plus workflow_dispatch for a manual run.
++#
++# Scoped with `paths` so an api-only or docs-only change doesn't spin up a
++# second full monorepo install just to rebuild a Next.js app nothing touched.
++# continue-on-error stays on: this build has a known-flaky path
++# (see AWS_FREE_TIER PR notes) and should not block merges to main on its own.
+ 
+ name: Web Build
+ 
+ on:
+   push:
+     branches: [main, master]
++    paths:
++      - 'apps/web/**'
++      - 'packages/ui/**'
++      - 'packages/auth/**'
++      - 'packages/agent/**'
++      - 'packages/design-tokens/**'
++      - 'packages/storefront/**'
++      - 'packages/automation-flow/**'
++      - 'package.json'
++      - 'package-lock.json'
++      - 'turbo.json'
++      - '.github/workflows/web-build.yml'
+   pull_request:
+     branches: [main, master]
++    paths:
++      - 'apps/web/**'
++      - 'packages/ui/**'
++      - 'packages/auth/**'
++      - 'packages/agent/**'
++      - 'packages/design-tokens/**'
++      - 'packages/storefront/**'
++      - 'packages/automation-flow/**'
++      - 'package.json'
++      - 'package-lock.json'
++      - 'turbo.json'
++      - '.github/workflows/web-build.yml'
+   workflow_dispatch:
+ 
++concurrency:
++  group: web-build-${{ github.ref }}
++  cancel-in-progress: true
++
+ env:
+   NEXT_PUBLIC_GRAPHQL_URL: http://localhost:4000/graphql
+   NEXT_PUBLIC_API_URL: http://localhost:4000
+@@ -22,6 +56,7 @@ jobs:
+     name: Web production build
+     runs-on: ubuntu-latest
+     continue-on-error: true
++    timeout-minutes: 15
+     steps:
+       - uses: actions/checkout@v4
+ 
+diff --git a/docs/deployment/GITHUB_ACTIONS_OIDC_SETUP.md b/docs/deployment/GITHUB_ACTIONS_OIDC_SETUP.md
+new file mode 100644
+index 0000000..62714d6
+--- /dev/null
++++ b/docs/deployment/GITHUB_ACTIONS_OIDC_SETUP.md
+@@ -0,0 +1,115 @@
++# GitHub Actions → AWS OIDC setup (one-time, AWS console)
++
++`.github/workflows/deploy-ec2.yml` deploys to the free-tier EC2 box with
++**zero stored AWS credentials** — no access key/secret sits in a GitHub
++secret. It authenticates by exchanging a short-lived GitHub OIDC token for a
++temporary AWS role session. This costs nothing extra; it's an IAM feature.
++
++This only needs to be done once, before the workflow can run successfully.
++It assumes the EC2 instance from `docs/AWS_FREE_TIER_RUNBOOK.md` already
++exists, tagged `Name=luxgen-prod` (or set `EC2_INSTANCE_TAG` below to match
++whatever you used), with the SSM agent running (Amazon Linux 2023 ships with
++it) and an app checkout at `/opt/luxgen`.
++
++## 1. Add the GitHub OIDC identity provider
++
++**IAM → Identity providers → Add provider**
++
++- Provider type: `OpenID Connect`
++- Provider URL: `https://token.actions.githubusercontent.com`
++- Audience: `sts.amazonaws.com`
++
++(Skip this step if a `token.actions.githubusercontent.com` provider already
++exists in the account — one provider covers every repo.)
++
++## 2. Create the deploy role
++
++**IAM → Roles → Create role → Web identity**
++
++- Identity provider: the one from step 1
++- Audience: `sts.amazonaws.com`
++- Trust policy — edit after creation to scope it to this repo/branch only
++  (replace `<ACCOUNT_ID>` and `<GITHUB_ORG>`):
++
++```json
++{
++  "Version": "2012-10-17",
++  "Statement": [{
++    "Effect": "Allow",
++    "Principal": {
++      "Federated": "arn:aws:iam::<ACCOUNT_ID>:oidc-provider/token.actions.githubusercontent.com"
++    },
++    "Action": "sts:AssumeRoleWithWebIdentity",
++    "Condition": {
++      "StringEquals": {
++        "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
++      },
++      "StringLike": {
++        "token.actions.githubusercontent.com:sub": "repo:<GITHUB_ORG>/luxgen-monorepo:ref:refs/heads/main"
++      }
++    }
++  }]
++}
++```
++
++The `sub` condition means only workflow runs triggered from `main` in this
++exact repo can assume the role — a PR from a fork, or a push to any other
++branch, cannot.
++
++- Permissions policy — attach an inline policy scoped to exactly what the
++  deploy needs, nothing broader:
++
++```json
++{
++  "Version": "2012-10-17",
++  "Statement": [
++    {
++      "Effect": "Allow",
++      "Action": "ec2:DescribeInstances",
++      "Resource": "*"
++    },
++    {
++      "Effect": "Allow",
++      "Action": ["ssm:SendCommand"],
++      "Resource": [
++        "arn:aws:ec2:*:<ACCOUNT_ID>:instance/*",
++        "arn:aws:ssm:*::document/AWS-RunShellScript"
++      ]
++    },
++    {
++      "Effect": "Allow",
++      "Action": ["ssm:GetCommandInvocation", "ssm:ListCommands"],
++      "Resource": "*"
++    }
++  ]
++}
++```
++
++- Name the role e.g. `luxgen-gha-deploy-role` and note its ARN.
++
++## 3. Set repository variables (not secrets — none of this is sensitive)
++
++**Repo → Settings → Secrets and variables → Actions → Variables tab**
++
++| Variable | Value |
++|---|---|
++| `AWS_DEPLOY_ROLE_ARN` | ARN of the role from step 2 |
++| `AWS_REGION` | `us-east-1` (or wherever the EC2 instance lives) |
++| `EC2_INSTANCE_TAG` | the `Name` tag on the instance, e.g. `luxgen-prod` |
++
++Nothing above is a secret — an assumable role ARN and a region string carry
++no credential material, which is the entire point of OIDC over long-lived
++access keys.
++
++## 4. (Optional) require manual approval before deploy
++
++`deploy-ec2.yml` targets `environment: production`. If you want a manual
++"approve to deploy" gate: **Repo → Settings → Environments → production →
++Required reviewers** → add yourself. Free on public repos.
++
++## 5. First run
++
++Push to `main` (CI workflow completes) or trigger
++**Actions → Deploy to EC2 (free tier) → Run workflow** manually. Check the
++run logs — the "Send deploy command over SSM" step's output mirrors exactly
++what ran on the instance, so a failure there is diagnosable without SSH.
+-- 
+2.34.1
+

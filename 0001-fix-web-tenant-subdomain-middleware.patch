@@ -1,0 +1,151 @@
+From d3eb3051abd3263e04485af02db272068ce973ce Mon Sep 17 00:00:00 2001
+From: susil-bot <susil-bot@users.noreply.github.com>
+Date: Sat, 11 Jul 2026 10:06:38 +0530
+Subject: [PATCH] fix(web): resolve tenant subdomains on production custom
+ domains, not just localhost
+
+apps/web/middleware.ts only matched *.localhost hostnames, so the
+Vercel free-tier deployment path documented in
+docs/deployment/FREE_TIER_CLOUD.md (Step 7: wildcard DNS *.yourdomain.com
+-> Vercel) silently did not work once deployed - the root-path ->
+/dashboard redirect and the tenant query-param rewrite never fired for
+a real production subdomain.
+
+- Extract subdomain resolution into extractSubdomain(), mirroring the
+  logic already used server-side in
+  apps/api/src/middleware/tenantRouting.ts (localhost handling +
+  3+ label production domains).
+- Explicitly exclude *.vercel.app / *.netlify.app so preview deploy
+  URLs are never misrouted as a tenant subdomain.
+- Add apps/web/lib/vitest-auto/41-middleware-tenant.auto.test.ts
+  following the repo's existing vitest-auto convention (see
+  32-tenant-host.auto.test.ts) - this path previously had no test
+  coverage at all.
+- Update docs/deployment/FREE_TIER_CLOUD.md Step 7 to reflect that
+  middleware.ts now actually handles this instead of telling the
+  reader to go configure it themselves.
+---
+ .../41-middleware-tenant.auto.test.ts         | 33 +++++++++++++
+ apps/web/middleware.ts                        | 49 ++++++++++++++++---
+ docs/deployment/FREE_TIER_CLOUD.md            |  2 +-
+ 3 files changed, 76 insertions(+), 8 deletions(-)
+ create mode 100644 apps/web/lib/vitest-auto/41-middleware-tenant.auto.test.ts
+
+diff --git a/apps/web/lib/vitest-auto/41-middleware-tenant.auto.test.ts b/apps/web/lib/vitest-auto/41-middleware-tenant.auto.test.ts
+new file mode 100644
+index 0000000..f028e24
+--- /dev/null
++++ b/apps/web/lib/vitest-auto/41-middleware-tenant.auto.test.ts
+@@ -0,0 +1,33 @@
++import { describe, expect, it } from 'vitest';
++import { extractSubdomain } from '../../middleware';
++
++describe('41', () => {
++  it('extractSubdomain resolves a local dev subdomain', () => {
++    expect(extractSubdomain('demo.localhost:3000')).toBe('demo');
++    expect(extractSubdomain('idea-vibes.localhost:3000')).toBe('idea-vibes');
++  });
++
++  it('extractSubdomain ignores www on localhost', () => {
++    expect(extractSubdomain('www.localhost:3000')).toBeNull();
++  });
++
++  it('extractSubdomain returns null for bare localhost / loopback', () => {
++    expect(extractSubdomain('localhost:3000')).toBeNull();
++    expect(extractSubdomain('127.0.0.1:3000')).toBeNull();
++  });
++
++  it('extractSubdomain resolves a production wildcard-DNS subdomain', () => {
++    expect(extractSubdomain('demo.example.com')).toBe('demo');
++    expect(extractSubdomain('acme-corp.example.com')).toBe('acme-corp');
++  });
++
++  it('extractSubdomain ignores www and apex domains in production', () => {
++    expect(extractSubdomain('www.example.com')).toBeNull();
++    expect(extractSubdomain('example.com')).toBeNull();
++  });
++
++  it('extractSubdomain does not treat Vercel/Netlify preview hosts as tenants', () => {
++    expect(extractSubdomain('luxgen-web-git-main-team.vercel.app')).toBeNull();
++    expect(extractSubdomain('some-deploy-id--luxgen.netlify.app')).toBeNull();
++  });
++});
+diff --git a/apps/web/middleware.ts b/apps/web/middleware.ts
+index 4b7ac1e..9e0531d 100644
+--- a/apps/web/middleware.ts
++++ b/apps/web/middleware.ts
+@@ -1,16 +1,51 @@
+ import { NextRequest, NextResponse } from 'next/server';
+ 
++// Platform hosting domains whose subdomain is a deployment identifier
++// (e.g. Vercel preview URLs), never a tenant — must not be treated as a tenant subdomain.
++const PLATFORM_HOSTS = ['vercel.app', 'netlify.app'];
++
++/**
++ * Resolve the tenant subdomain from a request hostname.
++ *
++ * Mirrors `extractSubdomain`/`extractCustomDomain` in
++ * `apps/api/src/middleware/tenantRouting.ts` so the web and API apps agree on
++ * tenant resolution once deployed behind a real domain (see
++ * docs/deployment/FREE_TIER_CLOUD.md, Step 7 — wildcard DNS -> Vercel).
++ *
++ * - `demo.localhost:3000` (local dev) -> `demo`
++ * - `demo.example.com` (production, wildcard DNS) -> `demo`
++ * - `luxgen-web-git-main-team.vercel.app` (Vercel preview) -> `null` (not a tenant)
++ * - `example.com` / `www.example.com` (apex/no tenant) -> `null`
++ */
++export function extractSubdomain(hostname: string): string | null {
++  const clean = hostname.split(':')[0];
++
++  if (clean === 'localhost' || clean.startsWith('127.0.0.1')) {
++    return null;
++  }
++
++  if (clean.endsWith('.localhost')) {
++    const parts = clean.split('.');
++    return parts.length >= 2 && parts[0] !== 'www' ? parts[0] : null;
++  }
++
++  if (PLATFORM_HOSTS.some((platformHost) => clean.endsWith(`.${platformHost}`))) {
++    return null;
++  }
++
++  // Production custom domain: `<subdomain>.<domain>.<tld>` (3+ labels)
++  const parts = clean.split('.');
++  return parts.length >= 3 && parts[0] !== 'www' ? parts[0] : null;
++}
++
+ export function middleware(request: NextRequest) {
+-  const hostname = (request.headers.get('host') || '').split(':')[0];
++  const hostname = request.headers.get('host') || '';
+   const url = request.nextUrl.clone();
+ 
+-  // Extract subdomain
+-  const parts = hostname.split('.');
+-  const subdomain = parts.length > 1 ? parts[0] : null;
++  const subdomain = extractSubdomain(hostname);
+ 
+-  // Handle localhost subdomains - simplified logic
+-  if (hostname.includes('localhost') && subdomain && subdomain !== 'www') {
+-    // Add tenant query parameter for client-side detection
++  if (subdomain) {
++    // Add tenant query parameter for client-side/SSR detection
+     url.searchParams.set('tenant', subdomain);
+ 
+     // For root path, redirect to dashboard
+diff --git a/docs/deployment/FREE_TIER_CLOUD.md b/docs/deployment/FREE_TIER_CLOUD.md
+index d18e85d..a0207c5 100644
+--- a/docs/deployment/FREE_TIER_CLOUD.md
++++ b/docs/deployment/FREE_TIER_CLOUD.md
+@@ -162,7 +162,7 @@ Use Stripe **test mode** for free development.
+ | ----------------------- | ---------------------------------------------------------------------- |
+ | Vercel                  | Add domain → DNS CNAME to Vercel                                       |
+ | Render                  | Add custom domain on API service                                       |
+-| Multi-tenant subdomains | Wildcard DNS `*.yourdomain.com` → Vercel; configure in `middleware.ts` |
++| Multi-tenant subdomains | Wildcard DNS `*.yourdomain.com` → Vercel. `middleware.ts` already resolves subdomains for both `*.localhost` (dev) and any production custom domain (3+ label hostnames), and ignores `*.vercel.app`/`*.netlify.app` preview URLs so they don't get misrouted as tenants. |
+ 
+ ---
+ 
+-- 
+2.34.1
+

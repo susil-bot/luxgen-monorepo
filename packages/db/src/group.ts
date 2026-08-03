@@ -85,7 +85,10 @@ const GroupMemberSchema = new Schema<IGroupMember>(
 // Indexes for better performance
 GroupSchema.index({ tenant: 1, isActive: 1 });
 GroupSchema.index({ createdBy: 1 });
-GroupMemberSchema.index({ groupId: 1, userId: 1 }, { unique: true });
+// `unique` is valid, standard Mongoose index option at runtime; the cast
+// works around a mongoose@7.8.7 / @types resolution mismatch where the
+// installed IndexOptions type doesn't include it. Not a real type error.
+GroupMemberSchema.index({ groupId: 1, userId: 1 }, { unique: true } as mongoose.IndexOptions);
 GroupMemberSchema.index({ userId: 1, isActive: 1 });
 
 export const Group = mongoose.model<IGroup>('Group', GroupSchema);

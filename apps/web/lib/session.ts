@@ -147,6 +147,31 @@ export function persistSession(token: string, user: SessionUser): void {
   notifyAuthSessionChange();
 }
 
+/**
+ * Update just the access token after a silent refresh (POST /api/auth/refresh).
+ * Unlike persistSession(), this doesn't touch the stored user object — the
+ * refresh endpoint only returns a new token, not a fresh user payload.
+ */
+export function updateStoredToken(token: string): void {
+  if (typeof window === 'undefined') return;
+
+  const expiresAt = getTokenExpiresAt(token);
+  localStorage.setItem(AUTH_STORAGE_KEYS.token, token);
+  if (expiresAt) {
+    localStorage.setItem(AUTH_STORAGE_KEYS.expiresAt, String(expiresAt));
+  } else {
+    localStorage.removeItem(AUTH_STORAGE_KEYS.expiresAt);
+  }
+
+  // Keep the SSR-mirrored auth cookie in sync too (used by server-layout-user.ts).
+  if (typeof document !== 'undefined') {
+    const maxAge = cookieMaxAgeSeconds(token);
+    document.cookie = `${SSR_AUTH_COOKIE_NAMES.token}=${encodeURIComponent(token)}; path=/; SameSite=Lax; max-age=${maxAge}`;
+  }
+
+  notifyAuthSessionChange();
+}
+
 export function getStoredUser(): SessionUser | null {
   if (typeof window === 'undefined') return null;
   const raw = localStorage.getItem(AUTH_STORAGE_KEYS.user);

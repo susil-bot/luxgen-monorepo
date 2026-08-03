@@ -54,6 +54,7 @@ export * from './RegisterForm';
 export { SocialLoginButtons } from './SocialLoginButtons/SocialLoginButtons';
 export type { SocialProvider } from './SocialLoginButtons/types';
 export * from './RegisterVisual';
+export * from './EditProfile';
 
 // Search and Navigation Components
 export * from './SearchBar';

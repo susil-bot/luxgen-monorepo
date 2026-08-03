@@ -69,14 +69,28 @@ services:
     environment:
       NODE_ENV: production
       PORT: 4000
-      MONGODB_URI: mongodb://${MONGO_ROOT_USERNAME}:${MONGO_ROOT_PASSWORD}@mongodb:27017/${MONGO_DATABASE}?authSource=admin
+      # Reads directly from SSM/.env instead of hardcoding the internal
+      # `mongodb` service hostname - this lets MONGODB_URI point at EITHER
+      # the self-hosted `mongodb` container below (mongodb://user:pass@
+      # mongodb:27017/db?authSource=admin) OR a free-tier managed database
+      # like MongoDB Atlas (mongodb+srv://user:pass@cluster.mongodb.net/db),
+      # with no file changes - just update the SSM parameter.
+      MONGODB_URI: ${MONGODB_URI}
       REDIS_URL: redis://redis:6379
       JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
       CORS_ORIGIN: ${CORS_ORIGIN}
       LOG_LEVEL: info
+      # Keep false in production - GraphQL introspection/Playground exposes
+      # your full schema to anyone who can reach /graphql. Only flip to
+      # 'true' temporarily while actively debugging.
+      APOLLO_INTROSPECTION: ${APOLLO_INTROSPECTION:-false}
     depends_on:
-      mongodb:
-        condition: service_healthy
+      # mongodb is intentionally NOT a hard dependency of api anymore - this
+      # is what lets you run api against an external managed database
+      # (Atlas free tier, etc.) without also starting the local `mongodb`
+      # container. If you want the self-hosted container instead, just add
+      # `mongodb` to your `docker compose up` service list; it's unaffected.
       redis:
         condition: service_healthy
     networks:

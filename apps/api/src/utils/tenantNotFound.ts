@@ -1,17 +1,16 @@
-import { getTenantWebOrigin } from '@luxgen/config';
+import { getWebUrl } from '@luxgen/config';
 
-const tenantLinks = (process.env.TENANT_SUBDOMAINS || 'demo,idea-vibes')
-  .split(',')
-  .map((s) => s.trim())
-  .filter(Boolean)
-  .map((id) => {
-    const label = id
-      .split('-')
-      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-      .join(' ');
-    return `<a href="${getTenantWebOrigin(id)}" class="tenant-link">${label}</a>`;
-  })
-  .join('\n      ');
+// This deployment is a single flat domain (www.luxgen.in) with tenant
+// selection done via the x-tenant header, not wildcard DNS subdomains —
+// there is no demo.luxgen.in / idea-vibes.luxgen.in to link to. Every
+// tenant lives at the same flat web origin (getTenantFromHost() defaults
+// a flat host to 'demo' already, see apps/web/lib/tenant.ts), so one
+// link is shown rather than one per TENANT_SUBDOMAINS entry — listing
+// "Idea Vibes" as its own link would be misleading since it would open
+// the exact same page as "Demo". If real per-tenant subdomains are set
+// up later (wildcard DNS + Vercel wildcard domain), go back to a link
+// per tenant via getTenantWebOrigin(id).
+const tenantLinks = `<a href="${getWebUrl()}" class="tenant-link">Visit LuxGen</a>`;
 
 export const renderTenantNotFound = (subdomain: string): string => `<!DOCTYPE html>
 <html lang="en">

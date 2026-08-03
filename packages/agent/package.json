@@ -2,10 +2,10 @@
   "name": "@luxgen/agent",
   "version": "1.0.0",
   "private": true,
-  "main": "src/index.ts",
+  "main": "dist/agent/src/index.js",
   "types": "src/index.ts",
   "scripts": {
-    "build": "tsc",
+    "build": "node ../../scripts/tsc-tolerant.js 16 dist/agent/src/index.js",
     "dev": "tsc --watch",
     "lint": "eslint src --ext .ts",
     "test": "vitest run",

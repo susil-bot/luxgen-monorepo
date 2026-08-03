@@ -1,5 +1,4 @@
 import { Request, Response, NextFunction } from 'express';
-import { isDevLocalOrigin } from '@luxgen/config';
 import { Tenant, ITenant, resolveEffectivePlan } from '@luxgen/db';
 import { verifyToken, getTenantFromToken } from '../utils/jwt';
 import { renderTenantNotFound } from '../utils/tenantNotFound';
@@ -12,8 +11,22 @@ export interface TenantContext {
   isCustomDomain: boolean;
 }
 
+// PaaS-provided default hostnames (e.g. luxgen-api.onrender.com) have 3+
+// dot-separated parts too, but the first label is the service name, not a
+// tenant subdomain — without this check, hitting the bare API host directly
+// renders a misleading "tenant luxgen-api not found" page instead of just
+// having no subdomain. Real customer routing goes through a custom domain
+// (or the x-tenant header, which tenantRoutingMiddleware checks separately
+// as a fallback) rather than this host directly.
+const FLAT_HOST_SUFFIXES = ['.onrender.com', '.vercel.app', '.netlify.app'];
+
 export const extractSubdomain = (hostname: string): string | null => {
   const cleanHostname = hostname.split(':')[0];
+
+  if (FLAT_HOST_SUFFIXES.some((suffix) => cleanHostname.endsWith(suffix))) {
+    return null;
+  }
+
   const parts = cleanHostname.split('.');
 
   if (cleanHostname.includes('localhost') || cleanHostname.includes('127.0.0.1')) {
@@ -29,8 +42,15 @@ export const extractCustomDomain = (hostname: string): string | null => {
   if (
     cleanHostname.includes('localhost') ||
     cleanHostname.includes('127.0.0.1') ||
-    cleanHostname.includes('.vercel.app') ||
-    cleanHostname.includes('.netlify.app')
+    // Same FLAT_HOST_SUFFIXES list as extractSubdomain above — this used to
+    // check '.vercel.app'/'.netlify.app' but not '.onrender.com', so a
+    // request straight to the API's own luxgen-api.onrender.com host (the
+    // common case for every proxied /graphql call, since Vercel's rewrite
+    // sets Host to the destination) fell through to a wasted Tenant.findOne
+    // lookup for domain: 'luxgen-api.onrender.com' on every request instead
+    // of being recognized as "no custom domain" up front like the other
+    // three flat-host suffixes already are.
+    FLAT_HOST_SUFFIXES.some((suffix) => cleanHostname.endsWith(suffix))
   ) {
     return null;
   }
@@ -202,26 +222,37 @@ export const tenantSecurityMiddleware = async (req: Request, res: Response, next
   try {
     if (!req.tenant) return next();
 
-    const { security } = req.tenant.settings;
-    const origin = req.get('origin');
+    // Removed: a per-tenant Origin check against tenant.settings.security.corsOrigins
+    // used to live here. It duplicated the *global* CORS check in app.ts's
+    // cors() middleware (which validates Origin against the CORS_ORIGINS env
+    // var and already runs first, before tenant resolution), but read from a
+    // second, independent allowlist stored on each Tenant document in Mongo.
+    // Every tenant's web traffic in this deployment shares the exact same
+    // origins (one flat Next.js app on Vercel serving all tenants) — there is
+    // no case where a request's Origin should pass the global check but fail
+    // a per-tenant one, so this never added real protection. It DID, twice
+    // now, cause a real outage: the domain cutover to www.luxgen.in updated
+    // CORS_ORIGINS and the tenant-config *source files* (config/tenants/*,
+    // scripts/init-tenants.js), but the already-seeded `demo` Tenant document
+    // in Atlas kept its stale corsOrigins list, so every GraphQL request
+    // (which resolves tenant via the x-tenant header and so always has
+    // req.tenant set, contrary to earlier assumption that /graphql bypassed
+    // tenant resolution entirely) got rejected here with "Origin not allowed
+    // for this tenant" even though the same Origin had already passed the
+    // real, global CORS check moments earlier in the same request.
 
-    if (
-      origin &&
-      security.corsOrigins.length > 0 &&
-      !security.corsOrigins.includes(origin) &&
-      !isDevLocalOrigin(origin)
-    ) {
-      return res
-        .status(403)
-        .json({ success: false, message: 'CORS policy violation', error: 'Origin not allowed for this tenant' });
-    }
-
-    const hostname = req.get('host') || req.hostname;
-    if (security.allowedDomains.length > 0 && !security.allowedDomains.some((d: string) => hostname.includes(d))) {
-      return res
-        .status(403)
-        .json({ success: false, message: 'Domain not allowed', error: 'Request domain not in allowed domains list' });
-    }
+    // Removed: a Host-header check against tenant.settings.security.allowedDomains
+    // used to live here. It compared the *request's own Host* (unavoidably the
+    // API's own address, e.g. luxgen-api.onrender.com) against a list of *web
+    // frontend* domains (demo.example.com, demo.vercel.app, etc). Those can
+    // never match in a cross-origin deployment (API and web on separate
+    // domains, as they are here — Render + Vercel) or from mobile clients,
+    // which hit the API directly. Found live: it silently rejected every
+    // request to any tenant with a non-empty allowedDomains list (i.e. demo)
+    // the moment tenant resolution actually worked, with no way to ever pass.
+    // The CORS Origin check above already does the real, meaningful check for
+    // browser traffic; this one wasn't providing additional protection, only
+    // false-positive-blocking legitimate requests.
 
     next();
   } catch {

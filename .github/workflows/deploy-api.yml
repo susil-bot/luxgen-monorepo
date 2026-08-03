@@ -1,0 +1,66 @@
+name: CI - API
+
+# Render deploys itself: once the API service is connected to this repo as a
+# Blueprint (render.yaml), Render watches `main` directly and rebuilds
+# Dockerfile.api on its own infrastructure on every push - no GitHub Action
+# needed to trigger or perform that deploy.
+#
+# What this workflow does instead: fail fast, before Render even starts its
+# own (slower) build. If apps/api or a package it depends on doesn't
+# type-check/build, this catches it in ~a minute on GitHub's runners instead
+# of after Render spends several minutes building a broken image.
+#
+# This replaces the previous version of this workflow, which built/pushed a
+# Docker image to GHCR and deployed it to an EC2 instance via AWS SSM Run
+# Command (OIDC role assumption, no stored AWS keys). That path is retired
+# along with the EC2 host itself - see docs/RENDER_VERCEL_FREE_STACK.md for
+# why, and docs/ORACLE_CLOUD_MIGRATION.md for the other free-host option
+# this project considered. If this project ever moves the API to a plain VM
+# again (Oracle, a paid EC2, etc.), the old build-push-action/SSM steps are
+# still in git history on this file's previous commits and can be restored.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'packages/**'
+      - 'Dockerfile.api'
+      - 'render.yaml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'packages/**'
+      - 'Dockerfile.api'
+      - 'render.yaml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+jobs:
+  build-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install
+        run: npm ci
+
+      - name: Build @luxgen/api + its dependency graph
+        run: npm run build:api:deps && npm run build:api
+
+      - name: Run API test suite
+        run: npm run test -- --filter=@luxgen/api
+        continue-on-error: true
+        # continue-on-error: this repo has a documented, tracked set of
+        # pre-existing test/type gaps (see docs/DEPLOYMENT_ISSUES_AND_STANDARD_WORKFLOW.md
+        # Part 2) that aren't regressions from any given PR. Flip this to a
+        # hard failure once that backlog is actually cleared, so it starts
+        # blocking merges instead of just reporting.

@@ -1,0 +1,84 @@
+# API-only build for platforms that can't target a specific stage in a
+# multi-stage Dockerfile (Render, Railway, etc. — confirmed Render has no
+# --target equivalent as of 2026: https://render.discourse.group/t/specify-a-target-build-stage-for-multi-stage-dockerfile/2219).
+# The shared root Dockerfile ends at `runner-web` (its last stage), so a
+# builder with no stage-targeting would ship the web image, not the API, if
+# pointed at that file. This file is the api/runner-api path only, trimmed of
+# every web-only stage, so the LAST stage here is always the one built.
+#
+# Kept in sync by hand with the root Dockerfile's base/deps/builder-api/
+# runner-api stages — if you change one, check the other.
+
+FROM node:20-alpine AS base
+
+FROM base AS deps
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+COPY package.json package-lock.json* ./
+COPY turbo.json ./
+COPY tsconfig.base.json ./
+COPY packages/ ./packages/
+COPY apps/ ./apps/
+
+RUN npm install
+
+ARG TENANT=demo
+
+FROM base AS builder-api
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+ARG TENANT
+
+# Render's free/starter web services run with more RAM than the EC2
+# t3.micro this project started on, but this ceiling costs nothing to keep -
+# see the root Dockerfile's builder-api stage for the full V8-heap
+# explanation.
+ENV NODE_OPTIONS="--max-old-space-size=768"
+
+RUN node scripts/select-tenant.js ${TENANT} && \
+    npx turbo run build --filter=@luxgen/api... --concurrency=1
+
+# See the root Dockerfile's builder-api stage for the full explanation: this
+# guarantees every internal dependency's dist/index.js actually exists,
+# regardless of a turbo scoping gap observed in production (2026-07-25) where
+# packages/config/dist silently didn't get built despite being a correctly
+# declared dependency with a normal tsc build script.
+# See the root Dockerfile's equivalent stage for why @luxgen/db is a special
+# case: its real entrypoint is nested at dist/db/src/index.js, not
+# dist/index.js, because it imports @luxgen/billing via the repo's
+# source-level cross-package type resolution.
+RUN for pkg in config core utils auth db billing agent automation-flow storefront; do \
+      if [ "$pkg" = "db" ]; then entry="packages/$pkg/dist/db/src/index.js"; baseline=16; extra="dist/db/src/index.js"; \
+      elif [ "$pkg" = "agent" ]; then entry="packages/$pkg/dist/agent/src/index.js"; baseline=16; extra="dist/agent/src/index.js"; \
+      else entry="packages/$pkg/dist/index.js"; baseline=0; extra=""; fi; \
+      if [ -f "packages/$pkg/package.json" ] && [ ! -f "$entry" ]; then \
+        echo "==> $entry missing after turbo build - building it directly"; \
+        (cd "packages/$pkg" && node ../../scripts/tsc-tolerant.js "$baseline" $extra); \
+      fi; \
+    done
+
+FROM base AS runner-api
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nextjs
+
+COPY --from=builder-api /app/apps/api/dist ./apps/api/dist
+COPY --from=builder-api /app/apps/api/package.json ./apps/api/
+COPY --from=builder-api /app/apps/api/openapi.yaml ./apps/api/openapi.yaml
+COPY --from=builder-api /app/packages ./packages
+COPY --from=deps /app/node_modules ./node_modules
+
+USER nextjs
+
+EXPOSE 4000
+ENV PORT=4000
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget -qO- http://localhost:4000/health || exit 1
+
+CMD ["node", "apps/api/dist/apps/api/src/index.js"]

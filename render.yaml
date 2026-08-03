@@ -1,0 +1,72 @@
+# Render Blueprint — codifies the API service config instead of manual
+# dashboard clicking. Import this file when creating the service ("New +" →
+# "Blueprint" → point at this repo) and Render reads it automatically.
+#
+# `sync: false` on every secret below means Render will prompt you to type
+# each value in during the first deploy and will NOT read them from this
+# file — nothing sensitive is committed to git.
+#
+# Render is the sole backend deployment target for the API (Vercel hosts
+# the web frontend). The previous EC2/AWS SSM deployment path is retired —
+# see .github/workflows/deploy-api.yml's header comment for why, and
+# docs/RENDER_VERCEL_FREE_STACK.md for the current stack.
+services:
+  - type: web
+    name: luxgen-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile.api
+    dockerContext: .
+    plan: free
+    healthCheckPath: /health
+    # Monorepo: only rebuild this service when something it actually depends
+    # on changed. Without this, every push to main (including web-only or
+    # docs-only changes) triggers a full Docker rebuild here too.
+    # render.yaml itself is always honored regardless of this filter.
+    buildFilter:
+      paths:
+        - apps/api/**
+        - packages/**
+        - Dockerfile.api
+        - render.yaml
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      # Core — required for the API to start and authenticate at all.
+      - key: MONGODB_URI
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: JWT_REFRESH_SECRET
+        sync: false
+      # Comma-separated allowlist (packages/config's getCorsOrigins() reads
+      # this in preference to the singular CORS_ORIGIN). luxgen.in is the
+      # cut-over custom domain (both www and bare host, since either can be
+      # hit directly); the vercel.app URL is kept working alongside it as a
+      # fallback/preview alias. luxgen.shop was the placeholder domain used
+      # before the real cutover — kept for now in case anything still points
+      # at it, remove once confirmed unused.
+      - key: CORS_ORIGINS
+        value: https://www.luxgen.in,https://luxgen.in,https://luxgen-monorepo-web.vercel.app,https://luxgen.shop
+      - key: WEB_APP_URL
+        value: https://www.luxgen.in
+      # Redis (Upstash) — required for realtime activity events
+      # (timelineRedisBridge/activityPubSub); ioredis reads TLS straight off
+      # a rediss:// URL, no extra config needed. Use Upstash's provided
+      # connection string exactly as given, starting with rediss://.
+      - key: REDIS_URL
+        sync: false
+      # Optional — only needed if these features are actually in use.
+      # Leave unset if not; each service already degrades gracefully
+      # without them (billing/email/etc. simply no-op or log a warning).
+      - key: STRIPE_SECRET_KEY
+        sync: false
+      - key: STRIPE_WEBHOOK_SECRET
+        sync: false
+      - key: SENDGRID_API_KEY
+        sync: false
+      - key: EMAIL_FROM
+        sync: false
+      - key: TENANT_SUBDOMAINS
+        value: demo

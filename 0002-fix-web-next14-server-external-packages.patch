@@ -1,0 +1,61 @@
+From dcad0d6f6a4f100c2a9ec366e7e153fa1d58158a Mon Sep 17 00:00:00 2001
+From: susil-bot <susil-bot@users.noreply.github.com>
+Date: Sat, 11 Jul 2026 10:20:17 +0530
+Subject: [PATCH] fix(web): use Next 14-compatible
+ experimental.serverComponentsExternalPackages
+
+next.config.js used the top-level serverExternalPackages key, which is
+only recognized by Next.js 15+ (this repo is pinned to next@^14.0.0,
+currently 14.2.33). Next silently dropped the unrecognized key
+("Invalid next.config.js options detected: Unrecognized key(s) in
+object: 'serverExternalPackages'"), so ioredis (pulled in transitively
+via @luxgen/agent -> packages/agent/src/queue/redis-queue.ts) was never
+externalized and webpack tried to bundle it for real, failing on:
+
+  Module build failed: UnhandledSchemeError: Reading from
+  "node:diagnostics_channel" is not handled by plugins.
+
+Moved the same package list under experimental.serverComponentsExternalPackages,
+which is the correct key for Next 14. No behavior change intended beyond
+actually taking effect - migrate back to the top-level key when this
+repo upgrades to Next 15.
+---
+ apps/web/next.config.js | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/apps/web/next.config.js b/apps/web/next.config.js
+index e18aec2..7332b6d 100644
+--- a/apps/web/next.config.js
++++ b/apps/web/next.config.js
+@@ -23,8 +23,6 @@ const nextConfig = {
+       { protocol: 'https', hostname: '**.amazonaws.com' },
+     ],
+   },
+-  /** Prevent bundling server-only packages into RSC/API server compilation issues */
+-  serverExternalPackages: ['@luxgen/agent', '@luxgen/db', 'ioredis', 'mongodb'],
+   /** Allow _next assets when browsing via tenant subdomains (demo.localhost:3000) */
+   allowedDevOrigins: devAllowedOrigins(),
+   env: {
+@@ -40,6 +38,19 @@ const nextConfig = {
+   ],
+   experimental: {
+     externalDir: true,
++    /**
++     * Prevent bundling server-only packages into RSC/API server compilation.
++     * NOTE: this is `serverExternalPackages` (top-level, stable) in Next.js 15+.
++     * This repo is pinned to Next.js ^14.0.0 (currently 14.2.33), where the
++     * top-level key is silently dropped ("Invalid next.config.js options
++     * detected: Unrecognized key(s) in object: 'serverExternalPackages'"),
++     * which meant ioredis (pulled in by @luxgen/agent) was NOT externalized
++     * and webpack tried to bundle it, failing on `node:diagnostics_channel`
++     * ("UnhandledSchemeError ... Reading from node:diagnostics_channel").
++     * Use the Next 14 experimental key instead; migrate back to the
++     * top-level `serverExternalPackages` when this repo upgrades to Next 15.
++     */
++    serverComponentsExternalPackages: ['@luxgen/agent', '@luxgen/db', 'ioredis', 'mongodb'],
+   },
+   typescript: {
+     ignoreBuildErrors: true,
+-- 
+2.34.1
+
