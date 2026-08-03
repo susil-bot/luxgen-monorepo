@@ -90,7 +90,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 
 | ID | Pri | SLA | Source slice | Task | Skill |
 | --- | --- | --- | --- | --- | --- |
-| [x] `T-SRCH-01` | P0 | M | L25–L256 | Global search overlay: open via header + ⌘K/Ctrl+K; filters + result list shell | `ios-design` → review `feat/global-search-overlay-shell` |
+| [x] `T-SRCH-01` | P0 | M | L25–L256 | Global search overlay: open via header + ⌘K/Ctrl+K; filters + result list shell | merged #465 |
 | [ ] `T-SRCH-02` | P0 | M | L187–L256 | Result cards for Courses + Learners (live GraphQL or existing queries) | `graphql` |
 | [ ] `T-SRCH-03` | P1 | M | L258–L425 | Command palette: create/nav commands (subset: create course, go dashboard, go orders) | `ios-design` |
 | [ ] `T-SRCH-04` | P1 | M | L569–L660 | Saved searches: persist per-user (localStorage MVP OK if API absent; document follow-up) | `fullstack-developer` |
@@ -111,8 +111,8 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 | --- | --- | --- | --- | --- | --- |
 | [x] `T-AUTO-01` | P0 | M | Align automation data model with flowDefinition + TODO §11 | → `audits/automation-model-map.md` + #457 |
 | [x] `T-AUTO-02` | P0 | M | Close one GraphQL mutation family from TODO §12 | `duplicateAutomation` |
-| [~] `T-AUTO-03` | P0 | M | L276–L431 | Builder canvas: add/edit/delete step UI wired to live mutations | review — config Delete + dirty footer |
-| [~] `T-AUTO-04` | P0 | M | L819–L884 | Publish / pause / archive actions + status UI | review — status enum + mutations |
+| [x] `T-AUTO-03` | P0 | M | L276–L431 | Builder canvas: add/edit/delete step UI wired to live mutations | merged #460 |
+| [x] `T-AUTO-04` | P0 | M | L819–L884 | Publish / pause / archive actions + status UI | merged #461 |
 | [ ] `T-AUTO-05` | P1 | M | L716–L751 | Run history list + detail drawer | `automation` |
 | [ ] `T-AUTO-06` | P1 | M | L846–L864 | Test-run with sample payload | `automation` |
 | [ ] `T-AUTO-07` | P1 | M | L942–L1054 | Enforce must-have business rules (tenant scope, required trigger, no empty publish) | `automation` |
@@ -128,9 +128,9 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 
 | ID | Pri | SLA | Source slice | Task | Skill |
 | --- | --- | --- | --- | --- | --- |
-| [~] `T-COM-01` | P0 | M | L21–L417 | Products list + create/edit: persist all editable fields (no disabled fakes) | review — commerce + collections |
-| [~] `T-COM-02` | P0 | M | L517–L653 | Orders list/detail: status filters + live order fields | review — filters + line items/payment |
-| [x] `T-COM-03` | P0 | M | L654–L827 | Customers list/detail/edit aligned to commerce TODO | `persona-pages` → review `feat/customers-commerce-crud` |
+| [x] `T-COM-01` | P0 | M | L21–L417 | Products list + create/edit: persist all editable fields (no disabled fakes) | merged #462 |
+| [x] `T-COM-02` | P0 | M | L517–L653 | Orders list/detail: status filters + live order fields | merged #463 |
+| [x] `T-COM-03` | P0 | M | L654–L827 | Customers list/detail/edit aligned to commerce TODO | merged #464 |
 | [ ] `T-COM-04` | P1 | M | L418–L516 | Bundles CRUD vertical | `fullstack-developer` |
 | [ ] `T-COM-05` | P1 | M | L828–L944 | Coupons CRUD vertical | `fullstack-developer` |
 | [ ] `T-COM-06` | P1 | M | L945–L1075 | Payments & subscriptions status surfaces | `billing` |
