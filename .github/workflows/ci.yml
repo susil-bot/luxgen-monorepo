@@ -21,6 +21,44 @@ env:
   API_URL: http://localhost:4000
 
 jobs:
+  # Single repo, deployed separately (Render = API, Vercel = web). This job
+  # reports which side(s) actually changed so it's visible in the PR/run
+  # summary alongside the always-run lint/build/test below — it does not skip
+  # or gate anything downstream. The real skip-the-rebuild logic lives at the
+  # deploy layer: render.yaml's buildFilter (both copies) and
+  # apps/web/vercel.json's ignoreCommand (turbo-ignore) each independently
+  # decide whether their own platform needs to rebuild.
+  detect-changes:
+    name: Detect changed scope
+    runs-on: ubuntu-latest
+    outputs:
+      api: ${{ steps.filter.outputs.api }}
+      web: ${{ steps.filter.outputs.web }}
+      shared: ${{ steps.filter.outputs.shared }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            api:
+              - 'apps/api/**'
+              - 'Dockerfile.api'
+              - 'render.yaml'
+              - 'deploy/platforms/render.yaml'
+            web:
+              - 'apps/web/**'
+            shared:
+              - 'packages/**'
+
+      - name: Summary
+        run: |
+          echo "### Changed scope" >> "$GITHUB_STEP_SUMMARY"
+          echo "- API: ${{ steps.filter.outputs.api }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Web: ${{ steps.filter.outputs.web }}" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Shared packages: ${{ steps.filter.outputs.shared }}" >> "$GITHUB_STEP_SUMMARY"
+
   lint:
     name: Lint
     runs-on: ubuntu-latest

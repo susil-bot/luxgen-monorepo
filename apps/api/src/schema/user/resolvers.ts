@@ -4,6 +4,7 @@ import { userService } from '../../services/userService';
 import { activityEventService, actorFromContext } from '../../services/activityEventService';
 import type { GraphQLContext } from '../../context';
 import { scopedTenantId } from '../../graphql/tenantScope';
+import { setRefreshCookie, refreshPayloadFromUser } from '../../utils/refreshToken';
 
 const STAFF_ROLES = new Set<UserRole>([UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.INSTRUCTOR]);
 
@@ -79,11 +80,20 @@ export const userResolvers = {
       return userService.deleteUser(id, context.tenantId);
     },
 
-    login: (_: unknown, { input }: { input: { email: string; password: string } }, ctx: GraphQLContext) =>
-      userService.login({ ...input, req: ctx.req }),
+    login: async (_: unknown, { input }: { input: { email: string; password: string } }, ctx: GraphQLContext) => {
+      const result = await userService.login({ ...input, req: ctx.req });
+      // Mirrors routes/auth.ts's REST /login — the frontend authenticates via
+      // this GraphQL mutation, not the REST endpoint, so the httpOnly refresh
+      // cookie must be set here too or silent token renewal can never work.
+      setRefreshCookie(ctx.res, refreshPayloadFromUser(result.user));
+      return result;
+    },
 
-    register: (_: unknown, { input }: { input: any }, ctx: GraphQLContext) =>
-      userService.register(input, { selfService: true, tenantId: ctx.tenantId }),
+    register: async (_: unknown, { input }: { input: any }, ctx: GraphQLContext) => {
+      const result = await userService.register(input, { selfService: true, tenantId: ctx.tenantId });
+      setRefreshCookie(ctx.res, refreshPayloadFromUser(result.user));
+      return result;
+    },
 
     registerPushToken: async (_: unknown, { token }: { token: string }, context: GraphQLContext) => {
       if (!context.user || !context.tenantId) {

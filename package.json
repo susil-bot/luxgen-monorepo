@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "build": "node scripts/select-tenant.js && turbo run build",
-    "build:web": "turbo run build --filter=@luxgen/web",
+    "build:web": "turbo run build --filter=@luxgen/web...",
     "build:api": "turbo run build --filter=@luxgen/api",
     "build:api:deps": "turbo run build --filter=@luxgen/api^...",
     "build:demo": "node scripts/select-tenant.js demo && turbo run build",
@@ -74,6 +74,6 @@
     "vitest": "^2.1.9"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   }
 }

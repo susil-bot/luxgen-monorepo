@@ -1,0 +1,22 @@
+# Overlay for docker-compose.prod.yml that switches the api service from
+# building locally to pulling a pre-built image from GHCR. Use this ONCE
+# .github/workflows/deploy-api.yml has successfully run at least once (i.e.
+# ghcr.io/<owner>/luxgen-monorepo/luxgen-api:latest actually exists) - not
+# before, or `docker compose pull` will fail with "manifest not found".
+#
+# Usage on the EC2 instance:
+#   docker compose -f docker-compose.prod.yml -f docker-compose.prod.image.yml pull api
+#   docker compose -f docker-compose.prod.yml -f docker-compose.prod.image.yml up -d api redis
+#
+# This is the permanent fix for the OOM/slow-build problems hit while
+# compiling apps/api directly on the free-tier instance: compilation happens
+# once on GitHub's runners, and the instance only ever downloads a finished
+# image, never runs tsc/turbo itself.
+#
+# Replace <owner> below with your actual GitHub username/org
+# (e.g. susil-bot) before using this file.
+
+services:
+  api:
+    build: !reset null
+    image: ghcr.io/<owner>/luxgen-monorepo/luxgen-api:latest
