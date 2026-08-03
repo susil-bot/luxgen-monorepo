@@ -42,6 +42,9 @@ Read `skills/<skill-name>/SKILL.md` **first** when a task matches that skill's d
 | **Local dev by role (web/admin/mobile)** | `skills/dev-workflows/SKILL.md`                                         |
 | CSS, colours, typography, layout         | `skills/ios-design/SKILL.md`                                            |
 | Any new page                             | `skills/ios-design/SKILL.md` + `docs/technical/development/CODEBASE.md` |
+| **TODO*.md → implement / audit**         | `docs/TODO_ORCHESTRATOR_BACKLOG.md` + `docs/todo-orchestrator/AGENT_TASK_CARD.md` |
+
+**TODO specs (24×7 orchestrator):** Do **not** load full `docs/TODO*.md`. Pick next task from `docs/todo-orchestrator/queue.yaml` (`python3 scripts/todo-orchestrator-next.py`), read only the cited line range, run Developer → Reviewer → PM Tester. See `docs/AGENT_ORCHESTRATOR.md`.
 
 **PR policy:** Feature work (`feat/`) and bug fixes (`fix/`) must be separate PRs — see `.cursor/rules/pr-workflow.mdc`. **Every PR/issue needs labels** — see `.cursor/rules/pr-labels.mdc` (`help wanted` is mandatory). **Auth / login UI** — see `.cursor/rules/auth-session.mdc`.
 
