@@ -10,20 +10,16 @@ import {
   UPDATE_AUTOMATION,
 } from '../graphql/queries/automations';
 import { createEmptyFlow, parseTowerFlowDocument, type TowerFlowDocument } from '../lib/automation-flow';
+import { normalizeAutomationStatus, type AutomationLifecycleStatus } from '../lib/automation-status';
 import { towerFlowToMutationInput } from '../lib/tower-flow-persist';
 
 export type TowerSaveState = 'idle' | 'saving' | 'saved' | 'error';
-export type TowerLifecycleStatus = 'draft' | 'live' | 'paused' | 'archived';
+export type TowerLifecycleStatus = AutomationLifecycleStatus;
 
 interface UseTowerFlowPersistOptions {
   towerId: string;
   tenantId: string;
   onCreated?: (id: string) => void;
-}
-
-function normalizeStatus(raw: string | null | undefined, enabled?: boolean): TowerLifecycleStatus {
-  if (raw === 'live' || raw === 'paused' || raw === 'draft' || raw === 'archived') return raw;
-  return enabled ? 'live' : 'draft';
 }
 
 export function useTowerFlowPersist({ towerId, tenantId, onCreated }: UseTowerFlowPersistOptions) {
@@ -61,7 +57,7 @@ export function useTowerFlowPersist({ towerId, tenantId, onCreated }: UseTowerFl
     const parsed = automation.flowDefinition ? parseTowerFlowDocument(automation.flowDefinition) : null;
     setFlow(parsed ?? createEmptyFlow(automation.name));
     setPersistedId(automation.id);
-    setLifecycleStatus(normalizeStatus(automation.status, automation.enabled));
+    setLifecycleStatus(normalizeAutomationStatus(automation.status, automation.enabled));
     setLoaded(true);
   }, [data, isNew]);
 
@@ -90,7 +86,7 @@ export function useTowerFlowPersist({ towerId, tenantId, onCreated }: UseTowerFl
           });
           const saved = result?.updateAutomation;
           if (!saved) throw new Error('Update failed');
-          if (saved.status) setLifecycleStatus(normalizeStatus(saved.status, saved.enabled));
+          if (saved.status) setLifecycleStatus(normalizeAutomationStatus(saved.status, saved.enabled));
           setSaveState('saved');
           return saved.id as string;
         }
@@ -106,7 +102,7 @@ export function useTowerFlowPersist({ towerId, tenantId, onCreated }: UseTowerFl
         const saved = result?.createAutomation;
         if (!saved) throw new Error('Create failed');
         setPersistedId(saved.id);
-        setLifecycleStatus(normalizeStatus(saved.status, saved.enabled));
+        setLifecycleStatus(normalizeAutomationStatus(saved.status, saved.enabled));
         setSaveState('saved');
         onCreated?.(saved.id);
         return saved.id as string;
@@ -122,7 +118,7 @@ export function useTowerFlowPersist({ towerId, tenantId, onCreated }: UseTowerFl
   const applyLifecycleResult = useCallback(
     (result: { status?: string; enabled?: boolean; flowDefinition?: unknown } | null | undefined) => {
       if (!result) return false;
-      setLifecycleStatus(normalizeStatus(result.status, result.enabled));
+      setLifecycleStatus(normalizeAutomationStatus(result.status, result.enabled));
       if (result.flowDefinition) {
         const parsed = parseTowerFlowDocument(result.flowDefinition);
         if (parsed) setFlow(parsed);

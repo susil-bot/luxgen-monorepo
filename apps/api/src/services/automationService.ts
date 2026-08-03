@@ -1,6 +1,9 @@
 import {
   Automation,
   AutomationRun,
+  enabledFromAutomationStatus,
+  liveAutomationFilter,
+  resolveAutomationStatus,
   type AutomationActionType,
   type AutomationStatus,
   type AutomationTriggerType,
@@ -40,7 +43,7 @@ export interface UpdateAutomationInput {
 }
 
 function enabledFromStatus(status: AutomationStatus): boolean {
-  return status === 'live';
+  return enabledFromAutomationStatus(status);
 }
 
 function statusFromEnabled(enabled: boolean, previous?: AutomationStatus | null): AutomationStatus {
@@ -48,15 +51,6 @@ function statusFromEnabled(enabled: boolean, previous?: AutomationStatus | null)
   if (enabled) return 'live';
   if (previous === 'draft' || previous == null) return 'draft';
   return 'paused';
-}
-
-/** Prefer stored status; backfill from `enabled` for pre-lifecycle rows. */
-export function resolveAutomationStatus(automation: {
-  status?: AutomationStatus | null;
-  enabled?: boolean;
-}): AutomationStatus {
-  if (automation.status) return automation.status;
-  return automation.enabled ? 'live' : 'draft';
 }
 
 function patchFlowMetaEnabled(
@@ -197,11 +191,7 @@ export class AutomationService {
   }
 
   async getAutomationsByTrigger(tenantId: string, triggerType: AutomationTriggerType): Promise<IAutomation[]> {
-    return Automation.find({
-      tenantId,
-      triggerType,
-      $or: [{ status: 'live' }, { status: { $exists: false }, enabled: true }],
-    });
+    return Automation.find(liveAutomationFilter({ tenantId, triggerType }));
   }
 
   async getAutomationRuns(tenantId: string, limit = 20): Promise<IAutomationRun[]> {

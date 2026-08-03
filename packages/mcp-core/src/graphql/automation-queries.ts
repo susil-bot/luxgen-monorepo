@@ -6,6 +6,9 @@ export const LIST_AUTOMATIONS = `
       id
       name
       enabled
+      status
+      publishedAt
+      archivedAt
       triggerType
       triggerLabel
       actions {
@@ -28,6 +31,9 @@ export const GET_AUTOMATION = `
       tenantId
       name
       enabled
+      status
+      publishedAt
+      archivedAt
       triggerType
       triggerLabel
       flowDefinition
@@ -72,11 +78,16 @@ export interface AutomationAction {
   config?: Record<string, unknown> | null;
 }
 
+export type AutomationLifecycleStatus = 'draft' | 'live' | 'paused' | 'archived';
+
 export interface AutomationRecord {
   id: string;
   tenantId?: string;
   name: string;
   enabled: boolean;
+  status?: AutomationLifecycleStatus;
+  publishedAt?: string | null;
+  archivedAt?: string | null;
   triggerType: string;
   triggerLabel: string;
   actions: AutomationAction[];
@@ -121,6 +132,7 @@ export const CREATE_AUTOMATION = `
       id
       name
       enabled
+      status
       triggerType
       triggerLabel
       flowDefinition
@@ -141,6 +153,7 @@ export const UPDATE_AUTOMATION = `
       id
       name
       enabled
+      status
       triggerType
       triggerLabel
       flowDefinition
@@ -160,6 +173,48 @@ export const TOGGLE_AUTOMATION = `
       id
       name
       enabled
+      status
+      publishedAt
+      archivedAt
+    }
+  }
+`;
+
+export const PUBLISH_AUTOMATION = `
+  mutation PublishAutomation($id: ID!) {
+    publishAutomation(id: $id) {
+      id
+      name
+      enabled
+      status
+      publishedAt
+      archivedAt
+    }
+  }
+`;
+
+export const PAUSE_AUTOMATION = `
+  mutation PauseAutomation($id: ID!) {
+    pauseAutomation(id: $id) {
+      id
+      name
+      enabled
+      status
+      publishedAt
+      archivedAt
+    }
+  }
+`;
+
+export const ARCHIVE_AUTOMATION = `
+  mutation ArchiveAutomation($id: ID!) {
+    archiveAutomation(id: $id) {
+      id
+      name
+      enabled
+      status
+      publishedAt
+      archivedAt
     }
   }
 `;
@@ -198,7 +253,19 @@ export interface UpdateAutomationResult {
 }
 
 export interface ToggleAutomationResult {
-  toggleAutomation: Pick<AutomationRecord, 'id' | 'name' | 'enabled'> | null;
+  toggleAutomation: Pick<AutomationRecord, 'id' | 'name' | 'enabled' | 'status'> | null;
+}
+
+export interface PublishAutomationResult {
+  publishAutomation: Pick<AutomationRecord, 'id' | 'name' | 'enabled' | 'status'> | null;
+}
+
+export interface PauseAutomationResult {
+  pauseAutomation: Pick<AutomationRecord, 'id' | 'name' | 'enabled' | 'status'> | null;
+}
+
+export interface ArchiveAutomationResult {
+  archiveAutomation: Pick<AutomationRecord, 'id' | 'name' | 'enabled' | 'status'> | null;
 }
 
 export interface DeleteAutomationResult {

@@ -75,11 +75,11 @@ Nav: `DefaultNavigation.tsx` → Automations → Tower, Recent Run Logs.
 | `createWorkflow` | wired | `createAutomation` |
 | `updateWorkflow` | wired | `updateAutomation` (includes whole `flowDefinition`) |
 | `addWorkflowStep` / `updateWorkflowStep` / `deleteWorkflowStep` | missing | Steps mutated by rewriting `flowDefinition` client-side then `updateAutomation` |
-| `publishWorkflow` | partial | `toggleAutomation(enabled: true)` — no version bump / `publishedAt` |
-| `pauseWorkflow` | partial | `toggleAutomation(enabled: false)` |
+| `publishWorkflow` | wired | `publishAutomation` (+ `toggleAutomation(true)`); stamps `publishedAt` |
+| `pauseWorkflow` | wired | `pauseAutomation` (+ `toggleAutomation(false)`) |
 | `testWorkflow` | missing | — |
-| `duplicateWorkflow` | missing | — |
-| `archiveWorkflow` | missing | `deleteAutomation` only (hard delete) |
+| `duplicateWorkflow` | wired | `duplicateAutomation` |
+| `archiveWorkflow` | wired | `archiveAutomation` (soft archive; `status=archived`) |
 
 ### Subscriptions
 

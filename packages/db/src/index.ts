@@ -26,7 +26,13 @@ export type {
   AutomationRunStatus,
   AutomationStatus,
 } from './automation';
-export { Automation, AutomationRun } from './automation';
+export {
+  Automation,
+  AutomationRun,
+  resolveAutomationStatus,
+  liveAutomationFilter,
+  enabledFromAutomationStatus,
+} from './automation';
 export type { ITenantSubscription, SubscriptionStatus } from './subscription';
 export { TenantSubscription } from './subscription';
 export { resolveEffectivePlan } from './tenant-billing';

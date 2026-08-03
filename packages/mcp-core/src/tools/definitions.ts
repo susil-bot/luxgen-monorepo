@@ -143,14 +143,50 @@ export function allToolDefinitions(config: ToolConfig): ToolDefinition[] {
     },
     {
       name: 'toggle_automation',
-      description: 'Enable or pause an automation without changing its flow.',
+      description: 'Publish (enabled=true) or pause (enabled=false) an automation. Prefer publish/pause/archive tools for explicit lifecycle.',
       inputSchema: {
         type: 'object',
         properties: {
           id: { type: 'string', description: 'Automation id' },
-          enabled: { type: 'boolean', description: 'true = active, false = paused' },
+          enabled: { type: 'boolean', description: 'true = live/publish, false = paused' },
         },
         required: ['id', 'enabled'],
+        additionalProperties: false,
+      },
+    },
+    {
+      name: 'publish_automation',
+      description: 'Set automation status to live (enabled=true). Blocked when archived.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'Automation id' },
+        },
+        required: ['id'],
+        additionalProperties: false,
+      },
+    },
+    {
+      name: 'pause_automation',
+      description: 'Set automation status to paused (enabled=false). Blocked when archived.',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'Automation id' },
+        },
+        required: ['id'],
+        additionalProperties: false,
+      },
+    },
+    {
+      name: 'archive_automation',
+      description: 'Soft-archive an automation (stops runs; keeps the row).',
+      inputSchema: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', description: 'Automation id' },
+        },
+        required: ['id'],
         additionalProperties: false,
       },
     },

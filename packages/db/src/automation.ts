@@ -38,6 +38,27 @@ export interface IAutomationAction {
 /** TODO `WorkflowStatus` — keep `enabled` mirrored (`live` ⇒ true; else false) for bridge filters. */
 export type AutomationStatus = 'draft' | 'live' | 'paused' | 'archived';
 
+/** Prefer stored status; backfill from `enabled` for pre-lifecycle rows. */
+export function resolveAutomationStatus(automation: {
+  status?: AutomationStatus | null;
+  enabled?: boolean;
+}): AutomationStatus {
+  if (automation.status) return automation.status;
+  return automation.enabled ? 'live' : 'draft';
+}
+
+/** Mongo filter: live automations, including legacy rows with only `enabled: true`. */
+export function liveAutomationFilter(extra: Record<string, unknown> = {}): Record<string, unknown> {
+  return {
+    ...extra,
+    $or: [{ status: 'live' }, { status: { $exists: false }, enabled: true }],
+  };
+}
+
+export function enabledFromAutomationStatus(status: AutomationStatus): boolean {
+  return status === 'live';
+}
+
 export interface IAutomation extends Document {
   /** Tenant isolation — TODO §11 `organizationId` */
   tenantId: string;

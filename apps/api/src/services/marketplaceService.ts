@@ -230,6 +230,7 @@ export class MarketplaceService {
       // logic in flowDefinition, not the flat actions[] list — pass it through when present.
       flowDefinition: template.flowDefinition,
       enabled: false,
+      status: 'draft',
     });
 
     await AutomationTemplate.updateOne({ slug }, { $inc: { installCount: 1 } });

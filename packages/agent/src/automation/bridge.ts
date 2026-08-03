@@ -8,6 +8,7 @@ import {
   ActivityEventKind,
   ActivityActorType,
   enrollmentSubjectId,
+  liveAutomationFilter,
   type AutomationTriggerType,
   type IAutomation,
   type IAutomationAction,
@@ -65,11 +66,9 @@ export async function emitAutomationEvent(options: EmitAutomationEventOptions): 
     return 0;
   }
 
-  const automations = await Automation.find({
-    tenantId,
-    enabled: true,
-    triggerType,
-  }).lean<IAutomation[]>();
+  const automations = await Automation.find(
+    liveAutomationFilter({ tenantId, triggerType }),
+  ).lean<IAutomation[]>();
 
   let executed = 0;
   for (const automation of automations) {

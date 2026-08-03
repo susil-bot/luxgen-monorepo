@@ -54,24 +54,30 @@ export async function persistTowerFlowMutation(
     throw new Error(`flowDefinition validation failed:\n${validated.errors.join('\n')}`);
   }
 
-  const enabled =
-    typeof options?.enabled === 'boolean' ? options.enabled : (data.automation.enabled ?? current.meta.enabled);
-  const prepared = towerFlowToMutationInput(validated.flow, { enabled });
+  const prepared = towerFlowToMutationInput(
+    validated.flow,
+    typeof options?.enabled === 'boolean' ? { enabled: options.enabled } : undefined,
+  );
   if (!prepared.ok) {
     throw new Error(`flowDefinition validation failed:\n${prepared.errors.join('\n')}`);
   }
 
   const { input } = prepared;
+  const updateInput: Record<string, unknown> = {
+    name: input.name,
+    triggerType: input.triggerType,
+    triggerLabel: input.triggerLabel,
+    actions: input.actions,
+    flowDefinition: input.flowDefinition,
+  };
+  // Only touch lifecycle when caller explicitly passes enabled (maps to publish/pause).
+  if (typeof options?.enabled === 'boolean') {
+    updateInput.enabled = options.enabled;
+  }
+
   const updated = await client.query<UpdateAutomationResult>(UPDATE_AUTOMATION, {
     id: automationId,
-    input: {
-      name: input.name,
-      triggerType: input.triggerType,
-      triggerLabel: input.triggerLabel,
-      actions: input.actions,
-      enabled: input.enabled,
-      flowDefinition: input.flowDefinition,
-    },
+    input: updateInput,
   });
 
   if (!updated.updateAutomation) {

@@ -1,11 +1,11 @@
 import { flowToLegacyAutomation, validateTowerFlowDocument, type TowerFlowDocument } from './automation-flow';
 
+/** Canvas save payload — lifecycle (`enabled`/`status`) is owned by publish/pause/archive. */
 export interface TowerFlowMutationInput {
   name: string;
   triggerType: string;
   triggerLabel: string;
   actions: { type: string; label: string; config?: Record<string, unknown> }[];
-  enabled: boolean;
   flowDefinition: TowerFlowDocument;
 }
 
@@ -29,7 +29,6 @@ export function towerFlowToMutationInput(
         label: a.label,
         config: a.config,
       })),
-      enabled: legacy.enabled,
       flowDefinition: validated.data,
     },
   };

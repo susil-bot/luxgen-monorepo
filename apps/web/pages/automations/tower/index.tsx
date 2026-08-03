@@ -14,13 +14,16 @@ import {
   PUBLISH_AUTOMATION,
 } from '../../../graphql/queries/automations';
 import {
+  normalizeAutomationStatus,
+  type AutomationLifecycleStatus,
+} from '../../../lib/automation-status';
+import {
   triggerFromGql,
   actionFromGql,
   formatRelativeTime,
   type UiTriggerType,
   type UiActionType,
-} from '../../../lib/automation-map';
-import { getTenantPageProps } from '../../../lib/tenant-page-props';
+} from '../../../lib/automation-map';import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useTenantScope } from '../../../lib/use-tenant-scope';
 
 interface TowerPageProps {
@@ -29,7 +32,7 @@ interface TowerPageProps {
 
 type TriggerType = UiTriggerType;
 type ActionType = UiActionType;
-type LifecycleStatus = 'draft' | 'live' | 'paused' | 'archived';
+type LifecycleStatus = AutomationLifecycleStatus;
 
 interface Automation {
   id: string;
@@ -57,11 +60,6 @@ function statusBadge(status: LifecycleStatus) {
   if (status === 'paused') return <span className={styles.badgePaused}>Paused</span>;
   if (status === 'archived') return <span className={styles.badgeArchived}>Archived</span>;
   return <span className={styles.badgeDraft}>Draft</span>;
-}
-
-function normalizeStatus(raw: string | null | undefined, enabled: boolean): LifecycleStatus {
-  if (raw === 'live' || raw === 'paused' || raw === 'draft' || raw === 'archived') return raw;
-  return enabled ? 'live' : 'draft';
 }
 
 function TowerListContent({ tenant }: TowerPageProps) {
@@ -152,7 +150,7 @@ function TowerListContent({ tenant }: TowerPageProps) {
         }): Automation => ({
           id: a.id,
           name: a.name,
-          status: normalizeStatus(a.status, a.enabled),
+          status: normalizeAutomationStatus(a.status, a.enabled),
           trigger: { type: triggerFromGql(a.triggerType), label: a.triggerLabel },
           actions: a.actions.map((x) => ({ type: actionFromGql(x.type), label: x.label })),
           runCount: a.runCount,

@@ -16,7 +16,7 @@
 | `organizationId` | `tenantId` | Always required; never drop |
 | `name` | `name` + `flowDefinition.meta.name` | Synced on save |
 | `description` | `flowDefinition.meta.description` only | Not a top-level Mongo field |
-| `status` DRAFT/LIVE/PAUSED/ARCHIVED | `enabled: boolean` | false≈draft/paused; true≈live; archive≈delete |
+| `status` DRAFT/LIVE/PAUSED/ARCHIVED | `Automation.status` + mirrored `enabled` | `live` ⇔ `enabled`; soft archive via `archiveAutomation` |
 | `version` / `publishedAt` / `publishedBy` | — | Deferred (`T-AUTO-04`) |
 | `trigger` | `triggerType` + `triggerLabel` + entry node in `flowDefinition` | Synced via `flowToLegacyAutomation` |
 | `steps[]` | `flowDefinition.nodes` + `edges` | Flat `actions[]` = action nodes only |
