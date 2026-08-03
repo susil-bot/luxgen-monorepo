@@ -308,12 +308,9 @@ async function executeAction(
       });
       break;
     }
-<<<<<<< HEAD
-=======
     case 'ISSUE_CERTIFICATE':
       await executeIssueCertificate(action, automation, event, runId);
       break;
->>>>>>> 5fd9e92039498e194bcf2248acb81b19b3e3b4f8
     case 'NOTIFY_SLACK':
     case 'CALL_WEBHOOK':
     case 'TAG_USER':

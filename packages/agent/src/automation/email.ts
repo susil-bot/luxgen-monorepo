@@ -31,8 +31,7 @@ export const AUTOMATION_EMAIL_TEMPLATES: Record<string, EmailTemplateDef> = {
     body: (ctx) =>
       `Hi,\n\nYour order for "${str(ctx.payload.courseTitle, 'your course')}" is confirmed. Thanks for your purchase!`,
   },
-<<<<<<< HEAD
-=======
+
   abandoned_cart: {
     subject: () => 'Still interested? Your cart is waiting',
     body: (ctx) =>
@@ -51,7 +50,6 @@ export const AUTOMATION_EMAIL_TEMPLATES: Record<string, EmailTemplateDef> = {
       )}" expires in ${days} days. Renew your training now to stay compliant.`;
     },
   },
->>>>>>> 5fd9e92039498e194bcf2248acb81b19b3e3b4f8
   custom: {
     subject: (ctx) => str(ctx.subjectOverride, 'Update from your account'),
     body: (ctx) => str(ctx.payload.body as string | undefined, ''),
