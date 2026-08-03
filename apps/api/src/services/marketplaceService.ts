@@ -18,6 +18,7 @@ const CATALOG_SEED = [
       { type: 'ADD_TO_GROUP', label: 'Add to onboarding group' },
     ],
     tags: ['onboarding', 'email', 'free'],
+    industry: ['coaching', 'corporate-l&d', 'hr'],
   },
   {
     slug: 'completion-cert-slack',
@@ -29,11 +30,12 @@ const CATALOG_SEED = [
     triggerType: 'COURSE_COMPLETED',
     triggerLabel: 'Course Completed',
     actions: [
-      { type: 'ISSUE_CERTIFICATE', label: 'Issue Certificate' },
+      { type: 'ISSUE_CERTIFICATE', label: 'Issue Certificate', config: { validityDays: 365 } },
       { type: 'NOTIFY_SLACK', label: 'Notify Slack', config: { channel: '#wins' } },
-      { type: 'SEND_EMAIL', label: 'Send congrats email' },
+      { type: 'SEND_EMAIL', label: 'Send congrats email', config: { template: 'order_confirmation' } },
     ],
     tags: ['completion', 'certificate', 'slack'],
+    industry: ['coaching', 'compliance-training', 'franchise'],
   },
   {
     slug: 'power-learner-upsell',
@@ -49,6 +51,7 @@ const CATALOG_SEED = [
       { type: 'ENROLL_IN_COURSE', label: 'Enroll in advanced course' },
     ],
     tags: ['retention', 'upsell'],
+    industry: ['coaching', 'corporate-l&d'],
   },
   {
     slug: 'weekly-digest',
@@ -61,6 +64,7 @@ const CATALOG_SEED = [
     triggerLabel: 'Scheduled',
     actions: [{ type: 'SEND_EMAIL', label: 'Send weekly digest', config: { cron: '0 8 * * 1' } }],
     tags: ['engagement', 'email', 'free'],
+    industry: ['coaching', 'corporate-l&d', 'hr'],
   },
   {
     slug: 'crm-webhook-enroll',
@@ -79,6 +83,7 @@ const CATALOG_SEED = [
       },
     ],
     tags: ['integrations', 'webhook', 'crm'],
+    industry: ['agency', 'ecommerce', 'corporate-l&d'],
   },
   {
     slug: 'agent-merge-notify',
@@ -98,6 +103,85 @@ const CATALOG_SEED = [
       },
     ],
     tags: ['agent', 'enterprise'],
+    industry: ['saas', 'engineering'],
+  },
+  {
+    slug: 'certificate-recert-reminder',
+    name: 'Recertification reminder',
+    description:
+      'Notify learners before their certification expires — built for HIPAA/OSHA-style compliance training, franchise re-onboarding, or any recurring credential.',
+    category: 'retention',
+    priceCents: 0,
+    featured: true,
+    triggerType: 'CERTIFICATE_EXPIRING_SOON',
+    triggerLabel: 'Certificate Expiring Soon',
+    actions: [
+      {
+        type: 'SEND_EMAIL',
+        label: 'Send recertification reminder',
+        config: { template: 'certificate_recert_reminder' },
+      },
+    ],
+    tags: ['compliance', 'recertification', 'email', 'free'],
+    industry: ['compliance-training', 'franchise', 'healthcare'],
+  },
+  {
+    slug: 'abandoned-cart-reminder',
+    name: 'Abandoned cart reminder',
+    description:
+      'Waits 60 minutes after checkout is started, re-checks whether the order is still unpaid, and only then sends a reminder — so customers who already completed checkout never get a stray email.',
+    category: 'engagement',
+    priceCents: 0,
+    featured: true,
+    triggerType: 'ORDER_DRAFTED',
+    triggerLabel: 'Order Drafted',
+    actions: [],
+    flowDefinition: {
+      version: 1,
+      meta: {
+        name: 'Abandoned cart reminder',
+        enabled: false,
+        description: 'Order drafted → wait 60 min → still unpaid? → send reminder email.',
+      },
+      entryNodeId: 't_trigger',
+      nodes: [
+        {
+          id: 't_trigger',
+          kind: 'trigger',
+          compoundId: 'commerce.order.drafted',
+          title: 'Order drafted',
+          config: {},
+        },
+        {
+          id: 'w_delay',
+          kind: 'wait',
+          compoundId: 'core.wait.delay',
+          title: 'Wait 60 minutes',
+          config: { seconds: 3600 },
+        },
+        {
+          id: 'c_unpaid',
+          kind: 'condition',
+          compoundId: 'core.condition.field_equals',
+          title: 'Still unpaid?',
+          config: { field: 'paymentStatus', operator: 'not_equals', value: 'PAID' },
+        },
+        {
+          id: 'a_email',
+          kind: 'action',
+          compoundId: 'core.notification.send_email',
+          title: 'Send abandoned cart email',
+          config: { template: 'abandoned_cart' },
+        },
+      ],
+      edges: [
+        { from: 't_trigger', to: 'w_delay' },
+        { from: 'w_delay', to: 'c_unpaid' },
+        { from: 'c_unpaid', to: 'a_email', label: 'true' },
+      ],
+    },
+    tags: ['ecommerce', 'cart', 'email', 'free'],
+    industry: ['ecommerce', 'retail'],
   },
 ];
 
@@ -112,11 +196,12 @@ export class MarketplaceService {
     logger.info(`Seeded ${CATALOG_SEED.length} automation marketplace templates`);
   }
 
-  async listTemplates(options: { category?: TemplateCategory; featured?: boolean } = {}) {
+  async listTemplates(options: { category?: TemplateCategory; featured?: boolean; industry?: string } = {}) {
     await this.ensureCatalogSeeded();
     const filter: Record<string, unknown> = {};
     if (options.category) filter.category = options.category;
     if (options.featured !== undefined) filter.featured = options.featured;
+    if (options.industry) filter.industry = options.industry;
     return AutomationTemplate.find(filter).sort({ featured: -1, installCount: -1 });
   }
 
@@ -141,6 +226,9 @@ export class MarketplaceService {
         label: a.label,
         config: a.config,
       })),
+      // Graph templates (trigger → wait → condition → action, e.g. abandoned-cart) carry their
+      // logic in flowDefinition, not the flat actions[] list — pass it through when present.
+      flowDefinition: template.flowDefinition,
       enabled: false,
     });
 
@@ -166,8 +254,10 @@ export class MarketplaceService {
         label: a.label,
         config: a.config ?? null,
       })),
+      flowDefinition: template.flowDefinition ?? null,
       installCount: template.installCount,
       tags: template.tags,
+      industry: template.industry ?? [],
     };
   }
 }
