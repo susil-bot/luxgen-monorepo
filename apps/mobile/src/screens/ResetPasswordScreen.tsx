@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
+import { BackButton } from '../components/BackButton';
 import { resetPasswordWithToken } from '../../lib/auth-api';
 import type { LearnerNavigation } from '../../lib/learner-navigation';
 
@@ -51,9 +52,7 @@ export default function ResetPasswordScreen({ navigation, resetToken = '' }: Pro
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={[styles.backArrow, { color: theme.text }]}>{'<'}</Text>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} style={styles.backBtn} />
 
         <Text style={[styles.heading, { color: theme.text }]}>Reset Your Password</Text>
         <Text style={[styles.description, { color: theme.subtext }]}>
@@ -131,10 +130,6 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     marginBottom: 28,
-    alignSelf: 'flex-start',
-  },
-  backArrow: {
-    fontSize: 24,
   },
   heading: {
     fontSize: 26,

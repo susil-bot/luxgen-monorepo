@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
+import { BackButton } from '../components/BackButton';
 import { requestPasswordReset } from '../../lib/auth-api';
 import type { LearnerNavigation } from '../../lib/learner-navigation';
 
@@ -28,9 +29,12 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
     setError(null);
     setLoading(true);
     try {
-      await requestPasswordReset(email);
+      const result = await requestPasswordReset(email);
       setSent(true);
-      navigation.navigate('OTP', { email: email.trim().toLowerCase() });
+      navigation.navigate('OTP', {
+        email: email.trim().toLowerCase(),
+        ...(result.resetToken ? { token: result.resetToken } : {}),
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to send reset code');
     } finally {
@@ -45,9 +49,7 @@ export default function ForgotPasswordScreen({ navigation }: Props) {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={[styles.backArrow, { color: theme.text }]}>{'<'}</Text>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} style={styles.backBtn} />
 
         <Text style={[styles.heading, { color: theme.text }]}>Forgot Your Password?</Text>
         <Text style={[styles.description, { color: theme.subtext }]}>
@@ -97,10 +99,6 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     marginBottom: 28,
-    alignSelf: 'flex-start',
-  },
-  backArrow: {
-    fontSize: 24,
   },
   heading: {
     fontSize: 26,

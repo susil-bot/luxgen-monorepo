@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet } from 'react-native';
 import { useTheme } from '../theme/ThemeContext';
 import { AuthLoadingModal } from '../components/AuthLoadingModal';
+import { BackButton } from '../components/BackButton';
 import { SocialAuthButton } from '../components/SocialAuthButton';
 import { useAuth } from '../../hooks/useAuth';
 import { useTenant } from '../../hooks/useTenant';
@@ -19,7 +20,6 @@ export default function SignInScreen({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [remember, setRemember] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
@@ -44,10 +44,7 @@ export default function SignInScreen({ navigation }: Props) {
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
-        {/* Back Button */}
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={[styles.backArrow, { color: theme.text }]}>{'<'}</Text>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} style={styles.backBtn} />
 
         {/* Heading */}
         <Text style={[styles.heading, { color: theme.text }]}>Welcome back Folks</Text>
@@ -85,38 +82,22 @@ export default function SignInScreen({ navigation }: Props) {
             </TouchableOpacity>
           </View>
 
-      {/* Buttons */}
-      <View style={styles.buttons}>
-        <TouchableOpacity
-          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
-          onPress={() => showSocialLoginUnavailable('google')}
-        >
-          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Google</Text>
-        </TouchableOpacity>
+          {/* Buttons */}
+          <View style={styles.buttons}>
+            <SocialAuthButton provider="google" onPress={() => showSocialLoginUnavailable('google')} />
+            <SocialAuthButton provider="apple" onPress={() => showSocialLoginUnavailable('apple')} />
+            <SocialAuthButton provider="facebook" onPress={() => showSocialLoginUnavailable('facebook')} />
 
-        <TouchableOpacity
-          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
-          onPress={() => showSocialLoginUnavailable('apple')}
-        >
-          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Apple</Text>
-        </TouchableOpacity>
+            {error ? <Text style={[styles.errorTxt, { color: '#c62828' }]}>{error}</Text> : null}
 
-        <TouchableOpacity
-          style={[styles.socialBtn, { borderColor: '#d0d0d0' }]}
-          onPress={() => showSocialLoginUnavailable('facebook')}
-        >
-          <Text style={[styles.socialTxt, { color: theme.text }]}>Continue with Facebook</Text>
-        </TouchableOpacity>
-
-          {error ? <Text style={[styles.errorTxt, { color: '#c62828' }]}>{error}</Text> : null}
-
-          <TouchableOpacity
-            style={[styles.signInBtn, { backgroundColor: theme.btnPrimary, opacity: showLoading ? 0.7 : 1 }]}
-            onPress={handleSignIn}
-            disabled={showLoading || !email.trim() || !password}
-          >
-            <Text style={[styles.signInTxt, { color: theme.btnPrimaryText }]}>Sign in</Text>
-          </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.signInBtn, { backgroundColor: theme.btnPrimary, opacity: showLoading ? 0.7 : 1 }]}
+              onPress={handleSignIn}
+              disabled={showLoading || !email.trim() || !password}
+            >
+              <Text style={[styles.signInTxt, { color: theme.btnPrimaryText }]}>Sign in</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </ScrollView>
       <AuthLoadingModal visible={showLoading} variant="sign-in" />
@@ -133,10 +114,6 @@ const styles = StyleSheet.create({
   },
   backBtn: {
     marginBottom: 24,
-    alignSelf: 'flex-start',
-  },
-  backArrow: {
-    fontSize: 24,
   },
   heading: {
     fontSize: 26,

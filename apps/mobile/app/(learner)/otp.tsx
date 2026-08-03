@@ -5,7 +5,13 @@ import OTPScreen from '../../src/screens/OTPScreen';
 
 export default function OTPScreenRoute() {
   const navigation = useLearnerNavigation();
-  const { email } = useLocalSearchParams<{ email?: string }>();
+  const { email, token } = useLocalSearchParams<{ email?: string; token?: string }>();
 
-  return <OTPScreen navigation={navigation} email={typeof email === 'string' ? email : ''} />;
+  return (
+    <OTPScreen
+      navigation={navigation}
+      email={typeof email === 'string' ? email : ''}
+      initialToken={typeof token === 'string' ? token : ''}
+    />
+  );
 }
