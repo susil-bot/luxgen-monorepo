@@ -1,12 +1,12 @@
 import Head from 'next/head';
 import { useRouter } from 'next/router';
-import { useEffect, useMemo, useState } from 'react';
-import { useQuery } from '@apollo/client';
-import { SnackbarProvider } from '@luxgen/ui';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useMutation, useQuery } from '@apollo/client';
+import { SnackbarProvider, useSnackbar } from '@luxgen/ui';
 
 import { TowerShell } from '../../../components/automations/tower';
 import styles from '../../../components/automations/tower/TowerFlow.module.css';
-import { GET_AUTOMATIONS } from '../../../graphql/queries/automations';
+import { DUPLICATE_AUTOMATION, GET_AUTOMATIONS } from '../../../graphql/queries/automations';
 import {
   triggerFromGql,
   actionFromGql,
@@ -99,18 +99,43 @@ function statusBadge(status: Automation['status']) {
 
 function TowerListContent({ tenant }: TowerPageProps) {
   const router = useRouter();
+  const { showSuccess, showError } = useSnackbar();
   const { queryTenantId, subdomain } = useTenantScope(tenant);
 
   const [automations, setAutomations] = useState<Automation[]>(INITIAL_AUTOMATIONS);
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]['id']>('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
 
-  const { data: gqlData } = useQuery(GET_AUTOMATIONS, {
+  const { data: gqlData, refetch } = useQuery(GET_AUTOMATIONS, {
     variables: { tenantId: queryTenantId },
     skip: !queryTenantId,
     errorPolicy: 'ignore',
     fetchPolicy: 'cache-and-network',
   });
+
+  const [duplicateAutomation] = useMutation(DUPLICATE_AUTOMATION);
+
+  const handleDuplicate = useCallback(
+    async (id: string, name: string) => {
+      setDuplicatingId(id);
+      try {
+        const { data } = await duplicateAutomation({
+          variables: { id, name: `${name} (copy)` },
+        });
+        const createdId = data?.duplicateAutomation?.id as string | undefined;
+        if (!createdId) throw new Error('Duplicate failed');
+        showSuccess('Tower duplicated');
+        await refetch();
+        void router.push(`/automations/tower/${createdId}`);
+      } catch (err) {
+        showError(err instanceof Error ? err.message : 'Could not duplicate tower');
+      } finally {
+        setDuplicatingId(null);
+      }
+    },
+    [duplicateAutomation, refetch, router, showSuccess, showError],
+  );
 
   useEffect(() => {
     if (!gqlData?.automations) return;
@@ -234,13 +259,23 @@ function TowerListContent({ tenant }: TowerPageProps) {
                       </td>
                       <td style={{ color: 'var(--color-label-secondary)' }}>{auto.runCount.toLocaleString()}</td>
                       <td>
-                        <button
-                          type="button"
-                          className={styles.secondaryBtn}
-                          onClick={() => void router.push(`/automations/tower/${auto.id}`)}
-                        >
-                          Open
-                        </button>
+                        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                          <button
+                            type="button"
+                            className={styles.secondaryBtn}
+                            disabled={duplicatingId === auto.id}
+                            onClick={() => void handleDuplicate(auto.id, auto.name)}
+                          >
+                            {duplicatingId === auto.id ? 'Copying…' : 'Duplicate'}
+                          </button>
+                          <button
+                            type="button"
+                            className={styles.secondaryBtn}
+                            onClick={() => void router.push(`/automations/tower/${auto.id}`)}
+                          >
+                            Open
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}

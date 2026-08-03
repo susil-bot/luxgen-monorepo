@@ -118,6 +118,8 @@ export const automationTypeDefs = `
     updateAutomation(id: ID!, input: UpdateAutomationInput!): Automation
     toggleAutomation(id: ID!, enabled: Boolean!): Automation
     deleteAutomation(id: ID!): Boolean!
+    """TODO §12 DuplicateWorkflow — clone automation config; new row starts disabled."""
+    duplicateAutomation(id: ID!, name: String): Automation
     runAgentTask(input: RunAgentTaskInput!): AgentTaskResult!
   }
 `;

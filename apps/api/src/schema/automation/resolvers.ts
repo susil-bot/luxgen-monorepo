@@ -108,6 +108,25 @@ export const automationResolvers = {
       if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
       return automationService.deleteAutomation(id, ctx.tenantId);
     },
+    duplicateAutomation: async (
+      _: unknown,
+      { id, name }: { id: string; name?: string | null },
+      ctx: GraphQLContext,
+    ) => {
+      await requireFeature(ctx, 'automations');
+      if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
+      try {
+        await usageService.assertAutomationCreateAllowed(ctx.tenantId);
+      } catch (e) {
+        if (e instanceof UsageLimitError) {
+          const { code: _code, ...rest } = e.toJSON();
+          throw new GraphQLError(e.message, { extensions: { code: e.code, ...rest } });
+        }
+        throw e;
+      }
+      const created = await automationService.duplicateAutomation(id, ctx.tenantId, name ?? undefined);
+      return created ? automationService.toGraphQL(created) : null;
+    },
     runAgentTask: async (
       _: unknown,
       { input }: { input: { tenantId: string; prompt: string; model?: string } },

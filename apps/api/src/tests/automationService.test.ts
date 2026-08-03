@@ -57,4 +57,50 @@ describe('AutomationService', () => {
     );
     expect(result).toBe(created);
   });
+
+  it('duplicateAutomation clones config as disabled copy for same tenant', async () => {
+    const source = {
+      _id: 'auto1',
+      tenantId: 'tenant1',
+      name: 'Welcome',
+      enabled: true,
+      triggerType: 'USER_ENROLLED',
+      triggerLabel: 'User Enrolled',
+      actions: [{ type: 'SEND_EMAIL', label: 'Send Email', config: { template: 'welcome' } }],
+      flowDefinition: {
+        version: 1,
+        meta: { name: 'Welcome', enabled: true },
+        entryNodeId: 't1',
+        nodes: [],
+        edges: [],
+      },
+      runCount: 42,
+    };
+    const created = {
+      _id: 'auto2',
+      tenantId: 'tenant1',
+      name: 'Welcome (copy)',
+      enabled: false,
+      runCount: 0,
+    };
+    (Automation.findOne as jest.Mock).mockResolvedValue(source);
+    (Automation.create as jest.Mock).mockResolvedValue(created);
+
+    const result = await service.duplicateAutomation('auto1', 'tenant1');
+
+    expect(Automation.findOne).toHaveBeenCalledWith({ _id: 'auto1', tenantId: 'tenant1' });
+    expect(Automation.create).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tenantId: 'tenant1',
+        name: 'Welcome (copy)',
+        enabled: false,
+        triggerType: 'USER_ENROLLED',
+        runCount: 0,
+        flowDefinition: expect.objectContaining({
+          meta: expect.objectContaining({ name: 'Welcome (copy)', enabled: false }),
+        }),
+      }),
+    );
+    expect(result).toBe(created);
+  });
 });
