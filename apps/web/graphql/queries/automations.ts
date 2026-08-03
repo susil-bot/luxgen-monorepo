@@ -46,11 +46,32 @@ export const GET_AUTOMATION = gql`
 `;
 
 export const GET_AUTOMATION_RUNS = gql`
-  query GetAutomationRuns($tenantId: String!, $limit: Int) {
-    automationRuns(tenantId: $tenantId, limit: $limit) {
+  query GetAutomationRuns($tenantId: String!, $limit: Int, $automationId: ID) {
+    automationRuns(tenantId: $tenantId, limit: $limit, automationId: $automationId) {
       id
+      automationId
       automationName
+      triggerType
       triggeredAt
+      startedAt
+      completedAt
+      status
+      durationMs
+      error
+    }
+  }
+`;
+
+export const GET_AUTOMATION_RUN = gql`
+  query GetAutomationRun($id: ID!) {
+    automationRun(id: $id) {
+      id
+      automationId
+      automationName
+      triggerType
+      triggeredAt
+      startedAt
+      completedAt
       status
       durationMs
       error

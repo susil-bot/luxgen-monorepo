@@ -66,7 +66,7 @@ Nav: `DefaultNavigation.tsx` → Automations → Tower, Recent Run Logs.
 | `workflow(id)` / GetWorkflow | partial | `automation(id)` | No version/settings/run aggregates beyond `runCount`/`lastRunAt` |
 | `workflows(organizationId, filter, sort, pagination)` | partial | `automations(tenantId, limit, offset)` | No cursor connection, filter/sort enums, or `totalCount` |
 | `workflowElements` | wired | `automationSchema: JSON!` | Returns compound catalog (triggers/actions/logic) |
-| `workflowRuns(workflowId, pagination)` | partial | `automationRuns(tenantId, limit)` | Tenant-scoped list; **not** filtered by automationId in schema |
+| `workflowRuns(workflowId, pagination)` | partial | `automationRuns(tenantId, limit, automationId?)` + `automationRun(id)` | Filter + detail; startedAt/completedAt |
 
 ### Mutations
 
@@ -103,7 +103,7 @@ Web client ops: `apps/web/graphql/queries/automations.ts` — GET/CREATE/UPDATE/
 | Enable / disable from builder | wired | `flow.meta.enabled` + save (`[id].tsx`) |
 | Legacy list CRUD + toggle + runs strip | wired | `apps/web/pages/automations/index.tsx` |
 | Plan gate | wired | `PlanGate feature="automations"` |
-| Per-workflow run history drawer | missing | Only `/automations/tower/runs` aggregate |
+| Per-workflow run history drawer | partial | `/automations/tower/runs?automationId=` + `/runs/[id]` | List + detail page (no drawer chrome) |
 | Test-run panel | missing | — |
 | Publish vs save draft UX | missing | Boolean enabled only |
 | Analytics / versions / settings screens | missing | — |

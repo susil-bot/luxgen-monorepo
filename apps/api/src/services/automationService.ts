@@ -194,8 +194,18 @@ export class AutomationService {
     return Automation.find(liveAutomationFilter({ tenantId, triggerType }));
   }
 
-  async getAutomationRuns(tenantId: string, limit = 20): Promise<IAutomationRun[]> {
-    return AutomationRun.find({ tenantId }).sort({ triggeredAt: -1 }).limit(limit);
+  async getAutomationRuns(
+    tenantId: string,
+    limit = 20,
+    automationId?: string,
+  ): Promise<IAutomationRun[]> {
+    const filter: { tenantId: string; automationId?: string } = { tenantId };
+    if (automationId) filter.automationId = automationId;
+    return AutomationRun.find(filter).sort({ triggeredAt: -1 }).limit(limit);
+  }
+
+  async getAutomationRunById(id: string, tenantId: string): Promise<IAutomationRun | null> {
+    return AutomationRun.findOne({ _id: id, tenantId });
   }
 
   async createAutomation(input: CreateAutomationInput): Promise<IAutomation> {
@@ -423,6 +433,11 @@ export class AutomationService {
   }
 
   runToGraphQL(run: IAutomationRun) {
+    const startedAt = run.triggeredAt;
+    const completedAt =
+      run.status === 'running' || !startedAt
+        ? null
+        : new Date(new Date(startedAt).getTime() + (run.durationMs || 0));
     return {
       id: String(run._id),
       automationId: run.automationId,
@@ -432,7 +447,9 @@ export class AutomationService {
       status: run.status,
       durationMs: run.durationMs,
       error: run.error ?? null,
-      triggeredAt: run.triggeredAt,
+      startedAt,
+      triggeredAt: startedAt,
+      completedAt,
     };
   }
 }

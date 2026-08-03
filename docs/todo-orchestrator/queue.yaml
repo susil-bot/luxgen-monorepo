@@ -106,7 +106,7 @@ tasks:
     epic: E0
     priority: 1
     sla: S
-    status: review
+    status: done
     title: Audit Role modules vs organization settings routes
     skill: persona-pages
     source:
@@ -397,7 +397,7 @@ tasks:
     epic: E2
     priority: 1
     sla: M
-    status: todo
+    status: review
     title: Workflow run history list + detail
     skill: automation
     source:
@@ -412,6 +412,8 @@ tasks:
       - T-AUTO-04
     acceptance:
       - Runs list tenant-scoped; detail shows status timestamps
+    notes: Run list + detail timestamps; no demo fallback —
+      feat/automation-run-history-detail
   - id: T-AUTO-06
     epic: E2
     priority: 1

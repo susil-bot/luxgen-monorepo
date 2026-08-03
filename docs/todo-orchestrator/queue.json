@@ -133,7 +133,7 @@
       "epic": "E0",
       "priority": 1,
       "sla": "S",
-      "status": "review",
+      "status": "done",
       "title": "Audit Role modules vs organization settings routes",
       "skill": "persona-pages",
       "source": {
@@ -148,7 +148,7 @@
       "acceptance": [
         "Gap table for org dashboard profile tenants users roles security SSO SCIM"
       ],
-      "notes": "role-gaps.md \u2014 chore/audit-role-org-gaps"
+      "notes": "role-gaps.md \u2014 chore/audit-role-org-gaps \u2014 merged #469"
     },
     {
       "id": "T-SRCH-01",
@@ -504,7 +504,7 @@
       "epic": "E2",
       "priority": 1,
       "sla": "M",
-      "status": "todo",
+      "status": "review",
       "title": "Workflow run history list + detail",
       "skill": "automation",
       "source": {
@@ -521,7 +521,8 @@
       ],
       "acceptance": [
         "Runs list tenant-scoped; detail shows status timestamps"
-      ]
+      ],
+      "notes": "Run list + detail timestamps; no demo fallback \u2014 feat/automation-run-history-detail"
     },
     {
       "id": "T-AUTO-06",
