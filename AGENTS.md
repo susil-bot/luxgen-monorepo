@@ -80,11 +80,12 @@ Read `skills/<skill-name>/SKILL.md` **first** when a task matches that skill's d
 
 ## Shipped platform modules
 
-| Module                 | Doc                                      |
-| ---------------------- | ---------------------------------------- |
-| Automations (Phase 7)  | `docs/AGENT_STUDIO_ARCHITECTURE.md`      |
-| Billing (Phase 9)      | `docs/PHASE_9_BILLING.md`                |
-| Marketplace (Phase 10) | `docs/PHASE_10_MARKETPLACE.md`           |
-| Business listings      | `docs/LISTING_SUBSCRIPTION_LIFECYCLE.md` |
+| Module                                      | Doc                                      |
+| -------------------------------------------- | ---------------------------------------- |
+| Automations (Phase 7)                        | `docs/AGENT_STUDIO_ARCHITECTURE.md`      |
+| Billing (Phase 9)                             | `docs/PHASE_9_BILLING.md`                |
+| Marketplace (Phase 10)                        | `docs/PHASE_10_MARKETPLACE.md`           |
+| Business listings                             | `docs/LISTING_SUBSCRIPTION_LIFECYCLE.md` |
+| Agent Orchestrator (Developer/Reviewer/PM Tester) | `docs/AGENT_ORCHESTRATOR.md`             |
 
 Full index: `docs/INDEX.md`

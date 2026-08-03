@@ -86,6 +86,7 @@ export { executeToolWithTimeout, listDirRecursive, searchInDir } from './tools/e
 
 // Prompts
 export { SYSTEM_PROMPT } from './prompts/system';
+export { DEVELOPER_SYSTEM_PROMPT, REVIEWER_SYSTEM_PROMPT, PM_TESTER_SYSTEM_PROMPT } from './prompts/roles';
 
 // Providers
 export { findAvailableModel, checkOllamaHealth, pingOllama, supportsToolCalling, MODEL_META } from './providers/ollama';
@@ -93,6 +94,10 @@ export type { OllamaHealthResult } from './providers/ollama';
 
 // Core
 export { runAgentLoop } from './core/orchestrator';
+export { runOrchestratedTask } from './core/orchestrated-task';
+export type { RunOrchestratedTaskParams, RunOrchestratedTaskResult } from './core/orchestrated-task';
+export { runReviewerPass, runPMTesterPass } from './core/roles';
+export { buildSessionDiffSummary } from './core/diff';
 
 // Validation
 export { runValidationPipeline, getSessionValidation } from './validation/pipeline';
@@ -126,6 +131,7 @@ export {
   extractBearerToken,
 } from './auth/context';
 export type { TaskStatus, TaskMode, AgentAuthContext, HeadlessTaskJob, AuditAction } from './types/task';
+export type { OrchestrationRole, ReviewVerdict, RoleReviewResult, OrchestrationState } from './types/review';
 
 // Queue
 export {

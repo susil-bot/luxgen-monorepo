@@ -56,6 +56,7 @@ export async function syncSessionToMongo(session: AgentSession): Promise<void> {
       files: session.files,
       git: session.git,
       validation: session.validation,
+      orchestration: session.orchestration,
       messages: session.messages,
       metadata: {
         model: session.metadata?.model,
@@ -164,6 +165,7 @@ export async function sessionFromMongoDoc(sessionId: string): Promise<AgentSessi
     files: (doc.files as AgentSession['files']) || {},
     git: doc.git as AgentSession['git'],
     validation: doc.validation as AgentSession['validation'],
+    orchestration: doc.orchestration as AgentSession['orchestration'],
     messages: doc.messages as AgentSession['messages'],
     metadata: { model: meta.model as string | undefined },
     createdAt,

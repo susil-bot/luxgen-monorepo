@@ -1,6 +1,6 @@
 import { getAgentConfig } from '../config/agent-mode';
 import { ensureGitSession, commitStagedSession, mergeAgentBranch } from '../git/service';
-import { runAgentLoop } from '../core/orchestrator';
+import { runOrchestratedTask } from '../core/orchestrated-task';
 import {
   loadSession,
   saveSession,
@@ -9,7 +9,6 @@ import {
   ensureSessionHydrated,
 } from '../changeset/session-store';
 import { appendAuditEntry, syncSessionToMongo } from '../persistence/mongo';
-import { runValidationPipeline } from '../validation/pipeline';
 import { emitAgentAutomationEvent } from '../automation/bridge';
 import {
   dequeueHeadlessTask,
@@ -44,55 +43,20 @@ export async function processHeadlessJob(job: HeadlessTaskJob): Promise<void> {
 
   await ensureGitSession(job.sessionId);
 
-  await runAgentLoop({
+  // Developer -> Reviewer -> PM Tester loop (docs/AGENT_ORCHESTRATOR.md). Handles its own
+  // staging/validating/reviewing/pm_testing status transitions and audit entries; only reaches
+  // 'pending_review' with converged=true once the Developer's staged changes pass deterministic
+  // validation AND both LLM review roles approve.
+  const orchestrated = await runOrchestratedTask({
     sessionId: job.sessionId,
+    tenantId: job.tenantId,
+    userId: job.userId,
     messages: job.messages,
     ollamaHost: job.ollamaHost,
     model: job.model,
-    onEvent: () => {},
   });
 
-  const updated = loadSession(job.sessionId);
-  updated.status = Object.keys(updated.files).length > 0 ? 'staged' : 'pending_review';
-  saveSession(updated);
-  await syncSessionToMongo(updated);
-
-  if (Object.keys(updated.files).length === 0) return;
-
-  await appendAuditEntry({
-    sessionId: job.sessionId,
-    tenantId: job.tenantId,
-    userId: job.userId,
-    action: 'staged',
-    details: { fileCount: Object.keys(updated.files).length },
-  });
-
-  await emitAgentAutomationEvent(job.tenantId, 'staged', {
-    sessionId: job.sessionId,
-    fileCount: Object.keys(updated.files).length,
-    userId: job.userId,
-  }).catch(() => {});
-
-  updated.status = 'validating';
-  saveSession(updated);
-  await syncSessionToMongo(updated);
-
-  const validation = await runValidationPipeline(job.sessionId);
-
-  const afterValidation = loadSession(job.sessionId);
-  afterValidation.status = validation.passed ? 'pending_review' : 'staged';
-  saveSession(afterValidation);
-  await syncSessionToMongo(afterValidation);
-
-  await appendAuditEntry({
-    sessionId: job.sessionId,
-    tenantId: job.tenantId,
-    userId: job.userId,
-    action: 'validated',
-    details: { passed: validation.passed, checkCount: validation.checks.length },
-  });
-
-  if (!validation.passed) return;
+  if (!orchestrated.converged) return;
 
   const commitResult = await commitStagedSession(job.sessionId);
   if (!commitResult.commitSha) return;
