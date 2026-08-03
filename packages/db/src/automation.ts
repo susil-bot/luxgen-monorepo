@@ -35,15 +35,22 @@ export interface IAutomationAction {
   config?: Record<string, unknown>;
 }
 
+/** TODO `WorkflowStatus` — keep `enabled` mirrored (`live` ⇒ true; else false) for bridge filters. */
+export type AutomationStatus = 'draft' | 'live' | 'paused' | 'archived';
+
 export interface IAutomation extends Document {
   /** Tenant isolation — TODO §11 `organizationId` */
   tenantId: string;
   name: string;
   /**
-   * Lifecycle stand-in for TODO `WorkflowStatus` (DRAFT/LIVE/PAUSED/ARCHIVED).
-   * `false` ≈ draft/paused; `true` ≈ live. Archive = delete (no soft status yet).
+   * Runtime gate used by bridge (`enabled: true` only). Prefer `status` for UI lifecycle.
+   * Always keep in sync: `status === 'live'` ⇔ `enabled === true`.
    */
   enabled: boolean;
+  /** Canonical lifecycle (TODO publish / pause / archive). */
+  status: AutomationStatus;
+  publishedAt?: Date;
+  archivedAt?: Date;
   /** Flat trigger — mirrored from `flowDefinition` entry node via `flowToLegacyAutomation` */
   triggerType: AutomationTriggerType;
   triggerLabel: string;
@@ -104,6 +111,14 @@ const automationSchema = new Schema<IAutomation>(
     tenantId: { type: String, required: true, index: true },
     name: { type: String, required: true },
     enabled: { type: Boolean, default: false },
+    status: {
+      type: String,
+      enum: ['draft', 'live', 'paused', 'archived'],
+      default: 'draft',
+      index: true,
+    },
+    publishedAt: { type: Date },
+    archivedAt: { type: Date },
     triggerType: {
       type: String,
       enum: [
@@ -135,6 +150,7 @@ const automationSchema = new Schema<IAutomation>(
 );
 
 automationSchema.index({ tenantId: 1, enabled: 1, triggerType: 1 });
+automationSchema.index({ tenantId: 1, status: 1 });
 
 const automationRunSchema = new Schema<IAutomationRun>(
   {

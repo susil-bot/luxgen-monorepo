@@ -52,6 +52,7 @@ describe('AutomationService', () => {
         tenantId: 'tenant1',
         name: 'Welcome',
         enabled: false,
+        status: 'draft',
         runCount: 0,
       }),
     );
@@ -94,6 +95,7 @@ describe('AutomationService', () => {
         tenantId: 'tenant1',
         name: 'Welcome (copy)',
         enabled: false,
+        status: 'draft',
         triggerType: 'USER_ENROLLED',
         runCount: 0,
         flowDefinition: expect.objectContaining({
@@ -102,5 +104,80 @@ describe('AutomationService', () => {
       }),
     );
     expect(result).toBe(created);
+  });
+
+  it('publishAutomation sets live + enabled and stamps publishedAt', async () => {
+    const existing = {
+      _id: 'auto1',
+      tenantId: 'tenant1',
+      name: 'Welcome',
+      enabled: false,
+      status: 'draft',
+      flowDefinition: { version: 1, meta: { name: 'Welcome', enabled: false }, entryNodeId: 't1', nodes: [], edges: [] },
+    };
+    const updated = { ...existing, enabled: true, status: 'live', publishedAt: new Date('2026-01-01') };
+    (Automation.findOne as jest.Mock).mockResolvedValue(existing);
+    (Automation.findOneAndUpdate as jest.Mock).mockResolvedValue(updated);
+
+    const result = await service.publishAutomation('auto1', 'tenant1');
+
+    expect(Automation.findOneAndUpdate).toHaveBeenCalledWith(
+      { _id: 'auto1', tenantId: 'tenant1' },
+      {
+        $set: expect.objectContaining({
+          status: 'live',
+          enabled: true,
+          publishedAt: expect.any(Date),
+        }),
+      },
+      { new: true },
+    );
+    expect(result).toBe(updated);
+  });
+
+  it('pauseAutomation sets paused and disables', async () => {
+    const existing = {
+      _id: 'auto1',
+      tenantId: 'tenant1',
+      enabled: true,
+      status: 'live',
+      flowDefinition: { version: 1, meta: { enabled: true }, entryNodeId: 't1', nodes: [], edges: [] },
+    };
+    const updated = { ...existing, enabled: false, status: 'paused' };
+    (Automation.findOne as jest.Mock).mockResolvedValue(existing);
+    (Automation.findOneAndUpdate as jest.Mock).mockResolvedValue(updated);
+
+    const result = await service.pauseAutomation('auto1', 'tenant1');
+
+    expect(Automation.findOneAndUpdate).toHaveBeenCalledWith(
+      { _id: 'auto1', tenantId: 'tenant1' },
+      {
+        $set: expect.objectContaining({
+          status: 'paused',
+          enabled: false,
+        }),
+      },
+      { new: true },
+    );
+    expect(result).toBe(updated);
+  });
+
+  it('archiveAutomation soft-archives and refuses further publish', async () => {
+    const existing = {
+      _id: 'auto1',
+      tenantId: 'tenant1',
+      enabled: true,
+      status: 'live',
+      flowDefinition: { version: 1, meta: { enabled: true }, entryNodeId: 't1', nodes: [], edges: [] },
+    };
+    const archived = { ...existing, enabled: false, status: 'archived', archivedAt: new Date('2026-02-01') };
+    (Automation.findOne as jest.Mock).mockResolvedValueOnce(existing).mockResolvedValueOnce(archived);
+    (Automation.findOneAndUpdate as jest.Mock).mockResolvedValue(archived);
+
+    const result = await service.archiveAutomation('auto1', 'tenant1');
+    expect(result?.status).toBe('archived');
+
+    const publishBlocked = await service.publishAutomation('auto1', 'tenant1');
+    expect(publishBlocked).toBeNull();
   });
 });

@@ -24,6 +24,7 @@ export type {
   AutomationTriggerType,
   AutomationActionType,
   AutomationRunStatus,
+  AutomationStatus,
 } from './automation';
 export { Automation, AutomationRun } from './automation';
 export type { ITenantSubscription, SubscriptionStatus } from './subscription';
