@@ -593,7 +593,7 @@ tasks:
     epic: E3
     priority: 1
     sla: M
-    status: review
+    status: done
     title: Coupons CRUD vertical
     skill: fullstack-developer
     source:
@@ -687,7 +687,7 @@ tasks:
     epic: E4
     priority: 1
     sla: M
-    status: todo
+    status: review
     title: Close top Learning sitemap gaps (one vertical from audit)
     skill: persona-pages
     source:
