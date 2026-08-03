@@ -1,6 +1,13 @@
 # Cross-Platform Restructure — Sharing Logic Between `apps/web` (React) and `apps/mobile` (React Native)
 
 > Scope: how to stop duplicating business logic between web and mobile, using foundations that already exist in the repo rather than a rewrite. Written after auditing `apps/web/presenters`, `packages/ui`, `packages/native-ui`, `packages/design-tokens`, and `apps/mobile`.
+>
+> **Status: Step 1 of the sequencing below is done.** `packages/presenters` now exists;
+> `search/` moved there as the proof-of-concept (see its own README.md for the exact layer
+> rules and the one fix required — `fetchers.ts` no longer imports a concrete Apollo client,
+> it takes one as a parameter, since a shared package can't hardcode either app's client
+> singleton). Steps 2–4 (Automation Hub built presenter-first, migrating the rest of
+> `apps/web/presenters/*`, expanding `packages/native-ui`) are still open.
 
 ## What's already in place (don't rebuild this)
 
