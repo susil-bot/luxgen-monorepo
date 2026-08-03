@@ -78,7 +78,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 | [x] `T-E0-01` | P0 | S | Merge/ensure commerce+role TODO docs on `main` (#453) | Done — files on `main` |
 | [x] `T-E0-02` | P0 | S | Audit Search: map TODO sections → existing routes/components | → `docs/todo-orchestrator/audits/search-gaps.md` |
 | [x] `T-E0-03` | P0 | S | Audit Automation builder: TODO vs `/automations` + GraphQL | → `docs/todo-orchestrator/audits/automation-gaps.md` |
-| [ ] `T-E0-04` | P0 | S | Audit Commerce: TODO vs `/products` `/orders` `/admin/customers` | Gap list; mark already-wired |
+| [x] `T-E0-04` | P0 | S | Audit Commerce: TODO vs `/products` `/orders` `/admin/customers` | → `docs/todo-orchestrator/audits/commerce-gaps.md` |
 | [ ] `T-E0-05` | P1 | S | Audit Sitemap L1/L2 vs `DefaultNavigation.tsx` + pages | Missing routes table |
 | [ ] `T-E0-06` | P1 | S | Audit Role modules vs `/organization/*` settings | Gap list for IAM/SSO/SCIM |
 
@@ -109,7 +109,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 
 | ID | Pri | SLA | Source slice | Task | Skill |
 | --- | --- | --- | --- | --- | --- |
-| [ ] `T-AUTO-01` | P0 | M | L432–L596 | Align data model / types with `flowDefinition` + existing automation models | `automation` |
+| [x] `T-AUTO-01` | P0 | M | Align automation data model with flowDefinition + TODO §11 | → `audits/automation-model-map.md` + #457 |
 | [x] `T-AUTO-02` | P0 | M | Close one GraphQL mutation family from TODO §12 | `duplicateAutomation` |
 | [ ] `T-AUTO-03` | P0 | M | L276–L431 | Builder canvas: add/edit/delete step UI wired to live mutations | `automation` + `ios-design` |
 | [ ] `T-AUTO-04` | P0 | M | L819–L884 | Publish / pause / archive actions + status UI | `automation` |
