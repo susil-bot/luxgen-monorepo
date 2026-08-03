@@ -1,5 +1,6 @@
 import type { OrderDetail } from '../../fetcher';
 import { OrderDetailSection } from '../../OrderDetailSection';
+import { paymentDisplayLabel } from '../../fetcher';
 
 export interface PaymentSummarySectionProps {
   order: OrderDetail;
@@ -13,7 +14,14 @@ export function PaymentSummarySection({ order }: PaymentSummarySectionProps) {
   ];
 
   return (
-    <OrderDetailSection title="Payment" hint="Shopify: payment summary · LuxGen: enrollment billing">
+    <OrderDetailSection
+      title="Payment"
+      hint={`Status: ${paymentDisplayLabel(order.paymentStatus)} · LuxGen enrollment billing`}
+    >
+      <p className="text-sm mb-3">
+        <span className="text-secondary">Payment status: </span>
+        <span className="font-medium text-primary">{paymentDisplayLabel(order.paymentStatus)}</span>
+      </p>
       <ul className="space-y-2 text-sm">
         {rows.map((row) => (
           <li key={row.label} className="flex justify-between">
@@ -29,7 +37,6 @@ export function PaymentSummarySection({ order }: PaymentSummarySectionProps) {
           <span className="text-primary">{order.total === '—' ? '—' : order.total}</span>
         </li>
       </ul>
-      <p className="text-xs text-tertiary">Paid via LuxGen billing · Stripe integration — Phase 3</p>
     </OrderDetailSection>
   );
 }

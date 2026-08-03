@@ -77,8 +77,8 @@ Nav: `DefaultNavigation.tsx` — Products, Orders (drafts/abandoned), Customers 
 
 | Capability | Status | Evidence |
 | --- | --- | --- |
-| List + status tabs | partial | `orders/index.tsx` → `GET_ORDER_ROWS` |
-| Detail | partial | `orders/[id].tsx` — enrollment + courses/users |
+| List + status tabs | wired | `orders/index.tsx` → `GET_ORDER_ROWS` + live payment/fulfillment/learning filters (`?tab=`) |
+| Detail | wired | line items + payment + fulfillment + learning badges; totals from `commerce` |
 | Create (manual) | wired | `orders/create.tsx` → `ENROLL_STUDENT` + `UPDATE_ORDER` |
 | Drafts / abandoned | partial | `drafts.tsx`, `abandoned.tsx` — checklist still open vs paymentStatus |
 | Notes update | wired | `updateOrderNotes` / `UPDATE_ORDER` |

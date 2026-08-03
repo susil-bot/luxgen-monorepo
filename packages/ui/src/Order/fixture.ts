@@ -13,6 +13,7 @@ const sampleOrder: OrderRow = {
   customerEmail: 'jane@example.com',
   paymentStatus: 'paid',
   fulfillmentStatus: 'partial',
+  learningStatus: 'ACTIVE',
   total: '99.00',
   itemCount: 1,
   courseTitle: 'Introduction to Product Design',

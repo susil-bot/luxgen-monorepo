@@ -98,7 +98,7 @@ export const enrollmentTypeDefs = `
     studentEnrollments(tenantId: ID!, studentId: ID!): [Enrollment!]!
     draftEnrollments(tenantId: ID!): [Enrollment!]!
     abandonedCheckouts(tenantId: ID!): [AbandonedCheckout!]!
-    orderRows(tenantId: ID!): [OrderRow!]!
+    orderRows(tenantId: ID!, statusTab: String): [OrderRow!]!
   }
 
   type OrderRow {
@@ -113,6 +113,8 @@ export const enrollmentTypeDefs = `
     customerEmail: String!
     paymentStatus: String!
     fulfillmentStatus: String!
+    """Enrollment learning status: ACTIVE | COMPLETED"""
+    learningStatus: String!
     total: String!
     itemCount: Int!
     courseTitle: String!

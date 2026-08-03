@@ -667,7 +667,7 @@
       "epic": "E3",
       "priority": 0,
       "sla": "M",
-      "status": "todo",
+      "status": "review",
       "title": "Orders list detail status filters live",
       "skill": "fullstack-developer",
       "source": {
@@ -684,7 +684,8 @@
       ],
       "acceptance": [
         "Filters work; detail shows line items status payment"
-      ]
+      ],
+      "notes": "Live payment/fulfillment/learning filters + detail line items — feat/orders-status-filters-detail"
     },
     {
       "id": "T-COM-03",

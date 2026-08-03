@@ -127,9 +127,21 @@ export const enrollmentResolvers = {
       const docs = await checkoutSessionService.listAbandoned(scoped);
       return docs.map(mapAbandonedCheckout);
     },
-    orderRows: async (_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) => {
+    orderRows: async (
+      _: unknown,
+      { tenantId, statusTab }: { tenantId: string; statusTab?: string | null },
+      ctx: GraphQLContext,
+    ) => {
       const scoped = scopedTenantId(ctx, tenantId);
-      return listOrderRows(scoped);
+      const tab =
+        statusTab === 'unpaid' ||
+        statusTab === 'unfulfilled' ||
+        statusTab === 'open' ||
+        statusTab === 'archived' ||
+        statusTab === 'all'
+          ? statusTab
+          : 'all';
+      return listOrderRows(scoped, { statusTab: tab });
     },
   },
   Mutation: {

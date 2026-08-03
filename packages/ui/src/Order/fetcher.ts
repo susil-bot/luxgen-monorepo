@@ -2,6 +2,7 @@
 
 export type OrderPaymentStatus = 'paid' | 'pending' | 'refunded' | 'voided';
 export type OrderFulfillmentStatus = 'fulfilled' | 'unfulfilled' | 'partial' | 'restocked';
+export type OrderLearningStatus = 'ACTIVE' | 'COMPLETED';
 export type OrderFilterTab = 'all' | 'unpaid' | 'unfulfilled' | 'open' | 'archived';
 
 export interface OrderLineItem {
@@ -12,6 +13,7 @@ export interface OrderLineItem {
   unitPrice: string;
   total: string;
   courseId: string;
+  learningStatus?: OrderLearningStatus;
 }
 
 export interface OrderTimelineEvent {
@@ -35,6 +37,7 @@ export interface OrderRow {
   customerEmail: string;
   paymentStatus: OrderPaymentStatus;
   fulfillmentStatus: OrderFulfillmentStatus;
+  learningStatus: OrderLearningStatus;
   total: string;
   itemCount: number;
   courseTitle: string;
@@ -62,6 +65,10 @@ export interface EnrollmentCourseSource {
   createdAt?: string;
   updatedAt?: string;
   students?: { id: string }[] | null;
+  commerce?: {
+    priceCents?: number | null;
+    currency?: string | null;
+  } | null;
 }
 
 export interface EnrollmentUserSource {
@@ -112,6 +119,17 @@ function orderNumberFromId(orderId: string): string {
   return `#${1000 + (hash % 9000)}`;
 }
 
+function formatCourseTotal(course?: EnrollmentCourseSource | null): string {
+  const cents = course?.commerce?.priceCents;
+  if (cents == null || !Number.isFinite(cents)) return '—';
+  const currency = (course?.commerce?.currency ?? 'usd').toUpperCase();
+  try {
+    return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(cents / 100);
+  } catch {
+    return `$${(cents / 100).toFixed(2)}`;
+  }
+}
+
 function derivePaymentStatus(courseStatus?: string): OrderPaymentStatus {
   if (courseStatus === 'CANCELLED') return 'voided';
   if (courseStatus === 'DRAFT') return 'pending';
@@ -131,6 +149,10 @@ export function mapEnrollmentPaymentStatus(status?: string | null): OrderPayment
   }
 }
 
+function mapLearningStatus(status?: string | null): OrderLearningStatus {
+  return status === 'COMPLETED' ? 'COMPLETED' : 'ACTIVE';
+}
+
 function deriveFulfillmentStatus(
   courseStatus?: string,
   enrollment?: OrderEnrollmentSource | null,
@@ -138,9 +160,13 @@ function deriveFulfillmentStatus(
   if (enrollment?.paymentStatus === 'VOIDED' || enrollment?.paymentStatus === 'REFUNDED') {
     return 'restocked';
   }
-  if (courseStatus === 'COMPLETED') return 'fulfilled';
-  if (courseStatus === 'CANCELLED') return 'restocked';
-  if (courseStatus === 'PUBLISHED') return 'partial';
+  if (courseStatus === 'CANCELLED' || courseStatus === 'ARCHIVED') return 'restocked';
+  if (enrollment?.learningStatus === 'COMPLETED' || (enrollment?.progressPercent ?? 0) >= 100) {
+    return 'fulfilled';
+  }
+  if (enrollment?.learningStatus === 'ACTIVE' || courseStatus === 'PUBLISHED' || courseStatus === 'COMPLETED') {
+    return 'partial';
+  }
   return 'unfulfilled';
 }
 
@@ -194,6 +220,14 @@ export function fulfillmentDisplayLabel(status: OrderFulfillmentStatus): string 
   return labels[status];
 }
 
+export function learningDisplayLabel(status: OrderLearningStatus): string {
+  return status === 'COMPLETED' ? 'Completed' : 'Active';
+}
+
+export function learningBadgeClass(status: OrderLearningStatus): string {
+  return status === 'COMPLETED' ? 'badge-green' : 'badge-blue';
+}
+
 export {
   buildOrderId,
   buildOrderSubjectId,
@@ -243,7 +277,8 @@ export function buildOrdersFromEnrollments(
           ? mapEnrollmentPaymentStatus(enrollment.paymentStatus)
           : derivePaymentStatus(course.status),
         fulfillmentStatus: deriveFulfillmentStatus(course.status, enrollment),
-        total: '—',
+        learningStatus: mapLearningStatus(enrollment?.learningStatus),
+        total: formatCourseTotal(course),
         itemCount: 1,
         courseTitle: course.title,
         archived,
@@ -288,7 +323,8 @@ export function buildOrdersFromEnrollmentList(
         ? mapEnrollmentPaymentStatus(enrollment.paymentStatus)
         : derivePaymentStatus(course.status),
       fulfillmentStatus: deriveFulfillmentStatus(course.status, enrollment),
-      total: '—',
+      learningStatus: mapLearningStatus(enrollment.learningStatus),
+      total: formatCourseTotal(course),
       itemCount: 1,
       courseTitle: course.title,
       archived,
@@ -364,7 +400,7 @@ export function filterOrdersByTab(orders: OrderRow[], tab: OrderFilterTab): Orde
     case 'unpaid':
       return orders.filter((o) => o.paymentStatus === 'pending');
     case 'unfulfilled':
-      return orders.filter((o) => o.fulfillmentStatus === 'unfulfilled');
+      return orders.filter((o) => o.fulfillmentStatus === 'unfulfilled' || o.fulfillmentStatus === 'partial');
     case 'open':
       return orders.filter((o) => !o.archived && o.fulfillmentStatus !== 'fulfilled');
     case 'archived':
@@ -375,19 +411,22 @@ export function filterOrdersByTab(orders: OrderRow[], tab: OrderFilterTab): Orde
 }
 
 export function buildOrderDetail(order: OrderRow, course?: EnrollmentCourseSource | null): OrderDetail {
-  const sku = `CRS-${course?.id.slice(-6).toUpperCase() ?? 'UNKNOWN'}`;
+  const sku = `CRS-${course?.id.slice(-6).toUpperCase() ?? order.courseId.slice(-6).toUpperCase()}`;
+  const priced = order.total !== '—' ? order.total : formatCourseTotal(course);
   const lineItem: OrderLineItem = {
     id: `${order.id}:line-1`,
     title: order.courseTitle,
     sku,
     quantity: 1,
-    unitPrice: order.total === '—' ? '0.00' : order.total,
-    total: order.total === '—' ? '0.00' : order.total,
+    unitPrice: priced === '—' ? '0.00' : priced,
+    total: priced === '—' ? '0.00' : priced,
     courseId: course?.id ?? order.courseId,
+    learningStatus: order.learningStatus,
   };
 
   return {
     ...order,
+    total: priced,
     lineItems: [lineItem],
     subtotal: lineItem.total,
     discount: '0.00',
@@ -409,6 +448,12 @@ export function buildOrderDetail(order: OrderRow, course?: EnrollmentCourseSourc
         id: '2',
         at: order.date,
         message: `Access granted for ${order.courseTitle}`,
+        actor: 'LuxGen',
+      },
+      {
+        id: '3',
+        at: order.date,
+        message: `Payment ${paymentDisplayLabel(order.paymentStatus).toLowerCase()} · Learning ${learningDisplayLabel(order.learningStatus).toLowerCase()}`,
         actor: 'LuxGen',
       },
     ],

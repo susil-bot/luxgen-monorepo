@@ -11,6 +11,7 @@ import {
   type OrderFilterTab,
   type OrderPaymentStatus,
   type OrderFulfillmentStatus,
+  type OrderLearningStatus,
   type OrderRow,
 } from '@luxgen/ui';
 import { PageLoadingState, PageEmptyState } from '../../components/common/PageStates';
@@ -26,6 +27,12 @@ interface OrdersPageProps {
   tenant: string;
 }
 
+const VALID_TABS: OrderFilterTab[] = ['all', 'unpaid', 'unfulfilled', 'open', 'archived'];
+
+function parseTab(raw: unknown): OrderFilterTab {
+  return typeof raw === 'string' && (VALID_TABS as string[]).includes(raw) ? (raw as OrderFilterTab) : 'all';
+}
+
 function mapApiOrderRow(row: {
   id: string;
   subjectId: string;
@@ -38,6 +45,7 @@ function mapApiOrderRow(row: {
   customerEmail: string;
   paymentStatus: string;
   fulfillmentStatus: string;
+  learningStatus?: string;
   total: string;
   itemCount: number;
   courseTitle: string;
@@ -48,6 +56,7 @@ function mapApiOrderRow(row: {
     date: String(row.date),
     paymentStatus: row.paymentStatus as OrderPaymentStatus,
     fulfillmentStatus: row.fulfillmentStatus as OrderFulfillmentStatus,
+    learningStatus: (row.learningStatus === 'COMPLETED' ? 'COMPLETED' : 'ACTIVE') as OrderLearningStatus,
   };
 }
 
@@ -71,7 +80,16 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
   useEffect(() => {
     const q = router.query.search;
     if (typeof q === 'string') setSearch(q);
-  }, [router.query.search]);
+    setActiveTab(parseTab(router.query.tab));
+  }, [router.query.search, router.query.tab]);
+
+  const handleTabChange = (tab: OrderFilterTab) => {
+    setActiveTab(tab);
+    const nextQuery: Record<string, string> = {};
+    if (typeof router.query.search === 'string' && router.query.search) nextQuery.search = router.query.search;
+    if (tab !== 'all') nextQuery.tab = tab;
+    void router.replace({ pathname: router.pathname, query: nextQuery }, undefined, { shallow: true });
+  };
 
   const allOrders = useMemo(() => (data?.orderRows ?? []).map(mapApiOrderRow), [data?.orderRows]);
 
@@ -136,7 +154,7 @@ function OrdersPageContent({ tenant }: OrdersPageProps) {
           <OrderListView
             orders={orders}
             activeTab={activeTab}
-            onTabChange={setActiveTab}
+            onTabChange={handleTabChange}
             search={search}
             onSearchChange={setSearch}
             tabCounts={tabCounts}

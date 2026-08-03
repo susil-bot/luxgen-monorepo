@@ -39,6 +39,8 @@ export interface OrderEnrollmentSource {
   courseId: string;
   studentId: string;
   paymentStatus?: string;
+  learningStatus?: string;
+  progressPercent?: number;
   enrolledAt?: string;
   notes?: string;
 }
