@@ -7,6 +7,7 @@ import {
   GET_AUTOMATION,
   PAUSE_AUTOMATION,
   PUBLISH_AUTOMATION,
+  TEST_AUTOMATION,
   UPDATE_AUTOMATION,
 } from '../graphql/queries/automations';
 import { createEmptyFlow, parseTowerFlowDocument, type TowerFlowDocument } from '../lib/automation-flow';
@@ -36,6 +37,9 @@ export function useTowerFlowPersist({ towerId, tenantId, onCreated }: UseTowerFl
   const [publishMutation] = useMutation(PUBLISH_AUTOMATION);
   const [pauseMutation] = useMutation(PAUSE_AUTOMATION);
   const [archiveMutation] = useMutation(ARCHIVE_AUTOMATION);
+  const [testMutation] = useMutation(TEST_AUTOMATION);
+  const [testBusy, setTestBusy] = useState(false);
+  const [testError, setTestError] = useState<string | null>(null);
 
   const [flow, setFlow] = useState<TowerFlowDocument>(() => createEmptyFlow());
   const [loaded, setLoaded] = useState(isNew);
@@ -172,6 +176,49 @@ export function useTowerFlowPersist({ towerId, tenantId, onCreated }: UseTowerFl
     }
   }, [persistedId, archiveMutation, applyLifecycleResult, refetch]);
 
+  /** Sample payload test-run — creates AutomationRun without a live trigger. */
+  const testRun = useCallback(
+    async (testData?: Record<string, unknown>) => {
+      if (!persistedId) {
+        setTestError('Save the tower before running a test');
+        return null;
+      }
+      setTestBusy(true);
+      setTestError(null);
+      try {
+        const sample =
+          testData ??
+          ({
+            studentEmail: 'test-run@example.com',
+            courseTitle: 'Sample Course',
+            note: 'Manual test run from Tower editor',
+          } as Record<string, unknown>);
+        const { data: result, errors } = await testMutation({
+          variables: { id: persistedId, testData: sample },
+        });
+        if (errors?.length) {
+          setTestError(errors[0]?.message ?? 'Test run failed');
+          return null;
+        }
+        const payload = result?.testAutomation;
+        if (!payload?.run?.id) {
+          setTestError('Test run did not return a run id');
+          return null;
+        }
+        if (payload.errors?.length) {
+          setTestError(payload.errors.join('; '));
+        }
+        return payload.run as { id: string; status: string; error?: string | null };
+      } catch (e: unknown) {
+        setTestError(e instanceof Error ? e.message : 'Test run failed');
+        return null;
+      } finally {
+        setTestBusy(false);
+      }
+    },
+    [persistedId, testMutation],
+  );
+
   return {
     flow,
     setFlow,
@@ -187,5 +234,8 @@ export function useTowerFlowPersist({ towerId, tenantId, onCreated }: UseTowerFl
     publish,
     pause,
     archive,
+    testRun,
+    testBusy,
+    testError,
   };
 }

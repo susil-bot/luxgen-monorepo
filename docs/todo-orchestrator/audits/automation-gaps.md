@@ -77,7 +77,7 @@ Nav: `DefaultNavigation.tsx` → Automations → Tower, Recent Run Logs.
 | `addWorkflowStep` / `updateWorkflowStep` / `deleteWorkflowStep` | missing | Steps mutated by rewriting `flowDefinition` client-side then `updateAutomation` |
 | `publishWorkflow` | wired | `publishAutomation` (+ `toggleAutomation(true)`); stamps `publishedAt` |
 | `pauseWorkflow` | wired | `pauseAutomation` (+ `toggleAutomation(false)`) |
-| `testWorkflow` | missing | — |
+| `testWorkflow` | wired | `testAutomation(id, testData)` → `TestAutomationResult` | Creates run via `runAutomationTest` (no live trigger) |
 | `duplicateWorkflow` | wired | `duplicateAutomation` |
 | `archiveWorkflow` | wired | `archiveAutomation` (soft archive; `status=archived`) |
 

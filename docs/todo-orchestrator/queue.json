@@ -504,7 +504,7 @@
       "epic": "E2",
       "priority": 1,
       "sla": "M",
-      "status": "review",
+      "status": "done",
       "title": "Workflow run history list + detail",
       "skill": "automation",
       "source": {
@@ -522,14 +522,14 @@
       "acceptance": [
         "Runs list tenant-scoped; detail shows status timestamps"
       ],
-      "notes": "Run list + detail timestamps; no demo fallback \u2014 feat/automation-run-history-detail"
+      "notes": "Run list + detail timestamps; no demo fallback \u2014 feat/automation-run-history-detail \u2014 merged #471"
     },
     {
       "id": "T-AUTO-06",
       "epic": "E2",
       "priority": 1,
       "sla": "M",
-      "status": "todo",
+      "status": "review",
       "title": "Test-run workflow with sample payload",
       "skill": "automation",
       "source": {
@@ -547,7 +547,8 @@
       ],
       "acceptance": [
         "Test action creates a run without requiring live trigger event"
-      ]
+      ],
+      "notes": "testAutomation + runAutomationTest \u2014 feat/automation-test-run"
     },
     {
       "id": "T-AUTO-07",

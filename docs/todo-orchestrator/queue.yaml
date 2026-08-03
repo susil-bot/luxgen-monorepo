@@ -397,7 +397,7 @@ tasks:
     epic: E2
     priority: 1
     sla: M
-    status: review
+    status: done
     title: Workflow run history list + detail
     skill: automation
     source:
@@ -418,7 +418,7 @@ tasks:
     epic: E2
     priority: 1
     sla: M
-    status: todo
+    status: review
     title: Test-run workflow with sample payload
     skill: automation
     source:
@@ -434,6 +434,7 @@ tasks:
       - T-AUTO-03
     acceptance:
       - Test action creates a run without requiring live trigger event
+    notes: testAutomation + runAutomationTest — feat/automation-test-run
   - id: T-AUTO-07
     epic: E2
     priority: 1
