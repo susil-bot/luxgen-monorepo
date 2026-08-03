@@ -313,11 +313,24 @@ export const tenantConfigService = TenantConfigService.getInstance();
  * Utility functions for tenant configuration
  */
 export class TenantConfigUtils {
+  // PaaS-provided default hostnames (e.g. luxgen-api.onrender.com,
+  // luxgen-monorepo-web.vercel.app) have 3+ dot-separated parts too, but
+  // the first label is the service/project name, not a tenant subdomain.
+  // Same fix as apps/api/src/middleware/tenantRouting.ts's extractSubdomain
+  // and apps/web/lib/tenant.ts's getTenantFromHost — without this guard,
+  // hitting the bare PaaS host directly gets misread as a fake tenant.
+  private static readonly FLAT_HOST_SUFFIXES = ['.onrender.com', '.vercel.app', '.netlify.app'];
+
   /**
    * Get tenant subdomain from hostname
    */
   public static extractSubdomain(hostname: string): string | null {
     const cleanHostname = hostname.split(':')[0];
+
+    if (this.FLAT_HOST_SUFFIXES.some((suffix) => cleanHostname.endsWith(suffix))) {
+      return null;
+    }
+
     const parts = cleanHostname.split('.');
 
     // For localhost development

@@ -8,22 +8,37 @@
 
 ## 1. Executive Summary
 
-**LuxGen is an AI-native, multi-tenant learning & automation platform (LMS+) for organizations that sell or deliver training — not a generic website builder and not a dev tool.**
+**LuxGen's core is an industry-agnostic multi-tenant automation engine (trigger → condition → action, Shopify-Flow-style) with a training/commerce data model on top — not a generic website builder and not a dev tool.**
+
+The critical distinction this doc used to blur: the **engine** (multi-tenancy, the automation graph, billing, marketplace) is industry-agnostic and does not change per customer. What changes per industry is a thin **customization layer** — compound packs (triggers/conditions/actions tagged by industry) and pre-built templates that wire those compounds together with sensible defaults. See [AUTOMATION_HUB_STRATEGY.md](./AUTOMATION_HUB_STRATEGY.md) and [TEMPLATE_CONTROL_CORE.md](./TEMPLATE_CONTROL_CORE.md) for the technical model. This doc is the **go-to-market** sequencing on top of that shared core — it answers "who do we sell to first," not "what can the platform do."
 
 What exists in the monorepo today:
 
-| Layer | What we built | Monetizable value |
-|-------|---------------|-------------------|
-| **Core LMS** | Courses, groups, users, dashboards, learner (`/customers`) & admin personas | Training delivery |
-| **Multi-tenancy** | Subdomain tenants (`demo`, `idea-vibes`), branding, plans | White-label SaaS |
-| **Automations** | Trigger → action workflows (UI + Phase 7 GraphQL backend) | Ops efficiency, upsell |
-| **Agent Studio** | AI that changes the codebase with approval + git pipeline | Enterprise differentiation |
-| **GraphQL API** | Single backend for web + mobile | Platform scale |
-| **Analytics** | Admin metrics, group/course analytics | Revenue intelligence |
+| Layer | What we built | Monetizable value | Industry-agnostic? |
+|-------|---------------|-------------------|---------------------|
+| **Core LMS** | Courses, groups, users, dashboards, learner (`/customers`) & admin personas | Training delivery | Yes — "course" is a generic content/progress model |
+| **Multi-tenancy** | Subdomain tenants (`demo`, `idea-vibes`), branding, plans | White-label SaaS | Yes |
+| **Automations** | Trigger → action workflows (UI + Phase 7 GraphQL backend), compound catalog tagged by industry | Ops efficiency, upsell | Yes — the engine; only the *template packs* are industry-specific |
+| **Agent Studio** | AI that changes the codebase with approval + git pipeline | Enterprise differentiation | Yes |
+| **GraphQL API** | Single backend for web + mobile | Platform scale | Yes |
+| **Analytics** | Admin metrics, group/course analytics | Revenue intelligence | Yes |
 
-**Recommended 2026 wedge:** *TrainOS for teams under 500* — coaches, bootcamps, and L&D teams who outgrew Teachable/Thinkific but cannot afford Cornerstone + custom dev.
+**Recommended 2026 wedge:** *TrainOS for teams under 500* — coaches, bootcamps, and L&D teams who outgrew Teachable/Thinkific but cannot afford Cornerstone + custom dev. This is a **go-to-market** choice (who we sell to and market to first), not an architecture constraint — the underlying engine already ships compound packs for e-commerce, compliance training, franchise, and SaaS ops (see §4a below).
 
 **Primary buyer:** Head of L&D, agency owner, or creator-operator who needs **branded training + automations + optional AI customization** without hiring engineers.
+
+---
+
+## 3a. Core vs. Customization — the model this strategy runs on
+
+| | Fixed (core) | Flexible (per industry) |
+|---|---|---|
+| What it is | Multi-tenant engine, Tower flow graph, plan gates, billing, GraphQL contract | Compound packs (new triggers/actions tagged `industry: [...]`) + Marketplace templates |
+| Who changes it | Engineering, rarely | Product/growth, per vertical, cheaply |
+| Example | The trigger→condition→action→wait execution model itself | "Recertification reminder" (compliance-training), "Abandoned cart reminder" (ecommerce) |
+| Risk if confused | Rebuilding the engine per customer segment (slow, expensive) | Under-customizing and losing industry fit (what this doc previously did) |
+
+**Practical rule:** if a new industry's core pain can be solved by adding *compounds and templates* (no new services, no new data model), it's cheap — evaluate it. If it needs new infrastructure, treat it as a separate initiative, not a line item on this roadmap.
 
 ---
 
@@ -52,6 +67,8 @@ What exists in the monorepo today:
 
 ## 4. Target Niches — Ranked for 2026 AI Era
 
+> This is a **go-to-market sequencing** table (who to market/sell to, in what order), not a statement that the platform only works for niche #1. The core engine already has (or can cheaply add) compound packs for every row below — see §4a and [AUTOMATION_HUB_STRATEGY.md](./AUTOMATION_HUB_STRATEGY.md) §3 for the industry → trigger/action mapping. Ranking exists so marketing and sales don't spread thin, not because the product is architecturally locked to one vertical.
+
 Scoring: **TAM access** · **willingness to pay** · **fit with current codebase** · **AI differentiation**
 
 | Rank | Niche | ICP (ideal customer) | Price band | Why now (2026) |
@@ -74,7 +91,9 @@ Scoring: **TAM access** · **willingness to pay** · **fit with current codebase
 ## 5. Product Definition — What the Monorepo IS
 
 ```
-LuxGen = Multi-tenant LMS + Automation Engine + (Enterprise) AI Customization Layer
+LuxGen = Multi-tenant Core (LMS + Commerce + Automation Engine)
+       + Industry Customization Layer (compound packs + templates, per vertical)
+       + (Enterprise) AI Customization Layer (Agent Studio)
 ```
 
 ### Applications in the monorepo

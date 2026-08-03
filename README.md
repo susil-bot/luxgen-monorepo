@@ -15,6 +15,18 @@
 
 ---
 
+## Live
+
+| Environment       | URL                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------ |
+| **Web app**        | [luxgen-monorepo-web.vercel.app](https://luxgen-monorepo-web.vercel.app/register)   |
+| **API**            | [luxgen-api.onrender.com](https://luxgen-api.onrender.com)                          |
+| **API docs**       | [luxgen-api.onrender.com/api-docs](https://luxgen-api.onrender.com/api-docs) (Swagger UI) |
+
+Render's free tier spins down after 15 min idle — first request after that can take up to ~50s to wake back up. See [docs/RENDER_VERCEL_FREE_STACK.md](./docs/RENDER_VERCEL_FREE_STACK.md) for the full deployment architecture.
+
+---
+
 ## About
 
 LuxGen helps teams run branded learning experiences, commerce workflows, and AI-assisted operations from a single platform. Each customer organization gets an isolated tenant with its own subdomain, branding, users, and data — while sharing a reliable, scalable core.

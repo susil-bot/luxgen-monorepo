@@ -86,5 +86,21 @@ Read `skills/<skill-name>/SKILL.md` **first** when a task matches that skill's d
 | Billing (Phase 9)      | `docs/PHASE_9_BILLING.md`                |
 | Marketplace (Phase 10) | `docs/PHASE_10_MARKETPLACE.md`           |
 | Business listings      | `docs/LISTING_SUBSCRIPTION_LIFECYCLE.md` |
+| Industry compound packs / templates | `docs/AUTOMATION_HUB_STRATEGY.md`, `docs/TEMPLATE_CONTROL_CORE.md` |
+| Cross-platform (web + mobile) sharing | `docs/CROSS_PLATFORM_RESTRUCTURE.md` |
 
 Full index: `docs/INDEX.md`
+
+---
+
+## Core-vs-customization rule (read before touching `automation-flow` or `AutomationTemplate`)
+
+The Tower engine (`packages/automation-flow`, `packages/agent/src/automation/bridge.ts`) is
+**fixed and industry-agnostic**. Industries are served by a thin, cheap **customization layer**:
+compounds tagged `industry: string[]` (discovery only — never an execution gate) and Marketplace
+templates that configure those compounds. **Templates never extend the core** — if a template
+needs a capability the catalog doesn't have, add a compound (rare, reviewed change) rather than
+special-casing the template. Full model + decision tree: `docs/TEMPLATE_CONTROL_CORE.md`.
+
+Do not conflate this with go-to-market sequencing — `docs/BUSINESS_STRATEGY_2026.md` §4's ranked
+niches are about who to *sell to* first, not which industries the engine can serve.

@@ -24,13 +24,12 @@ type Props = {
   iconSize?: number;
 };
 
-/** Pill social login button with brand icon before the label. */
 export function SocialAuthButton({ provider, onPress, iconSize = 25 }: Props) {
   const theme = useTheme();
 
   return (
     <TouchableOpacity
-      style={[styles.button, { borderColor: '#d0d0d0', backgroundColor: '#ffffff' }]}
+      style={[styles.button, { borderColor: '#d0d0d0', backgroundColor: 'transparent' }]}
       onPress={onPress}
       activeOpacity={0.7}
     >
@@ -63,7 +62,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: '600',
     flexShrink: 1,
   },
 });

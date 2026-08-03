@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import ProgressBar from '../components/ProgressBar';
 import QuestionCard from '../components/QuestionCard';
+import { BackButton } from '../components/BackButton';
 import { useTheme } from '../theme/ThemeContext';
 import { LEARNER_SKILL_QUESTIONS, scoreSkillAssessment } from '../data/skill-assessment';
 import type { LearnerNavigation } from '../../lib/learner-navigation';
@@ -52,9 +53,7 @@ export default function QuestionProgressScreen({ navigation }: Props) {
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={styles.topRow}>
-        <TouchableOpacity style={styles.backBtn} onPress={() => navigation.goBack()}>
-          <Text style={[styles.backArrow, { color: theme.text }]}>{'<'}</Text>
-        </TouchableOpacity>
+        <BackButton onPress={() => navigation.goBack()} style={styles.backBtn} />
 
         <View style={styles.progressWrapper}>
           <ProgressBar currentStep={activeQuestion + 1} totalSteps={questions.length} />
@@ -90,14 +89,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   backBtn: {
-    alignSelf: 'flex-start',
-    paddingVertical: 4,
-    paddingRight: 12,
-  },
-  backArrow: {
-    fontSize: 28,
-    fontWeight: '300',
-    lineHeight: 32,
+    paddingRight: 4,
   },
   topRow: {
     flexDirection: 'row',

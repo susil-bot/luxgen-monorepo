@@ -60,14 +60,8 @@ services:
   api:
     build:
       context: .
-      dockerfile: Dockerfile
-      # api and web are now separate image targets (runner-api / runner-web),
-      # each built from their own independent builder stage - a broken web
-      # page (or any web-only dependency) can no longer block shipping api,
-      # and vice versa. See Dockerfile comments for the full rationale.
-      target: runner-api
-      args:
-        TENANT: ${TENANT:-demo}
+      dockerfile: apps/api/Dockerfile
+      target: runner
     container_name: luxgen-api-prod
     restart: unless-stopped
     ports:
@@ -117,17 +111,12 @@ services:
   web:
     build:
       context: .
-      dockerfile: Dockerfile
-      target: runner-web
-      # These get inlined into the browser bundle at build time - setting
-      # them under `environment:` below does nothing for a Next.js
-      # standalone build, the page JS is already compiled by then. The app
-      # reads NEXT_PUBLIC_GRAPHQL_URL (apps/web/graphql/client.ts) and
-      # NEXT_PUBLIC_BASE_URL (apps/web/lib/tenant.ts, tenant-switcher links).
+      dockerfile: apps/web/Dockerfile
+      target: runner
       args:
-        TENANT: ${TENANT:-demo}
-        NEXT_PUBLIC_GRAPHQL_URL: ${NEXT_PUBLIC_GRAPHQL_URL}
-        NEXT_PUBLIC_BASE_URL: ${NEXT_PUBLIC_BASE_URL}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+        NEXT_PUBLIC_APP_ENV: production
     container_name: luxgen-web-prod
     restart: unless-stopped
     ports:
@@ -135,6 +124,10 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
+      API_URL: http://api:4000
+      GRAPHQL_URL: http://api:4000/graphql
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
     depends_on:
       api:
         condition: service_healthy

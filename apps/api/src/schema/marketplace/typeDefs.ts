@@ -26,8 +26,10 @@ export const marketplaceTypeDefs = `
     triggerType: AutomationTriggerType!
     triggerLabel: String!
     actions: [AutomationTemplateAction!]!
+    flowDefinition: JSON
     installCount: Int!
     tags: [String!]!
+    industry: [String!]!
   }
 
   type UsageLimitsStatus {
@@ -55,7 +57,7 @@ export const marketplaceTypeDefs = `
   }
 
   extend type Query {
-    automationTemplates(category: TemplateCategory, featured: Boolean): [AutomationTemplate!]!
+    automationTemplates(category: TemplateCategory, featured: Boolean, industry: String): [AutomationTemplate!]!
     automationTemplate(slug: String!): AutomationTemplate
     tenantUsage(tenantId: String!): TenantUsageSummary!
   }

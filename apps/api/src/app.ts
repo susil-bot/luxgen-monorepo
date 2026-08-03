@@ -4,6 +4,7 @@ import { useServer } from 'graphql-ws/lib/use/ws';
 import { WebSocketServer } from 'ws';
 import express from 'express';
 import { ApolloServer } from 'apollo-server-express';
+import { ApolloServerPluginLandingPageDisabled, ApolloServerPluginLandingPageLocalDefault } from 'apollo-server-core';
 import cors from 'cors';
 import helmet from 'helmet';
 import cookieParser from 'cookie-parser';
@@ -11,7 +12,7 @@ import cookieParser from 'cookie-parser';
 import { schema } from './schema';
 import { context, buildGraphQLContext, type GraphQLContext } from './context';
 import { logger } from './utils/logger';
-import { errorHandler, notFoundHandler } from './utils/errorHandler';
+import { AppError, errorHandler, notFoundHandler } from './utils/errorHandler';
 import { mountApiDocs } from './docs/swagger';
 
 // Middleware
@@ -48,7 +49,11 @@ app.use(
       if (!origin || isDevLocalOrigin(origin) || getCorsOrigins().includes(origin)) {
         return callback(null, true);
       }
-      callback(new Error('Not allowed by CORS'));
+      // AppError (not a bare Error) so errorHandler reports the real 403
+      // CORS rejection instead of falling through to its generic 500
+      // "Internal Server Error" — that masking is what made a CORS_ORIGINS
+      // gap on a newly cut-over domain look like a server crash.
+      callback(new AppError('Not allowed by CORS', 403));
     },
     credentials: true,
   }),
@@ -98,6 +103,28 @@ const apolloServer = new ApolloServer({
   schema,
   context,
   introspection: process.env.APOLLO_INTROSPECTION === 'true',
+  // Apollo Server enables automatic persisted queries by default, backed by
+  // an *unbounded* in-memory LRU cache — Apollo's own startup log flags this
+  // as a DoS/memory-exhaustion risk. Neither apps/web nor apps/mobile's
+  // Apollo clients send persisted-query hashes (no createPersistedQueryLink
+  // anywhere), so the feature is enabled but never actually used. Disabled
+  // outright rather than just bounding the cache, since there's no upside
+  // to keeping it on.
+  persistedQueries: false,
+  // Apollo's default landing page (shown when hitting /graphql via GET in a
+  // browser) loads its embedded UI from apollo-server-landing-page.cdn
+  // .apollographql.com. helmet()'s default CSP blocks that cross-origin
+  // script, so it silently degrades to "The full landing page cannot be
+  // loaded; it appears that you might be offline" - a confusing, broken-
+  // looking response with no real functionality behind it. Disabled outright
+  // in production (this endpoint is only ever meant to be POSTed to by the
+  // app itself, not browsed - same reasoning as introspection being off by
+  // default); kept as the normal interactive page in development.
+  plugins: [
+    process.env.NODE_ENV === 'production'
+      ? ApolloServerPluginLandingPageDisabled()
+      : ApolloServerPluginLandingPageLocalDefault({ embed: true }),
+  ],
   formatError: (error) => {
     logger.error('GraphQL Error', { error });
     return { message: error.message, locations: error.locations, path: error.path };

@@ -70,6 +70,22 @@ query GetDashboardData($tenant: String) {
 
 ---
 
+## GraphQL — Learner chat
+
+`learnerChat` is an authenticated mobile-ready mutation. It sends a validated user/assistant conversation to the server-side Ollama learning assistant. It has no access to Agent Studio tools, files, or private learner records.
+
+```graphql
+mutation LearnerChat($messages: [LearnerChatMessageInput!]!) {
+  learnerChat(messages: $messages) {
+    content
+  }
+}
+```
+
+**Mobile mutation:** `apps/mobile/graphql/queries.ts`
+
+---
+
 ## GraphQL — Commerce (tenant → customer → product → order)
 
 Full functional spec: [technical/COMMERCE_API.md](./technical/COMMERCE_API.md)
