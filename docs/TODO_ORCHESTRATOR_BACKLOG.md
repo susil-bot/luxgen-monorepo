@@ -115,7 +115,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 | [x] `T-AUTO-04` | P0 | M | L819–L884 | Publish / pause / archive actions + status UI | merged #461 |
 | [x] `T-AUTO-05` | P1 | M | L716–L751 | Run history list + detail drawer | merged #471 |
 | [x] `T-AUTO-06` | P1 | M | L846–L864 | Test-run with sample payload | done #472 |
-| [x] `T-AUTO-07` | P1 | M | L942–L1054 | Enforce must-have business rules (tenant scope, required trigger, no empty publish) | review `feat/automation-publish-rules` |
+| [x] `T-AUTO-07` | P1 | M | L942–L1054 | Enforce must-have business rules (tenant scope, required trigger, no empty publish) | done #473 |
 | [ ] `T-AUTO-08` | P2 | M | L2083–L2172 | Workflow analytics page (success rate, run volume) | `persona-pages` |
 | [ ] `T-AUTO-09` | P2 | L | L886–L940 | Real-time subscriptions for runs | **split** — schema then UI |
 | [ ] `T-AUTO-10` | P2 | M | L1647–L1748 | Permission gates on edit/publish | `billing`/`automation` |
@@ -132,7 +132,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 | [x] `T-COM-02` | P0 | M | L517–L653 | Orders list/detail: status filters + live order fields | merged #463 |
 | [x] `T-COM-03` | P0 | M | L654–L827 | Customers list/detail/edit aligned to commerce TODO | merged #464 |
 | [ ] `T-COM-04` | P1 | M | L418–L516 | Bundles CRUD vertical | `fullstack-developer` |
-| [ ] `T-COM-05` | P1 | M | L828–L944 | Coupons CRUD vertical | `fullstack-developer` |
+| [x] `T-COM-05` | P1 | M | L828–L944 | Coupons CRUD vertical | review `feat/coupons-crud` |
 | [ ] `T-COM-06` | P1 | M | L945–L1075 | Payments & subscriptions status surfaces | `billing` |
 | [ ] `T-COM-07` | P2 | M | L1076–L1154 | Revenue analytics widgets (live or clearly gated) | `persona-pages` |
 | [ ] `T-COM-08` | P2 | M | L1155–L1235 | Conversion funnels view | `persona-pages` |

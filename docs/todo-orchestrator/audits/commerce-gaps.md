@@ -109,11 +109,13 @@ Nav: `DefaultNavigation.tsx` — Products, Orders (drafts/abandoned), Customers 
 
 | Capability | Status | Evidence |
 | --- | --- | --- |
-| Any admin UI | missing | No pages under `apps/web/pages` |
-| GraphQL / DB | missing | No coupon schema/model hits in `apps/api/src/schema` or `packages/db/src` |
-| Nav entry | missing | — |
+| List + search | wired | `pages/coupons/index.tsx` → `GET_COUPONS` |
+| Create / edit | wired | `create.tsx`, `[id]/edit.tsx` → `createCoupon` / `updateCoupon` |
+| Discount fields persist | wired | `Coupon` model + `couponService` (`code`, `discountType`, `discountValue`, dates, limits) |
+| Nav entry | wired | Commerce → Coupons (`/coupons`) |
+| Performance analytics widgets | missing | TODO KPI strip; not in T-COM-05 AC |
 
-→ `T-COM-05` is greenfield (model → GraphQL → UI).
+**API:** `apps/web/graphql/queries/coupons.ts` · `apps/api/src/schema/coupon/` · `packages/db/src/coupon.ts`.
 
 ---
 

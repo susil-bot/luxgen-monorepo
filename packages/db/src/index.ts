@@ -50,6 +50,8 @@ export type { ICheckoutSession } from './checkout-session';
 export { CheckoutSession, CheckoutSessionStatus } from './checkout-session';
 export type { IStorefrontBundle } from './storefront-bundle';
 export { StorefrontBundle, StorefrontBundleStatus, StorefrontBillingInterval } from './storefront-bundle';
+export type { ICoupon, CouponDiscountType, CouponAppliesTo, CouponStatus } from './coupon';
+export { Coupon, COUPON_DISCOUNT_TYPES, COUPON_APPLIES_TO, COUPON_STATUSES } from './coupon';
 export type { ILearnerSubscription } from './learner-subscription';
 export { LearnerSubscription, LearnerSubscriptionStatus } from './learner-subscription';
 export type { ICustomRole, ICustomRolePermissions } from './custom-role';
