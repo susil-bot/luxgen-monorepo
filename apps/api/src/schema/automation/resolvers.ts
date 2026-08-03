@@ -103,6 +103,24 @@ export const automationResolvers = {
       const updated = await automationService.toggleAutomation(id, ctx.tenantId, enabled);
       return updated ? automationService.toGraphQL(updated) : null;
     },
+    publishAutomation: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
+      await requireFeature(ctx, 'automations');
+      if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
+      const updated = await automationService.publishAutomation(id, ctx.tenantId);
+      return updated ? automationService.toGraphQL(updated) : null;
+    },
+    pauseAutomation: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
+      await requireFeature(ctx, 'automations');
+      if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
+      const updated = await automationService.pauseAutomation(id, ctx.tenantId);
+      return updated ? automationService.toGraphQL(updated) : null;
+    },
+    archiveAutomation: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
+      await requireFeature(ctx, 'automations');
+      if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
+      const updated = await automationService.archiveAutomation(id, ctx.tenantId);
+      return updated ? automationService.toGraphQL(updated) : null;
+    },
     deleteAutomation: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
       await requireFeature(ctx, 'automations');
       if (!ctx.tenantId) throw new GraphQLError('Tenant context required');

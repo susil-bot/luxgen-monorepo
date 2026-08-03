@@ -6,15 +6,24 @@ import { SnackbarProvider, useSnackbar } from '@luxgen/ui';
 
 import { TowerShell } from '../../../components/automations/tower';
 import styles from '../../../components/automations/tower/TowerFlow.module.css';
-import { DUPLICATE_AUTOMATION, GET_AUTOMATIONS } from '../../../graphql/queries/automations';
+import {
+  ARCHIVE_AUTOMATION,
+  DUPLICATE_AUTOMATION,
+  GET_AUTOMATIONS,
+  PAUSE_AUTOMATION,
+  PUBLISH_AUTOMATION,
+} from '../../../graphql/queries/automations';
+import {
+  normalizeAutomationStatus,
+  type AutomationLifecycleStatus,
+} from '../../../lib/automation-status';
 import {
   triggerFromGql,
   actionFromGql,
   formatRelativeTime,
   type UiTriggerType,
   type UiActionType,
-} from '../../../lib/automation-map';
-import { getTenantPageProps } from '../../../lib/tenant-page-props';
+} from '../../../lib/automation-map';import { getTenantPageProps } from '../../../lib/tenant-page-props';
 import { useTenantScope } from '../../../lib/use-tenant-scope';
 
 interface TowerPageProps {
@@ -23,11 +32,12 @@ interface TowerPageProps {
 
 type TriggerType = UiTriggerType;
 type ActionType = UiActionType;
+type LifecycleStatus = AutomationLifecycleStatus;
 
 interface Automation {
   id: string;
   name: string;
-  status: 'active' | 'paused' | 'draft';
+  status: LifecycleStatus;
   trigger: { type: TriggerType; label: string };
   actions: { type: ActionType; label: string }[];
   runCount: number;
@@ -35,65 +45,20 @@ interface Automation {
   createdAt: string;
 }
 
-const INITIAL_AUTOMATIONS: Automation[] = [
-  {
-    id: 'a1',
-    name: 'Welcome new learners',
-    status: 'active',
-    trigger: { type: 'user_enrolled', label: 'User Enrolled' },
-    actions: [
-      { type: 'send_email', label: 'Send Email' },
-      { type: 'add_to_group', label: 'Add to Group' },
-    ],
-    runCount: 284,
-    lastRunAt: '2 hours ago',
-    createdAt: 'Jan 12, 2025',
-  },
-  {
-    id: 'a2',
-    name: 'Course completion certificate',
-    status: 'active',
-    trigger: { type: 'course_completed', label: 'Course Completed' },
-    actions: [
-      { type: 'issue_certificate', label: 'Issue Certificate' },
-      { type: 'send_email', label: 'Send Email' },
-    ],
-    runCount: 97,
-    lastRunAt: '1 day ago',
-    createdAt: 'Feb 3, 2025',
-  },
-  {
-    id: 'a3',
-    name: 'Weekly progress report',
-    status: 'paused',
-    trigger: { type: 'schedule', label: 'Scheduled' },
-    actions: [{ type: 'send_email', label: 'Send Email' }],
-    runCount: 12,
-    lastRunAt: '7 days ago',
-    createdAt: 'Mar 20, 2025',
-  },
-  {
-    id: 'a4',
-    name: 'Tag power learners',
-    status: 'draft',
-    trigger: { type: 'certificate_issued', label: 'Certificate Issued' },
-    actions: [{ type: 'tag_user', label: 'Tag User' }],
-    runCount: 0,
-    lastRunAt: null,
-    createdAt: 'Apr 5, 2025',
-  },
-];
+const INITIAL_AUTOMATIONS: Automation[] = [];
 
 const TABS = [
   { id: 'all', label: 'All' },
-  { id: 'active', label: 'Active' },
+  { id: 'live', label: 'Live' },
   { id: 'paused', label: 'Paused' },
   { id: 'draft', label: 'Draft' },
+  { id: 'archived', label: 'Archived' },
 ] as const;
 
-function statusBadge(status: Automation['status']) {
-  if (status === 'active') return <span className={styles.badgeActive}>Active</span>;
+function statusBadge(status: LifecycleStatus) {
+  if (status === 'live') return <span className={styles.badgeActive}>Live</span>;
   if (status === 'paused') return <span className={styles.badgePaused}>Paused</span>;
+  if (status === 'archived') return <span className={styles.badgeArchived}>Archived</span>;
   return <span className={styles.badgeDraft}>Draft</span>;
 }
 
@@ -105,7 +70,7 @@ function TowerListContent({ tenant }: TowerPageProps) {
   const [automations, setAutomations] = useState<Automation[]>(INITIAL_AUTOMATIONS);
   const [activeTab, setActiveTab] = useState<(typeof TABS)[number]['id']>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
 
   const { data: gqlData, refetch } = useQuery(GET_AUTOMATIONS, {
     variables: { tenantId: queryTenantId },
@@ -115,10 +80,13 @@ function TowerListContent({ tenant }: TowerPageProps) {
   });
 
   const [duplicateAutomation] = useMutation(DUPLICATE_AUTOMATION);
+  const [publishAutomation] = useMutation(PUBLISH_AUTOMATION);
+  const [pauseAutomation] = useMutation(PAUSE_AUTOMATION);
+  const [archiveAutomation] = useMutation(ARCHIVE_AUTOMATION);
 
   const handleDuplicate = useCallback(
     async (id: string, name: string) => {
-      setDuplicatingId(id);
+      setBusyId(id);
       try {
         const { data } = await duplicateAutomation({
           variables: { id, name: `${name} (copy)` },
@@ -131,10 +99,37 @@ function TowerListContent({ tenant }: TowerPageProps) {
       } catch (err) {
         showError(err instanceof Error ? err.message : 'Could not duplicate tower');
       } finally {
-        setDuplicatingId(null);
+        setBusyId(null);
       }
     },
     [duplicateAutomation, refetch, router, showSuccess, showError],
+  );
+
+  const runLifecycle = useCallback(
+    async (id: string, action: 'publish' | 'pause' | 'archive') => {
+      setBusyId(id);
+      try {
+        if (action === 'publish') {
+          const { data } = await publishAutomation({ variables: { id } });
+          if (!data?.publishAutomation) throw new Error('Publish failed');
+          showSuccess('Tower published');
+        } else if (action === 'pause') {
+          const { data } = await pauseAutomation({ variables: { id } });
+          if (!data?.pauseAutomation) throw new Error('Pause failed');
+          showSuccess('Tower paused');
+        } else {
+          const { data } = await archiveAutomation({ variables: { id } });
+          if (!data?.archiveAutomation) throw new Error('Archive failed');
+          showSuccess('Tower archived');
+        }
+        await refetch();
+      } catch (err) {
+        showError(err instanceof Error ? err.message : `Could not ${action} tower`);
+      } finally {
+        setBusyId(null);
+      }
+    },
+    [publishAutomation, pauseAutomation, archiveAutomation, refetch, showSuccess, showError],
   );
 
   useEffect(() => {
@@ -145,27 +140,23 @@ function TowerListContent({ tenant }: TowerPageProps) {
           id: string;
           name: string;
           enabled: boolean;
-          flowDefinition?: unknown;
+          status?: string;
           triggerType: string;
           triggerLabel: string;
           actions: { type: string; label: string }[];
           runCount: number;
           lastRunAt?: string;
           createdAt?: string;
-        }): Automation => {
-          const hasFlow = a.flowDefinition != null && typeof a.flowDefinition === 'object';
-          const status: Automation['status'] = !hasFlow ? 'draft' : a.enabled ? 'active' : 'paused';
-          return {
-            id: a.id,
-            name: a.name,
-            status,
-            trigger: { type: triggerFromGql(a.triggerType), label: a.triggerLabel },
-            actions: a.actions.map((x) => ({ type: actionFromGql(x.type), label: x.label })),
-            runCount: a.runCount,
-            lastRunAt: formatRelativeTime(a.lastRunAt),
-            createdAt: formatRelativeTime(a.createdAt) ?? 'Recently',
-          };
-        },
+        }): Automation => ({
+          id: a.id,
+          name: a.name,
+          status: normalizeAutomationStatus(a.status, a.enabled),
+          trigger: { type: triggerFromGql(a.triggerType), label: a.triggerLabel },
+          actions: a.actions.map((x) => ({ type: actionFromGql(x.type), label: x.label })),
+          runCount: a.runCount,
+          lastRunAt: formatRelativeTime(a.lastRunAt),
+          createdAt: formatRelativeTime(a.createdAt) ?? 'Recently',
+        }),
       ),
     );
   }, [gqlData]);
@@ -259,14 +250,44 @@ function TowerListContent({ tenant }: TowerPageProps) {
                       </td>
                       <td style={{ color: 'var(--color-label-secondary)' }}>{auto.runCount.toLocaleString()}</td>
                       <td>
-                        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end' }}>
+                        <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+                          {auto.status !== 'live' && auto.status !== 'archived' ? (
+                            <button
+                              type="button"
+                              className={styles.secondaryBtn}
+                              disabled={busyId === auto.id}
+                              onClick={() => void runLifecycle(auto.id, 'publish')}
+                            >
+                              Publish
+                            </button>
+                          ) : null}
+                          {auto.status === 'live' ? (
+                            <button
+                              type="button"
+                              className={styles.secondaryBtn}
+                              disabled={busyId === auto.id}
+                              onClick={() => void runLifecycle(auto.id, 'pause')}
+                            >
+                              Pause
+                            </button>
+                          ) : null}
+                          {auto.status !== 'archived' ? (
+                            <button
+                              type="button"
+                              className={styles.secondaryBtn}
+                              disabled={busyId === auto.id}
+                              onClick={() => void runLifecycle(auto.id, 'archive')}
+                            >
+                              Archive
+                            </button>
+                          ) : null}
                           <button
                             type="button"
                             className={styles.secondaryBtn}
-                            disabled={duplicatingId === auto.id}
+                            disabled={busyId === auto.id}
                             onClick={() => void handleDuplicate(auto.id, auto.name)}
                           >
-                            {duplicatingId === auto.id ? 'Copying…' : 'Duplicate'}
+                            {busyId === auto.id ? '…' : 'Duplicate'}
                           </button>
                           <button
                             type="button"

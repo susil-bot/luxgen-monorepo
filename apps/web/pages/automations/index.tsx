@@ -13,7 +13,13 @@ import {
   CREATE_AUTOMATION,
   UPDATE_AUTOMATION,
   DELETE_AUTOMATION,
+  ARCHIVE_AUTOMATION,
 } from '../../graphql/queries/automations';
+import {
+  normalizeAutomationStatus,
+  automationStatusLabel,
+  type AutomationLifecycleStatus,
+} from '../../lib/automation-status';
 import { PlanGate } from '../../components/billing/PlanGate';
 import { GET_TENANT_BILLING } from '../../graphql/queries/billing';
 import { normalizePlan } from '@luxgen/billing';
@@ -41,6 +47,7 @@ interface Automation {
   id: string;
   name: string;
   enabled: boolean;
+  status: AutomationLifecycleStatus;
   trigger: { type: TriggerType; label: string };
   actions: { type: ActionType; label: string }[];
   runCount: number;
@@ -127,6 +134,7 @@ export default function AutomationsPage({ tenant }: Props) {
   const [createMutation] = useMutation(CREATE_AUTOMATION);
   const [updateMutation] = useMutation(UPDATE_AUTOMATION);
   const [deleteMutation] = useMutation(DELETE_AUTOMATION);
+  const [archiveMutation] = useMutation(ARCHIVE_AUTOMATION);
 
   const graphqlReady = gqlData?.automations != null;
 
@@ -138,22 +146,27 @@ export default function AutomationsPage({ tenant }: Props) {
           id: string;
           name: string;
           enabled: boolean;
+          status?: string;
           triggerType: string;
           triggerLabel: string;
           actions: { type: string; label: string }[];
           runCount: number;
           lastRunAt?: string;
           createdAt: string;
-        }) => ({
-          id: a.id,
-          name: a.name,
-          enabled: a.enabled,
-          trigger: { type: triggerFromGql(a.triggerType), label: a.triggerLabel },
-          actions: a.actions.map((x) => ({ type: actionFromGql(x.type), label: x.label })),
-          runCount: a.runCount,
-          lastRunAt: formatRelativeTime(a.lastRunAt),
-          createdAt: formatRelativeTime(a.createdAt) ?? 'Recently',
-        }),
+        }) => {
+          const status = normalizeAutomationStatus(a.status, a.enabled);
+          return {
+            id: a.id,
+            name: a.name,
+            enabled: status === 'live',
+            status,
+            trigger: { type: triggerFromGql(a.triggerType), label: a.triggerLabel },
+            actions: a.actions.map((x) => ({ type: actionFromGql(x.type), label: x.label })),
+            runCount: a.runCount,
+            lastRunAt: formatRelativeTime(a.lastRunAt),
+            createdAt: formatRelativeTime(a.createdAt) ?? 'Recently',
+          };
+        },
       ),
     );
   }, [gqlData]);
@@ -180,7 +193,7 @@ export default function AutomationsPage({ tenant }: Props) {
       ),
     );
   }, [runsData]);
-  const [activeTab, setActiveTab] = useState<'all' | 'active' | 'paused'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'live' | 'paused' | 'draft' | 'archived'>('all');
   const [builderOpen, setBuilderOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -189,23 +202,46 @@ export default function AutomationsPage({ tenant }: Props) {
   const [builder, setBuilder] = useState<BuilderState>({ name: '', trigger: null, actions: [] });
 
   const filtered = useMemo(() => {
-    if (activeTab === 'active') return automations.filter((a) => a.enabled);
-    if (activeTab === 'paused') return automations.filter((a) => !a.enabled);
-    return automations;
+    if (activeTab === 'all') return automations.filter((a) => a.status !== 'archived');
+    return automations.filter((a) => a.status === activeTab);
   }, [automations, activeTab]);
 
   const toggleEnabled = async (id: string) => {
     const current = automations.find((a) => a.id === id);
-    if (!current) return;
-    const next = !current.enabled;
-    setAutomations((prev) => prev.map((a) => (a.id === id ? { ...a, enabled: next } : a)));
+    if (!current || current.status === 'archived') return;
+    const next = current.status !== 'live';
+    const optimisticStatus: AutomationLifecycleStatus = next ? 'live' : 'paused';
+    setAutomations((prev) =>
+      prev.map((a) => (a.id === id ? { ...a, enabled: next, status: optimisticStatus } : a)),
+    );
     if (graphqlReady) {
       try {
         await toggleMutation({ variables: { id, enabled: next } });
         await refetchAutomations();
       } catch {
-        setAutomations((prev) => prev.map((a) => (a.id === id ? { ...a, enabled: !next } : a)));
+        setAutomations((prev) =>
+          prev.map((a) =>
+            a.id === id ? { ...a, enabled: current.enabled, status: current.status } : a,
+          ),
+        );
       }
+    }
+  };
+
+  const archiveAutomation = async (id: string) => {
+    const current = automations.find((a) => a.id === id);
+    if (!current || current.status === 'archived') return;
+    if (graphqlReady) {
+      try {
+        await archiveMutation({ variables: { id } });
+        await refetchAutomations();
+      } catch {
+        return;
+      }
+    } else {
+      setAutomations((prev) =>
+        prev.map((a) => (a.id === id ? { ...a, enabled: false, status: 'archived' } : a)),
+      );
     }
   };
 
@@ -217,6 +253,7 @@ export default function AutomationsPage({ tenant }: Props) {
         id: `${a.id}-copy-${Date.now()}`,
         name: `${a.name} (copy)`,
         enabled: false,
+        status: 'draft',
         runCount: 0,
         lastRunAt: null,
         createdAt: 'Just now',
@@ -247,7 +284,7 @@ export default function AutomationsPage({ tenant }: Props) {
   };
 
   const pauseFilteredAutomations = async () => {
-    const targets = filtered.filter((a) => a.enabled);
+    const targets = filtered.filter((a) => a.status === 'live');
     if (!targets.length) {
       setBulkConfirm(null);
       return;
@@ -351,6 +388,7 @@ export default function AutomationsPage({ tenant }: Props) {
           id: `a-${Date.now()}`,
           name: builder.name,
           enabled: false,
+          status: 'draft',
           trigger: { type: builder.trigger!, label: triggerMeta.label },
           actions: actionMetas,
           runCount: 0,
@@ -372,9 +410,11 @@ export default function AutomationsPage({ tenant }: Props) {
   const builderValid = builder.name.trim() && builder.trigger && builder.actions.length > 0;
 
   const counts = {
-    all: automations.length,
-    active: automations.filter((a) => a.enabled).length,
-    paused: automations.filter((a) => !a.enabled).length,
+    all: automations.filter((a) => a.status !== 'archived').length,
+    live: automations.filter((a) => a.status === 'live').length,
+    paused: automations.filter((a) => a.status === 'paused').length,
+    draft: automations.filter((a) => a.status === 'draft').length,
+    archived: automations.filter((a) => a.status === 'archived').length,
   };
 
   return (
@@ -417,7 +457,7 @@ export default function AutomationsPage({ tenant }: Props) {
 
             {/* Tabs */}
             <div className="lux-tab-bar">
-              {(['all', 'active', 'paused'] as const).map((tab) => (
+              {(['all', 'live', 'paused', 'draft', 'archived'] as const).map((tab) => (
                 <button
                   key={tab}
                   className="lux-tab"
@@ -435,10 +475,10 @@ export default function AutomationsPage({ tenant }: Props) {
                 <button
                   type="button"
                   className="ios-btn-secondary"
-                  disabled={!filtered.some((a) => a.enabled)}
+                  disabled={!filtered.some((a) => a.status === 'live')}
                   onClick={() => setBulkConfirm('pause-filtered')}
                 >
-                  Pause all in tab ({filtered.filter((a) => a.enabled).length})
+                  Pause all in tab ({filtered.filter((a) => a.status === 'live').length})
                 </button>
                 <button
                   type="button"
@@ -476,8 +516,8 @@ export default function AutomationsPage({ tenant }: Props) {
                     {/* Header row */}
                     <div className="lux-automation-header-row">
                       <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
-                        <span className={`badge ${auto.enabled ? 'badge-green' : ''}`}>
-                          {auto.enabled ? 'Active' : 'Paused'}
+                        <span className={`badge ${auto.status === 'live' ? 'badge-green' : ''}`}>
+                          {automationStatusLabel(auto.status)}
                         </span>
                         <span
                           className="lux-automation-name"
@@ -486,11 +526,21 @@ export default function AutomationsPage({ tenant }: Props) {
                           {auto.name}
                         </span>
                       </div>
-                      {/* iOS toggle */}
-                      <label style={{ position: 'relative', width: 44, height: 24, flexShrink: 0, cursor: 'pointer' }}>
+                      {/* iOS toggle — publish/pause (disabled when archived) */}
+                      <label
+                        style={{
+                          position: 'relative',
+                          width: 44,
+                          height: 24,
+                          flexShrink: 0,
+                          cursor: auto.status === 'archived' ? 'not-allowed' : 'pointer',
+                          opacity: auto.status === 'archived' ? 0.5 : 1,
+                        }}
+                      >
                         <input
                           type="checkbox"
-                          checked={auto.enabled}
+                          checked={auto.status === 'live'}
+                          disabled={auto.status === 'archived'}
                           onChange={() => toggleEnabled(auto.id)}
                           style={{ opacity: 0, width: 0, height: 0 }}
                         />
@@ -498,7 +548,8 @@ export default function AutomationsPage({ tenant }: Props) {
                           style={{
                             position: 'absolute',
                             inset: 0,
-                            background: auto.enabled ? 'var(--color-green)' : 'var(--color-fill-secondary)',
+                            background:
+                              auto.status === 'live' ? 'var(--color-green)' : 'var(--color-fill-secondary)',
                             borderRadius: 24,
                             transition: 'background var(--transition-fast)',
                           }}
@@ -507,7 +558,7 @@ export default function AutomationsPage({ tenant }: Props) {
                           style={{
                             position: 'absolute',
                             top: 3,
-                            left: auto.enabled ? 23 : 3,
+                            left: auto.status === 'live' ? 23 : 3,
                             width: 18,
                             height: 18,
                             background: '#fff',
@@ -545,6 +596,15 @@ export default function AutomationsPage({ tenant }: Props) {
                       <button className="lux-icon-btn" title="Duplicate" onClick={() => duplicateAutomation(auto)}>
                         📋
                       </button>
+                      {auto.status !== 'archived' ? (
+                        <button
+                          className="lux-icon-btn"
+                          title="Archive"
+                          onClick={() => void archiveAutomation(auto.id)}
+                        >
+                          📦
+                        </button>
+                      ) : null}
                       <button className="lux-icon-btn danger" title="Delete" onClick={() => setDeleteId(auto.id)}>
                         🗑️
                       </button>
@@ -822,7 +882,7 @@ export default function AutomationsPage({ tenant }: Props) {
                     }}
                   >
                     {bulkConfirm === 'pause-filtered'
-                      ? `This will pause ${filtered.filter((a) => a.enabled).length} active automation(s) in the current tab.`
+                      ? `This will pause ${filtered.filter((a) => a.status === 'live').length} live automation(s) in the current tab.`
                       : `This will permanently delete ${selectedIds.size} automation(s) and their run history.`}
                   </p>
                   <div style={{ display: 'flex', gap: 10, justifyContent: 'center' }}>

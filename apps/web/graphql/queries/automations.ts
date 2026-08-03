@@ -6,6 +6,9 @@ export const GET_AUTOMATIONS = gql`
       id
       name
       enabled
+      status
+      publishedAt
+      archivedAt
       triggerType
       triggerLabel
       actions {
@@ -27,6 +30,9 @@ export const GET_AUTOMATION = gql`
       id
       name
       enabled
+      status
+      publishedAt
+      archivedAt
       triggerType
       triggerLabel
       flowDefinition
@@ -57,6 +63,48 @@ export const TOGGLE_AUTOMATION = gql`
     toggleAutomation(id: $id, enabled: $enabled) {
       id
       enabled
+      status
+      publishedAt
+      archivedAt
+    }
+  }
+`;
+
+export const PUBLISH_AUTOMATION = gql`
+  mutation PublishAutomation($id: ID!) {
+    publishAutomation(id: $id) {
+      id
+      enabled
+      status
+      publishedAt
+      archivedAt
+      flowDefinition
+    }
+  }
+`;
+
+export const PAUSE_AUTOMATION = gql`
+  mutation PauseAutomation($id: ID!) {
+    pauseAutomation(id: $id) {
+      id
+      enabled
+      status
+      publishedAt
+      archivedAt
+      flowDefinition
+    }
+  }
+`;
+
+export const ARCHIVE_AUTOMATION = gql`
+  mutation ArchiveAutomation($id: ID!) {
+    archiveAutomation(id: $id) {
+      id
+      enabled
+      status
+      publishedAt
+      archivedAt
+      flowDefinition
     }
   }
 `;
@@ -67,6 +115,7 @@ export const CREATE_AUTOMATION = gql`
       id
       name
       enabled
+      status
       triggerType
       triggerLabel
       flowDefinition
@@ -87,6 +136,7 @@ export const UPDATE_AUTOMATION = gql`
       id
       name
       enabled
+      status
       triggerType
       triggerLabel
       flowDefinition
@@ -110,6 +160,7 @@ export const DUPLICATE_AUTOMATION = gql`
       id
       name
       enabled
+      status
       triggerType
       triggerLabel
       flowDefinition

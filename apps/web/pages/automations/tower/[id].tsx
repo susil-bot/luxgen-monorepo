@@ -41,13 +41,22 @@ function runLiveLabel(saveState: string) {
   return { text: 'Idle', live: false };
 }
 
-function saveStatusLabel(isNew: boolean, persistedId: string | null, saveState: string, dirty: boolean) {
+function saveStatusLabel(
+  isNew: boolean,
+  persistedId: string | null,
+  saveState: string,
+  dirty: boolean,
+  lifecycleStatus: string,
+) {
   if (saveState === 'saving') return 'Saving…';
   if (saveState === 'error') return 'Save failed';
   if (dirty) return 'Unsaved changes';
+  if (lifecycleStatus === 'archived') return 'Archived';
+  if (lifecycleStatus === 'live') return 'Live';
+  if (lifecycleStatus === 'paused') return 'Paused';
   if (isNew && !persistedId) return 'Draft';
   if (saveState === 'saved') return 'Saved';
-  return 'Saved';
+  return lifecycleStatus === 'draft' ? 'Draft' : 'Saved';
 }
 
 function flowSnapshot(flow: TowerFlowDocument): string {
@@ -64,7 +73,21 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
   const towerId = typeof id === 'string' ? id : 'new';
   const { queryTenantId } = useTenantScope(tenant);
 
-  const { flow, setFlow, loading, isNew, persistedId, save, saveState, saveError } = useTowerFlowPersist({
+  const {
+    flow,
+    setFlow,
+    loading,
+    isNew,
+    persistedId,
+    save,
+    saveState,
+    saveError,
+    lifecycleStatus,
+    lifecycleBusy,
+    publish,
+    pause,
+    archive,
+  } = useTowerFlowPersist({
     towerId,
     tenantId: queryTenantId,
     onCreated: (newId) => {
@@ -215,29 +238,62 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
     mutateFlow((prev) => removeFlowNode(prev, removeId));
   };
 
-  const editorToolkitItems = useMemo<ToolkitItem[]>(
-    () => [
+  const editorToolkitItems = useMemo<ToolkitItem[]>(() => {
+    const items: ToolkitItem[] = [
       {
         id: 'save',
         label: saveState === 'saving' ? 'Saving…' : dirty ? 'Save*' : 'Save',
         onClick: () => void persistFlow(flow),
-        disabled: saveState === 'saving',
+        disabled: saveState === 'saving' || lifecycleStatus === 'archived',
       },
       {
         id: 'run-logs',
         label: 'View run logs',
         onClick: () => void router.push('/automations/tower/runs'),
       },
-      {
-        id: 'toggle',
-        label: flow.meta.enabled ? 'Turn off' : 'Turn on',
-        active: flow.meta.enabled,
-        destructive: flow.meta.enabled,
-        onClick: () => mutateFlow((prev) => ({ ...prev, meta: { ...prev.meta, enabled: !prev.meta.enabled } })),
-      },
-    ],
-    [flow, router, persistFlow, saveState, dirty, mutateFlow],
-  );
+    ];
+
+    if (persistedId && lifecycleStatus !== 'archived') {
+      if (lifecycleStatus !== 'live') {
+        items.push({
+          id: 'publish',
+          label: lifecycleBusy ? 'Publishing…' : 'Publish',
+          onClick: () => void publish(),
+          disabled: lifecycleBusy,
+        });
+      }
+      if (lifecycleStatus === 'live') {
+        items.push({
+          id: 'pause',
+          label: lifecycleBusy ? 'Pausing…' : 'Pause',
+          destructive: true,
+          onClick: () => void pause(),
+          disabled: lifecycleBusy,
+        });
+      }
+      items.push({
+        id: 'archive',
+        label: lifecycleBusy ? 'Archiving…' : 'Archive',
+        destructive: true,
+        onClick: () => void archive(),
+        disabled: lifecycleBusy,
+      });
+    }
+
+    return items;
+  }, [
+    flow,
+    router,
+    persistFlow,
+    saveState,
+    dirty,
+    persistedId,
+    lifecycleStatus,
+    lifecycleBusy,
+    publish,
+    pause,
+    archive,
+  ]);
 
   if (loading) {
     return (
@@ -302,7 +358,7 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
                   aria-hidden
                 />
               )}
-              {saveStatusLabel(isNew, persistedId, saveState, dirty)}
+              {saveStatusLabel(isNew, persistedId, saveState, dirty, lifecycleStatus)}
             </span>
           </span>
           <span className={styles.statusPill} style={{ fontFamily: 'monospace', fontSize: 10 }}>

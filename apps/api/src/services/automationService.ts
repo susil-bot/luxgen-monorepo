@@ -1,7 +1,11 @@
 import {
   Automation,
   AutomationRun,
+  enabledFromAutomationStatus,
+  liveAutomationFilter,
+  resolveAutomationStatus,
   type AutomationActionType,
+  type AutomationStatus,
   type AutomationTriggerType,
   type IAutomation,
   type IAutomationAction,
@@ -24,6 +28,7 @@ export interface CreateAutomationInput {
   triggerLabel: string;
   actions: AutomationActionInput[];
   enabled?: boolean;
+  status?: AutomationStatus;
   flowDefinition?: Record<string, unknown>;
 }
 
@@ -33,7 +38,31 @@ export interface UpdateAutomationInput {
   triggerLabel?: string;
   actions?: AutomationActionInput[];
   enabled?: boolean;
+  status?: AutomationStatus;
   flowDefinition?: Record<string, unknown>;
+}
+
+function enabledFromStatus(status: AutomationStatus): boolean {
+  return enabledFromAutomationStatus(status);
+}
+
+function statusFromEnabled(enabled: boolean, previous?: AutomationStatus | null): AutomationStatus {
+  if (previous === 'archived') return 'archived';
+  if (enabled) return 'live';
+  if (previous === 'draft' || previous == null) return 'draft';
+  return 'paused';
+}
+
+function patchFlowMetaEnabled(
+  flowDefinition: Record<string, unknown> | undefined,
+  enabled: boolean,
+): Record<string, unknown> | undefined {
+  if (!flowDefinition || typeof flowDefinition !== 'object') return flowDefinition;
+  const next = JSON.parse(JSON.stringify(flowDefinition)) as Record<string, unknown>;
+  if (next.meta && typeof next.meta === 'object') {
+    (next.meta as Record<string, unknown>).enabled = enabled;
+  }
+  return next;
 }
 
 /**
@@ -41,12 +70,13 @@ export interface UpdateAutomationInput {
  * queries stay aligned with Tower graph (TODO §11 Workflow.steps ↔ Automation dual write).
  * Invalid/missing flow left unchanged — callers may still use flat-only automations.
  */
-function applyFlowDefinitionSync<T extends { flowDefinition?: Record<string, unknown> }>(
+function applyFlowDefinitionSync<T extends { flowDefinition?: Record<string, unknown>; status?: AutomationStatus }>(
   input: T,
 ): T &
   Partial<{
     name: string;
     enabled: boolean;
+    status: AutomationStatus;
     triggerType: AutomationTriggerType;
     triggerLabel: string;
     actions: AutomationActionInput[];
@@ -59,7 +89,6 @@ function applyFlowDefinitionSync<T extends { flowDefinition?: Record<string, unk
   return {
     ...input,
     name: legacy.name,
-    enabled: legacy.enabled,
     triggerType: legacy.triggerType as AutomationTriggerType,
     triggerLabel: legacy.triggerLabel,
     actions: legacy.actions.map((a) => ({
@@ -68,6 +97,7 @@ function applyFlowDefinitionSync<T extends { flowDefinition?: Record<string, unk
       config: a.config,
     })),
     flowDefinition: flow as unknown as Record<string, unknown>,
+    // Lifecycle (`status` / `enabled`) is owned by publish/pause/archive — not flow.meta
   };
 }
 
@@ -75,6 +105,7 @@ const DEMO_SEED: Omit<CreateAutomationInput, 'tenantId'>[] = [
   {
     name: 'Welcome new learners',
     enabled: true,
+    status: 'live',
     triggerType: 'USER_ENROLLED',
     triggerLabel: 'User Enrolled',
     actions: [
@@ -85,6 +116,7 @@ const DEMO_SEED: Omit<CreateAutomationInput, 'tenantId'>[] = [
   {
     name: 'Course completion certificate',
     enabled: true,
+    status: 'live',
     triggerType: 'COURSE_COMPLETED',
     triggerLabel: 'Course Completed',
     actions: [
@@ -96,6 +128,7 @@ const DEMO_SEED: Omit<CreateAutomationInput, 'tenantId'>[] = [
   {
     name: 'Weekly progress report',
     enabled: false,
+    status: 'paused',
     triggerType: 'SCHEDULE',
     triggerLabel: 'Scheduled',
     actions: [{ type: 'SEND_EMAIL', label: 'Send Email' }],
@@ -103,6 +136,7 @@ const DEMO_SEED: Omit<CreateAutomationInput, 'tenantId'>[] = [
   {
     name: 'Tag power learners',
     enabled: true,
+    status: 'live',
     triggerType: 'CERTIFICATE_ISSUED',
     triggerLabel: 'Certificate Issued',
     actions: [
@@ -113,6 +147,7 @@ const DEMO_SEED: Omit<CreateAutomationInput, 'tenantId'>[] = [
   {
     name: 'Notify on agent merge',
     enabled: false,
+    status: 'draft',
     triggerType: 'CODE_CHANGE_MERGED',
     triggerLabel: 'Code Change Merged',
     actions: [
@@ -132,7 +167,14 @@ export class AutomationService {
     if (count > 0) return;
 
     for (const item of DEMO_SEED) {
-      await Automation.create({ tenantId, ...item, runCount: item.enabled ? Math.floor(Math.random() * 200) + 10 : 0 });
+      const status = item.status ?? statusFromEnabled(Boolean(item.enabled));
+      await Automation.create({
+        tenantId,
+        ...item,
+        status,
+        enabled: enabledFromStatus(status),
+        runCount: item.enabled ? Math.floor(Math.random() * 200) + 10 : 0,
+      });
     }
     logger.info(`Seeded ${DEMO_SEED.length} automations for tenant ${tenantId}`);
   }
@@ -149,7 +191,7 @@ export class AutomationService {
   }
 
   async getAutomationsByTrigger(tenantId: string, triggerType: AutomationTriggerType): Promise<IAutomation[]> {
-    return Automation.find({ tenantId, enabled: true, triggerType });
+    return Automation.find(liveAutomationFilter({ tenantId, triggerType }));
   }
 
   async getAutomationRuns(tenantId: string, limit = 20): Promise<IAutomationRun[]> {
@@ -158,10 +200,13 @@ export class AutomationService {
 
   async createAutomation(input: CreateAutomationInput): Promise<IAutomation> {
     const synced = applyFlowDefinitionSync(input);
+    const status = synced.status ?? statusFromEnabled(Boolean(synced.enabled ?? false));
+    const enabled = enabledFromStatus(status);
     const automation = await Automation.create({
       ...synced,
       tenantId: input.tenantId,
-      enabled: synced.enabled ?? false,
+      status,
+      enabled,
       runCount: 0,
     });
     logger.info(`Automation created: ${automation.name} (${automation.tenantId})`);
@@ -169,12 +214,91 @@ export class AutomationService {
   }
 
   async updateAutomation(id: string, tenantId: string, input: UpdateAutomationInput): Promise<IAutomation | null> {
-    const synced = applyFlowDefinitionSync(input);
-    return Automation.findOneAndUpdate({ _id: id, tenantId }, { $set: synced }, { new: true });
+    const existing = await this.getAutomationById(id, tenantId);
+    if (!existing) return null;
+    if (resolveAutomationStatus(existing) === 'archived') return existing;
+
+    const synced = applyFlowDefinitionSync({
+      ...input,
+      status:
+        input.status ??
+        (input.enabled != null ? statusFromEnabled(input.enabled, resolveAutomationStatus(existing)) : undefined),
+    });
+
+    const $set: Record<string, unknown> = { ...synced };
+    if (synced.status) {
+      $set.enabled = enabledFromStatus(synced.status);
+      if (synced.status === 'live' && !existing.publishedAt) {
+        $set.publishedAt = new Date();
+      }
+    } else if (synced.enabled != null) {
+      const nextStatus = statusFromEnabled(Boolean(synced.enabled), resolveAutomationStatus(existing));
+      $set.status = nextStatus;
+      $set.enabled = enabledFromStatus(nextStatus);
+      if (nextStatus === 'live' && !existing.publishedAt) {
+        $set.publishedAt = new Date();
+      }
+    }
+
+    return Automation.findOneAndUpdate({ _id: id, tenantId }, { $set }, { new: true });
   }
 
   async toggleAutomation(id: string, tenantId: string, enabled: boolean): Promise<IAutomation | null> {
-    return Automation.findOneAndUpdate({ _id: id, tenantId }, { $set: { enabled } }, { new: true });
+    return enabled ? this.publishAutomation(id, tenantId) : this.pauseAutomation(id, tenantId);
+  }
+
+  /** TODO §12 PublishWorkflow — set live + enabled; stamp publishedAt once. */
+  async publishAutomation(id: string, tenantId: string): Promise<IAutomation | null> {
+    const existing = await this.getAutomationById(id, tenantId);
+    if (!existing) return null;
+    if (resolveAutomationStatus(existing) === 'archived') return null;
+
+    const $set: Record<string, unknown> = {
+      status: 'live',
+      enabled: true,
+      flowDefinition: patchFlowMetaEnabled(existing.flowDefinition, true),
+    };
+    if (!existing.publishedAt) $set.publishedAt = new Date();
+
+    return Automation.findOneAndUpdate({ _id: id, tenantId }, { $set }, { new: true });
+  }
+
+  /** TODO §12 PauseWorkflow */
+  async pauseAutomation(id: string, tenantId: string): Promise<IAutomation | null> {
+    const existing = await this.getAutomationById(id, tenantId);
+    if (!existing) return null;
+    if (resolveAutomationStatus(existing) === 'archived') return null;
+
+    return Automation.findOneAndUpdate(
+      { _id: id, tenantId },
+      {
+        $set: {
+          status: 'paused',
+          enabled: false,
+          flowDefinition: patchFlowMetaEnabled(existing.flowDefinition, false),
+        },
+      },
+      { new: true },
+    );
+  }
+
+  /** TODO §12 ArchiveWorkflow — soft archive (keeps row; stops runs). */
+  async archiveAutomation(id: string, tenantId: string): Promise<IAutomation | null> {
+    const existing = await this.getAutomationById(id, tenantId);
+    if (!existing) return null;
+
+    return Automation.findOneAndUpdate(
+      { _id: id, tenantId },
+      {
+        $set: {
+          status: 'archived',
+          enabled: false,
+          archivedAt: existing.archivedAt ?? new Date(),
+          flowDefinition: patchFlowMetaEnabled(existing.flowDefinition, false),
+        },
+      },
+      { new: true },
+    );
   }
 
   async deleteAutomation(id: string, tenantId: string): Promise<boolean> {
@@ -212,6 +336,7 @@ export class AutomationService {
         config: a.config ? ({ ...a.config } as Record<string, unknown>) : undefined,
       })),
       enabled: false,
+      status: 'draft',
       flowDefinition,
     });
   }
@@ -222,7 +347,7 @@ export class AutomationService {
     payload: Record<string, unknown> = {},
   ): Promise<IAutomationRun | null> {
     const automation = await this.getAutomationById(automationId, tenantId);
-    if (!automation?.enabled) return null;
+    if (!automation || resolveAutomationStatus(automation) !== 'live' || !automation.enabled) return null;
 
     const started = Date.now();
     const run = await AutomationRun.create({
@@ -273,11 +398,15 @@ export class AutomationService {
   }
 
   toGraphQL(automation: IAutomation) {
+    const status = resolveAutomationStatus(automation);
     return {
       id: String(automation._id),
       tenantId: automation.tenantId,
       name: automation.name,
       enabled: automation.enabled,
+      status,
+      publishedAt: automation.publishedAt ?? null,
+      archivedAt: automation.archivedAt ?? null,
       triggerType: automation.triggerType,
       triggerLabel: automation.triggerLabel,
       actions: automation.actions.map((a: IAutomationAction) => ({

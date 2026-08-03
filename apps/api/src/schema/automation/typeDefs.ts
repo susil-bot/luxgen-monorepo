@@ -36,6 +36,14 @@ export const automationTypeDefs = `
     running
   }
 
+  """TODO WorkflowStatus — draft / live / paused / archived (enabled mirrors live)."""
+  enum AutomationStatus {
+    draft
+    live
+    paused
+    archived
+  }
+
   type AutomationAction {
     type: AutomationActionType!
     label: String!
@@ -47,6 +55,9 @@ export const automationTypeDefs = `
     tenantId: String!
     name: String!
     enabled: Boolean!
+    status: AutomationStatus!
+    publishedAt: Date
+    archivedAt: Date
     triggerType: AutomationTriggerType!
     triggerLabel: String!
     actions: [AutomationAction!]!
@@ -117,6 +128,12 @@ export const automationTypeDefs = `
     createAutomation(input: CreateAutomationInput!): Automation!
     updateAutomation(id: ID!, input: UpdateAutomationInput!): Automation
     toggleAutomation(id: ID!, enabled: Boolean!): Automation
+    """TODO §12 PublishWorkflow — status=live, enabled=true."""
+    publishAutomation(id: ID!): Automation
+    """TODO §12 PauseWorkflow — status=paused, enabled=false."""
+    pauseAutomation(id: ID!): Automation
+    """TODO §12 ArchiveWorkflow — soft archive; stops runs."""
+    archiveAutomation(id: ID!): Automation
     deleteAutomation(id: ID!): Boolean!
     """TODO §12 DuplicateWorkflow — clone automation config; new row starts disabled."""
     duplicateAutomation(id: ID!, name: String): Automation

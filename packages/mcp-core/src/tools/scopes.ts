@@ -9,6 +9,9 @@ export const MCP_WRITE_TOOLS = new Set([
   'tower_connect_nodes',
   'tower_disconnect_nodes',
   'toggle_automation',
+  'publish_automation',
+  'pause_automation',
+  'archive_automation',
   'delete_automation',
   'run_agent_task',
 ]);

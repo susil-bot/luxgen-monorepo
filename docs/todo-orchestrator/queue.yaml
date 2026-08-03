@@ -372,7 +372,7 @@ tasks:
     epic: E2
     priority: 0
     sla: M
-    status: todo
+    status: review
     title: Publish pause archive workflow actions + status UI
     skill: automation
     source:
@@ -387,6 +387,8 @@ tasks:
       - T-AUTO-02
     acceptance:
       - Status transitions persist and reflect in list/detail
+    notes: AutomationStatus draft/live/paused/archived + publish/pause/archive
+      mutations — feat/automation-status-lifecycle
   - id: T-AUTO-05
     epic: E2
     priority: 1

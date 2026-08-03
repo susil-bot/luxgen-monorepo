@@ -3,19 +3,25 @@ import type { LuxgenGraphqlClient } from '../graphql/client';
 import {
   AUTOMATION_RUNS,
   AUTOMATION_SCHEMA,
+  ARCHIVE_AUTOMATION,
   CREATE_AUTOMATION,
   DELETE_AUTOMATION,
   GET_AUTOMATION,
   LIST_AUTOMATIONS,
+  PAUSE_AUTOMATION,
+  PUBLISH_AUTOMATION,
   TOGGLE_AUTOMATION,
   UPDATE_AUTOMATION,
   RUN_AGENT_TASK,
+  type ArchiveAutomationResult,
   type AutomationRunsResult,
   type AutomationSchemaResult,
   type CreateAutomationResult,
   type DeleteAutomationResult,
   type GetAutomationResult,
   type ListAutomationsResult,
+  type PauseAutomationResult,
+  type PublishAutomationResult,
   type ToggleAutomationResult,
   type UpdateAutomationResult,
   type RunAgentTaskResult,
@@ -136,16 +142,19 @@ export async function handleAutomationTool(
 
       return runTool(config, async () => {
         const { input } = prepared;
+        const updateInput: Record<string, unknown> = {
+          name: input.name,
+          triggerType: input.triggerType,
+          triggerLabel: input.triggerLabel,
+          actions: input.actions,
+          flowDefinition: input.flowDefinition,
+        };
+        if (typeof enabled === 'boolean') {
+          updateInput.enabled = enabled;
+        }
         const data = await client.query<UpdateAutomationResult>(UPDATE_AUTOMATION, {
           id,
-          input: {
-            name: input.name,
-            triggerType: input.triggerType,
-            triggerLabel: input.triggerLabel,
-            actions: input.actions,
-            enabled: input.enabled,
-            flowDefinition: input.flowDefinition,
-          },
+          input: updateInput,
         });
         if (!data.updateAutomation) throw new Error(`Automation not found: ${id}`);
         return data.updateAutomation;
@@ -265,6 +274,36 @@ export async function handleAutomationTool(
         });
         if (!data.toggleAutomation) throw new Error(`Automation not found: ${id}`);
         return data.toggleAutomation;
+      });
+    }
+
+    case 'publish_automation': {
+      const id = String(args.id ?? '');
+      if (!id) throw new Error('id is required');
+      return runTool(config, async () => {
+        const data = await client.query<PublishAutomationResult>(PUBLISH_AUTOMATION, { id });
+        if (!data.publishAutomation) throw new Error(`Automation not found or archived: ${id}`);
+        return data.publishAutomation;
+      });
+    }
+
+    case 'pause_automation': {
+      const id = String(args.id ?? '');
+      if (!id) throw new Error('id is required');
+      return runTool(config, async () => {
+        const data = await client.query<PauseAutomationResult>(PAUSE_AUTOMATION, { id });
+        if (!data.pauseAutomation) throw new Error(`Automation not found or archived: ${id}`);
+        return data.pauseAutomation;
+      });
+    }
+
+    case 'archive_automation': {
+      const id = String(args.id ?? '');
+      if (!id) throw new Error('id is required');
+      return runTool(config, async () => {
+        const data = await client.query<ArchiveAutomationResult>(ARCHIVE_AUTOMATION, { id });
+        if (!data.archiveAutomation) throw new Error(`Automation not found: ${id}`);
+        return data.archiveAutomation;
       });
     }
 

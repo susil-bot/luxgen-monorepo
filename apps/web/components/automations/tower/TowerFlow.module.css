@@ -214,8 +214,18 @@
   padding: 2px 8px;
   font-size: 12px;
   font-weight: 500;
-  color: #616161;
-  background: #e4e5e7;
+  color: var(--color-label-secondary, #616161);
+  background: var(--color-fill-secondary, #e4e5e7);
+  border-radius: 999px;
+}
+
+.badgeArchived {
+  display: inline-flex;
+  padding: 2px 8px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-label-secondary, #616161);
+  background: color-mix(in srgb, var(--color-label-secondary) 12%, transparent);
   border-radius: 999px;
 }
 
