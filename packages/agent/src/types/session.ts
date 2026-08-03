@@ -26,6 +26,7 @@ export interface StagedFile {
 
 import type { AgentSessionGit } from './git';
 import type { ValidationResult } from './validation';
+import type { OrchestrationState } from './review';
 
 /** Persisted chat turn (capped at 50 per session). */
 export interface SessionChatMessage {
@@ -50,6 +51,8 @@ export interface AgentSession {
     model?: string;
   };
   messages?: SessionChatMessage[];
+  /** Developer -> Reviewer -> PM Tester loop state. Only set for orchestrated (headless) runs. */
+  orchestration?: OrchestrationState;
 }
 
 export interface ApplyResult {

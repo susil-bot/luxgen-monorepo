@@ -5,6 +5,12 @@ export type AgentTaskStatus =
   | 'running'
   | 'staged'
   | 'validating'
+  // Orchestration loop states — kept in sync with packages/agent/src/types/task.ts's TaskStatus.
+  // See docs/AGENT_ORCHESTRATOR.md.
+  | 'reviewing'
+  | 'review_changes_requested'
+  | 'pm_testing'
+  | 'pm_test_changes_requested'
   | 'pending_review'
   | 'committed'
   | 'merged'
@@ -23,6 +29,8 @@ export interface IAgentTask extends Document {
   files: Record<string, unknown>;
   git?: Record<string, unknown>;
   validation?: Record<string, unknown>;
+  /** Developer -> Reviewer -> PM Tester loop state (OrchestrationState in @luxgen/agent). */
+  orchestration?: Record<string, unknown>;
   messages?: Array<{ role: string; content: string; timestamp: number }>;
   metadata: {
     model?: string;
@@ -46,6 +54,10 @@ const agentTaskSchema = new Schema<IAgentTask>(
         'running',
         'staged',
         'validating',
+        'reviewing',
+        'review_changes_requested',
+        'pm_testing',
+        'pm_test_changes_requested',
         'pending_review',
         'committed',
         'merged',
@@ -59,6 +71,7 @@ const agentTaskSchema = new Schema<IAgentTask>(
     files: { type: Schema.Types.Mixed, default: {} },
     git: { type: Schema.Types.Mixed },
     validation: { type: Schema.Types.Mixed },
+    orchestration: { type: Schema.Types.Mixed },
     messages: { type: Schema.Types.Mixed },
     metadata: {
       model: String,

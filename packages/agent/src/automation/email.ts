@@ -31,6 +31,27 @@ export const AUTOMATION_EMAIL_TEMPLATES: Record<string, EmailTemplateDef> = {
     body: (ctx) =>
       `Hi,\n\nYour order for "${str(ctx.payload.courseTitle, 'your course')}" is confirmed. Thanks for your purchase!`,
   },
+<<<<<<< HEAD
+=======
+  abandoned_cart: {
+    subject: () => 'Still interested? Your cart is waiting',
+    body: (ctx) =>
+      `Hi,\n\nYou started checking out for "${str(
+        ctx.payload.courseTitle,
+        'a course',
+      )}" but didn't finish. Complete your order whenever you're ready — your spot is saved.`,
+  },
+  certificate_recert_reminder: {
+    subject: () => 'Your certification is expiring soon',
+    body: (ctx) => {
+      const days = ctx.payload.daysBefore ?? ctx.payload.daysUntilExpiry ?? 'a few';
+      return `Hi,\n\nYour certification for "${str(
+        ctx.payload.courseTitle,
+        'your course',
+      )}" expires in ${days} days. Renew your training now to stay compliant.`;
+    },
+  },
+>>>>>>> 5fd9e92039498e194bcf2248acb81b19b3e3b4f8
   custom: {
     subject: (ctx) => str(ctx.subjectOverride, 'Update from your account'),
     body: (ctx) => str(ctx.payload.body as string | undefined, ''),

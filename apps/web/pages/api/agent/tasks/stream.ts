@@ -3,7 +3,18 @@ import { getTaskFromMongo } from '@luxgen/agent';
 import type { TaskStatus } from '@luxgen/agent';
 import { requireAgentAuth } from '../../../../lib/agent-auth';
 
-const TERMINAL_STATUSES: TaskStatus[] = ['pending_review', 'failed', 'merged', 'cancelled'];
+// Kept in sync with apps/web/components/agent/HeadlessTaskPanel.tsx's TERMINAL set —
+// review_changes_requested/pm_test_changes_requested only reach the task record once the
+// orchestrator's iteration limit is hit (docs/AGENT_ORCHESTRATOR.md), so they're as terminal as
+// 'failed' from this stream's point of view.
+const TERMINAL_STATUSES: TaskStatus[] = [
+  'pending_review',
+  'failed',
+  'merged',
+  'cancelled',
+  'review_changes_requested',
+  'pm_test_changes_requested',
+];
 const POLL_INTERVAL_MS = 2000;
 
 function sendEvent(res: NextApiResponse, data: Record<string, unknown>) {

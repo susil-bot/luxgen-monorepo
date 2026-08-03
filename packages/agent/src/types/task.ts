@@ -3,6 +3,14 @@ export type TaskStatus =
   | 'running'
   | 'staged'
   | 'validating'
+  // Orchestrated (Developer -> Reviewer -> PM Tester) states — see docs/AGENT_ORCHESTRATOR.md.
+  // 'reviewing'/'pm_testing' are transient (an LLM pass is in flight); the '*_changes_requested'
+  // states are terminal-for-the-loop but not terminal-for-the-task — a human can re-run the
+  // Developer with the notes attached, same as they'd act on a failed 'staged' validation today.
+  | 'reviewing'
+  | 'review_changes_requested'
+  | 'pm_testing'
+  | 'pm_test_changes_requested'
   | 'pending_review'
   | 'committed'
   | 'merged'
@@ -36,7 +44,15 @@ export type AuditAction =
   | 'merged'
   | 'discarded'
   | 'failed'
-  | 'enqueued';
+  | 'enqueued'
+  // Orchestration loop — see docs/AGENT_ORCHESTRATOR.md
+  | 'review_started'
+  | 'review_passed'
+  | 'review_changes_requested'
+  | 'pm_test_started'
+  | 'pm_test_passed'
+  | 'pm_test_changes_requested'
+  | 'iteration_limit_reached';
 
 export interface AgentAuditRecord {
   sessionId: string;

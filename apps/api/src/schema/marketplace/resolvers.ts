@@ -25,10 +25,14 @@ function handleUsageError(e: unknown): never {
 
 export const marketplaceResolvers = {
   Query: {
-    automationTemplates: async (_: unknown, { category, featured }: { category?: string; featured?: boolean }) => {
+    automationTemplates: async (
+      _: unknown,
+      { category, featured, industry }: { category?: string; featured?: boolean; industry?: string },
+    ) => {
       const items = await marketplaceService.listTemplates({
         category: fromGqlCategory(category) as TemplateCategory | undefined,
         featured,
+        industry: industry?.toLowerCase(),
       });
       return items.map((t) => marketplaceService.toGraphQL(t));
     },

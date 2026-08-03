@@ -10,7 +10,15 @@ export type AgentAuditAction =
   | 'merged'
   | 'discarded'
   | 'failed'
-  | 'enqueued';
+  | 'enqueued'
+  // Orchestration loop — kept in sync with packages/agent/src/types/task.ts's AuditAction.
+  | 'review_started'
+  | 'review_passed'
+  | 'review_changes_requested'
+  | 'pm_test_started'
+  | 'pm_test_passed'
+  | 'pm_test_changes_requested'
+  | 'iteration_limit_reached';
 
 export interface IAgentAuditEntry extends Document {
   sessionId: string;
@@ -39,6 +47,13 @@ const agentAuditSchema = new Schema<IAgentAuditEntry>(
         'discarded',
         'failed',
         'enqueued',
+        'review_started',
+        'review_passed',
+        'review_changes_requested',
+        'pm_test_started',
+        'pm_test_passed',
+        'pm_test_changes_requested',
+        'iteration_limit_reached',
       ],
       required: true,
     },

@@ -35,15 +35,27 @@ luxgen-monorepo-main/
 ├── apps/
 │   ├── web/                     # Next.js 14 frontend (port 3000)
 │   ├── api/                     # GraphQL API — Apollo Server + Express (port 4000)
-│   └── agent-worker/            # Headless agent jobs (Redis queue)
+│   ├── agent-worker/            # Headless agent jobs (Redis queue)
+│   ├── mobile/                  # Expo/React Native learner app (see docs/CROSS_PLATFORM_RESTRUCTURE.md)
+│   └── mcp-server/               # MCP tool server (see packages/mcp-core)
 ├── packages/
-│   ├── ui/                      # @luxgen/ui — shared React component library
+│   ├── ui/                      # @luxgen/ui — shared React (DOM) component library
+│   ├── native-ui/               # @luxgen/native-ui — shared React Native primitives (iOS design tokens)
+│   ├── presenters/               # @luxgen/presenters — shared data-fetching + view-model layer (web + mobile)
+│   ├── design-tokens/            # @luxgen/design-tokens — colors/spacing/typography, shared by web + mobile
 │   ├── db/                      # @luxgen/db — Mongoose models + DB connection
 │   ├── agent/                   # @luxgen/agent — orchestrator, git, automation bridge
+│   ├── automation-flow/          # @luxgen/automation-flow — trigger/condition/action compound catalog + engine
 │   ├── billing/                 # @luxgen/billing — plans, feature gates, usage limits
 │   ├── auth/                    # @luxgen/auth — JWT helpers
 │   ├── config/                  # @luxgen/config — shared env/config utilities
-│   └── utils/                   # @luxgen/utils — shared pure functions
+│   ├── core/                     # @luxgen/core — server/workflow Presenter plugin (distinct from packages/presenters)
+│   ├── shared/                   # @luxgen/shared — shared utilities and types
+│   ├── storefront/                # @luxgen/storefront — storefront-specific shared logic
+│   ├── types/                    # @luxgen/types — shared TS interfaces (web + mobile, no runtime deps)
+│   ├── mcp-core/                 # @luxgen/mcp-core — shared MCP server logic (backs apps/mcp-server)
+│   ├── test-harness/              # @luxgen/test-harness — shared test utilities
+│   └── utils/                    # @luxgen/utils — shared pure functions
 ├── docs/                        # Documentation — start at INDEX.md; technical hub at docs/technical/
 ├── deploy/                      # Platform configs (Vercel, Render, Fly) + prod env template
 ├── skills/                      # Domain skills for agents (.agents/skills → here)
@@ -392,6 +404,22 @@ Mongoose models: `User`, `Tenant`, `Course`, `Group`, `Automation`, `AutomationR
 
 - `signToken(payload)` → JWT string
 - `verifyToken(token)` → decoded payload
+
+### @luxgen/presenters (`packages/presenters/`)
+
+- Shared data-fetching + view-model layer: `queries.ts` → `fetchers.ts` → `transformers.ts` →
+  `client.entry.ts` (hook), per feature folder. Consumed via subpath imports
+  (`@luxgen/presenters/<feature>`), same convention as `@luxgen/ui/<Component>`.
+- Consumed by both `apps/web` and `apps/mobile` — this is the actual cross-platform sharing
+  layer (styling/tokens were already shared via `@luxgen/design-tokens`; this is the
+  data/business-logic layer). See `docs/CROSS_PLATFORM_RESTRUCTURE.md` for the full rationale
+  and migration sequencing.
+
+### @luxgen/native-ui (`packages/native-ui/src/`)
+
+- React Native presentational primitives (`Button`, `Card`, `ListRow`, `Screen`), styled from
+  `@luxgen/design-tokens`'s `lightTheme`. Mobile's equivalent of `@luxgen/ui`, intentionally
+  separate (DOM vs. native rendering) rather than a shared component layer.
 
 ---
 

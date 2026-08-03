@@ -308,13 +308,18 @@ async function executeAction(
       });
       break;
     }
+<<<<<<< HEAD
+=======
+    case 'ISSUE_CERTIFICATE':
+      await executeIssueCertificate(action, automation, event, runId);
+      break;
+>>>>>>> 5fd9e92039498e194bcf2248acb81b19b3e3b4f8
     case 'NOTIFY_SLACK':
     case 'CALL_WEBHOOK':
     case 'TAG_USER':
     case 'ADD_TO_GROUP':
     case 'REMOVE_FROM_GROUP':
     case 'ENROLL_IN_COURSE':
-    case 'ISSUE_CERTIFICATE':
       console.log(
         `[automation-bridge] ${action.type} for "${automation.name}" (tenant=${event.tenantId})`,
         action.config ?? {},
@@ -434,6 +439,41 @@ async function recordAutomationActionTimeline(params: {
       metadata,
     });
   }
+}
+
+/**
+ * Sets `Enrollment.certificateExpiresAt` from the action's `validityDays` config so the
+ * `certificateReminderService` sweep job has something to scan. Without this, ISSUE_CERTIFICATE
+ * was a log-only stub and CERTIFICATE_EXPIRING_SOON could never fire for real data.
+ */
+async function executeIssueCertificate(
+  action: IAutomationAction,
+  automation: IAutomation,
+  event: AutomationEventPayload,
+  runId: string,
+): Promise<void> {
+  console.log(
+    `[automation-bridge] ISSUE_CERTIFICATE for "${automation.name}" (tenant=${event.tenantId})`,
+    action.config ?? {},
+  );
+
+  const orderIds = resolveOrderIds(event.payload);
+  if (orderIds) {
+    const validityDays = Number(action.config?.validityDays ?? 365);
+    const expiresAt = new Date(Date.now() + validityDays * 24 * 60 * 60 * 1000);
+    await Enrollment.updateOne(
+      { tenant: event.tenantId, course: orderIds.courseId, student: orderIds.studentId },
+      { certificateExpiresAt: expiresAt, certificateReminderSentAt: null },
+    );
+  }
+
+  await recordAutomationActionTimeline({
+    tenantId: event.tenantId,
+    automation,
+    action,
+    payload: event.payload,
+    runId,
+  });
 }
 
 function resolveOrderIds(
@@ -561,6 +601,19 @@ export async function emitAgentAutomationEvent(
     triggerType: map[kind],
     payload: details,
     source: 'agent',
+  });
+}
+
+/** Fed by a daily sweep job (`certificateReminderService`), not a live user action. */
+export async function emitCertificateExpiringSoonEvent(
+  tenantId: string,
+  details: Record<string, unknown>,
+): Promise<number> {
+  return emitAutomationEvent({
+    tenantId,
+    triggerType: 'CERTIFICATE_EXPIRING_SOON',
+    payload: details,
+    source: 'system',
   });
 }
 

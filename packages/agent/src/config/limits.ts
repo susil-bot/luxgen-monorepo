@@ -26,3 +26,14 @@ export const MAX_STAGED_FILES_PER_SESSION = 20;
 export const MAX_CONSECUTIVE_TOOL_ONLY = 5;
 export const MAX_ITERATIONS = 10;
 export const MAX_CONTEXT_CHARS = 80_000;
+
+/**
+ * Bounds the Developer -> Reviewer -> PM Tester loop (core/orchestrator.ts's
+ * runOrchestratedTask). Each iteration can run the Developer once plus up to two more LLM
+ * calls (Reviewer, PM Tester) — capped low by design per the orchestrator's cost-control
+ * principle: a task that can't converge in 3 rounds needs a human, not more retries.
+ */
+export const MAX_ORCHESTRATOR_ITERATIONS = 3;
+
+/** Max characters of the staged-file diff summary fed to the Reviewer/PM Tester prompts. */
+export const MAX_DIFF_SUMMARY_CHARS = 12_000;
