@@ -31,6 +31,7 @@ export const AUTOMATION_EMAIL_TEMPLATES: Record<string, EmailTemplateDef> = {
     body: (ctx) =>
       `Hi,\n\nYour order for "${str(ctx.payload.courseTitle, 'your course')}" is confirmed. Thanks for your purchase!`,
   },
+
   abandoned_cart: {
     subject: () => 'Still interested? Your cart is waiting',
     body: (ctx) =>
