@@ -88,7 +88,7 @@ tasks:
     epic: E0
     priority: 1
     sla: S
-    status: todo
+    status: review
     title: Audit Sitemap L1/L2 vs DefaultNavigation + pages
     skill: sidebar
     source:
@@ -101,6 +101,7 @@ tasks:
     acceptance:
       - Missing/partial routes table for Learning Commerce Automation Analytics
       - Uses DefaultNavigation.tsx as nav source of truth
+    notes: sitemap-gaps.md — chore/audit-sitemap-nav-gaps
   - id: T-E0-06
     epic: E0
     priority: 1

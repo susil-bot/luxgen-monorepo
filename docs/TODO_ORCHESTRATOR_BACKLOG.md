@@ -79,7 +79,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 | [x] `T-E0-02` | P0 | S | Audit Search: map TODO sections → existing routes/components | → `docs/todo-orchestrator/audits/search-gaps.md` |
 | [x] `T-E0-03` | P0 | S | Audit Automation builder: TODO vs `/automations` + GraphQL | → `docs/todo-orchestrator/audits/automation-gaps.md` |
 | [x] `T-E0-04` | P0 | S | Audit Commerce: TODO vs `/products` `/orders` `/admin/customers` | → `docs/todo-orchestrator/audits/commerce-gaps.md` |
-| [ ] `T-E0-05` | P1 | S | Audit Sitemap L1/L2 vs `DefaultNavigation.tsx` + pages | Missing routes table |
+| [x] `T-E0-05` | P1 | S | Audit Sitemap L1/L2 vs `DefaultNavigation.tsx` + pages | → `docs/todo-orchestrator/audits/sitemap-gaps.md` |
 | [ ] `T-E0-06` | P1 | S | Audit Role modules vs `/organization/*` settings | Gap list for IAM/SSO/SCIM |
 
 **Acceptance (all E0):** output is a **diff to docs or checklist only** (or tiny inventory markdown under `docs/todo-orchestrator/audits/`). No product code unless a one-line fix is required to document truth.
