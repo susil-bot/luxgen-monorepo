@@ -555,7 +555,7 @@
       "epic": "E2",
       "priority": 1,
       "sla": "M",
-      "status": "review",
+      "status": "done",
       "title": "Enforce publish business rules (trigger required tenant scope)",
       "skill": "automation",
       "source": {
@@ -572,7 +572,7 @@
       "acceptance": [
         "Cannot publish empty/invalid workflow; clear GraphQL errors"
       ],
-      "notes": "collectAutomationPublishErrors + AUTOMATION_PUBLISH_INVALID \u2014 feat/automation-publish-rules"
+      "notes": "collectAutomationPublishErrors + AUTOMATION_PUBLISH_INVALID \u2014 feat/automation-publish-rules \u2014 merged #473"
     },
     {
       "id": "T-AUTO-08",
@@ -748,7 +748,7 @@
       "epic": "E3",
       "priority": 1,
       "sla": "M",
-      "status": "todo",
+      "status": "review",
       "title": "Coupons CRUD vertical",
       "skill": "fullstack-developer",
       "source": {
@@ -765,7 +765,8 @@
       ],
       "acceptance": [
         "Coupon create edit list; discount fields persist"
-      ]
+      ],
+      "notes": "Coupon CRUD list/create/edit + discount persist \u2014 feat/coupons-crud"
     },
     {
       "id": "T-COM-06",
