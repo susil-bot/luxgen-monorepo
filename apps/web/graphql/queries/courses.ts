@@ -72,6 +72,14 @@ export const CREATE_COURSE = gql`
       id
       title
       description
+      status
+      commerce {
+        priceCents
+        compareAtPriceCents
+        sku
+        category
+        currency
+      }
       instructor {
         id
         firstName
@@ -88,6 +96,13 @@ export const UPDATE_COURSE = gql`
       title
       description
       status
+      commerce {
+        priceCents
+        compareAtPriceCents
+        sku
+        category
+        currency
+      }
     }
   }
 `;

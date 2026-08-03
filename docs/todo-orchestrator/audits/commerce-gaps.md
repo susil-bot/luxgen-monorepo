@@ -51,10 +51,9 @@ Nav: `DefaultNavigation.tsx` — Products, Orders (drafts/abandoned), Customers 
 | --- | --- | --- |
 | List + search/filter | partial | `apps/web/pages/products/index.tsx` + `GET_COURSES` |
 | Create | wired | `create.tsx` → `CREATE_COURSE` / `UPDATE_COURSE` |
-| Edit persist (title/desc/status/SEO) | wired | `[id]/edit.tsx` → `GET_COURSE` / `UPDATE_COURSE` |
-| Quick stats / MRR / reviews | missing | Not on list page |
-| Import CSV | missing | — |
-| Media / variants / delivery / metafields / collections | partial | UI present but **disabled** — Phase 3 (`packages/ui/src/ProductEdit/…`) |
+| Edit persist (title/desc/status/SEO) | wired | `[id]/edit.tsx` → `GET_COURSE` / `UPDATE_COURSE` (+ `commerce` on mutate) |
+| List price/SKU/type | wired | `product-display.ts` reads `commerce` + meta blob |
+| Media / variants / delivery / metafields | partial | UI present but **disabled** — Phase 3 (no API); collections now save via meta |
 | Subscription product type | missing | Variants “Subscriptions — Phase 3” |
 | Stripe price sync | missing | Checklist open |
 

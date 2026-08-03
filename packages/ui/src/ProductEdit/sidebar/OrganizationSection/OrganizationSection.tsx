@@ -37,7 +37,15 @@ export function OrganizationSection({ meta, onMetaChange }: OrganizationSectionP
           <input
             id="org-collections"
             className="ios-input"
-            disabled
+            value={meta.collectionIds.join(', ')}
+            onChange={(e) =>
+              onMetaChange({
+                collectionIds: e.target.value
+                  .split(',')
+                  .map((t) => t.trim())
+                  .filter(Boolean),
+              })
+            }
             placeholder={organizationSectionDefaults.collectionsPlaceholder}
           />
         </div>

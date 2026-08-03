@@ -128,7 +128,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 
 | ID | Pri | SLA | Source slice | Task | Skill |
 | --- | --- | --- | --- | --- | --- |
-| [ ] `T-COM-01` | P0 | M | L21–L417 | Products list + create/edit: persist all editable fields (no disabled fakes) | `fullstack-developer` |
+| [~] `T-COM-01` | P0 | M | L21–L417 | Products list + create/edit: persist all editable fields (no disabled fakes) | review — commerce + collections |
 | [ ] `T-COM-02` | P0 | M | L517–L653 | Orders list/detail: status filters + live order fields | `fullstack-developer` |
 | [ ] `T-COM-03` | P0 | M | L654–L827 | Customers list/detail/edit aligned to commerce TODO | `persona-pages` |
 | [ ] `T-COM-04` | P1 | M | L418–L516 | Bundles CRUD vertical | `fullstack-developer` |
