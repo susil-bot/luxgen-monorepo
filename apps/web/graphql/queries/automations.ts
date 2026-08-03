@@ -104,6 +104,25 @@ export const DELETE_AUTOMATION = gql`
   }
 `;
 
+export const DUPLICATE_AUTOMATION = gql`
+  mutation DuplicateAutomation($id: ID!, $name: String) {
+    duplicateAutomation(id: $id, name: $name) {
+      id
+      name
+      enabled
+      triggerType
+      triggerLabel
+      flowDefinition
+      actions {
+        type
+        label
+      }
+      runCount
+      createdAt
+    }
+  }
+`;
+
 export const RUN_AGENT_TASK = gql`
   mutation RunAgentTask($input: RunAgentTaskInput!) {
     runAgentTask(input: $input) {

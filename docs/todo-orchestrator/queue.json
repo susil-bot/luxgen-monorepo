@@ -419,7 +419,7 @@
       "epic": "E2",
       "priority": 0,
       "sla": "M",
-      "status": "todo",
+      "status": "done",
       "title": "Close one GraphQL mutation family from TODO §12 (pick highest gap from audit)",
       "skill": "graphql",
       "source": {
@@ -439,7 +439,8 @@
         "Chosen mutations work end-to-end",
         "Resolvers thin; services hold logic",
         "Single feat PR"
-      ]
+      ],
+      "notes": "duplicateAutomation mutation (TODO §12 DuplicateWorkflow) — feat/automation-duplicate-mutation"
     },
     {
       "id": "T-AUTO-03",

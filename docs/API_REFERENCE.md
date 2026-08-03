@@ -228,6 +228,14 @@ mutation ToggleAutomation($id: ID!, $enabled: Boolean!) {
   }
 }
 
+mutation DuplicateAutomation($id: ID!, $name: String) {
+  duplicateAutomation(id: $id, name: $name) {
+    id
+    name
+    enabled
+  }
+}
+
 mutation RunAgentTask($input: RunAgentTaskInput!) {
   runAgentTask(input: $input) {
     sessionId
@@ -238,7 +246,8 @@ mutation RunAgentTask($input: RunAgentTaskInput!) {
 ```
 
 **Requires:** Pro plan for mutations. Enterprise for `runAgentTask`.  
-**Web:** `apps/web/graphql/queries/automations.ts`
+**Web:** `apps/web/graphql/queries/automations.ts`  
+**Duplicate:** clones config + `flowDefinition`; new automation starts `enabled: false` with empty run history (TODO §12 `DuplicateWorkflow`).
 
 ---
 

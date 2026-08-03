@@ -182,6 +182,40 @@ export class AutomationService {
     return Boolean(result);
   }
 
+  /**
+   * TODO §12 `DuplicateWorkflow` — clone config into a new disabled automation.
+   * Does not copy run history. Preserves tenantId from the source row.
+   */
+  async duplicateAutomation(id: string, tenantId: string, name?: string): Promise<IAutomation | null> {
+    const source = await this.getAutomationById(id, tenantId);
+    if (!source) return null;
+
+    const copyName = (name?.trim() || `${source.name} (copy)`).slice(0, 200);
+    const flowDefinition = source.flowDefinition
+      ? (JSON.parse(JSON.stringify(source.flowDefinition)) as Record<string, unknown>)
+      : undefined;
+
+    if (flowDefinition && typeof flowDefinition === 'object' && flowDefinition.meta && typeof flowDefinition.meta === 'object') {
+      const meta = flowDefinition.meta as Record<string, unknown>;
+      meta.name = copyName;
+      meta.enabled = false;
+    }
+
+    return this.createAutomation({
+      tenantId,
+      name: copyName,
+      triggerType: source.triggerType,
+      triggerLabel: source.triggerLabel,
+      actions: source.actions.map((a) => ({
+        type: a.type,
+        label: a.label,
+        config: a.config ? ({ ...a.config } as Record<string, unknown>) : undefined,
+      })),
+      enabled: false,
+      flowDefinition,
+    });
+  }
+
   async executeAutomation(
     automationId: string,
     tenantId: string,
