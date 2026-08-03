@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 
@@ -17,6 +17,7 @@ import {
   getFlowCompound,
   insertFlowNodeAfter,
   listFlowCompounds,
+  removeFlowNode,
   type FlowEdgeLabel,
   type FlowNodeKind,
   type FlowStepView,
@@ -40,12 +41,17 @@ function runLiveLabel(saveState: string) {
   return { text: 'Idle', live: false };
 }
 
-function saveStatusLabel(isNew: boolean, persistedId: string | null, saveState: string) {
+function saveStatusLabel(isNew: boolean, persistedId: string | null, saveState: string, dirty: boolean) {
   if (saveState === 'saving') return 'Saving…';
   if (saveState === 'error') return 'Save failed';
+  if (dirty) return 'Unsaved changes';
   if (isNew && !persistedId) return 'Draft';
   if (saveState === 'saved') return 'Saved';
   return 'Saved';
+}
+
+function flowSnapshot(flow: TowerFlowDocument): string {
+  return JSON.stringify(flow);
 }
 
 interface TowerEditRoomProps {
@@ -66,6 +72,9 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
     },
   });
 
+  const baselineRef = useRef<string | null>(null);
+  const [dirty, setDirty] = useState(false);
+
   const steps = useMemo(() => flowToOrderedSteps(flow), [flow]);
   const graphRoots = useMemo(() => flowToGraphSteps(flow), [flow]);
   const [selectedStepId, setSelectedStepId] = useState<string>(flow.entryNodeId);
@@ -77,6 +86,17 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
   const triggerOptions = listFlowCompounds('trigger');
 
   useEffect(() => {
+    if (loading) {
+      baselineRef.current = null;
+      return;
+    }
+    if (baselineRef.current === null) {
+      baselineRef.current = flowSnapshot(flow);
+      setDirty(false);
+    }
+  }, [loading, flow]);
+
+  useEffect(() => {
     setNameInput(flow.meta.name);
   }, [flow.meta.name]);
 
@@ -86,24 +106,77 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
     }
   }, [steps, selectedStepId, flow.entryNodeId]);
 
+  const mutateFlow = useCallback(
+    (updater: (prev: TowerFlowDocument) => TowerFlowDocument) => {
+      setFlow((prev) => {
+        const next = updater(prev);
+        const baseline = baselineRef.current;
+        setDirty(baseline === null ? true : flowSnapshot(next) !== baseline);
+        return next;
+      });
+    },
+    [setFlow],
+  );
+
+  const persistFlow = useCallback(
+    async (nextFlow: TowerFlowDocument) => {
+      const idSaved = await save(nextFlow);
+      if (idSaved) {
+        baselineRef.current = flowSnapshot(nextFlow);
+        setDirty(false);
+      }
+      return idSaved;
+    },
+    [save],
+  );
+
+  const discardChanges = useCallback(() => {
+    if (!baselineRef.current) return;
+    const restored = JSON.parse(baselineRef.current) as TowerFlowDocument;
+    setFlow(restored);
+    setDirty(false);
+    setSelectedStepId(restored.entryNodeId);
+  }, [setFlow]);
+
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') void router.push('/automations/tower');
+      const target = e.target as HTMLElement | null;
+      const typing =
+        target?.tagName === 'INPUT' ||
+        target?.tagName === 'TEXTAREA' ||
+        target?.tagName === 'SELECT' ||
+        target?.isContentEditable;
+
+      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+        e.preventDefault();
+        void persistFlow(flow);
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        void router.push('/automations/tower');
+        return;
+      }
+
+      if (!typing && (e.key === 'Delete' || e.key === 'Backspace') && selectedStepId !== flow.entryNodeId) {
+        e.preventDefault();
+        mutateFlow((prev) => removeFlowNode(prev, selectedStepId));
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [router]);
+  }, [router, persistFlow, flow, mutateFlow, selectedStepId]);
 
   const commitName = () => {
     const name = nameInput.trim() || flow.meta.name;
-    setFlow((prev) => ({ ...prev, meta: { ...prev.meta, name } }));
+    mutateFlow((prev) => ({ ...prev, meta: { ...prev.meta, name } }));
     setEditingName(false);
   };
 
   const replaceTriggerCompound = (compoundId: string) => {
     const compound = getFlowCompound(compoundId);
     if (!compound || compound.kind !== 'trigger') return;
-    setFlow((prev) => ({
+    mutateFlow((prev) => ({
       ...prev,
       nodes: prev.nodes.map((n) =>
         n.id === prev.entryNodeId ? { ...n, compoundId, title: compound.label, config: {} } : n,
@@ -112,21 +185,21 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
   };
 
   const updateNodeConfig = (nodeId: string, key: string, value: unknown) => {
-    setFlow((prev) => ({
+    mutateFlow((prev) => ({
       ...prev,
       nodes: prev.nodes.map((n) => (n.id === nodeId ? { ...n, config: { ...n.config, [key]: value } } : n)),
     }));
   };
 
   const updateFlow = (updater: (prev: TowerFlowDocument) => TowerFlowDocument) => {
-    setFlow(updater);
+    mutateFlow(updater);
   };
 
   const addStepAfterNode = (afterNodeId: string, compoundId: string, branchLabel?: FlowEdgeLabel) => {
     const compound = getFlowCompound(compoundId);
     if (!compound) return;
 
-    setFlow((prev) => {
+    mutateFlow((prev) => {
       const next = insertFlowNodeAfter(prev, afterNodeId, compound.kind, compoundId, branchLabel);
       const newNode = next.nodes.find((node) => !prev.nodes.some((existing) => existing.id === node.id));
       if (newNode) {
@@ -136,12 +209,18 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
     });
   };
 
+  const deleteSelectedStep = () => {
+    if (!selectedStep || selectedStep.id === flow.entryNodeId) return;
+    const removeId = selectedStep.id;
+    mutateFlow((prev) => removeFlowNode(prev, removeId));
+  };
+
   const editorToolkitItems = useMemo<ToolkitItem[]>(
     () => [
       {
         id: 'save',
-        label: saveState === 'saving' ? 'Saving…' : 'Save',
-        onClick: () => void save(flow),
+        label: saveState === 'saving' ? 'Saving…' : dirty ? 'Save*' : 'Save',
+        onClick: () => void persistFlow(flow),
         disabled: saveState === 'saving',
       },
       {
@@ -154,10 +233,10 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
         label: flow.meta.enabled ? 'Turn off' : 'Turn on',
         active: flow.meta.enabled,
         destructive: flow.meta.enabled,
-        onClick: () => setFlow((prev) => ({ ...prev, meta: { ...prev.meta, enabled: !prev.meta.enabled } })),
+        onClick: () => mutateFlow((prev) => ({ ...prev, meta: { ...prev.meta, enabled: !prev.meta.enabled } })),
       },
     ],
-    [flow, router, save, saveState, setFlow],
+    [flow, router, persistFlow, saveState, dirty, mutateFlow],
   );
 
   if (loading) {
@@ -217,9 +296,13 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
           <span className={styles.statusPill}>
             <span className="inline-flex items-center gap-1.5">
               {runLiveLabel(saveState).live && (
-                <span className="run-live-indicator w-2 h-2 rounded-full bg-green-500 animate-pulse" aria-hidden />
+                <span
+                  className="run-live-indicator w-2 h-2 rounded-full animate-pulse"
+                  style={{ background: 'var(--color-green)' }}
+                  aria-hidden
+                />
               )}
-              {saveStatusLabel(isNew, persistedId, saveState)}
+              {saveStatusLabel(isNew, persistedId, saveState, dirty)}
             </span>
           </span>
           <span className={styles.statusPill} style={{ fontFamily: 'monospace', fontSize: 10 }}>
@@ -311,13 +394,39 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
                   onSelectStep={setSelectedStepId}
                 />
 
+                {selectedStep.kind !== 'trigger' ? (
+                  <button type="button" className={styles.configDeleteBtn} onClick={deleteSelectedStep}>
+                    Delete step
+                  </button>
+                ) : null}
+
                 <p style={{ fontSize: 12, color: 'var(--color-label-secondary)', lineHeight: 1.5, margin: 0 }}>
-                  Persisted as <code>TowerFlowDocument</code> v1 on <code>Automation.flowDefinition</code>.
+                  Persisted as <code>TowerFlowDocument</code> v1 on <code>Automation.flowDefinition</code>. Save
+                  (⌘/Ctrl+S) writes via <code>updateAutomation</code>/<code>createAutomation</code>.
                 </p>
               </div>
             </aside>
           ) : null}
         </div>
+
+        {dirty ? (
+          <footer className={styles.editorFooter} role="status">
+            <span className={styles.editorFooterHint}>Unsaved changes</span>
+            <div className={styles.editorFooterActions}>
+              <button type="button" className={styles.secondaryBtn} onClick={discardChanges}>
+                Discard
+              </button>
+              <button
+                type="button"
+                className={styles.primaryBtn}
+                disabled={saveState === 'saving'}
+                onClick={() => void persistFlow(flow)}
+              >
+                {saveState === 'saving' ? 'Saving…' : 'Save'}
+              </button>
+            </div>
+          </footer>
+        ) : null}
       </div>
     </>
   );

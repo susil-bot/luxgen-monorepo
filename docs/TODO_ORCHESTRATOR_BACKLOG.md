@@ -111,7 +111,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 | --- | --- | --- | --- | --- | --- |
 | [x] `T-AUTO-01` | P0 | M | Align automation data model with flowDefinition + TODO §11 | → `audits/automation-model-map.md` + #457 |
 | [x] `T-AUTO-02` | P0 | M | Close one GraphQL mutation family from TODO §12 | `duplicateAutomation` |
-| [ ] `T-AUTO-03` | P0 | M | L276–L431 | Builder canvas: add/edit/delete step UI wired to live mutations | `automation` + `ios-design` |
+| [~] `T-AUTO-03` | P0 | M | L276–L431 | Builder canvas: add/edit/delete step UI wired to live mutations | review — config Delete + dirty footer |
 | [ ] `T-AUTO-04` | P0 | M | L819–L884 | Publish / pause / archive actions + status UI | `automation` |
 | [ ] `T-AUTO-05` | P1 | M | L716–L751 | Run history list + detail drawer | `automation` |
 | [ ] `T-AUTO-06` | P1 | M | L846–L864 | Test-run with sample payload | `automation` |
