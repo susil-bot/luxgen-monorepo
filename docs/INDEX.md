@@ -45,6 +45,7 @@
 | [BUSINESS_TECH_TRANSLATION.md](./BUSINESS_TECH_TRANSLATION.md) | Business goal → technical feature map           |
 | [FEATURE_CATALOG.md](./FEATURE_CATALOG.md)                     | Every feature: user value, code locations, APIs |
 | [TODO_ORCHESTRATOR_BACKLOG.md](./TODO_ORCHESTRATOR_BACKLOG.md) | **PM backlog** from all `TODO*.md` — priority, SLA, AC, 24×7 queue |
+| [todo-orchestrator/COVERAGE_PLAN.md](./todo-orchestrator/COVERAGE_PLAN.md) | Section→task coverage matrix + priority waves |
 | [todo-orchestrator/queue.yaml](./todo-orchestrator/queue.yaml) | Machine task queue for headless orchestrator    |
 | [PERSONA_PAGES.md](./PERSONA_PAGES.md)                         | Admin, learner, analytics, developer personas   |
 

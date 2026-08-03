@@ -14,7 +14,7 @@ tasks:
     epic: E0
     priority: 0
     sla: S
-    status: blocked
+    status: done
     title: Ensure commerce + role TODO docs non-empty on main (merge PR 453)
     skill: null
     source:
@@ -28,7 +28,7 @@ tasks:
     acceptance:
       - docs/TODO-Commerce Experience.md has content on main
       - docs/TODO-role.md exists on main
-    notes: Blocked until https://github.com/susil-bot/luxgen-monorepo/pull/453 merges
+    notes: "Done: PR #453/#454 merged — commerce + role TODO docs on main"
   - id: T-E0-02
     epic: E0
     priority: 0
@@ -70,7 +70,7 @@ tasks:
     epic: E0
     priority: 0
     sla: S
-    status: blocked
+    status: todo
     title: Audit Commerce TODO vs products/orders/customers pages
     skill: fullstack-developer
     source:
@@ -79,8 +79,7 @@ tasks:
       end: 80
     touch:
       - docs/todo-orchestrator/audits/commerce-gaps.md
-    deps:
-      - T-E0-01
+    deps: []
     acceptance:
       - Gap table for Products Orders Customers Coupons Bundles
       - Cross-links PAGE_FUNCTIONALITY_CHECKLIST.md
@@ -105,7 +104,7 @@ tasks:
     epic: E0
     priority: 1
     sla: S
-    status: blocked
+    status: todo
     title: Audit Role modules vs organization settings routes
     skill: persona-pages
     source:
@@ -114,8 +113,7 @@ tasks:
       end: 350
     touch:
       - docs/todo-orchestrator/audits/role-gaps.md
-    deps:
-      - T-E0-01
+    deps: []
     acceptance:
       - Gap table for org dashboard profile tenants users roles security SSO SCIM
   - id: T-SRCH-01
@@ -510,7 +508,6 @@ tasks:
       - apps/web/pages
       - apps/api
     deps:
-      - T-E0-01
       - T-E0-04
     acceptance:
       - Create read update list reflect changes
@@ -797,7 +794,6 @@ tasks:
       - apps/web
       - apps/api
     deps:
-      - T-E0-01
       - T-E0-06
     acceptance:
       - Dashboard shows live tenant-scoped KPIs or empty-with-reason
@@ -923,3 +919,134 @@ tasks:
       - T-ROLE-06
     acceptance:
       - Create T-ROLE-08a API and T-ROLE-08b UI tasks before enqueue
+  - id: T-SRCH-11
+    epic: E1
+    priority: 2
+    sla: S
+    status: todo
+    title: Pinned searches (star + pin list in overlay)
+    skill: ios-design
+    source:
+      file: docs/TODO-search.md
+      start: 833
+      end: 866
+    touch:
+      - apps/web
+    deps:
+      - T-SRCH-01
+    acceptance:
+      - User can pin a search and see it in Pinned list
+      - Pin state survives reload (localStorage MVP OK)
+  - id: T-SRCH-12
+    epic: E1
+    priority: 2
+    sla: M
+    status: todo
+    title: Search settings page (result prefs / defaults)
+    skill: persona-pages
+    source:
+      file: docs/TODO-search.md
+      start: 910
+      end: 973
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-SRCH-01
+    acceptance:
+      - Settings route or section exists
+      - At least one preference persists
+  - id: T-SRCH-13
+    epic: E1
+    priority: 3
+    sla: L
+    status: wont
+    title: Mobile search experience (defer to mobile epic)
+    skill: ios-design
+    source:
+      file: docs/TODO-search.md
+      start: 974
+      end: 987
+    touch:
+      - apps/mobile
+    deps: []
+    acceptance:
+      - Track under mobile epic; do not enqueue as one job
+  - id: T-AUTO-11
+    epic: E2
+    priority: 2
+    sla: M
+    status: todo
+    title: Workflow notifications + activity timeline surfaces
+    skill: automation
+    source:
+      file: "docs/TODO-Enterprise Product Specification: Workflow Automation
+        Builder.md"
+      start: 1483
+      end: 1646
+    touch:
+      - apps/web
+      - apps/api
+    deps:
+      - T-AUTO-05
+    acceptance:
+      - Failure/success notify settings persist OR documented defer
+      - Activity timeline shows create/update/publish events
+  - id: T-AUTO-12
+    epic: E2
+    priority: 3
+    sla: L
+    status: wont
+    title: AI opportunities in builder (SPLIT before enqueue)
+    skill: ai-studio
+    source:
+      file: "docs/TODO-Enterprise Product Specification: Workflow Automation
+        Builder.md"
+      start: 1967
+      end: 2082
+    touch: []
+    deps:
+      - T-AUTO-03
+    acceptance:
+      - Split into suggestion API + UI tasks before enqueue
+  - id: T-AUTO-13
+    epic: E2
+    priority: 2
+    sla: M
+    status: todo
+    title: Tower builder accessibility pass
+    skill: ios-design
+    source:
+      file: "docs/TODO-Enterprise Product Specification: Workflow Automation
+        Builder.md"
+      start: 2296
+      end: 2482
+    touch:
+      - apps/web/pages/automations/tower
+      - apps/web/components/automations
+    deps:
+      - T-AUTO-03
+    acceptance:
+      - Keyboard operable step select
+      - aria labels on canvas controls
+      - focus visible
+  - id: T-MAP-08
+    epic: E4
+    priority: 1
+    sla: S
+    status: todo
+    title: Dashboard sitemap widgets vs live /dashboard
+    skill: persona-pages
+    source:
+      file: docs/TODO-sitemap.md
+      start: 5
+      end: 11
+    touch:
+      - apps/web/pages/dashboard.tsx
+      - docs/todo-orchestrator/audits/sitemap-gaps.md
+    deps:
+      - T-E0-05
+    acceptance:
+      - Gap note for each sitemap dashboard widget
+      - Wire or defer each with checklist update
+coverage_plan: docs/todo-orchestrator/COVERAGE_PLAN.md

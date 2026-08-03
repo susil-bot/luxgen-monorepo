@@ -32,8 +32,10 @@
 | SRC-SITEMAP | `docs/TODO-sitemap.md` | 1266 | Platform IA / routes | Ready on `main` |
 | SRC-SEARCH | `docs/TODO-search.md` | 1100 | Search | Ready on `main` |
 | SRC-AUTO | `docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md` | 3426 | Automation builder | Ready on `main` |
-| SRC-COMMERCE | `docs/TODO-Commerce Experience.md` | 1367 | Commerce | **Blocked until PR #453 merges** (empty on `main`) |
-| SRC-ROLE | `docs/TODO-role.md` | 2181 | Enterprise / org admin | **Blocked until PR #453 merges** |
+| SRC-COMMERCE | `docs/TODO-Commerce Experience.md` | 1366 | Commerce | Ready on `main` (#453/#454) |
+| SRC-ROLE | `docs/TODO-role.md` | 2180 | Enterprise / org admin | Ready on `main` (#453/#454) |
+
+**Full section→task matrix:** [`todo-orchestrator/COVERAGE_PLAN.md`](./todo-orchestrator/COVERAGE_PLAN.md)
 
 ---
 
@@ -56,12 +58,12 @@
 
 ## 3. Epic checklist (rollup)
 
-- [ ] **E0** Bootstrap — audits + queue hygiene
+- [~] **E0** Bootstrap — audits + queue hygiene (`T-E0-01/02/03` done; `04–06` open)
 - [ ] **E1** Search (`SRC-SEARCH`) — P0
 - [ ] **E2** Automation builder deepen (`SRC-AUTO`) — P0
-- [ ] **E3** Commerce experience (`SRC-COMMERCE`) — P0 *(after #453)*
+- [ ] **E3** Commerce experience (`SRC-COMMERCE`) — P0
 - [ ] **E4** Sitemap gap close (`SRC-SITEMAP`) — P1
-- [ ] **E5** Enterprise role / org admin (`SRC-ROLE`) — P1 *(after #453)*
+- [ ] **E5** Enterprise role / org admin (`SRC-ROLE`) — P1
 
 ---
 
@@ -73,7 +75,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 
 | ID | Pri | SLA | Task | AC (summary) |
 | --- | --- | --- | --- | --- |
-| [ ] `T-E0-01` | P0 | S | Merge/ensure commerce+role TODO docs on `main` (#453) | Both files non-empty on `main` |
+| [x] `T-E0-01` | P0 | S | Merge/ensure commerce+role TODO docs on `main` (#453) | Done — files on `main` |
 | [x] `T-E0-02` | P0 | S | Audit Search: map TODO sections → existing routes/components | → `docs/todo-orchestrator/audits/search-gaps.md` |
 | [x] `T-E0-03` | P0 | S | Audit Automation builder: TODO vs `/automations` + GraphQL | → `docs/todo-orchestrator/audits/automation-gaps.md` |
 | [ ] `T-E0-04` | P0 | S | Audit Commerce: TODO vs `/products` `/orders` `/admin/customers` | Gap list; mark already-wired |
