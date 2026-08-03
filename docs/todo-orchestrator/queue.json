@@ -748,7 +748,7 @@
       "epic": "E3",
       "priority": 1,
       "sla": "M",
-      "status": "review",
+      "status": "done",
       "title": "Coupons CRUD vertical",
       "skill": "fullstack-developer",
       "source": {
@@ -766,7 +766,7 @@
       "acceptance": [
         "Coupon create edit list; discount fields persist"
       ],
-      "notes": "Coupon CRUD list/create/edit + discount persist \u2014 feat/coupons-crud"
+      "notes": "Coupon CRUD list/create/edit + discount persist \u2014 feat/coupons-crud \u2014 merged #474"
     },
     {
       "id": "T-COM-06",
@@ -871,7 +871,7 @@
       "epic": "E4",
       "priority": 1,
       "sla": "M",
-      "status": "todo",
+      "status": "review",
       "title": "Close top Learning sitemap gaps (one vertical from audit)",
       "skill": "persona-pages",
       "source": {
@@ -888,7 +888,8 @@
       ],
       "acceptance": [
         "Highest-traffic missing Learning item wired or explicitly deferred in checklist"
-      ]
+      ],
+      "notes": "Issued certificates admin /certificates + defer quizzes/paths in checklist \u2014 feat/learning-sitemap-certificates"
     },
     {
       "id": "T-MAP-02",

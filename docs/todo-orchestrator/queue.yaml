@@ -702,6 +702,8 @@ tasks:
     acceptance:
       - Highest-traffic missing Learning item wired or explicitly deferred in
         checklist
+    notes: Issued certificates admin /certificates + defer quizzes/paths —
+      feat/learning-sitemap-certificates
   - id: T-MAP-02
     epic: E4
     priority: 1
