@@ -301,7 +301,7 @@ tasks:
     epic: E2
     priority: 0
     sla: M
-    status: todo
+    status: done
     title: Align automation data model with flowDefinition + TODO §11
     skill: automation
     source:
@@ -319,6 +319,8 @@ tasks:
       - Documented mapping of TODO entities to existing models
       - Code changes only where schema gap blocks builder
       - Tenant fields preserved
+    notes: Model map + API flowDefinition→legacy sync (see
+      fix/automation-flowdefinition-legacy-sync)
   - id: T-AUTO-02
     epic: E2
     priority: 0

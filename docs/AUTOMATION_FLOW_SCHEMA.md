@@ -41,6 +41,8 @@ Tower automations use a **versioned flow document** instead of ad-hoc UI state. 
 
 Persisted on Mongo `Automation.flowDefinition`. Legacy flat fields (`triggerType`, `actions[]`) are derived via `flowToLegacyAutomation()` for GraphQL and backward compatibility. At runtime the bridge prefers graph execution via `planFlowExecution()` when `flowDefinition` is valid.
 
+**TODO §11 alignment:** product spec uses the name `Workflow`; the codebase keeps `Automation` + Tower flow. Full field map: [todo-orchestrator/audits/automation-model-map.md](./todo-orchestrator/audits/automation-model-map.md). API `createAutomation` / `updateAutomation` re-sync flat fields whenever a valid `flowDefinition` is sent.
+
 ---
 
 ## Graph editing (Phase 1+)

@@ -109,7 +109,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 
 | ID | Pri | SLA | Source slice | Task | Skill |
 | --- | --- | --- | --- | --- | --- |
-| [ ] `T-AUTO-01` | P0 | M | L432–L596 | Align data model / types with `flowDefinition` + existing automation models | `automation` |
+| [x] `T-AUTO-01` | P0 | M | Align automation data model with flowDefinition + TODO §11 | → `audits/automation-model-map.md` + API sync |
 | [ ] `T-AUTO-02` | P0 | M | L597–L940 | Close GraphQL gaps called in §12 that are still stub/missing (one mutation family per PR) | `graphql` + `automation` |
 | [ ] `T-AUTO-03` | P0 | M | L276–L431 | Builder canvas: add/edit/delete step UI wired to live mutations | `automation` + `ios-design` |
 | [ ] `T-AUTO-04` | P0 | M | L819–L884 | Publish / pause / archive actions + status UI | `automation` |
