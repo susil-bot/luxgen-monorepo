@@ -77,7 +77,11 @@ export const automationTypeDefs = `
     status: AutomationRunStatus!
     durationMs: Int!
     error: String
+    """Alias of triggeredAt — when the run started."""
+    startedAt: Date!
     triggeredAt: Date!
+    """Null while status=running; otherwise startedAt + durationMs."""
+    completedAt: Date
   }
 
   type AgentTaskResult {
@@ -120,7 +124,10 @@ export const automationTypeDefs = `
   extend type Query {
     automations(tenantId: String!, limit: Int, offset: Int): [Automation!]!
     automation(id: ID!): Automation
-    automationRuns(tenantId: String!, limit: Int): [AutomationRun!]!
+    """Tenant-scoped run history. Optional automationId filters to one workflow."""
+    automationRuns(tenantId: String!, limit: Int, automationId: ID): [AutomationRun!]!
+    """Single run detail — tenant-scoped via context."""
+    automationRun(id: ID!): AutomationRun
     automationSchema: JSON!
   }
 

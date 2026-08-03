@@ -249,7 +249,13 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
       {
         id: 'run-logs',
         label: 'View run logs',
-        onClick: () => void router.push('/automations/tower/runs'),
+        onClick: () => {
+          const aid = persistedId ?? (towerId !== 'new' ? towerId : '');
+          const qs = new URLSearchParams();
+          qs.set('tenant', tenant);
+          if (aid) qs.set('automationId', aid);
+          void router.push(`/automations/tower/runs?${qs.toString()}`);
+        },
       },
     ];
 
@@ -288,6 +294,8 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
     saveState,
     dirty,
     persistedId,
+    towerId,
+    tenant,
     lifecycleStatus,
     lifecycleBusy,
     publish,

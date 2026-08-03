@@ -172,7 +172,7 @@ export default function AutomationsPage({ tenant }: Props) {
   }, [gqlData]);
 
   useEffect(() => {
-    if (!runsData?.automationRuns?.length) return;
+    if (runsData?.automationRuns == null) return;
     setRunHistory(
       runsData.automationRuns.map(
         (r: {

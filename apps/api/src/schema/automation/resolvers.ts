@@ -58,12 +58,17 @@ export const automationResolvers = {
     },
     automationRuns: async (
       _: unknown,
-      { tenantId, limit }: { tenantId: string; limit?: number },
+      { tenantId, limit, automationId }: { tenantId: string; limit?: number; automationId?: string },
       ctx: GraphQLContext,
     ) => {
       const scoped = scopedTenantId(ctx, tenantId);
-      const runs = await automationService.getAutomationRuns(scoped, limit ?? 20);
+      const runs = await automationService.getAutomationRuns(scoped, limit ?? 20, automationId);
       return runs.map((r) => automationService.runToGraphQL(r));
+    },
+    automationRun: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
+      if (!ctx.tenantId) return null;
+      const run = await automationService.getAutomationRunById(id, ctx.tenantId);
+      return run ? automationService.runToGraphQL(run) : null;
     },
     automationSchema: () => AUTOMATION_SCHEMA,
   },
