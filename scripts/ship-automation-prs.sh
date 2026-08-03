@@ -1,3 +1,132 @@
+#!/bin/bash
+# Run with: bash scripts/ship-automation-prs.sh
+# (Run with bash explicitly, not by pasting into zsh — that's what broke last time:
+# zsh only treats a leading `#` as a comment in scripts, not when lines are pasted
+# interactively, so every comment line above became "command not found: #".)
+#
+# Cleans up the two empty placeholder branches left by an earlier failed attempt,
+# then creates the fix/ branch (bug fixes) and the feat/ branch (stacked on it,
+# industry compounds) with real commits, pushes both, and opens PRs if `gh` is
+# installed and authenticated.
+set -uo pipefail
+
+REPO="/Users/susil/Documents/Workspcae/luxgen-monorepo"
+cd "$REPO" || { echo "Could not cd to $REPO"; exit 1; }
+
+echo "== Step 0: clear any stale git lock files =="
+for f in .git/index.lock .git/HEAD.lock; do
+  if [ -f "$f" ]; then
+    echo "Found $f — close any other git UI/terminal touching this repo, then removing it."
+    rm -f "$f"
+  fi
+done
+
+echo "== Step 1: snapshot the current combined (fix+feat) bridge.ts/email.ts =="
+cp packages/agent/src/automation/bridge.ts /tmp/luxgen-combined-bridge.ts
+cp packages/agent/src/automation/email.ts /tmp/luxgen-combined-email.ts
+
+echo "== Step 2: remove the two empty placeholder branches from the earlier failed run =="
+git branch -D fix/automation-send-email-and-live-condition-eval 2>/dev/null
+git branch -D feat/automation-hub-industry-compounds 2>/dev/null
+git push origin --delete fix/automation-send-email-and-live-condition-eval 2>/dev/null
+git push origin --delete feat/automation-hub-industry-compounds 2>/dev/null
+
+echo "== Step 3: move to main, carrying your uncommitted work (no stash needed — verified no file overlap) =="
+git checkout main || { echo "git checkout main failed — resolve manually, then re-run"; exit 1; }
+git pull origin main
+
+echo "== Step 4: create fix/ branch =="
+git checkout -b fix/automation-send-email-and-live-condition-eval
+
+cat > packages/agent/src/automation/email.ts << 'EMAILEOF'
+/**
+ * Self-contained email dispatch for the automation bridge.
+ *
+ * Deliberately does NOT import from `apps/api` (packages must not depend on apps) — this
+ * mirrors `apps/api/src/utils/email.ts`'s provider logic (SendGrid via fetch, log fallback)
+ * so the bridge can actually send mail instead of only logging a SEND_EMAIL action.
+ */
+
+export interface AutomationEmailTemplateContext {
+  payload: Record<string, unknown>;
+  subjectOverride?: string;
+}
+
+interface EmailTemplateDef {
+  subject: (ctx: AutomationEmailTemplateContext) => string;
+  body: (ctx: AutomationEmailTemplateContext) => string;
+}
+
+function str(value: unknown, fallback: string): string {
+  return typeof value === 'string' && value.trim() ? value : fallback;
+}
+
+/**
+ * Template registry — keyed to match the `template` select options on the
+ * `core.notification.send_email` compound (`packages/automation-flow/src/catalog/compounds.ts`).
+ * Add a new template here whenever a new option is added to that select.
+ */
+export const AUTOMATION_EMAIL_TEMPLATES: Record<string, EmailTemplateDef> = {
+  order_confirmation: {
+    subject: () => 'Your order is confirmed',
+    body: (ctx) =>
+      `Hi,\n\nYour order for "${str(ctx.payload.courseTitle, 'your course')}" is confirmed. Thanks for your purchase!`,
+  },
+  custom: {
+    subject: (ctx) => str(ctx.subjectOverride, 'Update from your account'),
+    body: (ctx) => str(ctx.payload.body as string | undefined, ''),
+  },
+};
+
+export interface SendAutomationEmailParams {
+  to: string;
+  template: string;
+  subject?: string;
+  payload: Record<string, unknown>;
+}
+
+export async function sendAutomationEmail(params: SendAutomationEmailParams): Promise<void> {
+  const def = AUTOMATION_EMAIL_TEMPLATES[params.template] ?? AUTOMATION_EMAIL_TEMPLATES.custom;
+  const ctx: AutomationEmailTemplateContext = { payload: params.payload, subjectOverride: params.subject };
+  const subject = params.subject && params.template === 'custom' ? params.subject : def.subject(ctx);
+  const body = def.body(ctx);
+  const provider = process.env.EMAIL_PROVIDER || 'log';
+
+  if (provider === 'sendgrid' && process.env.SENDGRID_API_KEY) {
+    const res = await fetch('https://api.sendgrid.com/v3/mail/send', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${process.env.SENDGRID_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        personalizations: [{ to: [{ email: params.to }] }],
+        from: {
+          email: process.env.EMAIL_FROM || 'noreply@luxgen.com',
+          name: process.env.EMAIL_FROM_NAME || 'LuxGen',
+        },
+        subject,
+        content: [{ type: 'text/plain', value: body }],
+      }),
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`SendGrid error ${res.status}: ${text}`);
+    }
+    return;
+  }
+
+  console.log(`[automation-email:${provider}] To: ${params.to} | Subject: ${subject}\n${body}`);
+}
+
+/** Best-effort recipient resolution from a trigger payload — checks the common field names in use across the codebase. */
+export function resolveRecipientEmail(payload: Record<string, unknown>): string | undefined {
+  const candidate = payload.customerEmail ?? payload.email ?? payload.studentEmail ?? payload.recipientEmail;
+  return typeof candidate === 'string' && candidate.includes('@') ? candidate : undefined;
+}
+EMAILEOF
+
+cat > packages/agent/src/automation/bridge.ts << 'BRIDGEEOF'
 import {
   Automation,
   AutomationRun,
@@ -308,15 +437,13 @@ async function executeAction(
       });
       break;
     }
-    case 'ISSUE_CERTIFICATE':
-      await executeIssueCertificate(action, automation, event, runId);
-      break;
     case 'NOTIFY_SLACK':
     case 'CALL_WEBHOOK':
     case 'TAG_USER':
     case 'ADD_TO_GROUP':
     case 'REMOVE_FROM_GROUP':
     case 'ENROLL_IN_COURSE':
+    case 'ISSUE_CERTIFICATE':
       console.log(
         `[automation-bridge] ${action.type} for "${automation.name}" (tenant=${event.tenantId})`,
         action.config ?? {},
@@ -436,41 +563,6 @@ async function recordAutomationActionTimeline(params: {
       metadata,
     });
   }
-}
-
-/**
- * Sets `Enrollment.certificateExpiresAt` from the action's `validityDays` config so the
- * `certificateReminderService` sweep job has something to scan. Without this, ISSUE_CERTIFICATE
- * was a log-only stub and CERTIFICATE_EXPIRING_SOON could never fire for real data.
- */
-async function executeIssueCertificate(
-  action: IAutomationAction,
-  automation: IAutomation,
-  event: AutomationEventPayload,
-  runId: string,
-): Promise<void> {
-  console.log(
-    `[automation-bridge] ISSUE_CERTIFICATE for "${automation.name}" (tenant=${event.tenantId})`,
-    action.config ?? {},
-  );
-
-  const orderIds = resolveOrderIds(event.payload);
-  if (orderIds) {
-    const validityDays = Number(action.config?.validityDays ?? 365);
-    const expiresAt = new Date(Date.now() + validityDays * 24 * 60 * 60 * 1000);
-    await Enrollment.updateOne(
-      { tenant: event.tenantId, course: orderIds.courseId, student: orderIds.studentId },
-      { certificateExpiresAt: expiresAt, certificateReminderSentAt: null },
-    );
-  }
-
-  await recordAutomationActionTimeline({
-    tenantId: event.tenantId,
-    automation,
-    action,
-    payload: event.payload,
-    runId,
-  });
 }
 
 function resolveOrderIds(
@@ -601,19 +693,6 @@ export async function emitAgentAutomationEvent(
   });
 }
 
-/** Fed by a daily sweep job (`certificateReminderService`), not a live user action. */
-export async function emitCertificateExpiringSoonEvent(
-  tenantId: string,
-  details: Record<string, unknown>,
-): Promise<number> {
-  return emitAutomationEvent({
-    tenantId,
-    triggerType: 'CERTIFICATE_EXPIRING_SOON',
-    payload: details,
-    source: 'system',
-  });
-}
-
 async function resolveTenantPlan(tenantId: string) {
   return resolveEffectivePlan(tenantId);
 }
@@ -630,3 +709,88 @@ async function incrementAutomationRuns(tenantId: string): Promise<void> {
   const period = currentUsagePeriod();
   await TenantUsageMonthly.findOneAndUpdate({ tenantId, period }, { $inc: { automationRuns: 1 } }, { upsert: true });
 }
+BRIDGEEOF
+
+git add packages/agent/src/automation/bridge.ts packages/agent/src/automation/email.ts
+git commit -m "fix(agent): make SEND_EMAIL actually send mail and re-evaluate flow conditions after a wait against live data
+
+Two correctness bugs in the Tower automation bridge:
+
+1. SEND_EMAIL was a log-only stub - every automation using it (welcome-sequence,
+   weekly-digest, completion-cert-slack templates already in the marketplace seed)
+   silently never sent real email. Added packages/agent/src/automation/email.ts
+   (self-contained SendGrid/log dispatch, mirroring apps/api/src/utils/email.ts)
+   and wired it into executeAction.
+
+2. planFlowExecutionFromDefinition resolved condition branches once, against the
+   trigger-time payload, before any wait step ran. A flow like 'wait 60 minutes,
+   then check if still unpaid' would evaluate the condition on stale data captured
+   an hour earlier. executeAutomationActions now walks the flow graph node-by-node
+   (walkFlowLive) and re-fetches live Enrollment state after every wait
+   (refreshEventPayload) before the next condition runs.
+
+No new dependencies, no new infrastructure, no schema changes - both fixes work
+within the existing engine and existing Enrollment model."
+
+if [ $? -ne 0 ]; then
+  echo "Fix commit failed — stopping before touching the feat branch. Check the error above."
+  exit 1
+fi
+
+git push -u origin fix/automation-send-email-and-live-condition-eval
+
+if command -v gh >/dev/null 2>&1; then
+  gh pr create \
+    --title "fix(agent): make SEND_EMAIL actually send mail and re-evaluate flow conditions after a wait against live data" \
+    --base main \
+    --label "help wanted" --label bug --label agent --label need-manual-review \
+    --body-file PR_DESCRIPTION_automation-send-email-and-live-condition-eval.md
+else
+  echo "gh CLI not found — open the PR manually:"
+  echo "  https://github.com/susil-bot/luxgen-monorepo/pull/new/fix/automation-send-email-and-live-condition-eval"
+  echo "  (body is in PR_DESCRIPTION_automation-send-email-and-live-condition-eval.md)"
+fi
+
+echo "== Step 5: create feat/ branch, stacked on the fix =="
+git checkout -b feat/automation-hub-industry-compounds
+
+cp /tmp/luxgen-combined-bridge.ts packages/agent/src/automation/bridge.ts
+cp /tmp/luxgen-combined-email.ts packages/agent/src/automation/email.ts
+
+git add -A
+git commit -m "feat(agent): industry-tagged compound catalog + recertification reminder + abandoned-cart reminder
+
+Proves the 'core is fixed, industry is a thin customization layer' model with
+two concrete cross-industry compounds: a compliance-training/franchise recert
+reminder (new trigger + sweep job) and an ecommerce abandoned-cart reminder
+(reuses existing trigger/wait/condition compounds, ships as a graph template).
+
+See docs/AUTOMATION_HUB_STRATEGY.md and docs/TEMPLATE_CONTROL_CORE.md for the
+full design. Depends on the paired fix/automation-send-email-and-live-condition-eval
+branch - the abandoned-cart template needs its live condition re-evaluation to
+behave correctly."
+
+if [ $? -ne 0 ]; then
+  echo "Feat commit failed — check the error above. The fix PR/branch above is still fine."
+  exit 1
+fi
+
+git push -u origin feat/automation-hub-industry-compounds
+
+if command -v gh >/dev/null 2>&1; then
+  gh pr create \
+    --title "feat(agent): industry-tagged compound catalog + recertification reminder + abandoned-cart reminder" \
+    --base fix/automation-send-email-and-live-condition-eval \
+    --label "help wanted" --label feat --label agent --label api --label graphql --label mongo --label need-manual-review \
+    --body-file PR_DESCRIPTION_automation-hub-industry-compounds.md
+else
+  echo "gh CLI not found — open the PR manually:"
+  echo "  https://github.com/susil-bot/luxgen-monorepo/pull/new/feat/automation-hub-industry-compounds"
+  echo "  Set base branch to fix/automation-send-email-and-live-condition-eval, not main."
+  echo "  (body is in PR_DESCRIPTION_automation-hub-industry-compounds.md)"
+fi
+
+echo ""
+echo "== Done. Before deploying either branch: =="
+echo "  npm run build --workspace=@luxgen/automation-flow"
+echo "  npm run build --workspace=@luxgen/agent"

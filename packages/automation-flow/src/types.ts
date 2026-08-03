@@ -32,6 +32,12 @@ export interface FlowCompoundDefinition {
   legacyTriggerType?: string;
   /** Maps to @luxgen/db AutomationActionType when kind === action */
   legacyActionType?: string;
+  /**
+   * Optional industry tags (e.g. 'ecommerce', 'compliance-training', 'franchise').
+   * Compounds are industry-agnostic by default (omit or leave empty = usable anywhere).
+   * Tags only drive Marketplace/Template Library discovery — never gate execution.
+   */
+  industry?: string[];
 }
 
 export interface FlowNodeBase {

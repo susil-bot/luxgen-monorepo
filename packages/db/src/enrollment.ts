@@ -28,6 +28,10 @@ export interface IEnrollment extends Document {
   cancelledAt?: Date;
   completedAt?: Date;
   enrolledAt: Date;
+  /** Set when ISSUE_CERTIFICATE fires with a validityDays config — drives recert reminders. */
+  certificateExpiresAt?: Date;
+  /** Last time the CERTIFICATE_EXPIRING_SOON reminder job notified this learner — prevents re-sends. */
+  certificateReminderSentAt?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -57,6 +61,8 @@ const enrollmentSchema = new Schema<IEnrollment>(
     cancelledAt: { type: Date },
     completedAt: { type: Date },
     enrolledAt: { type: Date, default: Date.now },
+    certificateExpiresAt: { type: Date },
+    certificateReminderSentAt: { type: Date },
   },
   { timestamps: true },
 );
@@ -65,6 +71,7 @@ enrollmentSchema.index({ course: 1, student: 1 }, { unique: true });
 enrollmentSchema.index({ tenant: 1, student: 1 });
 enrollmentSchema.index({ tenant: 1, paymentStatus: 1 });
 enrollmentSchema.index({ stripeCheckoutSessionId: 1 }, { sparse: true });
+enrollmentSchema.index({ certificateExpiresAt: 1 }, { sparse: true });
 
 export const Enrollment = model<IEnrollment>('Enrollment', enrollmentSchema);
 

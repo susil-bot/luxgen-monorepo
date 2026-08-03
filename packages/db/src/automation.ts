@@ -5,6 +5,7 @@ export type AutomationTriggerType =
   | 'USER_ENROLLED'
   | 'GROUP_JOINED'
   | 'CERTIFICATE_ISSUED'
+  | 'CERTIFICATE_EXPIRING_SOON'
   | 'SCHEDULE'
   | 'WEBHOOK'
   | 'ORDER_CREATED'
@@ -99,6 +100,7 @@ const automationSchema = new Schema<IAutomation>(
         'USER_ENROLLED',
         'GROUP_JOINED',
         'CERTIFICATE_ISSUED',
+        'CERTIFICATE_EXPIRING_SOON',
         'SCHEDULE',
         'WEBHOOK',
         'ORDER_CREATED',
