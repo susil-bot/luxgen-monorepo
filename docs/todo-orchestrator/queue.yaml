@@ -505,7 +505,7 @@ tasks:
     epic: E3
     priority: 0
     sla: M
-    status: todo
+    status: review
     title: Products list create edit — all fields persist
     skill: fullstack-developer
     source:
@@ -520,6 +520,8 @@ tasks:
     acceptance:
       - Create read update list reflect changes
       - No disabled fields that should save
+    notes: commerce on create/update + list hydrate; collections meta —
+      feat/products-fields-persist
   - id: T-COM-02
     epic: E3
     priority: 0

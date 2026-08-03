@@ -1,4 +1,4 @@
 export const organizationSectionDefaults = {
-  collectionsPlaceholder: 'Link groups — Phase 3',
+  collectionsPlaceholder: 'Comma-separated group or collection ids',
   tagsPlaceholder: 'current issue, bundle, digital',
 };

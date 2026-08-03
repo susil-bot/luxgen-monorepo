@@ -46,6 +46,13 @@ export interface CourseProductSource {
   createdAt?: string;
   instructor?: { firstName?: string; lastName?: string } | null;
   students?: { id: string }[] | null;
+  commerce?: {
+    priceCents?: number | null;
+    compareAtPriceCents?: number | null;
+    sku?: string | null;
+    category?: string | null;
+    currency?: string | null;
+  } | null;
 }
 
 const DEFAULT_SEO: ProductSeo = {
@@ -70,6 +77,42 @@ export const DEFAULT_PRODUCT_EDIT_META: ProductEditMeta = {
   sellWhenOutOfStock: false,
   themeTemplate: 'default',
 };
+
+export function centsToPriceString(cents: number | null | undefined): string {
+  if (cents == null || !Number.isFinite(cents)) return '';
+  return (cents / 100).toFixed(2);
+}
+
+export function priceStringToCents(price: string | undefined): number | null {
+  if (!price?.trim()) return null;
+  const normalized = price.replace(/[^0-9.]/g, '');
+  const value = Number.parseFloat(normalized);
+  if (!Number.isFinite(value) || value < 0) return null;
+  return Math.round(value * 100);
+}
+
+export function commerceInputFromMeta(meta: ProductEditMeta): {
+  priceCents?: number;
+  compareAtPriceCents?: number;
+  sku?: string;
+  category?: string;
+  currency: string;
+} {
+  const commerce: {
+    priceCents?: number;
+    compareAtPriceCents?: number;
+    sku?: string;
+    category?: string;
+    currency: string;
+  } = { currency: 'usd' };
+  const priceCents = priceStringToCents(meta.price);
+  const compareAtPriceCents = priceStringToCents(meta.compareAtPrice);
+  if (priceCents != null) commerce.priceCents = priceCents;
+  if (compareAtPriceCents != null) commerce.compareAtPriceCents = compareAtPriceCents;
+  if (meta.sku?.trim()) commerce.sku = meta.sku.trim();
+  if (meta.category?.trim()) commerce.category = meta.category.trim();
+  return commerce;
+}
 
 export function statusBadgeClass(status: ProductStatus): string {
   switch (status) {
@@ -162,13 +205,7 @@ export function parseProductMeta(raw: string | null | undefined): {
 
 function appendProductMeta(content: string, meta: ProductEditMeta): string {
   const base = content.trim();
-  const hasValues = Object.entries(meta).some(([k, v]) => {
-    if (k === 'productType' || k === 'themeTemplate' || k === 'trackInventory') return false;
-    if (Array.isArray(v)) return v.length > 0;
-    if (typeof v === 'boolean') return v !== DEFAULT_PRODUCT_EDIT_META[k as keyof ProductEditMeta];
-    return v !== '' && v !== null;
-  });
-  if (!hasValues) return base;
+  // Always persist meta so type/theme/inventory toggles and empty price clears survive reload.
   return `${base}${META_MARKER}${JSON.stringify(meta)}\n-->`;
 }
 
@@ -190,6 +227,7 @@ export function mapCourseToProductEditState(course: CourseProductSource): Produc
   const parsed = parseProductEditRecord(course.description);
   const vendor = courseVendor(course);
   const sku = defaultSku(course.id);
+  const commerce = course.commerce;
 
   return {
     title: course.title ?? '',
@@ -200,8 +238,11 @@ export function mapCourseToProductEditState(course: CourseProductSource): Produc
     meta: {
       ...parsed.meta,
       vendor: parsed.meta.vendor || vendor,
-      sku: parsed.meta.sku || sku,
+      sku: parsed.meta.sku || commerce?.sku || sku,
+      category: parsed.meta.category || commerce?.category || '',
       productType: parsed.meta.productType || 'Course',
+      price: parsed.meta.price || centsToPriceString(commerce?.priceCents ?? null),
+      compareAtPrice: parsed.meta.compareAtPrice || centsToPriceString(commerce?.compareAtPriceCents ?? null),
     },
   };
 }
@@ -212,11 +253,13 @@ export function buildCourseUpdateInput(
   title: string;
   description: string;
   status: ProductStatus;
+  commerce: ReturnType<typeof commerceInputFromMeta>;
 } {
   return {
     title: state.title.trim(),
     description: serializeProductEditRecord(state.bodyHtml, state.seo, state.meta),
     status: state.status,
+    commerce: commerceInputFromMeta(state.meta),
   };
 }
 
@@ -229,11 +272,13 @@ export function buildCourseCreateInput(
   description: string;
   instructorId: string;
   tenantId: string;
+  commerce: ReturnType<typeof commerceInputFromMeta>;
 } {
   return {
     title: state.title.trim(),
     description: serializeProductEditRecord(state.bodyHtml, state.seo, state.meta),
     instructorId,
     tenantId,
+    commerce: commerceInputFromMeta(state.meta),
   };
 }
