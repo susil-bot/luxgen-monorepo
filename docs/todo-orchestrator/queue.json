@@ -34,7 +34,7 @@
         "docs/TODO-Commerce Experience.md has content on main",
         "docs/TODO-role.md exists on main"
       ],
-      "notes": "Done: PR #453/#454 merged — commerce + role TODO docs on main"
+      "notes": "Done: PR #453/#454 merged \u2014 commerce + role TODO docs on main"
     },
     {
       "id": "T-E0-02",
@@ -77,7 +77,7 @@
       ],
       "deps": [],
       "acceptance": [
-        "Gap table for §11–§12 model/GraphQL and builder UI",
+        "Gap table for \u00a711\u2013\u00a712 model/GraphQL and builder UI",
         "File paths cited",
         "No product code unless documenting a one-line truth fix"
       ]
@@ -110,7 +110,7 @@
       "epic": "E0",
       "priority": 1,
       "sla": "S",
-      "status": "review",
+      "status": "done",
       "title": "Audit Sitemap L1/L2 vs DefaultNavigation + pages",
       "skill": "sidebar",
       "source": {
@@ -126,7 +126,7 @@
         "Missing/partial routes table for Learning Commerce Automation Analytics",
         "Uses DefaultNavigation.tsx as nav source of truth"
       ],
-      "notes": "sitemap-gaps.md — chore/audit-sitemap-nav-gaps"
+      "notes": "sitemap-gaps.md \u2014 chore/audit-sitemap-nav-gaps \u2014 merged #466"
     },
     {
       "id": "T-E0-06",
@@ -154,7 +154,7 @@
       "epic": "E1",
       "priority": 0,
       "sla": "M",
-      "status": "review",
+      "status": "done",
       "title": "Global search overlay shell (header + Cmd/Ctrl+K)",
       "skill": "ios-design",
       "source": {
@@ -175,7 +175,7 @@
         "Filter sidebar + results panel shell render",
         "Uses iOS tokens; guest auth rules intact"
       ],
-      "notes": "Overlay shell + ⌘K host — feat/global-search-overlay-shell"
+      "notes": "Overlay shell + \u2318K host \u2014 feat/global-search-overlay-shell \u2014 merged #465"
     },
     {
       "id": "T-SRCH-02",
@@ -303,7 +303,7 @@
       "priority": 3,
       "sla": "L",
       "status": "wont",
-      "title": "AI conversational search (SPLIT REQUIRED — do not enqueue)",
+      "title": "AI conversational search (SPLIT REQUIRED \u2014 do not enqueue)",
       "skill": "ai-studio",
       "source": {
         "file": "docs/TODO-search.md",
@@ -396,7 +396,7 @@
       "priority": 0,
       "sla": "M",
       "status": "done",
-      "title": "Align automation data model with flowDefinition + TODO §11",
+      "title": "Align automation data model with flowDefinition + TODO \u00a711",
       "skill": "automation",
       "source": {
         "file": "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md",
@@ -424,7 +424,7 @@
       "priority": 0,
       "sla": "M",
       "status": "done",
-      "title": "Close one GraphQL mutation family from TODO §12 (pick highest gap from audit)",
+      "title": "Close one GraphQL mutation family from TODO \u00a712 (pick highest gap from audit)",
       "skill": "graphql",
       "source": {
         "file": "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md",
@@ -444,14 +444,14 @@
         "Resolvers thin; services hold logic",
         "Single feat PR"
       ],
-      "notes": "duplicateAutomation mutation (TODO §12 DuplicateWorkflow) — feat/automation-duplicate-mutation"
+      "notes": "duplicateAutomation mutation (TODO \u00a712 DuplicateWorkflow) \u2014 feat/automation-duplicate-mutation"
     },
     {
       "id": "T-AUTO-03",
       "epic": "E2",
       "priority": 0,
       "sla": "M",
-      "status": "review",
+      "status": "done",
       "title": "Builder canvas add/edit/delete step wired to live mutations",
       "skill": "automation",
       "source": {
@@ -470,14 +470,14 @@
         "User can add configure delete a step and persist",
         "iOS tokens; no mock-only save"
       ],
-      "notes": "Config-panel Delete + dirty footer + ⌘S / Delete keys — feat/tower-step-crud-persist"
+      "notes": "Config-panel Delete + dirty footer + \u2318S / Delete keys \u2014 feat/tower-step-crud-persist \u2014 merged #460"
     },
     {
       "id": "T-AUTO-04",
       "epic": "E2",
       "priority": 0,
       "sla": "M",
-      "status": "review",
+      "status": "done",
       "title": "Publish pause archive workflow actions + status UI",
       "skill": "automation",
       "source": {
@@ -495,7 +495,7 @@
       "acceptance": [
         "Status transitions persist and reflect in list/detail"
       ],
-      "notes": "AutomationStatus draft/live/paused/archived + publish/pause/archive mutations — feat/automation-status-lifecycle"
+      "notes": "AutomationStatus draft/live/paused/archived + publish/pause/archive mutations \u2014 feat/automation-status-lifecycle \u2014 merged #461"
     },
     {
       "id": "T-AUTO-05",
@@ -599,7 +599,7 @@
       "priority": 2,
       "sla": "L",
       "status": "wont",
-      "title": "Real-time run subscriptions (SPLIT — schema then UI)",
+      "title": "Real-time run subscriptions (SPLIT \u2014 schema then UI)",
       "skill": "graphql",
       "source": {
         "file": "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md",
@@ -643,8 +643,8 @@
       "epic": "E3",
       "priority": 0,
       "sla": "M",
-      "status": "review",
-      "title": "Products list create edit — all fields persist",
+      "status": "done",
+      "title": "Products list create edit \u2014 all fields persist",
       "skill": "fullstack-developer",
       "source": {
         "file": "docs/TODO-Commerce Experience.md",
@@ -662,14 +662,14 @@
         "Create read update list reflect changes",
         "No disabled fields that should save"
       ],
-      "notes": "commerce on create/update + list hydrate; collections meta — feat/products-fields-persist"
+      "notes": "commerce on create/update + list hydrate; collections meta \u2014 feat/products-fields-persist \u2014 merged #462"
     },
     {
       "id": "T-COM-02",
       "epic": "E3",
       "priority": 0,
       "sla": "M",
-      "status": "review",
+      "status": "done",
       "title": "Orders list detail status filters live",
       "skill": "fullstack-developer",
       "source": {
@@ -687,14 +687,14 @@
       "acceptance": [
         "Filters work; detail shows line items status payment"
       ],
-      "notes": "Live payment/fulfillment/learning filters + detail line items — feat/orders-status-filters-detail"
+      "notes": "Live payment/fulfillment/learning filters + detail line items \u2014 feat/orders-status-filters-detail \u2014 merged #463"
     },
     {
       "id": "T-COM-03",
       "epic": "E3",
       "priority": 0,
       "sla": "M",
-      "status": "review",
+      "status": "done",
       "title": "Customers list detail edit per commerce TODO",
       "skill": "persona-pages",
       "source": {
@@ -712,7 +712,7 @@
       "acceptance": [
         "CRUD chain complete; tenant scoped"
       ],
-      "notes": "Staff + tenant gates on customers/create/update/delete/notes — feat/customers-commerce-crud"
+      "notes": "Staff + tenant gates on customers/create/update/delete/notes \u2014 feat/customers-commerce-crud \u2014 merged #464"
     },
     {
       "id": "T-COM-04",

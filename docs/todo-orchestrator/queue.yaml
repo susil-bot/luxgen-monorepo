@@ -88,7 +88,7 @@ tasks:
     epic: E0
     priority: 1
     sla: S
-    status: review
+    status: done
     title: Audit Sitemap L1/L2 vs DefaultNavigation + pages
     skill: sidebar
     source:
@@ -122,7 +122,7 @@ tasks:
     epic: E1
     priority: 0
     sla: M
-    status: review
+    status: done
     title: Global search overlay shell (header + Cmd/Ctrl+K)
     skill: ios-design
     source:
@@ -352,7 +352,7 @@ tasks:
     epic: E2
     priority: 0
     sla: M
-    status: review
+    status: done
     title: Builder canvas add/edit/delete step wired to live mutations
     skill: automation
     source:
@@ -374,7 +374,7 @@ tasks:
     epic: E2
     priority: 0
     sla: M
-    status: review
+    status: done
     title: Publish pause archive workflow actions + status UI
     skill: automation
     source:
@@ -507,7 +507,7 @@ tasks:
     epic: E3
     priority: 0
     sla: M
-    status: review
+    status: done
     title: Products list create edit — all fields persist
     skill: fullstack-developer
     source:
@@ -528,7 +528,7 @@ tasks:
     epic: E3
     priority: 0
     sla: M
-    status: review
+    status: done
     title: Orders list detail status filters live
     skill: fullstack-developer
     source:
@@ -548,7 +548,7 @@ tasks:
     epic: E3
     priority: 0
     sla: M
-    status: review
+    status: done
     title: Customers list detail edit per commerce TODO
     skill: persona-pages
     source:
