@@ -90,7 +90,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 
 | ID | Pri | SLA | Source slice | Task | Skill |
 | --- | --- | --- | --- | --- | --- |
-| [ ] `T-SRCH-01` | P0 | M | L25–L256 | Global search overlay: open via header + ⌘K/Ctrl+K; filters + result list shell | `ios-design` + `fullstack-developer` |
+| [x] `T-SRCH-01` | P0 | M | L25–L256 | Global search overlay: open via header + ⌘K/Ctrl+K; filters + result list shell | `ios-design` → review `feat/global-search-overlay-shell` |
 | [ ] `T-SRCH-02` | P0 | M | L187–L256 | Result cards for Courses + Learners (live GraphQL or existing queries) | `graphql` |
 | [ ] `T-SRCH-03` | P1 | M | L258–L425 | Command palette: create/nav commands (subset: create course, go dashboard, go orders) | `ios-design` |
 | [ ] `T-SRCH-04` | P1 | M | L569–L660 | Saved searches: persist per-user (localStorage MVP OK if API absent; document follow-up) | `fullstack-developer` |

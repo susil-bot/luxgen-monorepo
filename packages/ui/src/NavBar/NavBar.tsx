@@ -25,7 +25,11 @@ export interface NavBarProps {
   onUserAction?: (action: 'profile' | 'settings' | 'logout') => void;
   showSearch?: boolean;
   onSearch?: (query: string) => void;
+  /** Fired when the header search field is focused (e.g. open global overlay) */
+  onSearchFocus?: () => void;
   searchPlaceholder?: string;
+  /** Keyboard shortcut hint next to the header search field */
+  searchShortcutBadge?: string;
   showNotifications?: boolean;
   notificationCount?: number;
   notificationsLoading?: boolean;
@@ -53,7 +57,9 @@ const NavBarComponent: React.FC<NavBarProps> = ({
   onUserAction,
   showSearch = true,
   onSearch,
+  onSearchFocus,
   searchPlaceholder = 'Search',
+  searchShortcutBadge,
   showNotifications = false,
   notificationCount = 0,
   notificationsLoading = false,
@@ -200,7 +206,13 @@ const NavBarComponent: React.FC<NavBarProps> = ({
               type="button"
               className="sm:hidden p-2"
               aria-label="Search"
-              onClick={() => setMobileSearchOpen((v) => !v)}
+              onClick={() => {
+                if (onSearchFocus) {
+                  onSearchFocus();
+                  return;
+                }
+                setMobileSearchOpen((v) => !v);
+              }}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -214,7 +226,13 @@ const NavBarComponent: React.FC<NavBarProps> = ({
             <div
               className={`${mobileSearchOpen ? 'fixed inset-x-0 top-14 z-50 px-4 py-2 bg-[var(--color-bg-primary)] sm:static sm:flex-1 sm:min-w-0 sm:max-w-md sm:mx-4' : 'hidden sm:block sm:flex-1 sm:min-w-0 sm:max-w-md sm:mx-2 sm:mx-4'}`}
             >
-              <SearchBar placeholder={searchPlaceholder} onSearch={handleSearch} size="sm" />
+              <SearchBar
+                placeholder={searchPlaceholder}
+                onSearch={handleSearch}
+                onFocus={onSearchFocus}
+                shortcutBadge={searchShortcutBadge}
+                size="sm"
+              />
             </div>
           </>
         )}

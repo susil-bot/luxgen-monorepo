@@ -12,6 +12,7 @@ import { SessionMonitor } from '../components/auth/SessionMonitor';
 import { SessionSync } from '../components/auth/SessionSync';
 import { SuperAdminTenantSwitchProvider } from '../components/layout/SuperAdminTenantSwitchProvider';
 import { GlobalNotificationHost } from '../lib/global-notifications';
+import { GlobalSearchHost } from '../lib/global-search';
 import { AIStudioSidekickPanel } from '../components/agent/AIStudioSidekickPanel';
 import { DefaultPageHead } from '../components/seo/PageHead';
 import { LayoutUserProvider } from '../lib/layout-user-context';
@@ -56,22 +57,24 @@ export default function App({ Component, pageProps }: AppProps) {
                 <LayoutUserProvider initialUser={layoutUser}>
                   <SuperAdminTenantSwitchProvider>
                     <GlobalNotificationHost>
-                      <SessionMonitor />
-                      <SessionSync />
-                      <AIStudioPanelSlot>
-                        <AIStudioSidekickPanel />
-                      </AIStudioPanelSlot>
-                      <a
-                        href="#main-content"
-                        className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:px-3 focus:py-2"
-                      >
-                        Skip to main content
-                      </a>
-                      <AuthGuard>
-                        <ErrorBoundary>
-                          <Component {...pageProps} />
-                        </ErrorBoundary>
-                      </AuthGuard>
+                      <GlobalSearchHost>
+                        <SessionMonitor />
+                        <SessionSync />
+                        <AIStudioPanelSlot>
+                          <AIStudioSidekickPanel />
+                        </AIStudioPanelSlot>
+                        <a
+                          href="#main-content"
+                          className="sr-only focus:not-sr-only focus:absolute focus:top-2 focus:left-2 focus:z-[9999] focus:px-3 focus:py-2"
+                        >
+                          Skip to main content
+                        </a>
+                        <AuthGuard>
+                          <ErrorBoundary>
+                            <Component {...pageProps} />
+                          </ErrorBoundary>
+                        </AuthGuard>
+                      </GlobalSearchHost>
                     </GlobalNotificationHost>
                   </SuperAdminTenantSwitchProvider>
                 </LayoutUserProvider>

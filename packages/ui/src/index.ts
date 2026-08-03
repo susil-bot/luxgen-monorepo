@@ -58,6 +58,7 @@ export * from './EditProfile';
 
 // Search and Navigation Components
 export * from './SearchBar';
+export * from './GlobalSearch';
 export * from './CountryLanguageDropdown';
 
 // Display Components

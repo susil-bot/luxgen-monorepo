@@ -76,11 +76,13 @@ export interface UserDashboardLayoutProps extends BaseComponentProps {
   loading?: boolean;
   onUserAction?: (action: 'profile' | 'settings' | 'logout') => void;
   onSearch?: (query: string) => void;
+  onSearchFocus?: () => void;
   onNotificationClick?: () => void;
   showSearch?: boolean;
   showNotifications?: boolean;
   notificationCount?: number;
   searchPlaceholder?: string;
+  searchShortcutBadge?: string;
   responsive?: boolean;
   mobileBreakpoint?: number;
   tabletBreakpoint?: number;
@@ -125,11 +127,13 @@ const UserDashboardLayoutComponent: React.FC<UserDashboardLayoutProps> = ({
   loading = false,
   onUserAction,
   onSearch,
+  onSearchFocus,
   onNotificationClick,
   showSearch = true,
   showNotifications = false,
   notificationCount = 0,
   searchPlaceholder = 'Search...',
+  searchShortcutBadge,
   responsive = true,
   mobileBreakpoint = 768,
   tabletBreakpoint = 1024,
@@ -160,11 +164,13 @@ const UserDashboardLayoutComponent: React.FC<UserDashboardLayoutProps> = ({
           user={user}
           onUserAction={onUserAction}
           onSearch={onSearch}
+          onSearchFocus={onSearchFocus}
           onNotificationClick={onNotificationClick}
           showSearch={showSearch}
           showNotifications={showNotifications}
           notificationCount={notificationCount}
           searchPlaceholder={searchPlaceholder}
+          searchShortcutBadge={searchShortcutBadge}
           logo={logo}
           responsive={responsive}
           mobileBreakpoint={mobileBreakpoint}
