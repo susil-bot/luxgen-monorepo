@@ -34,7 +34,7 @@ const EditProfilePageContentImpl: React.FC = () => {
       
       setUserData(data);
       showSuccess('Profile updated successfully!');
-    } catch (error) {
+    } catch (_error) {
       showError('Failed to update profile. Please try again.');
     } finally {
       setLoading(false);
@@ -52,7 +52,7 @@ const EditProfilePageContentImpl: React.FC = () => {
         showSuccess('Profile picture updated successfully!');
       };
       reader.readAsDataURL(file);
-    } catch (error) {
+    } catch (_error) {
       showError('Failed to update profile picture. Please try again.');
     }
   };
