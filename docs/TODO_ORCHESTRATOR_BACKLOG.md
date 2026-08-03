@@ -75,7 +75,7 @@ Status key: `[ ]` todo · `[~]` doing/review · `[x]` done · `[!]` blocked · `
 | --- | --- | --- | --- | --- |
 | [ ] `T-E0-01` | P0 | S | Merge/ensure commerce+role TODO docs on `main` (#453) | Both files non-empty on `main` |
 | [x] `T-E0-02` | P0 | S | Audit Search: map TODO sections → existing routes/components | → `docs/todo-orchestrator/audits/search-gaps.md` |
-| [ ] `T-E0-03` | P0 | S | Audit Automation builder: TODO vs `/automations` + GraphQL | Gap list with file paths |
+| [x] `T-E0-03` | P0 | S | Audit Automation builder: TODO vs `/automations` + GraphQL | → `docs/todo-orchestrator/audits/automation-gaps.md` |
 | [ ] `T-E0-04` | P0 | S | Audit Commerce: TODO vs `/products` `/orders` `/admin/customers` | Gap list; mark already-wired |
 | [ ] `T-E0-05` | P1 | S | Audit Sitemap L1/L2 vs `DefaultNavigation.tsx` + pages | Missing routes table |
 | [ ] `T-E0-06` | P1 | S | Audit Role modules vs `/organization/*` settings | Gap list for IAM/SSO/SCIM |

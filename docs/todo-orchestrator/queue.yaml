@@ -51,7 +51,7 @@ tasks:
     epic: E0
     priority: 0
     sla: S
-    status: todo
+    status: done
     title: Audit Automation builder TODO vs automations UI + GraphQL
     skill: automation
     source:
