@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
 import { AppLayout } from '@luxgen/ui';
 import { useAppShellConfig } from '../lib/app-shell-config';
@@ -68,6 +68,34 @@ export default function SearchPage() {
     const name = typeof window !== 'undefined' ? window.prompt('Name this saved search:', q) : null;
     if (!name) return;
     saveSearch(name, q, tenant);
+  };
+
+  // T-SRCH-05: advanced course filters. The search presenter only surfaces title/description/status
+  // today (packages/presenters/search) — richer facets (price, enrollment, completion rate) need a
+  // GraphQL field addition, which is out of this task's apps/web-only scope. Multi-select status +
+  // sort is the honest slice available from data already on the wire.
+  const COURSE_STATUSES = ['Published', 'Draft', 'Archived'] as const;
+  const [statusFilters, setStatusFilters] = useState<Set<string>>(new Set(COURSE_STATUSES));
+  const [courseSort, setCourseSort] = useState<'title-asc' | 'title-desc'>('title-asc');
+
+  const filteredCourses = useMemo(() => {
+    const filtered = viewModel.courses.filter((c) => statusFilters.has(c.status));
+    return [...filtered].sort((a, b) =>
+      courseSort === 'title-asc' ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title),
+    );
+  }, [viewModel.courses, statusFilters, courseSort]);
+
+  const toggleStatusFilter = (status: string) => {
+    setStatusFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(status)) {
+        if (next.size === 1) return next; // keep at least one status selected
+        next.delete(status);
+      } else {
+        next.add(status);
+      }
+      return next;
+    });
   };
 
   // Record a completed search once results have settled (T-SRCH-06).
@@ -200,9 +228,34 @@ export default function SearchPage() {
           ) : (
             <div className="space-y-6">
               <section>
-                <h2 className="font-semibold mb-2">Courses ({viewModel.courseCount})</h2>
+                <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
+                  <h2 className="font-semibold m-0">Courses ({filteredCourses.length})</h2>
+                  <div className="flex items-center gap-3 flex-wrap" role="group" aria-label="Course filters">
+                    <div className="flex items-center gap-2">
+                      {COURSE_STATUSES.map((status) => (
+                        <label key={status} className="flex items-center gap-1 text-xs cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={statusFilters.has(status)}
+                            onChange={() => toggleStatusFilter(status)}
+                          />
+                          {status}
+                        </label>
+                      ))}
+                    </div>
+                    <select
+                      aria-label="Sort courses"
+                      className="input-field text-xs"
+                      value={courseSort}
+                      onChange={(e) => setCourseSort(e.target.value as 'title-asc' | 'title-desc')}
+                    >
+                      <option value="title-asc">Title A-Z</option>
+                      <option value="title-desc">Title Z-A</option>
+                    </select>
+                  </div>
+                </div>
                 <ul className="space-y-1 list-none m-0 p-0">
-                  {viewModel.courses.map((c) => (
+                  {filteredCourses.map((c) => (
                     <li key={c.id} style={{ borderBottom: '1px solid var(--color-separator)' }}>
                       <a
                         href={c.href}
