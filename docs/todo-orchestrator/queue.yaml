@@ -166,7 +166,7 @@ tasks:
     epic: E1
     priority: 1
     sla: M
-    status: todo
+    status: done
     title: Command palette subset (create course, nav dashboard/orders)
     skill: ios-design
     source:
@@ -180,6 +180,8 @@ tasks:
     acceptance:
       - At least 3 create/nav commands work
       - Keyboard select + enter navigates
+    notes: CommandPaletteOverlay (apps/web-only) + verified-href command list;
+      '>' prefix switches GlobalSearchHost into command mode — feat/frontend-todo-batch
   - id: T-SRCH-04
     epic: E1
     priority: 1
@@ -219,7 +221,7 @@ tasks:
     epic: E1
     priority: 2
     sla: S
-    status: todo
+    status: done
     title: Recent searches list + clear
     skill: ios-design
     source:
@@ -232,6 +234,8 @@ tasks:
       - T-SRCH-01
     acceptance:
       - Shows last searches; clear removes them
+    notes: localStorage recent-searches lib + list/clear on /search empty state —
+      feat/frontend-todo-batch
   - id: T-SRCH-07
     epic: E1
     priority: 3
@@ -271,7 +275,7 @@ tasks:
     epic: E1
     priority: 2
     sla: S
-    status: todo
+    status: done
     title: Search overlay a11y (focus trap aria keyboard)
     skill: ios-design
     source:
@@ -285,11 +289,13 @@ tasks:
       - T-SRCH-01
     acceptance:
       - Focus trapped; aria labels; Tab cycle; Esc restores focus
+    notes: GlobalSearchOverlay (packages/ui) — focus trap, role=combobox/listbox/option,
+      roving ArrowUp/Down+Enter, focus restore on close — feat/frontend-todo-batch
   - id: T-SRCH-10
     epic: E1
     priority: 2
     sla: S
-    status: todo
+    status: done
     title: Search error empty loading states
     skill: ios-design
     source:
@@ -302,6 +308,9 @@ tasks:
       - T-SRCH-02
     acceptance:
       - Distinct UI for loading empty error; no fabricated results
+    notes: Verified pre-existing — ResultsPanel (packages/ui) and /search page both
+      already render distinct loading/empty/error states with no fabricated results;
+      no code change needed, AC already met — feat/frontend-todo-batch
   - id: T-AUTO-01
     epic: E2
     priority: 0
@@ -776,7 +785,7 @@ tasks:
     epic: E4
     priority: 2
     sla: S
-    status: todo
+    status: done
     title: Search route in nav + page exists
     skill: sidebar
     source:
@@ -790,6 +799,8 @@ tasks:
       - T-SRCH-01
     acceptance:
       - /search reachable from nav; page renders overlay or dedicated UI
+    notes: Added Search sidebar item -> /search (page existed, had zero nav entry) —
+      feat/frontend-todo-batch
   - id: T-MAP-07
     epic: E4
     priority: 3
@@ -950,7 +961,7 @@ tasks:
     epic: E1
     priority: 2
     sla: S
-    status: todo
+    status: done
     title: Pinned searches (star + pin list in overlay)
     skill: ios-design
     source:
@@ -964,6 +975,8 @@ tasks:
     acceptance:
       - User can pin a search and see it in Pinned list
       - Pin state survives reload (localStorage MVP OK)
+    notes: localStorage pinned-searches lib (max 5) + pin/unpin UI on /search —
+      feat/frontend-todo-batch
   - id: T-SRCH-12
     epic: E1
     priority: 2
