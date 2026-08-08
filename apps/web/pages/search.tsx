@@ -20,6 +20,7 @@ import {
   unpinSearch,
   type PinnedSearchEntry,
 } from '../lib/pinned-searches';
+import { saveSearch } from '../lib/saved-searches';
 
 function timeAgo(ts: number): string {
   const diffMs = Date.now() - ts;
@@ -61,6 +62,14 @@ export default function SearchPage() {
     setPinned(currentIsPinned ? unpinSearch(q) : pinSearch(q));
   };
 
+  // T-SRCH-04: save the current query under a name, reopenable from /search/saved.
+  const handleSaveSearch = () => {
+    if (!q) return;
+    const name = typeof window !== 'undefined' ? window.prompt('Name this saved search:', q) : null;
+    if (!name) return;
+    saveSearch(name, q, tenant);
+  };
+
   // Record a completed search once results have settled (T-SRCH-06).
   useEffect(() => {
     if (!q || loading || error) return;
@@ -81,18 +90,28 @@ export default function SearchPage() {
       <AppLayout sidebarSections={sidebarSections} user={layoutUser ?? undefined} logo={logo} responsive>
         <div className="max-w-3xl mx-auto px-4 py-8">
           <div className="flex items-center justify-between gap-3 mb-2">
-            <h1 className="ios-large-title">Search</h1>
+            <div className="flex items-baseline gap-3">
+              <h1 className="ios-large-title">Search</h1>
+              <a href="/search/saved" className="ios-btn-plain text-xs no-underline">
+                Saved searches
+              </a>
+            </div>
             {q ? (
-              <button
-                type="button"
-                className="ios-btn-secondary text-xs flex-shrink-0"
-                onClick={togglePinCurrent}
-                disabled={!currentIsPinned && isPinnedLimitReached()}
-                title={!currentIsPinned && isPinnedLimitReached() ? 'Max 5 pinned searches — unpin one first' : undefined}
-                aria-pressed={currentIsPinned}
-              >
-                {currentIsPinned ? '📌 Pinned' : '📌 Pin this search'}
-              </button>
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button type="button" className="ios-btn-secondary text-xs" onClick={handleSaveSearch}>
+                  ⭐ Save this search
+                </button>
+                <button
+                  type="button"
+                  className="ios-btn-secondary text-xs"
+                  onClick={togglePinCurrent}
+                  disabled={!currentIsPinned && isPinnedLimitReached()}
+                  title={!currentIsPinned && isPinnedLimitReached() ? 'Max 5 pinned searches — unpin one first' : undefined}
+                  aria-pressed={currentIsPinned}
+                >
+                  {currentIsPinned ? '📌 Pinned' : '📌 Pin this search'}
+                </button>
+              </div>
             ) : null}
           </div>
           {!viewModel.hasQuery ? (
