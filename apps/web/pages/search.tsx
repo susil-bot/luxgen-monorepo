@@ -13,6 +13,13 @@ import {
   removeRecentSearch,
   type RecentSearchEntry,
 } from '../lib/recent-searches';
+import {
+  getPinnedSearches,
+  isPinnedLimitReached,
+  pinSearch,
+  unpinSearch,
+  type PinnedSearchEntry,
+} from '../lib/pinned-searches';
 
 function timeAgo(ts: number): string {
   const diffMs = Date.now() - ts;
@@ -40,11 +47,19 @@ export default function SearchPage() {
   });
 
   const [recent, setRecent] = useState<RecentSearchEntry[]>([]);
+  const [pinned, setPinned] = useState<PinnedSearchEntry[]>([]);
 
-  // Load recent searches once on mount (client-only — localStorage).
+  // Load recent + pinned searches once on mount (client-only — localStorage).
   useEffect(() => {
     setRecent(getRecentSearches());
+    setPinned(getPinnedSearches());
   }, []);
+
+  const currentIsPinned = q ? pinned.some((p) => p.query.toLowerCase() === q.toLowerCase()) : false;
+  const togglePinCurrent = () => {
+    if (!q) return;
+    setPinned(currentIsPinned ? unpinSearch(q) : pinSearch(q));
+  };
 
   // Record a completed search once results have settled (T-SRCH-06).
   useEffect(() => {
@@ -65,10 +80,57 @@ export default function SearchPage() {
       <PageHead title={q ? `Search: ${q}` : 'Search'} robots="noindex" />
       <AppLayout sidebarSections={sidebarSections} user={layoutUser ?? undefined} logo={logo} responsive>
         <div className="max-w-3xl mx-auto px-4 py-8">
-          <h1 className="ios-large-title mb-2">Search</h1>
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <h1 className="ios-large-title">Search</h1>
+            {q ? (
+              <button
+                type="button"
+                className="ios-btn-secondary text-xs flex-shrink-0"
+                onClick={togglePinCurrent}
+                disabled={!currentIsPinned && isPinnedLimitReached()}
+                title={!currentIsPinned && isPinnedLimitReached() ? 'Max 5 pinned searches — unpin one first' : undefined}
+                aria-pressed={currentIsPinned}
+              >
+                {currentIsPinned ? '📌 Pinned' : '📌 Pin this search'}
+              </button>
+            ) : null}
+          </div>
           {!viewModel.hasQuery ? (
             <div className="space-y-6">
               <PageEmptyState title="Enter a search term" subtitle="Use ⌘K / Ctrl+K or the nav search to find courses and learners." />
+              {pinned.length > 0 ? (
+                <section aria-label="Pinned searches">
+                  <h2 className="font-semibold text-sm mb-2" style={{ color: 'var(--color-label-secondary)' }}>
+                    PINNED
+                  </h2>
+                  <ul className="list-none m-0 p-0 space-y-1">
+                    {pinned.map((entry) => (
+                      <li
+                        key={entry.query}
+                        className="flex items-center justify-between gap-3 py-2 px-1"
+                        style={{ borderBottom: '1px solid var(--color-separator)' }}
+                      >
+                        <a
+                          href={`/search?q=${encodeURIComponent(entry.query)}&tenant=${tenant}`}
+                          className="flex-1 min-w-0 no-underline"
+                          style={{ color: 'var(--color-label-primary)' }}
+                        >
+                          <span aria-hidden>📌 </span>
+                          <span className="text-sm font-medium">{entry.query}</span>
+                        </a>
+                        <button
+                          type="button"
+                          aria-label={`Unpin "${entry.query}"`}
+                          className="ios-btn-plain text-xs flex-shrink-0"
+                          onClick={() => setPinned(unpinSearch(entry.query))}
+                        >
+                          Unpin
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
               {recent.length > 0 ? (
                 <section aria-label="Recent searches">
                   <div className="flex items-center justify-between mb-2">
