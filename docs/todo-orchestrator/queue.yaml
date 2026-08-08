@@ -708,7 +708,7 @@ tasks:
     epic: E4
     priority: 1
     sla: M
-    status: todo
+    status: done
     title: Automation/AI sitemap items missing from nav
     skill: sidebar
     source:
@@ -722,6 +722,12 @@ tasks:
       - T-E0-05
     acceptance:
       - Nav entries match shipped pages; no dead links
+    notes: admin/agent-tasks.tsx was a shipped page with zero inbound nav —
+      added as "Task History" child under Administration > Agent Studio
+      alongside "Agent Chat" (/agent). /developer (AI Studio) already
+      reachable via Settings > Advanced > Apps & integrations, left as-is —
+      Automation Hub (Tower, Recent Run Logs, Marketplace) already covers
+      every shipped /automations* route — feat/nav-agent-task-history
   - id: T-MAP-03
     epic: E4
     priority: 1

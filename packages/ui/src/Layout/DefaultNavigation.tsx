@@ -406,6 +406,10 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
         id: 'agent-studio',
         label: 'Agent Studio',
         href: '/agent',
+        children: [
+          { id: 'agent-studio-chat', label: 'Agent Chat', href: '/agent', exact: true },
+          { id: 'agent-studio-tasks', label: 'Task History', href: '/admin/agent-tasks' },
+        ],
         icon: (
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
