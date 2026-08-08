@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { AppLayout } from '@luxgen/ui';
 import { useAppShellConfig } from '../lib/app-shell-config';
@@ -5,6 +6,24 @@ import { useLayoutUser, useAppTenantId } from '../lib/app-layout-user';
 import { PageHead } from '../components/seo/PageHead';
 import { PageEmptyState } from '../components/common/PageStates';
 import { useSearchPresenter } from '@luxgen/presenters/search';
+import {
+  clearRecentSearches,
+  getRecentSearches,
+  recordRecentSearch,
+  removeRecentSearch,
+  type RecentSearchEntry,
+} from '../lib/recent-searches';
+
+function timeAgo(ts: number): string {
+  const diffMs = Date.now() - ts;
+  const mins = Math.round(diffMs / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins} minute${mins === 1 ? '' : 's'} ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  const days = Math.round(hours / 24);
+  return `${days} day${days === 1 ? '' : 's'} ago`;
+}
 
 export default function SearchPage() {
   const router = useRouter();
@@ -20,6 +39,27 @@ export default function SearchPage() {
     tenant,
   });
 
+  const [recent, setRecent] = useState<RecentSearchEntry[]>([]);
+
+  // Load recent searches once on mount (client-only — localStorage).
+  useEffect(() => {
+    setRecent(getRecentSearches());
+  }, []);
+
+  // Record a completed search once results have settled (T-SRCH-06).
+  useEffect(() => {
+    if (!q || loading || error) return;
+    const resultCount = viewModel.courseCount + viewModel.userCount;
+    setRecent(recordRecentSearch(q, resultCount));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, loading, error]);
+
+  const handleRemoveRecent = (query: string) => setRecent(removeRecentSearch(query));
+  const handleClearRecent = () => {
+    clearRecentSearches();
+    setRecent([]);
+  };
+
   return (
     <>
       <PageHead title={q ? `Search: ${q}` : 'Search'} robots="noindex" />
@@ -27,7 +67,49 @@ export default function SearchPage() {
         <div className="max-w-3xl mx-auto px-4 py-8">
           <h1 className="ios-large-title mb-2">Search</h1>
           {!viewModel.hasQuery ? (
-            <PageEmptyState title="Enter a search term" subtitle="Use ⌘K / Ctrl+K or the nav search to find courses and learners." />
+            <div className="space-y-6">
+              <PageEmptyState title="Enter a search term" subtitle="Use ⌘K / Ctrl+K or the nav search to find courses and learners." />
+              {recent.length > 0 ? (
+                <section aria-label="Recent searches">
+                  <div className="flex items-center justify-between mb-2">
+                    <h2 className="font-semibold text-sm" style={{ color: 'var(--color-label-secondary)' }}>
+                      RECENT
+                    </h2>
+                    <button type="button" className="ios-btn-plain text-xs" onClick={handleClearRecent}>
+                      Clear history
+                    </button>
+                  </div>
+                  <ul className="list-none m-0 p-0 space-y-1">
+                    {recent.map((entry) => (
+                      <li
+                        key={entry.query}
+                        className="flex items-center justify-between gap-3 py-2 px-1"
+                        style={{ borderBottom: '1px solid var(--color-separator)' }}
+                      >
+                        <a
+                          href={`/search?q=${encodeURIComponent(entry.query)}&tenant=${tenant}`}
+                          className="flex-1 min-w-0 no-underline"
+                          style={{ color: 'var(--color-label-primary)' }}
+                        >
+                          <span className="block text-sm font-medium truncate">{entry.query}</span>
+                          <span className="block text-xs" style={{ color: 'var(--color-label-tertiary)' }}>
+                            {timeAgo(entry.ts)} · {entry.resultCount} result{entry.resultCount === 1 ? '' : 's'}
+                          </span>
+                        </a>
+                        <button
+                          type="button"
+                          aria-label={`Remove "${entry.query}" from recent searches`}
+                          className="ios-btn-plain text-xs flex-shrink-0"
+                          onClick={() => handleRemoveRecent(entry.query)}
+                        >
+                          Remove
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+            </div>
           ) : error ? (
             <PageEmptyState title="Search temporarily unavailable" subtitle={error} />
           ) : loading ? (
