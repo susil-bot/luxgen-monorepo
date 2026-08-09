@@ -78,6 +78,12 @@ export * from './Modal';
 export * from './ActionMenu';
 export * from './Toolkit';
 export * from './Table';
+// Only the component is re-exported here -- TabItem/TabProps are intentionally not,
+// since packages/ui/src/types.ts already defines a public TabItem shape (id/label/content/
+// disabled) that Tab's own richer TabItem (+ icon/badge) would otherwise collide with via
+// export *, per TS2308. Consumers needing the richer shape can import it directly from './Tab'.
+export { Tab } from './Tab';
+export * from './Todo';
 
 // Dashboard Components
 export * from './AdminDashboard';
