@@ -327,7 +327,7 @@
       "epic": "E1",
       "priority": 2,
       "sla": "M",
-      "status": "todo",
+      "status": "done",
       "title": "Search analytics admin stub + client event hook",
       "skill": "persona-pages",
       "source": {
@@ -345,7 +345,8 @@
       "acceptance": [
         "Admin page or section exists",
         "At least one search event logged or stubbed with TODO API"
-      ]
+      ],
+      "notes": "/admin/search-analytics admin page + logSearchEvent fire-and-forget hook on /search (FE) + SearchEvent model/searchEventSummary rolling-30-day aggregate (BE). feat/frontend-todo-batch-v2 + feat/backend-todo-batch"
     },
     {
       "id": "T-SRCH-09",
@@ -1250,7 +1251,7 @@
       "epic": "E1",
       "priority": 2,
       "sla": "M",
-      "status": "todo",
+      "status": "done",
       "title": "Search settings page (result prefs / defaults)",
       "skill": "persona-pages",
       "source": {
@@ -1268,7 +1269,8 @@
       "acceptance": [
         "Settings route or section exists",
         "At least one preference persists"
-      ]
+      ],
+      "notes": "/settings/search page (FE) + SearchSettings model/searchSettings + updateSearchSettings resolvers, upsert-on-update (BE). resultsPerPage + trackSearchHistory persist. feat/frontend-todo-batch-v2 + feat/backend-todo-batch"
     },
     {
       "id": "T-SRCH-13",
@@ -1296,7 +1298,7 @@
       "epic": "E2",
       "priority": 2,
       "sla": "M",
-      "status": "todo",
+      "status": "done",
       "title": "Workflow notifications + activity timeline surfaces",
       "skill": "automation",
       "source": {
@@ -1314,7 +1316,8 @@
       "acceptance": [
         "Failure/success notify settings persist OR documented defer",
         "Activity timeline shows create/update/publish events"
-      ]
+      ],
+      "notes": "Automation.notifySettings {onFailure,onSuccess} persisted via updateAutomation (BE, shallow-merge) + Tower editor right-panel toggle + Activity timeline from createdAt/updatedAt/publishedAt/archivedAt (FE). Pause/resume/comment/AI-action timeline events + weekly digest/Slack notifications from the full spec deferred. feat/frontend-todo-batch-v2 + feat/backend-todo-batch"
     },
     {
       "id": "T-AUTO-12",
