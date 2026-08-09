@@ -1119,7 +1119,7 @@ tasks:
     epic: E5
     priority: 1
     sla: S
-    status: todo
+    status: done
     title: Tenant vocabulary schema + default resolver
     skill: fullstack-developer
     source:
@@ -1132,11 +1132,12 @@ tasks:
     acceptance:
       - ITenant.settings.vocabulary field added with LMS defaults
       - Existing tenants resolve defaults with zero migration
+    notes: Merged -- feat/vertical-templates-backend
   - id: T-VERT-02
     epic: E5
     priority: 1
     sla: S
-    status: todo
+    status: done
     title: updateTenantVocabulary mutation + service
     skill: fullstack-developer
     source:
@@ -1150,11 +1151,12 @@ tasks:
     acceptance:
       - updateTenantVocabulary mutation persists to Tenant.settings.vocabulary
       - Follows existing updateTenantBranding service pattern
+    notes: Merged -- feat/vertical-templates-backend
   - id: T-VERT-03
     epic: E5
     priority: 1
     sla: M
-    status: todo
+    status: done
     title: Settings vocabulary screen + useVocabulary hook
     skill: persona-pages
     source:
@@ -1170,11 +1172,12 @@ tasks:
     acceptance:
       - /organization/vocabulary screen with live preview per term
       - useVocabulary() hook resolves tenant vocabulary with LMS fallback
+    notes: Settings > Vocabulary screen + useVocabulary() hook + REST /api/tenant/vocabulary -- feat/vertical-templates-frontend + feat/vertical-templates-backend
   - id: T-VERT-04
     epic: E5
     priority: 1
     sla: M
-    status: todo
+    status: done
     title: Apply vocabulary to nav + /courses page copy
     skill: ios-design
     source:
@@ -1189,11 +1192,12 @@ tasks:
     acceptance:
       - Sidebar nav label and /courses <h1> read from tenant vocabulary
       - No route or URL change
+    notes: Nav + /courses relabel via useVocabulary() -- feat/vertical-templates-frontend
   - id: T-VERT-05
     epic: E5
     priority: 1
     sla: M
-    status: todo
+    status: done
     title: Apply vocabulary to storefront/customer-facing cards
     skill: ios-design
     source:
@@ -1207,11 +1211,12 @@ tasks:
     acceptance:
       - Customer-facing product/course cards read from tenant vocabulary
       - No route or URL change
+    notes: /learn catalog + course detail page relabel -- feat/vertical-templates-frontend
   - id: T-VERT-06
     epic: E5
     priority: 2
     sla: M
-    status: todo
+    status: done
     title: FunnelTemplate model + digital-products vertical seed
     skill: automation
     source:
@@ -1226,11 +1231,12 @@ tasks:
     acceptance:
       - FunnelTemplate schema stores vocabularyPreset + enabledModules + automationTemplateSlugs
       - digital-products seed installs via existing installAutomationTemplate, no new bridge code
+    notes: FunnelTemplate model + digital-products seed -- feat/vertical-templates-backend
   - id: T-VERT-07
     epic: E5
     priority: 2
     sla: M
-    status: todo
+    status: done
     title: Funnel seed — agency & consulting vertical
     skill: automation
     source:
@@ -1244,11 +1250,12 @@ tasks:
     acceptance:
       - agency-consulting FunnelTemplate seed installable end to end
       - Reuses AUTOMATION_HUB_STRATEGY.md's already-scoped client-summary action or defers it explicitly
+    notes: agency-consulting seed -- feat/vertical-templates-backend
   - id: T-VERT-08
     epic: E5
     priority: 2
     sla: M
-    status: todo
+    status: done
     title: Funnel seed — membership vocabulary + drip automation only
     skill: automation
     source:
@@ -1262,11 +1269,12 @@ tasks:
     acceptance:
       - membership FunnelTemplate seed ships vocabulary preset + drip-content automation only
       - Community feed and end-customer recurring billing explicitly NOT included — documented as separate initiative
+    notes: membership seed, vocab + drip only, community/billing explicitly out -- feat/vertical-templates-backend
   - id: T-VERT-09
     epic: E5
     priority: 2
     sla: M
-    status: todo
+    status: done
     title: Funnel Templates tab in Marketplace UI
     skill: automation
     source:
@@ -1280,6 +1288,7 @@ tasks:
     acceptance:
       - Marketplace has a Funnel Templates tab alongside existing automation Templates tab
       - Selecting a funnel template shows its stages before install
+    notes: Funnel Templates tab in /marketplace -- feat/vertical-templates-frontend
   - id: T-VERT-10
     epic: E5
     priority: 3
@@ -1302,7 +1311,7 @@ tasks:
     epic: E5
     priority: 2
     sla: M
-    status: todo
+    status: done
     title: Super-admin tenant capability map page
     skill: persona-pages
     source:
@@ -1317,4 +1326,5 @@ tasks:
     acceptance:
       - /organization/tenant-map visible only to SUPER_ADMIN, 403/hidden otherwise
       - Page shows domain/module/template/vocabulary state read live, no new cache layer
+    notes: Query.tenantCapabilityMap (SUPER_ADMIN gated) + /organization/tenant-map -- feat/vertical-templates-backend + feat/vertical-templates-frontend
 coverage_plan: docs/todo-orchestrator/COVERAGE_PLAN.md

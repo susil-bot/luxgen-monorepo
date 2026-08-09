@@ -1,6 +1,10 @@
+import { resolveVocabulary, type ITenant } from '@luxgen/db';
 import { tenantService } from '../../services/tenantService';
 
 export const tenantResolvers = {
+  Tenant: {
+    vocabulary: (parent: ITenant) => resolveVocabulary(parent),
+  },
   Query: {
     tenant: async (_: any, { id }: { id: string }) => {
       return await tenantService.getTenantById(id);
@@ -21,6 +25,12 @@ export const tenantResolvers = {
     },
     deleteTenant: async (_: any, { id }: { id: string }) => {
       return await tenantService.deleteTenant(id);
+    },
+    updateTenantVocabulary: async (
+      _: any,
+      { tenantId, vocabulary }: { tenantId: string; vocabulary: Record<string, string | null | undefined> },
+    ) => {
+      return await tenantService.updateVocabulary(tenantId, vocabulary);
     },
   },
 };

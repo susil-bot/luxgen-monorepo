@@ -5,7 +5,8 @@ export * from './types';
 export * from './tenant-config';
 
 // Export models and interfaces with explicit names
-export type { ITenant } from './tenant';
+export type { ITenant, TenantVocabulary } from './tenant';
+export { DEFAULT_TENANT_VOCABULARY, resolveVocabulary } from './tenant';
 export { Tenant } from './tenant';
 export type { IUser, IUserPermissions } from './user';
 export { User, UserRole, UserStatus } from './user';
@@ -41,6 +42,8 @@ export type { ITenantUsageMonthly } from './usage';
 export { TenantUsageMonthly, currentUsagePeriod } from './usage';
 export type { IAutomationTemplate, TemplateCategory } from './automation-template';
 export { AutomationTemplate } from './automation-template';
+export type { IFunnelTemplate, IFunnelStage } from './funnel-template';
+export { FunnelTemplate } from './funnel-template';
 export type { ISearchSettings } from './search-settings';
 export { SearchSettings } from './search-settings';
 export type { ISearchEvent } from './search-event';

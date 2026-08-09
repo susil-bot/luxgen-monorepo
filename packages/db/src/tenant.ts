@@ -77,6 +77,45 @@ export interface TenantConfig {
   };
 }
 
+/**
+ * T-VERT-01 — per-tenant display-name overrides. Internal collection/field/route names
+ * (Course, Enrollment, Student...) never change; this only swaps the label a human sees.
+ * See docs/PLATFORM_VERTICALIZATION_STRATEGY.md §3.
+ */
+export interface TenantVocabulary {
+  course: string;
+  enrollment: string;
+  student: string;
+  instructor: string;
+  certificate: string;
+  group: string;
+  order: string;
+  product: string;
+}
+
+export const DEFAULT_TENANT_VOCABULARY: TenantVocabulary = {
+  course: 'Course',
+  enrollment: 'Enrollment',
+  student: 'Student',
+  instructor: 'Instructor',
+  certificate: 'Certificate',
+  group: 'Group',
+  order: 'Order',
+  product: 'Product',
+};
+
+/**
+ * Merge stored vocabulary (possibly partial, possibly absent on legacy tenants) with
+ * defaults. Mongoose schema defaults already do this for hydrated documents, but `.lean()`
+ * reads skip schema defaults — call this explicitly wherever a lean/plain object might reach
+ * display code.
+ */
+export function resolveVocabulary(tenant: {
+  settings?: { vocabulary?: Partial<TenantVocabulary> | null } | null;
+}): TenantVocabulary {
+  return { ...DEFAULT_TENANT_VOCABULARY, ...(tenant.settings?.vocabulary ?? {}) };
+}
+
 export interface ITenant extends Document {
   name: string;
   subdomain: string;
@@ -87,6 +126,7 @@ export interface ITenant extends Document {
     security: TenantSecurity;
     config: TenantConfig;
     onboarding?: TenantOnboarding;
+    vocabulary: TenantVocabulary;
   };
   metadata: {
     createdAt: Date;
@@ -198,6 +238,16 @@ const tenantSchema = new Schema<ITenant>(
       onboarding: {
         completedSteps: { type: [String], default: [] },
         dismissed: { type: Boolean, default: false },
+      },
+      vocabulary: {
+        course: { type: String, default: 'Course' },
+        enrollment: { type: String, default: 'Enrollment' },
+        student: { type: String, default: 'Student' },
+        instructor: { type: String, default: 'Instructor' },
+        certificate: { type: String, default: 'Certificate' },
+        group: { type: String, default: 'Group' },
+        order: { type: String, default: 'Order' },
+        product: { type: String, default: 'Product' },
       },
       config: {
         features: {
