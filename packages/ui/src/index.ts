@@ -86,6 +86,8 @@ export { Tab } from './Tab';
 export * from './Todo';
 export { TaskDetailDrawer } from './TaskDetailDrawer';
 export type { TaskDetailDrawerProps, TaskActivityItem } from './TaskDetailDrawer';
+export { ReminderEditor } from './ReminderEditor';
+export type { ReminderEditorProps, TaskReminderItem, ReminderOffsetPreset } from './ReminderEditor';
 export * from './TodoIcons';
 export { TodoPageHeader } from './TodoPageHeader';
 export type { TodoPageHeaderProps } from './TodoPageHeader';

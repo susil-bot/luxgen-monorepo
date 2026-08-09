@@ -98,6 +98,52 @@ export const GET_TASK_ACTIVITY = gql`
   }
 `;
 
+export const GET_TASK_REMINDERS = gql`
+  query GetTaskReminders($taskId: ID!, $tenantId: String!) {
+    taskReminders(taskId: $taskId, tenantId: $tenantId) {
+      id
+      taskId
+      fireAt
+      offsetPreset
+      channelPrefs
+      status
+      snoozeUntil
+      lastFiredAt
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const CREATE_TASK_REMINDER = gql`
+  mutation CreateTaskReminder($taskId: ID!, $tenantId: String!, $input: CreateReminderInput!) {
+    createTaskReminder(taskId: $taskId, tenantId: $tenantId, input: $input) {
+      id
+      fireAt
+      offsetPreset
+      status
+      snoozeUntil
+    }
+  }
+`;
+
+export const SNOOZE_TASK_REMINDER = gql`
+  mutation SnoozeTaskReminder($id: ID!, $tenantId: String!, $until: Date!) {
+    snoozeTaskReminder(id: $id, tenantId: $tenantId, until: $until) {
+      id
+      fireAt
+      status
+      snoozeUntil
+    }
+  }
+`;
+
+export const DELETE_TASK_REMINDER = gql`
+  mutation DeleteTaskReminder($id: ID!, $tenantId: String!) {
+    deleteTaskReminder(id: $id, tenantId: $tenantId)
+  }
+`;
+
 export const CREATE_TASK = gql`
   mutation CreateTask($input: CreateTaskInput!) {
     createTask(input: $input) {
