@@ -261,6 +261,17 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
         },
       },
       {
+        // T-AUTO-08: per-workflow success rate / run volume, computed from the same run history.
+        id: 'analytics',
+        label: 'Analytics',
+        disabled: !persistedId,
+        onClick: () => {
+          const aid = persistedId ?? (towerId !== 'new' ? towerId : '');
+          if (!aid) return;
+          void router.push(`/automations/tower/${aid}/analytics?tenant=${encodeURIComponent(tenant)}`);
+        },
+      },
+      {
         id: 'test-run',
         label: testBusy ? 'Testing…' : 'Test run',
         disabled: !persistedId || lifecycleStatus === 'archived' || testBusy || dirty,
