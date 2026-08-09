@@ -97,6 +97,25 @@ export class TenantService {
     return resolveVocabulary(tenant);
   }
 
+  /**
+   * T-VERT-06 — same scoped-per-field $set discipline as updateVocabulary(): only flips the
+   * flags named in `modules` to `true`, never replaces settings.config.features wholesale.
+   */
+  async updateFeatureFlags(id: string, modules: string[]): Promise<ITenant> {
+    if (modules.length === 0) {
+      const tenant = await Tenant.findById(id);
+      if (!tenant) throw new Error('Tenant not found');
+      return tenant;
+    }
+    const $set: Record<string, boolean> = {};
+    for (const flag of modules) {
+      $set[`settings.config.features.${flag}`] = true;
+    }
+    const tenant = await Tenant.findByIdAndUpdate(id, { $set }, { new: true });
+    if (!tenant) throw new Error('Tenant not found');
+    return tenant;
+  }
+
   async suspendTenant(id: string): Promise<ITenant> {
     return this.updateTenant(id, { status: 'suspended' });
   }

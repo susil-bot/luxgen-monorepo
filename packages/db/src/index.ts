@@ -42,6 +42,8 @@ export type { ITenantUsageMonthly } from './usage';
 export { TenantUsageMonthly, currentUsagePeriod } from './usage';
 export type { IAutomationTemplate, TemplateCategory } from './automation-template';
 export { AutomationTemplate } from './automation-template';
+export type { IFunnelTemplate, IFunnelStage } from './funnel-template';
+export { FunnelTemplate } from './funnel-template';
 export type { ISearchSettings } from './search-settings';
 export { SearchSettings } from './search-settings';
 export type { ISearchEvent } from './search-event';
