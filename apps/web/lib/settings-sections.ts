@@ -11,6 +11,7 @@ export type SettingsSectionId =
   | 'domains'
   | 'notifications'
   | 'branding'
+  | 'vocabulary'
   | 'customers'
   | 'policies'
   | 'languages'
@@ -85,6 +86,14 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     href: '/settings/branding',
     status: 'partial',
     icon: '🎨',
+  },
+  {
+    id: 'vocabulary',
+    label: 'Vocabulary',
+    description: 'Rename Course, Student, and related terms to fit your business',
+    href: '/settings/vocabulary',
+    status: 'implemented',
+    icon: '🏷️',
   },
   {
     id: 'security',
@@ -170,7 +179,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
 ];
 
 export const SETTINGS_GROUPS = [
-  { title: 'Store', ids: ['general', 'storefront', 'branding', 'domains'] as SettingsSectionId[] },
+  { title: 'Store', ids: ['general', 'storefront', 'branding', 'vocabulary', 'domains'] as SettingsSectionId[] },
   { title: 'Team & access', ids: ['staff', 'security', 'search'] as SettingsSectionId[] },
   { title: 'Commerce', ids: ['payments', 'billing', 'checkout', 'shipping', 'taxes'] as SettingsSectionId[] },
   { title: 'Customers & comms', ids: ['customers', 'notifications', 'policies', 'languages'] as SettingsSectionId[] },

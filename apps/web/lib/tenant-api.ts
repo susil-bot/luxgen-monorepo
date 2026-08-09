@@ -34,6 +34,17 @@ export interface TenantStorefrontSettingsPayload {
   };
 }
 
+export interface TenantVocabularyPayload {
+  course?: string;
+  enrollment?: string;
+  student?: string;
+  instructor?: string;
+  certificate?: string;
+  group?: string;
+  order?: string;
+  product?: string;
+}
+
 export interface TenantCurrentData {
   id: string;
   name: string;
@@ -117,6 +128,26 @@ export async function patchTenantGeneral(input: {
     body: JSON.stringify(input),
   });
   return parseJson(response);
+}
+
+export async function fetchTenantVocabulary(): Promise<TenantVocabularyPayload> {
+  const response = await fetch(apiPath('/api/tenant/vocabulary'), {
+    headers: tenantRequestHeaders(),
+  });
+  const data = await parseJson<{ vocabulary: TenantVocabularyPayload }>(response);
+  return data.vocabulary;
+}
+
+export async function patchTenantVocabulary(
+  vocabulary: TenantVocabularyPayload,
+): Promise<TenantVocabularyPayload> {
+  const response = await fetch(apiPath('/api/tenant/vocabulary'), {
+    method: 'PATCH',
+    headers: tenantRequestHeaders(),
+    body: JSON.stringify({ vocabulary }),
+  });
+  const data = await parseJson<{ vocabulary: TenantVocabularyPayload }>(response);
+  return data.vocabulary;
 }
 
 export async function patchNotificationTemplate(templateId: string, input: { subject?: string; body?: string }) {
