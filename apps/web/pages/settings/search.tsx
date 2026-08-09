@@ -4,6 +4,7 @@ import { AppLayout } from '@luxgen/ui';
 import { useAppShellConfig } from '../../lib/app-shell-config';
 import { useLayoutUser, useAppTenantId } from '../../lib/app-layout-user';
 import { PageHead } from '../../components/seo/PageHead';
+import { getTenantPageProps } from '../../lib/tenant-page-props';
 import { GET_SEARCH_SETTINGS, UPDATE_SEARCH_SETTINGS } from '../../graphql/queries/search-settings';
 
 const RESULTS_PER_PAGE_OPTIONS = [10, 25, 50, 100];
@@ -19,7 +20,6 @@ export default function SearchSettingsPage() {
   const layoutUser = useLayoutUser();
   const { sidebarSections, logo } = useAppShellConfig();
   const tenantId = useAppTenantId();
-  const { showSuccess, showError } = useSnackbar();
 
   const { data, loading } = useQuery(GET_SEARCH_SETTINGS, {
     variables: { tenantId: tenantId ?? '' },
@@ -44,9 +44,7 @@ export default function SearchSettingsPage() {
     if (!tenantId) return;
     const { errors } = await updateSettings({ variables: { tenantId, resultsPerPage, trackSearchHistory } });
     setStatusMessage(
-      errors?.length
-        ? 'Could not save — the backend for this is being built separately.'
-        : 'Search settings saved.',
+      errors?.length ? 'Could not save — the backend for this is being built separately.' : 'Search settings saved.',
     );
   };
 
@@ -108,3 +106,5 @@ export default function SearchSettingsPage() {
     </>
   );
 }
+
+export const getServerSideProps = getTenantPageProps;
