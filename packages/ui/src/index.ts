@@ -84,6 +84,8 @@ export * from './Table';
 // export *, per TS2308. Consumers needing the richer shape can import it directly from './Tab'.
 export { Tab } from './Tab';
 export * from './Todo';
+export { TaskDetailDrawer } from './TaskDetailDrawer';
+export type { TaskDetailDrawerProps, TaskActivityItem } from './TaskDetailDrawer';
 export * from './TodoIcons';
 export { TodoPageHeader } from './TodoPageHeader';
 export type { TodoPageHeaderProps } from './TodoPageHeader';

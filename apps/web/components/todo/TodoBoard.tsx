@@ -1,35 +1,35 @@
 import { useState } from 'react';
-import type { TodoItem } from '@luxgen/ui';
+import { isTodoDone, isTodoOpen, type TodoItem } from '@luxgen/ui';
 
-/** Two-column kanban (To do / Done) for the Todo List's Board view. Mirrors the drag/drop
- * mechanics in apps/web/components/project/IterationBoard.tsx (native HTML5 draggable,
- * onDragOver/onDrop per column) but decoupled from ProjectProvider — takes items + a moveItem
- * callback as props so it has no dependency on the sprint-tracker's context. */
+/** Two-column kanban (Open / Done) for Board view — buckets all open vs done statuses. */
 
-const COLUMNS: { status: 'TODO' | 'DONE'; label: string }[] = [
-  { status: 'TODO', label: 'To do' },
+type BoardBucket = 'OPEN' | 'DONE';
+
+const COLUMNS: { status: BoardBucket; label: string }[] = [
+  { status: 'OPEN', label: 'To do' },
   { status: 'DONE', label: 'Done' },
 ];
 
 interface TodoBoardProps {
   items: TodoItem[];
-  onMove: (id: string, status: 'TODO' | 'DONE') => void;
+  onMove: (id: string, status: 'OPEN' | 'COMPLETED') => void;
+  onOpen?: (id: string) => void;
 }
 
-export function TodoBoard({ items, onMove }: TodoBoardProps) {
+export function TodoBoard({ items, onMove, onOpen }: TodoBoardProps) {
   const [draggingId, setDraggingId] = useState<string | null>(null);
-  const [dropTarget, setDropTarget] = useState<'TODO' | 'DONE' | null>(null);
+  const [dropTarget, setDropTarget] = useState<BoardBucket | null>(null);
 
   const itemsByStatus = COLUMNS.reduce(
     (acc, col) => {
-      acc[col.status] = items.filter((i) => i.status === col.status);
+      acc[col.status] = items.filter((i) => (col.status === 'OPEN' ? isTodoOpen(i) : isTodoDone(i)));
       return acc;
     },
-    {} as Record<'TODO' | 'DONE', TodoItem[]>,
+    {} as Record<BoardBucket, TodoItem[]>,
   );
 
-  const handleDrop = (status: 'TODO' | 'DONE') => {
-    if (draggingId) onMove(draggingId, status);
+  const handleDrop = (bucket: BoardBucket) => {
+    if (draggingId) onMove(draggingId, bucket === 'OPEN' ? 'OPEN' : 'COMPLETED');
     setDraggingId(null);
     setDropTarget(null);
   };
@@ -68,10 +68,16 @@ export function TodoBoard({ items, onMove }: TodoBoardProps) {
                 key={item.id}
                 draggable
                 onDragStart={() => setDraggingId(item.id)}
+                onClick={() => onOpen?.(item.id)}
                 className="ios-card p-3 text-sm cursor-grab"
                 style={{ background: 'var(--color-bg-secondary)' }}
               >
-                {item.title}
+                <div>{item.title}</div>
+                {item.priority && item.priority !== 'MEDIUM' ? (
+                  <div className="text-xs mt-1" style={{ color: 'var(--color-label-secondary)' }}>
+                    {item.priority}
+                  </div>
+                ) : null}
               </div>
             ))}
             {itemsByStatus[col.status].length === 0 && (
