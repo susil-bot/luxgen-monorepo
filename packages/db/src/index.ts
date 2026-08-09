@@ -76,6 +76,10 @@ export type { ITaskReminder, ReminderOffsetPreset, ReminderStatus, ReminderChann
 export { TaskReminder, REMINDER_OFFSET_PRESETS, REMINDER_STATUSES, fireAtFromDueAndPreset } from './task-reminder';
 export type { IAppNotification, AppNotificationCategory } from './app-notification';
 export { AppNotification, APP_NOTIFICATION_CATEGORIES } from './app-notification';
+export type { ITaskTemplate, ITaskFieldDefinition, TaskFieldType } from './task-template';
+export { TaskTemplate, TASK_FIELD_TYPES, newFieldDefinitionId } from './task-template';
+export type { ITaskFieldValue } from './task-field-value';
+export { TaskFieldValue, isTaskFieldValueFilled } from './task-field-value';
 export type { ILearnerSubscription } from './learner-subscription';
 export { LearnerSubscription, LearnerSubscriptionStatus } from './learner-subscription';
 export type { ICustomRole, ICustomRolePermissions } from './custom-role';

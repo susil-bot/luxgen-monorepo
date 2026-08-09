@@ -88,6 +88,13 @@ export { TaskDetailDrawer } from './TaskDetailDrawer';
 export type { TaskDetailDrawerProps, TaskActivityItem } from './TaskDetailDrawer';
 export { ReminderEditor } from './ReminderEditor';
 export type { ReminderEditorProps, TaskReminderItem, ReminderOffsetPreset } from './ReminderEditor';
+export { RequiredFieldsEditor } from './RequiredFieldsEditor';
+export type {
+  RequiredFieldsEditorProps,
+  TaskTemplateItem,
+  TaskFieldDefinitionItem,
+  TaskFieldValueItem,
+} from './RequiredFieldsEditor';
 export * from './TodoIcons';
 export { TodoPageHeader } from './TodoPageHeader';
 export type { TodoPageHeaderProps } from './TodoPageHeader';

@@ -14,7 +14,8 @@ Architecture pack for extending the existing Todo List — **not** a separate re
 
 **Status**
 
-| Phase                   | State                                      |
-| ----------------------- | ------------------------------------------ |
-| 1 Task enrichment       | Shipped (`#489`)                           |
-| 2 Reminders + job sweep | In progress (`feat/todo-phase2-reminders`) |
+| Phase                   | State                                            |
+| ----------------------- | ------------------------------------------------ |
+| 1 Task enrichment       | Shipped (`#489`)                                 |
+| 2 Reminders + job sweep | PR `#490` (+ notifications feed `#491`)          |
+| 3 Required fields       | In progress (`feat/todo-phase3-required-fields`) |

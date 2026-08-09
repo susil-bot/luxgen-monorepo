@@ -16,6 +16,7 @@ export const TASK_FIELDS = gql`
     dueDate
     timezone
     completedAt
+    templateId
     createdById
     createdAt
     updatedAt
@@ -141,6 +142,70 @@ export const SNOOZE_TASK_REMINDER = gql`
 export const DELETE_TASK_REMINDER = gql`
   mutation DeleteTaskReminder($id: ID!, $tenantId: String!) {
     deleteTaskReminder(id: $id, tenantId: $tenantId)
+  }
+`;
+
+export const GET_TASK_TEMPLATES = gql`
+  query GetTaskTemplates($tenantId: String!, $teamId: ID) {
+    taskTemplates(tenantId: $tenantId, teamId: $teamId) {
+      id
+      name
+      description
+      teamId
+      fields {
+        id
+        name
+        type
+        required
+        options
+        helpText
+      }
+    }
+  }
+`;
+
+export const GET_TASK_FIELD_VALUES = gql`
+  query GetTaskFieldValues($taskId: ID!, $tenantId: String!) {
+    taskFieldValues(taskId: $taskId, tenantId: $tenantId) {
+      id
+      fieldDefinitionId
+      value
+      updatedAt
+    }
+  }
+`;
+
+export const CREATE_TASK_TEMPLATE = gql`
+  mutation CreateTaskTemplate($input: CreateTaskTemplateInput!) {
+    createTaskTemplate(input: $input) {
+      id
+      name
+      fields {
+        id
+        name
+        type
+        required
+      }
+    }
+  }
+`;
+
+export const APPLY_TASK_TEMPLATE = gql`
+  mutation ApplyTaskTemplate($taskId: ID!, $tenantId: String!, $templateId: ID!) {
+    applyTaskTemplate(taskId: $taskId, tenantId: $tenantId, templateId: $templateId) {
+      ...TaskFields
+    }
+  }
+  ${TASK_FIELDS}
+`;
+
+export const UPSERT_TASK_FIELD_VALUE = gql`
+  mutation UpsertTaskFieldValue($taskId: ID!, $tenantId: String!, $fieldId: ID!, $value: JSON!) {
+    upsertTaskFieldValue(taskId: $taskId, tenantId: $tenantId, fieldId: $fieldId, value: $value) {
+      id
+      fieldDefinitionId
+      value
+    }
   }
 `;
 
