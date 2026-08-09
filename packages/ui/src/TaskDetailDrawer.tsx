@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import type { TodoItem, TodoTaskPriority, TodoTaskStatus } from './Todo';
 import { SplitPageFormField } from './SplitPageLayout/SplitPageFormField';
+import { ReminderEditor, type ReminderOffsetPreset, type TaskReminderItem } from './ReminderEditor';
 
 export interface TaskActivityItem {
   id: string;
@@ -14,7 +15,9 @@ export interface TaskDetailDrawerProps {
   open: boolean;
   task: TodoItem | null;
   activity?: TaskActivityItem[];
+  reminders?: TaskReminderItem[];
   saving?: boolean;
+  reminderBusy?: boolean;
   onClose: () => void;
   onSave: (input: {
     title: string;
@@ -26,6 +29,9 @@ export interface TaskDetailDrawerProps {
     startDate?: string | null;
     dueDate?: string | null;
   }) => void;
+  onCreateReminder?: (input: { offsetPreset: ReminderOffsetPreset; fireAt?: string | null }) => void;
+  onSnoozeReminder?: (id: string, untilIso: string) => void;
+  onCancelReminder?: (id: string) => void;
 }
 
 function toDateInput(value?: string | null): string {
@@ -35,7 +41,19 @@ function toDateInput(value?: string | null): string {
   return d.toISOString().slice(0, 10);
 }
 
-export function TaskDetailDrawer({ open, task, activity = [], saving, onClose, onSave }: TaskDetailDrawerProps) {
+export function TaskDetailDrawer({
+  open,
+  task,
+  activity = [],
+  reminders = [],
+  saving,
+  reminderBusy,
+  onClose,
+  onSave,
+  onCreateReminder,
+  onSnoozeReminder,
+  onCancelReminder,
+}: TaskDetailDrawerProps) {
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
   const [status, setStatus] = useState<TodoTaskStatus>('OPEN');
@@ -191,6 +209,17 @@ export function TaskDetailDrawer({ open, task, activity = [], saving, onClose, o
               />
             </SplitPageFormField>
           </div>
+
+          {onCreateReminder && onSnoozeReminder && onCancelReminder ? (
+            <ReminderEditor
+              reminders={reminders}
+              hasDueDate={Boolean(dueDate || task.dueDate)}
+              busy={reminderBusy}
+              onCreate={onCreateReminder}
+              onSnooze={onSnoozeReminder}
+              onCancel={onCancelReminder}
+            />
+          ) : null}
 
           <button
             type="button"

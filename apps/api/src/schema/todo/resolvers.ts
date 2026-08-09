@@ -1,8 +1,10 @@
-import type { TaskStatus } from '@luxgen/db';
+import type { ReminderChannel, ReminderOffsetPreset, ReminderStatus, TaskStatus } from '@luxgen/db';
+import { GraphQLError } from 'graphql';
 import type { GraphQLContext } from '../../context';
 import { scopedTenantId as resolveScopedTenantId } from '../../graphql/tenantScope';
 import { todoService, type CreateTaskInput, type UpdateTaskInput } from '../../services/todoService';
 import { todoListService, type CreateTodoListInput, type UpdateTodoListInput } from '../../services/todoListService';
+import { taskReminderService } from '../../services/taskReminderService';
 
 function actorFromCtx(ctx: GraphQLContext): { id?: string | null; name?: string | null } {
   const user = ctx.user as { _id?: { toString(): string }; id?: string; firstName?: string; lastName?: string } | null;
@@ -10,6 +12,14 @@ function actorFromCtx(ctx: GraphQLContext): { id?: string | null; name?: string 
   const id = user._id?.toString?.() ?? user.id ?? null;
   const name = [user.firstName, user.lastName].filter(Boolean).join(' ').trim() || null;
   return { id, name };
+}
+
+function requireUserId(ctx: GraphQLContext): string {
+  const id = actorFromCtx(ctx).id;
+  if (!id) {
+    throw new GraphQLError('Authentication required', { extensions: { code: 'UNAUTHENTICATED' } });
+  }
+  return id;
 }
 
 export const todoResolvers = {
@@ -50,6 +60,25 @@ export const todoResolvers = {
       const scopedId = resolveScopedTenantId(ctx, tenantId);
       const rows = await todoService.listActivity(taskId, scopedId, limit ?? 50);
       return rows.map((r) => todoService.activityToGraphQL(r));
+    },
+    taskReminders: async (
+      _: unknown,
+      { taskId, tenantId }: { taskId: string; tenantId: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const rows = await taskReminderService.listForTask(taskId, scopedId);
+      return rows.map((r) => taskReminderService.toGraphQL(r));
+    },
+    myNotifications: async (
+      _: unknown,
+      { tenantId, unreadOnly }: { tenantId: string; unreadOnly?: boolean },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const userId = requireUserId(ctx);
+      const rows = await taskReminderService.listNotifications(scopedId, userId, unreadOnly);
+      return rows.map((n) => taskReminderService.notificationToGraphQL(n));
     },
   },
   Mutation: {
@@ -108,6 +137,77 @@ export const todoResolvers = {
       const scopedId = resolveScopedTenantId(ctx, tenantId);
       const items = await todoService.reorder(scopedId, orderedIds, todoListId);
       return items.map((t) => todoService.toGraphQL(t));
+    },
+
+    createTaskReminder: async (
+      _: unknown,
+      {
+        taskId,
+        tenantId,
+        input,
+      }: {
+        taskId: string;
+        tenantId: string;
+        input: {
+          fireAt?: string | null;
+          offsetPreset?: ReminderOffsetPreset | null;
+          channelPrefs?: ReminderChannel[];
+        };
+      },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const actor = actorFromCtx(ctx);
+      const created = await taskReminderService.create(taskId, scopedId, {
+        ...input,
+        createdById: actor.id ?? null,
+      });
+      return taskReminderService.toGraphQL(created);
+    },
+    updateTaskReminder: async (
+      _: unknown,
+      {
+        id,
+        tenantId,
+        input,
+      }: {
+        id: string;
+        tenantId: string;
+        input: {
+          fireAt?: string | null;
+          offsetPreset?: ReminderOffsetPreset | null;
+          channelPrefs?: ReminderChannel[];
+          status?: ReminderStatus;
+        };
+      },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const updated = await taskReminderService.update(id, scopedId, input);
+      return updated ? taskReminderService.toGraphQL(updated) : null;
+    },
+    snoozeTaskReminder: async (
+      _: unknown,
+      { id, tenantId, until }: { id: string; tenantId: string; until: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const updated = await taskReminderService.snooze(id, scopedId, until);
+      return updated ? taskReminderService.toGraphQL(updated) : null;
+    },
+    deleteTaskReminder: async (_: unknown, { id, tenantId }: { id: string; tenantId: string }, ctx: GraphQLContext) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      return taskReminderService.delete(id, scopedId);
+    },
+    markNotificationRead: async (
+      _: unknown,
+      { id, tenantId }: { id: string; tenantId: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const userId = requireUserId(ctx);
+      const updated = await taskReminderService.markNotificationRead(id, scopedId, userId);
+      return updated ? taskReminderService.notificationToGraphQL(updated) : null;
     },
   },
 };

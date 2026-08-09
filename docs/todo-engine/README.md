@@ -11,3 +11,10 @@ Architecture pack for extending the existing Todo List — **not** a separate re
 | [TESTING.md](./TESTING.md)           | Unit / integration / E2E                     |
 
 **Rule:** Implement in phases (see ARCHITECTURE §10). Deterministic engine before AI.
+
+**Status**
+
+| Phase                   | State                                      |
+| ----------------------- | ------------------------------------------ |
+| 1 Task enrichment       | Shipped (`#489`)                           |
+| 2 Reminders + job sweep | In progress (`feat/todo-phase2-reminders`) |

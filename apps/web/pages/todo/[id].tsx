@@ -46,11 +46,15 @@ import {
   GET_TODO_LIST,
   GET_TASKS,
   GET_TASK_ACTIVITY,
+  GET_TASK_REMINDERS,
   CREATE_TASK,
   TOGGLE_TASK,
   DELETE_TASK,
   REORDER_TASKS,
   UPDATE_TASK,
+  CREATE_TASK_REMINDER,
+  SNOOZE_TASK_REMINDER,
+  DELETE_TASK_REMINDER,
 } from '../../graphql/queries/todo';
 
 interface Props {
@@ -107,6 +111,7 @@ function TodoListPageContent({ tenant }: Props) {
   const [activeView, setActiveView] = useState('todo');
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [savingDetail, setSavingDetail] = useState(false);
+  const [reminderBusy, setReminderBusy] = useState(false);
 
   const {
     data: listData,
@@ -134,11 +139,20 @@ function TodoListPageContent({ tenant }: Props) {
     fetchPolicy: 'network-only',
   });
 
+  const { data: remindersData, refetch: refetchReminders } = useQuery(GET_TASK_REMINDERS, {
+    variables: { taskId: selectedTaskId, tenantId: tenant },
+    skip: !selectedTaskId,
+    fetchPolicy: 'network-only',
+  });
+
   const [createTask] = useMutation(CREATE_TASK);
   const [toggleTask] = useMutation(TOGGLE_TASK);
   const [deleteTask] = useMutation(DELETE_TASK);
   const [reorderTasks] = useMutation(REORDER_TASKS);
   const [updateTask] = useMutation(UPDATE_TASK);
+  const [createTaskReminder] = useMutation(CREATE_TASK_REMINDER);
+  const [snoozeTaskReminder] = useMutation(SNOOZE_TASK_REMINDER);
+  const [deleteTaskReminder] = useMutation(DELETE_TASK_REMINDER);
 
   const handleCreate = async (title: string) => {
     try {
@@ -258,6 +272,59 @@ function TodoListPageContent({ tenant }: Props) {
       showError(err instanceof Error ? err.message : 'Failed to save task');
     } finally {
       setSavingDetail(false);
+    }
+  };
+
+  const handleCreateReminder = async (input: { offsetPreset: string; fireAt?: string | null }) => {
+    if (!selectedTaskId) return;
+    setReminderBusy(true);
+    try {
+      await createTaskReminder({
+        variables: {
+          taskId: selectedTaskId,
+          tenantId: tenant,
+          input: {
+            offsetPreset: input.offsetPreset,
+            fireAt: input.fireAt ?? null,
+            channelPrefs: ['in_app'],
+          },
+        },
+      });
+      showSuccess('Reminder scheduled');
+      await refetchReminders();
+      await refetchActivity();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to add reminder');
+    } finally {
+      setReminderBusy(false);
+    }
+  };
+
+  const handleSnoozeReminder = async (id: string, untilIso: string) => {
+    setReminderBusy(true);
+    try {
+      await snoozeTaskReminder({
+        variables: { id, tenantId: tenant, until: untilIso },
+      });
+      showSuccess('Reminder snoozed');
+      await refetchReminders();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to snooze reminder');
+    } finally {
+      setReminderBusy(false);
+    }
+  };
+
+  const handleCancelReminder = async (id: string) => {
+    setReminderBusy(true);
+    try {
+      await deleteTaskReminder({ variables: { id, tenantId: tenant } });
+      showSuccess('Reminder cancelled');
+      await refetchReminders();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to cancel reminder');
+    } finally {
+      setReminderBusy(false);
     }
   };
 
@@ -510,9 +577,14 @@ function TodoListPageContent({ tenant }: Props) {
         open={Boolean(selectedTask)}
         task={selectedTask}
         activity={activityData?.taskActivity ?? []}
+        reminders={remindersData?.taskReminders ?? []}
         saving={savingDetail}
+        reminderBusy={reminderBusy}
         onClose={() => setSelectedTaskId(null)}
         onSave={(input) => void handleSaveDetail(input)}
+        onCreateReminder={(input) => void handleCreateReminder(input)}
+        onSnoozeReminder={(id, until) => void handleSnoozeReminder(id, until)}
+        onCancelReminder={(id) => void handleCancelReminder(id)}
       />
     </>
   );
