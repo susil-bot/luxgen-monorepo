@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useAppShellConfig } from '../../lib/app-shell-config';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import Head from 'next/head';
@@ -32,6 +32,24 @@ export default function MarketplacePage({ tenant }: Props) {
   const [installTemplate] = useMutation(INSTALL_AUTOMATION_TEMPLATE);
 
   const templates = data?.automationTemplates ?? [];
+
+  // T-MAP-04 (Marketplace Browse gaps): search + category filter over templates already on the
+  // wire. Item-detail pages, a separate "installed items" list (installs become live Automations
+  // immediately — see /automations), seller/publish flow, and reviews all need new backend models
+  // and are deferred — see docs/todo-orchestrator/audits/sitemap-gaps.md.
+  const [search, setSearch] = useState('');
+  const [category, setCategory] = useState<string>('ALL');
+  const [featuredOnly, setFeaturedOnly] = useState(false);
+
+  const filteredTemplates = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return templates.filter((t: { name: string; description: string; category: string; featured: boolean }) => {
+      if (category !== 'ALL' && t.category !== category) return false;
+      if (featuredOnly && !t.featured) return false;
+      if (!q) return true;
+      return t.name.toLowerCase().includes(q) || t.description.toLowerCase().includes(q);
+    });
+  }, [templates, search, category, featuredOnly]);
 
   const handleInstall = async (slug: string, name: string) => {
     setInstalling(slug);
@@ -72,8 +90,41 @@ export default function MarketplacePage({ tenant }: Props) {
             </Link>
           </header>
 
+          <div className="flex flex-wrap items-center gap-3 mb-6">
+            <input
+              type="search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search templates…"
+              aria-label="Search marketplace templates"
+              className="input-field text-sm flex-1 min-w-[200px]"
+            />
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              aria-label="Filter by category"
+              className="input-field text-sm"
+            >
+              <option value="ALL">All categories</option>
+              {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+            <label className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              <input type="checkbox" checked={featuredOnly} onChange={(e) => setFeaturedOnly(e.target.checked)} />
+              Featured only
+            </label>
+          </div>
+
+          {filteredTemplates.length === 0 ? (
+            <p className="text-sm" style={{ color: 'var(--color-text-secondary)' }}>
+              No templates match your filters.
+            </p>
+          ) : (
           <div className="grid gap-4 md:grid-cols-2">
-            {templates.map(
+            {filteredTemplates.map(
               (t: {
                 id: string;
                 slug: string;
@@ -129,6 +180,7 @@ export default function MarketplacePage({ tenant }: Props) {
               ),
             )}
           </div>
+          )}
         </div>
       </AppLayout>
     </>

@@ -126,6 +126,29 @@ slice once the underlying aggregate query exists; don't build the report builder
 
 ---
 
+## Marketplace (sitemap L488–557; closed by `T-MAP-04`)
+
+> Source window: `docs/TODO-sitemap.md` L488–557 (Browse/Item Details/My Items/Publish/Reviews).
+> Touch: `apps/web` only — no new GraphQL fields or models.
+
+| Sitemap L2 route | Status | Notes |
+| --- | --- | --- |
+| Marketplace Home (`/marketplace`) | wired | `marketplace/index.tsx` |
+| Browse → Search & Filters / Sort | wired (this task) | Added search box + category select + featured-only toggle over templates already fetched via `GET_AUTOMATION_TEMPLATES` |
+| Browse → Category View, Search Results (separate routes) | deferred | Client-side filter above covers the same user need on one page; a separate `/marketplace/category/:id` or `/marketplace/search` route would fragment state for no benefit at this catalog size |
+| Item Details (course/workflow/template/agent/integration) | deferred | No per-item detail/reviews/documentation data model exists — templates today are catalog rows, not entities with their own page |
+| My Items → Installed | **not applicable — different model** | Installing a template creates a live `Automation` immediately (see `installTemplate` mutation); there's no separate "installed items" list to build because `/automations` already *is* that list. Bridged via the existing "← Back to automations" link |
+| My Items → Purchases | deferred | No purchase/payment records exist for marketplace items (templates are free/plan-gated, not individually priced+purchased) |
+| Publish (seller dashboard, listings, publish flow) | deferred | Full multi-sided-marketplace seller feature — new `Seller`/`Listing` models, payout settings, a review queue; this is a product decision, not a nav-wiring gap |
+| Reviews (leave/manage) | deferred | No review/rating model exists on `AutomationTemplate` |
+
+**Bottom line:** the one real Browse gap (search/filter/sort) is wired against existing data.
+Everything else needs new backend models this apps/web-only task can't add, or doesn't apply
+because LuxGen's install-is-instant model already fulfills the spec's intent through a different
+route. Templates for those, if ever prioritized, are a Marketplace v2 project, not a queue task.
+
+---
+
 ## Dashboard (sitemap L5–11; feeds `T-MAP-08`)
 
 | Sitemap widget | Live `/dashboard` | Status |
