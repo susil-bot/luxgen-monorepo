@@ -80,6 +80,14 @@ export type { ITaskTemplate, ITaskFieldDefinition, TaskFieldType } from './task-
 export { TaskTemplate, TASK_FIELD_TYPES, newFieldDefinitionId } from './task-template';
 export type { ITaskFieldValue } from './task-field-value';
 export { TaskFieldValue, isTaskFieldValueFilled } from './task-field-value';
+export type { ITaskRecurrenceRule, RecurrenceFrequency, IncompleteOccurrenceBehavior } from './task-recurrence';
+export {
+  TaskRecurrenceRule,
+  RECURRENCE_FREQUENCIES,
+  INCOMPLETE_OCCURRENCE_BEHAVIORS,
+  occurrenceKeyFromDate,
+  advanceRecurrenceFireAt,
+} from './task-recurrence';
 export type { ILearnerSubscription } from './learner-subscription';
 export { LearnerSubscription, LearnerSubscriptionStatus } from './learner-subscription';
 export type { ICustomRole, ICustomRolePermissions } from './custom-role';

@@ -17,6 +17,8 @@ export const TASK_FIELDS = gql`
     timezone
     completedAt
     templateId
+    seriesId
+    occurrenceKey
     createdById
     createdAt
     updatedAt
@@ -206,6 +208,42 @@ export const UPSERT_TASK_FIELD_VALUE = gql`
       fieldDefinitionId
       value
     }
+  }
+`;
+
+export const GET_TASK_RECURRENCE = gql`
+  query GetTaskRecurrence($taskId: ID!, $tenantId: String!) {
+    taskRecurrence(taskId: $taskId, tenantId: $tenantId) {
+      id
+      taskId
+      seriesId
+      frequency
+      interval
+      incompleteBehavior
+      timezone
+      nextFireAt
+      enabled
+      endAt
+    }
+  }
+`;
+
+export const UPSERT_TASK_RECURRENCE = gql`
+  mutation UpsertTaskRecurrence($taskId: ID!, $tenantId: String!, $input: UpsertTaskRecurrenceInput!) {
+    upsertTaskRecurrence(taskId: $taskId, tenantId: $tenantId, input: $input) {
+      id
+      frequency
+      interval
+      incompleteBehavior
+      nextFireAt
+      enabled
+    }
+  }
+`;
+
+export const DISABLE_TASK_RECURRENCE = gql`
+  mutation DisableTaskRecurrence($taskId: ID!, $tenantId: String!) {
+    disableTaskRecurrence(taskId: $taskId, tenantId: $tenantId)
   }
 `;
 

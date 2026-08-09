@@ -8,6 +8,12 @@ import {
   type TaskFieldValueItem,
   type TaskTemplateItem,
 } from './RequiredFieldsEditor';
+import {
+  RecurrenceEditor,
+  type IncompleteOccurrenceBehavior,
+  type RecurrenceFrequency,
+  type TaskRecurrenceItem,
+} from './RecurrenceEditor';
 
 export interface TaskActivityItem {
   id: string;
@@ -26,9 +32,11 @@ export interface TaskDetailDrawerProps {
   fieldDefinitions?: TaskFieldDefinitionItem[];
   fieldValues?: TaskFieldValueItem[];
   missingRequired?: string[];
+  recurrence?: TaskRecurrenceItem | null;
   saving?: boolean;
   reminderBusy?: boolean;
   fieldsBusy?: boolean;
+  recurrenceBusy?: boolean;
   onClose: () => void;
   onSave: (input: {
     title: string;
@@ -46,6 +54,14 @@ export interface TaskDetailDrawerProps {
   onApplyTemplate?: (templateId: string) => void;
   onCreateQuickTemplate?: (name: string, fieldName: string) => void;
   onChangeFieldValue?: (fieldId: string, value: unknown) => void;
+  onSaveRecurrence?: (input: {
+    frequency: RecurrenceFrequency;
+    interval: number;
+    incompleteBehavior: IncompleteOccurrenceBehavior;
+    nextFireAt?: string | null;
+    enabled: boolean;
+  }) => void;
+  onDisableRecurrence?: () => void;
 }
 
 function toDateInput(value?: string | null): string {
@@ -64,9 +80,11 @@ export function TaskDetailDrawer({
   fieldDefinitions = [],
   fieldValues = [],
   missingRequired = [],
+  recurrence = null,
   saving,
   reminderBusy,
   fieldsBusy,
+  recurrenceBusy,
   onClose,
   onSave,
   onCreateReminder,
@@ -75,6 +93,8 @@ export function TaskDetailDrawer({
   onApplyTemplate,
   onCreateQuickTemplate,
   onChangeFieldValue,
+  onSaveRecurrence,
+  onDisableRecurrence,
 }: TaskDetailDrawerProps) {
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
@@ -254,6 +274,15 @@ export function TaskDetailDrawer({
               onCreate={onCreateReminder}
               onSnooze={onSnoozeReminder}
               onCancel={onCancelReminder}
+            />
+          ) : null}
+
+          {onSaveRecurrence && onDisableRecurrence ? (
+            <RecurrenceEditor
+              recurrence={recurrence}
+              busy={recurrenceBusy}
+              onSave={onSaveRecurrence}
+              onDisable={onDisableRecurrence}
             />
           ) : null}
 
