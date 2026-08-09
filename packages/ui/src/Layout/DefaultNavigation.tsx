@@ -341,6 +341,12 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
           </svg>
         ),
       },
+    ],
+  },
+  {
+    id: 'marketing',
+    title: 'Marketing',
+    items: [
       {
         id: 'todo',
         label: 'Todo List',
