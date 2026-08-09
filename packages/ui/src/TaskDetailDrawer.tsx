@@ -14,6 +14,7 @@ import {
   type RecurrenceFrequency,
   type TaskRecurrenceItem,
 } from './RecurrenceEditor';
+import { TaskAutomationBuilder, type TaskAutomationItem } from './TaskAutomationBuilder';
 
 export interface TaskActivityItem {
   id: string;
@@ -33,10 +34,12 @@ export interface TaskDetailDrawerProps {
   fieldValues?: TaskFieldValueItem[];
   missingRequired?: string[];
   recurrence?: TaskRecurrenceItem | null;
+  automations?: TaskAutomationItem[];
   saving?: boolean;
   reminderBusy?: boolean;
   fieldsBusy?: boolean;
   recurrenceBusy?: boolean;
+  automationBusy?: boolean;
   onClose: () => void;
   onSave: (input: {
     title: string;
@@ -62,6 +65,15 @@ export interface TaskDetailDrawerProps {
     enabled: boolean;
   }) => void;
   onDisableRecurrence?: () => void;
+  onCreateAutomation?: (input: {
+    name: string;
+    enabled: boolean;
+    trigger: { type: string };
+    actions: Array<{ type: string; config?: Record<string, unknown> }>;
+  }) => void;
+  onToggleAutomation?: (id: string, enabled: boolean) => void;
+  onDeleteAutomation?: (id: string) => void;
+  onTestAutomation?: (id: string) => void;
 }
 
 function toDateInput(value?: string | null): string {
@@ -81,10 +93,12 @@ export function TaskDetailDrawer({
   fieldValues = [],
   missingRequired = [],
   recurrence = null,
+  automations = [],
   saving,
   reminderBusy,
   fieldsBusy,
   recurrenceBusy,
+  automationBusy,
   onClose,
   onSave,
   onCreateReminder,
@@ -95,6 +109,10 @@ export function TaskDetailDrawer({
   onChangeFieldValue,
   onSaveRecurrence,
   onDisableRecurrence,
+  onCreateAutomation,
+  onToggleAutomation,
+  onDeleteAutomation,
+  onTestAutomation,
 }: TaskDetailDrawerProps) {
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
@@ -283,6 +301,18 @@ export function TaskDetailDrawer({
               busy={recurrenceBusy}
               onSave={onSaveRecurrence}
               onDisable={onDisableRecurrence}
+            />
+          ) : null}
+
+          {onCreateAutomation && onToggleAutomation && onDeleteAutomation ? (
+            <TaskAutomationBuilder
+              automations={automations}
+              sampleTaskId={task.id}
+              busy={automationBusy}
+              onCreate={onCreateAutomation}
+              onToggle={onToggleAutomation}
+              onDelete={onDeleteAutomation}
+              onTest={onTestAutomation}
             />
           ) : null}
 

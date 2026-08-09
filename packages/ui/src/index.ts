@@ -102,6 +102,12 @@ export type {
   RecurrenceFrequency,
   IncompleteOccurrenceBehavior,
 } from './RecurrenceEditor';
+export { TaskAutomationBuilder } from './TaskAutomationBuilder';
+export type {
+  TaskAutomationBuilderProps,
+  TaskAutomationItem,
+  TaskAutomationTriggerType,
+} from './TaskAutomationBuilder';
 export * from './TodoIcons';
 export { TodoPageHeader } from './TodoPageHeader';
 export type { TodoPageHeaderProps } from './TodoPageHeader';

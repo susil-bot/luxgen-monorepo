@@ -88,6 +88,23 @@ export {
   occurrenceKeyFromDate,
   advanceRecurrenceFireAt,
 } from './task-recurrence';
+export type {
+  ITaskAutomation,
+  ITaskAutomationExecution,
+  ITaskAutomationTrigger,
+  ITaskAutomationConditionGroup,
+  ITaskAutomationConditionRule,
+  ITaskAutomationAction,
+  ITaskAutomationExecutionStep,
+  TaskAutomationTriggerType,
+  TaskAutomationExecutionStatus,
+} from './task-automation';
+export {
+  TaskAutomation,
+  TaskAutomationExecution,
+  TASK_AUTOMATION_TRIGGER_TYPES,
+  TASK_AUTOMATION_EXECUTION_STATUSES,
+} from './task-automation';
 export type { ILearnerSubscription } from './learner-subscription';
 export { LearnerSubscription, LearnerSubscriptionStatus } from './learner-subscription';
 export type { ICustomRole, ICustomRolePermissions } from './custom-role';
