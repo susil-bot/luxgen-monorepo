@@ -9,6 +9,7 @@ import { PageLoadingState, PageEmptyState } from '../components/common/PageState
 import { useLayoutUser } from '../lib/app-layout-user';
 import { useAppShellConfig } from '../lib/app-shell-config';
 import { createHandleUserAction } from '../lib/user-actions';
+import { useVocabulary } from '../hooks/useVocabulary';
 
 interface CoursesPageProps {
   tenant: string;
@@ -19,6 +20,7 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
   const layoutUser = useLayoutUser();
   const { sidebarSections, logo } = useAppShellConfig();
   const handleUserAction = createHandleUserAction(router);
+  const { t } = useVocabulary();
   const [userRole, setUserRole] = useState<'admin' | 'instructor' | 'learner' | 'user'>('learner');
   const [loading, setLoading] = useState(true);
 
@@ -59,7 +61,9 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
   return (
     <>
       <Head>
-        <title>Courses - {tenant.charAt(0).toUpperCase() + tenant.slice(1)}</title>
+        <title>
+          {t('course', 'plural')} - {tenant.charAt(0).toUpperCase() + tenant.slice(1)}
+        </title>
       </Head>
 
       <AppLayout
@@ -77,19 +81,19 @@ export default function CoursesPage({ tenant }: CoursesPageProps) {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-2">
           <div className="mb-8">
-            <h1 className="ios-large-title">Courses</h1>
-            <p className="mt-1 text-secondary text-sm">Browse and manage learning content</p>
+            <h1 className="ios-large-title">{t('course', 'plural')}</h1>
+            <p className="mt-1 text-secondary text-sm">Browse and manage your {t('course', 'plural').toLowerCase()}</p>
           </div>
           <div className="space-y-8">
             {catalogCourses.length === 0 && (
               <PageEmptyState
                 icon="📚"
-                title="No courses yet"
-                subtitle="Create your first course or browse the learn catalog."
+                title={`No ${t('course', 'plural').toLowerCase()} yet`}
+                subtitle={`Create your first ${t('course').toLowerCase()} or browse the learn catalog.`}
                 action={
                   <div className="flex flex-wrap justify-center gap-2 mt-4">
                     <Link href="/courses/create" className="ios-btn-primary text-sm">
-                      Create course
+                      Create {t('course').toLowerCase()}
                     </Link>
                     <Link href="/learn" className="ios-btn-secondary text-sm">
                       Browse catalog

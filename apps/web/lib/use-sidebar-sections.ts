@@ -3,6 +3,7 @@ import { useQuery } from '@apollo/client';
 import { getDefaultSidebarSections, type SidebarSection } from '@luxgen/ui';
 import { GET_TENANT_BILLING } from '../graphql/queries/billing';
 import { useLayoutUser, useAppTenantId } from './app-layout-user';
+import { useVocabulary } from '../hooks/useVocabulary';
 import { isAdminOrAbove, isStaffOrAbove } from './user-roles';
 
 type SidebarItem = SidebarSection['items'][number];
@@ -86,12 +87,35 @@ function filterSection(
   return items.length > 0 ? { ...section, items } : null;
 }
 
+/**
+ * T-VERT-04 — relabels the Learning > Courses branch using the tenant vocabulary layer.
+ * Internal item ids/hrefs never change (nav routing, filterItem() switch above, and tests that
+ * key off item.id all keep working) — only the label text a human reads is swapped.
+ */
+function relabelCourseItems(sections: SidebarSection[], t: (term: 'course', form?: 'singular' | 'plural') => string): SidebarSection[] {
+  const relabelItem = (item: SidebarItem): SidebarItem => {
+    let label = item.label;
+    if (item.id === 'courses') label = t('course', 'plural');
+    else if (item.id === 'all-courses') label = `All ${t('course', 'plural')}`;
+    else if (item.id === 'my-courses') label = `My ${t('course', 'plural')}`;
+    else if (item.id === 'create-course') label = `Create ${t('course')}`;
+    else if (item.id === 'course-analytics') label = `${t('course')} Analytics`;
+    if (!item.children?.length) return label === item.label ? item : { ...item, label };
+    return { ...item, label, children: item.children.map((child) => relabelItem(child as SidebarItem)) as SidebarItem[]['children'] };
+  };
+
+  return sections.map((section) =>
+    section.id === 'learning' ? { ...section, items: section.items.map(relabelItem) } : section,
+  );
+}
+
 /** Role- and plan-aware sidebar sections (UI-14). */
 export function useSidebarSections(): SidebarSection[] {
   const layoutUser = useLayoutUser();
   const tenantId = useAppTenantId();
   const role = parseRole(layoutUser?.role);
   const guest = !layoutUser;
+  const { t } = useVocabulary();
 
   const { data } = useQuery(GET_TENANT_BILLING, {
     variables: { tenantId: tenantId ?? '' },
@@ -103,8 +127,10 @@ export function useSidebarSections(): SidebarSection[] {
 
   return useMemo(() => {
     const base = getDefaultSidebarSections();
-    return base
+    const filtered = base
       .map((section) => filterSection(section, role, flags, guest))
       .filter((section): section is SidebarSection => section !== null);
-  }, [role, flags.automations, flags.analytics, flags.project, flags.agentStudio, guest]);
+    return relabelCourseItems(filtered, t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [role, flags.automations, flags.analytics, flags.project, flags.agentStudio, guest, t('course'), t('course', 'plural')]);
 }
