@@ -149,8 +149,8 @@ Work **only** missing/partial routes from `T-E0-05`. Do not rebuild working page
 | ID | Pri | SLA | Source slice | Task |
 | --- | --- | --- | --- | --- |
 | [x] `T-MAP-01` | P1 | M | L12–L110 | Learning: close highest-traffic gaps (lessons/quizzes/certs) one vertical at a time | review `feat/learning-sitemap-certificates` |
-| [ ] `T-MAP-02` | P1 | M | L219–L388 | Automation/AI sitemap items not yet in nav — add nav + stub or wire |
-| [ ] `T-MAP-03` | P1 | M | L389–L487 | Analytics subdomain pages missing from nav/pages |
+| [x] `T-MAP-02` | P1 | M | L219–L388 | Automation/AI sitemap items not yet in nav — add nav + stub or wire |
+| [x] `T-MAP-03` | P1 | M | L389–L487 | Analytics subdomain pages missing from nav/pages — Course/Group wired; Workflow via T-AUTO-08; 12 deferred w/ note in `sitemap-gaps.md` |
 | [ ] `T-MAP-04` | P2 | M | L488–L675 | Marketplace IA gaps |
 | [ ] `T-MAP-05` | P2 | M | L676–L1029 | Settings / content / support gaps (split heavily) |
 | [ ] `T-MAP-06` | P2 | S | L1030–L1042 | Search route present in nav + page |
