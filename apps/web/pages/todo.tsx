@@ -11,6 +11,11 @@ import {
   TodoList,
   TodoCard,
   TodoStatsChart,
+  TodoTimeline,
+  TodoCalendarView,
+  TodoDashboard,
+  TodoContentPlanner,
+  TodoTaskForm,
   Table,
   Column,
 } from '@luxgen/ui';
@@ -18,7 +23,7 @@ import { TodoBoard } from '../components/todo/TodoBoard';
 import { useAppShellConfig } from '../lib/app-shell-config';
 import { useLayoutUser } from '../lib/app-layout-user';
 import { getTenantPageProps } from '../lib/tenant-page-props';
-import { GET_TASKS, CREATE_TASK, TOGGLE_TASK, DELETE_TASK, REORDER_TASKS } from '../graphql/queries/todo';
+import { GET_TASKS, CREATE_TASK, TOGGLE_TASK, DELETE_TASK, REORDER_TASKS, UPDATE_TASK } from '../graphql/queries/todo';
 
 interface Props {
   tenant: string;
@@ -32,15 +37,34 @@ interface Props {
  * Map, Calendar, Form) are not built — showing a "Coming soon" toast rather than
  * fabricating functionality that doesn't exist yet.
  */
-const ADD_VIEW_OPTIONS = ['Table', 'Board', 'Gallery', 'List', 'Chart', 'Dashboard', 'Timeline', 'Feed', 'Map', 'Calendar', 'Form'];
+const ADD_VIEW_OPTIONS = [
+  'Table',
+  'Board',
+  'Gallery',
+  'List',
+  'Chart',
+  'Dashboard',
+  'Timeline',
+  'Calendar',
+  'Form',
+  'Content Planner',
+  'Feed',
+  'Map',
+];
 // Maps an add-view menu option to the tab id it should jump to. Anything not listed here
-// falls through to the "coming soon" toast in handleAddView.
+// falls through to the "coming soon" toast in handleAddView. Feed and Map stay unmapped —
+// neither has a task-data equivalent, so a real view would just be fabricated UI.
 const VIEW_TO_TAB_ID: Record<string, string> = {
   Table: 'table',
   Board: 'board',
   Gallery: 'gallery',
   List: 'list',
   Chart: 'chart',
+  Dashboard: 'dashboard',
+  Timeline: 'timeline',
+  Calendar: 'calendar',
+  Form: 'form',
+  'Content Planner': 'content-planner',
 };
 
 function TodoContent({ tenant }: Props) {
@@ -62,6 +86,7 @@ function TodoContent({ tenant }: Props) {
   const [toggleTask] = useMutation(TOGGLE_TASK);
   const [deleteTask] = useMutation(DELETE_TASK);
   const [reorderTasks] = useMutation(REORDER_TASKS);
+  const [updateTask] = useMutation(UPDATE_TASK);
 
   const handleCreate = async (title: string) => {
     try {
@@ -97,6 +122,25 @@ function TodoContent({ tenant }: Props) {
       await refetch();
     } catch (err) {
       showError(err instanceof Error ? err.message : 'Failed to reorder tasks');
+    }
+  };
+
+  const handleReschedule = async (id: string, dueDate: string | null) => {
+    try {
+      await updateTask({ variables: { id, tenantId: tenant, input: { dueDate } } });
+      await refetch();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to reschedule task');
+    }
+  };
+
+  const handleCreateFull = async (input: { title: string; notes?: string; dueDate?: string }) => {
+    try {
+      await createTask({ variables: { input: { tenantId: tenant, ...input } } });
+      showSuccess('Task added');
+      await refetch();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to create task');
     }
   };
 
@@ -250,6 +294,31 @@ function TodoContent({ tenant }: Props) {
           emptyHint="No tasks yet."
         />
       ),
+    },
+    {
+      id: 'timeline',
+      label: 'Timeline',
+      content: <TodoTimeline items={tasks} onToggle={handleToggle} />,
+    },
+    {
+      id: 'calendar',
+      label: 'Calendar',
+      content: <TodoCalendarView items={tasks} onToggle={handleToggle} />,
+    },
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      content: <TodoDashboard items={tasks} />,
+    },
+    {
+      id: 'content-planner',
+      label: 'Content Planner',
+      content: <TodoContentPlanner items={tasks} onReschedule={handleReschedule} />,
+    },
+    {
+      id: 'form',
+      label: 'Form',
+      content: <TodoTaskForm onCreate={handleCreateFull} />,
     },
   ];
 
