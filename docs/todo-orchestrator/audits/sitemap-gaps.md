@@ -109,17 +109,17 @@ Flat legacy list `getDefaultNavItems()` still exposes `/courses`, `/groups`, `/u
 | Learning → Course Analytics (`/analytics/learning/courses`) | wired (alt URL) | `courses/analytics.tsx`, linked from the hub as "Course analytics" |
 | Learning → Learner/Instructor/Content Analytics | deferred | No underlying query for per-learner time-spent, instructor revenue attribution, or lesson-level engagement; needs new GraphQL fields (out of apps/web-only scope) |
 | Commerce Analytics (all 4 sub-routes) | deferred | No revenue/funnel/LTV/churn queries exist yet; `admin/customers` has record-level data but no aggregate revenue dashboard |
-| Automation Analytics → Workflow Performance (`/analytics/automation/workflows`) | tracked separately | See `T-AUTO-08` — same gap, already queued as its own task to avoid duplicate work |
+| Automation Analytics → Workflow Performance (`/analytics/automation/workflows`) | shipped (alt URL) | `automations/tower/[id]/analytics.tsx` via `T-AUTO-08` — success rate, avg duration, 7-day run-volume, computed client-side from `automationRuns` (status/durationMs/triggeredAt) |
 | Automation Analytics → Email Performance | deferred | No email-open/click tracking exists in the automation bridge yet |
 | AI Analytics (usage + performance) | deferred | No token/cost/latency metrics are captured anywhere today — this is a new instrumentation project, not a page-wiring gap |
 | Custom Reports (builder/list/viewer) | deferred | Full report-builder feature, several epics of scope on its own — not a sitemap-nav fix |
 | Exports (`/analytics/exports`) | deferred | No export job history model exists |
 
 **Bottom line:** of 15 aspirational sub-routes, 2 (Course + Group analytics) are already wired
-under alternate URLs and cross-linked from the hub; 1 (Workflow analytics) is tracked as its own
-task (`T-AUTO-08`) rather than duplicated here; the remaining 12 need new backend data models and
-queries before there's anything real to render — building empty/fake pages for those would violate
-"no fabricated results." Deferred, not stubbed.
+under alternate URLs and cross-linked from the hub; 1 (Workflow analytics) is shipped via
+`T-AUTO-08` at `/automations/tower/:id/analytics` rather than duplicated here; the remaining 12
+need new backend data models and queries before there's anything real to render — building
+empty/fake pages for those would violate "no fabricated results." Deferred, not stubbed.
 
 **Enqueue hint (any future work):** pick ONE of Commerce Analytics or AI Analytics as the next
 slice once the underlying aggregate query exists; don't build the report builder as a nav task.

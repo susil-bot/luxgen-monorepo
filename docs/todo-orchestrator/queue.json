@@ -930,7 +930,7 @@
       "epic": "E4",
       "priority": 1,
       "sla": "M",
-      "status": "todo",
+      "status": "done",
       "title": "Analytics sitemap gaps",
       "skill": "persona-pages",
       "source": {
@@ -946,7 +946,8 @@
       ],
       "acceptance": [
         "Missing analytics routes added or deferred with note"
-      ]
+      ],
+      "notes": "Docs-only closure per AC 'deferred with note' — audit in sitemap-gaps.md Analytics section: Course + Group analytics already wired (courses/analytics, groups/analytics, cross-linked from /analytics hub); Workflow performance shipped via T-AUTO-08 (/automations/tower/:id/analytics); remaining 12 sub-routes (learner/instructor/content, commerce x4, email, AI usage+performance, custom reports x3, exports) deferred — each needs new backend aggregate data this apps/web-only task cannot add, and stubbing fake numbers violates 'no fabricated results'. No product code change."
     },
     {
       "id": "T-MAP-04",
