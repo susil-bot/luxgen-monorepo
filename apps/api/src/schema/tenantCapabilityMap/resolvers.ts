@@ -3,6 +3,7 @@ import { Automation, UserRole, resolveVocabulary } from '@luxgen/db';
 import { tenantService } from '../../services/tenantService';
 import { billingService } from '../../services/billingService';
 import { funnelTemplateService } from '../../services/funnelTemplateService';
+import { scopedTenantId as resolveScopedTenantId } from '../../graphql/tenantScope';
 import type { GraphQLContext } from '../../context';
 
 function assertSuperAdmin(ctx: GraphQLContext): void {
@@ -14,34 +15,44 @@ function assertSuperAdmin(ctx: GraphQLContext): void {
   }
 }
 
-// The 9-domain sidebar/IA model from docs/PRODUCT_ARCHITECTURE.md, in the same order as that
-// doc's table -- this resolver reads that model, it does not invent a new one (see T-VERT-11
-// acceptance criteria + PLATFORM_VERTICALIZATION_STRATEGY.md §6).
-function buildDomains(featureFlags: Record<string, boolean>) {
-  return [
-    { domain: 'Home', enabled: true, reason: 'Core — always on' },
-    { domain: 'Learning', enabled: true, reason: 'Core LMS — always on' },
-    { domain: 'Commerce', enabled: true, reason: 'Core commerce — always on' },
-    { domain: 'People', enabled: true, reason: 'Core — always on' },
+// The sidebar/IA domain model from docs/PRODUCT_ARCHITECTURE.md, in the same order as that
+// doc's table (Listings removed per product decision) -- this resolver reads that model, it
+// does not invent a new one (see T-VERT-11 acceptance criteria + PLATFORM_VERTICALIZATION_STRATEGY.md §6).
+//
+// planEnabled is what the tenant's billing plan would say on its own; `overrides` (from
+// Tenant.settings.config.domainOverrides, set via updateTenantDomainAccess) wins when present --
+// that's how a super admin can demo/test a domain regardless of the tenant's actual plan.
+function buildDomains(featureFlags: Record<string, boolean>, overrides: Record<string, boolean> = {}) {
+  const base: { domain: string; planEnabled: boolean; planReason: string }[] = [
+    { domain: 'Home', planEnabled: true, planReason: 'Core — always on' },
+    { domain: 'Learning', planEnabled: true, planReason: 'Core LMS — always on' },
+    { domain: 'Commerce', planEnabled: true, planReason: 'Core commerce — always on' },
+    { domain: 'People', planEnabled: true, planReason: 'Core — always on' },
     {
       domain: 'Automation Hub',
-      enabled: Boolean(featureFlags.automations),
-      reason: featureFlags.automations ? 'Enabled by current plan' : 'Requires a plan with automations',
+      planEnabled: Boolean(featureFlags.automations),
+      planReason: featureFlags.automations ? 'Enabled by current plan' : 'Requires a plan with automations',
     },
     {
       domain: 'Intelligence',
-      enabled: Boolean(featureFlags.analytics),
-      reason: featureFlags.analytics ? 'Enabled by current plan' : 'Requires a plan with analytics',
+      planEnabled: Boolean(featureFlags.analytics),
+      planReason: featureFlags.analytics ? 'Enabled by current plan' : 'Requires a plan with analytics',
     },
     {
       domain: 'Workspace',
-      enabled: Boolean(featureFlags.project),
-      reason: featureFlags.project ? 'Enabled by current plan' : 'Requires a plan with project tracking',
+      planEnabled: Boolean(featureFlags.project),
+      planReason: featureFlags.project ? 'Enabled by current plan' : 'Requires a plan with project tracking',
     },
-    { domain: 'Listings', enabled: true, reason: 'Separate paid product — visibility not plan-gated here' },
-    { domain: 'Administration', enabled: true, reason: 'Visible to Admin+ roles, not plan-gated' },
-    { domain: 'Settings', enabled: true, reason: 'Personal settings — always on' },
+    { domain: 'Administration', planEnabled: true, planReason: 'Visible to Admin+ roles, not plan-gated' },
+    { domain: 'Settings', planEnabled: true, planReason: 'Personal settings — always on' },
   ];
+
+  return base.map(({ domain, planEnabled, planReason }) => {
+    const overridden = Object.prototype.hasOwnProperty.call(overrides, domain);
+    const enabled = overridden ? Boolean(overrides[domain]) : planEnabled;
+    const reason = overridden ? `Manually ${enabled ? 'enabled' : 'disabled'} by super admin` : planReason;
+    return { domain, enabled, reason, overridden };
+  });
 }
 
 export const tenantCapabilityMapResolvers = {
@@ -74,11 +85,42 @@ export const tenantCapabilityMapResolvers = {
         subdomain: tenant.subdomain,
         plan: billing.plan,
         vocabulary,
-        domains: buildDomains(billing.featureFlags as unknown as Record<string, boolean>),
+        domains: buildDomains(
+          billing.featureFlags as unknown as Record<string, boolean>,
+          tenant.settings?.config?.domainOverrides ?? {},
+        ),
         installedAutomationCount,
         likelyFunnelTemplate: matched ? funnelTemplateService.toGraphQL(matched) : null,
         tenantFeatureFlags: tenant.settings?.config?.features ?? {},
       };
+    },
+
+    tenantDomainAccess: async (_: unknown, { tenantId }: { tenantId: string }, ctx: GraphQLContext) => {
+      // Unlike tenantCapabilityMap, this one IS scoped normally -- any tenant's own users (or a
+      // guest on that tenant) need this to render their own sidebar, not just super admins.
+      const scoped = resolveScopedTenantId(ctx, tenantId);
+      const tenant = await tenantService.getTenantById(scoped);
+      if (!tenant) throw new GraphQLError('Tenant not found', { extensions: { code: 'NOT_FOUND' } });
+      const billing = await billingService.getTenantBilling(scoped);
+      return buildDomains(
+        billing.featureFlags as unknown as Record<string, boolean>,
+        tenant.settings?.config?.domainOverrides ?? {},
+      );
+    },
+  },
+  Mutation: {
+    updateTenantDomainAccess: async (
+      _: unknown,
+      { tenantId, domain, enabled }: { tenantId: string; domain: string; enabled: boolean | null },
+      ctx: GraphQLContext,
+    ) => {
+      assertSuperAdmin(ctx);
+      const tenant = await tenantService.updateDomainOverride(tenantId, domain, enabled ?? null);
+      const billing = await billingService.getTenantBilling(tenantId);
+      return buildDomains(
+        billing.featureFlags as unknown as Record<string, boolean>,
+        tenant.settings?.config?.domainOverrides ?? {},
+      );
     },
   },
 };

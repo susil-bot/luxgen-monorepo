@@ -48,8 +48,6 @@ export type { ISearchSettings } from './search-settings';
 export { SearchSettings } from './search-settings';
 export type { ISearchEvent } from './search-event';
 export { SearchEvent } from './search-event';
-export type { IBusinessListing, ApplicationStatus, PublicationStatus, IStatusHistoryEntry } from './business-listing';
-export { BusinessListing } from './business-listing';
 export type { IActivityEvent } from './activity-event';
 export { ActivityEvent, ActivitySubjectType, ActivityEventKind, ActivityActorType } from './activity-event';
 export type { IEnrollment } from './enrollment';
@@ -62,6 +60,8 @@ export type { ICoupon, CouponDiscountType, CouponAppliesTo, CouponStatus } from 
 export { Coupon, COUPON_DISCOUNT_TYPES, COUPON_APPLIES_TO, COUPON_STATUSES } from './coupon';
 export type { ITask, TaskStatus } from './task';
 export { Task, TASK_STATUSES } from './task';
+export type { ITodoList } from './todoList';
+export { TodoList } from './todoList';
 export type { ILearnerSubscription } from './learner-subscription';
 export { LearnerSubscription, LearnerSubscriptionStatus } from './learner-subscription';
 export type { ICustomRole, ICustomRolePermissions } from './custom-role';

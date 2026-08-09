@@ -3,6 +3,7 @@ import { GraphQLError } from 'graphql';
 
 export interface CreateTaskInput {
   tenantId: string;
+  todoListId: string;
   title: string;
   notes?: string | null;
   status?: TaskStatus;
@@ -17,12 +18,14 @@ export interface UpdateTaskInput {
 }
 
 export interface ListTasksFilter {
+  todoListId?: string;
   status?: TaskStatus;
 }
 
 export class TodoService {
   async listByTenant(tenantId: string, filter: ListTasksFilter = {}): Promise<ITask[]> {
     const query: Record<string, unknown> = { tenantId };
+    if (filter.todoListId) query.todoListId = filter.todoListId;
     if (filter.status) query.status = filter.status;
     return Task.find(query).sort({ sortOrder: 1, createdAt: -1 });
   }
@@ -36,13 +39,17 @@ export class TodoService {
     if (!title) {
       throw new GraphQLError('Task title is required', { extensions: { code: 'BAD_USER_INPUT' } });
     }
-    // New tasks go to the end of the list — same "append after current max" idiom as
-    // ProjectItem's sortOrder handling.
-    const last = await Task.findOne({ tenantId: input.tenantId }).sort({ sortOrder: -1 });
+    // New tasks go to the end of THEIR list — same "append after current max" idiom as
+    // ProjectItem's sortOrder handling, now scoped per todoListId since each named list
+    // orders independently.
+    const last = await Task.findOne({ tenantId: input.tenantId, todoListId: input.todoListId }).sort({
+      sortOrder: -1,
+    });
     const sortOrder = (last?.sortOrder ?? 0) + 1;
 
     return Task.create({
       tenantId: input.tenantId,
+      todoListId: input.todoListId,
       title,
       notes: input.notes ?? null,
       status: input.status ?? 'TODO',
@@ -81,17 +88,18 @@ export class TodoService {
 
   /** Persists sortOrder = index for each id in orderedIds, scoped to tenant. Ids not owned by
    * this tenant are silently skipped (findOneAndUpdate with tenantId filter matches nothing). */
-  async reorder(tenantId: string, orderedIds: string[]): Promise<ITask[]> {
+  async reorder(tenantId: string, orderedIds: string[], todoListId?: string): Promise<ITask[]> {
     await Promise.all(
       orderedIds.map((id, index) => Task.findOneAndUpdate({ _id: id, tenantId }, { $set: { sortOrder: index } })),
     );
-    return this.listByTenant(tenantId);
+    return this.listByTenant(tenantId, todoListId ? { todoListId } : {});
   }
 
   toGraphQL(task: ITask) {
     return {
       id: task._id.toString(),
       tenantId: task.tenantId,
+      todoListId: task.todoListId,
       title: task.title,
       notes: task.notes ?? null,
       status: task.status,

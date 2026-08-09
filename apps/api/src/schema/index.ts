@@ -14,7 +14,6 @@ import { userRoleTypeDefs } from './userRole/typeDefs';
 import { automationTypeDefs } from './automation/typeDefs';
 import { billingTypeDefs } from './billing/typeDefs';
 import { marketplaceTypeDefs } from './marketplace/typeDefs';
-import { listingTypeDefs } from './listing/typeDefs';
 import { activityEventTypeDefs } from './activityEvent/typeDefs';
 import { enrollmentTypeDefs } from './enrollment/typeDefs';
 import { storefrontTypeDefs } from './storefront/typeDefs';
@@ -39,7 +38,6 @@ import { userRoleResolvers } from './userRole/resolvers';
 import { automationResolvers } from './automation/resolvers';
 import { billingResolvers } from './billing/resolvers';
 import { marketplaceResolvers } from './marketplace/resolvers';
-import { listingResolvers } from './listing/resolvers';
 import { activityEventResolvers } from './activityEvent/resolvers';
 import { enrollmentResolvers } from './enrollment/resolvers';
 import { storefrontResolvers } from './storefront/resolvers';
@@ -98,7 +96,6 @@ export const typeDefs = mergeTypeDefs([
   automationTypeDefs,
   billingTypeDefs,
   marketplaceTypeDefs,
-  listingTypeDefs,
   activityEventTypeDefs,
   enrollmentTypeDefs,
   storefrontTypeDefs,
@@ -143,7 +140,6 @@ const mergedResolvers = mergeResolvers([
   automationResolvers,
   billingResolvers,
   marketplaceResolvers,
-  listingResolvers,
   activityEventResolvers,
   enrollmentResolvers,
   storefrontResolvers,

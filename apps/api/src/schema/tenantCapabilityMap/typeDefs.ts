@@ -5,6 +5,9 @@ export const tenantCapabilityMapTypeDefs = `
     domain: String!
     enabled: Boolean!
     reason: String!
+    """True if a super admin has explicitly pinned this domain on/off for this tenant
+    (settings.config.domainOverrides) rather than it just following the plan-derived flag."""
+    overridden: Boolean!
   }
 
   type TenantCapabilityMap {
@@ -28,5 +31,15 @@ export const tenantCapabilityMapTypeDefs = `
   extend type Query {
     """SUPER_ADMIN only -- throws FORBIDDEN otherwise."""
     tenantCapabilityMap(tenantId: ID!): TenantCapabilityMap!
+    """Any authenticated (or guest) caller, for their OWN tenant -- the effective, override-aware
+    domain list a tenant's sidebar should render. Same merge logic as tenantCapabilityMap.domains,
+    just without the super-admin-only extras (vocabulary, automation count, etc)."""
+    tenantDomainAccess(tenantId: String!): [TenantCapabilityDomain!]!
+  }
+
+  extend type Mutation {
+    """SUPER_ADMIN only. Pins a sidebar domain on/off for a tenant, overriding whatever their plan
+    would otherwise say. Pass enabled: null to clear the override and fall back to the plan."""
+    updateTenantDomainAccess(tenantId: ID!, domain: String!, enabled: Boolean): [TenantCapabilityDomain!]!
   }
 `;
