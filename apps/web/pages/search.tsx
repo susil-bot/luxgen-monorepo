@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
-import { useMutation } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { AppLayout } from '@luxgen/ui';
 import { useAppShellConfig } from '../lib/app-shell-config';
 import { useLayoutUser, useAppTenantId } from '../lib/app-layout-user';
@@ -8,6 +8,7 @@ import { PageHead } from '../components/seo/PageHead';
 import { PageEmptyState } from '../components/common/PageStates';
 import { useSearchPresenter } from '@luxgen/presenters/search';
 import { LOG_SEARCH_EVENT } from '../graphql/queries/search-analytics';
+import { GET_SEARCH_SETTINGS } from '../graphql/queries/search-settings';
 import {
   clearRecentSearches,
   getRecentSearches,
@@ -104,16 +105,27 @@ export default function SearchPage() {
   // errorPolicy 'all' means a missing field there just no-ops here, never breaks search UX.
   const [logSearchEvent] = useMutation(LOG_SEARCH_EVENT, { errorPolicy: 'all' });
 
-  // Record a completed search once results have settled (T-SRCH-06 + T-SRCH-08).
+  // T-SRCH-12: respect the "track search history" preference (default true — same default the
+  // settings page and spec use — until the backend answers with an explicit false).
+  const { data: settingsData } = useQuery(GET_SEARCH_SETTINGS, {
+    variables: { tenantId: tenantId ?? '' },
+    skip: !tenantId,
+    errorPolicy: 'all',
+  });
+  const trackSearchHistory = settingsData?.searchSettings?.trackSearchHistory ?? true;
+
+  // Record a completed search once results have settled (T-SRCH-06 + T-SRCH-08 + T-SRCH-12).
   useEffect(() => {
     if (!q || loading || error) return;
     const resultCount = viewModel.courseCount + viewModel.userCount;
-    setRecent(recordRecentSearch(q, resultCount));
+    if (trackSearchHistory) {
+      setRecent(recordRecentSearch(q, resultCount));
+    }
     if (tenantId) {
       void logSearchEvent({ variables: { tenantId, query: q, resultCount } }).catch(() => {});
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, loading, error]);
+  }, [q, loading, error, trackSearchHistory]);
 
   const handleRemoveRecent = (query: string) => setRecent(removeRecentSearch(query));
   const handleClearRecent = () => {
