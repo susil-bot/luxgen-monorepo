@@ -47,6 +47,8 @@ import {
   GET_TASKS,
   GET_TASK_ACTIVITY,
   GET_TASK_REMINDERS,
+  GET_TASK_TEMPLATES,
+  GET_TASK_FIELD_VALUES,
   CREATE_TASK,
   TOGGLE_TASK,
   DELETE_TASK,
@@ -55,6 +57,9 @@ import {
   CREATE_TASK_REMINDER,
   SNOOZE_TASK_REMINDER,
   DELETE_TASK_REMINDER,
+  CREATE_TASK_TEMPLATE,
+  APPLY_TASK_TEMPLATE,
+  UPSERT_TASK_FIELD_VALUE,
 } from '../../graphql/queries/todo';
 
 interface Props {
@@ -145,6 +150,17 @@ function TodoListPageContent({ tenant }: Props) {
     fetchPolicy: 'network-only',
   });
 
+  const { data: templatesData, refetch: refetchTemplates } = useQuery(GET_TASK_TEMPLATES, {
+    variables: { tenantId: tenant },
+    fetchPolicy: 'cache-and-network',
+  });
+
+  const { data: fieldValuesData, refetch: refetchFieldValues } = useQuery(GET_TASK_FIELD_VALUES, {
+    variables: { taskId: selectedTaskId, tenantId: tenant },
+    skip: !selectedTaskId,
+    fetchPolicy: 'network-only',
+  });
+
   const [createTask] = useMutation(CREATE_TASK);
   const [toggleTask] = useMutation(TOGGLE_TASK);
   const [deleteTask] = useMutation(DELETE_TASK);
@@ -153,6 +169,10 @@ function TodoListPageContent({ tenant }: Props) {
   const [createTaskReminder] = useMutation(CREATE_TASK_REMINDER);
   const [snoozeTaskReminder] = useMutation(SNOOZE_TASK_REMINDER);
   const [deleteTaskReminder] = useMutation(DELETE_TASK_REMINDER);
+  const [createTaskTemplate] = useMutation(CREATE_TASK_TEMPLATE);
+  const [applyTaskTemplate] = useMutation(APPLY_TASK_TEMPLATE);
+  const [upsertTaskFieldValue] = useMutation(UPSERT_TASK_FIELD_VALUE);
+  const [fieldsBusy, setFieldsBusy] = useState(false);
 
   const handleCreate = async (title: string) => {
     try {
@@ -325,6 +345,85 @@ function TodoListPageContent({ tenant }: Props) {
       showError(err instanceof Error ? err.message : 'Failed to cancel reminder');
     } finally {
       setReminderBusy(false);
+    }
+  };
+
+  const templates = templatesData?.taskTemplates ?? [];
+  const activeTemplate = templates.find((t: { id: string }) => t.id === selectedTask?.templateId);
+  const fieldDefinitions = activeTemplate?.fields ?? [];
+  const fieldValues = fieldValuesData?.taskFieldValues ?? [];
+  const missingRequired = fieldDefinitions
+    .filter((f: { required: boolean; id: string; name: string; type: string }) => f.required)
+    .filter((f: { id: string; type: string; name: string }) => {
+      const raw = fieldValues.find((v: { fieldDefinitionId: string }) => v.fieldDefinitionId === f.id)?.value;
+      if (f.type === 'checkbox') return raw !== true;
+      if (raw === null || raw === undefined) return true;
+      if (typeof raw === 'string') return raw.trim().length === 0;
+      if (Array.isArray(raw)) return raw.length === 0;
+      return false;
+    })
+    .map((f: { name: string }) => f.name);
+
+  const handleApplyTemplate = async (templateId: string) => {
+    if (!selectedTaskId) return;
+    setFieldsBusy(true);
+    try {
+      await applyTaskTemplate({
+        variables: { taskId: selectedTaskId, tenantId: tenant, templateId },
+      });
+      showSuccess('Template applied');
+      await refetch();
+      await refetchFieldValues();
+      await refetchActivity();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to apply template');
+    } finally {
+      setFieldsBusy(false);
+    }
+  };
+
+  const handleCreateQuickTemplate = async (name: string, fieldName: string) => {
+    if (!selectedTaskId) return;
+    setFieldsBusy(true);
+    try {
+      const created = await createTaskTemplate({
+        variables: {
+          input: {
+            tenantId: tenant,
+            name,
+            fields: [{ name: fieldName, type: 'text', required: true }],
+          },
+        },
+      });
+      const templateId = created.data?.createTaskTemplate?.id as string | undefined;
+      await refetchTemplates();
+      if (templateId) {
+        await applyTaskTemplate({
+          variables: { taskId: selectedTaskId, tenantId: tenant, templateId },
+        });
+        await refetch();
+        await refetchFieldValues();
+      }
+      showSuccess('Template created');
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to create template');
+    } finally {
+      setFieldsBusy(false);
+    }
+  };
+
+  const handleChangeFieldValue = async (fieldId: string, value: unknown) => {
+    if (!selectedTaskId) return;
+    setFieldsBusy(true);
+    try {
+      await upsertTaskFieldValue({
+        variables: { taskId: selectedTaskId, tenantId: tenant, fieldId, value },
+      });
+      await refetchFieldValues();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to save field');
+    } finally {
+      setFieldsBusy(false);
     }
   };
 
@@ -578,13 +677,21 @@ function TodoListPageContent({ tenant }: Props) {
         task={selectedTask}
         activity={activityData?.taskActivity ?? []}
         reminders={remindersData?.taskReminders ?? []}
+        templates={templates}
+        fieldDefinitions={fieldDefinitions}
+        fieldValues={fieldValues}
+        missingRequired={missingRequired}
         saving={savingDetail}
         reminderBusy={reminderBusy}
+        fieldsBusy={fieldsBusy}
         onClose={() => setSelectedTaskId(null)}
         onSave={(input) => void handleSaveDetail(input)}
         onCreateReminder={(input) => void handleCreateReminder(input)}
         onSnoozeReminder={(id, until) => void handleSnoozeReminder(id, until)}
         onCancelReminder={(id) => void handleCancelReminder(id)}
+        onApplyTemplate={(id) => void handleApplyTemplate(id)}
+        onCreateQuickTemplate={(name, field) => void handleCreateQuickTemplate(name, field)}
+        onChangeFieldValue={(fieldId, value) => void handleChangeFieldValue(fieldId, value)}
       />
     </>
   );

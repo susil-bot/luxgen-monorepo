@@ -34,6 +34,7 @@ export interface TodoItem {
   dueDate?: string | null;
   timezone?: string | null;
   completedAt?: string | null;
+  templateId?: string | null;
 }
 
 const OPEN_STATUSES: TodoTaskStatus[] = ['DRAFT', 'OPEN', 'TODO', 'IN_PROGRESS', 'BLOCKED', 'READY_FOR_REVIEW'];

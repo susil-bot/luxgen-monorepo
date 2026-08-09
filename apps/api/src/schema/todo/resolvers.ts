@@ -5,6 +5,7 @@ import { scopedTenantId as resolveScopedTenantId } from '../../graphql/tenantSco
 import { todoService, type CreateTaskInput, type UpdateTaskInput } from '../../services/todoService';
 import { todoListService, type CreateTodoListInput, type UpdateTodoListInput } from '../../services/todoListService';
 import { taskReminderService } from '../../services/taskReminderService';
+import { taskFieldService, type CreateTemplateInput, type UpdateTemplateInput } from '../../services/taskFieldService';
 
 function actorFromCtx(ctx: GraphQLContext): { id?: string | null; name?: string | null } {
   const user = ctx.user as { _id?: { toString(): string }; id?: string; firstName?: string; lastName?: string } | null;
@@ -80,6 +81,29 @@ export const todoResolvers = {
       const rows = await taskReminderService.listNotifications(scopedId, userId, unreadOnly);
       return rows.map((n) => taskReminderService.notificationToGraphQL(n));
     },
+    taskTemplates: async (
+      _: unknown,
+      { tenantId, teamId }: { tenantId: string; teamId?: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const rows = await taskFieldService.listTemplates(scopedId, teamId);
+      return rows.map((t) => taskFieldService.templateToGraphQL(t));
+    },
+    taskTemplate: async (_: unknown, { id, tenantId }: { id: string; tenantId: string }, ctx: GraphQLContext) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const row = await taskFieldService.getTemplate(id, scopedId);
+      return row ? taskFieldService.templateToGraphQL(row) : null;
+    },
+    taskFieldValues: async (
+      _: unknown,
+      { taskId, tenantId }: { taskId: string; tenantId: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const rows = await taskFieldService.listFieldValues(taskId, scopedId);
+      return rows.map((v) => taskFieldService.valueToGraphQL(v));
+    },
   },
   Mutation: {
     createTodoList: async (_: unknown, { input }: { input: CreateTodoListInput }, ctx: GraphQLContext) => {
@@ -123,6 +147,11 @@ export const todoResolvers = {
     toggleTask: async (_: unknown, { id, tenantId }: { id: string; tenantId: string }, ctx: GraphQLContext) => {
       const scopedId = resolveScopedTenantId(ctx, tenantId);
       const updated = await todoService.toggle(id, scopedId, actorFromCtx(ctx));
+      return updated ? todoService.toGraphQL(updated) : null;
+    },
+    completeTask: async (_: unknown, { id, tenantId }: { id: string; tenantId: string }, ctx: GraphQLContext) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const updated = await todoService.complete(id, scopedId, actorFromCtx(ctx));
       return updated ? todoService.toGraphQL(updated) : null;
     },
     deleteTask: async (_: unknown, { id, tenantId }: { id: string; tenantId: string }, ctx: GraphQLContext) => {
@@ -198,6 +227,50 @@ export const todoResolvers = {
     deleteTaskReminder: async (_: unknown, { id, tenantId }: { id: string; tenantId: string }, ctx: GraphQLContext) => {
       const scopedId = resolveScopedTenantId(ctx, tenantId);
       return taskReminderService.delete(id, scopedId);
+    },
+
+    createTaskTemplate: async (_: unknown, { input }: { input: CreateTemplateInput }, ctx: GraphQLContext) => {
+      const scopedId = resolveScopedTenantId(ctx, input.tenantId);
+      const actor = actorFromCtx(ctx);
+      const created = await taskFieldService.createTemplate({
+        ...input,
+        tenantId: scopedId,
+        createdById: actor.id ?? null,
+      });
+      return taskFieldService.templateToGraphQL(created);
+    },
+    updateTaskTemplate: async (
+      _: unknown,
+      { id, tenantId, input }: { id: string; tenantId: string; input: UpdateTemplateInput },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const updated = await taskFieldService.updateTemplate(id, scopedId, input);
+      return updated ? taskFieldService.templateToGraphQL(updated) : null;
+    },
+    deleteTaskTemplate: async (_: unknown, { id, tenantId }: { id: string; tenantId: string }, ctx: GraphQLContext) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      return taskFieldService.deleteTemplate(id, scopedId);
+    },
+    applyTaskTemplate: async (
+      _: unknown,
+      { taskId, tenantId, templateId }: { taskId: string; tenantId: string; templateId: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      await taskFieldService.applyTemplateToTask(taskId, scopedId, templateId);
+      const updated = await todoService.update(taskId, scopedId, { templateId }, actorFromCtx(ctx));
+      return updated ? todoService.toGraphQL(updated) : null;
+    },
+    upsertTaskFieldValue: async (
+      _: unknown,
+      { taskId, tenantId, fieldId, value }: { taskId: string; tenantId: string; fieldId: string; value: unknown },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const actor = actorFromCtx(ctx);
+      const row = await taskFieldService.upsertFieldValue(taskId, scopedId, fieldId, value, actor.id ?? null);
+      return taskFieldService.valueToGraphQL(row);
     },
   },
 };

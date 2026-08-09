@@ -1,6 +1,7 @@
 import {
   Task,
   TaskActivity,
+  TaskFieldValue,
   isTaskOpenStatus,
   normalizeTaskStatus,
   type ITask,
@@ -9,6 +10,7 @@ import {
   type TaskStatus,
 } from '@luxgen/db';
 import { GraphQLError } from 'graphql';
+import { taskFieldService } from './taskFieldService';
 
 export interface CreateTaskInput {
   tenantId: string;
@@ -23,6 +25,7 @@ export interface CreateTaskInput {
   startDate?: Date | null;
   dueDate?: Date | null;
   timezone?: string | null;
+  templateId?: string | null;
   createdById?: string | null;
 }
 
@@ -37,6 +40,7 @@ export interface UpdateTaskInput {
   startDate?: Date | null;
   dueDate?: Date | null;
   timezone?: string | null;
+  templateId?: string | null;
 }
 
 export interface ListTasksFilter {
@@ -110,6 +114,7 @@ export class TodoService {
       dueDate: parseDate(input.dueDate) ?? null,
       timezone: input.timezone ?? null,
       completedAt,
+      templateId: input.templateId ?? null,
       createdById: input.createdById ?? null,
     });
 
@@ -198,9 +203,21 @@ export class TodoService {
       $set.timezone = input.timezone;
       activities.push({ message: 'Timezone updated', field: 'timezone' });
     }
+    if (input.templateId !== undefined && input.templateId !== existing.templateId) {
+      $set.templateId = input.templateId;
+      activities.push({
+        message: input.templateId ? 'Template applied' : 'Template cleared',
+        field: 'templateId',
+        oldValue: existing.templateId ?? null,
+        newValue: input.templateId,
+      });
+    }
     if (input.status !== undefined) {
       const status = normalizeTaskStatus(input.status);
       if (status !== existing.status) {
+        if (status === 'COMPLETED' || status === 'DONE') {
+          await taskFieldService.assertCanComplete(id, tenantId);
+        }
         $set.status = status;
         $set.completedAt = isTaskOpenStatus(status) ? null : (existing.completedAt ?? new Date());
         activities.push({
@@ -242,10 +259,20 @@ export class TodoService {
     return this.update(id, tenantId, { status: nextStatus }, actor);
   }
 
+  /** Explicit complete — enforces required fields (Phase 3). */
+  async complete(
+    id: string,
+    tenantId: string,
+    actor?: { id?: string | null; name?: string | null },
+  ): Promise<ITask | null> {
+    return this.update(id, tenantId, { status: 'COMPLETED' }, actor);
+  }
+
   async delete(id: string, tenantId: string): Promise<boolean> {
     const result = await Task.findOneAndDelete({ _id: id, tenantId });
     if (result) {
       await TaskActivity.deleteMany({ tenantId, taskId: id });
+      await TaskFieldValue.deleteMany({ tenantId, taskId: id });
     }
     return Boolean(result);
   }
@@ -294,6 +321,7 @@ export class TodoService {
       dueDate: task.dueDate ?? null,
       timezone: task.timezone ?? null,
       completedAt: task.completedAt ?? null,
+      templateId: task.templateId ?? null,
       createdById: task.createdById ?? null,
       createdAt: task.createdAt,
       updatedAt: task.updatedAt,

@@ -64,6 +64,8 @@ export interface ITask extends Document {
   dueDate?: Date | null;
   timezone?: string | null;
   completedAt?: Date | null;
+  /** Phase 3 — optional blueprint for required fields. */
+  templateId?: string | null;
   createdById?: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -94,6 +96,7 @@ const taskSchema = new Schema<ITask>(
     dueDate: { type: Date, default: null },
     timezone: { type: String, default: null },
     completedAt: { type: Date, default: null },
+    templateId: { type: String, default: null, index: true },
     createdById: { type: String, default: null },
   },
   { timestamps: true },

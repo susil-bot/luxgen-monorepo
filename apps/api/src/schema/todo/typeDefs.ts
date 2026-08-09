@@ -45,6 +45,7 @@ export const todoTypeDefs = `
     dueDate: Date
     timezone: String
     completedAt: Date
+    templateId: ID
     createdById: String
     createdAt: Date!
     updatedAt: Date!
@@ -94,6 +95,75 @@ export const todoTypeDefs = `
     createdAt: Date!
   }
 
+  enum TaskFieldType {
+    text
+    number
+    currency
+    date
+    datetime
+    select
+    multi
+    person
+    team
+    file
+    url
+    checkbox
+    richtext
+  }
+
+  type TaskFieldDefinition {
+    id: ID!
+    name: String!
+    type: TaskFieldType!
+    required: Boolean!
+    options: [String!]!
+    helpText: String
+  }
+
+  type TaskTemplate {
+    id: ID!
+    tenantId: String!
+    teamId: ID
+    name: String!
+    description: String
+    fields: [TaskFieldDefinition!]!
+    createdById: String
+    createdAt: Date!
+    updatedAt: Date!
+  }
+
+  type TaskFieldValue {
+    id: ID!
+    taskId: ID!
+    fieldDefinitionId: ID!
+    value: JSON
+    updatedAt: Date!
+  }
+
+  input TaskFieldDefinitionInput {
+    id: ID
+    name: String!
+    type: TaskFieldType!
+    required: Boolean
+    options: [String!]
+    helpText: String
+  }
+
+  input CreateTaskTemplateInput {
+    tenantId: String!
+    name: String!
+    description: String
+    teamId: ID
+    fields: [TaskFieldDefinitionInput!]
+  }
+
+  input UpdateTaskTemplateInput {
+    name: String
+    description: String
+    teamId: ID
+    fields: [TaskFieldDefinitionInput!]
+  }
+
   input CreateReminderInput {
     fireAt: Date
     offsetPreset: String
@@ -129,6 +199,7 @@ export const todoTypeDefs = `
     startDate: Date
     dueDate: Date
     timezone: String
+    templateId: ID
   }
 
   input UpdateTaskInput {
@@ -142,6 +213,7 @@ export const todoTypeDefs = `
     startDate: Date
     dueDate: Date
     timezone: String
+    templateId: ID
   }
 
   extend type Query {
@@ -154,6 +226,9 @@ export const todoTypeDefs = `
     taskActivity(taskId: ID!, tenantId: String!, limit: Int): [TaskActivity!]!
     taskReminders(taskId: ID!, tenantId: String!): [TaskReminder!]!
     myNotifications(tenantId: String!, unreadOnly: Boolean): [AppNotification!]!
+    taskTemplates(tenantId: String!, teamId: ID): [TaskTemplate!]!
+    taskTemplate(id: ID!, tenantId: String!): TaskTemplate
+    taskFieldValues(taskId: ID!, tenantId: String!): [TaskFieldValue!]!
   }
 
   extend type Mutation {
@@ -165,6 +240,8 @@ export const todoTypeDefs = `
     createTask(input: CreateTaskInput!): Task!
     updateTask(id: ID!, tenantId: String!, input: UpdateTaskInput!): Task
     toggleTask(id: ID!, tenantId: String!): Task
+    """Marks COMPLETED; fails with REQUIRED_FIELDS_INCOMPLETE when required values missing."""
+    completeTask(id: ID!, tenantId: String!): Task
     deleteTask(id: ID!, tenantId: String!): Boolean!
     """Persists new sortOrder for each id, in the order given — used by drag-reorder in the To Do list and Board."""
     reorderTasks(tenantId: String!, todoListId: String, orderedIds: [ID!]!): [Task!]!
@@ -173,5 +250,11 @@ export const todoTypeDefs = `
     updateTaskReminder(id: ID!, tenantId: String!, input: UpdateReminderInput!): TaskReminder
     snoozeTaskReminder(id: ID!, tenantId: String!, until: Date!): TaskReminder
     deleteTaskReminder(id: ID!, tenantId: String!): Boolean!
+
+    createTaskTemplate(input: CreateTaskTemplateInput!): TaskTemplate!
+    updateTaskTemplate(id: ID!, tenantId: String!, input: UpdateTaskTemplateInput!): TaskTemplate
+    deleteTaskTemplate(id: ID!, tenantId: String!): Boolean!
+    applyTaskTemplate(taskId: ID!, tenantId: String!, templateId: ID!): Task!
+    upsertTaskFieldValue(taskId: ID!, tenantId: String!, fieldId: ID!, value: JSON!): TaskFieldValue!
   }
 `;

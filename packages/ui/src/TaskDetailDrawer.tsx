@@ -2,6 +2,12 @@ import { useEffect, useState } from 'react';
 import type { TodoItem, TodoTaskPriority, TodoTaskStatus } from './Todo';
 import { SplitPageFormField } from './SplitPageLayout/SplitPageFormField';
 import { ReminderEditor, type ReminderOffsetPreset, type TaskReminderItem } from './ReminderEditor';
+import {
+  RequiredFieldsEditor,
+  type TaskFieldDefinitionItem,
+  type TaskFieldValueItem,
+  type TaskTemplateItem,
+} from './RequiredFieldsEditor';
 
 export interface TaskActivityItem {
   id: string;
@@ -16,8 +22,13 @@ export interface TaskDetailDrawerProps {
   task: TodoItem | null;
   activity?: TaskActivityItem[];
   reminders?: TaskReminderItem[];
+  templates?: TaskTemplateItem[];
+  fieldDefinitions?: TaskFieldDefinitionItem[];
+  fieldValues?: TaskFieldValueItem[];
+  missingRequired?: string[];
   saving?: boolean;
   reminderBusy?: boolean;
+  fieldsBusy?: boolean;
   onClose: () => void;
   onSave: (input: {
     title: string;
@@ -32,6 +43,9 @@ export interface TaskDetailDrawerProps {
   onCreateReminder?: (input: { offsetPreset: ReminderOffsetPreset; fireAt?: string | null }) => void;
   onSnoozeReminder?: (id: string, untilIso: string) => void;
   onCancelReminder?: (id: string) => void;
+  onApplyTemplate?: (templateId: string) => void;
+  onCreateQuickTemplate?: (name: string, fieldName: string) => void;
+  onChangeFieldValue?: (fieldId: string, value: unknown) => void;
 }
 
 function toDateInput(value?: string | null): string {
@@ -46,13 +60,21 @@ export function TaskDetailDrawer({
   task,
   activity = [],
   reminders = [],
+  templates = [],
+  fieldDefinitions = [],
+  fieldValues = [],
+  missingRequired = [],
   saving,
   reminderBusy,
+  fieldsBusy,
   onClose,
   onSave,
   onCreateReminder,
   onSnoozeReminder,
   onCancelReminder,
+  onApplyTemplate,
+  onCreateQuickTemplate,
+  onChangeFieldValue,
 }: TaskDetailDrawerProps) {
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
@@ -209,6 +231,20 @@ export function TaskDetailDrawer({
               />
             </SplitPageFormField>
           </div>
+
+          {onApplyTemplate && onCreateQuickTemplate && onChangeFieldValue ? (
+            <RequiredFieldsEditor
+              templates={templates}
+              templateId={task.templateId}
+              fields={fieldDefinitions}
+              values={fieldValues}
+              missingRequired={missingRequired}
+              busy={fieldsBusy}
+              onApplyTemplate={onApplyTemplate}
+              onCreateQuickTemplate={onCreateQuickTemplate}
+              onChangeValue={onChangeFieldValue}
+            />
+          ) : null}
 
           {onCreateReminder && onSnoozeReminder && onCancelReminder ? (
             <ReminderEditor
