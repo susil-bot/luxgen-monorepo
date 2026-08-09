@@ -28,6 +28,7 @@ import { useTenantScope } from '../../../lib/use-tenant-scope';
 import { createHandleUserAction } from '../../../lib/user-actions';
 import { useAppLayoutHeader } from '../../../lib/app-layout-header';
 import { useLayoutUser } from '../../../lib/app-layout-user';
+import { canPublishAutomation } from '../../../lib/automation-permissions';
 
 function stepTypeLabel(kind: FlowNodeKind) {
   if (kind === 'trigger') return 'Trigger';
@@ -72,6 +73,8 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
   const { id } = router.query;
   const towerId = typeof id === 'string' ? id : 'new';
   const { queryTenantId } = useTenantScope(tenant);
+  const user = useLayoutUser();
+  const canPublish = canPublishAutomation(user?.role);
 
   const {
     flow,
@@ -247,7 +250,7 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
         id: 'save',
         label: saveState === 'saving' ? 'Saving…' : dirty ? 'Save*' : 'Save',
         onClick: () => void persistFlow(flow),
-        disabled: saveState === 'saving' || lifecycleStatus === 'archived',
+        disabled: saveState === 'saving' || lifecycleStatus === 'archived' || !canPublish,
       },
       {
         id: 'run-logs',
@@ -274,7 +277,7 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
       {
         id: 'test-run',
         label: testBusy ? 'Testing…' : 'Test run',
-        disabled: !persistedId || lifecycleStatus === 'archived' || testBusy || dirty,
+        disabled: !persistedId || lifecycleStatus === 'archived' || testBusy || dirty || !canPublish,
         onClick: () => {
           void (async () => {
             const run = await testRun();
@@ -294,7 +297,8 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
           id: 'publish',
           label: lifecycleBusy ? 'Publishing…' : 'Publish',
           onClick: () => void publish(),
-          disabled: lifecycleBusy,
+          // T-AUTO-10: Learner role (STUDENT/legacy USER) has no builder access per spec §21.
+          disabled: lifecycleBusy || !canPublish,
         });
       }
       if (lifecycleStatus === 'live') {
@@ -303,7 +307,7 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
           label: lifecycleBusy ? 'Pausing…' : 'Pause',
           destructive: true,
           onClick: () => void pause(),
-          disabled: lifecycleBusy,
+          disabled: lifecycleBusy || !canPublish,
         });
       }
       items.push({
@@ -311,7 +315,7 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
         label: lifecycleBusy ? 'Archiving…' : 'Archive',
         destructive: true,
         onClick: () => void archive(),
-        disabled: lifecycleBusy,
+        disabled: lifecycleBusy || !canPublish,
       });
     }
 
@@ -323,6 +327,7 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
     saveState,
     dirty,
     persistedId,
+    canPublish,
     towerId,
     tenant,
     lifecycleStatus,
@@ -404,6 +409,15 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
           <span className={styles.statusPill} style={{ fontFamily: 'monospace', fontSize: 10 }}>
             v{flow.version}
           </span>
+          {!canPublish ? (
+            <span
+              className={styles.statusPill}
+              style={{ color: 'var(--color-warning)' }}
+              title="Your role doesn't have access to edit or publish workflows. Contact an admin to request access."
+            >
+              🔒 Read-only
+            </span>
+          ) : null}
 
           {saveError ? (
             <span className={styles.statusPill} style={{ color: 'var(--color-red)' }} title={saveError}>
