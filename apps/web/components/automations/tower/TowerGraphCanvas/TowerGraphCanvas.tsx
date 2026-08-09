@@ -33,34 +33,48 @@ function TowerGraphStep({
   onAddStep: TowerGraphCanvasProps['onAddStep'];
 }) {
   const isSelected = selectedStepId === step.id;
+  const descId = `tower-step-desc-${step.id}`;
+  const ariaLabel = `${stepTypeLabel(step.kind)} step: ${step.title}. Press Enter to edit.`;
 
   return (
     <div className={styles.flowStepColumn}>
       <div
         role="button"
         tabIndex={0}
+        aria-label={ariaLabel}
+        aria-describedby={step.description ? descId : undefined}
+        aria-pressed={isSelected}
         className={`${styles.flowNode} ${isSelected ? styles.flowNodeSelected : ''}`}
         onClick={() => onSelectStep(step.id)}
         onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') onSelectStep(step.id);
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSelectStep(step.id);
+          }
         }}
       >
         {step.kind === 'trigger' ? (
           <>
-            <div className={styles.flowNodeTriggerHead}>
+            <div className={styles.flowNodeTriggerHead} aria-hidden>
               <span>{stepIcon(step.kind, step.emoji)}</span>
               {stepTypeLabel(step.kind)}
             </div>
             <div className={styles.flowNodeBody}>
               <h3 className={styles.flowNodeTitle}>{step.title}</h3>
-              <p className={styles.flowNodeDesc}>{step.description}</p>
+              <p className={styles.flowNodeDesc} id={descId}>
+                {step.description}
+              </p>
             </div>
           </>
         ) : (
           <div className={styles.flowNodeBody}>
-            <p className={styles.flowNodeKindLabel}>{stepTypeLabel(step.kind)}</p>
+            <p className={styles.flowNodeKindLabel} aria-hidden>
+              {stepTypeLabel(step.kind)}
+            </p>
             <h3 className={styles.flowNodeTitle}>{step.title}</h3>
-            <p className={styles.flowNodeDesc}>{step.description}</p>
+            <p className={styles.flowNodeDesc} id={descId}>
+              {step.description}
+            </p>
           </div>
         )}
       </div>
@@ -122,7 +136,7 @@ export function TowerGraphCanvas({ roots, selectedStepId, onSelectStep, onAddSte
   }, []);
 
   return (
-    <div ref={containerRef} className={styles.flowColumn}>
+    <div ref={containerRef} className={styles.flowColumn} role="main" aria-label="Workflow canvas">
       {roots.map((step) => (
         <TowerGraphStep
           key={step.id}
