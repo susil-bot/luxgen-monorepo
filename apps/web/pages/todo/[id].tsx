@@ -36,6 +36,7 @@ import {
 } from '@luxgen/ui';
 import { TodoBoard } from '../../components/todo/TodoBoard';
 import { useAppShellConfig } from '../../lib/app-shell-config';
+import { useAppLayoutHeader } from '../../lib/app-layout-header';
 import { useLayoutUser } from '../../lib/app-layout-user';
 import { getTenantPageProps } from '../../lib/tenant-page-props';
 import {
@@ -83,6 +84,7 @@ function TodoListPageContent({ tenant }: Props) {
   const todoListId = typeof id === 'string' ? id : '';
 
   const { sidebarSections, logo } = useAppShellConfig();
+  const headerProps = useAppLayoutHeader();
   const layoutUser = useLayoutUser();
   const { showSuccess, showError, showInfo } = useSnackbar();
   const [addedViews, setAddedViews] = useState<string[]>(DEFAULT_VIEWS);
@@ -336,7 +338,7 @@ function TodoListPageContent({ tenant }: Props) {
       <Head>
         <title>{listName ? `${listName} — Todo List` : 'Todo List'} — {tenant}</title>
       </Head>
-      <AppLayout responsive sidebarSections={sidebarSections} user={layoutUser ?? undefined} logo={logo}>
+      <AppLayout responsive sidebarSections={sidebarSections} user={layoutUser ?? undefined} logo={logo} {...headerProps}>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <TodoPageHeader
             breadcrumb={[{ label: 'Todo List', onClick: () => router.push('/todo') }, listName ?? '…']}

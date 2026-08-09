@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { useMutation, useQuery } from '@apollo/client';
 import { AppLayout, SnackbarProvider, useSnackbar, TodoPageHeader, TodoToDoIcon } from '@luxgen/ui';
 import { useAppShellConfig } from '../lib/app-shell-config';
+import { useAppLayoutHeader } from '../lib/app-layout-header';
 import { useLayoutUser } from '../lib/app-layout-user';
 import { getTenantPageProps } from '../lib/tenant-page-props';
 import { GET_TODO_LISTS, CREATE_TODO_LIST } from '../graphql/queries/todo';
@@ -28,6 +29,7 @@ interface TodoListSummary {
 function TodoHubContent({ tenant }: Props) {
   const router = useRouter();
   const { sidebarSections, logo } = useAppShellConfig();
+  const headerProps = useAppLayoutHeader();
   const layoutUser = useLayoutUser();
   const { showError } = useSnackbar();
   const [draftName, setDraftName] = useState('');
@@ -64,7 +66,7 @@ function TodoHubContent({ tenant }: Props) {
       <Head>
         <title>Todo List — {tenant}</title>
       </Head>
-      <AppLayout responsive sidebarSections={sidebarSections} user={layoutUser ?? undefined} logo={logo}>
+      <AppLayout responsive sidebarSections={sidebarSections} user={layoutUser ?? undefined} logo={logo} {...headerProps}>
         <div className="max-w-4xl mx-auto px-4 py-8">
           <TodoPageHeader breadcrumb={['Todo List']} title="Todo List" subtitle="Pick a list to open, or start a new one." />
 
