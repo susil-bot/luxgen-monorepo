@@ -1,7 +1,19 @@
 import { useState } from 'react';
 import Head from 'next/head';
 import { useMutation, useQuery } from '@apollo/client';
-import { AppLayout, SnackbarProvider, useSnackbar, Tab, TabItem, TodoItem, TodoList, TodoCard, TodoStatsChart } from '@luxgen/ui';
+import {
+  AppLayout,
+  SnackbarProvider,
+  useSnackbar,
+  Tab,
+  TabItem,
+  TodoItem,
+  TodoList,
+  TodoCard,
+  TodoStatsChart,
+  Table,
+  Column,
+} from '@luxgen/ui';
 import { TodoBoard } from '../components/todo/TodoBoard';
 import { useAppShellConfig } from '../lib/app-shell-config';
 import { useLayoutUser } from '../lib/app-layout-user';
@@ -14,19 +26,29 @@ interface Props {
 
 /**
  * Todo List — Workspace domain, sibling to Project. Matches the reference screenshot's
- * five views (To Do / Done / Board / Chart / Gallery) plus a "+" add-view menu. Table is
- * wired to the existing generic Table component; the remaining add-view options
- * (Dashboard, Timeline, Feed, Map, Calendar, Form) are not built — showing a "Coming soon"
- * toast rather than fabricating functionality that doesn't exist yet.
+ * views (To Do / Done / Board / Chart / Gallery) plus Table and List, reachable both as
+ * always-on tabs and via the "+" add-view menu (which just switches to the matching tab
+ * for anything already built). The remaining add-view options (Dashboard, Timeline, Feed,
+ * Map, Calendar, Form) are not built — showing a "Coming soon" toast rather than
+ * fabricating functionality that doesn't exist yet.
  */
 const ADD_VIEW_OPTIONS = ['Table', 'Board', 'Gallery', 'List', 'Chart', 'Dashboard', 'Timeline', 'Feed', 'Map', 'Calendar', 'Form'];
-const AVAILABLE_VIEWS = new Set(['Table', 'Board', 'Gallery', 'List', 'Chart']);
+// Maps an add-view menu option to the tab id it should jump to. Anything not listed here
+// falls through to the "coming soon" toast in handleAddView.
+const VIEW_TO_TAB_ID: Record<string, string> = {
+  Table: 'table',
+  Board: 'board',
+  Gallery: 'gallery',
+  List: 'list',
+  Chart: 'chart',
+};
 
 function TodoContent({ tenant }: Props) {
   const { sidebarSections, logo } = useAppShellConfig();
   const layoutUser = useLayoutUser();
   const { showSuccess, showError, showInfo } = useSnackbar();
   const [showAddView, setShowAddView] = useState(false);
+  const [activeView, setActiveView] = useState('todo');
 
   const { data, loading, error, refetch } = useQuery(GET_TASKS, {
     variables: { tenantId: tenant },
@@ -86,10 +108,64 @@ function TodoContent({ tenant }: Props) {
 
   const handleAddView = (view: string) => {
     setShowAddView(false);
-    if (!AVAILABLE_VIEWS.has(view)) {
+    const tabId = VIEW_TO_TAB_ID[view];
+    if (tabId) {
+      setActiveView(tabId);
+    } else {
       showInfo(`${view} view is coming soon`);
     }
   };
+
+  const tableColumns: Column<TodoItem & Record<string, unknown>>[] = [
+    {
+      key: 'title',
+      title: 'Task',
+      render: (_value, item) => (
+        <span style={{ textDecoration: item.status === 'DONE' ? 'line-through' : 'none' }}>{item.title}</span>
+      ),
+    },
+    {
+      key: 'status',
+      title: 'Status',
+      render: (_value, item) => (
+        <span
+          className="text-xs"
+          style={{
+            padding: '0.125rem 0.5rem',
+            borderRadius: '9999px',
+            background: item.status === 'DONE' ? 'var(--color-green-fill, #16a34a22)' : 'var(--color-fill-tertiary)',
+            color: item.status === 'DONE' ? 'var(--color-green, #16a34a)' : 'var(--color-text-secondary)',
+          }}
+        >
+          {item.status === 'DONE' ? 'Done' : 'To do'}
+        </span>
+      ),
+    },
+    {
+      key: 'dueDate',
+      title: 'Due',
+      render: (_value, item) => (item.dueDate ? new Date(item.dueDate).toLocaleDateString() : '—'),
+    },
+    {
+      key: 'id',
+      title: '',
+      render: (_value, item) => (
+        <div className="flex gap-3 justify-end">
+          <button type="button" className="text-xs" style={{ color: 'var(--color-accent)' }} onClick={() => handleToggle(item.id)}>
+            {item.status === 'DONE' ? 'Reopen' : 'Complete'}
+          </button>
+          <button
+            type="button"
+            className="text-xs"
+            style={{ color: 'var(--color-text-tertiary)' }}
+            onClick={() => handleDelete(item.id)}
+          >
+            Delete
+          </button>
+        </div>
+      ),
+    },
+  ];
 
   const tabItems: TabItem[] = [
     {
@@ -149,6 +225,32 @@ function TodoContent({ tenant }: Props) {
         </div>
       ),
     },
+    {
+      id: 'table',
+      label: 'Table',
+      content: (
+        <Table<TodoItem & Record<string, unknown>>
+          data={tasks as (TodoItem & Record<string, unknown>)[]}
+          columns={tableColumns}
+          emptyMessage="No tasks yet."
+        />
+      ),
+    },
+    {
+      id: 'list',
+      label: 'List',
+      content: (
+        <TodoList
+          items={tasks}
+          onToggle={handleToggle}
+          onDelete={handleDelete}
+          onCreate={handleCreate}
+          reorderable
+          onReorder={handleReorder}
+          emptyHint="No tasks yet."
+        />
+      ),
+    },
   ];
 
   return (
@@ -181,7 +283,7 @@ function TodoContent({ tenant }: Props) {
                       style={{ color: 'var(--color-text-primary)' }}
                     >
                       {view}
-                      {!AVAILABLE_VIEWS.has(view) && (
+                      {!VIEW_TO_TAB_ID[view] && (
                         <span className="text-xs ml-1" style={{ color: 'var(--color-text-tertiary)' }}>
                           (soon)
                         </span>
@@ -203,7 +305,15 @@ function TodoContent({ tenant }: Props) {
 
           {!loading || data ? (
             <div className="ios-card p-5">
-              <Tab items={tabItems} defaultActiveTab="todo" variant="underline" size="md" fullWidth={false} responsive />
+              <Tab
+                items={tabItems}
+                activeTab={activeView}
+                onTabChange={setActiveView}
+                variant="underline"
+                size="md"
+                fullWidth={false}
+                responsive
+              />
             </div>
           ) : null}
         </div>
