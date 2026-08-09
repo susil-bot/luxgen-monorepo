@@ -17,6 +17,22 @@ import { towerFlowToMutationInput } from '../lib/tower-flow-persist';
 export type TowerSaveState = 'idle' | 'saving' | 'saved' | 'error';
 export type TowerLifecycleStatus = AutomationLifecycleStatus;
 
+/** T-AUTO-11 — failure/success notify prefs + the timestamps the Activity panel renders. */
+export interface TowerNotifySettings {
+  onFailure: boolean;
+  onSuccess: boolean;
+}
+
+export interface TowerAutomationMeta {
+  createdAt: string | null;
+  updatedAt: string | null;
+  publishedAt: string | null;
+  archivedAt: string | null;
+  notifySettings: TowerNotifySettings;
+}
+
+const DEFAULT_NOTIFY_SETTINGS: TowerNotifySettings = { onFailure: true, onSuccess: false };
+
 interface UseTowerFlowPersistOptions {
   towerId: string;
   tenantId: string;
@@ -48,6 +64,7 @@ export function useTowerFlowPersist({ towerId, tenantId, onCreated }: UseTowerFl
   const [persistedId, setPersistedId] = useState<string | null>(isNew ? null : towerId);
   const [lifecycleStatus, setLifecycleStatus] = useState<TowerLifecycleStatus>('draft');
   const [lifecycleBusy, setLifecycleBusy] = useState(false);
+  const [automationMeta, setAutomationMeta] = useState<TowerAutomationMeta | null>(null);
 
   useEffect(() => {
     if (isNew) {
@@ -62,6 +79,13 @@ export function useTowerFlowPersist({ towerId, tenantId, onCreated }: UseTowerFl
     setFlow(parsed ?? createEmptyFlow(automation.name));
     setPersistedId(automation.id);
     setLifecycleStatus(normalizeAutomationStatus(automation.status, automation.enabled));
+    setAutomationMeta({
+      createdAt: automation.createdAt ?? null,
+      updatedAt: automation.updatedAt ?? null,
+      publishedAt: automation.publishedAt ?? null,
+      archivedAt: automation.archivedAt ?? null,
+      notifySettings: automation.notifySettings ?? DEFAULT_NOTIFY_SETTINGS,
+    });
     setLoaded(true);
   }, [data, isNew]);
 
@@ -219,6 +243,30 @@ export function useTowerFlowPersist({ towerId, tenantId, onCreated }: UseTowerFl
     [persistedId, testMutation],
   );
 
+  const updateNotifySettings = useCallback(
+    async (next: Partial<TowerNotifySettings>) => {
+      if (!persistedId) return false;
+      try {
+        const { data: result } = await updateMutation({
+          variables: { id: persistedId, input: { notifySettings: next } },
+        });
+        const saved = result?.updateAutomation;
+        if (!saved) return false;
+        setAutomationMeta((prev) => ({
+          createdAt: saved.createdAt ?? prev?.createdAt ?? null,
+          updatedAt: saved.updatedAt ?? prev?.updatedAt ?? null,
+          publishedAt: saved.publishedAt ?? prev?.publishedAt ?? null,
+          archivedAt: saved.archivedAt ?? prev?.archivedAt ?? null,
+          notifySettings: saved.notifySettings ?? { ...DEFAULT_NOTIFY_SETTINGS, ...prev?.notifySettings, ...next },
+        }));
+        return true;
+      } catch {
+        return false;
+      }
+    },
+    [persistedId, updateMutation],
+  );
+
   return {
     flow,
     setFlow,
@@ -237,5 +285,7 @@ export function useTowerFlowPersist({ towerId, tenantId, onCreated }: UseTowerFl
     testRun,
     testBusy,
     testError,
+    automationMeta,
+    updateNotifySettings,
   };
 }

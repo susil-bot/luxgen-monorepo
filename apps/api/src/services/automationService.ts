@@ -9,6 +9,7 @@ import {
   type AutomationTriggerType,
   type IAutomation,
   type IAutomationAction,
+  type IAutomationNotifySettings,
   type IAutomationRun,
 } from '@luxgen/db';
 import { emitAutomationEvent, runAutomationTest } from '@luxgen/agent';
@@ -47,6 +48,7 @@ export interface CreateAutomationInput {
   enabled?: boolean;
   status?: AutomationStatus;
   flowDefinition?: Record<string, unknown>;
+  notifySettings?: Partial<IAutomationNotifySettings>;
 }
 
 export interface UpdateAutomationInput {
@@ -57,6 +59,8 @@ export interface UpdateAutomationInput {
   enabled?: boolean;
   status?: AutomationStatus;
   flowDefinition?: Record<string, unknown>;
+  /** T-AUTO-11 — partial update supported; service does a shallow merge, not a replace. */
+  notifySettings?: Partial<IAutomationNotifySettings>;
 }
 
 function enabledFromStatus(status: AutomationStatus): boolean {
@@ -302,6 +306,14 @@ export class AutomationService {
     });
 
     const $set: Record<string, unknown> = { ...synced };
+    if (input.notifySettings) {
+      // Shallow-merge so toggling one of onFailure/onSuccess doesn't clobber the other.
+      $set.notifySettings = {
+        onFailure: existing.notifySettings?.onFailure ?? true,
+        onSuccess: existing.notifySettings?.onSuccess ?? false,
+        ...input.notifySettings,
+      };
+    }
     if (synced.status) {
       $set.enabled = enabledFromStatus(synced.status);
       if (synced.status === 'live' && !existing.publishedAt) {
@@ -510,6 +522,7 @@ export class AutomationService {
       flowDefinition: automation.flowDefinition ?? null,
       runCount: automation.runCount,
       lastRunAt: automation.lastRunAt ?? null,
+      notifySettings: automation.notifySettings ?? { onFailure: true, onSuccess: false },
       createdAt: automation.createdAt,
       updatedAt: automation.updatedAt,
     };

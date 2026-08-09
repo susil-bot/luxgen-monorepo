@@ -81,14 +81,19 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
   onSelectResult,
 }) => {
   const titleId = useId();
+  const descId = useId();
   const inputRef = useRef<HTMLInputElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
   const [query, setQuery] = useState(initialQuery);
   const [activeFilter, setActiveFilter] = useState<GlobalSearchFilterId>('all');
+  const [activeIndex, setActiveIndex] = useState(0);
 
   useEffect(() => {
     if (!open) return;
     setQuery(initialQuery);
     setActiveFilter('all');
+    setActiveIndex(0);
     onQueryChange?.(initialQuery);
     const t = window.setTimeout(() => inputRef.current?.focus(), 0);
     const prevOverflow = document.body.style.overflow;
@@ -101,6 +106,26 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, initialQuery]);
 
+  // Focus trap entry/exit point (T-SRCH-09): remember what had focus before the overlay
+  // opened, restore it on close (Esc or otherwise) instead of leaving focus on <body>.
+  useEffect(() => {
+    if (open) {
+      previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    } else if (previousFocusRef.current) {
+      previousFocusRef.current.focus();
+      previousFocusRef.current = null;
+    }
+  }, [open]);
+
+  const trimmed = query.trim();
+  const visible = filterResults(results, activeFilter);
+  const filterSupportsLive = LIVE_FILTERS.has(activeFilter);
+  const canNavigateResults = Boolean(trimmed) && filterSupportsLive && visible.length > 0;
+
+  useEffect(() => {
+    setActiveIndex(0);
+  }, [trimmed, activeFilter, visible.length]);
+
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
@@ -108,17 +133,49 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
         e.preventDefault();
         e.stopPropagation();
         onClose();
+        return;
+      }
+      if (e.key === 'ArrowDown' && canNavigateResults) {
+        e.preventDefault();
+        setActiveIndex((i) => (i + 1) % visible.length);
+        return;
+      }
+      if (e.key === 'ArrowUp' && canNavigateResults) {
+        e.preventDefault();
+        setActiveIndex((i) => (i - 1 + visible.length) % visible.length);
+        return;
+      }
+      if (e.key === 'Enter' && canNavigateResults && document.activeElement === inputRef.current) {
+        e.preventDefault();
+        handleSelect(visible[activeIndex]);
+        return;
+      }
+      // Focus trap: Tab/Shift+Tab cycle within the dialog instead of escaping to the page.
+      if (e.key === 'Tab' && dialogRef.current) {
+        const focusable = Array.from(
+          dialogRef.current.querySelectorAll<HTMLElement>(
+            'button, input, [href], [tabindex]:not([tabindex="-1"])',
+          ),
+        ).filter((el) => !el.hasAttribute('disabled') && el.offsetParent !== null);
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
       }
     };
     window.addEventListener('keydown', onKeyDown, true);
     return () => window.removeEventListener('keydown', onKeyDown, true);
-  }, [open, onClose]);
+    // handleSelect/visible/activeIndex intentionally tracked via canNavigateResults + closures below
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, onClose, canNavigateResults, visible, activeIndex]);
 
   if (!open) return null;
-
-  const trimmed = query.trim();
-  const visible = filterResults(results, activeFilter);
-  const filterSupportsLive = LIVE_FILTERS.has(activeFilter);
 
   const handleQueryChange = (next: string) => {
     setQuery(next);
@@ -148,6 +205,7 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
       />
 
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
@@ -165,6 +223,8 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
         </h2>
 
         <div
+          role="search"
+          aria-label="Global search"
           className="flex items-center gap-3 px-4"
           style={{
             height: 56,
@@ -193,11 +253,22 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
             onChange={(e) => handleQueryChange(e.target.value)}
             placeholder={placeholder}
             aria-label={placeholder}
+            aria-describedby={descId}
+            role="combobox"
+            aria-expanded={canNavigateResults}
+            aria-controls="global-search-results"
+            aria-activedescendant={
+              canNavigateResults ? `${visible[activeIndex]?.kind}-${visible[activeIndex]?.id}` : undefined
+            }
             className="flex-1 min-w-0 bg-transparent outline-none text-base"
             style={{ color: 'var(--color-label-primary)' }}
             autoComplete="off"
             spellCheck={false}
           />
+          <span id={descId} className="sr-only">
+            Type to search across all content. Use arrow keys to move through results, Enter to open, Escape to
+            close.
+          </span>
           <button
             type="button"
             onClick={onClose}
@@ -255,6 +326,7 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
           </aside>
 
           <div
+            id="global-search-results"
             className="flex-1 overflow-y-auto p-4"
             style={{ backgroundColor: 'var(--color-bg-secondary)' }}
             aria-live="polite"
@@ -290,6 +362,8 @@ export const GlobalSearchOverlay: React.FC<GlobalSearchOverlayProps> = ({
               filterSupportsLive={filterSupportsLive}
               activeFilterLabel={filters.find((f) => f.id === activeFilter)?.label ?? 'All Types'}
               visible={visible}
+              activeIndex={activeIndex}
+              onHoverIndex={setActiveIndex}
               onSelect={handleSelect}
             />
           </div>
@@ -326,6 +400,8 @@ function ResultsPanel({
   filterSupportsLive,
   activeFilterLabel,
   visible,
+  activeIndex,
+  onHoverIndex,
   onSelect,
 }: {
   trimmed: string;
@@ -334,6 +410,8 @@ function ResultsPanel({
   filterSupportsLive: boolean;
   activeFilterLabel: string;
   visible: GlobalSearchResultItem[];
+  activeIndex: number;
+  onHoverIndex: (index: number) => void;
   onSelect: (item: GlobalSearchResultItem) => void;
 }) {
   if (!trimmed) {
@@ -400,44 +478,56 @@ function ResultsPanel({
   }
 
   return (
-    <ul className="list-none m-0 p-0 flex flex-col">
-      {visible.map((item) => (
-        <li key={`${item.kind}-${item.id}`} style={{ borderBottom: '1px solid var(--color-separator)' }}>
-          <button
-            type="button"
-            onClick={() => onSelect(item)}
-            className="w-full text-left flex items-start gap-3 px-2 py-3 rounded-md transition-colors"
-            style={{ color: 'var(--color-label-primary)' }}
-            onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-fill-quaternary)')}
-            onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+    <ul className="list-none m-0 p-0 flex flex-col" role="listbox" aria-label="Search results">
+      {visible.map((item, index) => {
+        const active = index === activeIndex;
+        return (
+          <li
+            key={`${item.kind}-${item.id}`}
+            id={`${item.kind}-${item.id}`}
+            role="option"
+            aria-selected={active}
+            style={{ borderBottom: '1px solid var(--color-separator)' }}
           >
-            <span
-              className="flex-shrink-0 w-8 h-8 rounded-md flex items-center justify-center text-sm"
-              style={{ backgroundColor: 'var(--color-fill-tertiary)' }}
-              aria-hidden
+            <button
+              type="button"
+              onClick={() => onSelect(item)}
+              onMouseEnter={() => onHoverIndex(index)}
+              className="w-full text-left flex items-start gap-3 px-2 py-3 rounded-md transition-colors"
+              style={{
+                color: 'var(--color-label-primary)',
+                backgroundColor: active ? 'var(--color-fill-quaternary)' : 'transparent',
+              }}
+              aria-label={`${item.typeLabel}: ${item.title}${item.status ? `, ${item.status}` : ''}`}
             >
-              {item.kind === 'course' ? '🎓' : '👤'}
-            </span>
-            <span className="flex-1 min-w-0">
-              <span className="flex items-start justify-between gap-2">
-                <span className="text-sm font-semibold truncate">{item.title}</span>
-                <span className="text-xs flex-shrink-0" style={{ color: 'var(--color-blue)' }}>
-                  Open
-                </span>
+              <span
+                className="flex-shrink-0 w-8 h-8 rounded-md flex items-center justify-center text-sm"
+                style={{ backgroundColor: 'var(--color-fill-tertiary)' }}
+                aria-hidden
+              >
+                {item.kind === 'course' ? '🎓' : '👤'}
               </span>
-              <span className="block text-xs mt-0.5" style={{ color: 'var(--color-label-secondary)' }}>
-                {item.typeLabel}
-                {item.status ? ` · ${item.status}` : ''}
-              </span>
-              {item.metadata ? (
-                <span className="block text-xs mt-0.5 truncate" style={{ color: 'var(--color-label-tertiary)' }}>
-                  {item.metadata}
+              <span className="flex-1 min-w-0">
+                <span className="flex items-start justify-between gap-2">
+                  <span className="text-sm font-semibold truncate">{item.title}</span>
+                  <span className="text-xs flex-shrink-0" style={{ color: 'var(--color-blue)' }}>
+                    Open
+                  </span>
                 </span>
-              ) : null}
-            </span>
-          </button>
-        </li>
-      ))}
+                <span className="block text-xs mt-0.5" style={{ color: 'var(--color-label-secondary)' }}>
+                  {item.typeLabel}
+                  {item.status ? ` · ${item.status}` : ''}
+                </span>
+                {item.metadata ? (
+                  <span className="block text-xs mt-0.5 truncate" style={{ color: 'var(--color-label-tertiary)' }}>
+                    {item.metadata}
+                  </span>
+                ) : null}
+              </span>
+            </button>
+          </li>
+        );
+      })}
     </ul>
   );
 }

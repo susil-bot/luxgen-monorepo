@@ -1,10 +1,40 @@
+import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/router';
+import { useMutation, useQuery } from '@apollo/client';
 import { AppLayout } from '@luxgen/ui';
 import { useAppShellConfig } from '../lib/app-shell-config';
 import { useLayoutUser, useAppTenantId } from '../lib/app-layout-user';
 import { PageHead } from '../components/seo/PageHead';
 import { PageEmptyState } from '../components/common/PageStates';
 import { useSearchPresenter } from '@luxgen/presenters/search';
+import { LOG_SEARCH_EVENT } from '../graphql/queries/search-analytics';
+import { GET_SEARCH_SETTINGS } from '../graphql/queries/search-settings';
+import {
+  clearRecentSearches,
+  getRecentSearches,
+  recordRecentSearch,
+  removeRecentSearch,
+  type RecentSearchEntry,
+} from '../lib/recent-searches';
+import {
+  getPinnedSearches,
+  isPinnedLimitReached,
+  pinSearch,
+  unpinSearch,
+  type PinnedSearchEntry,
+} from '../lib/pinned-searches';
+import { saveSearch } from '../lib/saved-searches';
+
+function timeAgo(ts: number): string {
+  const diffMs = Date.now() - ts;
+  const mins = Math.round(diffMs / 60000);
+  if (mins < 1) return 'Just now';
+  if (mins < 60) return `${mins} minute${mins === 1 ? '' : 's'} ago`;
+  const hours = Math.round(mins / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  const days = Math.round(hours / 24);
+  return `${days} day${days === 1 ? '' : 's'} ago`;
+}
 
 export default function SearchPage() {
   const router = useRouter();
@@ -20,14 +50,196 @@ export default function SearchPage() {
     tenant,
   });
 
+  const [recent, setRecent] = useState<RecentSearchEntry[]>([]);
+  const [pinned, setPinned] = useState<PinnedSearchEntry[]>([]);
+
+  // Load recent + pinned searches once on mount (client-only — localStorage).
+  useEffect(() => {
+    setRecent(getRecentSearches());
+    setPinned(getPinnedSearches());
+  }, []);
+
+  const currentIsPinned = q ? pinned.some((p) => p.query.toLowerCase() === q.toLowerCase()) : false;
+  const togglePinCurrent = () => {
+    if (!q) return;
+    setPinned(currentIsPinned ? unpinSearch(q) : pinSearch(q));
+  };
+
+  // T-SRCH-04: save the current query under a name, reopenable from /search/saved.
+  const handleSaveSearch = () => {
+    if (!q) return;
+    const name = typeof window !== 'undefined' ? window.prompt('Name this saved search:', q) : null;
+    if (!name) return;
+    saveSearch(name, q, tenant);
+  };
+
+  // T-SRCH-05: advanced course filters. The search presenter only surfaces title/description/status
+  // today (packages/presenters/search) — richer facets (price, enrollment, completion rate) need a
+  // GraphQL field addition, which is out of this task's apps/web-only scope. Multi-select status +
+  // sort is the honest slice available from data already on the wire.
+  const COURSE_STATUSES = ['Published', 'Draft', 'Archived'] as const;
+  const [statusFilters, setStatusFilters] = useState<Set<string>>(new Set(COURSE_STATUSES));
+  const [courseSort, setCourseSort] = useState<'title-asc' | 'title-desc'>('title-asc');
+
+  const filteredCourses = useMemo(() => {
+    const filtered = viewModel.courses.filter((c) => statusFilters.has(c.status));
+    return [...filtered].sort((a, b) =>
+      courseSort === 'title-asc' ? a.title.localeCompare(b.title) : b.title.localeCompare(a.title),
+    );
+  }, [viewModel.courses, statusFilters, courseSort]);
+
+  const toggleStatusFilter = (status: string) => {
+    setStatusFilters((prev) => {
+      const next = new Set(prev);
+      if (next.has(status)) {
+        if (next.size === 1) return next; // keep at least one status selected
+        next.delete(status);
+      } else {
+        next.add(status);
+      }
+      return next;
+    });
+  };
+
+  // T-SRCH-08: fire-and-forget event log, paired apps/api backend tracked separately —
+  // errorPolicy 'all' means a missing field there just no-ops here, never breaks search UX.
+  const [logSearchEvent] = useMutation(LOG_SEARCH_EVENT, { errorPolicy: 'all' });
+
+  // T-SRCH-12: respect the "track search history" preference (default true — same default the
+  // settings page and spec use — until the backend answers with an explicit false).
+  const { data: settingsData } = useQuery(GET_SEARCH_SETTINGS, {
+    variables: { tenantId: tenantId ?? '' },
+    skip: !tenantId,
+    errorPolicy: 'all',
+  });
+  const trackSearchHistory = settingsData?.searchSettings?.trackSearchHistory ?? true;
+
+  // Record a completed search once results have settled (T-SRCH-06 + T-SRCH-08 + T-SRCH-12).
+  useEffect(() => {
+    if (!q || loading || error) return;
+    const resultCount = viewModel.courseCount + viewModel.userCount;
+    if (trackSearchHistory) {
+      setRecent(recordRecentSearch(q, resultCount));
+    }
+    if (tenantId) {
+      void logSearchEvent({ variables: { tenantId, query: q, resultCount } }).catch(() => {});
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [q, loading, error, trackSearchHistory]);
+
+  const handleRemoveRecent = (query: string) => setRecent(removeRecentSearch(query));
+  const handleClearRecent = () => {
+    clearRecentSearches();
+    setRecent([]);
+  };
+
   return (
     <>
       <PageHead title={q ? `Search: ${q}` : 'Search'} robots="noindex" />
       <AppLayout sidebarSections={sidebarSections} user={layoutUser ?? undefined} logo={logo} responsive>
         <div className="max-w-3xl mx-auto px-4 py-8">
-          <h1 className="ios-large-title mb-2">Search</h1>
+          <div className="flex items-center justify-between gap-3 mb-2">
+            <div className="flex items-baseline gap-3">
+              <h1 className="ios-large-title">Search</h1>
+              <a href="/search/saved" className="ios-btn-plain text-xs no-underline">
+                Saved searches
+              </a>
+            </div>
+            {q ? (
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <button type="button" className="ios-btn-secondary text-xs" onClick={handleSaveSearch}>
+                  ⭐ Save this search
+                </button>
+                <button
+                  type="button"
+                  className="ios-btn-secondary text-xs"
+                  onClick={togglePinCurrent}
+                  disabled={!currentIsPinned && isPinnedLimitReached()}
+                  title={!currentIsPinned && isPinnedLimitReached() ? 'Max 5 pinned searches — unpin one first' : undefined}
+                  aria-pressed={currentIsPinned}
+                >
+                  {currentIsPinned ? '📌 Pinned' : '📌 Pin this search'}
+                </button>
+              </div>
+            ) : null}
+          </div>
           {!viewModel.hasQuery ? (
-            <PageEmptyState title="Enter a search term" subtitle="Use ⌘K / Ctrl+K or the nav search to find courses and learners." />
+            <div className="space-y-6">
+              <PageEmptyState title="Enter a search term" subtitle="Use ⌘K / Ctrl+K or the nav search to find courses and learners." />
+              {pinned.length > 0 ? (
+                <section aria-label="Pinned searches">
+                  <h2 className="font-semibold text-sm mb-2" style={{ color: 'var(--color-label-secondary)' }}>
+                    PINNED
+                  </h2>
+                  <ul className="list-none m-0 p-0 space-y-1">
+                    {pinned.map((entry) => (
+                      <li
+                        key={entry.query}
+                        className="flex items-center justify-between gap-3 py-2 px-1"
+                        style={{ borderBottom: '1px solid var(--color-separator)' }}
+                      >
+                        <a
+                          href={`/search?q=${encodeURIComponent(entry.query)}&tenant=${tenant}`}
+                          className="flex-1 min-w-0 no-underline"
+                          style={{ color: 'var(--color-label-primary)' }}
+                        >
+                          <span aria-hidden>📌 </span>
+                          <span className="text-sm font-medium">{entry.query}</span>
+                        </a>
+                        <button
+                          type="button"
+                          aria-label={`Unpin "${entry.query}"`}
+                          className="ios-btn-plain text-xs flex-shrink-0"
+                          onClick={() => setPinned(unpinSearch(entry.query))}
+                        >
+                          Unpin
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+              {recent.length > 0 ? (
+                <section aria-label="Recent searches">
+                  <div className="flex items-center justify-between mb-2">
+                    <h2 className="font-semibold text-sm" style={{ color: 'var(--color-label-secondary)' }}>
+                      RECENT
+                    </h2>
+                    <button type="button" className="ios-btn-plain text-xs" onClick={handleClearRecent}>
+                      Clear history
+                    </button>
+                  </div>
+                  <ul className="list-none m-0 p-0 space-y-1">
+                    {recent.map((entry) => (
+                      <li
+                        key={entry.query}
+                        className="flex items-center justify-between gap-3 py-2 px-1"
+                        style={{ borderBottom: '1px solid var(--color-separator)' }}
+                      >
+                        <a
+                          href={`/search?q=${encodeURIComponent(entry.query)}&tenant=${tenant}`}
+                          className="flex-1 min-w-0 no-underline"
+                          style={{ color: 'var(--color-label-primary)' }}
+                        >
+                          <span className="block text-sm font-medium truncate">{entry.query}</span>
+                          <span className="block text-xs" style={{ color: 'var(--color-label-tertiary)' }}>
+                            {timeAgo(entry.ts)} · {entry.resultCount} result{entry.resultCount === 1 ? '' : 's'}
+                          </span>
+                        </a>
+                        <button
+                          type="button"
+                          aria-label={`Remove "${entry.query}" from recent searches`}
+                          className="ios-btn-plain text-xs flex-shrink-0"
+                          onClick={() => handleRemoveRecent(entry.query)}
+                        >
+                          Remove
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </section>
+              ) : null}
+            </div>
           ) : error ? (
             <PageEmptyState title="Search temporarily unavailable" subtitle={error} />
           ) : loading ? (
@@ -37,9 +249,34 @@ export default function SearchPage() {
           ) : (
             <div className="space-y-6">
               <section>
-                <h2 className="font-semibold mb-2">Courses ({viewModel.courseCount})</h2>
+                <div className="flex items-center justify-between gap-3 flex-wrap mb-2">
+                  <h2 className="font-semibold m-0">Courses ({filteredCourses.length})</h2>
+                  <div className="flex items-center gap-3 flex-wrap" role="group" aria-label="Course filters">
+                    <div className="flex items-center gap-2">
+                      {COURSE_STATUSES.map((status) => (
+                        <label key={status} className="flex items-center gap-1 text-xs cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={statusFilters.has(status)}
+                            onChange={() => toggleStatusFilter(status)}
+                          />
+                          {status}
+                        </label>
+                      ))}
+                    </div>
+                    <select
+                      aria-label="Sort courses"
+                      className="input-field text-xs"
+                      value={courseSort}
+                      onChange={(e) => setCourseSort(e.target.value as 'title-asc' | 'title-desc')}
+                    >
+                      <option value="title-asc">Title A-Z</option>
+                      <option value="title-desc">Title Z-A</option>
+                    </select>
+                  </div>
+                </div>
                 <ul className="space-y-1 list-none m-0 p-0">
-                  {viewModel.courses.map((c) => (
+                  {filteredCourses.map((c) => (
                     <li key={c.id} style={{ borderBottom: '1px solid var(--color-separator)' }}>
                       <a
                         href={c.href}

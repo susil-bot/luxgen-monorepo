@@ -41,6 +41,16 @@ export default function Dashboard({ tenant }: DashboardProps) {
 
   const onDashboardAction = createDashboardActionHandler(router);
 
+  // T-MAP-08: AdminDashboardLayout already supports a "Quick Actions" widget slot
+  // (packages/ui) but transformDashboardData never populated it — wired here instead of in
+  // lib/transformer.ts to stay within this task's dashboard.tsx-only touch list.
+  const quickActions = [
+    { id: 'create-course', label: 'Create course', onClick: () => router.push('/courses/create') },
+    { id: 'go-automations', label: 'Go to automations', onClick: () => router.push('/automations') },
+    { id: 'go-users', label: 'Manage users', onClick: () => router.push('/organization/users') },
+    { id: 'go-analytics', label: 'View analytics', onClick: () => router.push('/analytics') },
+  ];
+
   if (dataLoading) {
     return <PageLoadingState label="Loading dashboard…" />;
   }
@@ -131,7 +141,7 @@ export default function Dashboard({ tenant }: DashboardProps) {
             interval={5000}
           />
         }
-        dashboardData={transformedDashboardData}
+        dashboardData={{ ...transformedDashboardData, quickActions }}
         variant="default"
         loading={dataLoading}
         onUserAction={onUserAction}
