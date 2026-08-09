@@ -41,6 +41,12 @@ export const GET_AUTOMATION = gql`
         label
         config
       }
+      notifySettings {
+        onFailure
+        onSuccess
+      }
+      createdAt
+      updatedAt
     }
   }
 `;
@@ -165,6 +171,12 @@ export const UPDATE_AUTOMATION = gql`
         type
         label
       }
+      notifySettings {
+        onFailure
+        onSuccess
+      }
+      createdAt
+      updatedAt
     }
   }
 `;

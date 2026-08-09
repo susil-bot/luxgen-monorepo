@@ -1,8 +1,10 @@
-import { useCallback, useDeferredValue, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useRouter } from 'next/router';
 import { GlobalSearchOverlay } from '@luxgen/ui';
 import { useSearchPresenter } from '@luxgen/presenters/search';
 import { useAppTenant, useAppTenantId } from './app-layout-user';
+import { filterPaletteCommands, type PaletteCommand } from './command-palette-commands';
+import { CommandPaletteOverlay } from '../components/search/CommandPaletteOverlay';
 
 export const OPEN_GLOBAL_SEARCH_EVENT = 'luxgen-open-global-search';
 
@@ -73,8 +75,23 @@ export function GlobalSearchHost({ children }: { children: ReactNode }) {
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [open, close, openWith]);
 
+  // `>` prefix switches the overlay into command-palette mode (docs/TODO-search.md §3).
+  // Kept separate from GlobalSearchOverlay (packages/ui) — this task (T-SRCH-03) is
+  // scoped to apps/web only, and reuses none of the shared overlay's result list.
+  const isCommandMode = query.trimStart().startsWith('>');
+  const commandQuery = isCommandMode ? query.trimStart().slice(1) : '';
+  const commands = useMemo(() => filterPaletteCommands(commandQuery), [commandQuery]);
+
+  const runCommand = useCallback(
+    (command: PaletteCommand) => {
+      close();
+      void router.push(command.href);
+    },
+    [close, router],
+  );
+
   const { viewModel, loading, error } = useSearchPresenter({
-    query: open ? deferredQuery : '',
+    query: open && !isCommandMode ? deferredQuery : '',
     tenantId,
     tenant,
   });
@@ -82,19 +99,30 @@ export function GlobalSearchHost({ children }: { children: ReactNode }) {
   return (
     <>
       {children}
-      <GlobalSearchOverlay
-        open={open}
-        onClose={close}
-        initialQuery={initialQuery}
-        results={viewModel.results}
-        loading={loading}
-        error={error}
-        onQueryChange={setQuery}
-        onSelectResult={(item) => {
-          close();
-          void router.push(item.href);
-        }}
-      />
+      {isCommandMode ? (
+        <CommandPaletteOverlay
+          open={open}
+          query={commandQuery}
+          commands={commands}
+          onQueryChange={(next) => setQuery(`>${next}`)}
+          onClose={close}
+          onExecute={runCommand}
+        />
+      ) : (
+        <GlobalSearchOverlay
+          open={open}
+          onClose={close}
+          initialQuery={initialQuery}
+          results={viewModel.results}
+          loading={loading}
+          error={error}
+          onQueryChange={setQuery}
+          onSelectResult={(item) => {
+            close();
+            void router.push(item.href);
+          }}
+        />
+      )}
     </>
   );
 }

@@ -54,6 +54,32 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
     ],
   },
   {
+    id: 'search',
+    title: 'Search',
+    items: [
+      {
+        id: 'global-search',
+        label: 'Search',
+        href: '/search',
+        icon: (
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+            />
+          </svg>
+        ),
+        // T-SRCH-08: was an orphan page (route existed, nothing linked to it) — reachable from here now.
+        children: [
+          { id: 'search-home', label: 'Search', href: '/search', exact: true },
+          { id: 'search-analytics', label: 'Search analytics', href: '/admin/search-analytics' },
+        ],
+      },
+    ],
+  },
+  {
     id: 'learning',
     title: 'Learning',
     items: [

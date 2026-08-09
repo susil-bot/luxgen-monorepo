@@ -166,7 +166,7 @@ tasks:
     epic: E1
     priority: 1
     sla: M
-    status: todo
+    status: done
     title: Command palette subset (create course, nav dashboard/orders)
     skill: ios-design
     source:
@@ -180,6 +180,8 @@ tasks:
     acceptance:
       - At least 3 create/nav commands work
       - Keyboard select + enter navigates
+    notes: CommandPaletteOverlay (apps/web-only) + verified-href command list;
+      '>' prefix switches GlobalSearchHost into command mode — feat/frontend-todo-batch
   - id: T-SRCH-04
     epic: E1
     priority: 1
@@ -219,7 +221,7 @@ tasks:
     epic: E1
     priority: 2
     sla: S
-    status: todo
+    status: done
     title: Recent searches list + clear
     skill: ios-design
     source:
@@ -232,6 +234,8 @@ tasks:
       - T-SRCH-01
     acceptance:
       - Shows last searches; clear removes them
+    notes: localStorage recent-searches lib + list/clear on /search empty state —
+      feat/frontend-todo-batch
   - id: T-SRCH-07
     epic: E1
     priority: 3
@@ -252,7 +256,7 @@ tasks:
     epic: E1
     priority: 2
     sla: M
-    status: todo
+    status: done
     title: Search analytics admin stub + client event hook
     skill: persona-pages
     source:
@@ -267,11 +271,15 @@ tasks:
     acceptance:
       - Admin page or section exists
       - At least one search event logged or stubbed with TODO API
+    notes: /admin/search-analytics admin page + logSearchEvent fire-and-forget
+      hook on /search (FE, errorPolicy 'all' so it degrades gracefully) +
+      SearchEvent model/searchEventSummary rolling-30-day aggregate (BE) —
+      feat/frontend-todo-batch-v2 + feat/backend-todo-batch
   - id: T-SRCH-09
     epic: E1
     priority: 2
     sla: S
-    status: todo
+    status: done
     title: Search overlay a11y (focus trap aria keyboard)
     skill: ios-design
     source:
@@ -285,11 +293,13 @@ tasks:
       - T-SRCH-01
     acceptance:
       - Focus trapped; aria labels; Tab cycle; Esc restores focus
+    notes: GlobalSearchOverlay (packages/ui) — focus trap, role=combobox/listbox/option,
+      roving ArrowUp/Down+Enter, focus restore on close — feat/frontend-todo-batch
   - id: T-SRCH-10
     epic: E1
     priority: 2
     sla: S
-    status: todo
+    status: done
     title: Search error empty loading states
     skill: ios-design
     source:
@@ -302,6 +312,9 @@ tasks:
       - T-SRCH-02
     acceptance:
       - Distinct UI for loading empty error; no fabricated results
+    notes: Verified pre-existing — ResultsPanel (packages/ui) and /search page both
+      already render distinct loading/empty/error states with no fabricated results;
+      no code change needed, AC already met — feat/frontend-todo-batch
   - id: T-AUTO-01
     epic: E2
     priority: 0
@@ -459,7 +472,7 @@ tasks:
     epic: E2
     priority: 2
     sla: M
-    status: todo
+    status: done
     title: Workflow analytics page (success rate run volume)
     skill: persona-pages
     source:
@@ -474,6 +487,11 @@ tasks:
       - T-AUTO-05
     acceptance:
       - Page shows live or empty-with-reason metrics; plan gate if needed
+    notes: /automations/tower/:id/analytics — success rate, avg duration, 7-day
+      run-volume bar chart, computed client-side from the existing
+      automationRuns(automationId) query (status/durationMs/triggeredAt already
+      present); no apps/api change needed despite touch list. PlanGate-gated,
+      linked from Tower editor toolbar — feat/frontend-todo-batch-v2
   - id: T-AUTO-09
     epic: E2
     priority: 2
@@ -510,6 +528,12 @@ tasks:
       - T-AUTO-04
     acceptance:
       - Unauthorized role cannot publish; UI hides or disables correctly
+    notes: STUDENT/legacy USER role blocked from all mutating automation
+      resolvers server-side (requireAutomationBuilderAccess) + Tower editor
+      toolbar disables Save/Test run/Publish/Pause/Archive + read-only pill
+      client-side (canPublishAutomation). Manager/Instructor/Admin/Owner
+      tiering + Enterprise publish-approval flow deferred (out of scope) —
+      feat/frontend-todo-batch-v2 + feat/backend-todo-batch
   - id: T-COM-01
     epic: E3
     priority: 0
@@ -776,7 +800,7 @@ tasks:
     epic: E4
     priority: 2
     sla: S
-    status: todo
+    status: done
     title: Search route in nav + page exists
     skill: sidebar
     source:
@@ -790,6 +814,8 @@ tasks:
       - T-SRCH-01
     acceptance:
       - /search reachable from nav; page renders overlay or dedicated UI
+    notes: Added Search sidebar item -> /search (page existed, had zero nav entry) —
+      feat/frontend-todo-batch
   - id: T-MAP-07
     epic: E4
     priority: 3
@@ -950,7 +976,7 @@ tasks:
     epic: E1
     priority: 2
     sla: S
-    status: todo
+    status: done
     title: Pinned searches (star + pin list in overlay)
     skill: ios-design
     source:
@@ -964,11 +990,13 @@ tasks:
     acceptance:
       - User can pin a search and see it in Pinned list
       - Pin state survives reload (localStorage MVP OK)
+    notes: localStorage pinned-searches lib (max 5) + pin/unpin UI on /search —
+      feat/frontend-todo-batch
   - id: T-SRCH-12
     epic: E1
     priority: 2
     sla: M
-    status: todo
+    status: done
     title: Search settings page (result prefs / defaults)
     skill: persona-pages
     source:
@@ -983,6 +1011,10 @@ tasks:
     acceptance:
       - Settings route or section exists
       - At least one preference persists
+    notes: /settings/search page (FE) + SearchSettings model/searchSettings
+      + updateSearchSettings resolvers, upsert-on-update (BE). resultsPerPage
+      + trackSearchHistory persist — feat/frontend-todo-batch-v2 +
+      feat/backend-todo-batch
   - id: T-SRCH-13
     epic: E1
     priority: 3
@@ -1003,7 +1035,7 @@ tasks:
     epic: E2
     priority: 2
     sla: M
-    status: todo
+    status: done
     title: Workflow notifications + activity timeline surfaces
     skill: automation
     source:
@@ -1019,6 +1051,12 @@ tasks:
     acceptance:
       - Failure/success notify settings persist OR documented defer
       - Activity timeline shows create/update/publish events
+    notes: Automation.notifySettings {onFailure,onSuccess} persisted via
+      updateAutomation (BE, shallow-merge) + Tower editor right-panel toggle
+      + Activity timeline from createdAt/updatedAt/publishedAt/archivedAt
+      (FE). Pause/resume/comment/AI-action timeline events + weekly
+      digest/Slack notifications from the full spec deferred —
+      feat/frontend-todo-batch-v2 + feat/backend-todo-batch
   - id: T-AUTO-12
     epic: E2
     priority: 3

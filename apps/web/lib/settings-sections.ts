@@ -16,6 +16,7 @@ export type SettingsSectionId =
   | 'languages'
   | 'apps'
   | 'security'
+  | 'search'
   | 'billing';
 
 export interface SettingsSection {
@@ -94,6 +95,15 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
     icon: '🔒',
   },
   {
+    // T-SRCH-12: was an orphan page (route existed, nothing linked to it) — reachable from here now.
+    id: 'search',
+    label: 'Search',
+    description: 'Results per page, search history tracking',
+    href: '/settings/search',
+    status: 'implemented',
+    icon: '🔍',
+  },
+  {
     id: 'checkout',
     label: 'Checkout',
     description: 'Guest checkout, express pay',
@@ -161,7 +171,7 @@ export const SETTINGS_SECTIONS: SettingsSection[] = [
 
 export const SETTINGS_GROUPS = [
   { title: 'Store', ids: ['general', 'storefront', 'branding', 'domains'] as SettingsSectionId[] },
-  { title: 'Team & access', ids: ['staff', 'security'] as SettingsSectionId[] },
+  { title: 'Team & access', ids: ['staff', 'security', 'search'] as SettingsSectionId[] },
   { title: 'Commerce', ids: ['payments', 'billing', 'checkout', 'shipping', 'taxes'] as SettingsSectionId[] },
   { title: 'Customers & comms', ids: ['customers', 'notifications', 'policies', 'languages'] as SettingsSectionId[] },
   { title: 'Advanced', ids: ['apps'] as SettingsSectionId[] },
