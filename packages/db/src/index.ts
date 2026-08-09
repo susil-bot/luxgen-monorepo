@@ -20,6 +20,7 @@ export { AgentAuditEntry } from './agent-audit';
 export type {
   IAutomation,
   IAutomationAction,
+  IAutomationNotifySettings,
   IAutomationRun,
   AutomationTriggerType,
   AutomationActionType,
@@ -40,6 +41,10 @@ export type { ITenantUsageMonthly } from './usage';
 export { TenantUsageMonthly, currentUsagePeriod } from './usage';
 export type { IAutomationTemplate, TemplateCategory } from './automation-template';
 export { AutomationTemplate } from './automation-template';
+export type { ISearchSettings } from './search-settings';
+export { SearchSettings } from './search-settings';
+export type { ISearchEvent } from './search-event';
+export { SearchEvent } from './search-event';
 export type { IBusinessListing, ApplicationStatus, PublicationStatus, IStatusHistoryEntry } from './business-listing';
 export { BusinessListing } from './business-listing';
 export type { IActivityEvent } from './activity-event';

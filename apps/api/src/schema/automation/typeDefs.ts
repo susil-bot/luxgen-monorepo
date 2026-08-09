@@ -50,6 +50,17 @@ export const automationTypeDefs = `
     config: JSON
   }
 
+  type AutomationNotifySettings {
+    onFailure: Boolean!
+    onSuccess: Boolean!
+  }
+
+  # Both fields optional so updateAutomation can patch just one flag at a time (service merges with the existing value).
+  input AutomationNotifySettingsInput {
+    onFailure: Boolean
+    onSuccess: Boolean
+  }
+
   type Automation {
     id: ID!
     tenantId: String!
@@ -64,6 +75,7 @@ export const automationTypeDefs = `
     flowDefinition: JSON
     runCount: Int!
     lastRunAt: Date
+    notifySettings: AutomationNotifySettings
     createdAt: Date!
     updatedAt: Date!
   }
@@ -109,6 +121,7 @@ export const automationTypeDefs = `
     actions: [AutomationActionInput!]!
     enabled: Boolean
     flowDefinition: JSON
+    notifySettings: AutomationNotifySettingsInput
   }
 
   input UpdateAutomationInput {
@@ -118,6 +131,7 @@ export const automationTypeDefs = `
     actions: [AutomationActionInput!]
     enabled: Boolean
     flowDefinition: JSON
+    notifySettings: AutomationNotifySettingsInput
   }
 
   input RunAgentTaskInput {
