@@ -10,7 +10,8 @@
     "automation": "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md",
     "commerce": "docs/TODO-Commerce Experience.md",
     "role": "docs/TODO-role.md",
-    "vertical": "docs/PLATFORM_VERTICALIZATION_STRATEGY.md"
+    "vertical": "docs/PLATFORM_VERTICALIZATION_STRATEGY.md",
+    "marketing": "docs/MARKETING_PLATFORM_STRATEGY.md"
   },
   "tasks": [
     {
@@ -1666,6 +1667,331 @@
         "Page shows domain/module/template/vocabulary state read live, no new cache layer"
       ],
       "notes": "Query.tenantCapabilityMap (SUPER_ADMIN gated) + /organization/tenant-map -- feat/vertical-templates-backend + feat/vertical-templates-frontend"
+    },
+    {
+      "id": "T-MKT-01",
+      "epic": "E6",
+      "priority": 1,
+      "sla": "M",
+      "status": "todo",
+      "title": "Marketing data models — SocialAccount, MediaAsset, SocialPost",
+      "skill": "fullstack-developer",
+      "source": {
+        "file": "docs/MARKETING_PLATFORM_STRATEGY.md",
+        "start": 207,
+        "end": 233
+      },
+      "touch": [
+        "packages/db"
+      ],
+      "deps": [],
+      "acceptance": [
+        "SocialAccount/MediaAsset/SocialPost schemas added under packages/db/src/marketing/, tenant-scoped",
+        "Lead.convertedToCustomerId links into existing Customer model, not a parallel record",
+        "Barrel exports added to packages/db/src/index.ts"
+      ]
+    },
+    {
+      "id": "T-MKT-02",
+      "epic": "E6",
+      "priority": 1,
+      "sla": "M",
+      "status": "todo",
+      "title": "SocialPlatformAdapter interface + first real adapter (LinkedIn or X, whichever API access lands first)",
+      "skill": "graphql",
+      "source": {
+        "file": "docs/MARKETING_PLATFORM_STRATEGY.md",
+        "start": 257,
+        "end": 304
+      },
+      "touch": [
+        "apps/api"
+      ],
+      "deps": [
+        "T-MKT-01"
+      ],
+      "acceptance": [
+        "SocialPlatformAdapter interface defined per doc §7 (getAuthUrl, exchangeCodeForToken, refreshToken, publishPost, fetchEngagementMetrics)",
+        "One real adapter implements it end to end against a live sandbox/test account",
+        "No platform-specific branching anywhere outside the adapter file"
+      ],
+      "notes": "BLOCKED on external platform API access approval — see doc §7a. Do not start until at least one platform's developer access is granted."
+    },
+    {
+      "id": "T-MKT-03",
+      "epic": "E6",
+      "priority": 1,
+      "sla": "M",
+      "status": "todo",
+      "title": "socialAccountService (OAuth connect/disconnect/refresh) + GraphQL",
+      "skill": "graphql",
+      "source": {
+        "file": "docs/MARKETING_PLATFORM_STRATEGY.md",
+        "start": 257,
+        "end": 284
+      },
+      "touch": [
+        "apps/api"
+      ],
+      "deps": [
+        "T-MKT-02"
+      ],
+      "acceptance": [
+        "connectSocialAccount/disconnectSocialAccount mutations work end to end against the Phase-0 adapter",
+        "Tokens stored via encryptedAccessToken/encryptedRefreshToken, never returned in any GraphQL response",
+        "requireFeature(ctx, 'marketing') plan gate on every mutation"
+      ]
+    },
+    {
+      "id": "T-MKT-04",
+      "epic": "E6",
+      "priority": 1,
+      "sla": "M",
+      "status": "todo",
+      "title": "mediaAssetService — object storage upload/delete + GraphQL",
+      "skill": "fullstack-developer",
+      "source": {
+        "file": "docs/MARKETING_PLATFORM_STRATEGY.md",
+        "start": 207,
+        "end": 223
+      },
+      "touch": [
+        "apps/api"
+      ],
+      "deps": [
+        "T-MKT-01"
+      ],
+      "acceptance": [
+        "Uploads go to real object storage (S3-compatible), not base64-in-Mongo — confirmed doc §2 gap",
+        "uploadMediaAsset/deleteMediaAsset/mediaAssets GraphQL wired end to end"
+      ],
+      "notes": "Needs an object-storage provider decision (S3/R2/etc.) before starting — infra choice, not covered by this pass."
+    },
+    {
+      "id": "T-MKT-05",
+      "epic": "E6",
+      "priority": 2,
+      "sla": "M",
+      "status": "todo",
+      "title": "socialPostService (draft/schedule/publish state machine) + scheduled publish worker",
+      "skill": "automation",
+      "source": {
+        "file": "docs/MARKETING_PLATFORM_STRATEGY.md",
+        "start": 153,
+        "end": 233
+      },
+      "touch": [
+        "apps/api"
+      ],
+      "deps": [
+        "T-MKT-02",
+        "T-MKT-04"
+      ],
+      "acceptance": [
+        "createSocialPost/scheduleSocialPost/publishSocialPostNow mutations work end to end",
+        "Scheduled worker reuses core.schedule.cron compound (no new trigger primitive) to sweep due posts",
+        "Cross-post fan-out: one postGroupId, N SocialPost rows, confirmed by test covering 2+ platforms"
+      ]
+    },
+    {
+      "id": "T-MKT-06",
+      "epic": "E6",
+      "priority": 2,
+      "sla": "M",
+      "status": "todo",
+      "title": "marketing.* automation compounds + bridge handlers + marketing plan gate",
+      "skill": "automation",
+      "source": {
+        "file": "docs/MARKETING_PLATFORM_STRATEGY.md",
+        "start": 234,
+        "end": 333
+      },
+      "touch": [
+        "packages/automation-flow",
+        "packages/billing",
+        "packages/agent"
+      ],
+      "deps": [
+        "T-MKT-05"
+      ],
+      "acceptance": [
+        "marketing.post.published/marketing.post.failed/marketing.comment.received/marketing.lead.captured triggers added to catalog/compounds.ts",
+        "Bridge handlers wired in packages/agent/src/automation/bridge.ts",
+        "marketing/marketingMultiAccount/marketingAIWriter feature flags added to BillingFeature + FEATURE_MIN_PLAN"
+      ]
+    },
+    {
+      "id": "T-MKT-07",
+      "epic": "E6",
+      "priority": 2,
+      "sla": "M",
+      "status": "todo",
+      "title": "Marketing nav section + plan-gate upsell + /marketing overview",
+      "skill": "sidebar",
+      "source": {
+        "file": "docs/MARKETING_PLATFORM_STRATEGY.md",
+        "start": 106,
+        "end": 152
+      },
+      "touch": [
+        "apps/web",
+        "packages/ui"
+      ],
+      "deps": [
+        "T-MKT-06"
+      ],
+      "acceptance": [
+        "New Marketing sidebar section in DefaultNavigation.tsx, gated on the marketing plan flag same as automations/analytics",
+        "/marketing overview shows empty state before any account connected, summary cards after",
+        "Upsell card shown when marketing flag is off, matching existing gated-feature pattern"
+      ]
+    },
+    {
+      "id": "T-MKT-08",
+      "epic": "E6",
+      "priority": 2,
+      "sla": "M",
+      "status": "todo",
+      "title": "/marketing/accounts — connect/disconnect screen",
+      "skill": "persona-pages",
+      "source": {
+        "file": "docs/MARKETING_PLATFORM_STRATEGY.md",
+        "start": 377,
+        "end": 395
+      },
+      "touch": [
+        "apps/web"
+      ],
+      "deps": [
+        "T-MKT-03",
+        "T-MKT-07"
+      ],
+      "acceptance": [
+        "Connect button per supported platform, OAuth redirect + callback handling",
+        "Connection status list (connected/expired/revoked) with disconnect action"
+      ]
+    },
+    {
+      "id": "T-MKT-09",
+      "epic": "E6",
+      "priority": 3,
+      "sla": "M",
+      "status": "todo",
+      "title": "/marketing/create — AI Writer panel + save-as-draft",
+      "skill": "ai-studio",
+      "source": {
+        "file": "docs/MARKETING_PLATFORM_STRATEGY.md",
+        "start": 396,
+        "end": 422
+      },
+      "touch": [
+        "apps/web",
+        "apps/api"
+      ],
+      "deps": [
+        "T-MKT-06"
+      ],
+      "acceptance": [
+        "Prompt to caption/hashtag/hook variations, using existing packages/agent LLM orchestrator if its shape fits — confirm before building a second AI integration",
+        "Save-as-draft creates a SocialPost in draft status"
+      ],
+      "notes": "Needs a short spike confirming packages/agent/src/core/orchestrator.ts is reusable for freeform text generation (not just code-change tasks) before scoping the API side."
+    },
+    {
+      "id": "T-MKT-10",
+      "epic": "E6",
+      "priority": 3,
+      "sla": "M",
+      "status": "todo",
+      "title": "/marketing/library — media upload/grid/tag/search",
+      "skill": "persona-pages",
+      "source": {
+        "file": "docs/MARKETING_PLATFORM_STRATEGY.md",
+        "start": 377,
+        "end": 395
+      },
+      "touch": [
+        "apps/web"
+      ],
+      "deps": [
+        "T-MKT-04"
+      ],
+      "acceptance": [
+        "Drag-drop upload, grid view, tag/search/filter, delete — all backed by real object storage"
+      ]
+    },
+    {
+      "id": "T-MKT-11",
+      "epic": "E6",
+      "priority": 3,
+      "sla": "M",
+      "status": "todo",
+      "title": "/marketing/publish — Composer",
+      "skill": "persona-pages",
+      "source": {
+        "file": "docs/MARKETING_PLATFORM_STRATEGY.md",
+        "start": 340,
+        "end": 353
+      },
+      "touch": [
+        "apps/web"
+      ],
+      "deps": [
+        "T-MKT-05",
+        "T-MKT-08"
+      ],
+      "acceptance": [
+        "Platform picker, media attach, per-platform character-count awareness, schedule-or-publish-now"
+      ]
+    },
+    {
+      "id": "T-MKT-12",
+      "epic": "E6",
+      "priority": 3,
+      "sla": "M",
+      "status": "todo",
+      "title": "/marketing/publish — Calendar, Queue, Drafts",
+      "skill": "persona-pages",
+      "source": {
+        "file": "docs/MARKETING_PLATFORM_STRATEGY.md",
+        "start": 340,
+        "end": 353
+      },
+      "touch": [
+        "apps/web"
+      ],
+      "deps": [
+        "T-MKT-11"
+      ],
+      "acceptance": [
+        "Calendar month/week toggle showing scheduled posts",
+        "Queue list (scheduled/publishing/failed) and Drafts list, both live-wired to socialPosts query"
+      ]
+    },
+    {
+      "id": "T-MKT-13",
+      "epic": "E6",
+      "priority": 3,
+      "sla": "M",
+      "status": "todo",
+      "title": "/marketing/analytics — overview + per-post detail",
+      "skill": "persona-pages",
+      "source": {
+        "file": "docs/MARKETING_PLATFORM_STRATEGY.md",
+        "start": 340,
+        "end": 353
+      },
+      "touch": [
+        "apps/web",
+        "apps/api"
+      ],
+      "deps": [
+        "T-MKT-05"
+      ],
+      "acceptance": [
+        "Overview cards (posts published, avg engagement) live or empty-with-reason, no fabricated numbers",
+        "Per-post detail view shows impressions/likes/comments pulled via fetchEngagementMetrics"
+      ]
     }
   ],
   "coverage_plan": "docs/todo-orchestrator/COVERAGE_PLAN.md"
