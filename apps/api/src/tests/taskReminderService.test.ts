@@ -15,6 +15,8 @@ jest.mock('@luxgen/db', () => ({
     create: jest.fn(),
     find: jest.fn(),
     findOneAndUpdate: jest.fn(),
+    countDocuments: jest.fn(),
+    updateMany: jest.fn(),
   },
   fireAtFromDueAndPreset: (due: Date, preset: string) => {
     const ms: Record<string, number> = {
@@ -165,5 +167,35 @@ describe('TaskReminderService Phase 2', () => {
       { new: true },
     );
     expect(result?.status).toBe('snoozed');
+  });
+
+  it('getNotificationFeed returns unreadCount and NavBar item shape', async () => {
+    const row = {
+      _id: { toString: () => 'n1' },
+      category: 'task_reminder',
+      title: 'Task reminder',
+      body: '"Ship" is due soon.',
+      taskId: 'task1',
+      readAt: null,
+      createdAt: new Date('2026-08-09T12:00:00.000Z'),
+      metadata: { href: '/todo/list1', todoListId: 'list1' },
+    };
+    (AppNotification.find as jest.Mock).mockReturnValue({
+      sort: jest.fn().mockReturnValue({
+        limit: jest.fn().mockResolvedValue([row]),
+      }),
+    });
+    (AppNotification.countDocuments as jest.Mock).mockResolvedValue(1);
+
+    const feed = await service.getNotificationFeed('tenant1', 'u2', 15);
+    expect(feed.unreadCount).toBe(1);
+    expect(feed.items[0]).toEqual(
+      expect.objectContaining({
+        id: 'n1',
+        type: 'task_reminder',
+        title: 'Task reminder',
+        href: '/todo/list1',
+      }),
+    );
   });
 });

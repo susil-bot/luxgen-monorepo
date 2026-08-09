@@ -27,6 +27,7 @@ import { searchTypeDefs } from './search/typeDefs';
 import { todoTypeDefs } from './todo/typeDefs';
 import { funnelTemplateTypeDefs } from './funnelTemplate/typeDefs';
 import { tenantCapabilityMapTypeDefs } from './tenantCapabilityMap/typeDefs';
+import { notificationFeedTypeDefs } from './notification/typeDefs';
 
 // Import resolvers
 import { tenantResolvers } from './tenant/resolvers';
@@ -51,6 +52,7 @@ import { searchResolvers } from './search/resolvers';
 import { todoResolvers } from './todo/resolvers';
 import { funnelTemplateResolvers } from './funnelTemplate/resolvers';
 import { tenantCapabilityMapResolvers } from './tenantCapabilityMap/resolvers';
+import { notificationFeedResolvers } from './notification/typeDefs';
 import { EnrollmentStatusSummaryTypeDefs } from './engagement/enrollmentStatusSummary/typeDefs';
 import { EnrollmentStatusSummaryResolvers } from './engagement/enrollmentStatusSummary/resolvers';
 import { StoreCatalogFacetsTypeDefs } from './engagement/storeCatalogFacets/typeDefs';
@@ -107,6 +109,7 @@ export const typeDefs = mergeTypeDefs([
   couponTypeDefs,
   searchTypeDefs,
   todoTypeDefs,
+  notificationFeedTypeDefs,
   funnelTemplateTypeDefs,
   tenantCapabilityMapTypeDefs,
   EnrollmentStatusSummaryTypeDefs,
@@ -151,6 +154,7 @@ const mergedResolvers = mergeResolvers([
   couponResolvers,
   searchResolvers,
   todoResolvers,
+  notificationFeedResolvers,
   funnelTemplateResolvers,
   tenantCapabilityMapResolvers,
   EnrollmentStatusSummaryResolvers,

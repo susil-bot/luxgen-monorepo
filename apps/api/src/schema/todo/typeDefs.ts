@@ -173,6 +173,5 @@ export const todoTypeDefs = `
     updateTaskReminder(id: ID!, tenantId: String!, input: UpdateReminderInput!): TaskReminder
     snoozeTaskReminder(id: ID!, tenantId: String!, until: Date!): TaskReminder
     deleteTaskReminder(id: ID!, tenantId: String!): Boolean!
-    markNotificationRead(id: ID!, tenantId: String!): AppNotification
   }
 `;
