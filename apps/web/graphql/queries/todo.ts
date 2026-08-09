@@ -1,5 +1,27 @@
 import { gql } from '@apollo/client';
 
+export const TASK_FIELDS = gql`
+  fragment TaskFields on Task {
+    id
+    todoListId
+    title
+    notes
+    status
+    priority
+    sortOrder
+    teamId
+    assigneeId
+    followerIds
+    startDate
+    dueDate
+    timezone
+    completedAt
+    createdById
+    createdAt
+    updatedAt
+  }
+`;
+
 export const GET_TODO_LISTS = gql`
   query GetTodoLists($tenantId: String!) {
     todoLists(tenantId: $tenantId) {
@@ -53,15 +75,25 @@ export const DELETE_TODO_LIST = gql`
 export const GET_TASKS = gql`
   query GetTasks($tenantId: String!, $todoListId: String, $status: TaskStatus) {
     tasks(tenantId: $tenantId, todoListId: $todoListId, status: $status) {
+      ...TaskFields
+    }
+  }
+  ${TASK_FIELDS}
+`;
+
+export const GET_TASK_ACTIVITY = gql`
+  query GetTaskActivity($taskId: ID!, $tenantId: String!, $limit: Int) {
+    taskActivity(taskId: $taskId, tenantId: $tenantId, limit: $limit) {
       id
-      todoListId
-      title
-      notes
-      status
-      sortOrder
-      dueDate
+      taskId
+      message
+      actorId
+      actorName
+      field
+      oldValue
+      newValue
+      source
       createdAt
-      updatedAt
     }
   }
 `;
@@ -69,41 +101,28 @@ export const GET_TASKS = gql`
 export const CREATE_TASK = gql`
   mutation CreateTask($input: CreateTaskInput!) {
     createTask(input: $input) {
-      id
-      todoListId
-      title
-      notes
-      status
-      sortOrder
-      dueDate
-      createdAt
-      updatedAt
+      ...TaskFields
     }
   }
+  ${TASK_FIELDS}
 `;
 
 export const UPDATE_TASK = gql`
   mutation UpdateTask($id: ID!, $tenantId: String!, $input: UpdateTaskInput!) {
     updateTask(id: $id, tenantId: $tenantId, input: $input) {
-      id
-      title
-      notes
-      status
-      sortOrder
-      dueDate
-      updatedAt
+      ...TaskFields
     }
   }
+  ${TASK_FIELDS}
 `;
 
 export const TOGGLE_TASK = gql`
   mutation ToggleTask($id: ID!, $tenantId: String!) {
     toggleTask(id: $id, tenantId: $tenantId) {
-      id
-      status
-      updatedAt
+      ...TaskFields
     }
   }
+  ${TASK_FIELDS}
 `;
 
 export const DELETE_TASK = gql`

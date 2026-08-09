@@ -7,12 +7,43 @@ import { Button } from './Button';
 
 /** Shared shape — matches the Task GraphQL type (apps/api/src/schema/todo/typeDefs.ts) closely
  * enough for display purposes without importing GraphQL codegen types into packages/ui. */
+export type TodoTaskStatus =
+  | 'DRAFT'
+  | 'OPEN'
+  | 'TODO'
+  | 'IN_PROGRESS'
+  | 'BLOCKED'
+  | 'READY_FOR_REVIEW'
+  | 'COMPLETED'
+  | 'DONE'
+  | 'CANCELLED'
+  | 'ARCHIVED';
+
+export type TodoTaskPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+
 export interface TodoItem {
   id: string;
   title: string;
   notes?: string | null;
-  status: 'TODO' | 'DONE';
+  status: TodoTaskStatus;
+  priority?: TodoTaskPriority | null;
+  teamId?: string | null;
+  assigneeId?: string | null;
+  followerIds?: string[];
+  startDate?: string | null;
   dueDate?: string | null;
+  timezone?: string | null;
+  completedAt?: string | null;
+}
+
+const OPEN_STATUSES: TodoTaskStatus[] = ['DRAFT', 'OPEN', 'TODO', 'IN_PROGRESS', 'BLOCKED', 'READY_FOR_REVIEW'];
+
+export function isTodoOpen(item: Pick<TodoItem, 'status'>): boolean {
+  return OPEN_STATUSES.includes(item.status);
+}
+
+export function isTodoDone(item: Pick<TodoItem, 'status'>): boolean {
+  return !isTodoOpen(item);
 }
 
 // ---------------------------------------------------------------------------
@@ -23,11 +54,12 @@ export interface TodoRowProps {
   item: TodoItem;
   onToggle: (id: string) => void;
   onDelete?: (id: string) => void;
+  onOpen?: (id: string) => void;
   draggable?: boolean;
   onDragStart?: () => void;
 }
 
-export const TodoRow: React.FC<TodoRowProps> = ({ item, onToggle, onDelete, draggable, onDragStart }) => {
+export const TodoRow: React.FC<TodoRowProps> = ({ item, onToggle, onDelete, onOpen, draggable, onDragStart }) => {
   return (
     <div
       className="todo-row"
@@ -41,16 +73,28 @@ export const TodoRow: React.FC<TodoRowProps> = ({ item, onToggle, onDelete, drag
         borderBottom: '1px solid var(--color-border)',
       }}
     >
-      <Checkbox checked={item.status === 'DONE'} onChange={() => onToggle(item.id)} />
+      <Checkbox checked={!isTodoOpen(item)} onChange={() => onToggle(item.id)} />
       <span
         style={{
           flex: 1,
-          textDecoration: item.status === 'DONE' ? 'line-through' : 'none',
-          color: item.status === 'DONE' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+          textDecoration: isTodoDone(item) ? 'line-through' : 'none',
+          color: isTodoDone(item) ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+          cursor: 'pointer',
         }}
+        onClick={() => onOpen?.(item.id)}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') onOpen?.(item.id);
+        }}
+        role={onOpen ? 'button' : undefined}
+        tabIndex={onOpen ? 0 : undefined}
       >
         {item.title}
       </span>
+      {item.priority && item.priority !== 'MEDIUM' && (
+        <span className="text-xs badge" style={{ color: 'var(--color-label-secondary)' }}>
+          {item.priority}
+        </span>
+      )}
       {item.dueDate && (
         <span className="text-xs" style={{ color: 'var(--color-text-secondary)' }}>
           {new Date(item.dueDate).toLocaleDateString()}
@@ -78,6 +122,7 @@ export interface TodoListProps {
   items: TodoItem[];
   onToggle: (id: string) => void;
   onDelete?: (id: string) => void;
+  onOpen?: (id: string) => void;
   onCreate: (title: string) => void;
   emptyHint?: string;
   reorderable?: boolean;
@@ -88,6 +133,7 @@ export const TodoList: React.FC<TodoListProps> = ({
   items,
   onToggle,
   onDelete,
+  onOpen,
   onCreate,
   emptyHint = 'Check the box to mark items as done',
   reorderable = false,
@@ -134,6 +180,7 @@ export const TodoList: React.FC<TodoListProps> = ({
             item={item}
             onToggle={onToggle}
             onDelete={onDelete}
+            onOpen={onOpen}
             draggable={reorderable}
             onDragStart={() => setDragId(item.id)}
           />
@@ -174,19 +221,17 @@ export const TodoCard: React.FC<TodoCardProps> = ({ item, onToggle }) => {
   return (
     <Card variant="outlined" padding="medium">
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '0.5rem' }}>
-        <p style={{ fontWeight: 600, textDecoration: item.status === 'DONE' ? 'line-through' : 'none' }}>
-          {item.title}
-        </p>
+        <p style={{ fontWeight: 600, textDecoration: isTodoDone(item) ? 'line-through' : 'none' }}>{item.title}</p>
         <span
           className="text-xs"
           style={{
             padding: '0.125rem 0.5rem',
             borderRadius: '9999px',
-            background: item.status === 'DONE' ? 'var(--color-green-fill, #16a34a22)' : 'var(--color-fill-tertiary)',
-            color: item.status === 'DONE' ? 'var(--color-green, #16a34a)' : 'var(--color-text-secondary)',
+            background: isTodoDone(item) ? 'var(--color-green-fill, #16a34a22)' : 'var(--color-fill-tertiary)',
+            color: isTodoDone(item) ? 'var(--color-green, #16a34a)' : 'var(--color-text-secondary)',
           }}
         >
-          {item.status === 'DONE' ? 'Done' : 'To do'}
+          {isTodoDone(item) ? 'Done' : 'To do'}
         </span>
       </div>
       {item.notes && (
@@ -200,7 +245,7 @@ export const TodoCard: React.FC<TodoCardProps> = ({ item, onToggle }) => {
         className="text-sm"
         style={{ marginTop: '0.75rem', color: 'var(--color-accent)' }}
       >
-        {item.status === 'DONE' ? 'Mark as to do' : 'Mark as done'}
+        {isTodoDone(item) ? 'Mark as to do' : 'Mark as done'}
       </button>
     </Card>
   );
@@ -343,11 +388,11 @@ export const TodoTimeline: React.FC<TodoTimelineProps> = ({ items, onToggle }) =
                 key={item.id}
                 style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', padding: '0.375rem 0' }}
               >
-                <Checkbox checked={item.status === 'DONE'} onChange={() => onToggle(item.id)} />
+                <Checkbox checked={isTodoDone(item)} onChange={() => onToggle(item.id)} />
                 <span
                   style={{
-                    textDecoration: item.status === 'DONE' ? 'line-through' : 'none',
-                    color: item.status === 'DONE' ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
+                    textDecoration: isTodoDone(item) ? 'line-through' : 'none',
+                    color: isTodoDone(item) ? 'var(--color-text-tertiary)' : 'var(--color-text-primary)',
                   }}
                 >
                   {item.title}
@@ -458,10 +503,11 @@ export const TodoCalendarView: React.FC<TodoCalendarViewProps> = ({ items, onTog
                           padding: '0.0625rem 0.25rem',
                           marginTop: '0.125rem',
                           borderRadius: '0.25rem',
-                          background:
-                            t.status === 'DONE' ? 'var(--color-green-fill, #16a34a22)' : 'var(--color-fill-tertiary)',
-                          color: t.status === 'DONE' ? 'var(--color-green, #16a34a)' : 'var(--color-text-primary)',
-                          textDecoration: t.status === 'DONE' ? 'line-through' : 'none',
+                          background: isTodoDone(t)
+                            ? 'var(--color-green-fill, #16a34a22)'
+                            : 'var(--color-fill-tertiary)',
+                          color: isTodoDone(t) ? 'var(--color-green, #16a34a)' : 'var(--color-text-primary)',
+                          textDecoration: isTodoDone(t) ? 'line-through' : 'none',
                         }}
                       >
                         {t.title}
@@ -496,11 +542,11 @@ export const TodoDashboard: React.FC<TodoDashboardProps> = ({ items }) => {
   weekAgo.setDate(weekAgo.getDate() - 7);
 
   const total = items.length;
-  const done = items.filter((i) => i.status === 'DONE').length;
+  const done = items.filter((i) => isTodoDone(i)).length;
   const todo = total - done;
-  const overdue = items.filter((i) => i.status === 'TODO' && i.dueDate && new Date(i.dueDate) < today).length;
+  const overdue = items.filter((i) => isTodoOpen(i) && i.dueDate && new Date(i.dueDate) < today).length;
   const doneThisWeek = items.filter(
-    (i) => i.status === 'DONE' && i.dueDate && new Date(i.dueDate) >= weekAgo && new Date(i.dueDate) <= today,
+    (i) => isTodoDone(i) && i.dueDate && new Date(i.dueDate) >= weekAgo && new Date(i.dueDate) <= today,
   ).length;
 
   const tiles: { label: string; value: number; color?: string }[] = [
@@ -625,7 +671,7 @@ export const TodoContentPlanner: React.FC<TodoContentPlannerProps> = ({ items, o
                   className="ios-card p-3 text-sm cursor-grab"
                   style={{
                     background: 'var(--color-bg-secondary)',
-                    textDecoration: item.status === 'DONE' ? 'line-through' : 'none',
+                    textDecoration: isTodoDone(item) ? 'line-through' : 'none',
                   }}
                 >
                   {item.title}
@@ -650,22 +696,49 @@ export const TodoContentPlanner: React.FC<TodoContentPlannerProps> = ({ items, o
 // quick-add, which only takes a title.
 // ---------------------------------------------------------------------------
 export interface TodoTaskFormProps {
-  onCreate: (input: { title: string; notes?: string; dueDate?: string }) => void;
+  onCreate: (input: {
+    title: string;
+    notes?: string;
+    dueDate?: string;
+    startDate?: string;
+    priority?: TodoTaskPriority;
+    status?: TodoTaskStatus;
+    assigneeId?: string;
+    teamId?: string;
+  }) => void;
 }
 
 export const TodoTaskForm: React.FC<TodoTaskFormProps> = ({ onCreate }) => {
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
   const [dueDate, setDueDate] = useState('');
+  const [startDate, setStartDate] = useState('');
+  const [priority, setPriority] = useState<TodoTaskPriority>('MEDIUM');
+  const [assigneeId, setAssigneeId] = useState('');
+  const [teamId, setTeamId] = useState('');
+  const [more, setMore] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = title.trim();
     if (!trimmed) return;
-    onCreate({ title: trimmed, notes: notes.trim() || undefined, dueDate: dueDate || undefined });
+    onCreate({
+      title: trimmed,
+      notes: notes.trim() || undefined,
+      dueDate: dueDate || undefined,
+      startDate: more && startDate ? startDate : undefined,
+      priority: more ? priority : undefined,
+      assigneeId: more && assigneeId.trim() ? assigneeId.trim() : undefined,
+      teamId: more && teamId.trim() ? teamId.trim() : undefined,
+    });
     setTitle('');
     setNotes('');
     setDueDate('');
+    setStartDate('');
+    setPriority('MEDIUM');
+    setAssigneeId('');
+    setTeamId('');
+    setMore(false);
   };
 
   return (
@@ -698,6 +771,49 @@ export const TodoTaskForm: React.FC<TodoTaskFormProps> = ({ onCreate }) => {
           onChange={(e) => setDueDate(e.target.value)}
         />
       </div>
+      <button type="button" className="ios-btn-plain text-sm self-start" onClick={() => setMore((v) => !v)}>
+        {more ? 'Hide options' : 'More options'}
+      </button>
+      {more && (
+        <>
+          <div className="ios-form-group">
+            <label htmlFor="todo-form-start-date">Start date</label>
+            <input
+              id="todo-form-start-date"
+              type="date"
+              className="ios-input"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+            />
+          </div>
+          <div className="ios-form-group">
+            <label htmlFor="todo-form-priority">Priority</label>
+            <select
+              id="todo-form-priority"
+              className="ios-input"
+              value={priority}
+              onChange={(e) => setPriority(e.target.value as TodoTaskPriority)}
+            >
+              <option value="LOW">Low</option>
+              <option value="MEDIUM">Medium</option>
+              <option value="HIGH">High</option>
+              <option value="CRITICAL">Critical</option>
+            </select>
+          </div>
+          <Input
+            label="Assignee ID"
+            value={assigneeId}
+            onChange={(e) => setAssigneeId(e.target.value)}
+            placeholder="User id (optional)"
+          />
+          <Input
+            label="Team ID"
+            value={teamId}
+            onChange={(e) => setTeamId(e.target.value)}
+            placeholder="Team / group id (optional)"
+          />
+        </>
+      )}
       <Button type="submit" variant="primary">
         Add task
       </Button>

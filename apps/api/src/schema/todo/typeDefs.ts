@@ -1,7 +1,22 @@
 export const todoTypeDefs = `
   enum TaskStatus {
+    DRAFT
+    OPEN
     TODO
+    IN_PROGRESS
+    BLOCKED
+    READY_FOR_REVIEW
+    COMPLETED
     DONE
+    CANCELLED
+    ARCHIVED
+  }
+
+  enum TaskPriority {
+    LOW
+    MEDIUM
+    HIGH
+    CRITICAL
   }
 
   type TodoList {
@@ -21,11 +36,31 @@ export const todoTypeDefs = `
     title: String!
     notes: String
     status: TaskStatus!
+    priority: TaskPriority!
     sortOrder: Int!
+    teamId: ID
+    assigneeId: ID
+    followerIds: [ID!]!
+    startDate: Date
     dueDate: Date
+    timezone: String
+    completedAt: Date
     createdById: String
     createdAt: Date!
     updatedAt: Date!
+  }
+
+  type TaskActivity {
+    id: ID!
+    taskId: ID!
+    message: String!
+    actorId: String
+    actorName: String
+    field: String
+    oldValue: String
+    newValue: String
+    source: String!
+    createdAt: Date!
   }
 
   input CreateTodoListInput {
@@ -43,14 +78,26 @@ export const todoTypeDefs = `
     title: String!
     notes: String
     status: TaskStatus
+    priority: TaskPriority
+    teamId: ID
+    assigneeId: ID
+    followerIds: [ID!]
+    startDate: Date
     dueDate: Date
+    timezone: String
   }
 
   input UpdateTaskInput {
     title: String
     notes: String
     status: TaskStatus
+    priority: TaskPriority
+    teamId: ID
+    assigneeId: ID
+    followerIds: [ID!]
+    startDate: Date
     dueDate: Date
+    timezone: String
   }
 
   extend type Query {
@@ -60,6 +107,7 @@ export const todoTypeDefs = `
     todoList(id: ID!, tenantId: String!): TodoList
     tasks(tenantId: String!, todoListId: String, status: TaskStatus): [Task!]!
     task(id: ID!, tenantId: String!): Task
+    taskActivity(taskId: ID!, tenantId: String!, limit: Int): [TaskActivity!]!
   }
 
   extend type Mutation {

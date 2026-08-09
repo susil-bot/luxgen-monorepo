@@ -58,10 +58,20 @@ export type { IStorefrontBundle } from './storefront-bundle';
 export { StorefrontBundle, StorefrontBundleStatus, StorefrontBillingInterval } from './storefront-bundle';
 export type { ICoupon, CouponDiscountType, CouponAppliesTo, CouponStatus } from './coupon';
 export { Coupon, COUPON_DISCOUNT_TYPES, COUPON_APPLIES_TO, COUPON_STATUSES } from './coupon';
-export type { ITask, TaskStatus } from './task';
-export { Task, TASK_STATUSES } from './task';
+export type { ITask, TaskStatus, TaskPriority } from './task';
+export {
+  Task,
+  TASK_STATUSES,
+  TASK_PRIORITIES,
+  TASK_OPEN_STATUSES,
+  TASK_DONE_STATUSES,
+  isTaskOpenStatus,
+  normalizeTaskStatus,
+} from './task';
 export type { ITodoList } from './todoList';
 export { TodoList } from './todoList';
+export type { ITaskActivity } from './task-activity';
+export { TaskActivity } from './task-activity';
 export type { ILearnerSubscription } from './learner-subscription';
 export { LearnerSubscription, LearnerSubscriptionStatus } from './learner-subscription';
 export type { ICustomRole, ICustomRolePermissions } from './custom-role';
