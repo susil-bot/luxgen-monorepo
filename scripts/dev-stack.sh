@@ -55,6 +55,23 @@ ensure_web_env() {
   fi
 }
 
+# apps/api's dev server (ts-node-dev --transpile-only) loads workspace packages
+# (@luxgen/db, @luxgen/billing, etc.) through their compiled dist/ output via each
+# package's package.json "main" field -- plain Node require() resolution, not
+# webpack/tsconfig-paths. Unlike `next dev` (which resolves @luxgen/ui etc. straight
+# from source), a stale or missing dist/ silently ships old code: e.g. a newly added
+# model export resolves to `undefined` at runtime with no build-time warning, because
+# dev mode's turbo pipeline has no dependsOn and never rebuilds dependencies. dist/ is
+# gitignored, so a fresh clone or a newly pulled branch always needs this once.
+# Several of these packages' own "build" scripts intentionally exit non-zero even when
+# they've emitted usable output (tracked pre-existing Mongoose/type-error baselines,
+# see scripts/tsc-tolerant.js) -- `|| true` so that known, tracked drift never blocks
+# local dev from starting; a genuinely broken package still shows its errors above.
+build_api_deps() {
+  echo "► Building @luxgen/api's workspace dependencies (dist/ is gitignored, always stale on a fresh pull)..."
+  npx turbo run build --filter=@luxgen/api^... || true
+}
+
 ensure_mobile_env() {
   if [[ ! -d apps/mobile ]]; then
     echo "✗ apps/mobile not found. Merge PR #39 (feat/mobile-foundation) or checkout that branch."
@@ -102,6 +119,7 @@ fi
 
 ensure_infra
 ensure_web_env
+build_api_deps
 
 case "$ROLE" in
   web|admin)
