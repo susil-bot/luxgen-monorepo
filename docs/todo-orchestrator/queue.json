@@ -1375,7 +1375,7 @@
       "epic": "E4",
       "priority": 1,
       "sla": "S",
-      "status": "todo",
+      "status": "done",
       "title": "Dashboard sitemap widgets vs live /dashboard",
       "skill": "persona-pages",
       "source": {
@@ -1393,7 +1393,8 @@
       "acceptance": [
         "Gap note for each sitemap dashboard widget",
         "Wire or defer each with checklist update"
-      ]
+      ],
+      "notes": "Closed — widget work already on main via batch PR #477. Verified against live code: dashboard.tsx feeds the AdminDashboardLayout slots — banner+onboarding (Overview), stats (KPI tiles), activitiesData (Recent Activity, mapped from recentActivities), quickActions (4 real actions: create course / automations / users / analytics). Shortcuts deferred — no distinct data model; Quick Actions covers the spec's intent. Docs-only closure."
     },
     {
       "id": "T-VERT-01",
