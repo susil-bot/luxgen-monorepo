@@ -20,6 +20,7 @@ export { AgentAuditEntry } from './agent-audit';
 export type {
   IAutomation,
   IAutomationAction,
+  IAutomationNotifySettings,
   IAutomationRun,
   AutomationTriggerType,
   AutomationActionType,

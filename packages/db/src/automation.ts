@@ -59,6 +59,12 @@ export function enabledFromAutomationStatus(status: AutomationStatus): boolean {
   return status === 'live';
 }
 
+/** T-AUTO-11 — per-workflow failure/success notification prefs (TODO §19 email notifications, MVP). */
+export interface IAutomationNotifySettings {
+  onFailure: boolean;
+  onSuccess: boolean;
+}
+
 export interface IAutomation extends Document {
   /** Tenant isolation — TODO §11 `organizationId` */
   tenantId: string;
@@ -85,6 +91,8 @@ export interface IAutomation extends Document {
   /** TODO `totalRuns` (success/fail split not stored — see AutomationRun) */
   runCount: number;
   lastRunAt?: Date;
+  /** T-AUTO-11 — defaults applied at the schema level for legacy rows without this field. */
+  notifySettings?: IAutomationNotifySettings;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -166,6 +174,14 @@ const automationSchema = new Schema<IAutomation>(
     flowDefinition: { type: Schema.Types.Mixed },
     runCount: { type: Number, default: 0 },
     lastRunAt: { type: Date },
+    notifySettings: {
+      type: {
+        onFailure: { type: Boolean, default: true },
+        onSuccess: { type: Boolean, default: false },
+      },
+      default: () => ({ onFailure: true, onSuccess: false }),
+      _id: false,
+    },
   },
   { timestamps: true },
 );
