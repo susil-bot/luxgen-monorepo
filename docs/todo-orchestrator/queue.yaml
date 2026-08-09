@@ -9,6 +9,7 @@ sources:
   automation: "docs/TODO-Enterprise Product Specification: Workflow Automation Builder.md"
   commerce: docs/TODO-Commerce Experience.md
   role: docs/TODO-role.md
+  vertical: docs/PLATFORM_VERTICALIZATION_STRATEGY.md
 tasks:
   - id: T-E0-01
     epic: E0
@@ -1076,4 +1077,206 @@ tasks:
     acceptance:
       - Gap note for each sitemap dashboard widget
       - Wire or defer each with checklist update
+  - id: T-VERT-01
+    epic: E5
+    priority: 1
+    sla: S
+    status: todo
+    title: Tenant vocabulary schema + default resolver
+    skill: fullstack-developer
+    source:
+      file: docs/PLATFORM_VERTICALIZATION_STRATEGY.md
+      start: 46
+      end: 65
+    touch:
+      - packages/db
+    deps: []
+    acceptance:
+      - ITenant.settings.vocabulary field added with LMS defaults
+      - Existing tenants resolve defaults with zero migration
+  - id: T-VERT-02
+    epic: E5
+    priority: 1
+    sla: S
+    status: todo
+    title: updateTenantVocabulary mutation + service
+    skill: fullstack-developer
+    source:
+      file: docs/PLATFORM_VERTICALIZATION_STRATEGY.md
+      start: 76
+      end: 89
+    touch:
+      - apps/api
+    deps: 
+      - T-VERT-01
+    acceptance:
+      - updateTenantVocabulary mutation persists to Tenant.settings.vocabulary
+      - Follows existing updateTenantBranding service pattern
+  - id: T-VERT-03
+    epic: E5
+    priority: 1
+    sla: M
+    status: todo
+    title: Settings vocabulary screen + useVocabulary hook
+    skill: persona-pages
+    source:
+      file: docs/PLATFORM_VERTICALIZATION_STRATEGY.md
+      start: 66
+      end: 89
+    touch:
+      - apps/web
+      - packages/ui
+    deps: 
+      - T-VERT-01
+      - T-VERT-02
+    acceptance:
+      - /organization/vocabulary screen with live preview per term
+      - useVocabulary() hook resolves tenant vocabulary with LMS fallback
+  - id: T-VERT-04
+    epic: E5
+    priority: 1
+    sla: M
+    status: todo
+    title: Apply vocabulary to nav + /courses page copy
+    skill: ios-design
+    source:
+      file: docs/PLATFORM_VERTICALIZATION_STRATEGY.md
+      start: 76
+      end: 89
+    touch:
+      - apps/web
+      - packages/ui
+    deps: 
+      - T-VERT-03
+    acceptance:
+      - Sidebar nav label and /courses <h1> read from tenant vocabulary
+      - No route or URL change
+  - id: T-VERT-05
+    epic: E5
+    priority: 1
+    sla: M
+    status: todo
+    title: Apply vocabulary to storefront/customer-facing cards
+    skill: ios-design
+    source:
+      file: docs/PLATFORM_VERTICALIZATION_STRATEGY.md
+      start: 76
+      end: 89
+    touch:
+      - apps/web
+    deps: 
+      - T-VERT-04
+    acceptance:
+      - Customer-facing product/course cards read from tenant vocabulary
+      - No route or URL change
+  - id: T-VERT-06
+    epic: E5
+    priority: 2
+    sla: M
+    status: todo
+    title: FunnelTemplate model + digital-products vertical seed
+    skill: automation
+    source:
+      file: docs/PLATFORM_VERTICALIZATION_STRATEGY.md
+      start: 90
+      end: 119
+    touch:
+      - packages/db
+      - apps/api
+    deps: 
+      - T-VERT-01
+    acceptance:
+      - FunnelTemplate schema stores vocabularyPreset + enabledModules + automationTemplateSlugs
+      - digital-products seed installs via existing installAutomationTemplate, no new bridge code
+  - id: T-VERT-07
+    epic: E5
+    priority: 2
+    sla: M
+    status: todo
+    title: Funnel seed — agency & consulting vertical
+    skill: automation
+    source:
+      file: docs/PLATFORM_VERTICALIZATION_STRATEGY.md
+      start: 120
+      end: 131
+    touch:
+      - apps/api
+    deps: 
+      - T-VERT-06
+    acceptance:
+      - agency-consulting FunnelTemplate seed installable end to end
+      - Reuses AUTOMATION_HUB_STRATEGY.md's already-scoped client-summary action or defers it explicitly
+  - id: T-VERT-08
+    epic: E5
+    priority: 2
+    sla: M
+    status: todo
+    title: Funnel seed — membership vocabulary + drip automation only
+    skill: automation
+    source:
+      file: docs/PLATFORM_VERTICALIZATION_STRATEGY.md
+      start: 132
+      end: 144
+    touch:
+      - apps/api
+    deps: 
+      - T-VERT-06
+    acceptance:
+      - membership FunnelTemplate seed ships vocabulary preset + drip-content automation only
+      - Community feed and end-customer recurring billing explicitly NOT included — documented as separate initiative
+  - id: T-VERT-09
+    epic: E5
+    priority: 2
+    sla: M
+    status: todo
+    title: Funnel Templates tab in Marketplace UI
+    skill: automation
+    source:
+      file: docs/PLATFORM_VERTICALIZATION_STRATEGY.md
+      start: 90
+      end: 106
+    touch:
+      - apps/web
+    deps: 
+      - T-VERT-06
+    acceptance:
+      - Marketplace has a Funnel Templates tab alongside existing automation Templates tab
+      - Selecting a funnel template shows its stages before install
+  - id: T-VERT-10
+    epic: E5
+    priority: 3
+    sla: L
+    status: wont
+    title: AI setup wizard (SPLIT before enqueue)
+    skill: ai-studio
+    source:
+      file: docs/PLATFORM_VERTICALIZATION_STRATEGY.md
+      start: 145
+      end: 162
+    touch:
+
+    deps: 
+      - T-VERT-06
+      - T-VERT-03
+    acceptance:
+      - Split into: wizard screen, recommendation decision table, apply-mutations service — before enqueue
+  - id: T-VERT-11
+    epic: E5
+    priority: 2
+    sla: M
+    status: todo
+    title: Super-admin tenant capability map page
+    skill: persona-pages
+    source:
+      file: docs/PLATFORM_VERTICALIZATION_STRATEGY.md
+      start: 163
+      end: 178
+    touch:
+      - apps/web
+      - apps/api
+    deps: 
+      - T-VERT-01
+    acceptance:
+      - /organization/tenant-map visible only to SUPER_ADMIN, 403/hidden otherwise
+      - Page shows domain/module/template/vocabulary state read live, no new cache layer
 coverage_plan: docs/todo-orchestrator/COVERAGE_PLAN.md
