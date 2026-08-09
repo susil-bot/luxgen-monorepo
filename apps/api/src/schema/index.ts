@@ -24,6 +24,7 @@ import { learnerTypeDefs } from './learner/typeDefs';
 import { analyticsTypeDefs } from './analytics/typeDefs';
 import { certificateTypeDefs } from './certificate/typeDefs';
 import { couponTypeDefs } from './coupon/typeDefs';
+import { searchTypeDefs } from './search/typeDefs';
 
 // Import resolvers
 import { tenantResolvers } from './tenant/resolvers';
@@ -45,6 +46,7 @@ import { learnerResolvers } from './learner/resolvers';
 import { analyticsResolvers } from './analytics/resolvers';
 import { certificateResolvers } from './certificate/resolvers';
 import { couponResolvers } from './coupon/resolvers';
+import { searchResolvers } from './search/resolvers';
 import { EnrollmentStatusSummaryTypeDefs } from './engagement/enrollmentStatusSummary/typeDefs';
 import { EnrollmentStatusSummaryResolvers } from './engagement/enrollmentStatusSummary/resolvers';
 import { StoreCatalogFacetsTypeDefs } from './engagement/storeCatalogFacets/typeDefs';
@@ -100,6 +102,7 @@ export const typeDefs = mergeTypeDefs([
   analyticsTypeDefs,
   certificateTypeDefs,
   couponTypeDefs,
+  searchTypeDefs,
   EnrollmentStatusSummaryTypeDefs,
   StoreCatalogFacetsTypeDefs,
   CartSessionTypeDefs,
@@ -141,6 +144,7 @@ const mergedResolvers = mergeResolvers([
   analyticsResolvers,
   certificateResolvers,
   couponResolvers,
+  searchResolvers,
   EnrollmentStatusSummaryResolvers,
   StoreCatalogFacetsResolvers,
   CartSessionResolvers,
