@@ -1,37 +1,102 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { Tab, TabItem, ProfileForm, ProfileFormData, ProfilePicture, SnackbarProvider, useSnackbar } from '@luxgen/ui';
-import { PageWrapper } from '@luxgen/ui';
+import { useMutation } from '@apollo/client';
+import {
+  Tab,
+  TabItem,
+  ProfileForm,
+  ProfileFormData,
+  ProfilePicture,
+  SnackbarProvider,
+  useSnackbar,
+  PageWrapper,
+} from '@luxgen/ui';
+import { AUTH_SESSION_CHANGE_EVENT, getStoredUser, updateStoredUser, type SessionUser } from '../../lib/session';
+import { UPDATE_USER } from '../../graphql/queries/auth';
+
+function emptyProfile(): ProfileFormData {
+  return {
+    firstName: '',
+    lastName: '',
+    email: '',
+    username: '',
+    password: '',
+    dateOfBirth: '',
+    permanentAddress: '',
+    presentAddress: '',
+    city: '',
+    country: '',
+    postalCode: '',
+  };
+}
+
+function sessionToProfile(user: SessionUser): ProfileFormData {
+  return {
+    ...emptyProfile(),
+    firstName: user.firstName ?? '',
+    lastName: user.lastName ?? '',
+    email: user.email ?? '',
+    username: [user.firstName, user.lastName].filter(Boolean).join(' ') || user.email,
+  };
+}
 
 const EditProfilePageContentImpl: React.FC = () => {
   const router = useRouter();
   const { showSuccess, showError } = useSnackbar();
   const [loading, setLoading] = useState(false);
-  const [profileImage, setProfileImage] = useState<string>('https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80');
+  const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
+  const [hydrated, setHydrated] = useState(false);
+  const [profileImage, setProfileImage] = useState<string | undefined>(undefined);
+  const [userData, setUserData] = useState<ProfileFormData>(emptyProfile());
+  const [updateUser] = useMutation(UPDATE_USER);
 
-  // Sample user data - in real app, this would come from API
-  const [userData, setUserData] = useState<ProfileFormData>({
-    firstName: 'Charlene',
-    lastName: 'Reed',
-    email: 'charlenereed@gmail.com',
-    username: 'Charlene Reed',
-    password: '**********',
-    dateOfBirth: '1990-01-25',
-    permanentAddress: 'San Jose, California, USA',
-    presentAddress: 'San Jose, California, USA',
-    city: 'San Jose',
-    country: 'USA',
-    postalCode: '45962',
-  });
+  useEffect(() => {
+    const refresh = () => {
+      const stored = getStoredUser();
+      setSessionUser(stored);
+      if (stored) {
+        setUserData(sessionToProfile(stored));
+        setProfileImage(stored.avatar || undefined);
+      }
+      setHydrated(true);
+    };
+    refresh();
+    window.addEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+    window.addEventListener('storage', refresh);
+    return () => {
+      window.removeEventListener(AUTH_SESSION_CHANGE_EVENT, refresh);
+      window.removeEventListener('storage', refresh);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    if (!sessionUser) {
+      void router.replace('/login?reason=session_required&next=/settings/profile');
+    }
+  }, [hydrated, sessionUser, router]);
 
   const handleProfileUpdate = async (data: ProfileFormData) => {
+    if (!sessionUser) return;
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await updateUser({
+        variables: {
+          id: sessionUser.id,
+          input: {
+            firstName: data.firstName,
+            lastName: data.lastName,
+            email: data.email,
+          },
+        },
+      });
+      updateStoredUser({
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+      });
       setUserData(data);
       showSuccess('Profile updated successfully!');
     } catch (_error) {
@@ -43,13 +108,12 @@ const EditProfilePageContentImpl: React.FC = () => {
 
   const handleImageChange = async (file: File) => {
     try {
-      // Simulate image upload
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
       const reader = new FileReader();
       reader.onload = (e) => {
-        setProfileImage(e.target?.result as string);
-        showSuccess('Profile picture updated successfully!');
+        const dataUrl = e.target?.result as string;
+        setProfileImage(dataUrl);
+        updateStoredUser({ avatar: dataUrl });
+        showSuccess('Profile picture updated locally. Cloud upload is coming soon.');
       };
       reader.readAsDataURL(file);
     } catch (_error) {
@@ -61,13 +125,25 @@ const EditProfilePageContentImpl: React.FC = () => {
     router.back();
   };
 
+  if (!hydrated || !sessionUser) {
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center"
+        style={{ background: 'var(--color-bg-secondary)' }}
+      >
+        <p className="text-sm" style={{ color: 'var(--color-label-secondary)' }}>
+          {hydrated ? 'Redirecting to login…' : 'Loading profile…'}
+        </p>
+      </div>
+    );
+  }
+
   const tabItems: TabItem[] = [
     {
       id: 'edit-profile',
       label: 'Edit Profile',
       content: (
         <div className="space-y-6">
-          {/* Profile Picture Section */}
           <div className="flex items-start space-x-6">
             <ProfilePicture
               src={profileImage}
@@ -75,31 +151,24 @@ const EditProfilePageContentImpl: React.FC = () => {
               size="xl"
               editable={true}
               onImageChange={handleImageChange}
-              fallbackText={`${userData.firstName} ${userData.lastName}`}
+              fallbackText={`${userData.firstName} ${userData.lastName}`.trim() || sessionUser.email}
             />
             <div className="flex-1">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+              <h3 className="text-lg font-semibold" style={{ color: 'var(--color-label-primary)' }}>
                 Profile Picture
               </h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Click on the edit icon to change your profile picture. Recommended size is 400x400 pixels.
+              <p className="text-sm mb-4" style={{ color: 'var(--color-label-secondary)' }}>
+                Click the edit icon to change your picture. Recommended size is 400×400.
               </p>
-              <button
-                onClick={() => document.querySelector('input[type="file"]')?.click()}
-                className="text-sm text-blue-600 hover:text-blue-800 font-medium"
-              >
-                Change Picture
-              </button>
             </div>
           </div>
 
-          {/* Profile Form */}
           <ProfileForm
             initialData={userData}
             onSubmit={handleProfileUpdate}
             onCancel={handleCancel}
             loading={loading}
-            showPassword={true}
+            showPassword={false}
             showAddress={true}
             showPersonalInfo={true}
           />
@@ -111,51 +180,13 @@ const EditProfilePageContentImpl: React.FC = () => {
       label: 'Preferences',
       content: (
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Notification Preferences</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900">Email Notifications</h4>
-                  <p className="text-sm text-gray-600">Receive updates via email</p>
-                </div>
-                <input type="checkbox" className="h-4 w-4 text-blue-600" defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900">Push Notifications</h4>
-                  <p className="text-sm text-gray-600">Receive push notifications</p>
-                </div>
-                <input type="checkbox" className="h-4 w-4 text-blue-600" />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900">SMS Notifications</h4>
-                  <p className="text-sm text-gray-600">Receive SMS updates</p>
-                </div>
-                <input type="checkbox" className="h-4 w-4 text-blue-600" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Privacy Settings</h3>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900">Profile Visibility</h4>
-                  <p className="text-sm text-gray-600">Make your profile visible to other users</p>
-                </div>
-                <input type="checkbox" className="h-4 w-4 text-blue-600" defaultChecked />
-              </div>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-900">Activity Status</h4>
-                  <p className="text-sm text-gray-600">Show when you're online</p>
-                </div>
-                <input type="checkbox" className="h-4 w-4 text-blue-600" defaultChecked />
-              </div>
-            </div>
+          <div className="ios-card p-6">
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-label-primary)' }}>
+              Notification Preferences
+            </h3>
+            <p className="text-sm" style={{ color: 'var(--color-label-tertiary)' }}>
+              Preference persistence will use engagement user preferences API in a follow-up.
+            </p>
           </div>
         </div>
       ),
@@ -165,70 +196,13 @@ const EditProfilePageContentImpl: React.FC = () => {
       label: 'Security',
       content: (
         <div className="space-y-6">
-          <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Change Password</h3>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Current Password</label>
-                <input
-                  type="password"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter current password"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">New Password</label>
-                <input
-                  type="password"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Enter new password"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Confirm New Password</label>
-                <input
-                  type="password"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  placeholder="Confirm new password"
-                />
-              </div>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
-                Update Password
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Two-Factor Authentication</h3>
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="text-sm font-medium text-gray-900">Enable 2FA</h4>
-                <p className="text-sm text-gray-600">Add an extra layer of security to your account</p>
-              </div>
-              <button className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700">
-                Enable
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Active Sessions</h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Current Session</p>
-                  <p className="text-xs text-gray-600">Chrome on macOS • San Jose, CA</p>
-                </div>
-                <span className="text-xs text-green-600 font-medium">Active</span>
-              </div>
-              <div className="flex items-center justify-between p-3 bg-gray-50 rounded-md">
-                <div>
-                  <p className="text-sm font-medium text-gray-900">Mobile App</p>
-                  <p className="text-xs text-gray-600">iOS App • Last active 2 hours ago</p>
-                </div>
-                <button className="text-xs text-red-600 hover:text-red-800">Revoke</button>
-              </div>
-            </div>
+          <div className="ios-card p-6">
+            <h3 className="text-lg font-semibold mb-2" style={{ color: 'var(--color-label-primary)' }}>
+              Password & sessions
+            </h3>
+            <p className="text-sm" style={{ color: 'var(--color-label-tertiary)' }}>
+              Use forgot-password flow for resets. Session revoke UI is not wired yet.
+            </p>
           </div>
         </div>
       ),
@@ -243,16 +217,18 @@ const EditProfilePageContentImpl: React.FC = () => {
       </Head>
 
       <PageWrapper>
-        <div className="min-h-screen bg-gray-50 py-8">
+        <div className="min-h-screen py-8" style={{ background: 'var(--color-bg-secondary)' }}>
           <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            {/* Header */}
             <div className="mb-8">
-              <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
-              <p className="mt-2 text-gray-600">Manage your account settings and preferences</p>
+              <h1 className="text-3xl font-bold" style={{ color: 'var(--color-label-primary)' }}>
+                Settings
+              </h1>
+              <p className="mt-2" style={{ color: 'var(--color-label-secondary)' }}>
+                Manage your account settings and preferences
+              </p>
             </div>
 
-            {/* Main Content */}
-            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <div className="ios-card p-6">
               <Tab
                 items={tabItems}
                 defaultActiveTab="edit-profile"
@@ -260,7 +236,6 @@ const EditProfilePageContentImpl: React.FC = () => {
                 size="md"
                 fullWidth={false}
                 responsive={true}
-                onTabChange={(tabId) => console.log('Tab changed to:', tabId)}
               />
             </div>
           </div>
@@ -270,20 +245,11 @@ const EditProfilePageContentImpl: React.FC = () => {
   );
 };
 
-// This page is purely interactive settings UI with no SEO value, and pulls in
-// several @luxgen/ui components (Tab, ProfileForm, ProfilePicture) whose
-// render output isn't guaranteed safe to execute in Next.js's Node-based
-// static export step. Rather than chase the exact throw inside a shared UI
-// package, opt this page out of static prerendering entirely via
-// next/dynamic's ssr:false - it still works normally once hydrated in the
-// browser (including on Vercel), it's just never pre-rendered to static HTML
-// at build time. This is the standard fix for "Export encountered errors on
-// following paths" when a page is inherently client-only.
 const EditProfilePageContent = dynamic(() => Promise.resolve(EditProfilePageContentImpl), {
   ssr: false,
   loading: () => (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <p className="text-gray-500">Loading settings…</p>
+    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--color-bg-secondary)' }}>
+      <p style={{ color: 'var(--color-label-secondary)' }}>Loading settings…</p>
     </div>
   ),
 });
@@ -295,4 +261,3 @@ export default function EditProfile() {
     </SnackbarProvider>
   );
 }
-
