@@ -149,12 +149,18 @@ route. Templates for those, if ever prioritized, are a Marketplace v2 project, n
 
 ---
 
-## Dashboard (sitemap L5–11; feeds `T-MAP-08`)
+## Dashboard (sitemap L5–11; closed by `T-MAP-08`)
 
-| Sitemap widget | Live `/dashboard` | Status |
+> Touch: `apps/web/pages/dashboard.tsx` only. `AdminDashboardLayout` (packages/ui) already has
+> slots for all 4 widgets below — the gap was apps/web not always feeding them.
+
+| Sitemap widget | Status | Notes |
 | --- | --- | --- |
-| Overview landing | Page exists | wired |
-| Quick Actions / Recent Activity / KPI / Shortcuts | Deferred detail | unknown → `T-MAP-08` |
+| Overview landing | wired | Page exists, banner carousel + onboarding slot |
+| KPI (stats tiles) | wired | `transformDashboardData` maps `stats` (courses/students/completion/groups) from `GET_DASHBOARD_DATA` |
+| Recent Activity | wired | `transformDashboardData` maps `recentActivities` from the same query |
+| Quick Actions | **wired (this task)** | Layout slot existed but nothing fed it — added 4 real actions (Create course, Go to automations, Manage users, View analytics) directly in `dashboard.tsx`, merged onto `transformedDashboardData` so `lib/transformer.ts` didn't need touching |
+| Shortcuts | deferred | No distinct "Shortcuts" concept in the data model beyond Quick Actions above — spec doesn't distinguish them from Quick Actions in the widget mockup either; treating as covered rather than inventing a second, redundant action list |
 
 ---
 
