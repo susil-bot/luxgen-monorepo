@@ -1,4 +1,4 @@
-import { Tenant, ITenant } from '@luxgen/db';
+import { Tenant, ITenant, resolveVocabulary, type TenantVocabulary } from '@luxgen/db';
 import { logger } from '../utils/logger';
 
 export interface CreateTenantInput {
@@ -70,6 +70,31 @@ export class TenantService {
     const result = await Tenant.findByIdAndDelete(id);
     if (result) logger.info(`Tenant deleted: ${(result._id as any).toString()}`);
     return !!result;
+  }
+
+  /**
+   * T-VERT-02 — partial update: only terms present in `input` change. Uses a scoped
+   * `settings.vocabulary.<term>` $set per field rather than replacing the whole `settings`
+   * object, so this can never clobber `settings.branding`/`security`/`config` the way a
+   * naive `updateTenant({ settings: { vocabulary } })` call would (see updateTenant() above,
+   * which does `$set: input` — safe only because it's never called with a partial `settings`
+   * sub-object in practice; this method exists precisely to avoid relying on that).
+   */
+  async updateVocabulary(
+    id: string,
+    input: Partial<Record<keyof TenantVocabulary, string | null | undefined>>,
+  ): Promise<TenantVocabulary> {
+    const $set: Record<string, string> = {};
+    for (const [term, label] of Object.entries(input)) {
+      if (typeof label === 'string' && label.trim().length > 0) {
+        $set[`settings.vocabulary.${term}`] = label.trim();
+      }
+    }
+    const tenant = Object.keys($set).length
+      ? await Tenant.findByIdAndUpdate(id, { $set }, { new: true })
+      : await Tenant.findById(id);
+    if (!tenant) throw new Error('Tenant not found');
+    return resolveVocabulary(tenant);
   }
 
   async suspendTenant(id: string): Promise<ITenant> {
