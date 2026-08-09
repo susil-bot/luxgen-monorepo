@@ -10,6 +10,10 @@ export const TASK_STATUSES: TaskStatus[] = ['TODO', 'DONE'];
 
 export interface ITask extends Document {
   tenantId: string;
+  /** Which named TodoList (packages/db/src/todoList.ts) this task belongs to. Required for
+   * all new tasks; existing pre-multi-list documents may still be null until
+   * todoListService's lazy backfill (apps/api/src/services/todoListService.ts) runs. */
+  todoListId: string;
   title: string;
   notes?: string | null;
   status: TaskStatus;
@@ -23,6 +27,7 @@ export interface ITask extends Document {
 const taskSchema = new Schema<ITask>(
   {
     tenantId: { type: String, required: true, index: true },
+    todoListId: { type: String, required: true, index: true },
     title: { type: String, required: true, trim: true },
     notes: { type: String, default: null },
     status: {
@@ -38,6 +43,6 @@ const taskSchema = new Schema<ITask>(
   { timestamps: true },
 );
 
-taskSchema.index({ tenantId: 1, status: 1, sortOrder: 1 });
+taskSchema.index({ tenantId: 1, todoListId: 1, status: 1, sortOrder: 1 });
 
 export const Task = model<ITask>('Task', taskSchema);

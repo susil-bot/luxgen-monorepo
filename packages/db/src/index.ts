@@ -62,6 +62,8 @@ export type { ICoupon, CouponDiscountType, CouponAppliesTo, CouponStatus } from 
 export { Coupon, COUPON_DISCOUNT_TYPES, COUPON_APPLIES_TO, COUPON_STATUSES } from './coupon';
 export type { ITask, TaskStatus } from './task';
 export { Task, TASK_STATUSES } from './task';
+export type { ITodoList } from './todoList';
+export { TodoList } from './todoList';
 export type { ILearnerSubscription } from './learner-subscription';
 export { LearnerSubscription, LearnerSubscriptionStatus } from './learner-subscription';
 export type { ICustomRole, ICustomRolePermissions } from './custom-role';
