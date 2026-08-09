@@ -52,6 +52,26 @@ const CATALOG_SEED: Array<
       { stage: 'Recurring client status reports', description: 'Deferred — needs a new core.report.send_client_summary action, not shipped in this pass.' },
     ],
   },
+  {
+    // T-VERT-08 — vocabulary + drip automation ONLY. Community feed and end-customer recurring
+    // billing are a genuine new-infrastructure gap (confirmed by reading packages/billing/src/ —
+    // billing today is tenant-→-LuxGen plan gates, not end-customer-→-tenant charges), which
+    // fails TEMPLATE_CONTROL_CORE.md's own decision tree at step 3 ("does it need genuinely new
+    // infrastructure?"). Per that doc's rule, that's a scoped engineering initiative with its own
+    // review — not bundled into this seed. See docs/PLATFORM_VERTICALIZATION_STRATEGY.md §4c.
+    slug: 'membership-community',
+    name: 'Membership & community',
+    description: 'Vocabulary + drip content only in this pass — community feed and recurring end-customer billing are a separate initiative, not included here.',
+    industry: ['membership'],
+    vocabularyPreset: { course: 'Membership', enrollment: 'Subscription', student: 'Member' },
+    enabledModules: [],
+    automationTemplateSlugs: ['weekly-digest'],
+    funnelStages: [
+      { stage: 'Drip content', description: 'Existing weekly-digest template (SCHEDULE trigger + SEND_EMAIL action).' },
+      { stage: 'Recurring billing', description: 'NOT INCLUDED — no end-customer recurring billing exists in @luxgen/billing today. Separate initiative.' },
+      { stage: 'Community engagement', description: 'NOT INCLUDED — no discussion/feed feature exists in the codebase. Separate initiative.' },
+    ],
+  },
 ];
 
 export class FunnelTemplateService {
