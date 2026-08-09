@@ -66,6 +66,10 @@ export interface ITask extends Document {
   completedAt?: Date | null;
   /** Phase 3 — optional blueprint for required fields. */
   templateId?: string | null;
+  /** Phase 4 — recurrence series root id (usually template task id). */
+  seriesId?: string | null;
+  /** Phase 4 — unique per series occurrence, e.g. 2026-08-10. */
+  occurrenceKey?: string | null;
   createdById?: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -97,6 +101,8 @@ const taskSchema = new Schema<ITask>(
     timezone: { type: String, default: null },
     completedAt: { type: Date, default: null },
     templateId: { type: String, default: null, index: true },
+    seriesId: { type: String, default: null, index: true },
+    occurrenceKey: { type: String, default: null },
     createdById: { type: String, default: null },
   },
   { timestamps: true },
@@ -105,5 +111,6 @@ const taskSchema = new Schema<ITask>(
 taskSchema.index({ tenantId: 1, todoListId: 1, status: 1, sortOrder: 1 });
 taskSchema.index({ tenantId: 1, dueDate: 1 });
 taskSchema.index({ tenantId: 1, assigneeId: 1, status: 1 });
+taskSchema.index({ tenantId: 1, seriesId: 1, occurrenceKey: 1 }, { unique: true, sparse: true } as never);
 
 export const Task = model<ITask>('Task', taskSchema);

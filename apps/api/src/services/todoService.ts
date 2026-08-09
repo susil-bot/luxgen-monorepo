@@ -322,6 +322,8 @@ export class TodoService {
       timezone: task.timezone ?? null,
       completedAt: task.completedAt ?? null,
       templateId: task.templateId ?? null,
+      seriesId: task.seriesId ?? null,
+      occurrenceKey: task.occurrenceKey ?? null,
       createdById: task.createdById ?? null,
       createdAt: task.createdAt,
       updatedAt: task.updatedAt,

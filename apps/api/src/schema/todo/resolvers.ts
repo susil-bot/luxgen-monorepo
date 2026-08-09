@@ -6,6 +6,7 @@ import { todoService, type CreateTaskInput, type UpdateTaskInput } from '../../s
 import { todoListService, type CreateTodoListInput, type UpdateTodoListInput } from '../../services/todoListService';
 import { taskReminderService } from '../../services/taskReminderService';
 import { taskFieldService, type CreateTemplateInput, type UpdateTemplateInput } from '../../services/taskFieldService';
+import { taskRecurrenceService, type UpsertRecurrenceInput } from '../../services/taskRecurrenceService';
 
 function actorFromCtx(ctx: GraphQLContext): { id?: string | null; name?: string | null } {
   const user = ctx.user as { _id?: { toString(): string }; id?: string; firstName?: string; lastName?: string } | null;
@@ -103,6 +104,15 @@ export const todoResolvers = {
       const scopedId = resolveScopedTenantId(ctx, tenantId);
       const rows = await taskFieldService.listFieldValues(taskId, scopedId);
       return rows.map((v) => taskFieldService.valueToGraphQL(v));
+    },
+    taskRecurrence: async (
+      _: unknown,
+      { taskId, tenantId }: { taskId: string; tenantId: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const row = await taskRecurrenceService.getForTask(taskId, scopedId);
+      return row ? taskRecurrenceService.toGraphQL(row) : null;
     },
   },
   Mutation: {
@@ -271,6 +281,27 @@ export const todoResolvers = {
       const actor = actorFromCtx(ctx);
       const row = await taskFieldService.upsertFieldValue(taskId, scopedId, fieldId, value, actor.id ?? null);
       return taskFieldService.valueToGraphQL(row);
+    },
+    upsertTaskRecurrence: async (
+      _: unknown,
+      { taskId, tenantId, input }: { taskId: string; tenantId: string; input: UpsertRecurrenceInput },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const actor = actorFromCtx(ctx);
+      const row = await taskRecurrenceService.upsertForTask(taskId, scopedId, {
+        ...input,
+        createdById: actor.id ?? null,
+      });
+      return taskRecurrenceService.toGraphQL(row);
+    },
+    disableTaskRecurrence: async (
+      _: unknown,
+      { taskId, tenantId }: { taskId: string; tenantId: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      return taskRecurrenceService.disable(taskId, scopedId);
     },
   },
 };

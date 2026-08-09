@@ -49,6 +49,7 @@ import {
   GET_TASK_REMINDERS,
   GET_TASK_TEMPLATES,
   GET_TASK_FIELD_VALUES,
+  GET_TASK_RECURRENCE,
   CREATE_TASK,
   TOGGLE_TASK,
   DELETE_TASK,
@@ -60,6 +61,8 @@ import {
   CREATE_TASK_TEMPLATE,
   APPLY_TASK_TEMPLATE,
   UPSERT_TASK_FIELD_VALUE,
+  UPSERT_TASK_RECURRENCE,
+  DISABLE_TASK_RECURRENCE,
 } from '../../graphql/queries/todo';
 
 interface Props {
@@ -161,6 +164,12 @@ function TodoListPageContent({ tenant }: Props) {
     fetchPolicy: 'network-only',
   });
 
+  const { data: recurrenceData, refetch: refetchRecurrence } = useQuery(GET_TASK_RECURRENCE, {
+    variables: { taskId: selectedTaskId, tenantId: tenant },
+    skip: !selectedTaskId,
+    fetchPolicy: 'network-only',
+  });
+
   const [createTask] = useMutation(CREATE_TASK);
   const [toggleTask] = useMutation(TOGGLE_TASK);
   const [deleteTask] = useMutation(DELETE_TASK);
@@ -172,7 +181,10 @@ function TodoListPageContent({ tenant }: Props) {
   const [createTaskTemplate] = useMutation(CREATE_TASK_TEMPLATE);
   const [applyTaskTemplate] = useMutation(APPLY_TASK_TEMPLATE);
   const [upsertTaskFieldValue] = useMutation(UPSERT_TASK_FIELD_VALUE);
+  const [upsertTaskRecurrence] = useMutation(UPSERT_TASK_RECURRENCE);
+  const [disableTaskRecurrence] = useMutation(DISABLE_TASK_RECURRENCE);
   const [fieldsBusy, setFieldsBusy] = useState(false);
+  const [recurrenceBusy, setRecurrenceBusy] = useState(false);
 
   const handleCreate = async (title: string) => {
     try {
@@ -424,6 +436,56 @@ function TodoListPageContent({ tenant }: Props) {
       showError(err instanceof Error ? err.message : 'Failed to save field');
     } finally {
       setFieldsBusy(false);
+    }
+  };
+
+  const handleSaveRecurrence = async (input: {
+    frequency: string;
+    interval: number;
+    incompleteBehavior: string;
+    nextFireAt?: string | null;
+    enabled: boolean;
+  }) => {
+    if (!selectedTaskId) return;
+    setRecurrenceBusy(true);
+    try {
+      await upsertTaskRecurrence({
+        variables: {
+          taskId: selectedTaskId,
+          tenantId: tenant,
+          input: {
+            frequency: input.frequency,
+            interval: input.interval,
+            incompleteBehavior: input.incompleteBehavior,
+            nextFireAt: input.nextFireAt ?? null,
+            enabled: input.enabled,
+          },
+        },
+      });
+      showSuccess('Recurrence saved');
+      await refetchRecurrence();
+      await refetch();
+      await refetchActivity();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to save recurrence');
+    } finally {
+      setRecurrenceBusy(false);
+    }
+  };
+
+  const handleDisableRecurrence = async () => {
+    if (!selectedTaskId) return;
+    setRecurrenceBusy(true);
+    try {
+      await disableTaskRecurrence({
+        variables: { taskId: selectedTaskId, tenantId: tenant },
+      });
+      showSuccess('Recurrence disabled');
+      await refetchRecurrence();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to disable recurrence');
+    } finally {
+      setRecurrenceBusy(false);
     }
   };
 
@@ -684,6 +746,8 @@ function TodoListPageContent({ tenant }: Props) {
         saving={savingDetail}
         reminderBusy={reminderBusy}
         fieldsBusy={fieldsBusy}
+        recurrence={recurrenceData?.taskRecurrence ?? null}
+        recurrenceBusy={recurrenceBusy}
         onClose={() => setSelectedTaskId(null)}
         onSave={(input) => void handleSaveDetail(input)}
         onCreateReminder={(input) => void handleCreateReminder(input)}
@@ -692,6 +756,8 @@ function TodoListPageContent({ tenant }: Props) {
         onApplyTemplate={(id) => void handleApplyTemplate(id)}
         onCreateQuickTemplate={(name, field) => void handleCreateQuickTemplate(name, field)}
         onChangeFieldValue={(fieldId, value) => void handleChangeFieldValue(fieldId, value)}
+        onSaveRecurrence={(input) => void handleSaveRecurrence(input)}
+        onDisableRecurrence={() => void handleDisableRecurrence()}
       />
     </>
   );

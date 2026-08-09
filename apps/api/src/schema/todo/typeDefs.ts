@@ -46,6 +46,8 @@ export const todoTypeDefs = `
     timezone: String
     completedAt: Date
     templateId: ID
+    seriesId: ID
+    occurrenceKey: String
     createdById: String
     createdAt: Date!
     updatedAt: Date!
@@ -177,6 +179,44 @@ export const todoTypeDefs = `
     status: ReminderStatus
   }
 
+  enum RecurrenceFrequency {
+    DAILY
+    WEEKLY
+    MONTHLY
+    YEARLY
+  }
+
+  enum IncompleteOccurrenceBehavior {
+    create_anyway
+    skip
+    after_complete
+  }
+
+  type TaskRecurrenceRule {
+    id: ID!
+    taskId: ID!
+    seriesId: ID!
+    frequency: RecurrenceFrequency!
+    interval: Int!
+    incompleteBehavior: IncompleteOccurrenceBehavior!
+    timezone: String!
+    nextFireAt: Date!
+    enabled: Boolean!
+    endAt: Date
+    createdAt: Date!
+    updatedAt: Date!
+  }
+
+  input UpsertTaskRecurrenceInput {
+    frequency: RecurrenceFrequency!
+    interval: Int
+    incompleteBehavior: IncompleteOccurrenceBehavior
+    timezone: String
+    nextFireAt: Date
+    enabled: Boolean
+    endAt: Date
+  }
+
   input CreateTodoListInput {
     tenantId: String!
     name: String!
@@ -229,6 +269,7 @@ export const todoTypeDefs = `
     taskTemplates(tenantId: String!, teamId: ID): [TaskTemplate!]!
     taskTemplate(id: ID!, tenantId: String!): TaskTemplate
     taskFieldValues(taskId: ID!, tenantId: String!): [TaskFieldValue!]!
+    taskRecurrence(taskId: ID!, tenantId: String!): TaskRecurrenceRule
   }
 
   extend type Mutation {
@@ -256,5 +297,7 @@ export const todoTypeDefs = `
     deleteTaskTemplate(id: ID!, tenantId: String!): Boolean!
     applyTaskTemplate(taskId: ID!, tenantId: String!, templateId: ID!): Task!
     upsertTaskFieldValue(taskId: ID!, tenantId: String!, fieldId: ID!, value: JSON!): TaskFieldValue!
+    upsertTaskRecurrence(taskId: ID!, tenantId: String!, input: UpsertTaskRecurrenceInput!): TaskRecurrenceRule!
+    disableTaskRecurrence(taskId: ID!, tenantId: String!): Boolean!
   }
 `;

@@ -95,6 +95,13 @@ export type {
   TaskFieldDefinitionItem,
   TaskFieldValueItem,
 } from './RequiredFieldsEditor';
+export { RecurrenceEditor } from './RecurrenceEditor';
+export type {
+  RecurrenceEditorProps,
+  TaskRecurrenceItem,
+  RecurrenceFrequency,
+  IncompleteOccurrenceBehavior,
+} from './RecurrenceEditor';
 export * from './TodoIcons';
 export { TodoPageHeader } from './TodoPageHeader';
 export type { TodoPageHeaderProps } from './TodoPageHeader';
