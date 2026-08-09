@@ -62,3 +62,36 @@ export const INSTALL_AUTOMATION_TEMPLATE = gql`
     }
   }
 `;
+
+// T-VERT-09 — Funnel Templates (vocabulary + feature flags + automations bundle),
+// see docs/PLATFORM_VERTICALIZATION_STRATEGY.md §4.
+export const GET_FUNNEL_TEMPLATES = gql`
+  query GetFunnelTemplates($industry: String) {
+    funnelTemplates(industry: $industry) {
+      id
+      slug
+      name
+      description
+      industry
+      vocabularyPreset
+      enabledModules
+      automationTemplateSlugs
+      funnelStages {
+        stage
+        description
+      }
+      installCount
+    }
+  }
+`;
+
+export const INSTALL_FUNNEL_TEMPLATE = gql`
+  mutation InstallFunnelTemplate($tenantId: ID!, $slug: String!) {
+    installFunnelTemplate(tenantId: $tenantId, slug: $slug) {
+      id
+      slug
+      name
+      installCount
+    }
+  }
+`;
