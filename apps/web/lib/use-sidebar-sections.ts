@@ -52,6 +52,7 @@ function filterItem(item: SidebarItem, role: string | null, flags: BillingFlags,
     case 'agent-studio':
       return flags.agentStudio === true;
     case 'tenant-map':
+    case 'search-analytics':
       return role === 'SUPER_ADMIN';
     case 'create-course':
       return staffOrAbove(role);

@@ -58,9 +58,17 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
     title: 'Search',
     items: [
       {
-        id: 'global-search',
-        label: 'Search',
-        href: '/search',
+        // Gated to SUPER_ADMIN in apps/web/lib/use-sidebar-sections.ts's filterItem() —
+        // same pattern as 'tenant-map' below. Per-request, dropped the "Search" submenu
+        // item that duplicated this as a parent + child; this is now the only entry here
+        // (the super-admin-only analytics view). Note: /search itself has no other nav
+        // entry point right now (T-SRCH-08 originally added this link specifically because
+        // /search was otherwise an orphan route) -- fine if that's intentional, otherwise
+        // link it from wherever makes sense (e.g. the global search overlay's "see all
+        // results" action).
+        id: 'search-analytics',
+        label: 'Search Analytics',
+        href: '/admin/search-analytics',
         icon: (
           <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path
@@ -71,11 +79,6 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
             />
           </svg>
         ),
-        // T-SRCH-08: was an orphan page (route existed, nothing linked to it) — reachable from here now.
-        children: [
-          { id: 'search-home', label: 'Search', href: '/search', exact: true },
-          { id: 'search-analytics', label: 'Search analytics', href: '/admin/search-analytics' },
-        ],
       },
     ],
   },
@@ -341,27 +344,6 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
           </svg>
         ),
       },
-      {
-        id: 'todo',
-        label: 'Todo List',
-        href: '/todo',
-        icon: (
-          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12l2 2 4-4m5-1a9 9 0 11-18 0 9 9 0 0118 0z"
-            />
-          </svg>
-        ),
-      },
-    ],
-  },
-  {
-    id: 'marketing',
-    title: 'Marketing',
-    items: [
       {
         id: 'todo',
         label: 'Todo List',
