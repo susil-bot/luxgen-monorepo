@@ -53,25 +53,14 @@ export interface ITaskTemplate extends Document {
   updatedAt: Date;
 }
 
-const fieldDefinitionSchema = new Schema<ITaskFieldDefinition>(
-  {
-    id: { type: String, required: true },
-    name: { type: String, required: true, trim: true },
-    type: { type: String, enum: TASK_FIELD_TYPES, required: true },
-    required: { type: Boolean, default: false },
-    options: { type: Schema.Types.Mixed, default: [] },
-    helpText: { type: String, default: null },
-  },
-  { _id: false },
-);
-
 const taskTemplateSchema = new Schema<ITaskTemplate>(
   {
     tenantId: { type: String, required: true, index: true },
     teamId: { type: String, default: null, index: true },
     name: { type: String, required: true, trim: true },
     description: { type: String, default: null },
-    fields: { type: [fieldDefinitionSchema], default: [] },
+    /** Embedded field definitions (ITaskFieldDefinition[]). Mixed avoids mongoose array TS baseline noise. */
+    fields: { type: Schema.Types.Mixed, default: [] },
     createdById: { type: String, default: null },
   },
   { timestamps: true },
