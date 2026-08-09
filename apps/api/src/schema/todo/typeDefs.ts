@@ -217,6 +217,60 @@ export const todoTypeDefs = `
     endAt: Date
   }
 
+  enum TaskAutomationExecutionStatus {
+    running
+    completed
+    failed
+    tested
+    skipped
+  }
+
+  type TaskAutomation {
+    id: ID!
+    tenantId: String!
+    todoListId: ID
+    name: String!
+    enabled: Boolean!
+    trigger: JSON!
+    conditions: JSON!
+    actions: JSON!
+    createdById: ID
+    createdAt: Date!
+    updatedAt: Date!
+  }
+
+  type TaskAutomationExecution {
+    id: ID!
+    automationId: ID!
+    taskId: ID!
+    triggerType: String!
+    status: TaskAutomationExecutionStatus!
+    steps: [JSON!]!
+    error: String
+    startedAt: Date!
+    finishedAt: Date
+    createdAt: Date!
+  }
+
+  input CreateTaskAutomationInput {
+    tenantId: String!
+    name: String!
+    todoListId: ID
+    enabled: Boolean
+    trigger: JSON!
+    conditions: JSON
+    actions: JSON!
+  }
+
+  input UpdateTaskAutomationInput {
+    name: String
+    todoListId: ID
+    enabled: Boolean
+    trigger: JSON
+    conditions: JSON
+    actions: JSON
+  }
+
   input CreateTodoListInput {
     tenantId: String!
     name: String!
@@ -270,6 +324,9 @@ export const todoTypeDefs = `
     taskTemplate(id: ID!, tenantId: String!): TaskTemplate
     taskFieldValues(taskId: ID!, tenantId: String!): [TaskFieldValue!]!
     taskRecurrence(taskId: ID!, tenantId: String!): TaskRecurrenceRule
+    taskAutomations(tenantId: String!, todoListId: ID): [TaskAutomation!]!
+    taskAutomation(id: ID!, tenantId: String!): TaskAutomation
+    taskAutomationExecutions(automationId: ID!, tenantId: String!, limit: Int): [TaskAutomationExecution!]!
   }
 
   extend type Mutation {
@@ -299,5 +356,12 @@ export const todoTypeDefs = `
     upsertTaskFieldValue(taskId: ID!, tenantId: String!, fieldId: ID!, value: JSON!): TaskFieldValue!
     upsertTaskRecurrence(taskId: ID!, tenantId: String!, input: UpsertTaskRecurrenceInput!): TaskRecurrenceRule!
     disableTaskRecurrence(taskId: ID!, tenantId: String!): Boolean!
+
+    createTaskAutomation(input: CreateTaskAutomationInput!): TaskAutomation!
+    updateTaskAutomation(id: ID!, tenantId: String!, input: UpdateTaskAutomationInput!): TaskAutomation
+    enableTaskAutomation(id: ID!, tenantId: String!): TaskAutomation
+    disableTaskAutomation(id: ID!, tenantId: String!): TaskAutomation
+    testTaskAutomation(id: ID!, tenantId: String!, sampleTaskId: ID!): TaskAutomationExecution!
+    deleteTaskAutomation(id: ID!, tenantId: String!): Boolean!
   }
 `;

@@ -247,6 +247,83 @@ export const DISABLE_TASK_RECURRENCE = gql`
   }
 `;
 
+export const GET_TASK_AUTOMATIONS = gql`
+  query GetTaskAutomations($tenantId: String!, $todoListId: ID) {
+    taskAutomations(tenantId: $tenantId, todoListId: $todoListId) {
+      id
+      name
+      enabled
+      trigger
+      conditions
+      actions
+      todoListId
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const CREATE_TASK_AUTOMATION = gql`
+  mutation CreateTaskAutomation($input: CreateTaskAutomationInput!) {
+    createTaskAutomation(input: $input) {
+      id
+      name
+      enabled
+      trigger
+      conditions
+      actions
+    }
+  }
+`;
+
+export const UPDATE_TASK_AUTOMATION = gql`
+  mutation UpdateTaskAutomation($id: ID!, $tenantId: String!, $input: UpdateTaskAutomationInput!) {
+    updateTaskAutomation(id: $id, tenantId: $tenantId, input: $input) {
+      id
+      name
+      enabled
+      trigger
+      conditions
+      actions
+    }
+  }
+`;
+
+export const ENABLE_TASK_AUTOMATION = gql`
+  mutation EnableTaskAutomation($id: ID!, $tenantId: String!) {
+    enableTaskAutomation(id: $id, tenantId: $tenantId) {
+      id
+      enabled
+    }
+  }
+`;
+
+export const DISABLE_TASK_AUTOMATION = gql`
+  mutation DisableTaskAutomation($id: ID!, $tenantId: String!) {
+    disableTaskAutomation(id: $id, tenantId: $tenantId) {
+      id
+      enabled
+    }
+  }
+`;
+
+export const DELETE_TASK_AUTOMATION = gql`
+  mutation DeleteTaskAutomation($id: ID!, $tenantId: String!) {
+    deleteTaskAutomation(id: $id, tenantId: $tenantId)
+  }
+`;
+
+export const TEST_TASK_AUTOMATION = gql`
+  mutation TestTaskAutomation($id: ID!, $tenantId: String!, $sampleTaskId: ID!) {
+    testTaskAutomation(id: $id, tenantId: $tenantId, sampleTaskId: $sampleTaskId) {
+      id
+      status
+      steps
+      error
+    }
+  }
+`;
+
 export const CREATE_TASK = gql`
   mutation CreateTask($input: CreateTaskInput!) {
     createTask(input: $input) {

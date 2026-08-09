@@ -7,6 +7,11 @@ import { todoListService, type CreateTodoListInput, type UpdateTodoListInput } f
 import { taskReminderService } from '../../services/taskReminderService';
 import { taskFieldService, type CreateTemplateInput, type UpdateTemplateInput } from '../../services/taskFieldService';
 import { taskRecurrenceService, type UpsertRecurrenceInput } from '../../services/taskRecurrenceService';
+import {
+  taskAutomationService,
+  type CreateTaskAutomationInput,
+  type UpdateTaskAutomationInput,
+} from '../../services/taskAutomationService';
 
 function actorFromCtx(ctx: GraphQLContext): { id?: string | null; name?: string | null } {
   const user = ctx.user as { _id?: { toString(): string }; id?: string; firstName?: string; lastName?: string } | null;
@@ -113,6 +118,29 @@ export const todoResolvers = {
       const scopedId = resolveScopedTenantId(ctx, tenantId);
       const row = await taskRecurrenceService.getForTask(taskId, scopedId);
       return row ? taskRecurrenceService.toGraphQL(row) : null;
+    },
+    taskAutomations: async (
+      _: unknown,
+      { tenantId, todoListId }: { tenantId: string; todoListId?: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const rows = await taskAutomationService.list(scopedId, todoListId);
+      return rows.map((r) => taskAutomationService.toGraphQL(r));
+    },
+    taskAutomation: async (_: unknown, { id, tenantId }: { id: string; tenantId: string }, ctx: GraphQLContext) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const row = await taskAutomationService.getById(id, scopedId);
+      return row ? taskAutomationService.toGraphQL(row) : null;
+    },
+    taskAutomationExecutions: async (
+      _: unknown,
+      { automationId, tenantId, limit }: { automationId: string; tenantId: string; limit?: number },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const rows = await taskAutomationService.listExecutions(automationId, scopedId, limit ?? 50);
+      return rows.map((r) => taskAutomationService.executionToGraphQL(r));
     },
   },
   Mutation: {
@@ -302,6 +330,61 @@ export const todoResolvers = {
     ) => {
       const scopedId = resolveScopedTenantId(ctx, tenantId);
       return taskRecurrenceService.disable(taskId, scopedId);
+    },
+
+    createTaskAutomation: async (_: unknown, { input }: { input: CreateTaskAutomationInput }, ctx: GraphQLContext) => {
+      const scopedId = resolveScopedTenantId(ctx, input.tenantId);
+      const actor = actorFromCtx(ctx);
+      const created = await taskAutomationService.create({
+        ...input,
+        tenantId: scopedId,
+        createdById: actor.id ?? null,
+      });
+      return taskAutomationService.toGraphQL(created);
+    },
+    updateTaskAutomation: async (
+      _: unknown,
+      { id, tenantId, input }: { id: string; tenantId: string; input: UpdateTaskAutomationInput },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const updated = await taskAutomationService.update(id, scopedId, input);
+      return updated ? taskAutomationService.toGraphQL(updated) : null;
+    },
+    enableTaskAutomation: async (
+      _: unknown,
+      { id, tenantId }: { id: string; tenantId: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const updated = await taskAutomationService.setEnabled(id, scopedId, true);
+      return updated ? taskAutomationService.toGraphQL(updated) : null;
+    },
+    disableTaskAutomation: async (
+      _: unknown,
+      { id, tenantId }: { id: string; tenantId: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const updated = await taskAutomationService.setEnabled(id, scopedId, false);
+      return updated ? taskAutomationService.toGraphQL(updated) : null;
+    },
+    testTaskAutomation: async (
+      _: unknown,
+      { id, tenantId, sampleTaskId }: { id: string; tenantId: string; sampleTaskId: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      const execution = await taskAutomationService.test(id, scopedId, sampleTaskId);
+      return taskAutomationService.executionToGraphQL(execution);
+    },
+    deleteTaskAutomation: async (
+      _: unknown,
+      { id, tenantId }: { id: string; tenantId: string },
+      ctx: GraphQLContext,
+    ) => {
+      const scopedId = resolveScopedTenantId(ctx, tenantId);
+      return taskAutomationService.delete(id, scopedId);
     },
   },
 };

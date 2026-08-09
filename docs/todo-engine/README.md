@@ -14,9 +14,10 @@ Architecture pack for extending the existing Todo List — **not** a separate re
 
 **Status**
 
-| Phase                   | State                                       |
-| ----------------------- | ------------------------------------------- |
-| 1 Task enrichment       | Shipped (`#489`)                            |
-| 2 Reminders + job sweep | Shipped (`#490`)                            |
-| 3 Required fields       | Shipped (`#492`)                            |
-| 4 Recurrence            | In progress (`feat/todo-phase4-recurrence`) |
+| Phase                   | State                                            |
+| ----------------------- | ------------------------------------------------ |
+| 1 Task enrichment       | Shipped (`#489`)                                 |
+| 2 Reminders + job sweep | Shipped (`#490`)                                 |
+| 3 Required fields       | Shipped (`#492`)                                 |
+| 4 Recurrence            | Shipped (`#494`)                                 |
+| 5 Task automation       | In progress (`feat/todo-phase5-task-automation`) |

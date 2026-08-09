@@ -50,6 +50,7 @@ import {
   GET_TASK_TEMPLATES,
   GET_TASK_FIELD_VALUES,
   GET_TASK_RECURRENCE,
+  GET_TASK_AUTOMATIONS,
   CREATE_TASK,
   TOGGLE_TASK,
   DELETE_TASK,
@@ -63,6 +64,11 @@ import {
   UPSERT_TASK_FIELD_VALUE,
   UPSERT_TASK_RECURRENCE,
   DISABLE_TASK_RECURRENCE,
+  CREATE_TASK_AUTOMATION,
+  ENABLE_TASK_AUTOMATION,
+  DISABLE_TASK_AUTOMATION,
+  DELETE_TASK_AUTOMATION,
+  TEST_TASK_AUTOMATION,
 } from '../../graphql/queries/todo';
 
 interface Props {
@@ -170,6 +176,12 @@ function TodoListPageContent({ tenant }: Props) {
     fetchPolicy: 'network-only',
   });
 
+  const { data: automationsData, refetch: refetchAutomations } = useQuery(GET_TASK_AUTOMATIONS, {
+    variables: { tenantId: tenant, todoListId },
+    skip: !todoListId,
+    fetchPolicy: 'cache-and-network',
+  });
+
   const [createTask] = useMutation(CREATE_TASK);
   const [toggleTask] = useMutation(TOGGLE_TASK);
   const [deleteTask] = useMutation(DELETE_TASK);
@@ -183,8 +195,14 @@ function TodoListPageContent({ tenant }: Props) {
   const [upsertTaskFieldValue] = useMutation(UPSERT_TASK_FIELD_VALUE);
   const [upsertTaskRecurrence] = useMutation(UPSERT_TASK_RECURRENCE);
   const [disableTaskRecurrence] = useMutation(DISABLE_TASK_RECURRENCE);
+  const [createTaskAutomation] = useMutation(CREATE_TASK_AUTOMATION);
+  const [enableTaskAutomation] = useMutation(ENABLE_TASK_AUTOMATION);
+  const [disableTaskAutomation] = useMutation(DISABLE_TASK_AUTOMATION);
+  const [deleteTaskAutomation] = useMutation(DELETE_TASK_AUTOMATION);
+  const [testTaskAutomation] = useMutation(TEST_TASK_AUTOMATION);
   const [fieldsBusy, setFieldsBusy] = useState(false);
   const [recurrenceBusy, setRecurrenceBusy] = useState(false);
+  const [automationBusy, setAutomationBusy] = useState(false);
 
   const handleCreate = async (title: string) => {
     try {
@@ -489,6 +507,81 @@ function TodoListPageContent({ tenant }: Props) {
     }
   };
 
+  const handleCreateAutomation = async (input: {
+    name: string;
+    enabled: boolean;
+    trigger: { type: string };
+    actions: Array<{ type: string; config?: Record<string, unknown> }>;
+  }) => {
+    setAutomationBusy(true);
+    try {
+      await createTaskAutomation({
+        variables: {
+          input: {
+            tenantId: tenant,
+            todoListId,
+            name: input.name,
+            enabled: input.enabled,
+            trigger: input.trigger,
+            conditions: { op: 'AND', rules: [] },
+            actions: input.actions,
+          },
+        },
+      });
+      showSuccess('Automation created');
+      await refetchAutomations();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to create automation');
+    } finally {
+      setAutomationBusy(false);
+    }
+  };
+
+  const handleToggleAutomation = async (id: string, enabled: boolean) => {
+    setAutomationBusy(true);
+    try {
+      if (enabled) {
+        await enableTaskAutomation({ variables: { id, tenantId: tenant } });
+      } else {
+        await disableTaskAutomation({ variables: { id, tenantId: tenant } });
+      }
+      await refetchAutomations();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to update automation');
+    } finally {
+      setAutomationBusy(false);
+    }
+  };
+
+  const handleDeleteAutomation = async (id: string) => {
+    setAutomationBusy(true);
+    try {
+      await deleteTaskAutomation({ variables: { id, tenantId: tenant } });
+      showSuccess('Automation deleted');
+      await refetchAutomations();
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Failed to delete automation');
+    } finally {
+      setAutomationBusy(false);
+    }
+  };
+
+  const handleTestAutomation = async (id: string) => {
+    if (!selectedTaskId) return;
+    setAutomationBusy(true);
+    try {
+      const result = await testTaskAutomation({
+        variables: { id, tenantId: tenant, sampleTaskId: selectedTaskId },
+      });
+      const status = result.data?.testTaskAutomation?.status as string | undefined;
+      showSuccess(status === 'tested' ? 'Dry-run OK' : `Test status: ${status ?? 'unknown'}`);
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Test failed');
+    } finally {
+      setAutomationBusy(false);
+    }
+  };
+
   const handleAddView = (viewId: string) => {
     const meta = VIEW_META[viewId];
     if (!meta || !meta.available) {
@@ -748,6 +841,8 @@ function TodoListPageContent({ tenant }: Props) {
         fieldsBusy={fieldsBusy}
         recurrence={recurrenceData?.taskRecurrence ?? null}
         recurrenceBusy={recurrenceBusy}
+        automations={automationsData?.taskAutomations ?? []}
+        automationBusy={automationBusy}
         onClose={() => setSelectedTaskId(null)}
         onSave={(input) => void handleSaveDetail(input)}
         onCreateReminder={(input) => void handleCreateReminder(input)}
@@ -758,6 +853,10 @@ function TodoListPageContent({ tenant }: Props) {
         onChangeFieldValue={(fieldId, value) => void handleChangeFieldValue(fieldId, value)}
         onSaveRecurrence={(input) => void handleSaveRecurrence(input)}
         onDisableRecurrence={() => void handleDisableRecurrence()}
+        onCreateAutomation={(input) => void handleCreateAutomation(input)}
+        onToggleAutomation={(id, enabled) => void handleToggleAutomation(id, enabled)}
+        onDeleteAutomation={(id) => void handleDeleteAutomation(id)}
+        onTestAutomation={(id) => void handleTestAutomation(id)}
       />
     </>
   );

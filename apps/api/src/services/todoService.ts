@@ -126,6 +126,17 @@ export class TodoService {
       source: 'user',
     });
 
+    void import('./taskAutomationService')
+      .then(({ safeDispatch }) =>
+        safeDispatch({
+          tenantId: input.tenantId,
+          trigger: 'task.created',
+          task,
+          occurrenceBucket: `created:${task._id.toString()}`,
+        }),
+      )
+      .catch(() => undefined);
+
     return task;
   }
 
@@ -244,6 +255,10 @@ export class TodoService {
         ...activity,
       });
     }
+
+    void import('./taskAutomationService')
+      .then(({ safeDispatchFromUpdate }) => safeDispatchFromUpdate(existing, updated, tenantId))
+      .catch(() => undefined);
 
     return updated;
   }
