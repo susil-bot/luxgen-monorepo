@@ -8,13 +8,13 @@ import {
   couponFormToInput,
   emptyCouponForm,
   type CouponFormValues,
-} from '../../../components/commerce/CouponForm';
-import { CREATE_COUPON } from '../../../graphql/queries/coupons';
-import { getTenantPageProps } from '../../../lib/tenant-page-props';
-import { useCommercePageShell } from '../../../lib/commerce-page-shell';
-import { useAppTenantId } from '../../../lib/app-layout-user';
-import { getStoredUser } from '../../../lib/session';
-import { isMongoObjectId } from '../../../lib/mongo-id';
+} from '../../components/commerce/CouponForm';
+import { CREATE_COUPON } from '../../graphql/queries/coupons';
+import { getTenantPageProps } from '../../lib/tenant-page-props';
+import { useCommercePageShell } from '../../lib/commerce-page-shell';
+import { useAppTenantId } from '../../lib/app-layout-user';
+import { getStoredUser } from '../../lib/session';
+import { isMongoObjectId } from '../../lib/mongo-id';
 
 interface Props {
   tenant: string;
