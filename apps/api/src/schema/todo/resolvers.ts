@@ -199,15 +199,5 @@ export const todoResolvers = {
       const scopedId = resolveScopedTenantId(ctx, tenantId);
       return taskReminderService.delete(id, scopedId);
     },
-    markNotificationRead: async (
-      _: unknown,
-      { id, tenantId }: { id: string; tenantId: string },
-      ctx: GraphQLContext,
-    ) => {
-      const scopedId = resolveScopedTenantId(ctx, tenantId);
-      const userId = requireUserId(ctx);
-      const updated = await taskReminderService.markNotificationRead(id, scopedId, userId);
-      return updated ? taskReminderService.notificationToGraphQL(updated) : null;
-    },
   },
 };

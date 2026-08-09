@@ -186,6 +186,7 @@ export class TaskReminderService {
       const channels = (reminder.channelPrefs as ReminderChannel[]) || ['in_app'];
 
       if (recipientId && channels.includes('in_app')) {
+        const href = `/todo`;
         await AppNotification.create({
           tenantId: reminder.tenantId,
           userId: recipientId,
@@ -194,7 +195,7 @@ export class TaskReminderService {
           body: `"${task.title}" is due soon.`,
           taskId: task._id.toString(),
           reminderId: reminder._id.toString(),
-          metadata: { fireAt: reminder.fireAt.toISOString() },
+          metadata: { fireAt: reminder.fireAt.toISOString(), href, todoListId: task.todoListId },
         });
         notified += 1;
       }
@@ -229,10 +230,30 @@ export class TaskReminderService {
     return { processed, notified, skipped };
   }
 
-  async listNotifications(tenantId: string, userId: string, unreadOnly?: boolean): Promise<IAppNotification[]> {
+  async listNotifications(
+    tenantId: string,
+    userId: string,
+    unreadOnly?: boolean,
+    limit = 100,
+  ): Promise<IAppNotification[]> {
     const query: Record<string, unknown> = { tenantId, userId };
     if (unreadOnly) query.readAt = null;
-    return AppNotification.find(query).sort({ createdAt: -1 }).limit(100);
+    return AppNotification.find(query).sort({ createdAt: -1 }).limit(limit);
+  }
+
+  async getNotificationFeed(
+    tenantId: string,
+    userId: string,
+    limit = 15,
+  ): Promise<{ unreadCount: number; items: ReturnType<TaskReminderService['notificationFeedItem']>[] }> {
+    const [items, unreadCount] = await Promise.all([
+      this.listNotifications(tenantId, userId, false, limit),
+      AppNotification.countDocuments({ tenantId, userId, readAt: null }),
+    ]);
+    return {
+      unreadCount,
+      items: items.map((n) => this.notificationFeedItem(n)),
+    };
   }
 
   async markNotificationRead(id: string, tenantId: string, userId: string): Promise<IAppNotification | null> {
@@ -241,6 +262,11 @@ export class TaskReminderService {
       { $set: { readAt: new Date() } },
       { new: true },
     );
+  }
+
+  async markAllNotificationsRead(tenantId: string, userId: string): Promise<boolean> {
+    await AppNotification.updateMany({ tenantId, userId, readAt: null }, { $set: { readAt: new Date() } });
+    return true;
   }
 
   toGraphQL(reminder: ITaskReminder) {
@@ -266,6 +292,23 @@ export class TaskReminderService {
       body: n.body,
       taskId: n.taskId ?? null,
       reminderId: n.reminderId ?? null,
+      readAt: n.readAt ?? null,
+      createdAt: n.createdAt,
+    };
+  }
+
+  /** Shape expected by apps/web NotificationBell / useNotificationCount. */
+  notificationFeedItem(n: IAppNotification) {
+    const meta = (n.metadata ?? {}) as Record<string, unknown>;
+    const todoListId = typeof meta.todoListId === 'string' ? meta.todoListId : null;
+    const href =
+      (typeof meta.href === 'string' && meta.href) || (todoListId ? `/todo/${todoListId}` : n.taskId ? '/todo' : null);
+    return {
+      id: n._id.toString(),
+      type: n.category,
+      title: n.title,
+      body: n.body,
+      href,
       readAt: n.readAt ?? null,
       createdAt: n.createdAt,
     };
