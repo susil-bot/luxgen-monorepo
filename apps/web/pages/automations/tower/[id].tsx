@@ -30,6 +30,48 @@ import { useAppLayoutHeader } from '../../../lib/app-layout-header';
 import { useLayoutUser } from '../../../lib/app-layout-user';
 import { canPublishAutomation } from '../../../lib/automation-permissions';
 
+interface ActivityEvent {
+  id: string;
+  icon: string;
+  label: string;
+  at: string;
+}
+
+/**
+ * T-AUTO-11 — Activity timeline, built from Automation's own lifecycle timestamps
+ * (create/update/publish/archive). Pause/resume/delete-step/comment/AI-action events
+ * from the full TODO spec §20 require a dedicated audit log collection and are
+ * deferred — see docs/todo-orchestrator/queue.yaml notes for T-AUTO-11.
+ */
+function buildActivityTimeline(meta: {
+  createdAt: string | null;
+  updatedAt: string | null;
+  publishedAt: string | null;
+  archivedAt: string | null;
+}): ActivityEvent[] {
+  const events: ActivityEvent[] = [];
+  if (meta.createdAt) events.push({ id: 'created', icon: '\ud83d\udc64', label: 'Workflow created', at: meta.createdAt });
+  if (meta.publishedAt) events.push({ id: 'published', icon: '\ud83d\ude80', label: 'Published', at: meta.publishedAt });
+  if (meta.archivedAt) events.push({ id: 'archived', icon: '\ud83d\udddc\ufe0f', label: 'Archived', at: meta.archivedAt });
+  if (meta.updatedAt && meta.updatedAt !== meta.createdAt) {
+    events.push({ id: 'updated', icon: '\u270f\ufe0f', label: 'Last updated', at: meta.updatedAt });
+  }
+  return events.sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime());
+}
+
+function formatActivityTimestamp(iso: string): string {
+  try {
+    return new Date(iso).toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit',
+    });
+  } catch {
+    return iso;
+  }
+}
+
 function stepTypeLabel(kind: FlowNodeKind) {
   if (kind === 'trigger') return 'Trigger';
   if (kind === 'wait') return 'Wait';
@@ -93,6 +135,8 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
     testRun,
     testBusy,
     testError,
+    automationMeta,
+    updateNotifySettings,
   } = useTowerFlowPersist({
     towerId,
     tenantId: queryTenantId,
@@ -518,6 +562,57 @@ function TowerEditContent({ tenant }: TowerEditRoomProps) {
                 <p style={{ fontSize: 12, color: 'var(--color-label-secondary)', lineHeight: 1.5, margin: 0 }}>
                   Persisted as <code>TowerFlowDocument</code> v1 on <code>Automation.flowDefinition</code>. Save
                   (⌘/Ctrl+S) writes via <code>updateAutomation</code>/<code>createAutomation</code>.
+                </p>
+              </div>
+            </aside>
+          ) : automationMeta ? (
+            <aside className={styles.configPanel}>
+              <div className={styles.configPanelHead}>Activity</div>
+              <div className={styles.configPanelBody}>
+                <div className={styles.configField}>
+                  <label className={styles.configLabel}>Notify me by email</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+                      <input
+                        type="checkbox"
+                        checked={automationMeta.notifySettings.onFailure}
+                        disabled={!canPublish}
+                        onChange={(e) => void updateNotifySettings({ onFailure: e.target.checked })}
+                      />
+                      On failure
+                    </label>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+                      <input
+                        type="checkbox"
+                        checked={automationMeta.notifySettings.onSuccess}
+                        disabled={!canPublish}
+                        onChange={(e) => void updateNotifySettings({ onSuccess: e.target.checked })}
+                      />
+                      On every successful run
+                    </label>
+                  </div>
+                </div>
+
+                <div className={styles.configField}>
+                  <label className={styles.configLabel}>Timeline</label>
+                  <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {buildActivityTimeline(automationMeta).map((event) => (
+                      <li key={event.id} style={{ fontSize: 13, display: 'flex', gap: 8, alignItems: 'flex-start' }}>
+                        <span aria-hidden>{event.icon}</span>
+                        <span>
+                          <div>{event.label}</div>
+                          <div style={{ fontSize: 11, color: 'var(--color-label-secondary)' }}>
+                            {formatActivityTimestamp(event.at)}
+                          </div>
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <p style={{ fontSize: 12, color: 'var(--color-label-secondary)', lineHeight: 1.5, margin: 0 }}>
+                  Select a step to edit its settings. Run and pause/resume history — see{' '}
+                  <code>View run logs</code> above.
                 </p>
               </div>
             </aside>
