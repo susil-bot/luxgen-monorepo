@@ -1,10 +1,11 @@
 import { Router, Request, Response } from 'express';
-import { Tenant, TenantSubscription, resolveEffectivePlan } from '@luxgen/db';
+import { Tenant, TenantSubscription, resolveEffectivePlan, resolveVocabulary } from '@luxgen/db';
 import { UserRole } from '@luxgen/auth';
 import { getTenantConfig, validateTenantConfig, getInitialSubscriptionPlan } from '../config/tenants';
 import { getTenantContext } from '../middleware/tenantRouting';
 import { requireRole } from '../middleware/roleManagement';
 import { validateStorefrontPatchBody, validationErrorsToRecord, mergeStorefrontPatch } from '../middleware/validation';
+import { tenantService } from '../services/tenantService';
 
 const router = Router();
 
@@ -452,6 +453,83 @@ router.patch('/storefront', requireRole(UserRole.ADMIN), async (req: Request, re
       success: false,
       message: 'Internal server error',
       error: process.env.NODE_ENV === 'development' ? (error as Error).message : undefined,
+    });
+  }
+});
+
+/**
+ * Get tenant vocabulary (resolves LMS defaults for any field not overridden)
+ */
+router.get('/vocabulary', async (req: Request, res: Response) => {
+  try {
+    const tenantContext = getTenantContext(req);
+
+    if (!tenantContext) {
+      return res.status(404).json({
+        success: false,
+        message: 'No tenant context found',
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        vocabulary: resolveVocabulary(tenantContext.tenant),
+      },
+    });
+  } catch (error) {
+    console.error('Get tenant vocabulary error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error:
+        process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
+    });
+  }
+});
+
+/**
+ * Update tenant vocabulary (display-name overrides only — internal names/URLs never change,
+ * see docs/PLATFORM_VERTICALIZATION_STRATEGY.md §3). Uses tenantService.updateVocabulary(),
+ * which sets one dot-notation key per term so sibling settings.vocabulary fields are preserved
+ * (same discipline as updateFeatureFlags — never a whole-object $set).
+ */
+router.patch('/vocabulary', requireRole(UserRole.ADMIN), async (req: Request, res: Response) => {
+  try {
+    const tenantContext = getTenantContext(req);
+
+    if (!tenantContext) {
+      return res.status(404).json({
+        success: false,
+        message: 'No tenant context found',
+      });
+    }
+
+    const { vocabulary } = req.body;
+
+    if (!vocabulary || typeof vocabulary !== 'object') {
+      return res.status(400).json({
+        success: false,
+        message: 'Vocabulary data is required',
+      });
+    }
+
+    const updated = await tenantService.updateVocabulary(tenantContext.tenantId, vocabulary);
+
+    res.json({
+      success: true,
+      message: 'Vocabulary updated successfully',
+      data: {
+        vocabulary: updated,
+      },
+    });
+  } catch (error) {
+    console.error('Update tenant vocabulary error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error',
+      error:
+        process.env.NODE_ENV === 'development' ? (error instanceof Error ? error.message : String(error)) : undefined,
     });
   }
 });
