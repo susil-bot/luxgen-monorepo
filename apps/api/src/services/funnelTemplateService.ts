@@ -32,6 +32,26 @@ const CATALOG_SEED: Array<
       { stage: 'Post-purchase follow-up', description: 'Existing SEND_EMAIL automation action.' },
     ],
   },
+  {
+    // T-VERT-07 — recurring client status reports (core.report.send_client_summary) are
+    // already scoped as net-new engineering in docs/AUTOMATION_HUB_STRATEGY.md §3's "Agencies
+    // reselling white-label" row. Deliberately NOT invented here — this seed sticks to
+    // automation templates that exist today, per docs/PLATFORM_VERTICALIZATION_STRATEGY.md §4b.
+    slug: 'agency-consulting',
+    name: 'Agency & consulting services',
+    description: 'Client onboarding, engagement milestones, and lead capture — no cohort content library needed.',
+    industry: ['agency', 'consulting'],
+    vocabularyPreset: { course: 'Engagement', student: 'Client', instructor: 'Consultant', enrollment: 'Engagement start' },
+    enabledModules: [],
+    automationTemplateSlugs: ['crm-webhook-enroll', 'welcome-sequence'],
+    funnelStages: [
+      { stage: 'Lead capture', description: 'Existing core.webhook.received trigger.' },
+      { stage: 'Client onboarding checklist', description: 'Existing welcome-sequence template (SEND_EMAIL + ADD_TO_GROUP).' },
+      { stage: 'CRM sync', description: 'Existing crm-webhook-enroll template pushes enrollment events to HubSpot/Salesforce.' },
+      { stage: 'Deliverables tracking', description: 'Course modules, relabeled "Engagement milestones" via vocabulary preset.' },
+      { stage: 'Recurring client status reports', description: 'Deferred — needs a new core.report.send_client_summary action, not shipped in this pass.' },
+    ],
+  },
 ];
 
 export class FunnelTemplateService {
