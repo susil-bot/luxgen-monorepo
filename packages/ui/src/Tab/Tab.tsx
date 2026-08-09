@@ -15,6 +15,10 @@ export interface TabItem {
 export interface TabProps extends BaseComponentProps {
   items: TabItem[];
   defaultActiveTab?: string;
+  /** Controlled active tab id. When provided, the component mirrors this value instead of
+   * managing it internally -- lets a parent (e.g. a "jump to view" menu) switch tabs
+   * programmatically. Omit for the original uncontrolled behavior (defaultActiveTab only). */
+  activeTab?: string;
   variant?: 'default' | 'pills' | 'underline' | 'minimal';
   size?: 'sm' | 'md' | 'lg';
   orientation?: 'horizontal' | 'vertical';
@@ -28,6 +32,7 @@ export interface TabProps extends BaseComponentProps {
 const TabComponent: React.FC<TabProps> = ({
   items = [],
   defaultActiveTab,
+  activeTab: controlledActiveTab,
   variant = 'default',
   size = 'md',
   orientation = 'horizontal',
@@ -40,13 +45,15 @@ const TabComponent: React.FC<TabProps> = ({
   style = {},
   ...props
 }) => {
-  const [activeTab, setActiveTab] = useState<string>(
+  const isControlled = controlledActiveTab !== undefined;
+  const [uncontrolledActiveTab, setUncontrolledActiveTab] = useState<string>(
     defaultActiveTab || (items.length > 0 ? items[0].id : '')
   );
+  const activeTab = isControlled ? controlledActiveTab : uncontrolledActiveTab;
 
   const handleTabClick = (tabId: string, disabled?: boolean) => {
     if (disabled) return;
-    setActiveTab(tabId);
+    if (!isControlled) setUncontrolledActiveTab(tabId);
     onTabChange?.(tabId);
   };
 
@@ -102,14 +109,14 @@ const TabComponent: React.FC<TabProps> = ({
   // Responsive behavior
   const isVertical = orientation === 'vertical' || (responsive && typeof window !== 'undefined' && window.innerWidth < mobileBreakpoint);
 
-  const containerStyle = {
+  const containerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: isVertical ? 'column' : 'row',
     gap: isVertical ? '1rem' : '0',
     ...style,
   };
 
-  const tabListStyle = {
+  const tabListStyle: React.CSSProperties = {
     ...styles.tabList,
     flexDirection: isVertical ? 'column' : 'row',
     borderBottom: isVertical ? 'none' : styles.tabList.borderBottom,
