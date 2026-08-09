@@ -5,7 +5,12 @@ import Head from 'next/head';
 import Link from 'next/link';
 import { useQuery, useMutation } from '@apollo/client';
 import { AppLayout } from '@luxgen/ui';
-import { GET_AUTOMATION_TEMPLATES, INSTALL_AUTOMATION_TEMPLATE } from '../../graphql/queries/marketplace';
+import {
+  GET_AUTOMATION_TEMPLATES,
+  INSTALL_AUTOMATION_TEMPLATE,
+  GET_FUNNEL_TEMPLATES,
+  INSTALL_FUNNEL_TEMPLATE,
+} from '../../graphql/queries/marketplace';
 
 interface Props {
   tenant: string;
@@ -24,6 +29,31 @@ export default function MarketplacePage({ tenant }: Props) {
   const layoutUser = useLayoutUser();
   const { sidebarSections, logo } = useAppShellConfig();
   const [installing, setInstalling] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'automations' | 'funnels'>('automations');
+  const [expandedFunnel, setExpandedFunnel] = useState<string | null>(null);
+  const [installingFunnel, setInstallingFunnel] = useState<string | null>(null);
+
+  const { data: funnelData, refetch: refetchFunnels } = useQuery(GET_FUNNEL_TEMPLATES, {
+    skip: activeTab !== 'funnels',
+    errorPolicy: 'ignore',
+  });
+  const [installFunnelTemplate] = useMutation(INSTALL_FUNNEL_TEMPLATE);
+  const funnelTemplates = funnelData?.funnelTemplates ?? [];
+
+  const handleInstallFunnel = async (slug: string) => {
+    setInstallingFunnel(slug);
+    try {
+      await installFunnelTemplate({ variables: { tenantId: tenant, slug } });
+      await refetchFunnels();
+      window.location.href = `/settings/vocabulary?tenant=${encodeURIComponent(tenant)}&funnelInstalled=${slug}`;
+    } catch (e) {
+      console.error(e);
+      alert('Funnel install failed — check your plan includes automations.');
+    } finally {
+      setInstallingFunnel(null);
+    }
+  };
+
 
   const { data, refetch } = useQuery(GET_AUTOMATION_TEMPLATES, {
     errorPolicy: 'ignore',
@@ -90,6 +120,111 @@ export default function MarketplacePage({ tenant }: Props) {
             </Link>
           </header>
 
+          <div className="flex gap-2 mb-6 border-b" style={{ borderColor: 'var(--color-border)' }}>
+            <button
+              type="button"
+              onClick={() => setActiveTab('automations')}
+              className="px-4 py-2 text-sm font-medium -mb-px border-b-2"
+              style={{
+                borderColor: activeTab === 'automations' ? 'var(--color-accent)' : 'transparent',
+                color: activeTab === 'automations' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+              }}
+            >
+              Automation templates
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('funnels')}
+              className="px-4 py-2 text-sm font-medium -mb-px border-b-2"
+              style={{
+                borderColor: activeTab === 'funnels' ? 'var(--color-accent)' : 'transparent',
+                color: activeTab === 'funnels' ? 'var(--color-text-primary)' : 'var(--color-text-secondary)',
+              }}
+            >
+              Funnel templates
+            </button>
+          </div>
+
+          {activeTab === 'funnels' ? (
+            <div className="grid gap-4 md:grid-cols-2">
+              {funnelTemplates.length === 0 ? (
+                <p className="text-sm md:col-span-2" style={{ color: 'var(--color-text-secondary)' }}>
+                  No funnel templates available yet.
+                </p>
+              ) : (
+                funnelTemplates.map(
+                  (ft: {
+                    id: string;
+                    slug: string;
+                    name: string;
+                    description: string;
+                    industry: string[];
+                    funnelStages: { stage: string; description: string }[];
+                    installCount: number;
+                  }) => {
+                    const expanded = expandedFunnel === ft.slug;
+                    return (
+                      <article
+                        key={ft.id}
+                        className="rounded-xl border p-5 flex flex-col"
+                        style={{ background: 'var(--color-bg-secondary)', borderColor: 'var(--color-border)' }}
+                      >
+                        <div className="flex items-start justify-between gap-2 mb-2">
+                          <h2 className="font-semibold" style={{ color: 'var(--color-text-primary)' }}>
+                            {ft.name}
+                          </h2>
+                          <span
+                            className="text-xs px-2 py-0.5 rounded-full shrink-0 capitalize"
+                            style={{ background: 'var(--color-bg-tertiary)' }}
+                          >
+                            {ft.industry[0]?.replace(/-/g, ' ')}
+                          </span>
+                        </div>
+                        <p className="text-sm flex-1 mb-3" style={{ color: 'var(--color-text-secondary)' }}>
+                          {ft.description}
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => setExpandedFunnel(expanded ? null : ft.slug)}
+                          className="text-sm mb-3 text-left"
+                          style={{ color: 'var(--color-accent)' }}
+                        >
+                          {expanded ? 'Hide stages ▲' : `View ${ft.funnelStages.length} stages ▼`}
+                        </button>
+                        {expanded && (
+                          <ol className="text-xs space-y-2 mb-4 border-l pl-3" style={{ borderColor: 'var(--color-border)' }}>
+                            {ft.funnelStages.map((stage) => (
+                              <li key={stage.stage}>
+                                <span className="font-medium" style={{ color: 'var(--color-text-primary)' }}>
+                                  {stage.stage}
+                                </span>
+                                <p style={{ color: 'var(--color-text-secondary)' }}>{stage.description}</p>
+                              </li>
+                            ))}
+                          </ol>
+                        )}
+                        <div className="flex items-center justify-between mt-auto">
+                          <span className="text-xs" style={{ color: 'var(--color-text-tertiary)' }}>
+                            {ft.installCount.toLocaleString()} installs
+                          </span>
+                          <button
+                            type="button"
+                            disabled={installingFunnel === ft.slug}
+                            onClick={() => handleInstallFunnel(ft.slug)}
+                            className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
+                            style={{ background: 'var(--color-accent)' }}
+                          >
+                            {installingFunnel === ft.slug ? 'Installing…' : 'Install funnel'}
+                          </button>
+                        </div>
+                      </article>
+                    );
+                  },
+                )
+              )}
+            </div>
+          ) : (
+          <>
           <div className="flex flex-wrap items-center gap-3 mb-6">
             <input
               type="search"
@@ -180,6 +315,8 @@ export default function MarketplacePage({ tenant }: Props) {
               ),
             )}
           </div>
+          )}
+          </>
           )}
         </div>
       </AppLayout>

@@ -429,6 +429,23 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
         ),
       },
       {
+        // T-VERT-11 — gated to SUPER_ADMIN in apps/web/lib/use-sidebar-sections.ts's filterItem(),
+        // same pattern as the 'agent-studio' item below being gated on a plan flag.
+        id: 'tenant-map',
+        label: 'Tenant Map',
+        href: '/organization/tenant-map',
+        icon: (
+          <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"
+            />
+          </svg>
+        ),
+      },
+      {
         id: 'agent-studio',
         label: 'Agent Studio',
         href: '/agent',

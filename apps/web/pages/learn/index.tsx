@@ -7,6 +7,7 @@ import { PageLoadingState } from '../../components/common/PageStates';
 import { getStoredUser } from '../../lib/session';
 import { GET_COURSES } from '../../graphql/queries/courses';
 import { GET_TENANT } from '../../graphql/queries/tenants';
+import { useVocabulary } from '../../hooks/useVocabulary';
 import {
   filterPublishedCourses,
   formatInstructorName,
@@ -26,6 +27,7 @@ export default function LearnCatalogPage({ tenantSubdomain }: Props) {
   const tenantId = tenantData?.tenantBySubdomain?.id as string | undefined;
   const tenantName = tenantData?.tenantBySubdomain?.name as string | undefined;
   const tenantSettings = tenantData?.tenantBySubdomain?.settings;
+  const { t } = useVocabulary(tenantSettings?.vocabulary);
 
   const {
     data,
@@ -47,7 +49,7 @@ export default function LearnCatalogPage({ tenantSubdomain }: Props) {
     <>
       <Head>
         <title>{pageTitle}</title>
-        <meta name="description" content={`Browse training courses from ${tenantName ?? tenantSubdomain}`} />
+        <meta name="description" content={`Browse ${t('course', 'plural').toLowerCase()} from ${tenantName ?? tenantSubdomain}`} />
       </Head>
 
       <LearnLayout tenantSubdomain={tenantSubdomain} tenantName={tenantName} tenantSettings={tenantSettings}>
@@ -73,8 +75,10 @@ export default function LearnCatalogPage({ tenantSubdomain }: Props) {
           </div>
         )}
         <header className="mb-8">
-          <h1 className="ios-large-title">Training catalog</h1>
-          <p className="mt-1 text-secondary text-sm">Expert-led courses — sign in to enroll and start learning</p>
+          <h1 className="ios-large-title">{t('course', 'plural')} catalog</h1>
+          <p className="mt-1 text-secondary text-sm">
+            Expert-led {t('course', 'plural').toLowerCase()} — sign in to get started
+          </p>
           <div className="flex flex-wrap gap-3 mt-4 text-sm">
             <Link href="/store/product" style={{ color: 'var(--color-blue)' }}>
               GPT Store →
@@ -88,7 +92,7 @@ export default function LearnCatalogPage({ tenantSubdomain }: Props) {
           </div>
         </header>
 
-        {catalogLoading && <PageLoadingState label="Loading courses…" />}
+        {catalogLoading && <PageLoadingState label={`Loading ${t('course', 'plural').toLowerCase()}…`} />}
 
         {error && (
           <p className="text-sm" style={{ color: 'var(--color-red)' }}>
@@ -98,8 +102,8 @@ export default function LearnCatalogPage({ tenantSubdomain }: Props) {
 
         {!catalogLoading && !error && courses.length === 0 && (
           <div className="ios-empty-state ios-card py-12">
-            <p className="empty-title">No courses yet</p>
-            <p className="empty-subtitle">Check back soon for new training.</p>
+            <p className="empty-title">No {t('course', 'plural').toLowerCase()} yet</p>
+            <p className="empty-subtitle">Check back soon for new {t('course', 'plural').toLowerCase()}.</p>
           </div>
         )}
 
@@ -116,7 +120,7 @@ export default function LearnCatalogPage({ tenantSubdomain }: Props) {
                 {instructor && <p className="text-xs text-secondary mt-1">With {instructor}</p>}
                 {course.description && <p className="text-sm text-secondary mt-2 line-clamp-3">{course.description}</p>}
                 <span className="inline-block mt-4 text-sm font-medium" style={{ color: 'var(--color-blue)' }}>
-                  View course →
+                  View {t('course').toLowerCase()} →
                 </span>
               </Link>
             );
