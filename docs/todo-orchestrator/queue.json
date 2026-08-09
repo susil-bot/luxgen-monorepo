@@ -583,7 +583,7 @@
       "epic": "E2",
       "priority": 2,
       "sla": "M",
-      "status": "todo",
+      "status": "done",
       "title": "Workflow analytics page (success rate run volume)",
       "skill": "persona-pages",
       "source": {
@@ -600,7 +600,8 @@
       ],
       "acceptance": [
         "Page shows live or empty-with-reason metrics; plan gate if needed"
-      ]
+      ],
+      "notes": "/automations/tower/:id/analytics — success rate, avg duration, 7-day run-volume bar chart, computed client-side from existing automationRuns(automationId); no apps/api change needed. feat/frontend-todo-batch-v2"
     },
     {
       "id": "T-AUTO-09",
@@ -628,7 +629,7 @@
       "epic": "E2",
       "priority": 2,
       "sla": "M",
-      "status": "todo",
+      "status": "done",
       "title": "Permission gates on workflow edit/publish",
       "skill": "automation",
       "source": {
@@ -645,7 +646,8 @@
       ],
       "acceptance": [
         "Unauthorized role cannot publish; UI hides or disables correctly"
-      ]
+      ],
+      "notes": "STUDENT/legacy USER blocked from all mutating automation resolvers server-side (requireAutomationBuilderAccess) + Tower editor toolbar disables Save/Test run/Publish/Pause/Archive + read-only pill client-side (canPublishAutomation). Manager/Instructor/Admin/Owner tiering + Enterprise publish-approval flow deferred. feat/frontend-todo-batch-v2 + feat/backend-todo-batch"
     },
     {
       "id": "T-COM-01",
