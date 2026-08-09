@@ -45,3 +45,36 @@ export const UPDATE_TENANT = gql`
     }
   }
 `;
+
+// T-VERT-11 — super-admin only, see apps/api/src/schema/tenantCapabilityMap.
+export const GET_TENANT_CAPABILITY_MAP = gql`
+  query GetTenantCapabilityMap($tenantId: ID!) {
+    tenantCapabilityMap(tenantId: $tenantId) {
+      tenantId
+      tenantName
+      subdomain
+      plan
+      vocabulary {
+        course
+        enrollment
+        student
+        instructor
+        certificate
+        group
+        order
+        product
+      }
+      domains {
+        domain
+        enabled
+        reason
+      }
+      installedAutomationCount
+      likelyFunnelTemplate {
+        slug
+        name
+      }
+      tenantFeatureFlags
+    }
+  }
+`;
