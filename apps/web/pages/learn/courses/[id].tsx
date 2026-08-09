@@ -9,6 +9,7 @@ import { PageLoadingState } from '../../../components/common/PageStates';
 import { GET_COURSE } from '../../../graphql/queries/courses';
 import { GET_ENROLLMENT } from '../../../graphql/queries/enrollment';
 import { GET_TENANT } from '../../../graphql/queries/tenants';
+import { useVocabulary } from '../../../hooks/useVocabulary';
 import { formatInstructorName, learnStoreServerProps, type LearnCourse } from '../../../lib/learn-store';
 import { getStoredUser } from '../../../lib/session';
 import { useLearnEnroll } from '../../../lib/use-learn-enroll';
@@ -26,6 +27,7 @@ export default function LearnCourseDetailPage({ tenantSubdomain }: Props) {
   });
   const tenantName = tenantData?.tenantBySubdomain?.name as string | undefined;
   const tenantSettings = tenantData?.tenantBySubdomain?.settings;
+  const { t } = useVocabulary(tenantSettings?.vocabulary);
 
   const { data, loading, error } = useQuery(GET_COURSE, {
     skip: !courseId,
@@ -65,7 +67,7 @@ export default function LearnCourseDetailPage({ tenantSubdomain }: Props) {
   return (
     <>
       <Head>
-        <title>{course?.title ? `${course.title} — Learn` : 'Course — Learn'}</title>
+        <title>{course?.title ? `${course.title} — Learn` : `${t('course')} — Learn`}</title>
       </Head>
 
       <LearnLayout tenantSubdomain={tenantSubdomain} tenantName={tenantName} tenantSettings={tenantSettings}>
@@ -73,11 +75,11 @@ export default function LearnCourseDetailPage({ tenantSubdomain }: Props) {
           ← Catalog
         </Link>
 
-        {loading && <PageLoadingState label="Loading course…" />}
+        {loading && <PageLoadingState label={`Loading ${t('course').toLowerCase()}…`} />}
 
         {error && (
           <p className="text-sm" style={{ color: 'var(--color-red)' }}>
-            {error.message || 'Course not found.'}
+            {error.message || `${t('course')} not found.`}
           </p>
         )}
 
@@ -93,7 +95,7 @@ export default function LearnCourseDetailPage({ tenantSubdomain }: Props) {
 
             {course.description && (
               <section className="ios-card p-5">
-                <h2 className="font-semibold text-primary mb-2">About this course</h2>
+                <h2 className="font-semibold text-primary mb-2">About this {t('course').toLowerCase()}</h2>
                 <p className="text-secondary text-sm leading-relaxed whitespace-pre-wrap">{course.description}</p>
               </section>
             )}
@@ -109,7 +111,7 @@ export default function LearnCourseDetailPage({ tenantSubdomain }: Props) {
                 <p className="text-sm text-secondary mt-1">
                   {isEnrolled || success
                     ? 'Continue from your dashboard.'
-                    : 'Sign in and enroll to access this course.'}
+                    : `Sign in and enroll to access this ${t('course').toLowerCase()}.`}
                 </p>
               </div>
 
@@ -128,7 +130,7 @@ export default function LearnCourseDetailPage({ tenantSubdomain }: Props) {
 
             {(isEnrolled || success) && (
               <section className="ios-card p-5 space-y-4 lux-course-player">
-                <h2 className="font-semibold">Course player</h2>
+                <h2 className="font-semibold">{t('course')} player</h2>
                 <div
                   className="aspect-video rounded-lg flex items-center justify-center"
                   style={{ background: 'var(--color-fill-tertiary)' }}
