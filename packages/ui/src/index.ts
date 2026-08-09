@@ -78,6 +78,8 @@ export * from './Modal';
 export * from './ActionMenu';
 export * from './Toolkit';
 export * from './Table';
+export * from './Tab';
+export * from './Todo';
 
 // Dashboard Components
 export * from './AdminDashboard';
