@@ -98,6 +98,22 @@ export class TenantService {
   }
 
   /**
+   * Super-admin-only per-tenant sidebar domain override (e.g. "Commerce", "Workspace" —
+   * matching tenantCapabilityMap's buildDomains() names). `enabled: null` clears the override
+   * so that domain falls back to the plan-derived flag instead of being pinned on/off. Same
+   * scoped-per-field discipline as updateVocabulary(): never replaces domainOverrides wholesale.
+   */
+  async updateDomainOverride(id: string, domain: string, enabled: boolean | null): Promise<ITenant> {
+    const path = `settings.config.domainOverrides.${domain}`;
+    const tenant =
+      enabled === null
+        ? await Tenant.findByIdAndUpdate(id, { $unset: { [path]: '' } }, { new: true })
+        : await Tenant.findByIdAndUpdate(id, { $set: { [path]: enabled } }, { new: true });
+    if (!tenant) throw new Error('Tenant not found');
+    return tenant;
+  }
+
+  /**
    * T-VERT-06 — same scoped-per-field $set discipline as updateVocabulary(): only flips the
    * flags named in `modules` to `true`, never replaces settings.config.features wholesale.
    */

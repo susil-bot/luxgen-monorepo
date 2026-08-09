@@ -68,6 +68,7 @@ export const GET_TENANT_CAPABILITY_MAP = gql`
         domain
         enabled
         reason
+        overridden
       }
       installedAutomationCount
       likelyFunnelTemplate {
@@ -75,6 +76,32 @@ export const GET_TENANT_CAPABILITY_MAP = gql`
         name
       }
       tenantFeatureFlags
+    }
+  }
+`;
+
+// Effective, override-aware domain list for the CURRENT tenant's own sidebar — not super-admin
+// gated, unlike GET_TENANT_CAPABILITY_MAP above (which pulls the full admin picture).
+export const GET_TENANT_DOMAIN_ACCESS = gql`
+  query GetTenantDomainAccess($tenantId: String!) {
+    tenantDomainAccess(tenantId: $tenantId) {
+      domain
+      enabled
+      reason
+      overridden
+    }
+  }
+`;
+
+// Super-admin only — flips a sidebar domain on/off for a tenant, overriding their plan.
+// enabled: null clears the override so the domain falls back to the plan-derived flag.
+export const UPDATE_TENANT_DOMAIN_ACCESS = gql`
+  mutation UpdateTenantDomainAccess($tenantId: ID!, $domain: String!, $enabled: Boolean) {
+    updateTenantDomainAccess(tenantId: $tenantId, domain: $domain, enabled: $enabled) {
+      domain
+      enabled
+      reason
+      overridden
     }
   }
 `;

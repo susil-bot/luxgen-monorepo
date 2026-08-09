@@ -42,6 +42,13 @@ export interface TenantConfig {
     apiAccess: boolean;
     customDomain: boolean;
   };
+  /** Super-admin-set per-domain sidebar overrides (Home/Learning/Commerce/Workspace/...,
+   * matching tenantCapabilityMap's buildDomains() names). A domain present here wins over
+   * whatever the tenant's billing plan would otherwise say; a domain absent here just falls
+   * back to the plan-derived flags. Written only via updateTenantDomainAccess (super-admin-only
+   * mutation, apps/api/src/schema/tenantCapabilityMap), read by
+   * apps/web/lib/use-sidebar-sections.ts's gating. */
+  domainOverrides?: Record<string, boolean>;
   limits: {
     maxUsers: number;
     maxStorage: number; // in MB
@@ -271,6 +278,10 @@ const tenantSchema = new Schema<ITenant>(
             type: Boolean,
             default: false,
           },
+        },
+        domainOverrides: {
+          type: Schema.Types.Mixed,
+          default: {},
         },
         limits: {
           maxUsers: {
