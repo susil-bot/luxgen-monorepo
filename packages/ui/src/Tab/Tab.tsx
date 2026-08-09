@@ -102,14 +102,14 @@ const TabComponent: React.FC<TabProps> = ({
   // Responsive behavior
   const isVertical = orientation === 'vertical' || (responsive && typeof window !== 'undefined' && window.innerWidth < mobileBreakpoint);
 
-  const containerStyle = {
+  const containerStyle: React.CSSProperties = {
     display: 'flex',
     flexDirection: isVertical ? 'column' : 'row',
     gap: isVertical ? '1rem' : '0',
     ...style,
   };
 
-  const tabListStyle = {
+  const tabListStyle: React.CSSProperties = {
     ...styles.tabList,
     flexDirection: isVertical ? 'column' : 'row',
     borderBottom: isVertical ? 'none' : styles.tabList.borderBottom,
