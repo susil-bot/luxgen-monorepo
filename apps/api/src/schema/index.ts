@@ -26,6 +26,7 @@ import { certificateTypeDefs } from './certificate/typeDefs';
 import { couponTypeDefs } from './coupon/typeDefs';
 import { searchTypeDefs } from './search/typeDefs';
 import { funnelTemplateTypeDefs } from './funnelTemplate/typeDefs';
+import { tenantCapabilityMapTypeDefs } from './tenantCapabilityMap/typeDefs';
 
 // Import resolvers
 import { tenantResolvers } from './tenant/resolvers';
@@ -49,6 +50,7 @@ import { certificateResolvers } from './certificate/resolvers';
 import { couponResolvers } from './coupon/resolvers';
 import { searchResolvers } from './search/resolvers';
 import { funnelTemplateResolvers } from './funnelTemplate/resolvers';
+import { tenantCapabilityMapResolvers } from './tenantCapabilityMap/resolvers';
 import { EnrollmentStatusSummaryTypeDefs } from './engagement/enrollmentStatusSummary/typeDefs';
 import { EnrollmentStatusSummaryResolvers } from './engagement/enrollmentStatusSummary/resolvers';
 import { StoreCatalogFacetsTypeDefs } from './engagement/storeCatalogFacets/typeDefs';
@@ -106,6 +108,7 @@ export const typeDefs = mergeTypeDefs([
   couponTypeDefs,
   searchTypeDefs,
   funnelTemplateTypeDefs,
+  tenantCapabilityMapTypeDefs,
   EnrollmentStatusSummaryTypeDefs,
   StoreCatalogFacetsTypeDefs,
   CartSessionTypeDefs,
@@ -149,6 +152,7 @@ const mergedResolvers = mergeResolvers([
   couponResolvers,
   searchResolvers,
   funnelTemplateResolvers,
+  tenantCapabilityMapResolvers,
   EnrollmentStatusSummaryResolvers,
   StoreCatalogFacetsResolvers,
   CartSessionResolvers,
