@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 import { useQuery } from '@apollo/client';
 import { getDefaultSidebarSections, type SidebarSection } from '@luxgen/ui';
 import { GET_TENANT_BILLING } from '../graphql/queries/billing';
+import { GET_TENANT_DOMAIN_ACCESS } from '../graphql/queries/tenants';
 import { useLayoutUser, useAppTenantId } from './app-layout-user';
 import { useVocabulary } from '../hooks/useVocabulary';
 import { isAdminOrAbove, isStaffOrAbove } from './user-roles';
@@ -14,6 +15,22 @@ interface BillingFlags {
   project?: boolean;
   agentStudio?: boolean;
 }
+
+/** Maps tenantCapabilityMap/tenantDomainAccess's domain display names (apps/api/src/schema/
+ * tenantCapabilityMap/resolvers.ts's buildDomains()) to this file's section ids. Only domains a
+ * super admin can actually toggle are listed here — 'search' has no matching domain today and is
+ * intentionally always on, same as before this override system existed. */
+const DOMAIN_TO_SECTION_ID: Record<string, string> = {
+  Home: 'home',
+  Learning: 'learning',
+  Commerce: 'commerce',
+  People: 'people',
+  'Automation Hub': 'automation-hub',
+  Intelligence: 'intelligence',
+  Workspace: 'workspace',
+  Administration: 'administration',
+  Settings: 'settings',
+};
 
 function parseRole(role?: string): string | null {
   if (!role) return null;
@@ -32,14 +49,13 @@ function adminOrAbove(role: string | null): boolean {
 
 function filterItem(item: SidebarItem, role: string | null, flags: BillingFlags, guest: boolean): boolean {
   if (guest) {
-    return ['dashboard', 'listings-directory', 'my-listings', 'profile', 'settings'].includes(item.id);
+    return ['dashboard', 'profile', 'settings'].includes(item.id);
   }
 
   switch (item.id) {
     case 'customers':
     case 'products':
     case 'orders':
-    case 'admin-listings':
       return adminOrAbove(role);
     case 'analytics':
     case 'course-analytics':
@@ -78,10 +94,12 @@ function filterSection(
   role: string | null,
   flags: BillingFlags,
   guest: boolean,
+  disabledSectionIds: Set<string>,
 ): SidebarSection | null {
-  if (guest && !['listings', 'settings', 'navigation'].includes(section.id)) {
+  if (guest && !['settings', 'navigation'].includes(section.id)) {
     return null;
   }
+  if (disabledSectionIds.has(section.id)) return null;
   if (section.id === 'organization' && !adminOrAbove(role)) return null;
   if (section.id === 'developer' && flags.automations !== true) return null;
   if (section.id === 'developer-tools' && flags.agentStudio !== true) return null;
@@ -128,12 +146,37 @@ export function useSidebarSections(): SidebarSection[] {
 
   const flags: BillingFlags = data?.tenantBilling?.featureFlags ?? {};
 
+  // Super-admin domain overrides (apps/api's tenantDomainAccess/updateTenantDomainAccess) win
+  // over the plan-derived flags above. Skipped for guests since it needs an authenticated
+  // tenantId; while it's loading, disabledSectionIds is empty so nothing gets hidden by mistake.
+  const { data: domainData } = useQuery(GET_TENANT_DOMAIN_ACCESS, {
+    variables: { tenantId: tenantId ?? '' },
+    skip: !tenantId || guest,
+    fetchPolicy: 'cache-first',
+  });
+  const disabledSectionIds = new Set<string>(
+    (domainData?.tenantDomainAccess ?? [])
+      .filter((d: { domain: string; enabled: boolean }) => !d.enabled)
+      .map((d: { domain: string }) => DOMAIN_TO_SECTION_ID[d.domain])
+      .filter((id: string | undefined): id is string => Boolean(id)),
+  );
+
   return useMemo(() => {
     const base = getDefaultSidebarSections();
     const filtered = base
-      .map((section) => filterSection(section, role, flags, guest))
+      .map((section) => filterSection(section, role, flags, guest, disabledSectionIds))
       .filter((section): section is SidebarSection => section !== null);
     return relabelCourseItems(filtered, t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [role, flags.automations, flags.analytics, flags.project, flags.agentStudio, guest, t('course'), t('course', 'plural')]);
+  }, [
+    role,
+    flags.automations,
+    flags.analytics,
+    flags.project,
+    flags.agentStudio,
+    guest,
+    t('course'),
+    t('course', 'plural'),
+    JSON.stringify([...disabledSectionIds]),
+  ]);
 }

@@ -9,7 +9,6 @@ import {
   hasFeature,
 } from '@luxgen/billing';
 import { TenantSubscription, resolveEffectivePlan, type ITenantSubscription } from '@luxgen/db';
-import { listingSubscriptionService } from './listingSubscriptionService';
 import { enrollmentService } from './enrollmentService';
 import { logger } from '../utils/logger';
 import { getRedisClient } from '../lib/redis';
@@ -210,9 +209,6 @@ export class BillingService {
         // Redis unavailable — proceed without dedup (acceptable: handlers are idempotent)
       }
     }
-
-    const handledListing = await listingSubscriptionService.handleStripeEvent(event);
-    if (handledListing) return;
 
     switch (event.type) {
       case 'checkout.session.completed': {

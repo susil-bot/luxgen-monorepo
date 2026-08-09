@@ -19,7 +19,7 @@ ${urls}
 </urlset>`;
 }
 
-const PUBLIC_PATHS = ['/', '/listings', '/learn', '/store', '/login', '/register'];
+const PUBLIC_PATHS = ['/', '/learn', '/store', '/login', '/register'];
 
 export const getServerSideProps: GetServerSideProps = async ({ res, req }) => {
   const host = req.headers.host ?? 'localhost:3000';

@@ -48,8 +48,6 @@ export type { ISearchSettings } from './search-settings';
 export { SearchSettings } from './search-settings';
 export type { ISearchEvent } from './search-event';
 export { SearchEvent } from './search-event';
-export type { IBusinessListing, ApplicationStatus, PublicationStatus, IStatusHistoryEntry } from './business-listing';
-export { BusinessListing } from './business-listing';
 export type { IActivityEvent } from './activity-event';
 export { ActivityEvent, ActivitySubjectType, ActivityEventKind, ActivityActorType } from './activity-event';
 export type { IEnrollment } from './enrollment';
