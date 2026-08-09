@@ -9,6 +9,27 @@ import { scopedTenantId } from '../../graphql/tenantScope';
 
 const AUTOMATION_SCHEMA = exportAutomationSchema();
 
+/**
+ * T-AUTO-10 — role gate for the Tower workflow builder.
+ *
+ * Maps the TODO spec's permission matrix (Owner/Admin/Manager/Instructor/Learner/
+ * Support/Enterprise, docs/TODO-Enterprise Product Specification: Workflow
+ * Automation Builder.md §21) onto our actual `UserRole` enum. The only rule
+ * enforced here is spec's "Learner: No access to workflow builder" — Manager vs.
+ * Instructor vs. Admin vs. Owner distinctions, and the Enterprise "publish requires
+ * approval" flow, are deferred (see queue.yaml notes for T-AUTO-10).
+ */
+const AUTOMATION_BUILDER_BLOCKED_ROLES = new Set(['STUDENT', 'USER']);
+
+function requireAutomationBuilderAccess(ctx: GraphQLContext): void {
+  const role = ctx.user?.role;
+  if (role && AUTOMATION_BUILDER_BLOCKED_ROLES.has(role)) {
+    throw new GraphQLError('Your role does not have access to the workflow builder', {
+      extensions: { code: 'FORBIDDEN' },
+    });
+  }
+}
+
 async function runAgentTaskViaQueue(
   tenantId: string,
   userId: string,
@@ -78,6 +99,7 @@ export const automationResolvers = {
       { input }: { input: Parameters<typeof automationService.createAutomation>[0] },
       ctx: GraphQLContext,
     ) => {
+      requireAutomationBuilderAccess(ctx);
       await requireFeature(ctx, 'automations');
       const scoped = scopedTenantId(ctx, input.tenantId);
       try {
@@ -97,18 +119,21 @@ export const automationResolvers = {
       { id, input }: { id: string; input: Parameters<typeof automationService.updateAutomation>[1] },
       ctx: GraphQLContext,
     ) => {
+      requireAutomationBuilderAccess(ctx);
       await requireFeature(ctx, 'automations');
       if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
       const updated = await automationService.updateAutomation(id, ctx.tenantId, input);
       return updated ? automationService.toGraphQL(updated) : null;
     },
     toggleAutomation: async (_: unknown, { id, enabled }: { id: string; enabled: boolean }, ctx: GraphQLContext) => {
+      requireAutomationBuilderAccess(ctx);
       await requireFeature(ctx, 'automations');
       if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
       const updated = await automationService.toggleAutomation(id, ctx.tenantId, enabled);
       return updated ? automationService.toGraphQL(updated) : null;
     },
     publishAutomation: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
+      requireAutomationBuilderAccess(ctx);
       await requireFeature(ctx, 'automations');
       if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
       try {
@@ -129,18 +154,21 @@ export const automationResolvers = {
       }
     },
     pauseAutomation: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
+      requireAutomationBuilderAccess(ctx);
       await requireFeature(ctx, 'automations');
       if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
       const updated = await automationService.pauseAutomation(id, ctx.tenantId);
       return updated ? automationService.toGraphQL(updated) : null;
     },
     archiveAutomation: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
+      requireAutomationBuilderAccess(ctx);
       await requireFeature(ctx, 'automations');
       if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
       const updated = await automationService.archiveAutomation(id, ctx.tenantId);
       return updated ? automationService.toGraphQL(updated) : null;
     },
     deleteAutomation: async (_: unknown, { id }: { id: string }, ctx: GraphQLContext) => {
+      requireAutomationBuilderAccess(ctx);
       await requireFeature(ctx, 'automations');
       if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
       return automationService.deleteAutomation(id, ctx.tenantId);
@@ -150,6 +178,7 @@ export const automationResolvers = {
       { id, name }: { id: string; name?: string | null },
       ctx: GraphQLContext,
     ) => {
+      requireAutomationBuilderAccess(ctx);
       await requireFeature(ctx, 'automations');
       if (!ctx.tenantId) throw new GraphQLError('Tenant context required');
       try {
