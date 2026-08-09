@@ -71,6 +71,11 @@ export const DEFAULT_SIDEBAR_SECTIONS: SidebarSection[] = [
             />
           </svg>
         ),
+        // T-SRCH-08: was an orphan page (route existed, nothing linked to it) — reachable from here now.
+        children: [
+          { id: 'search-home', label: 'Search', href: '/search', exact: true },
+          { id: 'search-analytics', label: 'Search analytics', href: '/admin/search-analytics' },
+        ],
       },
     ],
   },
