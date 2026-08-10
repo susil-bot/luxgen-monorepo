@@ -155,6 +155,7 @@ Work **only** missing/partial routes from `T-E0-05`. Do not rebuild working page
 | [ ] `T-MAP-05` | P2 | M | L676–L1029 | Settings / content / support gaps (split heavily) |
 | [ ] `T-MAP-06` | P2 | S | L1030–L1042 | Search route present in nav + page |
 | [ ] `T-MAP-07` | P3 | L | L1043–L1266 | Mobile adaptations — separate mobile epic later |
+| [x] `T-MAP-08` | P1 | S | L5–L11 | Dashboard widgets vs live page — Overview/KPI/Recent Activity/Quick Actions wired (batch #477); Shortcuts deferred w/ note in `sitemap-gaps.md` |
 
 **Epic AC:** Every P0/P1 sitemap L2 either has a real page **or** an explicit `wont`/`deferred` note in `PAGE_FUNCTIONALITY_CHECKLIST.md`.
 
